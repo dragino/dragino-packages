@@ -1,0 +1,7 @@
+config settings 'general'
+	option server 'xively'
+	option user ''
+	option pass ''
+	option DeviceName ''
+	option uartmode 'bridge'
+	option debug '0'

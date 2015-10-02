@@ -1,0 +1,150 @@
+<%
+local http = require("luci.http")
+http.prepare_content("text/html; charset=utf-8")
+local baud_rate = {600,1200,2400,4800,9600,14400,19200,38400,57600,115200,230400}
+function pairsByKeys (t, f)
+      local a = {}
+      for n in pairs(t) do table.insert(a, n) end
+      table.sort(a, f)
+      local i = 0      -- iterator variable
+      local iter = function ()   -- iterator function
+        i = i + 1
+        if a[i] == nil then return nil
+        else return a[i], t[a[i]]
+        end
+      end
+      return iter
+end
+
+local uci = require('luci.model.uci')
+uci = uci.cursor()
+MODEL = uci:get('system.vendor.web_model')
+
+-%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+    Copyright (C) 2014 Dragino Technology Co., Limited
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+  <link rel="stylesheet" type="text/css" href="<%= resource %>/arduino/style.css" />
+  <title><%= MODEL %></title>
+</head>
+<body>
+<div id="container">
+  <div id="header">
+    <div class="wrapper">
+      <h1><%= MODEL %></h1>
+      <div id="logo"><a href="<%= pcdata(controller .. '/webpanel') %>"><img src="<%= resource %>/arduino/logo.png" alt="<%= MODEL %>"/></a></div>
+    </div>
+  </div>
+  <div id="content">
+    <div class="wrapper divide" id="yun_config">
+      <form id="form1" name="form1" method="post" onsubmit="send_post('<%=pcdata(controller .. "/webpanel/sensor")%>', this);" action="#">
+        <div id="error_response" class="hidden">
+          <p class="alert">An error has occurred.</p>
+        </div>
+        <ul>
+			<li>
+				<label class="title">MCU Configuration</label>
+			</li> 	
+
+			<li>
+				<label class="desc" for="avr_part">
+				AutoDetect AVR Part</span>
+				</label>
+
+				<div class="input_container">
+				<input id="avr_part" name="avr_part" type="text" value=<%=avr_part%> readonly="readonly">
+				</div>
+			</li>
+			
+			<li>
+				<label class="desc" for="board">
+				Upload Profile 
+				</label>
+				<div class="input_container">
+					<select id="board" name="board">
+						<% for k,v in pairs(board_type) do%>
+						<option value=<%=v.code%>
+						<%if board == v.code then %>
+						selected="selected"
+						<% end %>
+						><%=v.label%></option>
+						<%end%>
+					</select>
+				</div>
+			</li>
+		
+			<li>
+				<label for="upload_bootloader" class="left">Upload Bootloader</label>
+				<div class="input_container checkbox_container">
+					<input type="checkbox" name="upload_bootloader" id="upload_bootloader" value="enable"
+					<%if upload_bootloader == "enable" then %>checked="checked" <% end %>
+					>
+					</input>
+				</div>
+			</li>
+
+		</ul>
+	</div>
+
+    <div class="wrapper divide">
+      <div class="input_container">
+        <input id="discard" class="btTxt submit saveForm btn" type="reset" value="Discard">
+        <input id="conf_rest_btn" class="btTxt submit saveForm" type="submit" value="Configure &amp; Restart MCU">
+      </div>
+
+      </form>
+    </div>
+
+	<div class="wrapper divide">
+      <h3><strong>Upload sketch</strong></h3>
+      <p class="description">Select a <strong>.hex</strong> file (compiled sketch) and upload it to the Arduino or AVR.
+        <br>
+        For more information about how to obtain the <strong>.hex</strong> file of your sketch, visit <a target="_blank" href="http://arduino.cc/en/Hacking/BuildProcess">this page</a>.
+      </p>
+      <p>
+      <form method="post" action="<%= pcdata(controller .. '/webpanel/upload_sketch') %>" enctype="multipart/form-data">
+        <ul>
+          <li>
+            <div class="input_container">
+              <input id="sketch" name="sketch_hex" type="file">
+            </div>
+            <p><br/></p>
+          </li>
+          <li>
+            <div class="input_container">
+              <input id="upload_button" class="btTxt submit saveForm" type="submit" name="button" value="Upload">
+            </div>
+          </li>
+          <li id="progress_bar_upload" style="display: none">
+            <div class="progress_bar_upload blue_arduino stripes">
+              <span style="width: 100%"></span>
+            </div>
+          </li>
+        </ul>
+      </form>
+      </p>
+    </div>
+	
+  </div>
+  <!-- #content -->
+  
+
+  
+  <br class="clear"/>
+</div>
+<!-- #container -->
+<script type="text/javascript" charset="utf-8" src="<%= resource %>/arduino/zepto.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+#This script converts a received text message to XML.
+#Written by Thomas Dolberg, October 2005
+
+#run this script only when a message was received.
+if [ "$1" != "RECEIVED" ]; then exit; fi;
+
+#Extract data from the SMS file
+FROM=`formail -zx From: < $2`
+TEXT=`formail -I "" <$2 | sed -e"1d"`
+
+#Save as XML
+#for some reason the mktemp-command creates two instances of the file if I add the .xml-extension to the FILENAME-variable.
+FILENAME=`mktemp /var/spool/sms/XML/answerXXXXXX`
+echo "<?xml version='1.0'?>" >$FILENAME.xml
+echo "<SMS>" >>$FILENAME.xml
+echo "  <from>$FROM</from>" >>$FILENAME.xml
+echo "  <message>$TEXT</message>" >>$FILENAME.xml
+echo "</SMS>" >>$FILENAME.xml
+
+#Delete the original file without the .xml-extension
+rm $FILENAME

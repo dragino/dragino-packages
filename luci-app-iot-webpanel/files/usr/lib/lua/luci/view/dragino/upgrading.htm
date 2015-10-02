@@ -1,0 +1,73 @@
+<%
+local http = require("luci.http")
+http.prepare_content("text/html; charset=GB2312")
+local uci = require('luci.model.uci')
+uci = uci.cursor()
+MODEL = uci:get('system.vendor.web_model')
+-%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+    Copyright (C) 2014 Dragino Technology Co., Limited
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+  <link rel="stylesheet" type="text/css" href="<%= resource %>/arduino/style.css"/>
+  <title><%= MODEL %></title>
+  <script type="text/javascript">
+    var progress_bar_interval;
+
+    function start_progress_bar() {
+      progress_bar_interval = window.setInterval(function() {
+        var progress_bar = document.getElementById("progress_bar");
+        var width = parseInt(progress_bar.style.width);
+        if (isNaN(width)) {
+          width = 0;
+        }
+        if (width < 100) {
+          width += 100 / 60;
+          if (width > 100) {
+            width = 100;
+          }
+          progress_bar.style.width = width + "%";
+        }
+        if (width >= 100) {
+          window.clearInterval(progress_bar_interval);
+          document.getElementById("progress_bar_response").style.display = "block";
+        }
+      }, 1000);
+    }
+  </script>
+</head>
+<body onload="javascript:start_progress_bar();">
+<div id="container">
+  <div id="header">
+    <div class="wrapper">
+      <h1><%= MODEL %></h1>
+      <div id="logo"><a href="<%= pcdata(controller .. '/webpanel') %>"><img src="<%= resource %>/arduino/logo.png" alt="<%= MODEL %>"/></a></div>
+    </div>
+  </div>
+  <div id="content">
+    <div class="wrapper divide">
+      <h2>Upgrading...</h2>
+    </div>
+    <div class="wrapper divide">
+      <p>The process will last several minutes, don't power off during upgrade<br/>WiFi LED will be off after upgrade and system will reboot.
+	<br/>You may need to use new IP address to access the device, depends on if you have keep the settings during upgrade.
+      </p>
+
+      <div class="progress_bar_container">
+        <div id="progress_bar" class="progress_bar">&nbsp;</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

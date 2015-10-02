@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# This script converts a received sms file into a pure unicode text file.
+
+if [ $# -ne 1 ]; then
+  echo "Usage: sms2unicode filename"
+  exit 1
+fi
+
+if grep "Alphabet:.*UCS" $1 >/dev/null; then
+  ucs2=true
+else
+  ucs2=false
+fi
+
+echo -en "\xFE\xFF"
+text=`od -t x1 $1 | cut -c8-99`
+foundstart="false"
+previous=""
+for character in $text; do
+  # Search for the start of the 16 bit part. Starts after "0a 0a"
+  if [ "$foundstart" = "false" ]; then
+    if [ "$character" = "0a" ] && [ "$previous" = "0a" ]; then
+      foundstart="true"
+    fi
+    if [ "$character" = "0a" ] && [ "$previous" != "0d" ]; then
+      echo -en "\x00\x0d\x00\x$character"
+    else  
+      echo -en "\x00\x$character"
+    fi  
+  else
+    if [ "$ucs2" = "false" ]; then
+      if [ "$character" = "0a" ] && [ "$previous" != "0d" ]; then
+        echo -en "\x00\x0d\x00\x$character"
+      else
+        echo -en "\x00\x$character"
+      fi
+    else
+      echo -en "\x$character"
+    fi  
+  fi
+  previous="$character"
+done
+

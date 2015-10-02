@@ -1,0 +1,21 @@
+
+config settings 'service'
+	option server 'Xively'
+	option update_interval '60'
+	option debug '0'
+
+config settings 'mcu'
+	option MCUProfile 'leonardo'
+
+config settings 'auto_update'
+	option update_on_boot '0'
+	option current_ver '0'
+	option update_url ''
+	option mac_identify '0'
+	option update_info ''
+
+config settings 'poweruart'
+	option uartmode 'bridge'
+	option baudrate '115200'
+
+

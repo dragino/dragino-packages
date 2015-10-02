@@ -1,0 +1,33 @@
+#!/bin/bash
+# SMS Server Tools 3.
+# Sample eventhandler script for storing delivery timestamps.
+
+#--------------------------------------------------------------------------
+
+# The following code stores delivery timestamp to the sent message
+if [ "$1" = "REPORT" ]; then
+  SENTDIR=/var/spool/sms/sent
+  if grep "Status: 0" $2 >/dev/null; then
+    FROM=`formail -zx From: < $2`
+    RECEIVED=`formail -zx Received: < $2`
+    TMPFILE=`mktemp /tmp/smsd_XXXXXX`
+    formail -I "" < $2 | sed -e"1,2d" > $TMPFILE
+    MESSAGE_ID=`formail -zX Message_id: < $TMPFILE`
+    grep -lx "$MESSAGE_ID" $SENTDIR/* > $TMPFILE
+    cat $TMPFILE | while read FNAME; do
+      OLDRECEIVED=`formail -zx Received: < ${FNAME}`
+      if [ "$OLDRECEIVED" = "" ]; then
+        TO=`formail -zx To: < ${FNAME}`
+        if [ "$TO" = "$FROM" ]; then
+          TMPFILE2=`mktemp /tmp/smsd_XXXXXX`
+          cp ${FNAME} $TMPFILE2
+          formail -f -I "Received: $RECEIVED" < $TMPFILE2 > ${FNAME}
+          unlink $TMPFILE2
+        fi
+      fi
+    done 
+    unlink $TMPFILE
+  fi
+fi
+
+exit 0

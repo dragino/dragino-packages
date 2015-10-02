@@ -1,0 +1,55 @@
+#!/bin/sh
+# This is an example script that you can use to resent
+# failed messages. The script inserts a counter in the message
+# file that is used to ensure that the number of retries
+# is limited.
+# The script does not need any command line arguments.
+
+smsd_user="smsd"
+
+owner=""
+if [ -f /etc/passwd ]; then
+  if grep $smsd_user: /etc/passwd >/dev/null; then
+    owner=$smsd_user
+  fi
+fi
+
+failed=/var/spool/sms/failed
+outgoing=/var/spool/sms/outgoing
+max=5
+
+used=0
+notused=0
+cd $failed
+
+for file in *; do
+  if [ "$file" = "*" ]; then
+    echo "No failed files found"
+    exit 0
+  fi
+  retry=`formail -zx Retry: < $file`
+  if [ "$retry" ]; then
+    retry=`expr $retry + 1`
+  else
+    retry=1
+  fi
+  if [ $retry -gt $max ]; then
+    notused=`expr $notused + 1`
+  else
+    used=`expr $used + 1`
+    mv $file $file.old
+    formail -f -I "Retry: $retry" < $file.old > $file
+
+    if [ "x$owner" != x ]; then
+      chown $owner $file
+    fi
+
+    mv $file $outgoing
+    rm $file.old
+  fi
+done
+
+echo "$used messages moved again into outgoing spool directory"
+echo "$notused messages ignored because of to many retries"
+
+exit 0

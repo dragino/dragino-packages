@@ -1,0 +1,8 @@
+#!/bin/sh /etc/rc.common
+
+START=92
+
+start() {
+	/etc/init.d/rngd stop
+}
+

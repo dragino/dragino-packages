@@ -1,0 +1,147 @@
+#!/bin/sh
+#AutoDetect Avr script
+
+sig0x1e9004="ATtiny11"
+sig0x1e9005="ATtiny12"
+sig0x1e9006="ATtiny15"
+sig0x1e9001="AT90S1200"
+sig0x1e9201="AT90S4414"
+sig0x1e9101="AT90S2313"
+sig0x1e9105="AT90S2333"
+sig0x1e9103="AT90S2343"
+sig0x1e9203="AT90S4433"
+sig0x1e9202="AT90S4434"
+sig0x1e9301="AT90S8515"
+sig0x1e9303="AT90S8535"
+sig0x1e9701="ATmega103"
+sig0x1e9602="ATmega64"
+sig0x1e9702="ATmega128"
+sig0x1e9781="AT90CAN128"
+sig0x1e9681="AT90CAN64"
+sig0x1e9581="AT90CAN32"
+sig0x1e9403="ATmega16"
+sig0x1e940a="ATmega164P"
+sig0x1e9508="ATmega324P"
+sig0x1e9511="ATmega324PA"
+sig0x1e9609="ATmega644"
+sig0x1e960a="ATmega644P"
+sig0x1e9705="ATmega1284P"
+sig0x1e9404="ATmega162"
+sig0x1e9402="ATmega163"
+sig0x1e9405="ATmega169"
+sig0x1e9503="ATmega329"
+sig0x1e950b="ATmega329P"
+sig0x1e9504="ATmega3290"
+sig0x1e950c="ATmega3290P"
+sig0x1e9603="ATmega649"
+sig0x1e9604="ATmega6490"
+sig0x1e9502="ATmega32"
+sig0x1e9401="ATmega161"
+sig0x1e9307="ATmega8"
+sig0x1e9306="ATmega8515"
+sig0x1e9308="ATmega8535"
+sig0x1e9109="ATtiny26"
+sig0x1e920a="ATmega48P"
+sig0x1e930f="ATmega88P"
+sig0x1e940b="ATmega168P"
+sig0x1e9406="ATmega168"
+sig0x1e950f="ATmega328P"
+sig0x1e9514="ATmega328"
+sig0x1e9383="AT90PWM2B"
+sig0x1e9483="AT90PWM316"
+sig0x1e9608="ATmega640"
+sig0x1e9703="ATmega1280"
+sig0x1e9704="ATmega1281"
+sig0x1e9801="ATmega2560"
+sig0x1e9802="ATmega2561"
+sig0x1ea701="ATmega128RFA1"
+sig0x1ea802="ATmega256RFR2"
+sig0x1ea702="ATmega128RFR2"
+sig0x1ea602="ATmega64RFR2"
+sig0x1e9587="ATmega32U4"
+sig0x1e9682="AT90USB646"
+sig0x1e9682="AT90USB647"
+sig0x1e9782="AT90USB1286"
+sig0x1e9782="AT90USB1287"
+sig0x1e9482="AT90USB162"
+sig0x1e9382="AT90USB82"
+sig0x1e958a="ATmega32U2"
+sig0x1e9489="ATmega16U2"
+sig0x1e9389="ATmega8U2"
+sig0x1e9505="ATmega325"
+sig0x1e9605="ATmega645"
+sig0x1e9506="ATmega3250"
+sig0x1e9606="ATmega6450"
+sig0x1e964e="ATxmega64A1"
+sig0x1e974c="ATxmega128A1"
+sig0x1e9741="ATxmega128A1revD"
+sig0x1e974e="ATxmega192A1"
+sig0x1e9846="ATxmega256A1"
+sig0x1e9642="ATxmega64A3"
+sig0x1e9742="ATxmega128A3"
+sig0x1e9744="ATxmega192A3"
+sig0x1e9842="ATxmega256A3"
+sig0x1e9843="ATxmega256A3B"
+sig0x1e9441="ATxmega16A4"
+sig0x1e9541="ATxmega32A4"
+sig0x1e9646="ATxmega64A4"
+sig0x1e9746="ATxmega128A4"
+sig0x1e9442="ATxmega16D4"
+sig0x1e9542="ATxmega32D4"
+sig0x1e9647="ATxmega64D4"
+sig0x1e9747="ATxmega128D4"
+sig0xedc03f="AT32UC3A0512"
+sig0x1e8f0a="ATtiny4"
+sig0x1e8f09="ATtiny5"
+sig0x1e9008="ATtiny9"
+sig0x1e9003="ATtiny10"
+
+
+#Check if GPIO19 is already exported
+if [ -d /sys/class/gpio/gpio19 ]; then
+GPIO19_EXPORTED='YES'
+fi
+
+if [ ! $GPIO19_EXPORTED ]; then
+	echo 19 > /sys/class/gpio/export
+	echo "high" > /sys/class/gpio/gpio19/direction
+fi
+
+echo 1 > /sys/class/gpio/gpio19/value
+
+[ ! -d /tmp/avr ] && mkdir /tmp/avr
+
+#Get Device signature
+avrdude -c linuxgpio -C /etc/avrdude.conf -p m328p > /tmp/avr/avrdude_info 2>&1
+avr_sig=`cat /tmp/avr/avrdude_info | grep 'Device signature' | awk '{print $5}'`
+if [ -z $avr_sig ]; then
+	avr_part="unknown"
+else 
+	avr_sig=sig$avr_sig
+	avr_part=`eval echo '${'$avr_sig}'`
+fi
+
+
+
+profile="undefined"
+if [ $avr_part == "ATmega328P" ]; then
+	profile="uno"
+elif [ $avr_part == "ATmega32U4" ]; then
+	profile="leonardo"
+elif [ $avr_part == "ATmega328" ]; then
+	profile="duemilanove328"
+elif [ $avr_part == "ATmega168" ]; then
+	profile="duemilanove168"
+elif [ $avr_part == "ATmega2560" ]; then
+	profile="mega2560"
+fi
+
+uci set sensor.mcu.avr_part=$avr_part
+uci set sensor.mcu.board=$profile
+uci commit sensor
+
+echo 0 > /sys/class/gpio/gpio19/value
+
+if [ ! $GPIO19_EXPORTED ]; then
+	echo 19 > /sys/class/gpio/unexport
+fi

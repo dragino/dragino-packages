@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Incoming missed call sample (eventhandler).
+
+# In the modem section of smsd.conf define phonecalls = yes
+# and use this script as an eventhandler or part of it.
+
+if [ "$1" = "CALL" ]; then
+  TO=`formail -zx From: <$2`
+  FILE=`mktemp /tmp/send_XXXXXX`
+  echo "To: $TO" > $FILE
+  echo "" >> $FILE
+  echo "This number only accepts SMS." >> $FILE
+  FILE2=`mktemp /var/spool/sms/outgoing/send_XXXXXX`
+  mv $FILE $FILE2
+fi

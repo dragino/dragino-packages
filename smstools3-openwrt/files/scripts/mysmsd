@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# This is an example script that logs all events into an SQL database
+# You need a MYSQL database as described in the documentation.
+# Please read the documentation before using this script.
+
+SQL_HOST=localhost
+SQL_USER=root
+SQL_PASSWORD=""
+SQL_DATABASE=smsd
+SQL_TABLE=sms_log
+
+DATE=`date +"%Y-%m-%d %H:%M:%S"`
+#Extract data from the SMS file
+FROM=`formail -zx From: < $2 | sed 's/"//g'`
+TO=`formail -zx To: < $2`
+#Remove plus sign, spaces, minus and short number prefix
+TO=`echo "$TO" | sed 's/ //g' | sed 's/+//g' | sed 's/s//g' | sed 's/-//g'`
+SUBJECT=`formail -zx Subject: < $2`
+SENT=`formail -zx Sent: < $2`
+#Text is not used but could be used 
+#TEXT=`formail -I "" <$2`
+
+#Set some SQL parameters
+if [ "$SQL_PASSWORD" != "" ]; then 
+  SQL_ARGS="-p$SQL_PASSWORD"; 
+else 
+  SQL_ARGS=""; 
+fi
+SQL_ARGS="-h $SQL_HOST -u $SQL_USER $SQL_ARGS -D $SQL_DATABASE -s -e"
+
+#Insert a new entry into the SQL table
+
+if [ "$1" = "FAILED" ] || [ "$1" = "SENT" ]; then
+   mysql $SQL_ARGS "insert into $SQL_TABLE (type,sent,sender,receiver,msgid) values (\"$1\",\"$DATE\",\"$FROM\",\"$TO\",\"$3\");";
+elif [ "$1" = "RECEIVED" ]; then
+   mysql $SQL_ARGS "insert into $SQL_TABLE (type,sent,received,sender,receiver) values (\"RECEIVED\",\"$SENT\",\"$DATE\",\"$FROM\",\"$SUBJECT\");";
+elif [ "$1" = "REPORT" ]; then
+   #Extract more data from the status report file
+   DISCHARGE=`sed -e 1,/SMS\ STATUS/d < $2 | formail -zx Discharge_timestamp:`
+   MSGID=`sed -e 1,/SMS\ STATUS/d < $2 | formail -zx Message_id:`
+   STATUS=`sed -e 1,/SMS\ STATUS/d < $2 | formail -zx Status: | cut -f1 -d,`
+
+   if [ "$MSGID" != "" ]; then
+     ID=`mysql $SQL_ARGS "select id from $SQL_TABLE where receiver=\"$FROM\" and type=\"SENT\" and msgid=\"$MSGID\" order by id desc limit 1;"`
+     mysql $SQL_ARGS "update $SQL_TABLE set received=\"$DISCHARGE\",status=\"$STATUS\" where id=\"$ID\";"
+   fi
+
+fi
+

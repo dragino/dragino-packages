@@ -1,0 +1,47 @@
+# Translation of SMS Server Tools 3 message file headers for
+# finnish, created by Keijo Kasvi 30.07.2007.
+
+incoming	= yes
+datetime	= %d.%m.%Y %H:%M:%S
+yes_word	= kyllä
+no_word		= ei
+yes_chars	= 'K','k'
+no_chars	= 'E','e'
+ 
+To:		= Vastaanottaja:
+From:		= Lähettäjä:
+#Flash:		= Flash:
+Provider:	= Palveluntarjoaja:
+Queue:		= Jono:
+Binary:		= Binääri:
+Report:		= Raportti:
+Autosplit:	= Automaattipilkonta:
+Validity:	= Voimassaolo:
+Voicecall:	= Äänipuhelu:
+Replace:	= Korvaa:
+Alphabet:	= Merkistö:
+Include:	= Liitä:
+Macro:		= Makro:
+Hex:		= Heksa:
+SMSC:		= Viestikeskus:
+Sent:		= Lähetetty:
+Modem:		= Modeemi:
+From_TOA:	= Osoitetyyppi:
+From_SMSC:	= Viestikeskus:
+Name:		= Nimi:
+Received:	= Vastaanotettu:
+Subject:	= Otsikko:
+UDH-Type:	= UDH-Tyyppi:
+Length:		= Pituus:
+Fail_reason:	= Epäonnistumisen_syy:
+Failed:		= Epäonnistunut:
+IMSI:		= Liittymätunniste:
+Message_id:	= Viestitunniste:
+Priority:	= Etuoikeus:
+Original_filename: = Alkuperäinen_tiedostonimi:
+Call_type:	= Puhelutyyppi:
+missed		= vastaamaton
+CALL MISSED	= VASTAAMATON PUHELU
+Result:		= Tulos:
+Number: 	= Numero:
+Incomplete:	= Epätäydellinen:

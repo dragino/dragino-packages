@@ -1,0 +1,10 @@
+#!/bin/sh
+# This sample converts outgoing UTF-8 file to ISO character set
+# which is an internal format used in smsd.
+
+# After version 3.0.8 this is not needed, conversion is automatic.
+
+FILE=`mktemp /tmp/smsd_XXXXXX`
+iconv -t ISO-8859-15 -f UTF-8  < $1 > $FILE
+mv $FILE $1
+chmod 644 $1

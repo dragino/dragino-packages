@@ -1,0 +1,235 @@
+<!--
+ This file is part of YunWebUI.
+
+ YunWebUI is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ As a special exception, you may use this file as part of a free software
+ library without restriction.  Specifically, if other files instantiate
+ templates or use macros or inline functions from this file, or you compile
+ this file and link it with other files to produce an executable, this
+ file does not by itself cause the resulting executable to be covered by
+ the GNU General Public License.  This exception does not however
+ invalidate any other reasons why the executable file might be covered by
+ the GNU General Public License.
+
+ Copyright 2013 Arduino LLC (http://www.arduino.cc/)
+-->
+<html>
+<head>
+  <title>Bridge Key/Value Storage Manager Example</title>
+  <style>
+    body {
+      background-color: #00979c;
+      color: #222;
+      font: 1em "Lucida Grande", Lucida, Verdana, sans-serif;
+    }
+  </style>
+</head>
+<body>
+<div style="visibility: hidden; display: none;">
+  <table id="template">
+    <tr>
+      <td>"KEY"</td>
+      <td><input name="KEY" type="hidden" value="VALUE"> <input name="KEY" value="VALUE" type="text"></td>
+      <td><input type="button" name="KEY" value="delete"></td>
+    </tr>
+  </table>
+</div>
+
+<div style="background: none repeat scroll 0 0 #F5F5F5">
+  <div style="padding: 2em;">
+    <div id="warning" style="display: none;">
+      <span style="color: #c37676;">You are using HTTP. We suggest to use HTTPS to protect your Y&uacute;n<br><br></span>
+    </div>
+
+    Password: <input id="password" type="password" value="">
+    <br/>
+    <br/>
+
+    <div id="storage">
+      Retrieving storage values...
+    </div>
+    <br/>
+
+    <input id="refresh" type="button" value="Reload storage!">
+    <br/>
+    <br/>
+
+    <div>
+      Add a new entry into the storage:<br>
+      <table>
+        <tr>
+          <td>Key:</td>
+          <td><input id="new_storage_key" type="text"></td>
+        </tr>
+        <tr>
+          <td>Value:</td>
+          <td><input id="new_storage_value" type="text"></td>
+        </tr>
+      </table>
+    </div>
+
+    <input id="update" type="button" value="Update or insert new key/value pair">
+  </div>
+</div>
+<script type="text/javascript" src="zepto.min.js"></script>
+<script>
+  "use strict";
+
+  var please_wait_message = "Retrieving storage values...";
+
+  function util_make_basic_auth(user, password) {
+    var tok = user + ':' + (password || "arduino");
+    var hash = btoa(tok);
+    return "Basic " + hash;
+  }
+
+  function add_basic_auth_headers_if_password(ajax_call_options, password) {
+    if (password && password !== "") {
+      ajax_call_options.headers = {
+        Authorization: util_make_basic_auth("root", password)
+      }
+    }
+  }
+
+  function error_handler(error) {
+    if (error && error.status && error.status === 403) {
+      alert("Password is wrong!");
+      return
+    }
+
+    if (error && error.status && error.status === 500) {
+      alert("Error accessing the key/value store. Is the Bridge example sketch running?");
+    } else {
+      alert("Uknown error: check browser console");
+    }
+
+    console.log(arguments);
+  }
+
+  function storage_retrieve_all(callback) {
+    var ajax_call_options = {
+      url: "/data/get",
+      timeout: 10000,
+      success: callback,
+      error: error_handler
+    };
+    add_basic_auth_headers_if_password(ajax_call_options, $("#password").val());
+    $.ajax(ajax_call_options)
+  }
+
+  function storage_delete_by_key(key, callback) {
+    var ajax_call_options = {
+      url: "/data/delete/" + encodeURIComponent(key),
+      timeout: 10000,
+      success: callback,
+      error: error_handler
+    };
+    add_basic_auth_headers_if_password(ajax_call_options, $("#password").val());
+    $.ajax(ajax_call_options)
+  }
+
+  function storage_update_key_value(key, value, callback) {
+    var ajax_call_options = {
+      url: "/data/put/" + encodeURIComponent(key) + "/" + encodeURIComponent(value),
+      timeout: 10000,
+      success: callback,
+      error: error_handler
+    };
+    add_basic_auth_headers_if_password(ajax_call_options, $("#password").val());
+    $.ajax(ajax_call_options)
+  }
+
+  function repaint_storage(storage) {
+    $("#storage").empty();
+
+    if (storage.value.length === 0) {
+      $("#storage").html("Storage is empty!");
+      return;
+    }
+
+    var template = $("#template tbody").html();
+
+    var html = "";
+    for (var key in storage.value) {
+      html = html + template.replace(/KEY/g, key).replace(/VALUE/g, storage.value[key]);
+    }
+    $("#storage").html("<table><tr><td>Key</td><td>Value</td><td></td></tr>" + html + "</table>");
+  }
+
+  function confirm_storage_key_deletion(event) {
+    var key = $(event.target).attr("name");
+    if (confirm("Are you sure you want to delete key \"" + key + "\" ?")) {
+      storage_delete_by_key(key, function() {
+        $("#storage").html(please_wait_message);
+        storage_retrieve_all(repaint_storage);
+      });
+    }
+  }
+
+  function update_storage(callback) {
+    var keys_to_update = [];
+    $("#storage input[type=text]").each(function(idx, item) {
+      var $key_value = $(item);
+      if ($key_value.val() !== $("#storage input[type=hidden][name=" + $key_value.attr("name") + "]").val()) {
+        keys_to_update.push({
+          key: $key_value.attr("name"),
+          value: $key_value.val()
+        });
+      }
+    });
+
+    var new_storage_key = $("#new_storage_key").val();
+    var new_storage_value = $("#new_storage_value").val();
+    if (new_storage_key && new_storage_value) {
+      keys_to_update.push({
+        key: new_storage_key,
+        value: new_storage_value
+      });
+    }
+
+    var done = 0;
+    for (var idx = 0; idx < keys_to_update.length; idx++) {
+      storage_update_key_value(keys_to_update[idx].key, keys_to_update[idx].value, function() {
+        done++;
+        if (done === keys_to_update.length) {
+          callback();
+        }
+      });
+    }
+  }
+
+  $(function() {
+    $("#storage").html(please_wait_message);
+    storage_retrieve_all(repaint_storage);
+    $("#storage").on("click", "input[type=button]", confirm_storage_key_deletion);
+    $("#update").on("click", function() {
+      update_storage(function() {
+        $("#storage").html(please_wait_message);
+        storage_retrieve_all(repaint_storage);
+      })
+    });
+    $("#refresh").on("click", function() {
+      $("#storage").html(please_wait_message);
+      storage_retrieve_all(repaint_storage);
+    });
+
+    if (window.location.protocol === "http:") {
+      $("#warning").attr("style", "");
+    }
+  });
+</script>
+</body>
+</html>

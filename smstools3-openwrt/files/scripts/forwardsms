@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# SMS forwarding sample (eventhandler).
+FORWARD_TO="358401234567"
+
+if [ "$1" = "RECEIVED" ]; then
+  TEXT=`formail -I "" <$2`
+  FILE=`mktemp /tmp/send_XXXXXX`
+  echo "To: $FORWARD_TO" >> $FILE
+  echo "" >> $FILE
+  echo "$TEXT" >> $FILE
+  FILE2=`mktemp /var/spool/sms/outgoing/send_XXXXXX`
+  mv $FILE $FILE2
+fi

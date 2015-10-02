@@ -1,0 +1,12 @@
+# Example smsd.conf. Read the manual for a description
+
+devices = GSM_Net1
+logfile = /var/log/smsd.log
+loglevel = 7
+
+[GSM_Net1]
+# This is a socket
+device = @10.1.1.1:5000
+pin = 1234
+keep_open = no
+incoming = yes

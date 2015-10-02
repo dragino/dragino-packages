@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# This script converts a pure unicode text file into an sms file for sending.
+
+if [ $# -ne 1 ]; then
+  echo "Usage: unicode2sms filename"
+  exit 1
+fi
+
+if grep ".A.l.p.h.a.b.e.t.:.*U.C.S" $1 >/dev/null; then
+  ucs2=true
+else
+  ucs2=false
+fi
+
+text=`od -t x1 $1 | cut -c8-99`
+foundstart="false"
+position="first"
+for character in $text; do
+  if [ "$position" = "first" ]; then
+    if [ "$foundstart" = "true" ]; then
+      echo -en "\x$character"
+    fi
+    position="second"
+  else
+    if [ "$character" != "ff" ]; then
+      echo -en "\x$character"
+    fi  
+    if [ "$foundstart" = "false" ] && [ "$character" = "0a" ] && [ "$previous" = "0a" ]; then
+      foundstart="true"
+    fi
+    previous="$character"
+    position="first"
+  fi  
+done
+

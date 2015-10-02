@@ -1,0 +1,9 @@
+VERBOSE=off
+MAILDIR=/var/spool/mail
+DEFAULT=/var/spool/mail/sms
+LOGFILE=/var/log/procmail
+
+:0
+* ^TOsms
+| /usr/local/bin/email2sms
+

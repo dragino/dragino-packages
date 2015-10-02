@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Smsd can send eMails via SMS. You simply need to store the eMail as text
+# file in the outgoing queue directory with a unique filename.
+
+# The eMail must include the phone number in the To: field, for example:
+# To: "Herbert +491721234567" <sms@localhost>
+
+# This simple script creates a unique filename and copies the eMail from
+# stdin to that file.
+
+# If you use procmail to deliver local eMail. Create the user sms and create
+# the file /home/sms/.procmailrc with this content:
+
+# VERBOSE=off
+# MAILDIR=/var/spool/mail
+# DEFAULT=/var/spool/mail/sms
+# LOGFILE=/var/log/procmail
+# 
+# :0
+# * ^TOsms
+# | /usr/local/bin/email2sms
+
+
+
+# If you use QMail and vpopmail you need the file
+# /home/vpopmail/domains/your-domain/.qmail-sms with this content:
+
+# | /usr/local/bin/email2sms
+
+
+
+tmp=$(mktemp /tmp/smsgw.XXXXXX)
+cat >$tmp
+destinations=`formail -zx "To:" < $tmp`
+IFS=,
+for destination in $destinations; do
+  destination=${destination## }
+  OUTFILE=$(mktemp /var/spool/sms/outgoing/smsgw.out.XXXXXX)
+  formail -f -I "To: $destination" < $tmp > $OUTFILE
+  chmod 666 $OUTFILE
+  echo "SMS queued to $OUTFILE"
+done
+rm $tmp

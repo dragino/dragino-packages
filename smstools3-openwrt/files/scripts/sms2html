@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# This script converts a received sms file into a html file. 
+
+if [ $# -ne 1 ]; then
+  echo "Usage: sms2html filename"
+  exit 1
+fi
+
+if grep "Alphabet:.*UCS" $1 >/dev/null; then
+  ucs2="true"
+else
+  ucs2="false"
+fi
+
+# Write HTML header
+echo "<html><body>"
+
+# Write Header of the SMS file
+echo "<b>"
+while read line; do
+  if [ -z "$line" ]; then
+    break
+  else 
+    echo "$line<br>"
+  fi
+done < $1
+echo "</b>"
+
+# Write message text
+echo "<p>"
+if [ "$ucs2" = "true" ]; then
+  text=`od -t x1 $1 | cut -c8-99`
+  position="first"
+  foundstart="false"
+  previous=""
+  for character in $text; do
+    # Search for the start of the 16 bit part. Starts after "0a 0a"
+    if [ "$foundstart" = "false" ]; then
+      if [ "$character" = "0a" ] && [ "$previous" = "0a" ]; then
+        foundstart="true"
+      fi
+    else
+      # Combine two bytes to one 16bit character in html syntax 
+      if [ "$position" = "first" ]; then
+        echo -en "&#x$character"
+        position="second"
+      else
+        echo -en "$character;"
+        position="first"
+      fi  
+    fi
+    previous="$character"
+  done
+else
+  text=`formail -I "" < $1`
+  echo "$text"
+fi
+
+# Write HTML footer
+echo ""
+echo "</body></html>"

@@ -1,0 +1,68 @@
+#!/bin/sh
+# This is an example how to use an eventhandler with smsd.
+# $1 is the type of the event wich can be SENT, RECEIVED, FAILED or REPORT.
+# $2 is the filename of the sms.
+# $3 is the message id. Only used for SENT messages with status report.
+
+#The next line changes the file attributes so that everybody can read
+#received SM
+#if [ "$1" = "RECEIVED" ]; then
+#  chmod a+r $2
+#fi
+
+
+#This sends all received SM to an eMail receiver:
+#if [ "$1" = "RECEIVED" ]; then
+#  /usr/sbin/sendmail username@localhost <$2
+#fi
+
+#This sends all received SM to eMail receiver. The recipient address 
+#must be the first word of the SM.
+
+#if [ "$1" = "RECEIVED" ]; then
+#  receiver=`cat $2 | grep '^.*@.*' | sed -n 1p | cut -f1 -d' '`
+#  if [ $receiver ]; then
+#    /usr/sbin/sendmail $receiver < $2
+#  fi
+#fi
+
+#This forwards all received SM to another mobile phone:
+#if [ "$1" = "RECEIVED" ]; then
+#  FROM=`formail -zx From: <$2`
+#  formail -f -I "To: 491721234567" <$2 >$2.forward
+#  echo "from $FROM" >> $2.forward
+#  mv $2.forward /var/spool/sms/outgoing
+#fi
+
+#The following code concatenates multipart text messages
+if [ "$1" = "RECEIVED" ]; then
+  if grep "UDH-DATA: 05 00 03" $2 >/dev/null; then
+    if grep "Alphabet: ISO" $2 >/dev/null || grep "Alphabet: GSM" $2 >/dev/null; then
+      # This is a multipart text message
+      FROM=`formail -zx From: <$2`
+      UDHDATA=`formail -zx UDH-DATA: <$2`
+      # Extract information from UDH using awk to convert hex to dec
+      MSGID=`echo "$UDHDATA" | awk '{printf "%d",strtonum("0x"$4)}'`
+      PARTS=`echo "$UDHDATA" | awk '{printf "%d",strtonum("0x"$5)}'`
+      PART=`echo "$UDHDATA" | awk '{printf "%d",strtonum("0x"$6)}'`
+      # Rename the file
+      mv $2 "$FROM.$MSGID.$PART"
+      # Check if all parts have been received
+      received=`ls -1 "$FROM.$MSGID."* | wc -l`
+      if [ "$PARTS" -eq "$received" ]; then
+        # Concatenate all parts
+        # copy header from last part into a new file
+        formail -X "" <$FROM.$MSGID.$PART >$2.concatenated
+        echo "" >>$2.concatenated
+        # add the text of each part
+        counter=1
+        while [ "$counter" -le "$PARTS" ]; do
+          sed -e '1,/^$/ d' <$FROM.$MSGID.$counter >>$2.concatenated
+          rm $FROM.$MSGID.$counter
+          counter=`expr $counter + 1`
+        done
+      fi
+    fi
+  fi
+fi
+

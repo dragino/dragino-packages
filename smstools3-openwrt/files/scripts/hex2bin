@@ -1,0 +1,19 @@
+#!/bin/gawk -f
+
+# This script reads a hex-dump and converts it to a binary file.
+# The hex-dump must contain one or more hexadecimal numbers separated
+# by spaces, colon or 0x. The lest significant end of the hex values
+# is on the right side. Valid examples:
+#
+# echo "01 2 0x03 04:05 fa3B" | hex2bin > testfile.bin
+
+
+BEGIN {
+  FS="((0x)|[ :])*";
+}
+
+{
+  for (i=1; $i!=""; i++) {
+    printf "%c",strtonum("0x"$i);
+  } 
+}

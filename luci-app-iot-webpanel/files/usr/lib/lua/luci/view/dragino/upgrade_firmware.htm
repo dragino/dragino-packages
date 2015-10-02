@@ -1,0 +1,80 @@
+<%
+local http = require("luci.http")
+http.prepare_content("text/html; charset=GB2312")
+local uci = require('luci.model.uci')
+uci = uci.cursor()
+MODEL = uci:get('system.vendor.web_model')
+-%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+    Copyright (C) 2014 Dragino Technology Co., Limited
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+-->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+  <link rel="stylesheet" type="text/css" href="<%= resource %>/arduino/style.css" />
+  <title><%= MODEL %></title>
+</head>
+<body>
+<div id="container">
+  <div id="header">
+    <div class="wrapper">
+      <h1><%= MODEL %></h1>
+      <div id="logo"><a href="<%= pcdata(controller .. '/webpanel') %>"><img src="<%= resource %>/arduino/logo.png" alt="<%= MODEL %>"/></a></div>
+     </div>
+  </div>
+  <div id="content">
+    <div class="wrapper">
+      <div id="welcome_container">
+        <h2>Upgrade Firmware</h2>
+      </div>
+    </div>
+
+    <div class="wrapper divide">
+      <ul>
+	 <% if upgrade_avail then %>
+	 <form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
+
+        <li>
+		<label class="desc" for="keep">Keep Settings:</label>
+            	<!--<div class="input_container"> -->
+			<input type="checkbox" name="keep" id="keep" >
+		<!--</div>-->
+        </li>
+
+        <li>
+		<label class="desc left" for="image">Choose Firmware:</label>
+			<input type="file" name="image" id="image" >	
+        </li>	
+
+        <li>				
+		<div class="input_container">
+			<input type="submit" class="btTxt submit saveForm" value="Upload Firmware" />
+		</div>
+        </li>	
+
+	 <% if image_invalid then %>
+		<label class="title">Image Format Invalid</label>
+	 <% end %>
+	 </form>
+	 <% else %>
+		<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present, a new firmware image must be flashed manually. Please refer to the OpenWrt wiki for device specific install instructions.%></div>
+	 <% end %>
+      </ul>
+    </div>
+
+  </div>
+  <!-- #content -->
+  <br class="clear"/>
+</div>
+<!-- #container -->
+</body>
+</html>

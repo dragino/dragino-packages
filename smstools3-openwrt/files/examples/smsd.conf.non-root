@@ -1,0 +1,18 @@
+# Example smsd.conf. Read the manual for a description
+
+devices = GSM1
+#logfile = /var/log/smsd.log
+loglevel = 7
+
+# Settings to run smsd without root priviledges:
+user = user
+group = dialout
+logfile = /var/spool/sms/smsd.log
+infofile = /var/spool/sms/smsd.running
+# When infofile is changed, it must be changed to the /etc/init.d/sms3 script too.
+
+[GSM1]
+device = /dev/ttyS0
+incoming = yes
+#pin = 1111
+

@@ -1,0 +1,16 @@
+#!/bin/sh
+# This sample converts a received message file from
+# ISO to UTF-8 character set.
+
+# After version 3.0.8 this is not needed.
+# Use incoming_utf8 = yes in the modem settings.
+
+case "$1" in
+  SENT|RECEIVED|FAILED)
+    FILE=`mktemp /tmp/smsd_XXXXXX`
+    iconv -f ISO-8859-15 -t UTF-8  < $2 > $FILE
+    mv $FILE $2
+    chmod 644 $2
+    ;;
+esac
+

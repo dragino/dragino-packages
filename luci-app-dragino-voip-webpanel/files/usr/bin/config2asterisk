@@ -1,0 +1,45 @@
+### Set up Asterisk config files
+# Remove old files
+rm /etc/asterisk/softphone.sip.conf >> /dev/null
+
+
+# Get localnet and netmask from br-lan settings
+LOCALNET=`uci get network.lan.ipaddr | awk -F. '{print $1"."$2"."$3"."0}'`
+LOCALNETMASK=`uci get network.lan.netmask`
+
+
+# Check whether device is already at Softphone Master IP address
+CURRENTOCTET4=`uci show network.lan.ipaddr | cut -d = -f 2 | cut -d . -f 4`
+
+# If so, set new IP addr to default of .20 in case device is made non-Master
+# and the user forgets to change the IP address in the web UI at the same time
+
+
+#generate server info
+/usr/bin/config2servers 
+
+#generate clients info
+/usr/bin/config2clients
+
+#generate extension info
+/usr/bin/config2extension
+
+# Make sure Asterisk custom include files exist for user defined functions.
+touch /etc/asterisk/custom.incoming.extensions.conf
+touch /etc/asterisk/custom.extensions.conf
+touch /etc/asterisk/custom.sip.conf
+# -----------------------------------------------------
+
+
+# Run init to restart Asterisk
+
+# Start or stop Asterisk now and enable on boot up if required
+ENABLE_AST=`uci get voip.asterisk.enableast`
+if [ $ENABLE_AST = "1" ]; then
+    /etc/init.d/asterisk restart
+    /etc/init.d/asterisk enable
+else
+    /etc/init.d/asterisk stop
+    rm /etc/rc.d/S99asterisk
+fi
+

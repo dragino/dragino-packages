@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Please read the description in the manual of SMS Server Tools.
+
+#run this script only when a message was received.
+if [ "$1" != "RECEIVED" ]; then exit; fi;
+
+#Define the database parameters
+SQL_HOST=localhost
+SQL_USER=root
+SQL_PASSWORD=
+SQL_DATABASE=smsd
+SQL_TABLE=demo
+
+#Extract data from the SMS file
+FROM=`formail -zx From: < $2`
+TEXT=`formail -I "" <$2 | sed -e"1d"`
+
+#Set some SQL parameters
+if [ "$SQL_PASSWORD" != "" ]; then 
+  SQL_ARGS="-p $SQL_PASSWORD"; 
+else 
+  SQL_ARGS=""; 
+fi
+SQL_ARGS="-h $SQL_HOST -u $SQL_USER $SQL_ARGS -D $SQL_DATABASE -s -e"
+
+#Do the SQL Query
+AMOUNT=`mysql $SQL_ARGS "select amount from $SQL_TABLE where msisdn=\"$FROM\" and password=\"$TEXT\" ;"`
+
+#Create an answer SM with the amount
+FILENAME=`mktemp /var/spool/sms/outgoing/answerXXXXXX`
+echo "To: $FROM" >$FILENAME
+echo "" >> $FILENAME
+echo "Your amount is $AMOUNT" >>$FILENAME
+

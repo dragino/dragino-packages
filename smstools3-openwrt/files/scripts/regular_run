@@ -1,0 +1,123 @@
+#!/bin/bash
+# SMS Server Tools 3.
+# Sample script for using a regular run feature.
+# See run.html for more details.
+
+#--------------------------------------------------------------------------
+
+# The first part is going to the eventhandler:
+# The following code stores delivery timestamp to the sent message
+if [ "$1" = "REPORT" ]; then
+  SENTDIR=/var/spool/sms/sent
+  if grep "Status: 0" $2 >/dev/null; then
+    FROM=`formail -zx From: < $2`
+    RECEIVED=`formail -zx Received: < $2`
+    TMPFILE=`mktemp /tmp/smsd_XXXXXX`
+    formail -I "" < $2 | sed -e"1,2d" > $TMPFILE
+    MESSAGE_ID=`formail -zX Message_id: < $TMPFILE`
+    grep -lx "$MESSAGE_ID" $SENTDIR/* > $TMPFILE
+    cat $TMPFILE | while read FNAME; do
+      OLDRECEIVED=`formail -zx Received: < ${FNAME}`
+      if [ "$OLDRECEIVED" = "" ]; then
+        TO=`formail -zx To: < ${FNAME}`
+        if [ "$TO" = "$FROM" ]; then
+          TMPFILE2=`mktemp /tmp/smsd_XXXXXX`
+          cp ${FNAME} $TMPFILE2
+          formail -f -I "Received: $RECEIVED" < $TMPFILE2 > ${FNAME}
+          unlink $TMPFILE2
+        fi
+      fi
+    done 
+    unlink $TMPFILE
+  fi
+fi
+
+# The second part tries to find undelivered messages and sends them
+# to the alternate number if it is described.
+max_delay=600 #seconds, 1800 is 30 minutes.
+SENTDIR=/var/spool/sms/sent
+OUTGOINGDIR=/var/spool/sms/outgoing
+TMPFILE=`mktemp /tmp/smsd_XXXXXX`
+send2alternate=0
+rename_alternate=0
+grep -l ^Alternate_to: $SENTDIR/* > $TMPFILE
+cat $TMPFILE | while read FNAME; do
+  if ! test -f "${FNAME}.LOCK" ; then
+    ALT_TO=`formail -zx Alternate_to: < ${FNAME}`
+    if [ "$ALT_TO" != "" ]; then
+      MSG_ID=`formail -zx Message_id: < ${FNAME}`
+      if [ "$MSG_ID" != "" ]; then
+        RECEIVED=`formail -zx Received: < ${FNAME}`
+        if [ "$RECEIVED" = "" ]; then
+          #This message is not yet received
+          SENT=`formail -zx Sent: < ${FNAME}`
+          if [ "$SENT" = "" ]; then
+            #Hmmm... No Sent: timestamp? Will resend now.
+            send2alternate=1
+          else
+            #How long this message has been waiting?
+            cur_timestamp=`date +%s`
+            msg_timestamp=`date +%s -d "$SENT"`
+            time_diff=`expr $cur_timestamp - $msg_timestamp` 
+            if [ $time_diff -gt $max_delay ]; then
+              send2alternate=1
+            fi
+          fi
+        else
+          #This message is now received
+          rename_alternate=1
+        fi
+      fi
+
+      if [ $send2alternate -gt 0 ]; then
+        TMPFILE2=`mktemp /tmp/smsd_XXXXXX`
+        formail -f -I Alternate_to: -i "To: $ALT_TO" < ${FNAME} > $TMPFILE2
+        TMPFILE3=`mktemp $OUTGOINGDIR/regr_XXXXXX`
+        echo "$$" > $TMPFILE3.LOCK
+        mv $TMPFILE2 $TMPFILE3
+        rm $TMPFILE3.LOCK
+        rename_alternate=1
+      fi
+
+      if [ $rename_alternate -gt 0 ]; then
+        #Alternate number is not effective anymore:
+        TMPFILE2=`mktemp /tmp/smsd_XXXXXX`
+        cp ${FNAME} $TMPFILE2
+        formail -f -R Alternate_to: Old-Alternate_to: < $TMPFILE2 > ${FNAME}
+        unlink $TMPFILE2
+      fi
+    fi
+  fi
+done
+unlink $TMPFILE
+
+############################################
+SCHEDULEDDIR=/var/spool/sms/scheduled
+OUTGOINGDIR=/var/spool/sms/outgoing
+
+if [ "$(ls -A $SCHEDULEDDIR)" ]; then
+  TMPFILE=`mktemp /tmp/smsd_XXXXXX`
+  #grep -l ^Send: $SCHEDULEDDIR/* > $TMPFILE
+  grep -l ^To: $SCHEDULEDDIR/* > $TMPFILE
+  cat $TMPFILE | while read FNAME; do
+
+    schedule=`formail -zx Send: < ${FNAME}`
+    if [ "x$schedule" != "x" ]; then
+      cur_timestamp=`date +%s`
+      schedule_timestamp=`date +%s -d "$schedule"`
+      time_diff=$(($schedule_timestamp - $cur_timestamp))
+      if [ $time_diff -lt 0 ]; then
+        mv ${FNAME} $OUTGOINGDIR
+      fi
+      continue
+    fi
+
+    #
+
+  done
+  unlink $TMPFILE
+fi
+
+############################################
+
+exit 0

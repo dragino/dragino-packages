@@ -1,0 +1,91 @@
+<%
+local http = require("luci.http")
+http.prepare_content("text/html; charset=utf-8")
+local uci = require('luci.model.uci')
+uci = uci.cursor()
+MODEL = uci:get('system.vendor.web_model')
+-%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+    Copyright (C) 2014 Dragino Technology Co., Limited
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+  <link rel="stylesheet" type="text/css" href="<%= resource %>/arduino/style.css" />
+  <title><%= MODEL %></title>
+</head>
+<body>
+<div id="container">
+  <div id="header">
+    <div class="wrapper">
+      <h1><%= MODEL %></h1>
+      <div id="logo"><a href="<%= pcdata(controller .. '/webpanel') %>"><img src="<%= resource %>/arduino/logo.png" alt="<%= MODEL %>"/></a></div>
+     </div>
+  </div>
+  <div id="content">
+    <div class="wrapper">
+      <div id="welcome_container">
+        <h2>New image is uploaded, please confirm</h2>
+      </div>
+    </div>
+
+    <div class="wrapper divide">
+       <span class="row">
+         <span class="desc">md5 checksum:</span>
+         <span class="val"><%=checksum%></span>
+       </span>
+
+       <span class="row">
+         <span class="desc">size:</span>
+         <span class="val"><%
+			local w = require "luci.tools.webadmin"
+			write(w.byte_format(size))
+
+			if storage > 0 then
+				write(luci.i18n.translatef(
+					" (%s valid)",
+					w.byte_format(storage)
+				))
+			end
+         %></span>
+       </span>
+
+       <span class="row">
+         <span class="desc">Settings:</span>
+         <span class="val"><% if keep then %>
+		Keep settings after upgrade
+	  <% else %>
+		Clear settings after upgrade.
+	  <% end %>
+	 </span>
+       </span>
+    </div>
+     <div class="wrapper divide">
+	<div class="input_container">
+	<form style="display:inline" action="<%=REQUEST_URI%>" method="post">
+		<input class="btTxt submit saveForm btn" type="submit" value="Cancel Upgrade" />
+	</form>
+	<form style="display:inline" action="<%=REQUEST_URI%>" method="post">
+		<input type="hidden" name="step" value="2" />
+		<input type="hidden" name="keep" value="<%=keep and "1" or ""%>" />
+		<input class="btTxt submit saveForm" type="submit" value="Process Upgrade" />
+	</form>
+       </div>
+      </div>
+
+
+  </div>
+  <!-- #content -->
+  <br class="clear"/>
+</div>
+<!-- #container -->
+</body>
+</html>

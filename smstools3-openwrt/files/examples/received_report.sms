@@ -1,0 +1,10 @@
+From: 491721234567
+From_SMSC: 491722270333
+Sent: 02-01-21 22:26:23
+Received: 02-01-21 22:26:25
+Subject: GSM1
+
+SMS STATUS REPORT
+Message_id: 117
+Discharge_timestamp: 02-01-21 22:27:02
+Status: 0,Ok,short message received by the SME

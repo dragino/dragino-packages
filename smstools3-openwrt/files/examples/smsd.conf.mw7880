@@ -1,0 +1,24 @@
+# Example smsd.conf. Read the manual for a description
+# Modem Think-Will MW7880
+
+devices = GSM1
+logfile = /var/log/smsd.log
+loglevel = 5
+outgoing = /var/smstools3/sms/outgoing
+checked = /var/smstools3/sms/checked
+#failed = /var/smstools3/sms/failed
+incoming = /var/smstools3/sms/incoming
+#report = /var/smstools3/sms/report
+sent = /var/smstools3/sms/sent
+eventhandler = /usr/share/smstools3/scripts/ForwardtoMediaServer
+alarmlevel = 4
+delaytime = 10
+
+[GSM1]
+device = /dev/ttyUSB1
+incoming = 2
+report_device_details = yes
+#baudrate = 9600
+needs_wakeup_at = yes
+check_memory_method = 3
+mode = new

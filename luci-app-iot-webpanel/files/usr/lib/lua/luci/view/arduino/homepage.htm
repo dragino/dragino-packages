@@ -1,0 +1,182 @@
+<%
+local http = require("luci.http")
+http.prepare_content("text/html; charset=utf-8")
+local uci = require('luci.model.uci')
+uci = uci.cursor()
+MODEL = uci:get('system.vendor.web_model')
+-%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+ This file is part of YunWebUI.
+
+ YunWebUI is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ As a special exception, you may use this file as part of a free software
+ library without restriction.  Specifically, if other files instantiate
+ templates or use macros or inline functions from this file, or you compile
+ this file and link it with other files to produce an executable, this
+ file does not by itself cause the resulting executable to be covered by
+ the GNU General Public License.  This exception does not however
+ invalidate any other reasons why the executable file might be covered by
+ the GNU General Public License.
+
+ Copyright 2013 Arduino LLC (http://www.arduino.cc/)
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+  <link rel="stylesheet" type="text/css" href="<%= resource %>/arduino/style.css" />
+  <title><%= MODEL %></title>
+</head>
+<body>
+<div id="container">
+  <div id="header">
+    <div class="wrapper">
+      <h1><%= MODEL %></h1>
+      <div id="logo"><a href="<%= pcdata(controller .. '/webpanel') %>"><img src="<%= resource %>/arduino/logo.png" alt="<%= MODEL %>"/></a></div>
+    </div>
+  </div>
+  <div id="content">
+    <div class="wrapper">
+      <div id="welcome_container">
+        <h2>Welcome to use <strong><%= hostname %></strong></h2>
+      </div>
+      <div id="configurebtn_container">
+        <form method="get" action="<%= pcdata(controller .. '/webpanel/config') %>">
+          <input class="btTxt submit saveForm" type="submit" value="System" onclick="javascript:return goto('<%= pcdata(controller .. '/webpanel/config') %>');">
+        </form>
+        <form method="get" action="<%= pcdata(controller .. '/webpanel/sensor') %>">
+          <input class="btTxt submit saveForm" type="submit" value="Sensors" onclick="javascript:return goto('<%= pcdata(controller .. '/webpanel/sensor') %>');">
+        </form>
+        <form method="get" action="<%= pcdata(controller .. '/webpanel/flashops') %>">
+          <input class="btTxt submit saveForm" type="submit" value="Upgrade" onclick="javascript:return goto('<%= pcdata(controller .. '/webpanel/flashops') %>');">
+        </form>
+      </div>
+    </div>
+    <div class="wrapper divide" id="recap">
+      <div id="dashboard_container">
+        <div id="sections_container">
+	   <div class="section">
+		<h3>Version Info</h3>
+		<p>
+		   <span class="row">
+                    <span class="desc">Firmware Version:</span>
+                    <span class="val"><%=firmware_version%></span>
+                 </span>
+		   <span class="row">
+                    <span class="desc">Build Time:</span>
+                       <span class="val"><%=build_time%></span>
+                 </span>
+		</p>
+	   </div>
+          <% for name, data in pairs(ifaces) do %>
+          <div class="section">
+            <h3><% if data["pretty_name"] then %><%= data["pretty_name"] %> (<%= name %>)<% else %>Interface <%= name %><% end %> <% if data["address"] then %><span class="connected">connected</span><% else %><span class="disconnected">disconnected</span><% end %></h3>
+            <table>
+              <tr></tr>
+            </table>
+            <p>
+              <% if data["address"] then %>
+                <span class="row">
+                  <span class="desc">Address</span>
+                  <span class="val"><%= data["address"] %></span>
+                </span>
+                <span class="row">
+                  <span class="desc">Netmask</span>
+                  <span class="val"><%= data["netmask"] %></span>
+                </span>
+              <% end %>
+              <span class="row">
+                <span class="desc">MAC Address</span>
+                <span class="val"><%= data["mac"] %></span>
+              </span>
+              <span class="row">
+                <span class="desc">Received</span>
+                <span class="val"><%= data["rx"] %></span>
+              </span>
+              <span class="row">
+                <span class="desc">Trasmitted</span>
+                <span class="val"><%= data["tx"] %></span>
+              </span>
+            </p>
+          </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <% if last_log then %>
+    <div class="wrapper divide">
+      <div id="log_container">
+        <p>There was a problem last time I tried configuring wireless network.
+        <% if last_log_error_message then %>
+          <br/>The error is: <strong><%= last_log_error_message %></strong>
+        <% end %>
+        </p>
+        <p>Check the following log for details of what went wrong (<a id="dmesg_toogle" href="#">Show</a>)</p>
+        <textarea id="dmesg" rows="20" readonly="readonly"><% for i,line in pairs(last_log) do %><%= line %>
+<% end %></textarea>
+        <script language="javascript">document.getElementsByTagName("textarea")[0].scrollTop = 99999;</script>
+      </div>
+    </div>
+    <% end %>
+
+    <% if update_file then %>
+    <div class="wrapper divide">
+      <p>A file named <strong><%= update_file %></strong> has been found on the SD card.<br />Do you wish to use it to reset your Y&uacute;n?</p>
+      <p class="highlight alert">
+        <strong>ATTENTION!!</strong><br/>This will erase everything stored on the Y&uacute;n and update the whole system! Back up any custom files on your Y&uacute;n before proceeding!
+      </p>
+      <p>
+      <form method="post" action="<%= pcdata(controller .. '/webpanel/reset_board') %>">
+      <ul>
+          <li>
+            <div class="input_container">
+              <input class="btTxt submit saveForm alert" type="submit" name="button" value="Reset" onclick="javascript:return confirm('Are you sure you want to RESET the Y&uacute;n &#20113;?\nThis operation is irreversible!!');">
+            </div>
+          </li>
+        </ul>
+      </form>
+      </p>
+    </div>
+    <% end %>
+
+    <!--
+    <div class="wrapper divide" id="www">
+      <div id="currsketch">
+        <p>Current sketch: <a href="#">sketch title</a></p>
+        <ul id="wwwlist">
+          <li class="folder"><a href="#">folder1</a></li>
+        </ul>
+      </div>
+      <p>Other www folders: </p>
+      <ul id="wwwotherlist">
+        <li class="folder"><a href="#">folder2</a></li>
+        <li class="folder"><a href="#">folder3</a></li>
+        <li class="folder"><a href="#">folder4</a></li>
+        <li class="folder"><a href="#">folder5</a></li>
+      </ul>
+    </div>
+    -->
+  </div>
+  <!-- #content -->
+  <br class="clear"/>
+</div>
+<!-- #container -->
+<script type="text/javascript" charset="utf-8" src="<%= resource %>/arduino/zepto.min.js"></script>
+<script type="text/javascript" charset="utf-8" src="<%= resource %>/arduino/webpanel.ugly.js"></script>
+</body>
+</html>

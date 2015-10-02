@@ -1,0 +1,92 @@
+<%
+local http = require("luci.http")
+http.prepare_content("text/html; charset=utf-8")
+local uci = require('luci.model.uci')
+uci = uci.cursor()
+MODEL = uci:get('system.vendor.web_model')
+-%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+ This file is part of YunWebUI.
+
+ YunWebUI is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+ As a special exception, you may use this file as part of a free software
+ library without restriction.  Specifically, if other files instantiate
+ templates or use macros or inline functions from this file, or you compile
+ this file and link it with other files to produce an executable, this
+ file does not by itself cause the resulting executable to be covered by
+ the GNU General Public License.  This exception does not however
+ invalidate any other reasons why the executable file might be covered by
+ the GNU General Public License.
+
+ Copyright 2013 Arduino LLC (http://www.arduino.cc/)
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+  <link rel="stylesheet" type="text/css" href="<%= resource %>/arduino/style.css"/>
+  <title><%= MODEL %></title>
+  <script type="text/javascript">
+    var progress_bar_interval;
+
+    function start_progress_bar() {
+      progress_bar_interval = window.setInterval(function() {
+        var progress_bar = document.getElementById("progress_bar");
+        var width = parseInt(progress_bar.style.width);
+        if (isNaN(width)) {
+          width = 0;
+        }
+        if (width < 100) {
+          width += 100 / 60;
+          if (width > 100) {
+            width = 100;
+          }
+          progress_bar.style.width = width + "%";
+        }
+        if (width >= 100) {
+          window.clearInterval(progress_bar_interval);
+          document.getElementById("progress_bar_response").style.display = "block";
+        }
+      }, 1000);
+    }
+  </script>
+</head>
+<body onload="javascript:start_progress_bar();">
+<div id="container">
+  <div id="header">
+    <div class="wrapper">
+      <h1><%= MODEL %></h1>
+
+      <div id="logo"><a href="<%= pcdata(controller .. '/webpanel') %>"><img src="<%= resource %>/arduino/logo.png" alt="<%= MODEL %>"/></a></div>
+    </div>
+  </div>
+  <div id="content">
+    <div class="wrapper divide">
+      <h2>Configuration saved!</h2>
+    </div>
+    <div class="wrapper divide">
+      <p>I'm restarting. <br/>Please connect your computer to the wireless network called <strong><%= ssid %></strong>.
+      </p>
+
+      <div class="progress_bar_container">
+        <div id="progress_bar" class="progress_bar">&nbsp;</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

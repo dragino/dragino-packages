@@ -1,0 +1,6 @@
+
+package 'siod'
+
+config siod
+	option id	'1001'
+

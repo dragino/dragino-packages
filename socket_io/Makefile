@@ -57,9 +57,7 @@ endef
 # much easier to do it this way.
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	mkdir -p $(PKG_BUILD_DIR)/etc
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
-	$(CP) ./files/etc/* $(PKG_BUILD_DIR)/etc
 endef
 
 TARGET_LDFLAGS += -luci
@@ -81,10 +79,7 @@ define Package/socket_io/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/socket_io $(1)/bin/
 
 	$(INSTALL_DIR) $(1)/etc/config
-	$(CP) $(PKG_BUILD_DIR)/etc/config/siod $(1)/etc/config/siod
-
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/etc/init.d/siod.init $(1)/etc/init.d/siod
+	$(INSTALL_BIN) ./files/siod $(1)/etc/config/siod
 endef
 
 

@@ -117,7 +117,9 @@ int PLCdel(char *AAAA1, char *X1, char *Y1);
 void PLCprint(char *);
 void PLCexec(void);
 void bcast_init(void);
-
+void restart_asterisk(void);
+void asterisk_config_write(char *SIPRegistrar1, char *AuthenticationName1, char *Password1, char *SIPRegistrar2, char *AuthenticationName2, char *Password2);
+void asterisk_uptime(char *uptime);
 
 enum 		   {ConfigBatmanReq, ConfigBatmanRes, ConfigBatman, ConfigReq, ConfigRes, Config, \
 	  			RestartNetworkService, RestartAsterisk, ConfigAsterisk, AsteriskStatReq, \
@@ -618,28 +620,116 @@ int process_udp(char *datagram){
 
             }
             break;
+		/*
+		Message: JNTCIT/RestartAsterisk
+		Type: Unicast
+		Arguments: 
+		Description: CFG sends this packet to a device which have to restart its Asterisk server.
+		*/
         case RestartAsterisk:{
 
 				if(verbose==2) printf("Rcv: RestartAsterisk\n");
 
+				restart_asterisk(); 
+
             }
             break;
+		/*
+		Message:JNTCIT/ConfigAsterisk/SIPRegistrar1/AuthenticationName1/Password1/SIPRegistrar2/AuthenticationName2/Password2
+		Type: Unicast
+		Arguments: some of the arguments are optional. In this case back slash / still signifies the parameter place holder
+			SIPRegistrar1:(optional)Main	10.10.0.10
+			AuthenticationName1:(optional)	Iana
+			Password1:(optional)			1234
+			SIPRegistrar2(optional) Backup	20.20.20.20
+			AuthenticationName2:(optional)	Eva
+			Password2:(optional)			5678
+	
+	
+		Description: the SIOD will adjust its Asterisk configuration files as per the supplied arguments. SIOD Asterisk is configured as a simple SIP client. 
+			It means it will not have SIP or other VoIP clients register to it and it will not support dialplan. SIOD Asterisk will register as a SIP user 
+			to a single SIP server. If SIOD receive SIP call it will terminate it by an IVR (for IO control purpose). The SIOD Asterisk should qualify the 
+			registration to Main registrar. If Main registration fails SIOD will try to register to the Backup registrar. If the Main registrar came up SIOD 
+			Asterisk will re-connect to it again. Only SIOD devices process this packet.
+		*/ 
         case ConfigAsterisk:{
+				char *SIPRegistrar1, *AuthenticationName1, *Password1, *SIPRegistrar2, *AuthenticationName2, *Password2;
 
 				if(verbose==2) printf("Rcv: ConfigAsterisk\n");
 
+				SIPRegistrar1=args[1]; AuthenticationName1=args[2]; Password1=args[3]; SIPRegistrar2=args[4]; AuthenticationName2=args[5]; Password2=args[6];
+
+				asterisk_config_write(SIPRegistrar1, AuthenticationName1, Password1, SIPRegistrar2, AuthenticationName2, Password2);
+
             }
             break;
-        case AsteriskStatReq:{
+		/*
+		Message: JNTCIT/AsteriskStatReq
+		Type: Unicast
+		Arguments: 
+		Description: CFG sends this packet to a device which have to report its Asterisk status. 
+		*/
+		case AsteriskStatReq:{
+				char SIPRegistrar1[STR_MAX], AuthenticationName1[STR_MAX], Password1[STR_MAX], SIPRegistrar2[STR_MAX], AuthenticationName2[STR_MAX], Password2[STR_MAX];	
+				char ast_uptime[STR_MAX];			
 
 				if(verbose==2) printf("Rcv: AsteriskStatReq\n");
 
+				asterisk_uptime(ast_uptime);
+
+				printf("uptime = %s\n", ast_uptime);
+
+				if(ast_uptime[0] == '\0'){
+						
+					sprintf(msg, "JNTCIT/AsteriskStatRes/NotRunning////////");
+
+				} else {
+				
+					/* Read trunk infomation from the Asterisk configuration files */  
+					ini_gets("trunk1", "host", "", SIPRegistrar1, STR_MAX, "/etc/asterisk/sip.conf");
+					ini_gets("trunk1", "username", "", AuthenticationName1, STR_MAX, "/etc/asterisk/sip.conf");
+					ini_gets("trunk1", "secret", "", Password1, STR_MAX, "/etc/asterisk/sip.conf");
+
+                	ini_gets("trunk2", "host", "", SIPRegistrar2, STR_MAX, "/etc/asterisk/sip.conf");
+                	ini_gets("trunk2", "username", "", AuthenticationName2, STR_MAX, "/etc/asterisk/sip.conf");
+                	ini_gets("trunk2", "secret", "", Password2, STR_MAX, "/etc/asterisk/sip.conf");
+
+					sprintf(msg, "JNTCIT/AsteriskStatRes/Running/%s/%s/%s/%s/%s/%s/%s/", ast_uptime, SIPRegistrar1, AuthenticationName1, Password1, SIPRegistrar2, AuthenticationName2, Password2);
+
+				}
+
+				if(verbose==2) printf("Sent: %s\n", msg);
+
+				unicast(msg);
+
             }
             break;
+		/*
+		Message:JNTCIT/AsteriskStatRes/AsteriskState/AsteriskUpTime/SIPRegistrar1/AuthenticationName1/Password1/SIPRegistrar2/AuthenticationName2/Password2/
+	    	JNTCIT/AsteriskStatRes/NotRunning////////	
+		Type: Unicast
+		Arguments: some of the arguments are optional. In this case back slash / still signifies the parameter place holder
+			AsteriskState:				NotRunning, Running
+			AsteriskUpTime:(optional)		20min
+			SIPRegistrar1:(optional)		10.10.0.10
+			AuthenticationName1:(optional)	Iana
+			Password1:(optional)			1234
+			SIPRegistrar2:(optional)		10.10.0.11
+			AuthenticationName2:(optional)	Eva
+			Password2:(optional)			5678
+	
+	
+		Description: if SIOD doesn't have active Asterisk it responds with NotRunning and all the other arguments are empty. SIOD Asterisk is configured as 
+			a simple SIP client. It means it will not have SIP or other VoIP clients register to it and it will not support dialplan. SIOD Asterisk will 
+			register as a SIP user to a single SIP server. If SIOD receive SIP call it will terminate it by an IVR (for IO control purpose). The SIOD Asterisk 
+			should qualify the registration to Main registrar. If Main registration fails SIOD will try to register to the Backup registrar. If the Main 
+			registrar came up SIOD Asterisk will re-connect to it again. Only CFG process this packet. 
+		*/
         case AsteriskStatRes:{
 			
 				if(verbose==2) printf("Rcv: AsteriskStatRes\n");
-
+				
+				/* For the moment we do nothing */
             }
             break;
         case ConfigNTP:{
@@ -2487,4 +2577,69 @@ void bcast_init(void){
     bcast_servaddr.sin_family = AF_INET;
     bcast_servaddr.sin_addr.s_addr=inet_addr("255.255.255.255");
     bcast_servaddr.sin_port=htons(PORT);
+}
+
+
+/*
+ * Restart asterisk server
+ */
+void restart_asterisk(void){
+
+    FILE *fp;
+
+    fp=popen("asterisk -rx 'core restart now'","r");
+    pclose(fp);
+}
+
+/*
+ * Updates asterisk configurations
+ */
+void asterisk_config_write(char *SIPRegistrar1, char *AuthenticationName1, char *Password1, char *SIPRegistrar2, char *AuthenticationName2, char *Password2){
+
+	char regstr[STR_MAX];
+
+	/* Remove register lines */
+	ini_puts("general", "register", NULL, "/etc/asterisk/sip.conf");
+	ini_puts("general", "register", NULL, "/etc/asterisk/sip.conf");
+
+	/* Update register lines */
+	sprintf(regstr, "%s:%s@%s", AuthenticationName1, Password1, SIPRegistrar1);
+	ini_adds("general", "register", regstr, "/etc/asterisk/sip.conf");
+
+    sprintf(regstr, "%s:%s@%s", AuthenticationName2, Password2, SIPRegistrar2);
+	ini_adds("general", "register", regstr, "/etc/asterisk/sip.conf");
+	
+	/* Update trunk1 and trunk2 sections */
+	ini_puts("trunk1", "username", AuthenticationName1, "/etc/asterisk/sip.conf");
+	ini_puts("trunk1", "host", SIPRegistrar1, "/etc/asterisk/sip.conf");
+	ini_puts("trunk1", "secret", Password1, "/etc/asterisk/sip.conf");
+
+    ini_puts("trunk2", "username", AuthenticationName2, "/etc/asterisk/sip.conf");
+    ini_puts("trunk2", "host", SIPRegistrar2, "/etc/asterisk/sip.conf");
+    ini_puts("trunk2", "secret", Password2, "/etc/asterisk/sip.conf");
+
+
+}
+
+/*
+ * Read asterisk uptime. 
+ * If Asterisk is not started asterisk_uptime is made null string
+ * asterisk_uptime needs to be allocated by the caller
+ */
+void asterisk_uptime(char *uptime){
+
+
+    FILE *fp;
+    char *ret;
+	int i, len;
+
+	uptime[0]='\0';
+    fp=popen("asterisk -rx 'core show uptime' 2>&1 | sed -n -e 's/^.*Last reload: //p'","r");
+    ret=fgets(uptime, STR_MAX, fp);
+    pclose(fp);
+
+	//Remove trailing space and LF
+	len=strlen(uptime);
+	if(uptime[len-1] == 0xa) uptime[len-1] = '\0';
+	if(uptime[len-2] == ' ') uptime[len-2] = '\0';
 }

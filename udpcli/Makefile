@@ -16,7 +16,7 @@ define Package/$(PKG_NAME)
 endef
 
 define Package/$(PKG_NAME)/description
-	UDP tool to sent and get udp message
+	UDP tool to send and get udp message
 endef
 
 CONFIGURE_VARS+= \

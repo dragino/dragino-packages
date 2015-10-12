@@ -25,18 +25,29 @@ local function config_get()
   local uci = luci.model.uci.cursor()
   uci:load("sensor")
 
+  local mcu_part = {}
+  mcu_part[1] = { code = "ATmega32U4", label = "ATmega32U4" }
+  mcu_part[2] = { code = "ATmega328P", label = "ATmega328P" }
+  mcu_part[3] = { code = "ATmega328", label = "ATmega328" }
+  mcu_part[4] = { code = "ATmega168", label = "ATmega168" }
+  mcu_part[5] = { code = "ATmega2560", label = "ATmega2560" }
+  mcu_part[6] = { code = "MK20DX256", label = "MK20DX256(Teensy3.1/3.2)" }
+  mcu_part[7] = { code = "unknown", label = "Unknown" }
+  
   local board_type = {}
   board_type[1] = { code = "leonardo", label = "Leonardo, M32, M32W" }
   board_type[2] = { code = "uno", label = "Arduino Uno w/ATmega328P" }
   board_type[3] = { code = "duemilanove328", label = "Arduino Duemilanove or Diecimila w/ATmega328" }
   board_type[4] = { code = "duemilanove168", label = "Arduino Duemilanove or Diecimila w/ATmega168,MRFM12B" }
   board_type[5] = { code = "mega2560", label = "Arduino Mega2560" }
-  board_type[6] = { code = "undefined", label = "Undefined" }
+  board_type[6] = { code = "teensy31", label = "Teensy 3.1 / 3.2" }
+  board_type[7] = { code = "undefined", label = "Undefined" }
 
   local ctx = {
 	board = uci:get("sensor","mcu","board"),
+	mcu = uci:get("sensor","mcu","mcu_part"),
 	board_type = board_type,
-	avr_part = uci:get("sensor","mcu","avr_part"),
+	mcu_part = mcu_part,
 	upload_bootloader = uci:get("sensor","mcu","upload_bootloader"),
   }
   luci.template.render("dragino/sensor", ctx)
@@ -46,6 +57,10 @@ local function config_post()
   local uci = luci.model.uci.cursor()
   uci:load("sensor")
 
+  if luci.http.formvalue("mcu_part") then
+    uci:set("sensor", "mcu", "mcu_part", luci.http.formvalue("mcu_part"))
+  end
+  
   if luci.http.formvalue("board") then
     uci:set("sensor", "mcu", "board", luci.http.formvalue("board"))
   end

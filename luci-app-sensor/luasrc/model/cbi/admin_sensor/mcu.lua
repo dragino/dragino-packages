@@ -35,7 +35,7 @@ local Update_Info='File Format:\n' ..
 m = Map("sensor", translate("Micro-Controller settings"), translate("Configure correct Arduino profile will let you to able upload avr program via Arduino IDE and WiFi"))
 
 s = m:section(NamedSection, "mcu", "sensor", translate("MCU Upload Profile"))
-s:option(Value, "avr_part", translate("AVR Part"),translate("Auto detected by software on boot"))
+s:option(Value, "mcu_part", translate("MCU Part"),translate("Auto detected by software on boot"))
 
 local board = s:option(ListValue, "board", translate("Profile"),translate("Auto detected by software on boot"))
 board:value('leonardo','Leonardo, M32, M32W')
@@ -43,6 +43,7 @@ board:value('uno','Arduino Uno w/ATmega328P')
 board:value('duemilanove328','Arduino Duemilanove or Diecimila w/ATmega328')
 board:value('duemilanove168','Arduino Duemilanove or Diecimila w/ATmega168,MRFM12B')
 board:value('mega2560','Arduino Mega2560')
+board:value('teensy31','Teensy 3.1/3.2')
 board:value('undefined','Undefined')
 
 local uo = s:option(Flag, "upload_bootloader", translate("Add Bootloader"),translate("Add Arduino bootloader while upload"))

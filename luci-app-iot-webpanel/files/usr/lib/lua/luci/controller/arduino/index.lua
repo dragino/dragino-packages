@@ -300,7 +300,7 @@ function homepage()
     hostname = luci.sys.hostname(),
     ifaces = ifaces,
     firmware_version = f_version,
-    build_time = b_time
+    local_time = os.date()
   }
 
   --Traslates status codes extracted from include/linux/ieee80211.h to a more friendly version

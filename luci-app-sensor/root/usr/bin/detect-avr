@@ -1,6 +1,6 @@
 #!/bin/sh
 #AutoDetect Avr script
-
+	
 sig0x1e9004="ATtiny11"
 sig0x1e9005="ATtiny12"
 sig0x1e9006="ATtiny15"
@@ -115,28 +115,32 @@ echo 1 > /sys/class/gpio/gpio19/value
 avrdude -c linuxgpio -C /etc/avrdude.conf -p m328p > /tmp/avr/avrdude_info 2>&1
 avr_sig=`cat /tmp/avr/avrdude_info | grep 'Device signature' | awk '{print $5}'`
 if [ -z $avr_sig ]; then
-	avr_part="unknown"
+	mcu_part=`uci get sensor.mcu.mcu_part`
+	if [ $mcu_part == "MK20DX256" ]; then
+		#quit if set to teensy
+		exit
+	fi
+	mcu_part="unknown"
 else 
 	avr_sig=sig$avr_sig
-	avr_part=`eval echo '${'$avr_sig}'`
+	mcu_part=`eval echo '${'$avr_sig}'`
 fi
-
 
 
 profile="undefined"
-if [ $avr_part == "ATmega328P" ]; then
+if [ $mcu_part == "ATmega328P" ]; then
 	profile="uno"
-elif [ $avr_part == "ATmega32U4" ]; then
+elif [ $mcu_part == "ATmega32U4" ]; then
 	profile="leonardo"
-elif [ $avr_part == "ATmega328" ]; then
+elif [ $mcu_part == "ATmega328" ]; then
 	profile="duemilanove328"
-elif [ $avr_part == "ATmega168" ]; then
+elif [ $mcu_part == "ATmega168" ]; then
 	profile="duemilanove168"
-elif [ $avr_part == "ATmega2560" ]; then
+elif [ $mcu_part == "ATmega2560" ]; then
 	profile="mega2560"
 fi
 
-uci set sensor.mcu.avr_part=$avr_part
+uci set sensor.mcu.mcu_part=$mcu_part
 uci set sensor.mcu.board=$profile
 uci commit sensor
 

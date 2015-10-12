@@ -3,10 +3,12 @@
 #Auto Update AVR MCU 
 
 HAS_NEW_VERSION=0
-#mkdir /tmp/avr
-tmp_update_info="/var/avr/update_info"
-tmp_image='/var/avr/sketch.hex'
-update_log='/var/avr/avrdude_update_log'
+tmp_dir='/var/mcu'
+tmp_update_info="/var/mcu/update_info"
+update_log='/var/mcu/mcu_update_log'
+
+[ ! -d $tmp_dir ] && mkdir $tmp_dir
+
 
 mac_identify=`uci get sensor.auto_update.mac_identify`
 update_url=`uci get sensor.auto_update.update_url`
@@ -31,8 +33,8 @@ fi
 count=1
 while [ $count -le $retry_count ] ;do
 	logger "MCU Auto Update: Download Update Information from $update_url (try $count/$retry_count)"
-	wget $update_info_url -O $tmp_update_info 2>/var/avr/download_tmp
-	result=`cat /var/avr/download_tmp | grep "100%"`
+	wget $update_info_url -O $tmp_update_info 2>/var/mcu/download_tmp
+	result=`cat /var/mcu/download_tmp | grep "100%"`
 	if [ ! -z "$result" ]; then
 		break
 	fi 
@@ -58,6 +60,7 @@ HAS_NEW_VERSION=`expr $version \> $current_ver`
 logger "Find higher version $version in server, we will download the image $image"
 
 #Download the sketch used for auto update
+tmp_image=$tmp_dir/$image
 [ -f $tmp_image ] && rm $tmp_image
 wget $update_url/$image -O $tmp_image
 if [ ! -f $tmp_image ]; then
@@ -76,9 +79,17 @@ fi
 
 logger "MCU Auto Update: md5 checksum success. We will flash the image to the MCU"
 
-run-avrdude $tmp_image  > $update_log 2>&1
+#Different Type MCU use different method to update
+mcu_part=`uci get sensor.mcu.mcu_part`
+if [ $mcu_part == "MK20DX256" ];then
+	run-teensy-loader $tmp_image > $update_log 2>&1
+	update_result=`cat $update_log | grep -e 'Booting'`
+else 
+	run-avrdude $tmp_image  > $update_log 2>&1
+	update_result=`cat $update_log | grep -e 'bytes of flash verified' -e 'Fuses OK'`
+fi 
 
-update_result=`cat $update_log | grep -e 'bytes of flash verified' -e 'Fuses OK'`
+
 if [ -z "$update_result" ]; then
 	logger "MCU Auto Update: Programming MCU fail."
 	exit 1

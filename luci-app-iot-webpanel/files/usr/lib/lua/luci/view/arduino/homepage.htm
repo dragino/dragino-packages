@@ -70,15 +70,15 @@ MODEL = uci:get('system.vendor.web_model')
       <div id="dashboard_container">
         <div id="sections_container">
 	   <div class="section">
-		<h3>Version Info</h3>
+		<h3>System Info</h3>
 		<p>
 		   <span class="row">
                     <span class="desc">Firmware Version:</span>
                     <span class="val"><%=firmware_version%></span>
                  </span>
 		   <span class="row">
-                    <span class="desc">Build Time:</span>
-                       <span class="val"><%=build_time%></span>
+                    <span class="desc">System Time:</span>
+                       <span class="val"><%=local_time%></span>
                  </span>
 		</p>
 	   </div>

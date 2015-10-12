@@ -60,11 +60,19 @@ MODEL = uci:get('system.vendor.web_model')
 
 			<li>
 				<label class="desc" for="avr_part">
-				AutoDetect AVR Part</span>
+				MCU Part</span>
 				</label>
 
 				<div class="input_container">
-				<input id="avr_part" name="avr_part" type="text" value=<%=avr_part%> readonly="readonly">
+					<select id="mcu_part" name="mcu_part">
+						<% for k,v in pairs(mcu_part) do%>
+						<option value=<%=v.code%>
+						<%if mcu == v.code then %>
+						selected="selected"
+						<% end %>
+						><%=v.label%></option>
+						<%end%>
+					</select>
 				</div>
 			</li>
 			

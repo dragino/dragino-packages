@@ -32,10 +32,8 @@ define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)/usr
 	mkdir -p $(PKG_BUILD_DIR)/www
-	mkdir -p $(PKG_BUILD_DIR)/etc/config
 	$(CP) ./files/usr/* $(PKG_BUILD_DIR)/usr
 	$(CP) ./files/www/* $(PKG_BUILD_DIR)/www
-	$(CP) ./files/etc/* $(PKG_BUILD_DIR)/etc
 endef
 
 define Build/Compile
@@ -43,8 +41,6 @@ define Build/Compile
 endef
 
 define Package/luci-app-iot-webpanel/install
-	$(INSTALL_DIR) $(1)/etc/config
-	$(CP) $(PKG_BUILD_DIR)/etc/* $(1)/etc/
 
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/arduino
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/admin

@@ -5,7 +5,7 @@ config settings 'service'
 	option debug '0'
 
 config settings 'mcu'
-	option MCUProfile 'leonardo'
+    option upload_bootloader 'enable'
 
 config settings 'auto_update'
 	option update_on_boot '0'

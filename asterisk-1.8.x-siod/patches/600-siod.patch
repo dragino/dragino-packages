@@ -1,0 +1,723 @@
+diff -PurN a/apps/app_backticks.c b/apps/app_backticks.c
+--- a/apps/app_backticks.c	1970-01-01 02:00:00.000000000 +0200
++++ b/apps/app_backticks.c	2015-10-14 17:18:35.187979949 +0300
+@@ -0,0 +1,225 @@
++/*
++ * backticks Application For Asterisk
++ *
++ * Copyright (c) 2010-2011 Sebastiano Merlino <merlino.sebastiano@gmail.com>
++ *
++ * From an original idea of Anthony Minessale II
++ *
++ * Permission is hereby granted, free of charge, to any person
++ * obtaining a copy of this software and associated documentation
++ * files (the "Software"), to deal in the Software without
++ * restriction, including without limitation the rights to use,
++ * copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the
++ * Software is furnished to do so, subject to the following
++ * conditions:
++ *
++ * The above copyright notice and this permission notice shall be
++ * included in all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ * OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++#include "asterisk.h"
++
++#include <stdio.h> 
++#include <asterisk/file.h>
++#include <asterisk/logger.h>
++#include <asterisk/channel.h>
++#include <asterisk/pbx.h>
++#include <asterisk/module.h>
++#include <asterisk/manager.h>
++#include <asterisk/lock.h>
++#include <asterisk/app.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <string.h>
++
++static char *app = "BackTicks";
++static char *synopsis = "Execute a shell command and save the result as a variable.";
++static char *desc = ""
++"  Backticks(<VARNAME>,<command>)\n\n"
++"Be sure to include a full path!\n"
++
++;
++
++static char *do_backticks(const char *command, char *buf, size_t len) 
++{
++    int fds[2], pid = 0;
++    char *ret = NULL;
++
++    memset(buf, 0, len);
++
++    if (pipe(fds)) {    
++        ast_log(LOG_WARNING, "Pipe/Exec failed\n");
++    } else { /* good to go*/
++        
++        pid = fork();
++
++        if (pid < 0) { /* ok maybe not */
++            ast_log(LOG_WARNING, "Fork failed\n");
++            close(fds[0]);
++            close(fds[1]);
++        } else if (pid) { /* parent */
++            close(fds[1]);
++            read(fds[0], buf, len);
++            close(fds[0]);
++            ret = buf;
++        } else { /*  child */
++            char *argv[255] = {0};
++            int argc = 0;
++            char *p;
++            char *mycmd = ast_strdupa(command);
++            
++            close(fds[0]);
++            dup2(fds[1], STDOUT_FILENO);
++            argv[argc++] = mycmd;
++
++            do {
++                if ((p = strchr(mycmd, ' '))) {
++                    *p = '\0';
++                    mycmd = ++p;
++                    argv[argc++] = mycmd;
++                }
++            } while (p);
++
++            close(fds[1]);          
++            execv(argv[0], argv); 
++            /* DoH! */
++            ast_log(LOG_ERROR, "exec of %s failed\n", argv[0]);
++            exit(0);
++        }
++    }
++
++    return buf;
++}
++
++static int backticks_exec(struct ast_channel *chan, const char* data)
++{
++    int res = 0;
++    const char *usage = "Usage: Backticks(<VARNAME>,<command>)";
++    char buf[1024], *argv[2], *mydata;
++    int argc = 0;
++    
++    
++    if (!data) {
++        ast_log(LOG_WARNING, "%s\n", usage);
++        return -1;
++    }
++
++    if (!(mydata = ast_strdupa(data))) {
++        ast_log(LOG_ERROR, "Memory Error!\n");
++        res = -1;
++    } else {
++        if((argc = ast_app_separate_args(mydata, ',', argv, sizeof(argv) / sizeof(argv[0]))) < 2) {
++            ast_log(LOG_WARNING, "%s\n", usage);
++            res = -1;
++        }
++        
++        if (do_backticks(argv[1], buf, sizeof(buf))) {
++            pbx_builtin_setvar_helper(chan, argv[0], buf);
++        } else {
++            ast_log(LOG_WARNING, "No Data!\n");
++            res = -1;
++        }
++    }
++    return res;
++}
++
++static int backticks_exec_on_manager(struct mansession* s, const struct message* m)
++{
++    const char *id = astman_get_header(m,"ActionID");
++	const char *command = astman_get_header(m,"Command");
++	const char *channel = astman_get_header(m,"Channel");
++	const char *variable = astman_get_header(m,"Variable");
++
++	struct ast_channel *c = NULL;
++	char id_text[256] = "";
++	char buf[1024];
++	int set_variable = 0;
++
++	if (ast_strlen_zero(command)) {
++		astman_send_error(s, m, "Command not specified");
++		return 0;
++	}
++	if (((!ast_strlen_zero(channel))&&(ast_strlen_zero(variable)))||((ast_strlen_zero(channel))&&(!ast_strlen_zero(variable)))) {
++		astman_send_error(s, m, "If you set Channel, you have to set Variable and viceversa");
++		return 0;
++	}
++	if ((!ast_strlen_zero(channel))&&(!ast_strlen_zero(variable))) {
++		set_variable = 1;
++		c = ast_channel_get_by_name(channel);
++		if (!c) {
++			astman_send_error(s, m, "No such channel");
++			return 0;
++		}
++		ast_channel_lock(c);
++	}
++	/* Ok, we have everything */
++	if (!ast_strlen_zero(id)) {
++		snprintf(id_text, sizeof(id_text), "ActionID: %s\r\n", id);
++	}
++	if (do_backticks(command, buf, sizeof(buf))) {
++		astman_append(s, "Response: Success\r\n"
++		   "%s"
++		   "\r\n\r\n", buf);
++		if(set_variable) {
++			pbx_builtin_setvar_helper(c, variable, buf);
++			ast_channel_unlock(c);
++			ast_channel_unref(c);
++		}
++	} else {
++		astman_append(s, "Response: Fail\r\n");
++	}
++	return 0;
++
++}
++
++static char *function_backticks(struct ast_channel *chan, char *cmd, char *data, char *buf, size_t len)
++{
++    char *ret = NULL;
++
++    if (do_backticks(data, buf, len)) {
++        ret = buf;
++    }
++
++    return ret;
++}
++
++static struct ast_custom_function backticks_function = {
++    .name = "BACKTICKS", 
++    .desc = "Executes a shell command and evaluates to the result.", 
++    .syntax = "BACKTICKS(<command>)", 
++    .synopsis = "Executes a shell command.", 
++    .read = function_backticks
++};
++
++
++static int unload_module(void)
++{
++    ast_custom_function_unregister(&backticks_function);
++    ast_manager_unregister(app);
++    return ast_unregister_application(app);
++}
++
++static int load_module(void)
++{
++    ast_custom_function_register(&backticks_function);
++
++    int res = ast_register_application(app, backticks_exec, synopsis, desc);
++    res |= ast_manager_register2(app, EVENT_FLAG_SYSTEM, backticks_exec_on_manager, desc, synopsis);
++    return res;
++}
++
++AST_MODULE_INFO(ASTERISK_GPL_KEY, AST_MODFLAG_DEFAULT, "BackTicks Application. Execute shell command and save output into variable",
++		.load = load_module,
++		.unload = unload_module,
++);
++
+diff -PurN a/apps/app_siod_io_get.c b/apps/app_siod_io_get.c
+--- a/apps/app_siod_io_get.c	1970-01-01 02:00:00.000000000 +0200
++++ b/apps/app_siod_io_get.c	2015-10-14 17:18:06.139835907 +0300
+@@ -0,0 +1,237 @@
++/*
++ * Asterisk -- An open source telephony toolkit.
++ *
++ * Copyright (C) 1999 - 2005, Digium, Inc.
++ *
++ * Mark Spencer <markster@digium.com>
++ *
++ * See http://www.asterisk.org for more information about
++ * the Asterisk project. Please do not directly contact
++ * any of the maintainers of this project for assistance;
++ * the project provides a web site, mailing lists and IRC
++ * channels for your use.
++ *
++ * This program is free software, distributed under the terms of
++ * the GNU General Public License Version 2. See the LICENSE file
++ * at the top of the source tree.
++ */
++
++/*! \file
++ *
++ * \brief App to get SIOD IO state
++ *
++ * \author Dimitar Penev <dpn@switchvoice.com>
++ * 
++ * \ingroup applications
++ */
++
++/*** MODULEINFO
++	<support_level>core</support_level>
++ ***/
++ 
++#include "asterisk.h"
++
++ASTERISK_FILE_VERSION(__FILE__, "$Revision: 328209 $")
++
++#include "asterisk/file.h"
++#include "asterisk/channel.h"
++#include "asterisk/pbx.h"
++#include "asterisk/module.h"
++#include "asterisk/app.h"
++
++#include <sys/socket.h>
++#include <netinet/in.h>
++#include <stdio.h>
++
++#include <sys/select.h>
++#include <sys/time.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++
++#include <stdlib.h>
++
++
++#define BUFLEN 100
++
++/*** DOCUMENTATION
++	<application name="siod_io_get" language="en_US">
++		<synopsis>
++			App to get SIOD IO state
++		</synopsis>
++		<syntax>
++			<parameter name="AAAA" required="true" />
++			<parameter name="io" required="true" />
++		</syntax>
++		<description>
++			<para>App to get IO state of a given SIOD in the mesh. </para>
++            <para>App result will be stored in the <variable>SIODIOGETSTATUS</variable></para>
++            <variablelist>
++                <variable name="SIODIOGETSTATUS">
++                    <value name="0">
++                        IO is at logical state low.
++                    </value>
++                    <value name="1">
++                        IO is at logical state high.
++                    </value>
++                    <value name="WRONGFORMAT">
++                        io is wrong.
++                    </value>
++                    <value name="TIMOUT">
++                        Time out getting socket_io response.
++                    </value>
++                </variable>
++            </variablelist>
++		</description>
++		<see-also>
++			<ref type="application">siod_output_set</ref>
++		</see-also>
++	</application>
++ ***/
++
++static const char * const app = "siod_io_get";
++
++static int siod_io_get_exec(struct ast_channel *chan, const char *data)
++{
++    char *parse;
++	char msg[BUFLEN];
++	//fd_set rset;
++	ast_fdset rset;
++	int count;
++	struct timeval  timeout;
++    int sockfd, fifofd;
++    struct sockaddr_in servaddr;
++	int n;
++	AST_DECLARE_APP_ARGS(args,
++		AST_APP_ARG(AAAA);
++        AST_APP_ARG(io);
++    );
++
++
++	/* NOT ast_strlen_zero, because some protocols (e.g. SIP) MUST be able to
++	 * send a zero-length message. */
++	if (!data) {
++		ast_log(LOG_WARNING, "siod_io_get requires two arguments (AAAA and io)\n");
++		return -1;
++	}
++
++    /* We need to make a copy of the input string if we are going to modify it! */
++    parse = ast_strdupa(data);
++
++    AST_STANDARD_APP_ARGS(args, parse);
++
++    if(ast_strlen_zero(args.AAAA) || atoi(args.AAAA)<1000 || atoi(args.AAAA)>9999){
++        ast_log(LOG_NOTICE, "wrong SIOD ID: %s\n", args.AAAA);
++        pbx_builtin_setvar_helper(chan, "SIODIOGETSTATUS", "WRONGFORMAT");
++        return 0;
++    }
++
++	if(ast_strlen_zero(args.io) || args.io[0]<'0' || args.io[0]>'7'){
++		ast_log(LOG_NOTICE, "wrong io: %s\n", args.io);
++		pbx_builtin_setvar_helper(chan, "SIODIOGETSTATUS", "WRONGFORMAT");
++		return 0;
++	}
++
++	//named pipes to work we need to have it opened at the same time
++	mkfifo("/tmp/ivrfifo", 0666);
++    fifofd = open("/tmp/ivrfifo", O_RDONLY|O_NONBLOCK);
++    if(fifofd == -1){
++        ast_log(LOG_NOTICE, "open() failed, errno=%d", errno);
++        return -1;
++    }
++
++	//Send IVRGetReq 
++	sprintf(msg,"JNTCIT/IVRGetReq/%s/%c", args.AAAA, args.io[0]);
++    sockfd=socket(AF_INET,SOCK_DGRAM,0);
++    memset(&servaddr,0,sizeof(servaddr));
++    servaddr.sin_family = AF_INET;
++    servaddr.sin_addr.s_addr=inet_addr("127.0.0.1");
++    servaddr.sin_port=htons(9930);
++    sendto(sockfd,msg,strlen(msg),0, (struct sockaddr *)&servaddr,sizeof(servaddr));
++
++	count=0;
++    for ( ; ; ) {
++
++        /* descritors set prepared */
++		FD_ZERO(&rset);
++		FD_SET(fifofd, &rset);
++
++        /* Set the timeout */
++        timeout.tv_sec  = 0;
++        timeout.tv_usec =  100000L;//100ms
++
++		n = ast_select(fifofd+1, &rset, NULL, NULL, &timeout);
++        if (n < 0) {
++            ast_log(LOG_NOTICE, "Error or signal\n");
++            if (errno == EINTR)
++                continue; /* back to for() */
++            else {
++				ast_log(LOG_NOTICE, "select() failed");
++                return -1;
++            }
++        } else if (n) {
++            /* We have data to read */
++			n = read(fifofd, msg, BUFLEN);
++            if(n == -1){
++                /* System error */
++
++                ast_log(LOG_NOTICE, "read() failed, errno=%d", errno);
++                return -1;
++            } else if (n>0){
++                /* We have got an n byte datagram */
++                msg[n] = '\0';
++
++                ast_log(LOG_NOTICE,"%s\n", msg);
++				ast_log(LOG_NOTICE, "n=%d", n);			
++	
++
++				if(n==25 && !strncmp(msg, "JNTCIT/IVRGetRes/",17) && (msg[24]=='0'|| msg[24]=='1')){
++					ast_log(LOG_NOTICE, "Port %c of SIOD %d is %c", args.io[0], args.AAAA,msg[24]);
++					pbx_builtin_setvar_helper(chan, "SIODIOGETSTATUS", (msg[24]=='1')?"1":"0");
++				} else if (!strcmp(msg, "JNTCIT/IVRGetRes///")){
++					ast_log(LOG_NOTICE, "SIOD is UNKNOWN");
++					pbx_builtin_setvar_helper(chan, "SIODIOGETSTATUS", "SIODUNKNOWN");
++					
++				} else{
++					ast_log(LOG_NOTICE, "Unrecognized SIOD data");
++					pbx_builtin_setvar_helper(chan, "SIODIOGETSTATUS", "WRONGFORMAT");
++				
++				}
++				close(fifofd);
++				unlink("/tmp/ivrfifo");
++				close(sockfd);
++
++				return 0;
++
++            } else {
++                /* The socket closed, this should not happen with UDP */
++            }
++
++        } else {
++            /* Timeout, expected to happens each 100ms or so */
++			if(count++>20) { //2 sec time out
++				pbx_builtin_setvar_helper(chan, "SIODIOGETSTATUS", "TIMEOUT");
++				ast_log(LOG_NOTICE, "TIMEOUT getting SIOD data!\n");
++
++                close(fifofd);
++				unlink("/tmp/ivrfifo");
++                close(sockfd);
++
++				return -1;
++			}
++        }
++	}
++
++}
++
++static int unload_module(void)
++{
++	return ast_unregister_application(app);
++}
++
++static int load_module(void)
++{
++	return ast_register_application_xml(app, siod_io_get_exec);
++}
++
++AST_MODULE_INFO_STANDARD(ASTERISK_GPL_KEY, "Get IO state ot the specified SIOD");
+diff -PurN a/apps/app_siod_output_set.c b/apps/app_siod_output_set.c
+--- a/apps/app_siod_output_set.c	1970-01-01 02:00:00.000000000 +0200
++++ b/apps/app_siod_output_set.c	2015-10-14 17:18:22.427916675 +0300
+@@ -0,0 +1,249 @@
++/*
++ * Asterisk -- An open source telephony toolkit.
++ *
++ * Copyright (C) 1999 - 2005, Digium, Inc.
++ *
++ * Mark Spencer <markster@digium.com>
++ *
++ * See http://www.asterisk.org for more information about
++ * the Asterisk project. Please do not directly contact
++ * any of the maintainers of this project for assistance;
++ * the project provides a web site, mailing lists and IRC
++ * channels for your use.
++ *
++ * This program is free software, distributed under the terms of
++ * the GNU General Public License Version 2. See the LICENSE file
++ * at the top of the source tree.
++ */
++
++/*! \file
++ *
++ * \brief App to set SIOD output in the mesh
++ *
++ * \author Dimitar Penev <dpn@switchvoice.com>
++ * 
++ * \ingroup applications
++ */
++
++/*** MODULEINFO
++	<support_level>core</support_level>
++ ***/
++ 
++#include "asterisk.h"
++
++ASTERISK_FILE_VERSION(__FILE__, "$Revision: 328209 $")
++
++#include "asterisk/file.h"
++#include "asterisk/channel.h"
++#include "asterisk/pbx.h"
++#include "asterisk/module.h"
++#include "asterisk/app.h"
++
++#include <sys/socket.h>
++#include <netinet/in.h>
++#include <stdio.h>
++
++#include <sys/select.h>
++#include <sys/time.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++
++#include <stdlib.h>
++
++
++#define BUFLEN 100
++
++/*** DOCUMENTATION
++	<application name="siod_output_set" language="en_US">
++		<synopsis>
++			App to set SIOD output in the mesh
++		</synopsis>
++		<syntax>
++			<parameter name="AAAA" required="true" />
++			<parameter name="output" required="true" />
++			<parameter name="value" required="true" />
++		</syntax>
++		<description>
++			<para>App to set SIOD output in the mesh. </para>
++            <para>Result of the app will be stored in <variable>SIODOUTPUTSETSTATUS</variable></para>
++            <variablelist>
++                <variable name="SIODOUTPUTSETSTATUS">
++                    <value name="OK">
++                        Output is set.
++                    </value>
++                    <value name="SIODUNKNOWN">
++                        No SIOD with the specified ID in the mesh.
++                    </value>
++                    <value name="TIMERANGEOUT">
++                        Out of the SIOD allowed time range.
++                    </value>
++                    <value name="WRONGFORMAT">
++                        io is wrong.
++                    </value>
++                    <value name="TIMOUT">
++                        Time out getting socket_io response.
++                    </value>
++                </variable>
++            </variablelist>
++		</description>
++		<see-also>
++			<ref type="application">siod_output_set</ref>
++		</see-also>
++	</application>
++ ***/
++
++static const char * const app = "siod_output_set";
++
++static int siod_output_set_exec(struct ast_channel *chan, const char *data)
++{
++    char *parse;
++	char msg[BUFLEN];
++	//fd_set rset;
++	ast_fdset rset;
++	int count;
++	struct timeval  timeout;
++    int sockfd, fifofd;
++    struct sockaddr_in servaddr;
++	int n;
++	AST_DECLARE_APP_ARGS(args,
++		AST_APP_ARG(AAAA);
++        AST_APP_ARG(output);
++		AST_APP_ARG(value);
++    );
++
++
++	/* NOT ast_strlen_zero, because some protocols (e.g. SIP) MUST be able to
++	 * send a zero-length message. */
++	if (!data) {
++		ast_log(LOG_WARNING, "siod_output_set requires 3 arguments (AAAA, output and value)\n");
++		return -1;
++	}
++
++    /* We need to make a copy of the input string if we are going to modify it! */
++    parse = ast_strdupa(data);
++
++    AST_STANDARD_APP_ARGS(args, parse);
++
++    if(ast_strlen_zero(args.AAAA) || atoi(args.AAAA)<1000 || atoi(args.AAAA)>9999){
++        ast_log(LOG_NOTICE, "wrong SIOD ID: %s\n", args.AAAA);
++        pbx_builtin_setvar_helper(chan, "SIODOUTPUTSETSTATUS", "WRONGFORMAT");
++        return 0;
++    }
++
++	if(ast_strlen_zero(args.output) || args.output[0]<'0' || args.output[0]>'3'){
++		ast_log(LOG_NOTICE, "wrong output: %s\n", args.output);
++		pbx_builtin_setvar_helper(chan, "SIODOUTPUTSETSTATUS", "WRONGFORMAT");
++		return 0;
++	}
++
++    if(ast_strlen_zero(args.value) || args.value[0]<'0' || args.value[0]>'1'){
++        ast_log(LOG_NOTICE, "wrong value: %s\n", args.value);
++        pbx_builtin_setvar_helper(chan, "SIODOUTPUTSETSTATUS", "WRONGFORMAT");
++        return 0;
++    }
++	//named pipes to work we need to have it opened at the same time
++	mkfifo("/tmp/ivrfifo", 0666);
++    fifofd = open("/tmp/ivrfifo", O_RDONLY|O_NONBLOCK);
++    if(fifofd == -1){
++        ast_log(LOG_NOTICE, "open() failed, errno=%d", errno);
++        return -1;
++    }
++
++	//Send IVRGetReq 
++	sprintf(msg,"JNTCIT/IVRSetReq/%s/%c/%c", args.AAAA, args.output[0], args.value[0]);
++    sockfd=socket(AF_INET,SOCK_DGRAM,0);
++    memset(&servaddr,0,sizeof(servaddr));
++    servaddr.sin_family = AF_INET;
++    servaddr.sin_addr.s_addr=inet_addr("127.0.0.1");
++    servaddr.sin_port=htons(9930);
++    sendto(sockfd,msg,strlen(msg),0, (struct sockaddr *)&servaddr,sizeof(servaddr));
++
++	count=0;
++    for ( ; ; ) {
++
++        /* descritors set prepared */
++		FD_ZERO(&rset);
++		FD_SET(fifofd, &rset);
++
++        /* Set the timeout */
++        timeout.tv_sec  = 0;
++        timeout.tv_usec =  100000L;//100ms
++
++		n = ast_select(fifofd+1, &rset, NULL, NULL, &timeout);
++        if (n < 0) {
++            ast_log(LOG_NOTICE, "Error or signal\n");
++            if (errno == EINTR)
++                continue; /* back to for() */
++            else {
++				ast_log(LOG_NOTICE, "select() failed");
++                return -1;
++            }
++        } else if (n) {
++            /* We have data to read */
++			n = read(fifofd, msg, BUFLEN);
++            if(n == -1){
++                /* System error */
++
++                ast_log(LOG_NOTICE, "read() failed, errno=%d", errno);
++                return -1;
++            } else if (n>0){
++                /* We have got an n byte datagram */
++                msg[n] = '\0';
++
++                ast_log(LOG_NOTICE,"%s\n", msg);
++				ast_log(LOG_NOTICE, "n=%d", n);			
++	
++
++				if(n==25 && !strncmp(msg, "JNTCIT/IVRSetRes/",17) && (msg[24]=='0'|| msg[24]=='1')){
++					ast_log(LOG_NOTICE, "Port %c of SIOD %d set to %c", args.output[0], args.AAAA, msg[24]);
++					pbx_builtin_setvar_helper(chan, "SIODOUTPUTSETSTATUS", "OK");
++				} else if (!strcmp(msg, "JNTCIT/IVRSetRes///")){
++					ast_log(LOG_NOTICE, "SIOD is UNKNOWN");
++					pbx_builtin_setvar_helper(chan, "SIODOUTPUTSETSTATUS", "SIODUNKNOWN");
++					
++				} else if (!strcmp(msg, "JNTCIT/IVRSetRes/TimeRangeOut")){
++                    ast_log(LOG_NOTICE, "Out of the SIOD allowed time range.");
++                    pbx_builtin_setvar_helper(chan, "SIODOUTPUTSETSTATUS", "TIMERANGEOUT");
++				} else{
++                    ast_log(LOG_NOTICE, "Unrecognized SIOD data");
++                    pbx_builtin_setvar_helper(chan, "SIODOUTPUTSETSTATUS", "WRONGFORMAT");	
++				}
++				close(fifofd);
++				unlink("/tmp/ivrfifo");
++				close(sockfd);
++
++				return 0;
++
++            } else {
++                /* The socket closed, this should not happen with UDP */
++            }
++
++        } else {
++            /* Timeout, expected to happens each 100ms or so */
++			if(count++>20) { //2 sec time out
++				pbx_builtin_setvar_helper(chan, "SIODOUTPUTSETSTATUS", "TIMEOUT");
++				ast_log(LOG_NOTICE, "TIMEOUT getting SIOD data!\n");
++
++                close(fifofd);
++				unlink("/tmp/ivrfifo");
++                close(sockfd);
++
++				return -1;
++			}
++        }
++	}
++
++}
++
++static int unload_module(void)
++{
++	return ast_unregister_application(app);
++}
++
++static int load_module(void)
++{
++	return ast_register_application_xml(app, siod_output_set_exec);
++}
++
++AST_MODULE_INFO_STANDARD(ASTERISK_GPL_KEY, "set/reset SIOD output state");

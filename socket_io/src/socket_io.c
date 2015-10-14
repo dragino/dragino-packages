@@ -50,6 +50,7 @@
 #define IN2     23
 #define IN3     24
 
+#define IVRSETTIMEOUT 10    /* We have 1 sec to get Put message after IVRSet message */
 
 struct GST_nod {
     int siod_id;                /* ID of the SIOD */
@@ -120,15 +121,21 @@ void bcast_init(void);
 void restart_asterisk(void);
 void asterisk_config_write(char *SIPRegistrar1, char *AuthenticationName1, char *Password1, char *SIPRegistrar2, char *AuthenticationName2, char *Password2);
 void asterisk_uptime(char *uptime);
+int hashit(char *cmd);
+void IVRSetTimer(void);
+
+int IVRSet_counter;
 
 enum 		   {ConfigBatmanReq, ConfigBatmanRes, ConfigBatman, ConfigReq, ConfigRes, Config, \
 	  			RestartNetworkService, RestartAsterisk, ConfigAsterisk, AsteriskStatReq, \
 				AsteriskStatRes, ConfigNTP, Set, PLC, PLCReq, PLCRes, TimeRange, TimeRangeOut, \
-				Get, Put, GSTCheckSumReq, GSTCheckSum, GSTReq, GSTdata, Ping, PingRes};
-char *cmds[26]={"ConfigBatmanReq", "ConfigBatmanRes", "ConfigBatman", "ConfigReq", "ConfigRes", "Config", \
+				Get, Put, GSTCheckSumReq, GSTCheckSum, GSTReq, GSTdata, Ping, PingRes, \
+				IVRGetReq, IVRGetRes, IVRSetReq, IVRSetRes};
+char *cmds[30]={"ConfigBatmanReq", "ConfigBatmanRes", "ConfigBatman", "ConfigReq", "ConfigRes", "Config", \
       			"RestartNetworkService", "RestartAsterisk", "ConfigAsterisk", "AsteriskStatReq", \
 				"AsteriskStatRes","ConfigNTP", "Set", "PLC",  "PLCReq", "PLCRes", "TimeRange", "TimeRangeOut", \
-				"Get", "Put", "GSTCheckSumReq", "GSTCheckSum", "GSTReq", "GSTdata", "Ping", "PingRes"};
+				"Get", "Put", "GSTCheckSumReq", "GSTCheckSum", "GSTReq", "GSTdata", "Ping", "PingRes", \
+				"IVRGetReq", "IVRGetRes", "IVRSetReq", "IVRSetRes"};
 
 int verbose=0; 	/* get value from the command line */
 
@@ -310,6 +317,9 @@ int main(int argc, char **argv){
 			
 			//Check PLC rule
 			PLCexec();
+
+			//Timer for the IVRSet message
+			IVRSetTimer();
 		}
 	}
 
@@ -428,16 +438,16 @@ int process_udp(char *datagram){
             }
             break;
 		/*
-	Message: JNTCIT/ConfigBatman/MACAddress/SSID/Encryption/Passphrase/Enable
-	     	 JNTCIT/ConfigBatman//SSID/Encryption/Passphrase/Enable
-	Type: Broadcast
-	Arguments:
-		MACAddress:(WiFi)(optional)	0a:ba:ff:10:20:30
-		SSID:					jntcit
-		Encryption:				WPA2
-		Passphrase:				S10D
-		Enable					1 if enabled, 0 if disabled
-	Description: SIOD is broadcasting this response in the network. To be able to create Batman-adv mesh all the WiFi 
+		Message: JNTCIT/ConfigBatman/MACAddress/SSID/Encryption/Passphrase/Enable
+	     	 	 JNTCIT/ConfigBatman//SSID/Encryption/Passphrase/Enable
+		Type: Broadcast
+		Arguments:
+			MACAddress:(WiFi)(optional)	0a:ba:ff:10:20:30
+			SSID:					jntcit
+			Encryption:				WPA2
+			Passphrase:				S10D
+			Enable					1 if enabled, 0 if disabled
+		Description: SIOD is broadcasting this response in the network. To be able to create Batman-adv mesh all the WiFi 
 				 parameters of each SIODs should match. All of the SIOD are configured as mesh entry point, 
 				 bridge between wan and wlan. Note that the UDP messages are not passing thru if the Batman mesh 
 				 is not properly setup, so for an initial Batman configuration it may be useful to use wired Ethernet switch 
@@ -1024,7 +1034,7 @@ int process_udp(char *datagram){
 		case Put:{
 				char *AAAA, *X, *Y;
 				unsigned char gpios;
-				int res;
+				int res, fifofd;
 
                 if(verbose==2) printf("Rcv: Put\n");
 
@@ -1050,6 +1060,14 @@ int process_udp(char *datagram){
 
 				} else {
 					GSTadd(GST, atoi(AAAA), binarystr2byte(Y));
+
+					if(IVRSet_counter) {	//the Put message is due to IVRSetReq message
+                    	fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
+                    	sprintf(msg, "JNTCIT/IVRGetRes/%s/%s/%s",AAAA,X,Y);
+                    	if(verbose==2) printf("Sent: %s\n", msg);
+                    	write(fifofd, msg, strlen(msg));
+                    	close(fifofd);
+					}
 				}	
 			
             }
@@ -1222,10 +1240,135 @@ int process_udp(char *datagram){
 
 			}
             break;
+        /*                                                                                                                                                                                         
+        Message: JNTCIT/IVRGetReq/AAAA/X/Y                                                                                                                                                         
+        Type: Unicast (local host)                                                                                                                                                                 
+        Arguments:                                                                                                                                                                                 
+            AAAA: SIOD ID                                                                                                                                                                          
+            X:    number of an IO [0, 1, .. 7]. Current version of SIOD supports 7 IOs.                                                                                                            
+        Description: Asterisk IVR sends this message (to the local socket_io listener) if IO state from the SIOD mesh is required.                                                                 
+                     The local socket_io  return IO state information using GST. This command is process only by the SIOD type of devices.                                                         
+        */                                                                                                                                                                                         
+        case IVRGetReq:{                                                                                                                                                                           
+                char *AAAA, *X;
+				unsigned char gpios;                                                                                                                                                                    
+                int fifofd,n;      
+                                                                                                                                                                             
+                if(verbose==2) printf("Rcv: IVRGetReq\n");                                                                                                                                         
+                                                                                                                                                                                                   
+                AAAA = args[1]; X = args[2];                                                                                                                                                       
+                
+                fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);                                                                                                                                                                   
+				if(GSTget(GST, atoi(AAAA), &gpios)){
+                    sprintf(msg, "JNTCIT/IVRGetRes///");  //SIOD not available in the GST, assumed not available in the mesh
+                    if(verbose==2) printf("Sent: %s\n", msg);
+                    write(fifofd, msg, strlen(msg));					
+				} else {
+														 //SIOD available
+                    sprintf(msg, "JNTCIT/IVRGetRes/%s/%s/%d",AAAA,X,(gpios>>(X[0]-'0'))&1);
+                    if(verbose==2) printf("Sent: %s\n", msg);
+                    n=write(fifofd, msg, strlen(msg));
+				}                                                                                                                                                                                        
+                close(fifofd);                                                                                                                                                                                   
+            }                                                                                                                                                                                      
+            break;                                                                                                                                                                                 
+        /*                                                                                                                                                                                         
+        Message: JNTCIT/IVRGetRes/AAAA/X/Y                                                                                                                                                         
+                 JNTCIT/IVRGetRes///                                                                                                                                                               
+        Type: Unicast (local host)                                                                                                                                                                 
+        Arguments:                                                                                                                                                                                 
+            AAAA:(optional)     SIOD ID                                                                                                                                                            
+            X:(optional)        number of an IO [0, 1, .. 7]. Current version of SIOD supports 7 IOs.                                                                                              
+            Y:(optional)        Active/not active [0, 1]                                                                                                                                           
+        Description: socket_io responds with this message (to the local Asterisk IVR). If AAAA not available in GST AAAA, X and Y are empty.                                                       
+        */                                                                                                                                                                                         
+        case IVRGetRes:{                                                                                                                                                                           
+                                                                                                                                                                                                   
+                if(verbose==2) printf("Rcv: IVRGetRes\n");                                                                                                                                         
+                                                                                                                                                                                                   
+                //We should never get this                                                                                                                                                         
+                                                                                                                                                                                                   
+            }                                                                                                                                                                                      
+            break;
+		/*
+		Message: JNTCIT/IVRSetReq/AAAA/X/Y	
+		Type: Unicast (local host)
+		Arguments: 
+			AAAA: SIOD ID
+			X:	  number of an IO [0, 1, .. 3]. Current version of SIOD supports 4 outputs.
+			Y:  	 Active/not active [0, 1] 
+		Description: Asterisk IVR sends this message (to the local socket_io listener) if output state change of a SIOD in the mesh is required. 
+					 The local socket_io  broadcasts Set message and if it gets a Put message sends IVRSetRes to the IVR. This command is process 
+					 only by the SIOD type of devices.
+		*/ 
+        case IVRSetReq:{
+                char *AAAA, *X, *Y;
+                unsigned char gpios;
+                int fifofd,n, res;
 
-		default:
-			printf("Wrong command.\n");
-			return -1;
+                if(verbose==2) printf("Rcv: IVRSetReq\n");
+
+                AAAA = args[1]; X = args[2]; Y = args[3];
+
+				if(!strcmp(AAAA, SIOD_ID)){
+                	if(CheckTimeRange()){
+                    	res = setgpio(X, Y); //In addition it updates outputs state in GST if successful
+                    	if(!res){
+                        	sprintf(msg, "JNTCIT/Put/%s/%s/%s", SIOD_ID, X, Y);
+                        	if(verbose==2) printf("Sent: %s\n", msg);
+                        	broadcast(msg);
+
+							fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
+                    		sprintf(msg, "JNTCIT/IVRSetRes/%s/%s/%s", AAAA, X, Y);
+                    		if(verbose==2) printf("Sent: %s\n", msg);
+                    		write(fifofd, msg, strlen(msg));
+                    		close(fifofd);
+                    	}
+                	} else {
+                    	//Send TimeRangeOut to the caller
+						fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
+                    	sprintf(msg, "JNTCIT/IVRSetRes/TimeRangeOut");
+                    	if(verbose==2) printf("Sent: %s\n", msg);
+                    	write(fifofd, msg, strlen(msg));
+                    	close(fifofd);                	}
+
+                } else if(GSTget(GST, atoi(AAAA), &gpios)){     
+					fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
+                    sprintf(msg, "JNTCIT/IVRSetRes///");  //SIOD not available in the GST, assumed not available in the mesh
+                    if(verbose==2) printf("Sent: %s\n", msg);
+                    write(fifofd, msg, strlen(msg));
+					close(fifofd);
+                } else {
+                										  //SIOD available
+                    //broadcast Put message
+                    sprintf(msg, "JNTCIT/Put/%s/%s/%s", AAAA, X, Y);
+                    if(verbose==2) printf("Sent: %s\n", msg);
+                    broadcast(msg);
+					IVRSet_counter=1;						 //Start IVRSet timer
+                }
+            }
+            break;
+		/*
+		Message: JNTCIT/IVRSetRes/AAAA/X/Y
+	     		 JNTCIT/IVRSetRes/// 	
+		Type: Unicast (local host)
+		Arguments: 
+			AAAA: SIOD ID
+			X:	  number of an IO [0, 1, .. 3]. Current version of SIOD supports 4 outputs.
+			Y:  	 Active/not active [0, 1]  
+		Description: socket_io sends this message to Asterisk IVR to confirm output change. JNTCIT/IVRSetRes/// is send if SIOD AAAA 
+					 is not available in the mesh. JNTCIT/IVRGetRes/TimeRangeOut  is send if output adjustment is trying in the out 
+					 of the SIOD specified range. This command is process only by the SIOD type of devices.
+		*/
+        case IVRSetRes:{
+
+                if(verbose==2) printf("Rcv: IVRSetRes\n");
+
+                //We should never get this                                                                                                                                                         
+
+            }
+            break;
+                                                                                                                                                                                 
 	}
 
 	return 0;
@@ -1633,6 +1776,7 @@ int unicast(char *msg){
 
 	return(sendto(udpfd,msg,strlen(msg),0, (struct sockaddr *)&cliaddr,sizeof(cliaddr)));
 }
+
 
 /*
  * Initialize SIOD GPIOs. 
@@ -2642,4 +2786,16 @@ void asterisk_uptime(char *uptime){
 	len=strlen(uptime);
 	if(uptime[len-1] == 0xa) uptime[len-1] = '\0';
 	if(uptime[len-2] == ' ') uptime[len-2] = '\0';
+}
+/*
+ * Timer for the IVR command.
+ * Called 10 times per second 
+ */
+void IVRSetTimer(void){
+	
+	if (!IVRSet_counter) return;
+
+	if (IVRSet_counter++> IVRSETTIMEOUT){
+		IVRSet_counter=0;
+	} 
 }

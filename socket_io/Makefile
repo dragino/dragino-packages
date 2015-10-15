@@ -80,6 +80,10 @@ define Package/socket_io/install
 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_BIN) ./files/siod $(1)/etc/config/siod
+	$(INSTALL_BIN) ./files/system $(1)/etc/config/system
+	$(INSTALL_BIN) ./files/network $(1)/etc/config/network
+	$(INSTALL_BIN) ./files/wireless $(1)/etc/config/wireless
+	$(INSTALL_BIN) ./files/batman-adv $(1)/etc/config/batman-adv
 	$(INSTALL_BIN) ./files/get_siod_id.sh $(1)/bin/
 endef
 

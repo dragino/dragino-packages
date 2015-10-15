@@ -57,7 +57,10 @@ endef
 # much easier to do it this way.
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
+	mkdir -p $(PKG_BUILD_DIR)/usr
+	mkdir -p $(PKG_BUILD_DIR)/usr/lib/lua/luci
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
+	$(CP) ./luasrc/* $(PKG_BUILD_DIR)/usr/lib/lua/luci
 endef
 
 TARGET_LDFLAGS += -luci
@@ -85,6 +88,9 @@ define Package/socket_io/install
 	$(INSTALL_BIN) ./files/wireless $(1)/etc/config/wireless
 	$(INSTALL_BIN) ./files/batman-adv $(1)/etc/config/batman-adv
 	$(INSTALL_BIN) ./files/get_siod_id.sh $(1)/bin/
+	
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/
+	$(CP) $(PKG_BUILD_DIR)/usr/lib/lua/luci/* $(1)/usr/lib/lua/luci/
 endef
 
 

@@ -721,3 +721,253 @@ diff -PurN a/apps/app_siod_output_set.c b/apps/app_siod_output_set.c
 +}
 +
 +AST_MODULE_INFO_STANDARD(ASTERISK_GPL_KEY, "set/reset SIOD output state");
+diff -PurN a/configs/extensions.conf.sample b/configs/extensions.conf.sample
+--- a/configs/extensions.conf.sample	2011-01-19 17:53:20.000000000 +0200
++++ b/configs/extensions.conf.sample	2015-10-14 19:44:42.291453667 +0300
+@@ -609,7 +609,7 @@
+ ;
+ ; System Wide Page at extension 7999
+ ;
+-exten => 7999,1,Set(TIMEOUT(absolute)=60)
++exten = 7999,1,Set(TIMEOUT(absolute)=60)
+ exten => 7999,2,Page(Local/Grandstream1@page&Local/Xlite1@page&Local/1234@page/n,d)
+ 
+ ; Give voicemail at extension 8500
+@@ -815,7 +815,7 @@
+ ;
+ 
+ [ani]
+-exten => _X.,40000(ani),NoOp(ANI: ${EXTEN})
++exten = _X.,40000(ani),NoOp(ANI: ${EXTEN})
+ exten => _X.,n,Wait(0.25)
+ exten => _X.,n,Answer()
+ exten => _X.,n,Playback(vm-from)
+@@ -832,3 +832,166 @@
+ ; "core show functions" will list all dialplan functions
+ ; "core show function <COMMAND>" will show you more information about
+ ; one function. Remember that function names are UPPER CASE.
++
++
++[trunk1_incoming]
++exten => _X.,1,NoOp(Incoming call from ${CALLERID(all)})
++exten => _X.,n,Background(demo-congrats)
++exten => _X.,n,Hangup()
++
++[trunk2_incoming]  
++exten => _X.,1,NoOp(Incoming call from ${CALLERID(all)})
++exten => _X.,n,Background(demo-congrats)
++exten => _X.,n,Hangup()
++
++[context201]
++exten => _X.,1,Goto(ivr,1,1)
++
++[ivr]
++exten => s,1,Answer(500)
++exten => s,2,Backticks(LOCALSIODID,/bin/get_siod_id.sh)
++exten => s,3,Background(welcome)
++exten => s,4,WaitExten()
++exten => s,5,Goto(s,3) 
++
++exten => 3,1,Goto(setoutput_id,s,1)
++
++exten => 4,1,Goto(getio_id,s,1)
++
++exten => i,1,Goto(s,2)  
++;=================================================
++[setoutput_id]
++exten => s,1,Background(please-enter-a-node-id)
++exten => s,2,WaitExten()
++exten => s,3,Goto(s,1) 
++	
++exten => #,1,Set(SIODID=${LOCALSIODID:0:-1})
++exten => #,2,Goto(setoutput_id_good,s,1)
++
++exten => _XXXX,1,Set(SIODID=${EXTEN}) 
++exten => _XXXX,2,Goto(setoutput_id_good,s,1)
++
++exten => i,1,Goto(setoutput_id_bad,s,1)
++
++[setoutput_id_good]
++exten => s,1,Background(please-enter-output-port-number)
++exten => s,2,WaitExten()
++exten => s,3,Goto(s,1)
++
++exten => _[0-3],1,Set(SIODOUTPUT=${EXTEN})
++exten => _[0-3],2,Goto(setoutput_output_good,s,1)
++
++exten => i,1,Goto(setoutput_output_bad,s,1)
++                               
++[setoutput_output_good]
++exten => s,1,Background(press-one-to-activate-the-port)   
++exten => s,2,WaitExten()             
++exten => s,3,Goto(s,1) 
++
++exten => _[01],1,Set(SIODSTATE=${EXTEN}) 
++exten => _[01],2,siod_output_set(${SIODID},${SIODOUTPUT},${SIODSTATE})
++exten => _[01],3,GotoIf($["${SIODOUTPUTSETSTATUS}" = "OK"]?setoutput_talk,1,1)
++exten => _[01],4,GotoIf($["${SIODOUTPUTSETSTATUS}" = "SIODUNKNOWN"]?setoutput_talk,2,1)          
++exten => _[01],5,GotoIf($["${SIODOUTPUTSETSTATUS}" = "TIMEOUT"]?setoutput_talk,3,1) 
++
++exten => i,1,Goto(setoutput_state_bad,s,1)
++
++[setoutput_state_bad]
++exten => s,1,Background(state-is-not-accepted)                                                                      
++exten => s,2,WaitExten()                               
++exten => s,3,Goto(s,1)   
++
++exten => 9,1,Goto(setoutput_output_good,s,1)                     
++                                                        
++exten => *,1,Goto(ivr,s,3)  
++
++[setoutput_output_bad] 
++exten => s,1,Background(invalid-output-port)                
++exten => s,2,WaitExten()                                         
++exten => s,3,Goto(1,1)                            
++                                                  
++exten => 9,1,Goto(setoutput_id_good,s,1)               
++                                                                                                    
++exten => *,1,Goto(ivr,s,3) 
++
++[setoutput_id_bad]
++exten => s,1,Background(node-id-is-not-accepted)
++exten => s,2,WaitExten()
++exten => s,3,Goto(s,1)
++
++exten => 9,1,Goto(setoutput_id,s,1)  
++
++exten => *,1,Goto(ivr,s,3)  
++
++[setoutput_talk]
++exten => 1,1,Background(the-port-number)                                        
++exten => 1,2,SayDigits(${SIODOUTPUT})                                                                     
++exten => 1,3,Background(of-node-number)                                                      
++exten => 1,4,SayNumber(${SIODID})                                               
++exten => 1,5,GotoIf($["${SIODSTATE}" = "1"]?setoutput_talk,1,8)               
++exten => 1,6,Background(is-not-active)                                          
++exten => 1,7,Hangup()                                                          
++exten => 1,8,Background(is-active)                                              
++                                                                                
++exten => 2,1,Background(the-specified-node-id-is-not-available)                 
++                                                                                                                                                                
++exten => 3,1,Background(time-out) 
++;=================================================
++[getio_id]                                         
++exten => s,1,Background(please-enter-a-node-id)        
++exten => s,2,WaitExten()                                
++exten => s,3,Goto(s,1)                                            
++                                                        
++exten => #,1,Set(SIODID=${LOCALSIODID:0:-1})                           
++exten => #,2,Goto(getio_id_good,s,1)                   
++                                                                                                          
++exten => _XXXX,1,Set(SIODID=${EXTEN})             
++exten => _XXXX,2,Goto(getio_id_good,s,1)  
++                                                                                                                                                                                
++exten => i,1,Goto(getio_id_bad,s,1)
++
++[getio_id_good]                                     
++exten => s,1,Background(please-enter-port-number-from-0-to-7)
++exten => s,2,WaitExten()                        
++exten => s,3,Goto(s,1)                                  
++                                                        
++exten => _[0-7],1,Set(SIODIO=${EXTEN})                  
++exten => _[0-7],2,siod_io_get(${SIODID},${SIODIO})
++exten => _[0-7],3,GotoIf($["${SIODIOGETSTATUS}" = "0"]?getio_talk,1,1)
++exten => _[0-7],4,GotoIf($["${SIODIOGETSTATUS}" = "1"]?getio_talk,1,1)
++exten => _[0-7],5,GotoIf($["${SIODIOGETSTATUS}" = "SIODUNKNOWN"]?getio_talk,2,1)
++exten => _[0-7],6,GotoIf($["${SIODIOGETSTATUS}" = "TIMEOUT"]?getio_talk,3,1)
++                                                                                                          
++exten => i,1,Goto(getio_io_bad,s,1)
++
++[getio_io_bad]                      
++exten => s,1,Background(invalid-port)
++exten => s,2,WaitExten()                   
++exten => s,3,Goto(1,1)                     
++                                             
++exten => 9,1,Goto(getio_id_good,s,1)               
++                                                                                               
++exten => *,1,Goto(ivr,s,3)
++
++[getio_id_bad]                              
++exten => s,1,Background(node-id-is-not-accepted)  
++exten => s,2,WaitExten()                                 
++exten => s,3,Goto(s,1)                                                     
++                                                                    
++exten => 9,1,Goto(getio_id,s,1)
++                                                                                                                                  
++exten => *,1,Goto(ivr,s,3) 
++
++[getio_talk]
++exten => 1,1,Background(the-port-number)              
++exten => 1,2,SayDigits(${SIODIO})
++exten => 1,3,Background(of-node-number)
++exten => 1,4,SayNumber(${SIODID})
++exten => 1,5,GotoIf($["${SIODIOGETSTATUS}" = "1"]?getio_talk,1,8)
++exten => 1,6,Background(is-not-active)
++exten => 1,7,Hangup()
++exten => 1,8,Background(is-active)
++
++exten => 2,1,Background(the-specified-node-id-is-not-available)
++
++exten => 3,1,Background(time-out) 
+diff -PurN a/configs/sip.conf.sample b/configs/sip.conf.sample
+--- a/configs/sip.conf.sample	2014-04-21 18:25:18.000000000 +0300
++++ b/configs/sip.conf.sample	2015-10-14 19:45:06.235572400 +0300
+@@ -733,6 +733,7 @@
+ ;    Using 'udp://' explicitly is also useful in case the username part
+ ;    contains a '/' ('user/name').
+ 
++
+ ;registertimeout=20             ; retry registration calls every 20 seconds (default)
+ ;registerattempts=10            ; Number of registration attempts before we give up
+                                 ; 0 = continue forever, hammering the other server
+@@ -1072,6 +1073,8 @@
+ 
+ ;-----------------------------------------------------------------------------------
+ 
++register=iana:password123@192.168.1.101
++register=eva:password123@192.168.1.2
+ [authentication]
+ ; Global credentials for outbound calls, i.e. when a proxy challenges your
+ ; Asterisk server for authentication. These credentials override
+@@ -1421,3 +1424,41 @@
+                                 ; if the nat option is enabled. If a single RTP packet is received Asterisk will know the
+                                 ; external IP address of the remote device. If port forwarding is done at the client side
+                                 ; then UDPTL will flow to the remote device.
++                                
++[trunk1]
++type=friend
++secret=password123
++username=iana
++host=192.168.1.101
++dtmfmode=rfc2833
++canreinvite=no
++disallow=all
++allow=ulaw
++allow=alaw
++allow=gsm
++insecure=port,invite
++context=trunk1_incoming
++
++[trunk2]                                                                                                                 
++type=friend                                                                                                              
++secret=password123
++username=eva
++host=192.168.1.2
++dtmfmode=rfc2833                                                                                                         
++canreinvite=no                                                                                                       
++disallow=all                                                                                               
++allow=ulaw                                                                                                 
++allow=alaw                                                                                     
++allow=gsm                                                                                                  
++insecure=port,invite                                                                                       
++context=trunk2_incoming
++
++[201]
++type=friend
++host=dynamic
++username=201
++secret=201
++nat=yes
++context=context201
++disallow=all
++allow=ulaw

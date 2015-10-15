@@ -1,6 +1,6 @@
 
 package 'siod'
 
-config siod
-	option id	'1001'
+config parameters 'siod_id'
+	option id	'1000'
 

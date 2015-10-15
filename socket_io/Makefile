@@ -80,6 +80,7 @@ define Package/socket_io/install
 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_BIN) ./files/siod $(1)/etc/config/siod
+	$(INSTALL_BIN) ./files/get_siod_id.sh $(1)/bin/
 endef
 
 

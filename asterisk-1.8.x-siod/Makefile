@@ -86,9 +86,9 @@ define Package/asterisk18/Default/description
  equipment using relatively inexpensive hardware.
 endef
 
-define Package/asterisk18-siod
+define Package/asterisk18
 $(call Package/asterisk18/Default)
-  TITLE:=Complete open source PBX, v1.8.x
+  TITLE:=Complete open source PBX, v1.8.x for SIOD
   MENU:=1
   DEPENDS:=+libopenssl +libncurses +libpopt +libpthread +zlib @!TARGET_avr32
 endef
@@ -118,7 +118,9 @@ AST_CFG_FILES:=\
 	modules.conf sip.conf sip_notify.conf rtp.conf users.conf
 AST_EMB_MODULES:=\
 	app_dial app_echo app_macro app_playback codec_ulaw codec_gsm format_gsm format_pcm format_wav format_wav_gsm \
-	func_strings func_timeout func_callerid func_logic chan_sip pbx_config res_rtp_asterisk res_rtp_multicast
+	func_strings func_timeout func_callerid func_logic chan_sip pbx_config res_rtp_asterisk res_rtp_multicast \
+	app_siod_io_get app_siod_output_set app_backticks
+
 
 define Package/asterisk18/install
 $(call Package/asterisk18/install/sbin,$(1),asterisk)
@@ -128,6 +130,7 @@ $(foreach m,$(AST_EMB_MODULES),$(call Package/asterisk18/install/module,$(1),$(m
 	$(INSTALL_DATA) ./files/asterisk.default $(1)/etc/default/asterisk
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/asterisk.init $(1)/etc/init.d/asterisk
+	
 endef
 
 define Package/asterisk18-chan-lantiq
@@ -164,9 +167,7 @@ endef
 
 define Package/asterisk18-sounds/install
 	$(INSTALL_DIR) $(1)/usr/lib/asterisk/sounds/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/asterisk/sounds/en/* $(1)/usr/lib/asterisk/sounds/
-	rm -f $(1)/usr/lib/asterisk/sounds/vm-*
-	rm -f $(1)/usr/lib/asterisk/sounds/conf-*
+	tar -xf ./files/siod-sounds.tar -C $(1)/usr/lib/asterisk/sounds/
 endef
 
 ifneq ($(SDK)$(CONFIG_PACKAGE_asterisk18-chan-gtalk),)
@@ -295,7 +296,7 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/asterisk.h $(1)/usr/include/asterisk-1.8/include/
 endef
 
-$(eval $(call BuildPackage,asterisk18-siod))
+$(eval $(call BuildPackage,asterisk18))
 $(eval $(call BuildPackage,asterisk18-chan-lantiq))
 $(eval $(call BuildPackage,asterisk18-sounds))
 

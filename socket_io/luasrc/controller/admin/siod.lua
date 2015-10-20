@@ -18,5 +18,4 @@ module("luci.controller.admin.siod", package.seeall)
 function index()
 	entry({"admin", "socket_io"}, alias("admin", "socket_io","general"), "SIOD", 50).index = true
 	entry({"admin", "socket_io","general"}, cbi("siod/general"), "General Settings", 10)
-	entry({"admin", "socket_io","network"}, cbi("siod/network"), "Network", 20)
 end

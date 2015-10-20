@@ -16,7 +16,7 @@ m = Map("siod", translate("Socket IO"))
 s = m:section(NamedSection, "siod_id", "siod", translate("SIOD ID"))
 s.addremove = false
 
-local siod_id = s:option(Value, "id", "SIOD ID")
-siod_id.datatype="uinteger"
+local siod_id = s:option(Value, "id", "SIOD ID",translate("From 0000 to 9999"))
+siod_id.datatype="range(0000,9999)"
 
 return m

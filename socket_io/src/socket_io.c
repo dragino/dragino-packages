@@ -123,6 +123,8 @@ void asterisk_config_write(char *SIPRegistrar1, char *AuthenticationName1, char 
 void asterisk_uptime(char *uptime);
 int hashit(char *cmd);
 void IVRSetTimer(void);
+void getIP(char *);
+void getIPMask(char *);
 
 int IVRSet_counter;
 
@@ -216,7 +218,8 @@ int main(int argc, char **argv){
 	/* Our IP address */
 	{
 		char IPAddress[STR_MAX];
-		uciget("network.bat.ipaddr", IPAddress);
+		//uciget("network.bat.ipaddr", IPAddress);
+		getIP(IPAddress);
 		if(IPAddress[0] != '\0')
 			IPADR = IPaddress_str2num(IPAddress);
 	}
@@ -468,7 +471,7 @@ int process_udp(char *datagram){
                     return -1;
                 }
 
-                if(wifiMAC() == MACaddress_str2num(MACAddress) || MACAddress[0] == '\0') { /* Our MAC address matches or empty MAC, so process the packet */
+                if(MACAddress[0] == '\0' || wifiMAC() == MACaddress_str2num(MACAddress)) { /* Our MAC address matches or empty MAC, so process the packet */
                 	uciset("wireless.ah_0.ssid", SSID);
                 	uciset("wireless.ah_0.encryption", Encryption);
                 	uciset("wireless.ah_0.key", Passphrase);
@@ -477,6 +480,10 @@ int process_udp(char *datagram){
 					ucicommit();
 				
 					if(verbose) printf("WiFi Config commited\n");
+
+                    sprintf(msg, "JNTCIT/200");
+                    if(verbose==2) printf("Sent: %s\n", msg);
+                    unicast(msg);
 				}
             }
             break;
@@ -489,17 +496,20 @@ int process_udp(char *datagram){
         case ConfigReq:{
 				//We send our network parameters, check ConfigRes
 				char MACAddress[STR_MAX], Uptime[STR_MAX], SoftwareVersion[STR_MAX], IPAddress[STR_MAX], IPMask[STR_MAX], Gateway[STR_MAX], DNS1[STR_MAX], DNS2[STR_MAX], DHCP[STR_MAX];
+				int offset;
 
 				if(verbose==2) printf("Rcv: ConfigReq\n");
 
 				MACaddress_num2str(wifiMAC(), MACAddress);
             	uptime(Uptime);
             	getsoftwarever(SoftwareVersion);
-				uciget("network.bat.ipaddr", IPAddress);
-            	uciget("network.bat.netmask", IPMask);
+				//uciget("network.bat.ipaddr", IPAddress);
+            	//uciget("network.bat.netmask", IPMask);
+				getIP(IPAddress);
+				getIPMask(IPMask);
             	uciget("network.bat.gateway", Gateway);
-            	uciget("network.bat.dns", DNS1);
-				DNS2[0]='\0'; //Don't support for now
+            	uciget("network.bat.dns", msg);
+				sscanf(msg, "%s %s", DNS1, DNS2);
 				uciget("network.bat.proto", DHCP);
 				
 				sprintf(msg, "JNTCIT/ConfigRes/%s/%s/SIOD/%s/%s/%s/%s/%s/%s/%s/%s/%s", MACAddress, Uptime, HW_VER, SoftwareVersion, SIOD_ID, IPAddress, IPMask, Gateway, DNS1, DNS2, DHCP);
@@ -584,14 +594,19 @@ int process_udp(char *datagram){
                     uciset("network.bat.ipaddr", IPAddress);
                     uciset("network.bat.netmask", IPMask);
                     uciset("network.bat.gateway", Gateway);
-                    uciset("network.bat.dns", DNS1);
-                    //uciset("network.bat.dns", DNS2); ignore for now
+                	ucidelete("network.bat.dns");
+                	uciadd_list("network.bat.dns", DNS1);
+					uciadd_list("network.bat.dns", DNS2);
                     uciset("network.bat.proto", DHCP);
 
 					ucicommit();
 			
 					if(verbose) printf("bat Config commited\n");
 
+
+                    sprintf(msg, "JNTCIT/200");
+                	if(verbose==2) printf("Sent: %s\n", msg);
+                	unicast(msg);
 				}
 
             }
@@ -621,11 +636,16 @@ int process_udp(char *datagram){
 
 					restartnet();
 
-        			uciget("network.bat.ipaddr", IPAddress); //Update our IPADR
+        			//uciget("network.bat.ipaddr", IPAddress); //Update our IPADR
+					getIP(IPAddress);
         			if(IPAddress[0] != '\0')
             			IPADR = IPaddress_str2num(IPAddress);
 					else
 						IPADR=0;
+
+                    sprintf(msg, "JNTCIT/200");
+                    if(verbose==2) printf("Sent: %s\n", msg);
+                    unicast(msg);
 				}				
 
             }
@@ -1204,6 +1224,11 @@ int process_udp(char *datagram){
 
                 if(verbose==2) printf("Rcv: Ping\n");
 
+				if(n_args != 2 ) {
+					printf("Wrong format of Ping message\n");
+					break;
+				}
+
 				AAAA = args[1];
 
 				if(AAAA[0]=='\0' || !strcmp(AAAA, SIOD_ID)) { //AAAA is empty or our SIOD_ID matches so we we need to respond
@@ -1743,6 +1768,7 @@ int getsoftwarever(char *ver){
 
 	len=strlen(ver);
     if(ver[len-1]=='\r' || ver[len-1]=='\n') ver[len-1]='\0';
+	if(ver[len-2]==' ') ver[len-2]='\0';
 
     if(ret==NULL)
         return -1;
@@ -1784,7 +1810,7 @@ int unicast(char *msg){
  */
 int gpios_init(void){
 
-	int fd, n, fb0, fb1, fb2, fb3;
+	int fd, n, /*fb0, fb1, fb2, fb3*/ out0, out1, out2, out3;
 	char value[2], str[STR_MAX];
 
 	GPIOs=0;
@@ -1874,20 +1900,20 @@ int gpios_init(void){
 	/* read the relay feedbacks */
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", FB0);
     fd_fb0 = open(str, O_RDONLY);
-    read(fd_fb0, value, 2); value[2]='\0';
-    fb0=atoi(value);
+    //read(fd_fb0, value, 2); value[2]='\0';
+    //fb0=atoi(value);
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", FB1);
     fd_fb1 = open(str, O_RDONLY);
-    read(fd_fb1, value, 2); value[2]='\0';
-    fb1=atoi(value);
+    //read(fd_fb1, value, 2); value[2]='\0';
+    //fb1=atoi(value);
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", FB2);
     fd_fb2 = open(str, O_RDONLY);
-    read(fd_fb2, value, 2); value[2]='\0';
-    fb2=atoi(value);
+    //read(fd_fb2, value, 2); value[2]='\0';
+    //fb2=atoi(value);
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", FB3);
     fd_fb3 = open(str, O_RDONLY);
-    read(fd_fb3, value, 2); value[2]='\0';
-    fb3=atoi(value);
+    //read(fd_fb3, value, 2); value[2]='\0';
+    //fb3=atoi(value);
 
 
 	/* configure outputs */
@@ -1919,19 +1945,30 @@ int gpios_init(void){
     fd_pulse = open(str, O_WRONLY);    
 
 
+    /* Initialize the file descriptors in an array to ease indexing */
+    IOs[0]=fd_fb0; IOs[1]=fd_fb1; IOs[2]=fd_fb2; IOs[3]=fd_fb3;
+    IOs[4]=fd_in0; IOs[5]=fd_in1; IOs[6]=fd_in2; IOs[7]=fd_in3;
+
+
+
 	/* Set the output information in GPIOS 
      * GPIOS = [IN3 IN2 IN1 IN0 OUT3 OUT2 OUT1 OUT0]
    	 *          MSB                            LSB   
 	 */
-	GPIOs |= !(fb0);
+	/*GPIOs |= !(fb0);
 	GPIOs |= (!(fb1) << 1);
 	GPIOs |= (!(fb2) << 2);
 	GPIOs |= (!(fb3) << 3);
-
-	/* Initialize the file descriptors in an array to ease indexing */
-	IOs[0]=fd_fb0; IOs[1]=fd_fb1; IOs[2]=fd_fb2; IOs[3]=fd_fb3;
-	IOs[4]=fd_in0; IOs[5]=fd_in1; IOs[6]=fd_in2; IOs[7]=fd_in3;
-
+	*/
+	uciget("siod.@output[0].value", str);
+	setgpio("0", str);
+	uciget("siod.@output[1].value", str);
+	setgpio("1", str);
+    uciget("siod.@output[2].value", str);
+	setgpio("2", str);
+    uciget("siod.@output[3].value", str);
+	setgpio("3", str);
+    
 	if(verbose) printf("GPIOs = 0x%x\n", GPIOs);
 
 	return 0;
@@ -1939,7 +1976,7 @@ int gpios_init(void){
 
 
 /*
- * iet local gpio
+ * set local gpio
  *
  *	X:(optional)	index of the output [0, 1, .. 3] Current version of SIOD supports 4 outputs. 
  *					X can be empty string. If empty it is assumed that YYYY specifies the state of all outputs. 
@@ -1952,7 +1989,7 @@ int gpios_init(void){
 int setgpio(char *X, char *Y){
 
 	int x, n, xlen, ylen;
-	char str[STR_MAX];
+	char str[STR_MAX], value[2] ;
 	
 	xlen=strlen(X);
 	ylen=strlen(Y);
@@ -1979,6 +2016,11 @@ int setgpio(char *X, char *Y){
 		//Update GST
 		GST[0].gpios=GPIOs;
 
+		//Update the configs
+		sprintf(str, "siod.@output[%d].value", x);
+		uciset(str, Y);
+		ucicommit();
+
 	} else if (xlen == 0 && ylen == OUTPUTS_NUM){
 		int i;
 		
@@ -1993,8 +2035,15 @@ int setgpio(char *X, char *Y){
 				GPIOs = (Y[OUTPUTS_NUM-1-i]-'0')?(GPIOs|(1<<i)):(GPIOs&~(1<<i));
 
 				if(verbose == 2) printf("Set: OUT%d = %d\n", i, Y[OUTPUTS_NUM-1-i]-'0');
+
+				//Update the configs
+        		sprintf(str, "siod.@output[%d].value", i);
+				sprintf(value, "%c", Y[OUTPUTS_NUM-1-i]);
+        		uciset(str, value);	
 			}
 		}
+
+		ucicommit();
 
         //Update GST
         GST[0].gpios=GPIOs;
@@ -2798,4 +2847,40 @@ void IVRSetTimer(void){
 	if (IVRSet_counter++> IVRSETTIMEOUT){
 		IVRSet_counter=0;
 	} 
+}
+
+/*
+ * Get the IP address of the br-bat interface
+ * IP should have at least STR_MAX bytes alocated.
+ */
+void getIP(char *IP){
+    FILE *fp;
+    char *ret;
+	int len;
+
+    fp=popen("ifconfig br-bat | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'","r");
+    ret=fgets(IP, STR_MAX, fp);
+    pclose(fp);
+
+    len=strlen(IP);
+    if(IP[len-1]=='\r' || IP[len-1]=='\n') IP[len-1]='\0';
+
+}
+
+/*
+ * Get the IP netmask of the br-bat interface
+ * mask should have at least STR_MAX bytes alocated.
+ */
+void getIPMask(char *mask){
+    FILE *fp;
+    char *ret;
+	int len;
+
+    fp=popen("ifconfig br-bat | grep 'inet addr:' | cut -d: -f4","r");
+    ret=fgets(mask, STR_MAX, fp);
+    pclose(fp);
+
+    len=strlen(mask);
+    if(mask[len-1]=='\r' || mask[len-1]=='\n') mask[len-1]='\0';
+
 }

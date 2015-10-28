@@ -399,18 +399,18 @@ int process_udp(char *datagram){
 		*/
 		case ConfigBatmanReq:{
 
-                char MACAddress[STR_MAX], SSID[STR_MAX], Encryption[STR_MAX], Passphrase[STR_MAX], Enable[STR_MAX];
+                char MACAddress[STR_MAX], BSSID[STR_MAX], Encryption[STR_MAX], Passphrase[STR_MAX], Enable[STR_MAX];
 
                 if(verbose==2) printf("Rcv: ConfigBatmanReq\n");
 
                 MACaddress_num2str(wifiMAC(), MACAddress);
-                uciget("wireless.ah_0.ssid", SSID);
+                uciget("wireless.ah_0.bssid", BSSID);
                 uciget("wireless.ah_0.encryption", Encryption);
                 uciget("wireless.ah_0.key", Passphrase);
                 uciget("wireless.ah_0.disabled", Enable);
 				Enable[0]=(Enable[0]=='0')?'1':'0'; //Invert the logic
 
-                sprintf(msg, "JNTCIT/ConfigBatmanRes/%s/%s/%s/%s/%s", MACAddress, SSID, Encryption, Passphrase, Enable);
+                sprintf(msg, "JNTCIT/ConfigBatmanRes/%s/%s/%s/%s/%s", MACAddress, BSSID, Encryption, Passphrase, Enable);
 
                 if(verbose==2) printf("Sent: %s\n", msg);
 
@@ -419,11 +419,11 @@ int process_udp(char *datagram){
 			}
 			break;
         /*
-		Message: JNTCIT/ConfigBatmanRes/MACAddress/SSID/Encryption/Passphrase/WANbridge
+		Message: JNTCIT/ConfigBatmanRes/MACAddress/BSSID/Encryption/Passphrase/WANbridge
 		Type: Broadcast
 		Arguments:
 			MACAddress:			0a:ba:ff:10:20:30 (MAC of br-bat0 used as reference)
-			SSID:				jntcit
+			BSSID:				02:ca:ff:ee:ba:be
 			Encryption:			WPA2
 			Passphrase:			S10D
 		Description: SIOD is broadcasting this response in the network. To be able to create Batman-adv mesh 
@@ -441,12 +441,12 @@ int process_udp(char *datagram){
             }
             break;
 		/*
-		Message: JNTCIT/ConfigBatman/MACAddress/SSID/Encryption/Passphrase/Enable
-	     	 	 JNTCIT/ConfigBatman//SSID/Encryption/Passphrase/Enable
+		Message: JNTCIT/ConfigBatman/MACAddress/BSSID/Encryption/Passphrase/Enable
+	     	 	 JNTCIT/ConfigBatman//BSSID/Encryption/Passphrase/Enable
 		Type: Broadcast
 		Arguments:
 			MACAddress:(WiFi)(optional)	0a:ba:ff:10:20:30
-			SSID:					jntcit
+			BSSID:					02:ca:ff:ee:ba:be
 			Encryption:				WPA2
 			Passphrase:				S10D
 			Enable					1 if enabled, 0 if disabled
@@ -460,11 +460,11 @@ int process_udp(char *datagram){
 		*/
         case ConfigBatman:{
 
-                char *MACAddress, *SSID, *Encryption, *Passphrase, *Enable;
+                char *MACAddress, *BSSID, *Encryption, *Passphrase, *Enable;
 
                 if(verbose==2) printf("Rcv: ConfigBatman\n");
 
-				MACAddress=args[1]; SSID=args[2]; Encryption=args[3];  Passphrase=args[4]; Enable=args[5];
+				MACAddress=args[1]; BSSID=args[2]; Encryption=args[3];  Passphrase=args[4]; Enable=args[5];
 
                 if(n_args != 6) {
                     printf("Wrong format of ConfigBatman message\n");
@@ -472,7 +472,7 @@ int process_udp(char *datagram){
                 }
 
                 if(MACAddress[0] == '\0' || wifiMAC() == MACaddress_str2num(MACAddress)) { /* Our MAC address matches or empty MAC, so process the packet */
-                	uciset("wireless.ah_0.ssid", SSID);
+                	uciset("wireless.ah_0.bssid", BSSID);
                 	uciset("wireless.ah_0.encryption", Encryption);
                 	uciset("wireless.ah_0.key", Passphrase);
                 	uciset("wireless.ah_0.disabled", (Enable[0]=='0')?"1":"0");

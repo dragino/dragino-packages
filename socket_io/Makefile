@@ -83,6 +83,7 @@ define Package/socket_io/install
 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_BIN) ./files/siod $(1)/etc/config/siod
+	$(INSTALL_BIN) ./files/voip $(1)/etc/config/voip
 	$(INSTALL_BIN) ./files/system $(1)/etc/config/system
 	$(INSTALL_BIN) ./files/network $(1)/etc/config/network
 	$(INSTALL_BIN) ./files/wireless $(1)/etc/config/wireless

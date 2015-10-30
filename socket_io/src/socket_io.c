@@ -115,14 +115,17 @@ int ParseTimeRange(char *TimeRangeStr);
 int CheckTimeRange(void);
 int PLCadd(char *rule);
 int PLCdel(char *AAAA1, char *X1, char *Y1);
+int PLCdel_config(char *AAAA1, char *X1, char *Y1);
+int PLCread_config(void);
 void PLCprint(char *);
 void PLCexec(void);
 void bcast_init(void);
 void restart_asterisk(void);
-void asterisk_config_write(char *SIPRegistrar1, char *AuthenticationName1, char *Password1, char *SIPRegistrar2, char *AuthenticationName2, char *Password2);
 void asterisk_uptime(char *uptime);
 int hashit(char *cmd);
 void IVRSetTimer(void);
+void getIP(char *);
+void getIPMask(char *);
 
 int IVRSet_counter;
 
@@ -184,31 +187,30 @@ int main(int argc, char **argv){
 	/* CTR-C handler */
 	//signal(SIGINT, intHandler);
 
-
-	/* Splash ============================================================ */
-
-	/* No timing restrictions for the outputs ============================ */
-	ParseTimeRange("/");
-
-	/* We don't have rules in the PLC table ============================== */
-	PLCT.n=0;
-	PLCT.triggered[0]=0;
-
-	/* Check for verbosity argument */
-	if(argc>1) {
-		if(!strcmp(argv[1], "-v")){
-			verbose=1;
-			printf("socket_io - rev %s (verbose)\n", SOCKET_IO_REV);		
-		} else if(!strcmp(argv[1], "-vv")){
-			verbose=2;
-			printf("socket_io - rev %s (very verbose)\n", SOCKET_IO_REV);
-		} else if(!strcmp(argv[1], "-vvv")){
+    /* Check for verbosity argument ====================================== */
+    if(argc>1) {
+        if(!strcmp(argv[1], "-v")){
+            verbose=1;
+            printf("socket_io - rev %s (verbose)\n", SOCKET_IO_REV);
+        } else if(!strcmp(argv[1], "-vv")){
+            verbose=2;
+            printf("socket_io - rev %s (very verbose)\n", SOCKET_IO_REV);
+        } else if(!strcmp(argv[1], "-vvv")){
             verbose=3;
             printf("socket_io - rev %s (very very verbose)\n", SOCKET_IO_REV);
         }
 
-	} else
-		printf("socket_io - rev %s\n", SOCKET_IO_REV);
+    } else
+        printf("socket_io - rev %s\n", SOCKET_IO_REV);
+
+
+	/* Read the timing restrictions for the outputs from the configs ===== */
+   	char TimeRangeStr[STR_MAX];
+	uciget("siod.timerange.range", TimeRangeStr);
+	ParseTimeRange(TimeRangeStr);
+
+	/* Read the PLC rules from the config ================================ */
+	PLCread_config();
 
 	/* get SIOD_ID ======================================================= */
 	uciget("siod.siod_id.id", SIOD_ID); 
@@ -216,7 +218,8 @@ int main(int argc, char **argv){
 	/* Our IP address */
 	{
 		char IPAddress[STR_MAX];
-		uciget("network.bat.ipaddr", IPAddress);
+		//uciget("network.bat.ipaddr", IPAddress);
+		getIP(IPAddress);
 		if(IPAddress[0] != '\0')
 			IPADR = IPaddress_str2num(IPAddress);
 	}
@@ -259,7 +262,7 @@ int main(int argc, char **argv){
 		char msg[STR_MAX], Y[9];
 		byte2binarystr(GPIOs, Y);
 		sprintf(msg, "JNTCIT/Put/%s//%s", SIOD_ID, Y);
-    	if(verbose==2) printf("Sent: %s\n", msg);
+    	if(verbose>=2) printf("Sent: %s\n", msg);
     	broadcast(msg);	
 	}
 
@@ -296,7 +299,7 @@ int main(int argc, char **argv){
 			
 				/* ignore our own  broadcast messages */
 				if (IPADR == cliaddr.sin_addr.s_addr){
-					if(verbose==2) printf("Ignore our broadcast message\n");
+					if(verbose>=2) printf("Ignore our broadcast message\n");
 					continue;
 				}
 
@@ -358,12 +361,12 @@ int process_udp(char *datagram){
 	int n_args;
 	char *args[UDP_ARGS_MAX], msg[MSG_MAX];
 
-	if(verbose==2) printf("In process_udp() \n");
+	if(verbose>=2) printf("In process_udp() \n");
 
 
 	/* We process only datagrams starting with JNTCIT */
 	if ((strlen(datagram)<7) || strncmp(datagram, "JNTCIT/", 7)){
-		if(verbose==2) printf("Unrelated datagram => %s\n", datagram);
+		if(verbose>=2) printf("Unrelated datagram => %s\n", datagram);
 		return 0;
 	} else
 		datagram = datagram + 7;
@@ -396,31 +399,31 @@ int process_udp(char *datagram){
 		*/
 		case ConfigBatmanReq:{
 
-                char MACAddress[STR_MAX], SSID[STR_MAX], Encryption[STR_MAX], Passphrase[STR_MAX], Enable[STR_MAX];
+                char MACAddress[STR_MAX], BSSID[STR_MAX], Encryption[STR_MAX], Passphrase[STR_MAX], Enable[STR_MAX];
 
-                if(verbose==2) printf("Rcv: ConfigBatmanReq\n");
+                if(verbose>=2) printf("Rcv: ConfigBatmanReq\n");
 
                 MACaddress_num2str(wifiMAC(), MACAddress);
-                uciget("wireless.ah_0.ssid", SSID);
+                uciget("wireless.ah_0.bssid", BSSID);
                 uciget("wireless.ah_0.encryption", Encryption);
                 uciget("wireless.ah_0.key", Passphrase);
                 uciget("wireless.ah_0.disabled", Enable);
 				Enable[0]=(Enable[0]=='0')?'1':'0'; //Invert the logic
 
-                sprintf(msg, "JNTCIT/ConfigBatmanRes/%s/%s/%s/%s/%s", MACAddress, SSID, Encryption, Passphrase, Enable);
+                sprintf(msg, "JNTCIT/ConfigBatmanRes/%s/%s/%s/%s/%s", MACAddress, BSSID, Encryption, Passphrase, Enable);
 
-                if(verbose==2) printf("Sent: %s\n", msg);
+                if(verbose>=2) printf("Sent: %s\n", msg);
 
                 broadcast(msg);
 
 			}
 			break;
         /*
-		Message: JNTCIT/ConfigBatmanRes/MACAddress/SSID/Encryption/Passphrase/WANbridge
+		Message: JNTCIT/ConfigBatmanRes/MACAddress/BSSID/Encryption/Passphrase/WANbridge
 		Type: Broadcast
 		Arguments:
 			MACAddress:			0a:ba:ff:10:20:30 (MAC of br-bat0 used as reference)
-			SSID:				jntcit
+			BSSID:				02:ca:ff:ee:ba:be
 			Encryption:			WPA2
 			Passphrase:			S10D
 		Description: SIOD is broadcasting this response in the network. To be able to create Batman-adv mesh 
@@ -433,17 +436,17 @@ int process_udp(char *datagram){
 			/* Do nothing at the moment  */
 			char *MACaddress = args[1];
 			
-			if(verbose==2) printf("Rcv: ConfigBatmanRes\n");
+			if(verbose>=2) printf("Rcv: ConfigBatmanRes\n");
 
             }
             break;
 		/*
-		Message: JNTCIT/ConfigBatman/MACAddress/SSID/Encryption/Passphrase/Enable
-	     	 	 JNTCIT/ConfigBatman//SSID/Encryption/Passphrase/Enable
+		Message: JNTCIT/ConfigBatman/MACAddress/BSSID/Encryption/Passphrase/Enable
+	     	 	 JNTCIT/ConfigBatman//BSSID/Encryption/Passphrase/Enable
 		Type: Broadcast
 		Arguments:
 			MACAddress:(WiFi)(optional)	0a:ba:ff:10:20:30
-			SSID:					jntcit
+			BSSID:					02:ca:ff:ee:ba:be
 			Encryption:				WPA2
 			Passphrase:				S10D
 			Enable					1 if enabled, 0 if disabled
@@ -457,19 +460,19 @@ int process_udp(char *datagram){
 		*/
         case ConfigBatman:{
 
-                char *MACAddress, *SSID, *Encryption, *Passphrase, *Enable;
+                char *MACAddress, *BSSID, *Encryption, *Passphrase, *Enable;
 
-                if(verbose==2) printf("Rcv: ConfigBatman\n");
+                if(verbose>=2) printf("Rcv: ConfigBatman\n");
 
-				MACAddress=args[1]; SSID=args[2]; Encryption=args[3];  Passphrase=args[4]; Enable=args[5];
+				MACAddress=args[1]; BSSID=args[2]; Encryption=args[3];  Passphrase=args[4]; Enable=args[5];
 
                 if(n_args != 6) {
                     printf("Wrong format of ConfigBatman message\n");
                     return -1;
                 }
 
-                if(wifiMAC() == MACaddress_str2num(MACAddress) || MACAddress[0] == '\0') { /* Our MAC address matches or empty MAC, so process the packet */
-                	uciset("wireless.ah_0.ssid", SSID);
+                if(MACAddress[0] == '\0' || wifiMAC() == MACaddress_str2num(MACAddress)) { /* Our MAC address matches or empty MAC, so process the packet */
+                	uciset("wireless.ah_0.bssid", BSSID);
                 	uciset("wireless.ah_0.encryption", Encryption);
                 	uciset("wireless.ah_0.key", Passphrase);
                 	uciset("wireless.ah_0.disabled", (Enable[0]=='0')?"1":"0");
@@ -477,6 +480,10 @@ int process_udp(char *datagram){
 					ucicommit();
 				
 					if(verbose) printf("WiFi Config commited\n");
+
+                    sprintf(msg, "JNTCIT/200");
+                    if(verbose>=2) printf("Sent: %s\n", msg);
+                    unicast(msg);
 				}
             }
             break;
@@ -489,22 +496,25 @@ int process_udp(char *datagram){
         case ConfigReq:{
 				//We send our network parameters, check ConfigRes
 				char MACAddress[STR_MAX], Uptime[STR_MAX], SoftwareVersion[STR_MAX], IPAddress[STR_MAX], IPMask[STR_MAX], Gateway[STR_MAX], DNS1[STR_MAX], DNS2[STR_MAX], DHCP[STR_MAX];
+				int offset;
 
-				if(verbose==2) printf("Rcv: ConfigReq\n");
+				if(verbose>=2) printf("Rcv: ConfigReq\n");
 
 				MACaddress_num2str(wifiMAC(), MACAddress);
             	uptime(Uptime);
             	getsoftwarever(SoftwareVersion);
-				uciget("network.bat.ipaddr", IPAddress);
-            	uciget("network.bat.netmask", IPMask);
+				//uciget("network.bat.ipaddr", IPAddress);
+            	//uciget("network.bat.netmask", IPMask);
+				getIP(IPAddress);
+				getIPMask(IPMask);
             	uciget("network.bat.gateway", Gateway);
-            	uciget("network.bat.dns", DNS1);
-				DNS2[0]='\0'; //Don't support for now
+            	uciget("network.bat.dns", msg);
+				sscanf(msg, "%s %s", DNS1, DNS2);
 				uciget("network.bat.proto", DHCP);
 				
 				sprintf(msg, "JNTCIT/ConfigRes/%s/%s/SIOD/%s/%s/%s/%s/%s/%s/%s/%s/%s", MACAddress, Uptime, HW_VER, SoftwareVersion, SIOD_ID, IPAddress, IPMask, Gateway, DNS1, DNS2, DHCP);
 
-				if(verbose==2) printf("Sent: %s\n", msg);
+				if(verbose>=2) printf("Sent: %s\n", msg);
 
 				broadcast(msg);
 
@@ -537,7 +547,7 @@ int process_udp(char *datagram){
 				//Only update our IPT at the moment		
 				char *AAAA;
 
-				if(verbose==2) printf("Rcv: ConfigRes\n");
+				if(verbose>=2) printf("Rcv: ConfigRes\n");
 
 				AAAA=args[6];
 				if(AAAA[0]!='\0'){
@@ -584,14 +594,19 @@ int process_udp(char *datagram){
                     uciset("network.bat.ipaddr", IPAddress);
                     uciset("network.bat.netmask", IPMask);
                     uciset("network.bat.gateway", Gateway);
-                    uciset("network.bat.dns", DNS1);
-                    //uciset("network.bat.dns", DNS2); ignore for now
+                	ucidelete("network.bat.dns");
+                	uciadd_list("network.bat.dns", DNS1);
+					uciadd_list("network.bat.dns", DNS2);
                     uciset("network.bat.proto", DHCP);
 
 					ucicommit();
 			
 					if(verbose) printf("bat Config commited\n");
 
+
+                    sprintf(msg, "JNTCIT/200");
+                	if(verbose>=2) printf("Sent: %s\n", msg);
+                	unicast(msg);
 				}
 
             }
@@ -613,7 +628,7 @@ int process_udp(char *datagram){
 
 				MACAddress=args[1];				
 
-				if(verbose==2) printf("Rcv: RestartNetworkService\n");
+				if(verbose>=2) printf("Rcv: RestartNetworkService\n");
 				
 				if(*MACAddress == '\0' || wifiMAC() == MACaddress_str2num(MACAddress)) {
 
@@ -621,11 +636,16 @@ int process_udp(char *datagram){
 
 					restartnet();
 
-        			uciget("network.bat.ipaddr", IPAddress); //Update our IPADR
+        			//uciget("network.bat.ipaddr", IPAddress); //Update our IPADR
+					getIP(IPAddress);
         			if(IPAddress[0] != '\0')
             			IPADR = IPaddress_str2num(IPAddress);
 					else
 						IPADR=0;
+
+                    sprintf(msg, "JNTCIT/200");
+                    if(verbose>=2) printf("Sent: %s\n", msg);
+                    unicast(msg);
 				}				
 
             }
@@ -638,7 +658,7 @@ int process_udp(char *datagram){
 		*/
         case RestartAsterisk:{
 
-				if(verbose==2) printf("Rcv: RestartAsterisk\n");
+				if(verbose>=2) printf("Rcv: RestartAsterisk\n");
 
 				restart_asterisk(); 
 
@@ -665,11 +685,19 @@ int process_udp(char *datagram){
         case ConfigAsterisk:{
 				char *SIPRegistrar1, *AuthenticationName1, *Password1, *SIPRegistrar2, *AuthenticationName2, *Password2;
 
-				if(verbose==2) printf("Rcv: ConfigAsterisk\n");
+				if(verbose>=2) printf("Rcv: ConfigAsterisk\n");
 
 				SIPRegistrar1=args[1]; AuthenticationName1=args[2]; Password1=args[3]; SIPRegistrar2=args[4]; AuthenticationName2=args[5]; Password2=args[6];
 
-				asterisk_config_write(SIPRegistrar1, AuthenticationName1, Password1, SIPRegistrar2, AuthenticationName2, Password2);
+				// Read trunk infomation from /etc/config/voip    
+				uciset("voip.@registrar[0].host", SIPRegistrar1);
+				uciset("voip.@registrar[0].username", AuthenticationName1);	
+				uciset("voip.@registrar[0].password", Password1);
+
+				uciset("voip.@registrar[1].host", SIPRegistrar2);
+				uciset("voip.@registrar[1].username", AuthenticationName2);
+				uciset("voip.@registrar[1].password", Password2);
+
 
             }
             break;
@@ -683,7 +711,7 @@ int process_udp(char *datagram){
 				char SIPRegistrar1[STR_MAX], AuthenticationName1[STR_MAX], Password1[STR_MAX], SIPRegistrar2[STR_MAX], AuthenticationName2[STR_MAX], Password2[STR_MAX];	
 				char ast_uptime[STR_MAX];			
 
-				if(verbose==2) printf("Rcv: AsteriskStatReq\n");
+				if(verbose>=2) printf("Rcv: AsteriskStatReq\n");
 
 				asterisk_uptime(ast_uptime);
 
@@ -695,20 +723,20 @@ int process_udp(char *datagram){
 
 				} else {
 				
-					/* Read trunk infomation from the Asterisk configuration files */  
-					ini_gets("trunk1", "host", "", SIPRegistrar1, STR_MAX, "/etc/asterisk/sip.conf");
-					ini_gets("trunk1", "username", "", AuthenticationName1, STR_MAX, "/etc/asterisk/sip.conf");
-					ini_gets("trunk1", "secret", "", Password1, STR_MAX, "/etc/asterisk/sip.conf");
+					// Read trunk infomation from /etc/config/voip    
+					uciget("voip.@registrar[0].host", SIPRegistrar1);
+					uciget("voip.@registrar[0].username", AuthenticationName1);
+					uciget("voip.@registrar[0].password", Password1);
 
-                	ini_gets("trunk2", "host", "", SIPRegistrar2, STR_MAX, "/etc/asterisk/sip.conf");
-                	ini_gets("trunk2", "username", "", AuthenticationName2, STR_MAX, "/etc/asterisk/sip.conf");
-                	ini_gets("trunk2", "secret", "", Password2, STR_MAX, "/etc/asterisk/sip.conf");
+    				uciget("voip.@registrar[1].host", SIPRegistrar2);
+    				uciget("voip.@registrar[1].username", AuthenticationName2);
+    				uciget("voip.@registrar[1].password", Password2);	
 
 					sprintf(msg, "JNTCIT/AsteriskStatRes/Running/%s/%s/%s/%s/%s/%s/%s/", ast_uptime, SIPRegistrar1, AuthenticationName1, Password1, SIPRegistrar2, AuthenticationName2, Password2);
 
 				}
 
-				if(verbose==2) printf("Sent: %s\n", msg);
+				if(verbose>=2) printf("Sent: %s\n", msg);
 
 				unicast(msg);
 
@@ -737,7 +765,7 @@ int process_udp(char *datagram){
 		*/
         case AsteriskStatRes:{
 			
-				if(verbose==2) printf("Rcv: AsteriskStatRes\n");
+				if(verbose>=2) printf("Rcv: AsteriskStatRes\n");
 				
 				/* For the moment we do nothing */
             }
@@ -745,7 +773,7 @@ int process_udp(char *datagram){
         case ConfigNTP:{
 				char *NTPServer0, *NTPServer1, *NTPServer2, *NTPServer3, *enable_disable, *SyncTime;
 
-				if(verbose==2) printf("Rcv: ConfigNTP\n");
+				if(verbose>=2) printf("Rcv: ConfigNTP\n");
 
                 if(n_args != 7) {
                     printf("Wrong format of ConfigNTP message\n");
@@ -788,7 +816,7 @@ int process_udp(char *datagram){
 				int res;
 				char *X, *Y;
 			
-				if(verbose==2) printf("Rcv: Set\n");
+				if(verbose>=2) printf("Rcv: Set\n");
 	
 				X=args[1]; Y=args[2];
 
@@ -798,7 +826,7 @@ int process_udp(char *datagram){
 					if(!res){
 						sprintf(msg, "JNTCIT/Put/%s/%s/%s", SIOD_ID, X, Y);
 
-						if(verbose==2) printf("Sent: %s\n", msg);
+						if(verbose>=2) printf("Sent: %s\n", msg);
 
 						broadcast(msg);
 
@@ -808,7 +836,7 @@ int process_udp(char *datagram){
 					//Send TimeRangeOut to the caller
 					sprintf(msg, "JNTCIT/TimeRangeOut/%s/%s/%s", SIOD_ID, TIMERANGE.Date, TIMERANGE.Time);
 
-					if(verbose==2) printf("Sent: %s\n", msg);
+					if(verbose>=2) printf("Sent: %s\n", msg);
 
 					unicast(msg);
 
@@ -846,8 +874,9 @@ int process_udp(char *datagram){
 		*/
         case PLC:{
 				char *AAAA1, *X1, *Y1, *AAAA2, *X2, *Y2, *and_or, *AAAA3, *X3, *Y3;
+				char rule_list[STR_MAX];
 
-                if(verbose==2) printf("Rcv: PLC\n");
+                if(verbose>=2) printf("Rcv: PLC\n");
 					
 				AAAA1=args[1]; X1=args[2]; Y1=args[3]; AAAA2=args[4], X2=args[5]; Y2=args[6]; and_or=args[7]; AAAA3=args[8]; X3=args[9]; Y3=args[10];	
 
@@ -856,11 +885,24 @@ int process_udp(char *datagram){
 					
 					sprintf(rule, "%s/%s/%s/%s/%s/%s/%s/%s/%s/%s", AAAA1, X1, Y1, AAAA2, X2, Y2, and_or, AAAA3, X3, Y3);
 
+					//Add the PLC in the PLC table
 					PLCadd(rule);
+
+					//Add the PLC in the config if it is not already in
+					uciget("siod.plcrules.rule", rule_list);
+					if(strfind(rule_list, rule)){ 
+    					uciadd_list("siod.plcrules.rule", rule);
+    					ucicommit();
+    					printf("PLC rule have been added in the config file\n");
+					}
 
 				} else{				 //delete a rule
 
+					//Delete from PLC table
 					PLCdel(AAAA1, X1, Y1);
+
+					//Delete from the config
+					PLCdel_config(AAAA1, X1, Y1);
 				}
 
             }
@@ -875,13 +917,13 @@ int process_udp(char *datagram){
 				char PLCstr[MSG_MAX];
 				//Send our PLC table
 
-                if(verbose==2) printf("Rcv: PLCReq\n");
+                if(verbose>=2) printf("Rcv: PLCReq\n");
 
 				PLCprint(PLCstr);
 
 				sprintf(msg, "/JNTCIT/PLCRes/%s", PLCstr);
 
-				if(verbose==2) printf("Sent: %s\n", msg);
+				if(verbose>=2) printf("Sent: %s\n", msg);
 
 				unicast(msg);					
             }
@@ -906,7 +948,7 @@ int process_udp(char *datagram){
 		*/
         case PLCRes:{
 
-                if(verbose==2) printf("Rcv: PLCReq\n");
+                if(verbose>=2) printf("Rcv: PLCReq\n");
 				
 				//Do nothing
             }
@@ -946,14 +988,19 @@ int process_udp(char *datagram){
 
 				char *Date, *Time;
 				char TimeRangeStr[STR_MAX];
+				int ret;
 
-                if(verbose==2) printf("Rcv: TimeRange\n");
+                if(verbose>=2) printf("Rcv: TimeRange\n");
 
 				Date=args[1]; Time[2];
 				
 				sprintf(TimeRangeStr, "%s/%s", Date, Time);
 
-				ParseTimeRange(TimeRangeStr);
+				ret=ParseTimeRange(TimeRangeStr);
+
+				if(!ret){
+					uciset("siod.timerange.range", TimeRangeStr);
+				}
 
             }
             break;
@@ -977,7 +1024,7 @@ int process_udp(char *datagram){
         case TimeRangeOut:{
 				char *AAAA;
 
-                if(verbose==2) printf("Rcv: TimeRangeOut\n");
+                if(verbose>=2) printf("Rcv: TimeRangeOut\n");
 
 				AAAA = args[1];
 
@@ -1000,7 +1047,7 @@ int process_udp(char *datagram){
                 int res;
                 char *X, Y[STR_MAX];
 
-                if(verbose==2) printf("Rcv: Get\n");
+                if(verbose>=2) printf("Rcv: Get\n");
 
                 X=args[1];
 
@@ -1009,7 +1056,7 @@ int process_udp(char *datagram){
                 if(!res){
                     sprintf(msg, "JNTCIT/Put/%s/%s/%s", SIOD_ID, X, Y);
 
-                    if(verbose==2) printf("Sent: %s\n", msg);
+                    if(verbose>=2) printf("Sent: %s\n", msg);
 
 					unicast(msg);
                 }
@@ -1036,13 +1083,13 @@ int process_udp(char *datagram){
 				unsigned char gpios;
 				int res, fifofd;
 
-                if(verbose==2) printf("Rcv: Put\n");
+                if(verbose>=2) printf("Rcv: Put\n");
 
 				AAAA=args[1]; X=args[2]; Y=args[3];
 
 				/* Update the local GST with the information from the message */
 				if(!strcmp(AAAA, SIOD_ID)) {
-					if(verbose==2) printf("Ignoring Put message for our SIOD_ID\n");	
+					if(verbose>=2) printf("Ignoring Put message for our SIOD_ID\n");	
 					break;  				
 				}
 
@@ -1064,7 +1111,7 @@ int process_udp(char *datagram){
 					if(IVRSet_counter) {	//the Put message is due to IVRSetReq message
                     	fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
                     	sprintf(msg, "JNTCIT/IVRGetRes/%s/%s/%s",AAAA,X,Y);
-                    	if(verbose==2) printf("Sent: %s\n", msg);
+                    	if(verbose>=2) printf("Sent: %s\n", msg);
                     	write(fifofd, msg, strlen(msg));
                     	close(fifofd);
 					}
@@ -1084,11 +1131,11 @@ int process_udp(char *datagram){
         */
 		case GSTCheckSumReq:{
 				
-                if(verbose==2) printf("Rcv: GSTCheckSumReq\n");
+                if(verbose>=2) printf("Rcv: GSTCheckSumReq\n");
 
 				/* Send our GST check sum */
 				sprintf(msg, "JNTCIT/GSTCheckSum/%s/%d", SIOD_ID, GSTchecksum(GST));
-				if(verbose==2) printf("Sent: %s\n", msg);
+				if(verbose>=2) printf("Sent: %s\n", msg);
 				broadcast(msg);
             }
            	break; 
@@ -1110,7 +1157,7 @@ int process_udp(char *datagram){
 				char *AAAA, *Sum;
 				unsigned char sum;
 
-                if(verbose==2) printf("Rcv: GSTCheckSum\n");
+                if(verbose>=2) printf("Rcv: GSTCheckSum\n");
 								
 				AAAA=args[1]; Sum=args[2];
 
@@ -1141,12 +1188,12 @@ int process_udp(char *datagram){
 
 				char GSTtextdata[STR_MAX];
 
-                if(verbose==2) printf("Rcv: GSTReq\n");
+                if(verbose>=2) printf("Rcv: GSTReq\n");
 			
 				/* Send our GST */
 				GSTprint(GST, GSTtextdata);
 				sprintf(msg, "JNTCIT/GSTdata/%s", GSTtextdata);
-				if(verbose==2) printf("Sent: %s\n", msg);
+				if(verbose>=2) printf("Sent: %s\n", msg);
 				unicast(msg);
 
             }
@@ -1176,7 +1223,7 @@ int process_udp(char *datagram){
 
 				char *Data;
 
-                if(verbose==2) printf("Rcv: GSTdata\n");
+                if(verbose>=2) printf("Rcv: GSTdata\n");
 
 				Data=args[1];
 
@@ -1202,13 +1249,18 @@ int process_udp(char *datagram){
 
 				char *AAAA, IPAddressWiFi[STR_MAX];
 
-                if(verbose==2) printf("Rcv: Ping\n");
+                if(verbose>=2) printf("Rcv: Ping\n");
+
+				if(n_args != 2 ) {
+					printf("Wrong format of Ping message\n");
+					break;
+				}
 
 				AAAA = args[1];
 
 				if(AAAA[0]=='\0' || !strcmp(AAAA, SIOD_ID)) { //AAAA is empty or our SIOD_ID matches so we we need to respond
 					sprintf(msg, "JNTCIT/PingRes/%s", SIOD_ID);
-					if(verbose==2) printf("Sent: %s\n", msg);
+					if(verbose>=2) printf("Sent: %s\n", msg);
 					unicast(msg);											
 				}
 
@@ -1231,7 +1283,7 @@ int process_udp(char *datagram){
 				//TBD We will reconsider using of the IPAddressWAN here
 				char *AAAA;
 
-                if(verbose==2) printf("Rcv: PingRes\n");
+                if(verbose>=2) printf("Rcv: PingRes\n");
 
 				AAAA = args[1];
 
@@ -1254,19 +1306,19 @@ int process_udp(char *datagram){
 				unsigned char gpios;                                                                                                                                                                    
                 int fifofd,n;      
                                                                                                                                                                              
-                if(verbose==2) printf("Rcv: IVRGetReq\n");                                                                                                                                         
+                if(verbose>=2) printf("Rcv: IVRGetReq\n");                                                                                                                                         
                                                                                                                                                                                                    
                 AAAA = args[1]; X = args[2];                                                                                                                                                       
                 
                 fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);                                                                                                                                                                   
 				if(GSTget(GST, atoi(AAAA), &gpios)){
                     sprintf(msg, "JNTCIT/IVRGetRes///");  //SIOD not available in the GST, assumed not available in the mesh
-                    if(verbose==2) printf("Sent: %s\n", msg);
+                    if(verbose>=2) printf("Sent: %s\n", msg);
                     write(fifofd, msg, strlen(msg));					
 				} else {
 														 //SIOD available
                     sprintf(msg, "JNTCIT/IVRGetRes/%s/%s/%d",AAAA,X,(gpios>>(X[0]-'0'))&1);
-                    if(verbose==2) printf("Sent: %s\n", msg);
+                    if(verbose>=2) printf("Sent: %s\n", msg);
                     n=write(fifofd, msg, strlen(msg));
 				}                                                                                                                                                                                        
                 close(fifofd);                                                                                                                                                                                   
@@ -1284,7 +1336,7 @@ int process_udp(char *datagram){
         */                                                                                                                                                                                         
         case IVRGetRes:{                                                                                                                                                                           
                                                                                                                                                                                                    
-                if(verbose==2) printf("Rcv: IVRGetRes\n");                                                                                                                                         
+                if(verbose>=2) printf("Rcv: IVRGetRes\n");                                                                                                                                         
                                                                                                                                                                                                    
                 //We should never get this                                                                                                                                                         
                                                                                                                                                                                                    
@@ -1306,7 +1358,7 @@ int process_udp(char *datagram){
                 unsigned char gpios;
                 int fifofd,n, res;
 
-                if(verbose==2) printf("Rcv: IVRSetReq\n");
+                if(verbose>=2) printf("Rcv: IVRSetReq\n");
 
                 AAAA = args[1]; X = args[2]; Y = args[3];
 
@@ -1315,12 +1367,12 @@ int process_udp(char *datagram){
                     	res = setgpio(X, Y); //In addition it updates outputs state in GST if successful
                     	if(!res){
                         	sprintf(msg, "JNTCIT/Put/%s/%s/%s", SIOD_ID, X, Y);
-                        	if(verbose==2) printf("Sent: %s\n", msg);
+                        	if(verbose>=2) printf("Sent: %s\n", msg);
                         	broadcast(msg);
 
 							fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
                     		sprintf(msg, "JNTCIT/IVRSetRes/%s/%s/%s", AAAA, X, Y);
-                    		if(verbose==2) printf("Sent: %s\n", msg);
+                    		if(verbose>=2) printf("Sent: %s\n", msg);
                     		write(fifofd, msg, strlen(msg));
                     		close(fifofd);
                     	}
@@ -1328,21 +1380,21 @@ int process_udp(char *datagram){
                     	//Send TimeRangeOut to the caller
 						fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
                     	sprintf(msg, "JNTCIT/IVRSetRes/TimeRangeOut");
-                    	if(verbose==2) printf("Sent: %s\n", msg);
+                    	if(verbose>=2) printf("Sent: %s\n", msg);
                     	write(fifofd, msg, strlen(msg));
                     	close(fifofd);                	}
 
                 } else if(GSTget(GST, atoi(AAAA), &gpios)){     
 					fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
                     sprintf(msg, "JNTCIT/IVRSetRes///");  //SIOD not available in the GST, assumed not available in the mesh
-                    if(verbose==2) printf("Sent: %s\n", msg);
+                    if(verbose>=2) printf("Sent: %s\n", msg);
                     write(fifofd, msg, strlen(msg));
 					close(fifofd);
                 } else {
                 										  //SIOD available
                     //broadcast Put message
                     sprintf(msg, "JNTCIT/Put/%s/%s/%s", AAAA, X, Y);
-                    if(verbose==2) printf("Sent: %s\n", msg);
+                    if(verbose>=2) printf("Sent: %s\n", msg);
                     broadcast(msg);
 					IVRSet_counter=1;						 //Start IVRSet timer
                 }
@@ -1362,7 +1414,7 @@ int process_udp(char *datagram){
 		*/
         case IVRSetRes:{
 
-                if(verbose==2) printf("Rcv: IVRSetRes\n");
+                if(verbose>=2) printf("Rcv: IVRSetRes\n");
 
                 //We should never get this                                                                                                                                                         
 
@@ -1743,6 +1795,7 @@ int getsoftwarever(char *ver){
 
 	len=strlen(ver);
     if(ver[len-1]=='\r' || ver[len-1]=='\n') ver[len-1]='\0';
+	if(ver[len-2]==' ') ver[len-2]='\0';
 
     if(ret==NULL)
         return -1;
@@ -1784,7 +1837,7 @@ int unicast(char *msg){
  */
 int gpios_init(void){
 
-	int fd, n, fb0, fb1, fb2, fb3;
+	int fd, n, /*fb0, fb1, fb2, fb3*/ out0, out1, out2, out3;
 	char value[2], str[STR_MAX];
 
 	GPIOs=0;
@@ -1874,20 +1927,20 @@ int gpios_init(void){
 	/* read the relay feedbacks */
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", FB0);
     fd_fb0 = open(str, O_RDONLY);
-    read(fd_fb0, value, 2); value[2]='\0';
-    fb0=atoi(value);
+    //read(fd_fb0, value, 2); value[2]='\0';
+    //fb0=atoi(value);
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", FB1);
     fd_fb1 = open(str, O_RDONLY);
-    read(fd_fb1, value, 2); value[2]='\0';
-    fb1=atoi(value);
+    //read(fd_fb1, value, 2); value[2]='\0';
+    //fb1=atoi(value);
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", FB2);
     fd_fb2 = open(str, O_RDONLY);
-    read(fd_fb2, value, 2); value[2]='\0';
-    fb2=atoi(value);
+    //read(fd_fb2, value, 2); value[2]='\0';
+    //fb2=atoi(value);
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", FB3);
     fd_fb3 = open(str, O_RDONLY);
-    read(fd_fb3, value, 2); value[2]='\0';
-    fb3=atoi(value);
+    //read(fd_fb3, value, 2); value[2]='\0';
+    //fb3=atoi(value);
 
 
 	/* configure outputs */
@@ -1919,19 +1972,30 @@ int gpios_init(void){
     fd_pulse = open(str, O_WRONLY);    
 
 
+    /* Initialize the file descriptors in an array to ease indexing */
+    IOs[0]=fd_fb0; IOs[1]=fd_fb1; IOs[2]=fd_fb2; IOs[3]=fd_fb3;
+    IOs[4]=fd_in0; IOs[5]=fd_in1; IOs[6]=fd_in2; IOs[7]=fd_in3;
+
+
+
 	/* Set the output information in GPIOS 
      * GPIOS = [IN3 IN2 IN1 IN0 OUT3 OUT2 OUT1 OUT0]
    	 *          MSB                            LSB   
 	 */
-	GPIOs |= !(fb0);
+	/*GPIOs |= !(fb0);
 	GPIOs |= (!(fb1) << 1);
 	GPIOs |= (!(fb2) << 2);
 	GPIOs |= (!(fb3) << 3);
-
-	/* Initialize the file descriptors in an array to ease indexing */
-	IOs[0]=fd_fb0; IOs[1]=fd_fb1; IOs[2]=fd_fb2; IOs[3]=fd_fb3;
-	IOs[4]=fd_in0; IOs[5]=fd_in1; IOs[6]=fd_in2; IOs[7]=fd_in3;
-
+	*/
+	uciget("siod.@output[0].value", str);
+	setgpio("0", str);
+	uciget("siod.@output[1].value", str);
+	setgpio("1", str);
+    uciget("siod.@output[2].value", str);
+	setgpio("2", str);
+    uciget("siod.@output[3].value", str);
+	setgpio("3", str);
+    
 	if(verbose) printf("GPIOs = 0x%x\n", GPIOs);
 
 	return 0;
@@ -1939,7 +2003,7 @@ int gpios_init(void){
 
 
 /*
- * iet local gpio
+ * set local gpio
  *
  *	X:(optional)	index of the output [0, 1, .. 3] Current version of SIOD supports 4 outputs. 
  *					X can be empty string. If empty it is assumed that YYYY specifies the state of all outputs. 
@@ -1952,7 +2016,7 @@ int gpios_init(void){
 int setgpio(char *X, char *Y){
 
 	int x, n, xlen, ylen;
-	char str[STR_MAX];
+	char str[STR_MAX], value[2] ;
 	
 	xlen=strlen(X);
 	ylen=strlen(Y);
@@ -1979,6 +2043,11 @@ int setgpio(char *X, char *Y){
 		//Update GST
 		GST[0].gpios=GPIOs;
 
+		//Update the configs
+		sprintf(str, "siod.@output[%d].value", x);
+		uciset(str, Y);
+		ucicommit();
+
 	} else if (xlen == 0 && ylen == OUTPUTS_NUM){
 		int i;
 		
@@ -1993,8 +2062,15 @@ int setgpio(char *X, char *Y){
 				GPIOs = (Y[OUTPUTS_NUM-1-i]-'0')?(GPIOs|(1<<i)):(GPIOs&~(1<<i));
 
 				if(verbose == 2) printf("Set: OUT%d = %d\n", i, Y[OUTPUTS_NUM-1-i]-'0');
+
+				//Update the configs
+        		sprintf(str, "siod.@output[%d].value", i);
+				sprintf(value, "%c", Y[OUTPUTS_NUM-1-i]);
+        		uciset(str, value);	
 			}
 		}
+
+		ucicommit();
 
         //Update GST
         GST[0].gpios=GPIOs;
@@ -2417,7 +2493,7 @@ int CheckTimeRange(void){
 
 	if(TIMERANGE.start.tm_mday == -1 ){
 
-		if(verbose==2) printf("CheckTimeRange: Date repetition\n");
+		if(verbose>=2) printf("CheckTimeRange: Date repetition\n");
 
 		start_.tm_mday =  now_.tm_mday;
 		start_.tm_year = now_.tm_year;
@@ -2436,7 +2512,7 @@ int CheckTimeRange(void){
     
 	if(TIMERANGE.start.tm_min == -1 ){
 
-		if(verbose==2) printf("CheckTimeRange: Time repetition\n");
+		if(verbose>=2) printf("CheckTimeRange: Time repetition\n");
 
 		start_.tm_sec =  now_.tm_sec;
 		start_.tm_min = now_.tm_min;
@@ -2452,7 +2528,7 @@ int CheckTimeRange(void){
 
 	if (TIMERANGE.start.tm_year == 0){ //Date defined as week day. 
 
-		if(verbose==2) printf("CheckTimeRange: Week repetition\n");
+		if(verbose>=2) printf("CheckTimeRange: Week repetition\n");
 
 		/* into time_t converting to moments around now */
 		start_.tm_mday =  now_.tm_mday;
@@ -2469,13 +2545,13 @@ int CheckTimeRange(void){
 
 		if(TIMERANGE.end.tm_wday >= TIMERANGE.start.tm_wday){
 
-			if(verbose==2) printf("CheckTimeRange: Interval span a single week (sun, mon .. sat)\n");
+			if(verbose>=2) printf("CheckTimeRange: Interval span a single week (sun, mon .. sat)\n");
 
 			end = end+(TIMERANGE.end.tm_wday-now_.tm_wday)*SECSINDAY;
 
 		} else {
 			
-			if(verbose==2) printf("CheckTimeRange: 'end' is from the next week\n");
+			if(verbose>=2) printf("CheckTimeRange: 'end' is from the next week\n");
 
 			end = end+(TIMERANGE.end.tm_wday-now_.tm_wday+DAYSINWEEK)*SECSINDAY;
 		}
@@ -2486,7 +2562,7 @@ int CheckTimeRange(void){
 	} else { //Concret start-stop
 
 
-		if(verbose==2) printf("CheckTimeRange: concrete range\n");
+		if(verbose>=2) printf("CheckTimeRange: concrete range\n");
 
 		if(verbose==3) printf("start=%d, end=%d, now=%d\n", start, end, now);
 
@@ -2611,12 +2687,73 @@ int PLCdel(char *AAAA1, char *X1, char *Y1){
 			}
 				
 			PLCT.n--;           	//Reduce rules count
-
+			
 			return 0;
 		}
 	}
 
 	return -1;	
+}
+
+
+
+/*
+ * The tripel (AAAA1, X1, Y1) defines a rule in PLC table
+ * If that rule found it will be deleted from the config
+ *
+ * Function returns 0
+ */
+int PLCdel_config(char *AAAA1, char *X1, char *Y1){
+	char list[STR_MAX], rule[STR_MAX], del_rule[STR_MAX], *plist;
+	int len, len_list;
+
+	uciget("siod.plcrules.rule", list);
+	ucidelete("siod.plcrules.rule");
+
+	len=sprintf(del_rule,"%s/%s/%s",AAAA1,X1,Y1);
+	len_list=strlen(list);
+	plist=list;
+	do{
+		sscanf(plist, "%s", rule);
+		plist+=(strlen(rule)+1);
+		if(!strncmp(rule, del_rule, len)) continue;
+		uciadd_list("siod.plcrules.rule", rule);
+
+	} while((rule != '\0') && (plist-list < len_list));
+	
+	ucicommit();
+
+	if(verbose>=2)  printf("PLC rule have been deleted from the config file\n");
+
+	return 0;
+
+}
+
+/*
+ * The tripel (AAAA1, X1, Y1) defines a rule in PLC table
+ * If that rule found it will be deleted from PLC table
+ *
+ * Function returns 0
+ */
+int PLCread_config(void){
+    char list[STR_MAX], rule[STR_MAX], *plist;
+    int len_list;
+
+    uciget("siod.plcrules.rule", list);
+
+    len_list=strlen(list);
+    plist=list;
+    do{
+        sscanf(plist, "%s", rule);
+        plist+=(strlen(rule)+1);
+		PLCadd(rule);
+
+    } while((rule != '\0') && (plist-list < len_list));
+
+    if(verbose>=2) printf("PLC rules have been read from the config file\n");
+
+    return 0;
+
 }
 
 /*
@@ -2677,7 +2814,7 @@ void PLCexec(void){
 
 					//broadcast Put message
 					sprintf(msg, "JNTCIT/Put/%s/%s/%s", SIOD_ID, X1, Y1);
-					if(verbose==2) printf("Sent: %s\n", msg);
+					if(verbose>=2) printf("Sent: %s\n", msg);
 					broadcast(msg);				
 	
 				} else {					//remote output need to be set				
@@ -2688,7 +2825,7 @@ void PLCexec(void){
 
 						sprintf(msg, "JNTCIT/Set/%s/%s", X1, Y1);
 
-                    	if(verbose==2) printf("Sent: %s\n", msg);
+                    	if(verbose>=2) printf("Sent: %s\n", msg);
 
 						cliaddr.sin_addr.s_addr=ipaddress;
 						unicast(msg);					
@@ -2736,36 +2873,6 @@ void restart_asterisk(void){
 }
 
 /*
- * Updates asterisk configurations
- */
-void asterisk_config_write(char *SIPRegistrar1, char *AuthenticationName1, char *Password1, char *SIPRegistrar2, char *AuthenticationName2, char *Password2){
-
-	char regstr[STR_MAX];
-
-	/* Remove register lines */
-	ini_puts("general", "register", NULL, "/etc/asterisk/sip.conf");
-	ini_puts("general", "register", NULL, "/etc/asterisk/sip.conf");
-
-	/* Update register lines */
-	sprintf(regstr, "%s:%s@%s", AuthenticationName1, Password1, SIPRegistrar1);
-	ini_adds("general", "register", regstr, "/etc/asterisk/sip.conf");
-
-    sprintf(regstr, "%s:%s@%s", AuthenticationName2, Password2, SIPRegistrar2);
-	ini_adds("general", "register", regstr, "/etc/asterisk/sip.conf");
-	
-	/* Update trunk1 and trunk2 sections */
-	ini_puts("trunk1", "username", AuthenticationName1, "/etc/asterisk/sip.conf");
-	ini_puts("trunk1", "host", SIPRegistrar1, "/etc/asterisk/sip.conf");
-	ini_puts("trunk1", "secret", Password1, "/etc/asterisk/sip.conf");
-
-    ini_puts("trunk2", "username", AuthenticationName2, "/etc/asterisk/sip.conf");
-    ini_puts("trunk2", "host", SIPRegistrar2, "/etc/asterisk/sip.conf");
-    ini_puts("trunk2", "secret", Password2, "/etc/asterisk/sip.conf");
-
-
-}
-
-/*
  * Read asterisk uptime. 
  * If Asterisk is not started asterisk_uptime is made null string
  * asterisk_uptime needs to be allocated by the caller
@@ -2798,4 +2905,40 @@ void IVRSetTimer(void){
 	if (IVRSet_counter++> IVRSETTIMEOUT){
 		IVRSet_counter=0;
 	} 
+}
+
+/*
+ * Get the IP address of the br-bat interface
+ * IP should have at least STR_MAX bytes alocated.
+ */
+void getIP(char *IP){
+    FILE *fp;
+    char *ret;
+	int len;
+
+    fp=popen("ifconfig br-bat | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'","r");
+    ret=fgets(IP, STR_MAX, fp);
+    pclose(fp);
+
+    len=strlen(IP);
+    if(IP[len-1]=='\r' || IP[len-1]=='\n') IP[len-1]='\0';
+
+}
+
+/*
+ * Get the IP netmask of the br-bat interface
+ * mask should have at least STR_MAX bytes alocated.
+ */
+void getIPMask(char *mask){
+    FILE *fp;
+    char *ret;
+	int len;
+
+    fp=popen("ifconfig br-bat | grep 'inet addr:' | cut -d: -f4","r");
+    ret=fgets(mask, STR_MAX, fp);
+    pclose(fp);
+
+    len=strlen(mask);
+    if(mask[len-1]=='\r' || mask[len-1]=='\n') mask[len-1]='\0';
+
 }

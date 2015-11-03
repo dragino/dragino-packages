@@ -875,6 +875,7 @@ int process_udp(char *datagram){
         case PLC:{
 				char *AAAA1, *X1, *Y1, *AAAA2, *X2, *Y2, *and_or, *AAAA3, *X3, *Y3;
 				char rule_list[STR_MAX];
+				int res;				
 
                 if(verbose>=2) printf("Rcv: PLC\n");
 					
@@ -886,23 +887,27 @@ int process_udp(char *datagram){
 					sprintf(rule, "%s/%s/%s/%s/%s/%s/%s/%s/%s/%s", AAAA1, X1, Y1, AAAA2, X2, Y2, and_or, AAAA3, X3, Y3);
 
 					//Add the PLC in the PLC table
-					PLCadd(rule);
+					res=PLCadd(rule);
 
 					//Add the PLC in the config if it is not already in
-					uciget("siod.plcrules.rule", rule_list);
-					if(strfind(rule_list, rule)){ 
-    					uciadd_list("siod.plcrules.rule", rule);
-    					ucicommit();
-    					printf("PLC rule have been added in the config file\n");
+					if(!res){
+						uciget("siod.plcrules.rule", rule_list);
+						if(strfind(rule_list, rule)){ 
+    						uciadd_list("siod.plcrules.rule", rule);
+    						ucicommit();
+    						printf("PLC rule have been added in the config file\n");
+						}
+					} else{
+						printf("PLC rule have not been added in the config file\n");
 					}
 
 				} else{				 //delete a rule
 
 					//Delete from PLC table
-					PLCdel(AAAA1, X1, Y1);
+					res=PLCdel(AAAA1, X1, Y1);
 
 					//Delete from the config
-					PLCdel_config(AAAA1, X1, Y1);
+					if(!res) PLCdel_config(AAAA1, X1, Y1);
 				}
 
             }
@@ -992,7 +997,7 @@ int process_udp(char *datagram){
 
                 if(verbose>=2) printf("Rcv: TimeRange\n");
 
-				Date=args[1]; Time[2];
+				Date=args[1]; Time=args[2];
 				
 				sprintf(TimeRangeStr, "%s/%s", Date, Time);
 
@@ -1000,8 +1005,10 @@ int process_udp(char *datagram){
 
 				if(!ret){
 					uciset("siod.timerange.range", TimeRangeStr);
+					ucicommit();
+				} else {
+					 printf("Wrong TimeRange format\n");
 				}
-
             }
             break;
 		/*
@@ -2418,7 +2425,7 @@ int ParseTimeRange(char *TimeRangeStr){
 	strcpy(TIMERANGE.Date, date);
 	strcpy(TIMERANGE.Time, time);
 
-	
+
 	if(date[0]=='\0') {strcpy(date, "0-0"); repetitive_date=1;}//So strptime parsing works
 	if(time[0]=='\0') {strcpy(time, "00:00:00-00:00:00"); repetitive_time=1;} //So strptime parsing works
 
@@ -2446,7 +2453,6 @@ int ParseTimeRange(char *TimeRangeStr){
 			return -1;
 	}
 		
-
     if (strptime(end, "%d%b%Y %H:%M:%S", &TIMERANGE.end) == 0){
         if (strptime(end, "%w %H:%M:%S", &TIMERANGE.end) == 0)
             return -1;

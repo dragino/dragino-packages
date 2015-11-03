@@ -6,12 +6,13 @@ UARTMODE=`uci get sensor.poweruart.uartmode`
 
 load_config()
 {
-	 uci set system.@system[0].key=$(hexdump -v -e '1/1 "%.2x"' -s $((0x100)) -n 16 /dev/mtd6)
-        uci set system.@system[0].device=$(hexdump -v -e '1/1 "%.2x"' -s $((0x120)) -n 16 /dev/mtd6)
-        uci set system.@system[0].hostname=dragino2-$(hexdump -v -e '1/1 "%.2x"' -s $((0x120)) -n 3 /dev/mtd6)
-	 echo $(uci get system.@system[0].hostname) > /proc/sys/kernel/hostname
-	 uci set system.@system[0].firstboot='0'
-	 uci commit
+	uci set system.@system[0].key=$(hexdump -v -e '1/1 "%.2x"' -s $((0x100)) -n 16 /dev/mtd6)
+    uci set system.@system[0].device=$(hexdump -v -e '1/1 "%.2x"' -s $((0x120)) -n 16 /dev/mtd6)
+	hostname_prefix=$(uci get system.vendor.hostname)
+    uci set system.@system[0].hostname=$hostname_prefix-$(hexdump -v -e '1/1 "%.2x"' -s $((0x120)) -n 3 /dev/mtd6)
+	echo $(uci get system.@system[0].hostname) > /proc/sys/kernel/hostname
+	uci set system.@system[0].firstboot='0'
+	uci commit
 }
 
 
@@ -26,7 +27,7 @@ start()
 
 	FIRSTBOOT=$(uci get system.@system[0].firstboot)
 
-	if [ $FIRSTBOOT -eq '1' ]
+	if [ $FIRSTBOOT -eq '0' ]
 	then
 		load_config
 	fi

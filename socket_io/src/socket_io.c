@@ -318,7 +318,7 @@ int main(int argc, char **argv){
 		} else {
 			/* Expected to happens each 100ms or so */
 			
-			//Check PLC rule
+			//Check PLC rule if local input change a Put message is broadcasted
 			PLCexec();
 
 			//Timer for the IVRSet message
@@ -2114,15 +2114,23 @@ int getgpio(char *X, char *Y){
             return -1;
 		}
 
-        snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/value", IOs[x]);
 		lseek(IOs[x], 0, SEEK_SET);
         read(IOs[x], Y, 2); Y[2]='\0';
 		Y[0]=(Y[0]=='0')?'1':'0'; Y[1]='\0';	//Invererse logic for the inputs and feedbacks
 
 		if(verbose==3) printf("getgpio: IO%d = %s\n", x, Y);
-		
+	
+		//Broadcast Put if local input changes
+		if(x>3 && (((GPIOs>>x)&1) != (Y[0]-'0'))){
+        	sprintf(str, "JNTCIT/Put/%s/%d/%s", SIOD_ID, x, (Y[0]-'0')?"1":"0");
+        	if(verbose>=2) printf("Sent: %s\n", str);
+        	broadcast(str);
+		}
+
 		//Update GST
-		GPIOs = (Y[0]-'0')?(GPIOs&~(1<<x)):(GPIOs|(1<<x));
+		//GPIOs = (Y[0]-'0')?(GPIOs&~(1<<x)):(GPIOs|(1<<x));
+		GPIOs = (Y[0]-'0')?(GPIOs|(1<<x)):(GPIOs&~(1<<x));
+
 		GST[0].gpios=GPIOs;
 
     } else if (xlen == 0){
@@ -2134,7 +2142,15 @@ int getgpio(char *X, char *Y){
 
 			if(verbose==3) printf("getgpio: IO%d = %s\n", i, (str[0]=='0')?"1":"0");
 
-			GPIOs = (str[0]-'0')?(GPIOs&~(1<<i)):(GPIOs|(1<<i));
+        	//Broadcast Put if local input changes
+        	if(i>3 && (((GPIOs>>i)&1) == (str[0]-'0'))){
+				char msg[STR_MAX];
+            	sprintf(msg, "JNTCIT/Put/%s/%d/%s", SIOD_ID, i, (str[0]-'0')?"0":"1");
+            	if(verbose>=2) printf("Sent: %s\n", msg);
+            	broadcast(msg);
+        	}
+
+			GPIOs = ((str[0]-'0')?(GPIOs&~(1<<i)):(GPIOs|(1<<i)));
         }
 		Y[i]='\0';
 

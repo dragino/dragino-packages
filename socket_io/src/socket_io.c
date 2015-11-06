@@ -102,7 +102,7 @@ int setgpio(char *X, char *Y);
 int getgpio(char *X, char *Y);
 void intHandler(int dummy);
 unsigned char GSTchecksum(struct GST_nod *gst);
-void GSTadd(struct GST_nod *gst, unsigned short siod_id, unsigned char gpios);
+int GSTadd(struct GST_nod *gst, unsigned short siod_id, unsigned char gpios);
 void GSTdel(struct GST_nod *gst, unsigned short siod_id);
 int GSTget(struct GST_nod *gst, unsigned short siod_id, unsigned char *gpios);
 int GSTset(struct GST_nod *gst, unsigned short siod_id, unsigned char gpios);
@@ -1113,7 +1113,15 @@ int process_udp(char *datagram){
 					GSTset(GST, atoi(AAAA), (Y[0]=='1')?(gpios|(1<<atoi(X))):(gpios&~(1<<atoi(X))));
 
 				} else {
-					GSTadd(GST, atoi(AAAA), binarystr2byte(Y));
+					res=GSTadd(GST, atoi(AAAA), binarystr2byte(Y));
+					if(res==0){ //GST has been expanded with new SIOD, so initial SIOD startup is detected
+								//We send our local gpios so the newerly started SIOD update its GST
+        				char msg[STR_MAX], Y[9];
+        				byte2binarystr(GPIOs, Y);
+        				sprintf(msg, "JNTCIT/Put/%s//%s", SIOD_ID, Y);
+        				if(verbose>=2) printf("Sent: %s\n", msg);
+        				broadcast(msg);
+					}
 
 					if(IVRSet_counter) {	//the Put message is due to IVRSetReq message
                     	fifofd=open("/tmp/ivrfifo", O_WRONLY|O_NONBLOCK);
@@ -2190,28 +2198,31 @@ unsigned char GSTchecksum(struct GST_nod *gst){
 /*
  * Add siod_id, gpios data pair in the GST
  * If siod_id already available only the gpios value is updated
+ * If gpios are added 0 is returned, if it is updated 1 is returned, on issue -1 is returned
  * 
  */
-void GSTadd(struct GST_nod *gst, unsigned short siod_id, unsigned char gpios){
+int GSTadd(struct GST_nod *gst, unsigned short siod_id, unsigned char gpios){
 
 	int i;
 	i=0;
     while((gst+i)->siod_id) {
 		if ((gst+i)->siod_id == siod_id) { //The siod_id found
 			(gst+i)->gpios = gpios;
-			return;
+			return 1;
 		}
 
 		i++;
 
 		if(i>=SIODS_MAX) {
 			printf("Can not add, too much GST items already!\n");
-			return;
+			return -1;
 		}
 	}
 
 	(gst+i)->siod_id = siod_id;
 	(gst+i)->gpios = gpios;
+
+	return 0;
 }
 
 

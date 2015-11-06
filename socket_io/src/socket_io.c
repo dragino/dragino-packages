@@ -1120,7 +1120,7 @@ int process_udp(char *datagram){
         				byte2binarystr(GPIOs, Y);
         				sprintf(msg, "JNTCIT/Put/%s//%s", SIOD_ID, Y);
         				if(verbose>=2) printf("Sent: %s\n", msg);
-        				broadcast(msg);
+        				unicast(msg);
 					}
 
 					if(IVRSet_counter) {	//the Put message is due to IVRSetReq message

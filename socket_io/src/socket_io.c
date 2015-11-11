@@ -36,9 +36,9 @@
 #define RULES_MAX	10		/* We may have not more than that many rules in the PLC table */
 
 #define REL0	16			/* GPIOs controlling the outputs */
-#define REL1    28			/* The relay address is [REL0 REL1]  so REL1 is LSB */
+#define REL1    1			/* The relay address is [REL0 REL1]  so REL1 is LSB */
 #define S_R		15
-#define PULSE   1
+#define PULSE   28
 
 #define FB0		18			/* GPIO Feedbacks from the relay outputs*/
 #define FB1     21
@@ -1973,7 +1973,7 @@ int gpios_init(void){
     close(fd);
     snprintf(str, STR_MAX, "/sys/class/gpio/gpio%d/direction", PULSE);
     fd = open(str, O_WRONLY);
-    write(fd, "high", 4);
+    write(fd, "low", 3);
     close(fd);
 
 	/* Relays descriptors */
@@ -2049,7 +2049,7 @@ int setgpio(char *X, char *Y){
     
     	write(fd_rel0, (x>1)?"1":"0", 1); write(fd_rel1, (x%2)?"1":"0", 1);
     	write(fd_s_r, Y, 1);
-    	write(fd_pulse, "0", 1); usleep(100000L); write(fd_pulse, "1", 1);
+    	write(fd_pulse, "1", 1); usleep(100000L); write(fd_pulse, "0", 1);
 		      
 		GPIOs = (Y[0]-'0')?(GPIOs|(1<<x)):(GPIOs&~(1<<x));
 
@@ -2072,7 +2072,7 @@ int setgpio(char *X, char *Y){
 					
         		write(fd_rel0, (i>1)?"1":"0", 1); write(fd_rel1, (i%2)?"1":"0", 1);
         		write(fd_s_r, (Y[OUTPUTS_NUM-1-i]-'0')?"1":"0", 1);
-        		write(fd_pulse, "0", 1); usleep(100000L); write(fd_pulse, "1", 1);
+        		write(fd_pulse, "1", 1); usleep(100000L); write(fd_pulse, "0", 1);
 
 				GPIOs = (Y[OUTPUTS_NUM-1-i]-'0')?(GPIOs|(1<<i)):(GPIOs&~(1<<i));
 

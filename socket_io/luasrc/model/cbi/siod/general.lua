@@ -23,7 +23,7 @@ local plcrule_help='<abbr title=\"AAAA1: ID of the SIOD to be updated when PLC r
 s = m:section(NamedSection, "plcrules", "siod", translate(plcrule_help))
 s.anonymous = true
 s.addremove = false
-local plcrule = s:option(DynamicList, "rule", translate("PLC Rules"),translate("Format: AAAA1/X1/Y1/AAAA2/X2/Y2[/and_or/AAAA3/X3/Y3]"))
+local plcrule = s:option(DynamicList, "rule", translate("PLC Rules"),translate("Format: AAAA1/X1/Y1/AAAA2/X2/Y2/and_or/AAAA3/X3/Y3"))
 plcrule.datatype="siod_plc_rule"
 
 local plcrule_timerange='<abbr title=\"Date:(optional) Exact date 20Jul2015 or day in the week index (Monday 1, Sunday 0). Date ranges like 20Jul2015-25Jul2015 or 3-5 is also supported. Optional argument. If omitted any date assumed.\nTime:(optional) Time range specification in a format. hh1:mm1:ss1- hh2:mm2:ss2. If the second time point is smaller then the first one (and the Date does not specify a range) it is assumed that the second time is a sample from the next day. Optional argument, if omitted any time withing specified Date assumed\nexample1: Daylight:    /7:00:00-23:59:59\nexample2: Night:    /0:0:0-6:59:59 \nexample3: Friday and Saturday:   5-6/\nexample4: Sunday:   0/0:0:0-23:59:59\nexample5: Arbitrary single range:   20July2015/14:00:00-14:59:59\">PLC Rule Working Time Range</abbr>'

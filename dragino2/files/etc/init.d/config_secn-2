@@ -1,0 +1,56 @@
+#!/bin/sh /etc/rc.common
+START=99
+
+# This is the second part of config_secn which is run at the end of the start up sequence
+
+start()
+{	
+	#------------------------------
+	# Start or stop dnsmasq now and enable on boot up as required
+	DHCP_ENABLE=`uci get secn.dhcp.enable`
+	if [ $DHCP_ENABLE = "checked" ]; then
+		# Enable start on boot
+		/etc/init.d/dnsmasq enable
+
+		# Stop dnsmasq now in case settings have changed
+		/etc/init.d/dnsmasq stop
+		# Start dnsmasq now
+		/etc/init.d/dnsmasq start
+	else
+		# Disable start on boot
+		rm -f /etc/rc.d/S60dnsmasq
+		# Stop dnsmasq now
+		/etc/init.d/dnsmasq stop
+	fi
+
+	#------------------------------
+	#Start Net Connection Check 
+	PINGHOST=`uci get secn.wan.pinghost`
+	PID_LIST=`ps | grep "check_net_status" | grep -v grep | awk '{print $1}'`
+	for CHECK_NET_PID in `echo $PID_LIST`; do
+		kill $CHECK_NET_PID
+	done
+	
+	if [ ! -z "$PINGHOST" ]; then
+		check_net_status "$PINGHOST" 2>/dev/null &
+	fi
+
+	
+	#------------------------------	
+	#Add Fallback IP
+	FALLBACK=$(uci get secn.dhcp.FallbackIP)
+	if [ "$FALLBACK" == "enable" ]
+	then
+		echo "Adding FallBack IP"
+		echo "Checking bridge mode or not"
+		if [ `ifconfig | grep -m 1 br-lan | cut -d \  -f 1` ] 
+		then
+			echo "Device is in bridging mode."
+			ifconfig br-lan:9 172.31.255.254 netmask 255.255.255.252
+		else 
+			echo "Device is not in bridging mode."
+			ifconfig eth0:9 172.31.255.254 netmask 255.255.255.252
+		fi
+	fi
+}
+

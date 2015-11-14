@@ -37,10 +37,17 @@ endef
 
 define Package/dragino2/install
 	$(INSTALL_DIR) $(1)/etc
-
+	
+	$(INSTALL_DIR) $(1)/etc/triggerhappy
+	$(CP) $(PKG_BUILD_DIR)/etc/triggerhappy/* $(1)/etc/triggerhappy/
+	
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(CP) $(PKG_BUILD_DIR)/etc/uci-defaults/* $(1)/etc/uci-defaults/	
+	
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/etc/init.d/dragino.init $(1)/etc/init.d/dragino
-
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/etc/init.d/config_secn-2 $(1)/etc/init.d/config_secn-2
+	
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/lib/lua/dragino/iot
 	$(CP) $(PKG_BUILD_DIR)/usr/* $(1)/usr/

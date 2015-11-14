@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "timer" > /sys/class/leds/dragino2:red:system/trigger
+echo $1 > /sys/class/leds/dragino2:red:system/delay_on
+echo $1 > /sys/class/leds/dragino2:red:system/delay_off
+

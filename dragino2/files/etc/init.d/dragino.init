@@ -1,5 +1,5 @@
 #!/bin/sh /etc/rc.common
-# Copyright (c) 2012 Edwin Chen <edwin@dragino.com>
+# Copyright (c) 2015 Edwin Chen <edwin@dragino.com>
 
 START=98
 UARTMODE=`uci get sensor.poweruart.uartmode`
@@ -7,7 +7,7 @@ UARTMODE=`uci get sensor.poweruart.uartmode`
 start()
 {
 	# FXS module version
-	if [ ! -f /lib/modules/3.3.8/dragino2_si3217x.ko ]; then
+	if [ ! -f /lib/modules/*/dragino2_si3217x.ko ]; then
 		echo 24 > /sys/class/gpio/export
 		echo "high" > /sys/class/gpio/gpio24/direction
 	fi

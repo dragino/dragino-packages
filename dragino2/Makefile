@@ -47,6 +47,7 @@ define Package/dragino2/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/etc/init.d/dragino.init $(1)/etc/init.d/dragino
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/etc/init.d/config_secn-2 $(1)/etc/init.d/config_secn-2
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/etc/init.d/set-mesh-gw-mode.sh $(1)/etc/init.d/set-mesh-gw-mode.sh
 	
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/lib/lua/dragino/iot

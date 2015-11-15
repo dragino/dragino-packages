@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 # /etc/init.d/config_secn  
 
 # This script creates various config files based on parameters in 
@@ -14,27 +14,12 @@ LOCALNETMASK=`uci get network.lan.netmask`
 # Get the params from uci config file /etc/config/secn and wireless
 SSID=`uci get secn.accesspoint.ssid`
 PASSPHRASE=`uci get secn.accesspoint.passphrase`
-ENCRYPTION=`uci get secn.accesspoint.encryption`
+ENCRYPT=`uci get secn.accesspoint.encryption`
 AP_DISABLE=`uci get secn.accesspoint.ap_disable`
 MAXASSOC=`uci get secn.accesspoint.maxassoc`
-USREG_DOMAIN=`uci get secn.accesspoint.usreg_domain`
 CHANNEL=`uci get secn.accesspoint.channel`
 MESH_ENABLE=`uci get secn.mesh.mesh_enable`
 
-# Set to WPA1 by default                                 
-ENCRYPT="psk"
-
-if [ $ENCRYPTION = "WPA2" ]; then                                   
-ENCRYPT="psk2"
-fi
-
-if [ $ENCRYPTION = "WEP" ]; then                          
-ENCRYPT="wep"                                                     
-fi
-
-if [ $ENCRYPTION = "NONE" ]; then                          
-ENCRYPT="none"                                                      
-fi
 
 uci set wireless.radio0.channel=$CHANNEL
 uci set wireless.ap_0.encryption=$ENCRYPT
@@ -69,6 +54,7 @@ OPTION_DNS=`uci get secn.dhcp.dns`
 OPTION_DNS2=`uci get secn.dhcp.dns2`
 OPTION_SUBNET=`uci get secn.dhcp.subnet`
 OPTION_ROUTER=`uci get secn.dhcp.router`
+LANGATEWAY=`uci get secn.dhcp.gateway`
 
 uci set dhcp.setup.dhcpleasemax=$MAXLEASES
 uci set dhcp.setup.domain=$DOMAIN
@@ -88,10 +74,12 @@ VENDOR=`uci get secn.modem.vendor`
 PRODUCT=`uci get secn.modem.product`
 # Create the new usb-serial file
 rm /etc/modules.d/60-usb-serial
+if [ ! -z $VENDOR ] && [ ! -z $PRODUCT ]; then
 cat >> /etc/modules.d/60-usb-serial << EOF
 usbserial vendor=0x$VENDOR product=0x$PRODUCT
 EOF
-
+fi
+	
 # Get modem params
 SERVICE=`uci get secn.modem.service`
 APN=`uci get secn.modem.apn`
@@ -116,12 +104,13 @@ WANENCR=`uci get secn.wan.wanencr`
 PPPUSERNAME=`uci get secn.wan.username`
 PPPPASSWORD=`uci get secn.wan.password`
 
-
+#####Set up defaults settings
+uci set wireless.sta_0.disabled='1'
 uci set network.wan.type=''
+uci set network.lan.ifname='eth0'
+uci set network.lan.gateway=$LANGATEWAY
 # Set up for WAN disabled
 if [ $WANPORT = "Disable" ]; then
-	uci set network.lan.ifname='eth0'
-
 	uci set network.wan.ifname=''
 	uci set network.wan.proto=''
 	uci set network.wan.ipaddr=''
@@ -137,40 +126,27 @@ if [ $WANPORT = "Disable" ]; then
 	uci set network.wan.device=''
 
 	uci set wireless.ah_0.disabled='0'
-	uci set wireless.sta_0.disabled='1'
 fi
 
 #############################################################
 #### Use WAN port for Internet Access
 if [ $WANPORT = "Ethernet" ]; then
  	# Set up for Eth WAN port
-	uci set network.lan.ifname='eth0'   # This is just a dummy
-	uci set network.lan.gateway='255.255.255.255'
 	uci set network.wan.ifname='eth1' # Single Eth port devices
-	uci set wireless.sta_0.disabled='1'
 fi
 
 #### Use MESH Interface for Internet Access
 if [ $WANPORT = "Mesh" ]; then
  	# Set up eth1 as LAN or WAN
-	uci set network.lan.ifname='eth0'
 	uci set network.wan.ifname='bat0 eth1' 
 	uci set network.wan.type='bridge' # Reqd. See /etc/init.d/set-mesh-gw-mode
 	MESH_ENABLE='1'
 	uci set secn.mesh.mesh_enable='1'
-	uci set network.lan.gateway='255.255.255.255'
-
-	# Disable WiFi Client mode 
-	uci set wireless.sta_0.disabled='1'
 fi
 
 #### Use WiFi Client mode for Internet Access
 if [ $WANPORT = "WiFi" ]; then
-	uci set network.lan.ifname='eth0'
-	uci set network.lan.gateway='255.255.255.255'
-
-
-    	# Set up for wlan0 WAN port
+    # Set up for wlan0 WAN port
 	uci set wireless.sta_0.disabled='0'
 	uci set wireless.sta_0.ssid=$WANSSID
 	uci set wireless.sta_0.key=$WANPASS
@@ -184,6 +160,7 @@ if [ $WANPORT = "WiFi" ]; then
 	uci set secn.mesh.mesh_enable='0'
 	MESH_ENABLE='0'
 fi
+
 
 # Disable mesh if required
 if [ $MESH_ENABLE = "1" ]; then
@@ -223,10 +200,14 @@ else
 	uci set network.wan.dns=''
 fi
 
+# Make sure firewall is enabled
+/etc/init.d/firewall enable  
+#--------------------------------
+
+### 3G WAN should placed after ETHWANMODE settings
 # Set up for 3G Modem
 if [ $WANPORT = "USB-Modem" ]; then
 	uci set network.lan.ifname='eth0 eth1'
-	uci set network.lan.gateway='255.255.255.255'
 	uci set network.wan.ifname='ppp0'
 	uci set network.wan.proto='3g'
 	uci set network.wan.service=$SERVICE
@@ -236,10 +217,6 @@ if [ $WANPORT = "USB-Modem" ]; then
 	uci set network.wan.pin=$PIN
 	uci set network.wan.device=$TTY
 fi
-
-# Make sure firewall is enabled
-/etc/init.d/firewall enable  
-#--------------------------------
 
 # Set up modem chat scripts
 # Fix # characters in dialstr
@@ -300,48 +277,6 @@ CONNECT ''
 
 EOF
 
-#----------------------------------------------
-
-# Set up web server security configuration
-
-# Get checkbox values
-#AUTH=`uci get secn.http.auth`
-#LIMITIP=`uci get secn.http.limitip`
-#ENSSL=`uci get secn.http.enssl`
-
-# Set up basic auth
-#if [ $AUTH = "checked" ]; then                          
-#  uci set uhttpd.main.config="/etc/http.conf"
-#else
-#  uci set uhttpd.main.config="/etc/http.conf.off"
-#fi
-
-
-# Set up Restricted IP and SSL
-
-#if [ $LIMITIP != "checked" ] && [ $ENSSL != "checked" ]; then
-#  uci set uhttpd.main.listen_http="0.0.0.0:80"
-#  uci set uhttpd.main.listen_https=""
-#fi
-
-#if [ $LIMITIP = "checked" ] && [ $ENSSL != "checked" ]; then
-#  uci set uhttpd.main.listen_http="172.31.255.254:80"
-#  uci set uhttpd.main.listen_https=""
-#fi
-
-#if [ $LIMITIP != "checked" ] && [ $ENSSL = "checked" ]; then
-#      uci set uhttpd.main.listen_http=""                                                  
-#      uci set uhttpd.main.listen_https="0.0.0.0:443"
-#fi
-
-#if [ $LIMITIP = "checked" ] && [ $ENSSL = "checked" ]; then
-#    uci set uhttpd.main.listen_http=""
-#    uci set uhttpd.main.listen_https="172.31.255.254:443"
-#fi
-
-
-# Save the changes 
-#uci commit uhttpd
 uci commit dhcp
 uci commit network
 uci commit wireless

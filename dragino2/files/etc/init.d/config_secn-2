@@ -30,7 +30,7 @@ start()
 	for CHECK_NET_PID in `echo $PID_LIST`; do
 		kill $CHECK_NET_PID
 	done
-	
+	echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:system/brightness
 	if [ ! -z "$PINGHOST" ]; then
 		check_net_status "$PINGHOST" 2>/dev/null &
 	fi

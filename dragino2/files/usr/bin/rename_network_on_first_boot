@@ -10,3 +10,5 @@ DHCP_DOMAIN="$hostname_prefix-net"
 uci set secn.dhcp.domain=$DHCP_DOMAIN
 uci set dhcp.setup.domain=$DHCP_DOMAIN
 uci set network.wan.hostname="$hostname_prefix-$(hexdump -v -e '1/1 "%.2x"' -s $((0x1005)) -n 3 /dev/mtd6)"
+
+uci commit

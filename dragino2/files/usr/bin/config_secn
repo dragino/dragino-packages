@@ -4,11 +4,6 @@
 # This script creates various config files based on parameters in 
 # /etc/config/secn, /etc/config/network and /etc/config/wireless
 
-
-# Get localnet and netmask from br-lan settings
-LOCALNET=`uci get network.lan.ipaddr | awk -F. '{print $1"."$2"."$3"."0}'`
-LOCALNETMASK=`uci get network.lan.netmask`
-
 # Set up WiFi 
 
 # Get the params from uci config file /etc/config/secn and wireless
@@ -19,6 +14,7 @@ AP_DISABLE=`uci get secn.accesspoint.ap_disable`
 MAXASSOC=`uci get secn.accesspoint.maxassoc`
 CHANNEL=`uci get secn.accesspoint.channel`
 MESH_ENABLE=`uci get secn.mesh.mesh_enable`
+MESH_GROUP=`uci get secn.mesh.mesh_group`
 
 
 uci set wireless.radio0.channel=$CHANNEL
@@ -28,6 +24,25 @@ uci set wireless.ap_0.ssid=$SSID
 uci set wireless.ap_0.mode="ap"
 uci set wireless.ap_0.disabled=$AP_DISABLE
 uci set wireless.ap_0.maxassoc=$MAXASSOC
+
+#Convert Mesh Group to BSSID
+#-----------------------------
+mesh_hex=`printf %x $MESH_GROUP`
+cur_pos=${#mesh_hex}
+
+while [ $cur_pos -lt 10 ]
+do
+	cur_pos=`expr $cur_pos + 1`
+	mesh_hex=0$mesh_hex
+done
+
+mesh_bssid=02:${mesh_hex:0:2}:${mesh_hex:2:2}:${mesh_hex:4:2}:${mesh_hex:6:2}:${mesh_hex:8:2}
+uci set wireless.ah_0.bssid=$mesh_bssid
+
+#--------------------------------------------
+# SET Up LAN IP address
+LANIP=`uci get secn.dhcp.router`
+uci set network.lan.ipaddr=$LANIP
 
 #----------------------------------------------
 # Set up DHCP server
@@ -161,6 +176,11 @@ if [ $WANPORT = "WiFi" ]; then
 	MESH_ENABLE='0'
 fi
 
+#### 4G USB Ethernet Modem ####
+if [ $WANPORT = "USB-Eth-Modem" ]; then
+	USB_ETH=`uci get secn.wan.usb_eth_if`
+	uci set network.wan.ifname=$USB_ETH
+fi
 
 # Disable mesh if required
 if [ $MESH_ENABLE = "1" ]; then
@@ -182,15 +202,6 @@ if [ $ETHWANMODE = "Static" ]; then
 
 # Set up for DHCP
 elif [ $ETHWANMODE = "DHCP" ]; then
-	uci set network.wan.proto='dhcp'
-	uci set network.wan.ipaddr=''
-	uci set network.wan.gateway=''
-	uci set network.wan.netmask=''
-	uci set network.wan.dns=''
-	uci set network.wan.username=''
-	uci set network.wan.password=''
-
-else
 	uci set network.wan.proto='pppoe'
 	uci set network.wan.username=$PPPUSERNAME
 	uci set network.wan.password=$PPPPASSWORD
@@ -198,6 +209,14 @@ else
 	uci set network.wan.gateway=''
 	uci set network.wan.netmask=''
 	uci set network.wan.dns=''
+else
+	uci set network.wan.proto='dhcp'
+	uci set network.wan.ipaddr=''
+	uci set network.wan.gateway=''
+	uci set network.wan.netmask=''
+	uci set network.wan.dns=''
+	uci set network.wan.username=''
+	uci set network.wan.password=''
 fi
 
 # Make sure firewall is enabled
@@ -286,4 +305,9 @@ sleep 1
 
 /etc/init.d/network restart
 
+# wait till the network completey start and process next
+sleep 5
+
 /etc/init.d/config_secn-2 start
+
+/etc/init.d/set-mesh-gw-mode.sh start

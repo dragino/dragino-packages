@@ -88,10 +88,12 @@ for rule in $DIAL_RULE_LIST; do
 	echo $SUFFIX
 	TRUNK=`uci get dial-rules.$rule.trunk`	
 	PRO=`uci get dial-rules.$rule.protocol`
+	CID=`uci get dial-rules.$rule.callerid`
 	# add dial rule
 		echo $PRO
 	if [ ${PRO} == "SIP" ]; then
-		echo "exten => $PATTERN,1,Dial(${PRO}/${PREFIX}\${EXTEN${OFFSET}${LENGTH}}${SUFFIX}@${TRUNK},120,r)" >> /etc/asterisk/dragino.extensions.conf
+		echo "exten => $PATTERN,1,Set(CALLERID(name)=$CID)" >> /etc/asterisk/dragino.extensions.conf
+		echo "exten => $PATTERN,2,Dial(${PRO}/${PREFIX}\${EXTEN${OFFSET}${LENGTH}}${SUFFIX}@${TRUNK},120,r)" >> /etc/asterisk/dragino.extensions.conf
 	elif [ $PRO == "IAX2" ]; then
 		SERVER_LIST=`uci show voip | grep '=server' | awk '{gsub(/voip./,"")} {gsub(/=server/,"")} {print $1}'`
 		for server in $SERVER_LIST; do

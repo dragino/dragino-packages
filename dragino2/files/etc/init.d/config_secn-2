@@ -7,15 +7,18 @@ start()
 {	
 	#------------------------------
 	# Start or stop dnsmasq now and enable on boot up as required
+	DNSMASQ_IS_RUNNING=`ps | grep 'dnsmasq' | grep -v grep -c`
 	DHCP_ENABLE=`uci get secn.dhcp.enable`
 	if [ $DHCP_ENABLE = "checked" ]; then
 		# Enable start on boot
 		/etc/init.d/dnsmasq enable
-
-		# Stop dnsmasq now in case settings have changed
-		/etc/init.d/dnsmasq stop
-		# Start dnsmasq now
-		/etc/init.d/dnsmasq start
+		
+		if [ $DNSMASQ_IS_RUNNING -eq 0 ];then
+			# Stop dnsmasq now in case settings have changed
+			/etc/init.d/dnsmasq stop
+			# Start dnsmasq now
+			/etc/init.d/dnsmasq start
+		fi
 	else
 		# Disable start on boot
 		rm -f /etc/rc.d/S60dnsmasq
@@ -43,8 +46,8 @@ start()
 	then
 		echo "Adding FallBack IP"
 		echo "Checking bridge mode or not"
-		if [ `ifconfig | grep -m 1 br-lan | cut -d \  -f 1` ] 
-		then
+		IS_BRIDGE=`uci get network.lan.type`
+		if [ "$IS_BRIDGE" = "bridge" ];then
 			echo "Device is in bridging mode."
 			ifconfig br-lan:9 172.31.255.254 netmask 255.255.255.252
 		else 

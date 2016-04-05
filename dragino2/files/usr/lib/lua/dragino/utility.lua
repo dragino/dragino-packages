@@ -52,7 +52,7 @@ end
 function getVersion()
 	for line in io.lines('/etc/banner') do 
 		if string.match(line,'Version:[%s]+(.+)') then 
-			f_version = string.match(line,'Version: Dragino%-v2[%s]+(.+)')  
+			f_version = string.match(line,'Version:[%s]+[%w%-_]+[%s]+(.+)')  
 		end
 		if string.match(line,'Build[%s]+(.+)') then 
 			b_time = string.match(line,'Build[%s]+(.+)')  

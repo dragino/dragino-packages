@@ -32,6 +32,7 @@ set_sip_server(){
 	SECRET=`uci get voip.$ID.secret` # May be empty
 	FROMUSERNAME=`uci get voip.$ID.fromusername`
 	FROMDOMAIN=`uci get voip.$ID.fromdomain`
+	PHONENUM=`uci get voip.$ID.phonenumber`
 
 	# Get Asterisk SIP settings
 	if [ $REGISTER = "1" ]; then
@@ -48,10 +49,11 @@ set_sip_server(){
 	
 	# Add SIP entry 
 
-
-cat >> $TMP_SIP_REG_FILE << EOF
-$ENFLAG register => ${USERNAME}${DOMAINFLAG}$FROMDOMAIN:$SECRET@$HOST:$PORT
-EOF
+	if [ ! -z $PHONENUM ]; then
+		echo "$ENFLAG register => ${PHONENUM}:${SECRET}:${USERNAME}@$HOST:$PORT" >> $TMP_SIP_REG_FILE	
+	else 	
+		echo "$ENFLAG register => ${USERNAME}${DOMAINFLAG}$FROMDOMAIN:$SECRET@$HOST:$PORT" >> $TMP_SIP_REG_FILE
+	fi
 #-----------------------------------------------------------
 
 cat >> $TMP_SIP_USER_FILE << EOF

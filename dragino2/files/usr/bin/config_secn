@@ -201,7 +201,7 @@ if [ $ETHWANMODE = "Static" ]; then
 	uci set network.wan.password=''
 
 # Set up for DHCP
-elif [ $ETHWANMODE = "DHCP" ]; then
+elif [ $ETHWANMODE = "pppoe" ]; then
 	uci set network.wan.proto='pppoe'
 	uci set network.wan.username=$PPPUSERNAME
 	uci set network.wan.password=$PPPPASSWORD

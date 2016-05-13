@@ -24,11 +24,12 @@ TMP_IAX2_REG_FILE=/var/tmp_iax2_reg
 
 set_sip_server(){
 	ID=$1
-	NAME=`uci get voip.$ID.name`
+	USERNAME=`uci get voip.$ID.username`
+	NAME=$USERNAME
+	uci set voip.$ID.name=$NAME
 	REGISTER=`uci get voip.$ID.register`
 	HOST=`uci get voip.$ID.host`
 	PORT=`uci get voip.$ID.port`
-	USERNAME=`uci get voip.$ID.username`
 	SECRET=`uci get voip.$ID.secret` # May be empty
 	FROMUSERNAME=`uci get voip.$ID.fromusername`
 	FROMDOMAIN=`uci get voip.$ID.fromdomain`
@@ -48,12 +49,8 @@ set_sip_server(){
 	fi
 	
 	# Add SIP entry 
-
-	if [ ! -z $PHONENUM ]; then
-		echo "$ENFLAG register => ${PHONENUM}:${SECRET}:${USERNAME}@$HOST:$PORT" >> $TMP_SIP_REG_FILE	
-	else 	
-		echo "$ENFLAG register => ${USERNAME}${DOMAINFLAG}$FROMDOMAIN:$SECRET@$HOST:$PORT" >> $TMP_SIP_REG_FILE
-	fi
+	echo "$ENFLAG register => ${USERNAME}${DOMAINFLAG}$FROMDOMAIN:$SECRET@$HOST:$PORT" >> $TMP_SIP_REG_FILE
+	
 #-----------------------------------------------------------
 
 cat >> $TMP_SIP_USER_FILE << EOF
@@ -72,18 +69,121 @@ qualify=yes
 canreinvite=nonat
 context=incoming-vsp
 alwaysauthreject=yes
-
+outofcall_message_context = message-handler
 EOF
 #-----------------------------------------------------------
 }
 
+set_globacom_account(){
+	ID=$1
+	USERNAME=`uci get voip.$ID.username`
+	NAME=$USERNAME
+	uci set voip.$ID.name=$NAME
+	REGISTER=`uci get voip.$ID.register`
+	HOST=`uci get voip.$ID.host`
+	SECRET=`uci get voip.$ID.secret` # Maybe empty
+
+
+	# Get Asterisk SIP settings
+	if [ $REGISTER = "1" ]; then
+		ENFLAG=""
+	else
+		ENFLAG=";"
+	fi
+
+	if [ -z $FROMDOMAIN ];then
+		DOMAINFLAG=""
+	else
+		DOMAINFLAG="@"
+	fi
+	
+	# Add SIP entry 
+	echo "$ENFLAG register => ${USERNAME}:$SECRET@$HOST:$PORT" >> $TMP_SIP_REG_FILE
+	
+#-----------------------------------------------------------
+
+cat >> $TMP_SIP_USER_FILE << EOF
+[$NAME]
+host=$HOST
+secret=$SECRET
+defaultuser=$USERNAME
+fromuser=$USERNAME
+fromdomain=$HOST
+insecure=port,invite
+type=friend
+disallow=all
+allow=$CODEC1,$CODEC2,$CODEC3
+dtmfmod=rfc2833
+qualify=yes
+canreinvite=nonat
+context=incoming-vsp
+alwaysauthreject=yes
+outofcall_message_context = message-handler
+EOF
+#-----------------------------------------------------------	
+}
+
+set_suissephone_account(){
+	ID=$1
+	USERNAME=`uci get voip.$ID.username`
+	NAME=$USERNAME
+	uci set voip.$ID.name=$NAME
+	REGISTER=`uci get voip.$ID.register`
+	HOST=`uci get voip.$ID.host`
+	USERNAME=`uci get voip.$ID.username`
+	PORT="5060"
+	SECRET=`uci get voip.$ID.secret` # May be empty
+	PHONENUM=`uci get voip.$ID.phonenumber`
+
+	# Get Asterisk SIP settings
+	if [ $REGISTER = "1" ]; then
+		ENFLAG=""
+	else
+		ENFLAG=";"
+	fi
+
+	if [ -z $FROMDOMAIN ];then
+		DOMAINFLAG=""
+	else
+		DOMAINFLAG="@"
+	fi
+	
+	# Add SIP entry 
+
+	echo "$ENFLAG register => ${PHONENUM}:${SECRET}:${USERNAME}@$HOST:$PORT" >> $TMP_SIP_REG_FILE
+
+#-----------------------------------------------------------
+
+cat >> $TMP_SIP_USER_FILE << EOF
+[$NAME]
+host=$HOST
+secret=$SECRET
+defaultuser=$USERNAME
+fromuser=$PHONENUM
+fromdomain=$HOST
+insecure=port,invite
+type=peer
+disallow=all
+allow=$CODEC1,$CODEC2,$CODEC3
+dtmfmod=rfc2833
+qualify=yes
+canreinvite=nonat
+context=incoming-vsp
+alwaysauthreject=yes
+outofcall_message_context = message-handler
+EOF
+#-----------------------------------------------------------
+}
+
+
 set_iax2_server(){
 	ID=$1
-	NAME=`uci get voip.$ID.name`
+	USERNAME=`uci get voip.$ID.username`
+	NAME=$USERNAME
+	uci set voip.$ID.name=$NAME
 	REGISTER=`uci get voip.$ID.register`
 	HOST=`uci get voip.$ID.host`
 	PORT=`uci get voip.$ID.port`
-	USERNAME=`uci get voip.$ID.username`
 	SECRET=`uci get voip.$ID.secret` # May be empty
 	
 cat >> $TMP_IAX2_REG_FILE << EOF
@@ -104,16 +204,23 @@ touch $TMP_IAX2_REG_FILE
 SERVER_LIST=`uci show voip | grep '=server' | awk '{gsub(/voip./,"")} {gsub(/=server/,"")} {print $1}'`
 for server in $SERVER_LIST; do
 	# check if its type is server and it has a host address
+	protocol=`uci get voip.$server.protocol`
 	if [ `uci get voip.$server` == "server" ] && [ ! -z `uci get voip.$server.host` ] ;then
-		if [ `uci get voip.$server.protocol` == "sip" ]; then
+		if [ $protocol == "sip" ]; then
 			# it is a SIP account, distribute to sip part
 			set_sip_server $server
-		elif [ `uci get voip.$server.protocol` == "iax2" ]; then
+		elif [ $protocol == "suissephone" ]; then
+			set_suissephone_account $server
+		elif [ $protocol == "globacom" ]; then
+			set_globacom_account $server
+		elif [ $protocol == "iax2" ]; then
 			# it is an IAX2 account, distribute to iax part
 			set_iax2_server $server
 		fi
 	fi
-		
+
+	uci commit voip
+	
 	# remove blank user
 	if [ -z `uci get voip.$server.host` ]; then
 		uci delete voip.$server

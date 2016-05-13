@@ -57,6 +57,11 @@ $SOFTPHCLIENT exten => _$EXT_DIAL,1,Dial(SIP/\${EXTEN}@$SOFTPHMASTERIP, 120, r)
 
 ;-------------------------------
 
+[message-handler]
+exten => s,1,Answer()
+exten => s,n,AGI(/etc/asterisk/scripts/sip-message-handler.sh,,,\${MESSAGE(body)})
+exten => s,n,hangup()
+
 EOF
 # ------------------------------------------------------------------
 

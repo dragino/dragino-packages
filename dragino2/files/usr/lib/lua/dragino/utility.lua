@@ -19,7 +19,7 @@ _G[modname] = M
 
 
 
-local type,assert,print,pairs,string,io,os,table = type,assert,print,pairs,string,io,os,table
+local type,assert,print,pairs,string,io,os,table,tonumber = type,assert,print,pairs,string,io,os,table,tonumber
 
 local uci = require("luci.model.uci")
 local util = require("luci.util")
@@ -45,6 +45,57 @@ function tabledump(t,indent)
 		end
 	end
 end
+
+--Get Cellular Info
+--@return cellular info
+function getCellularInfo()
+	reg_status_table={['0']='Not registered',['1']='Registered,Home Network',['2']='Searching',['3']='Registration denied',
+					['4']='Unknown',['5']='Registered,Roaming'}
+	tech_table={['0']='GSM',['2']='UTRAN',['3']='GSM/EGPRS',
+					['4']='UTRAN W/HSDPA',['5']='UTRAN W/HSUPA',['6']='UTRAN W/HSDPA and HSUPA'}
+	band_table={['1']='GSM 900',['2']='GSM 1800',['4']='GSM 850', ['8']='GSM 1900', ['16']='WCDMA 2100',
+					['32']='WCDMA 1900',['64']='WCDMA 850',['128']='WCDMA 900',['256']='WCDMA 800'}
+
+	for line in io.lines('/var/cellular/info') do 
+		if string.match(line,'QCCID: ') then 
+			ICCID = string.match(line,'QCCID: (%d+)')  
+		end
+		if string.match(line,'IMEI=') then 
+			IMEI = string.match(line,'IMEI=(%d+)')  
+		end
+		if string.match(line,'IMSI=') then 
+			IMSI = string.match(line,'IMSI=(%d+)')  
+		end
+	end				
+	for line in io.lines('/var/cellular/status') do 
+		if string.match(line,'COPS:') then 
+			operator,tech = string.match(line,'COPS:%s%d,%d,"(.+)",(%d)') 
+			tech_type=tech_table[tech]			
+		end
+		if string.match(line,'CREG:') then 
+			reg_code = string.match(line,'CREG:%s%d,(%d)') 
+			reg_status=reg_status_table[reg_code]			
+		end
+		if string.match(line,'QGBAND:') then 
+			band_code = string.match(line,'QGBAND:%s(%d+)')
+			band=band_table[band_code]	
+		end	
+		if string.match(line,'CSQ:') then 
+			signal = tonumber(string.match(line,'CSQ:%s(%d+)'))
+			if signal <= 10 then
+				sig_Q = 'poor'
+			elseif signal < 15 then
+				sig_Q = 'normal'
+			elseif signal >=15 and signal ~=99 then
+				sig_Q = 'good'
+			elseif signal == 99 then
+				sig_Q = 'Not known or not detectable'
+			end
+		end	
+	end
+	return ICCID,IMEI,IMSI,operator,tech_type,reg_status,band,sig_Q
+end
+
 
 --Get Firmware Version
 --@return f_version firmware version

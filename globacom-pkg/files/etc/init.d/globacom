@@ -1,0 +1,12 @@
+#!/bin/sh /etc/rc.common
+# Copyright (c) 2015 Edwin Chen <edwin@dragino.com>
+
+START=99
+
+start()
+{
+	comgt -s /usr/bin/uc20_status.comgt -d /dev/ttyUSB2 & 
+	#log status to server via REST calls
+	/usr/bin/glo_routine &
+	#update_status_globacom.sh
+}

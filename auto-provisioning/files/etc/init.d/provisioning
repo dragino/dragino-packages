@@ -1,0 +1,32 @@
+#!/bin/sh /etc/rc.common
+
+#A script to update selected packages. 
+## Copyright (c) 2015 Dragino Tech <support@dragino.com>
+
+START=99
+
+start()
+{
+	# Configure auto update periodically.
+	# Remove previous configure
+	sed '/auto-provisioning/d' /etc/crontabs/root -i
+	sed '/update_packages/d' /etc/crontabs/root -i
+	UGD_ON_TIME=`uci get provisioning.update_time.update_on_time`
+	if [ $UGD_ON_TIME == '1' ];then
+		MIN=`uci get provisioning.update_time.min`
+		HOUR=`uci get provisioning.update_time.hour`
+		DATE_OF_MONTH=`uci get provisioning.update_time.date_of_month`
+		MONTH=`uci get provisioning.update_time.month`
+		DATE_OF_WEEK=`uci get provisioning.update_time.date_of_week`
+		echo "$MIN $HOUR $DATE_OF_MONTH $MONTH $DATE_OF_WEEK /usr/bin/update_packages.sh" >>  /etc/crontabs/root
+		echo "$MIN $HOUR $DATE_OF_MONTH $MONTH $DATE_OF_WEEK /usr/bin/auto-provisioning.sh" >>  /etc/crontabs/root
+	fi 
+	
+
+	# Check if need to check update on boot.
+	UGD_ON_BOOT=`uci get provisioning.update_time.update_on_boot`
+	if [ $UGD_ON_BOOT == '1' ];then
+		/usr/bin/auto-provisioning.sh &
+		/usr/bin/update_packages.sh &
+	fi
+}

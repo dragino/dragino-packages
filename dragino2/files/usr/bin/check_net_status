@@ -6,27 +6,7 @@ host="`uci get secn.wan.pinghost`"
 while [ 1 ]
 do
 	if [ -f "/etc/init.d/globacom" ]; then
-		SIGNAL=
-		SIGNAL=`grep 'SIGNAL=' /var/cellular/status | tail -n 1 | awk -F '[ |,]' '{print $2}'`
-		if [ -n "$SIGNAL" ]; then
-			echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wlan/brightness
-			echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:lan/brightness
-			echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wan/brightness
-			if [ $SIGNAL -le 10 ];then 
-				#BAD signal
-				echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wlan/brightness
-			elif [ $SIGNAL -lt 15 ];then 
-				#Normal signal
-				echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wan/brightness
-			elif [ $SIGNAL -lt 32 ];then 
-			#GOOD signal
-				echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:lan/brightness
-			else
-			#unknow signal
-				echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wlan/brightness
-			fi
-		fi
-		sleep 5
+		exit 0
 	else
 		echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:system/brightness
 		if [ ! -z "`fping -e $host | grep alive`" ]; then

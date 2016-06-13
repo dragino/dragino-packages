@@ -1,0 +1,46 @@
+#!/bin/sh
+#ping to a host address and indicate alive status via LEDs
+
+host="`uci get secn.wan.pinghost`"
+
+while [ 1 ]
+do
+	##Show SIGNAL
+	SIGNAL=
+	SIGNAL=`grep 'SIGNAL=' /var/cellular/status | tail -n 1 | awk -F '[ |,]' '{print $2}'`
+	if [ -n "$SIGNAL" ]; then
+		echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wlan/brightness
+		echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:lan/brightness
+		echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wan/brightness
+		if [ $SIGNAL -le 10 ];then 
+			#BAD signal
+			echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wlan/brightness
+		elif [ $SIGNAL -lt 15 ];then 
+			#Normal signal
+			echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wan/brightness
+		elif [ $SIGNAL -lt 32 ];then 
+			#GOOD signal
+			echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:lan/brightness
+		else
+			#unknow signal
+			echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:wlan/brightness
+		fi
+	fi
+	sleep 5
+	
+	##Check Net Connection
+	if [ -z "`fping -e $host | grep alive`" ]; then
+		logger "no internet connection"
+		if [ "`uci get secn.wan.wanport`" = "USB-Modem" ];then
+			echo USB-Modem
+			#reset USB modem
+		fi 
+	fi
+	##check if comgt is running, if not , run it.
+	HAS_COMGT=`ps | grep "uc20_status.comgt" | grep -v grep`
+	if [ -z "$HAS_COMGT" ];then
+		comgt -s /usr/bin/uc20_status.comgt -d /dev/ttyUSB2 &
+	fi
+	
+	sleep 5
+done

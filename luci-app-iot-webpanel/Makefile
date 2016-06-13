@@ -8,8 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-iot-webpanel
-PKG_VERSION:=Dragino-Yun-2.0
-PKG_RELEASE:=1
+PKG_VERSION:=2.0
 
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)

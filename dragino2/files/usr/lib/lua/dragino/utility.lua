@@ -49,6 +49,9 @@ end
 --Get Cellular Info
 --@return cellular info
 function getCellularInfo()
+	if luci_fs.access("/var/cellular/info") == nil then
+		return
+	end
 	reg_status_table={['0']='Not registered',['1']='Registered,Home Network',['2']='Searching',['3']='Registration denied',
 					['4']='Unknown',['5']='Registered,Roaming'}
 	tech_table={['0']='GSM',['2']='UTRAN',['3']='GSM/EGPRS',

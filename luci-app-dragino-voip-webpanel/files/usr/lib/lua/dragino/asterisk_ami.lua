@@ -21,7 +21,7 @@ local M = {}
 _G[modname] = M
 
 local socket = require('socket')
-local ipairs,string = ipairs,string
+local ipairs,pairs,string,os = ipairs,pairs,string,os
 local uci = require("luci.model.uci")
 local utility = require 'dragino.utility'
 setfenv(1,M)
@@ -125,7 +125,7 @@ function SendAMIMessage(msg_table)
 	return res,code
 end
 
-function get_status_all()
+function get_status_all(log_flag)
 	if SendAMIMessage(AMI_COMMAND["login"]) == nil then 
 		return 1
 	end
@@ -133,6 +133,17 @@ function get_status_all()
 	sta.ssr = SendAMIMessage(AMI_COMMAND["SIPshowregistry"])
 	sta.sp = SendAMIMessage(AMI_COMMAND["SIPpeers"])
 	client:close()
+	
+	if log_flag == 1 then
+	--log the info to Linux file for shell use.
+		for k,v in ipairs(sta.ssr) do 
+			os.execute('mkdir -p /var/voip/server/'.. k)
+			for i,j in pairs(v) do
+				os.execute('echo '..j..' > /var/voip/server/'..k..'/'..i)
+			end
+		end
+		
+	end
 	return sta
 end
 

@@ -119,10 +119,15 @@ WANENCR=`uci get secn.wan.wanencr`
 PPPUSERNAME=`uci get secn.wan.username`
 PPPPASSWORD=`uci get secn.wan.password`
 
+USE_ETH0_AS_WAN=`uci get secn.wan.use_eth0_as_wan`
+
 #####Set up defaults settings
 uci set wireless.sta_0.disabled='1'
 uci set network.wan.type=''
 uci set network.lan.ifname='eth0'
+if [ $USE_ETH0_AS_WAN = "1" ]; then
+	uci set network.lan.ifname='eth1'
+fi
 uci set network.lan.gateway=$LANGATEWAY
 # Set up for WAN disabled
 if [ $WANPORT = "Disable" ]; then
@@ -148,12 +153,18 @@ fi
 if [ $WANPORT = "Ethernet" ]; then
  	# Set up for Eth WAN port
 	uci set network.wan.ifname='eth1' # Single Eth port devices
+	if [ $USE_ETH0_AS_WAN = "1" ]; then
+		uci set network.wan.ifname='eth0'
+	fi
 fi
 
 #### Use MESH Interface for Internet Access
 if [ $WANPORT = "Mesh" ]; then
  	# Set up eth1 as LAN or WAN
 	uci set network.wan.ifname='bat0 eth1' 
+	if [ $USE_ETH0_AS_WAN = "1" ]; then
+		uci set network.wan.ifname='bat0 eth0'
+	fi
 	uci set network.wan.type='bridge' # Reqd. See /etc/init.d/set-mesh-gw-mode
 	MESH_ENABLE='1'
 	uci set secn.mesh.mesh_enable='1'

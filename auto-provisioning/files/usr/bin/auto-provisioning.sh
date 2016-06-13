@@ -41,7 +41,6 @@ if [ ! -z "$check_internet_host" ]; then
 			logger '[Autoprovisioning System]: No net connection to check host'
 		fi
 		CUR_COUNT=`expr $CUR_COUNT + 1`
-		echo $CUR_COUNT $MAX_RETRY_COUNT
 		sleep 10
 	done
 fi

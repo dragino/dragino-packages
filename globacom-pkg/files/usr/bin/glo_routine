@@ -3,6 +3,16 @@
 
 host="`uci get secn.wan.pinghost`"
 
+PKG_PID=`ps | grep "glo_routine" | grep -v grep | awk '{print $1}'`
+SELF_PID=$$
+if [ ! -z "$PKG_PID" ];then
+	for pid in $PKG_PID;do 
+		if [ $pid != $SELF_PID ]; then
+			kill -s 9 $pid
+		fi 
+	done
+fi
+
 while [ 1 ]
 do
 	##Show SIGNAL
@@ -29,7 +39,9 @@ do
 	sleep 5
 	
 	##Check Net Connection
+	HAS_INTERNET=1
 	if [ -z "`fping -e $host | grep alive`" ]; then
+		HAS_INTERNET=0
 		logger "no internet connection"
 		if [ "`uci get secn.wan.wanport`" = "USB-Modem" ];then
 			echo USB-Modem
@@ -40,6 +52,33 @@ do
 	HAS_COMGT=`ps | grep "uc20_status.comgt" | grep -v grep`
 	if [ -z "$HAS_COMGT" ];then
 		comgt -s /usr/bin/uc20_status.comgt -d /dev/ttyUSB2 &
+	fi
+	sleep 5
+	
+	#check register state to suissephone server
+	SUISSE_REG_STATE=
+	SUISSE_REG_STATE=`asterisk -x "sip show registry" | grep 'suissephone' | awk {'print $5'}`
+	if [ "$SUISSE_REG_STATE" = "Registered" ];then
+		echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:system/brightness
+	else
+		echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:system/brightness
+	fi
+	sleep 5
+	
+	if [ $HAS_INTERNET = 1 ]; then
+		servers=`uci show voip | grep 'server\[[0-9]\]=server' | awk -F '[][]' {'print $2'}`
+		username=
+		for server in $servers; do
+			if [ "`uci get voip.@server[$server].protocol`" = "suissephone" ];then
+				username=`uci get voip.@server[$server].username`
+			fi
+		done
+		SUISSE_PEER_STATE=
+		SUISSE_PEER_STATE=`asterisk -x "sip show peers" | grep "$username" | awk {'print $6'}`
+		if [ "$SUISSE_PEER_STATE" != "OK" ] || [ "$SUISSE_REG_STATE" != "Registered" ]; then
+			/usr/bin/config2asterisk
+		fi
+	
 	fi
 	
 	sleep 5

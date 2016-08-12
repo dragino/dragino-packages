@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-PKG_PID=`ps | grep "auto_provisioning" | grep -v grep | awk '{print $1}'`
+PKG_PID=`ps | grep "auto-provisioning.sh" | grep -v grep | awk '{print $1}'`
 SELF_PID=$$
 if [ ! -z "$PKG_PID" ];then
 	for pid in $PKG_PID;do 
@@ -56,16 +56,17 @@ fi
 [ -f $tmp_provisioning_file ] && rm $tmp_provisioning_file
 count=1
 while [ $count -le $RETRY_COUNT ] ;do
-	logger "[Autoprovisioning System]: Downloading $update_file_url (try $count/$RETRY_COUNT)"
-	if [ $update_protocol = 'http' ] || [ $update_protocol = 'https' ];then
-		wget $update_file_url -O $tmp_provisioning_file 2> $tmp_dir/update_log
-		result=`cat $tmp_dir/update_log | grep "100%"`
-	elif [ $update_protocol = 'tftp' ];then
+	logger "[Autoprovisioning System]: Downloading $update_file_url (try $count/$RETRY_COUNT)"	
+	if [ $update_protocol = 'tftp' ];then
 		atftp -g -r $eth0_mac.conf -l $tmp_provisioning_file  $update_url --trace 2>$tmp_dir/update_log
 		tftp_result=`cat $tmp_dir/update_log | grep -c "tftp: aborting"`
 		if [ $tftp_result -eq 0 ];then
 			result=1
 		fi
+	else 
+		#By default, use http or https use if [ $update_protocol = 'http' ] || [ $update_protocol = 'https' ];then
+		wget $update_file_url -O $tmp_provisioning_file 2> $tmp_dir/update_log
+		result=`cat $tmp_dir/update_log | grep "100%"`
 	fi 
 	if [ ! -z "$result" ]; then
 		break
@@ -102,6 +103,9 @@ update_network_section(){
 		#switch to USB-Modem
 		uci set secn.wan.wanport='USB-Modem'
 		uci set secn.wan.ethwanmode=''
+	fi
+	if [ ! -z "$cellular_pincode" ]; then
+		uci set secn.modem.pin=$cellular_pincode
 	fi
 	uci commit secn
 	/usr/bin/config_secn

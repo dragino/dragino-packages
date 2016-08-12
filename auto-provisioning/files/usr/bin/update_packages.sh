@@ -2,7 +2,7 @@
 #A script to update selected packages. 
 ## Copyright (c) 2015 Dragino Tech <support@dragino.com>
 
-PKG_PID=`ps | grep "update_packages" | grep -v grep | awk '{print $1}'`
+PKG_PID=`ps | grep "update_packages.sh" | grep -v grep | awk '{print $1}'`
 SELF_PID=$$
 if [ ! -z "$PKG_PID" ];then
 	for pid in $PKG_PID;do 

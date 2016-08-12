@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=globacom-pkg
-PKG_VERSION:=1.1
+PKG_VERSION:=1.3
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -38,6 +38,14 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr
 	$(INSTALL_DIR) $(1)/usr/bin	
 	$(CP) $(PKG_BUILD_DIR)/usr/* $(1)/usr/	
+endef
+
+define Package/$(PKG_NAME)/postinst
+#!/bin/sh
+if [ -z "$${IPKG_INSTROOT}" ]; then
+	/usr/bin/postinst_globacom_pkg.sh
+fi
+exit 0
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

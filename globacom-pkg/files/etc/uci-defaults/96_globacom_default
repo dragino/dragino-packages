@@ -1,0 +1,7 @@
+#!/bin/sh
+
+#rename-hostname
+uci set firewall.@forwarding[0].dest=lan
+uci commit firewall
+/etc/init.d/firewall restart
+exit 0

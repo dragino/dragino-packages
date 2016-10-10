@@ -3,7 +3,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dragino2
-PKG_VERSION:=1.2
+PKG_VERSION:=1.4
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -25,10 +25,12 @@ endef
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)/etc
+	mkdir -p $(PKG_BUILD_DIR)/lib
 	mkdir -p $(PKG_BUILD_DIR)/usr/bin
 	mkdir -p $(PKG_BUILD_DIR)/usr/lib/lua/dragino/iot
 	$(CP) ./files/etc/* $(PKG_BUILD_DIR)/etc
 	$(CP) ./files/usr/* $(PKG_BUILD_DIR)/usr
+	$(CP) ./files/lib/* $(PKG_BUILD_DIR)/lib
 endef
 
 define Build/Compile
@@ -39,6 +41,9 @@ define Package/dragino2/install
 	
 	$(INSTALL_DIR) $(1)/etc/triggerhappy
 	$(CP) $(PKG_BUILD_DIR)/etc/triggerhappy/* $(1)/etc/triggerhappy/
+	
+	$(INSTALL_DIR) $(1)/etc/cellular
+	$(CP) $(PKG_BUILD_DIR)/etc/cellular/* $(1)/etc/cellular/
 	
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(CP) $(PKG_BUILD_DIR)/etc/uci-defaults/* $(1)/etc/uci-defaults/	
@@ -52,6 +57,9 @@ define Package/dragino2/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/dragino/iot
 	$(CP) $(PKG_BUILD_DIR)/usr/* $(1)/usr/
 
+	$(INSTALL_DIR) $(1)/lib
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/functions2.sh $(1)/lib/functions2.sh
+	
 endef
 
 $(eval $(call BuildPackage,dragino2))

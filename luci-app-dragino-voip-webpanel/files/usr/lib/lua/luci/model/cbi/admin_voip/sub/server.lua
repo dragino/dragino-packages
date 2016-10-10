@@ -37,6 +37,7 @@ pro:value("sip","SIP-General")
 pro:value("iax2","IAX2-General")
 if has_globacom == '1' then
 	pro:value("suissephone","SuissePhone")
+	pro:value("globastar","Globastar")
 	pro:value("globacom","Globacom")
 end
 

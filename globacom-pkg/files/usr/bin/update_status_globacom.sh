@@ -25,8 +25,6 @@ if [ ! -z "$GlO_ROUTINE_PID" ];then
 		signal_quality='unknown'
 	fi	
 fi
-curl http://${LOG_SERVER}/api/${ETH0}/cellular/signal/${signal_quality}
-sleep 2
 
 #Get Internet Access method:
 wanport=`uci get secn.wan.wanport`
@@ -35,7 +33,6 @@ if [ "$wanport" = "Ethernet" ];then
 elif [ "$wanport" = "USB-Modem" ];then
 	internet='cellular'
 fi
-curl http://${LOG_SERVER}/api/${ETH0}/internet/${internet}
 
 
 #Get and Update Asterisk status
@@ -49,21 +46,20 @@ for server in `ls /var/voip/server/`;do
 			if [ "`uci get voip.@server[$uci_server].protocol`" = "suissephone" ];then
 				reg_state=`cat /var/voip/server/$server/state`
 				if [ "$reg_state" = "Registered" ];then
-					register="1"
+					voip_register="1"
 				else
-					register="0"
+					voip_register="0"
 				fi
-				curl http://${LOG_SERVER}/api/${ETH0}/sip/voip/registered/${register}
 			elif [ "`uci get voip.@server[$uci_server].protocol`" = "globacom" ];then
 				reg_state=`cat /var/voip/server/$server/state`
 				if [ "$reg_state" = "Registered" ];then
-					register="1"
+					control_register="1"
 				else
-					register="0"
-				fi
-				curl http://${LOG_SERVER}/api/${ETH0}/sip/control/registered/${register}				
+					control_register="0"
+				fi			
 			fi
 		fi
 	done 
 done
 
+curl -d "inet_type=${internet}&signal_strenght=${signal_quality}&sip_voip_registered=${voip_register}&sip_control_registered=${control_register}" "http://${LOG_SERVER}/api/${ETH0}/update"

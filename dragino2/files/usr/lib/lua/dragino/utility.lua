@@ -81,7 +81,9 @@ function getCellularInfo()
 		end
 		if string.match(line,'QGBAND:') then 
 			band_code = string.match(line,'QGBAND:%s(%d+)')
-			band=band_table[band_code]	
+			band=band_table[band_code]
+		elseif string.match(line,'QNWINFO:') then
+			band=string.match(line,'QNWINFO:%s(.+)')
 		end	
 		if string.match(line,'CSQ:') then 
 			signal = tonumber(string.match(line,'CSQ:%s(%d+)'))

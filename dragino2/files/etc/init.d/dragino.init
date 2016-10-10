@@ -14,6 +14,13 @@ start()
 		
 	[ ! -d /var/iot/channels ] && mkdir -p /var/iot/channels
 	load_uart
+
+    # configure USB modem.
+	/usr/bin/config_usb_modem.sh
+	
+	# Debug the internet connection
+	[ "`uci get system.@system[0].debug_inet`" = "1" ] && /usr/bin/inet_reliable_test.sh &
+	
 }
 
 restart() {

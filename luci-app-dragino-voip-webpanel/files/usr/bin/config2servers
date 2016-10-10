@@ -211,7 +211,7 @@ for server in $SERVER_LIST; do
 			set_sip_server $server
 		elif [ $protocol == "suissephone" ]; then
 			set_suissephone_account $server
-		elif [ $protocol == "globacom" ]; then
+		elif [ $protocol == "globacom" ] || [ $protocol == "globastar" ]; then
 			set_globacom_account $server
 		elif [ $protocol == "iax2" ]; then
 			# it is an IAX2 account, distribute to iax part

@@ -43,7 +43,7 @@ for server in `ls /var/voip/server/`;do
 	host=`cat /var/voip/server/$server/host`
 	for uci_server in $servers; do
 		if [ "$host" = "`uci get voip.@server[$uci_server].host`" ];then
-			if [ "`uci get voip.@server[$uci_server].protocol`" = "suissephone" ];then
+			if [ "`uci get voip.@server[$uci_server].protocol`" = "suissephone" ] || [ "`uci get voip.@server[$uci_server].protocol`" = "globastar" ];then
 				reg_state=`cat /var/voip/server/$server/state`
 				if [ "$reg_state" = "Registered" ];then
 					voip_register="1"

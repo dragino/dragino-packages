@@ -2,7 +2,7 @@
 # Auto generate sever account for Asterisk.
 
 # Remove old files
-rm /etc/asterisk/dragino.sip.conf >> /dev/null
+[ -f /etc/asterisk/dragino.sip.conf ] && rm /etc/asterisk/dragino.sip.conf
 
 CODEC1=`uci get voip.asterisk.codec1`
 CODEC2=`uci get voip.asterisk.codec2`

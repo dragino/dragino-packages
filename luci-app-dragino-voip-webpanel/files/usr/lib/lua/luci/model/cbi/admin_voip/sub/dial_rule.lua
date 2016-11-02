@@ -34,7 +34,7 @@ local length = cc:option(Value, "length", translate("Sub-number Length"))
 local suffix = cc:option(Value, "suffix", translate("Add Suffix"),translate("Add a suffix to the dial string"))
 
 local cid = cc:option(Value, "callerid", translate("Outgoing Caller ID"))
-cid.default="dragino"
+cid.default=m.uci:get("system",'vendor',"hostname")
 
 local trunk = cc:option(Value, "trunk", translate("Use Trunk"))
 uci:foreach("voip", "server",

@@ -1,4 +1,6 @@
-rm /etc/asterisk/dragino.extensions.conf >> /dev/null
+#!/bin/sh
+# Auto generate dial plan for Asterisk.
+[ -f /etc/asterisk/dragino.extensions.conf ] && rm /etc/asterisk/dragino.extensions.conf
 
 #Extension Setting
 EXT_PRE=`uci get voip.asterisk.extension_prefix`

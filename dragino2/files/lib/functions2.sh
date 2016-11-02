@@ -5,13 +5,11 @@ local debug=`uci get system.@system[0].debug_inet`
 [ -z $debug ] && debug="0"
 
 debug_str_to_file() {
-	[ $debug != "1" ] && exit 0
-	echo $1 >> $file
+	[ "$debug" = "1" ] && echo $1 >> $file
 }
 
 debug_cmd_to_file(){
-	[ $debug != "1" ] && exit 0
-	$1 >> $file
+	[ "$debug" = "1" ] && $1 >> $file
 }
 
 control_file_size(){

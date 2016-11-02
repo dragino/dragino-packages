@@ -63,4 +63,8 @@ local ext_type = cc:option(ListValue, "ext_type", translate("Extension Type"))
 ext_type:value("softphone",translate("Soft Phone / IP Phone"))
 ext_type:value("analog",translate("Analog Phone"))
 
+local enable_video = cc:option(Flag, "enable_video", translate("Enable Video"),translate("H.264 Video Pass Through"))
+enable_video.enabled  = "1"
+enable_video.disabled = "0"
+
 return m

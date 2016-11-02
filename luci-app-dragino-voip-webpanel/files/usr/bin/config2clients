@@ -3,7 +3,7 @@
 
 TMP_SIP_CLIENT=/var/tmp_sip_client
 TMP_IAX2_CLIENT=/var/tmp_iax2_client
-rm /etc/asterisk/softphone.sip.conf
+[ -f /etc/asterisk/softphone.sip.conf ] && rm /etc/asterisk/softphone.sip.conf
 
 [ -f $TMP_SIP_CLIENT ] && rm $TMP_SIP_CLIENT
 [ -f $TMP_IAX2_CLIENT ] && rm $TMP_IAX2_CLIENT
@@ -16,13 +16,19 @@ set_softphone_client(){
 	USER=`uci get voip.$ID.username`
 	NUMBER=`uci get voip.$ID.number`
 	PASSWORD=`uci get voip.$ID.password`
+	H264=`uci get voip.$ID.enable_video`
+	if [ "$H264" == "1"  ];then
+		VIDEO_SECTION="allow=h264"
+	else 
+		VIDEO_SECTION=""
+	fi
 
 ----------------------------------------------
 cat >> $TMP_SIP_CLIENT << EOF
 [$NUMBER](softph)
 username=$USER
 secret=$PASSWORD
-
+$VIDEO_SECTION
 EOF
 # --------------------------------------------
 

@@ -1,7 +1,6 @@
+#!/bin/sh
+# Auto generate sip/iax2 users for Asterisk.
 ### Set up Asterisk config files
-# Remove old files
-rm /etc/asterisk/softphone.sip.conf >> /dev/null
-
 
 # Get localnet and netmask from br-lan settings
 LOCALNET=`uci get network.lan.ipaddr | awk -F. '{print $1"."$2"."$3"."0}'`

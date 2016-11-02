@@ -3,6 +3,7 @@
 
 . /lib/functions2.sh
 host="`uci get secn.wan.pinghost`"
+SIP_LED="dragino2:red:system"
 
 [ "`uci get system.@system[0].debug_inet`" = "1" ] && debug="1"
 debug_str_to_file "$(date) Start debug for globastar"
@@ -11,14 +12,14 @@ PKG_PID=`ps | grep "glo_routine" | grep -v grep | awk '{print $1}'`
 SELF_PID=$$
 if [ ! -z "$PKG_PID" ];then
 	for pid in $PKG_PID;do 
-		if [ $pid != $SELF_PID ]; then
+		if [ "$pid" != "$SELF_PID" ]; then
 			kill -s 9 $pid
 		fi 
 	done
 fi
 
 #export gpio1 to control the 3G status LEDs
-echo 1 > /sys/class/gpio/export
+[ ! -d "/sys/class/gpio/gpio1" ] && echo 1 > /sys/class/gpio/export
 echo high > /sys/class/gpio/gpio1/direction
 
 ##HAS_INTERNET： 0:no net, 1: has net, 2: first boot
@@ -62,35 +63,36 @@ do
 		if [ $lose_internet -gt 120 ];then
 			old_time=$(date +%s)
 			#we have lost internet for 120 seconds. need to do something
-			reboot_count=`uci get system.@system[0].reboot_count`
-			if [ -z $reboot_count ] || [ $reboot_count -gt 4 ];then
-				reboot_count=1
-			fi
-			debug_str_to_file "$(date): reboot count is: $reboot_count"
+			#reboot_count=`uci get system.@system[0].reboot_count`
+			#debug_str_to_file "$(date): reboot count is: $reboot_count"
 			if [ "`uci get secn.wan.wanport`" = "USB-Modem" ];then
 				debug_str_to_file "^^^^^^^^^^logread start^^^^^^^^^^^^^^^^^^^^^^"
 				debug_cmd_to_file logread
 				debug_str_to_file "^^^^^^^^^^dmesg start^^^^^^^^^^^^^^^^^^^^^^^^"
 				debug_cmd_to_file dmesg
 				debug_str_to_file "^^^^^^^^^^end logread / dmesg^^^^^^^^^^^^^^^^"
-				debug_str_to_file "$(date): reset USB modem"
-				if [ $reboot_count -le 4 ];then
-					/etc/init.d/asterisk stop
-					/etc/init.d/dragino2-si3217x stop
+				#if [ $reboot_count -le 4 ];then
+					[ -f "/etc/rc.d/S61dragino2-si3217x" ] && /etc/init.d/dragino2-si3217x disable && debug_str_to_file "$(date): disable si32176" && reboot
+					debug_str_to_file "$(date): reset USB modem"
 					echo 20 > /sys/class/gpio/export
 					echo high > /sys/class/gpio/gpio20/direction
-					sleep 2
+					sleep 5
 					echo 0 > /sys/class/gpio/gpio20/value
 					echo 20 > /sys/class/gpio/unexport
-					reboot_count=`expr $reboot_count + 1`
-					uci set system.@system[0].reboot_count=$reboot_count
-					uci commit system
+					#reboot_count=`expr $reboot_count + 1`
+					#uci set system.@system[0].reboot_count=$reboot_count
+					#uci commit system
 					reboot
-				fi 		
+				#fi 		
 			fi
 		fi
 	else 
 		HAS_INTERNET=1
+		if [ ! -f "/etc/rc.d/S61dragino2-si3217x" ];then
+			/etc/init.d/dragino2-si3217x enable
+			debug_str_to_file "$(date): enable si32176"
+			reboot
+		fi	
 		echo 1 > /sys/class/gpio/gpio1/value		
 		old_time=$(date +%s)
 	fi
@@ -105,34 +107,37 @@ do
 	VOIP_USER_NAME=
 	servers=`uci show voip | grep 'server\[[0-9]\]=server' | awk -F '[][]' '{print $2}'`
 	for server in $servers; do
-		if [ `uci get voip.@server[$server].protocol` = "suissephone" ]; then
+		if [ "`uci get voip.@server[$server].protocol`" = "suissephone" ]; then
 			VOIP_USER_NAME=`uci get voip.@server[$server].phonenumber`
 		fi
-		if [ `uci get voip.@server[$server].protocol` = "globastar" ]; then
+		if [ "`uci get voip.@server[$server].protocol`" = "globastar" ]; then
 			VOIP_USER_NAME=`uci get voip.@server[$server].username`
 		fi
 	done
+	debug_str_to_file "VOIP_USER_NAME: $VOIP_USER_NAME"
+	
 	if [ ! -z $VOIP_USER_NAME ]; then
 		VOIP_REG_STATE=
 		VOIP_REG_STATE=`asterisk -x "sip show registry" | grep $VOIP_USER_NAME | awk {'print $5'}`
+		debug_str_to_file "VOIP_REG_STATE: $VOIP_REG_STATE"
 		if [ "$VOIP_REG_STATE" = "Registered" ];then
-			echo 1 > /sys/devices/platform/leds-gpio/leds/dragino2:red:system/brightness
+			echo 1 > /sys/devices/platform/leds-gpio/leds/$SIP_LED/brightness
 		else
-			echo 0 > /sys/devices/platform/leds-gpio/leds/dragino2:red:system/brightness
+			echo 0 > /sys/devices/platform/leds-gpio/leds/$SIP_LED/brightness
 		fi
 		sleep 5
-	
 		if [ $HAS_INTERNET = 1 ]; then		
 			servers=`uci show voip | grep 'server\[[0-9]\]=server' | awk -F '[][]' {'print $2'}`
 			username=
 			for server in $servers; do
 				pro=`uci get voip.@server[$server].protocol`
-				if [ $pro = "suissephone" ] || [ $pro = "globastar" ];then
+				if [ "$pro" = "suissephone" ] || [ "$pro" = "globastar" ];then
 					username=`uci get voip.@server[$server].username`
 				fi
 			done
 			VOIP_PEER_STATE=
 			VOIP_PEER_STATE=`asterisk -x "sip show peers" | grep "$username" | awk {'print $6'}`
+			debug_str_to_file "VOIP_PEER_STATE: $VOIP_PEER_STATE"
 			if [ "$VOIP_PEER_STATE" != "OK" ] || [ "$VOIP_REG_STATE" != "Registered" ]; then
 				now=$(date +%s)
 				lose_asterisk=`expr $now - $last_reset_asterisk`

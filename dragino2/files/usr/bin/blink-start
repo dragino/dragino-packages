@@ -13,4 +13,3 @@ echo "timer" > /sys/class/leds/$LED/trigger
 
 echo $1 > /sys/class/leds/$LED/delay_on
 echo $1 > /sys/class/leds/$LED/delay_off
-

@@ -31,6 +31,7 @@ then
 	cp /rom/etc/config/network /etc/config/
 	cp /rom/etc/config/dhcp /etc/config/
 	cp /rom/etc/config/wireless /etc/config/
+	cp /rom/etc/config/firewall /etc/config/
 	
 	rename_network_on_first_boot
 	

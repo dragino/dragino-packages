@@ -104,6 +104,24 @@ update_network_section(){
 		uci set secn.wan.wanport='USB-Modem'
 		uci set secn.wan.ethwanmode=''
 	fi
+	
+	#check whether lock or unlock the internet
+	if [ $lock_internet = 'lock' ];then
+		#lock internet
+		uci set firewall.@zone[1].forward='REJECT'
+		uci set firewall.@forwarding[0].dest='lan'
+		uci commit firewall
+		/etc/init.d/firewall restart
+		logger "[Autoprovisioning System]: Lock Internet"
+	elif [ $lock_internet = "unlock" ];then
+		#switch to USB-Modem
+		uci set firewall.@zone[1].forward='ACCEPT'
+		uci set firewall.@forwarding[0].dest='wan'
+		uci commit firewall
+		/etc/init.d/firewall restart
+		logger "[Autoprovisioning System]: Unlock Internet"
+	fi
+	
 	if [ ! -z "$cellular_pincode" ]; then
 		uci set secn.modem.pin=$cellular_pincode
 	fi
@@ -236,22 +254,32 @@ update_log_server_section(){
 
 if [ "$update_network" = "1" ]; then
 	update_network_section
+else
+	logger "[Autoprovisioning System]: Omit Network Section"
 fi 
 
 if [ "$update_voip" = "1" ]; then
 	update_voip_section
+else
+	logger "[Autoprovisioning System]: Omit VoIP Section"
 fi
 
 if [ "$update_pkg_maintain" = "1" ]; then
 	update_pkg_maintain_section
+else
+	logger "[Autoprovisioning System]: Omit Package Section"
 fi
 
 if [ "$update_log_server" = "1" ]; then
 	update_log_server_section
+else
+	logger "[Autoprovisioning System]: Omit Log Server Section"
 fi
 
 update_general_section
 
 if [ "$run_post_command" = "1" ]; then
 	execute_post_command
+else
+	logger "[Autoprovisioning System]: Omit Post Command Section"
 fi

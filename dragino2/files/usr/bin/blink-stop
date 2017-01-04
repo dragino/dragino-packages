@@ -1,11 +1,4 @@
 #!/bin/sh
 
-is_siod=`cat /etc/banner | grep 'SIOD' -c`
-
-LED="dragino2:red:system"
-if [ $is_siod -gt 0 ];then
-	LED="dragino2:red:wan"
-fi
-
-echo "none" > /sys/class/leds/$LED/trigger
+echo "none" > /sys/class/leds/dragino2:red:system/trigger
 

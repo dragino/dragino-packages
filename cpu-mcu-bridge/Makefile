@@ -8,12 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=cpu-mcu-bridge
-PKG_VERSION:=1.5.1
-PKG_RELEASE:=2
+PKG_VERSION:=1.6.1-git
+PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=http://downloads.arduino.cc/
-PKG_MD5SUM:=11338f65f3ed041abf3f0089bfc6ae50
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/arduino/YunBridge.git
+PKG_SOURCE_VERSION:=f94eb0d6bac5843703b1e482d0a85113087b8d6e
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -21,7 +23,7 @@ define Package/cpu-mcu-bridge
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=CPU-MCU Bridge
-  DEPENDS:=+python-mini
+  DEPENDS:=+python-light
 endef
 
 define Package/cpu-mcu-bridge/description
@@ -34,10 +36,10 @@ endef
 
 define Package/cpu-mcu-bridge/install
 	$(INSTALL_DIR) $(1)/usr/lib/python2.7/bridge
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/*.py $(1)/usr/lib/python2.7/bridge
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/bridge/*.py $(1)/usr/lib/python2.7/bridge
 
 	$(INSTALL_DIR) $(1)/usr/lib/php/bridge
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/php/*.php $(1)/usr/lib/php/bridge
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/bridge/php/*.php $(1)/usr/lib/php/bridge
 endef
 
 $(eval $(call BuildPackage,cpu-mcu-bridge))

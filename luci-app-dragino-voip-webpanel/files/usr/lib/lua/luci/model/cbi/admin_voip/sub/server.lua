@@ -10,7 +10,7 @@ $Id: server_entry.lua 5948 2015-02-10 Dragino Tech $
 
 local uci = luci.model.uci.cursor()
 local util= require('luci.util')
-has_globacom=util.trim(util.exec('cat /etc/banner | grep "globacom" -c'))
+has_globacom=util.trim(util.exec('cat /etc/banner | grep -E "globacom|Globastar" -c'))
 
 m = Map("voip", translate("Configure Server"))
 m.redirect = luci.dispatcher.build_url("admin/voip/servers")

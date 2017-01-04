@@ -57,6 +57,7 @@ cat >> $TMP_SIP_USER_FILE << EOF
 [$NAME]
 host=$HOST
 secret=$SECRET
+port=5060
 defaultuser=$USERNAME
 fromuser=$USERNAME
 fromdomain=$FROMDOMAIN
@@ -79,6 +80,7 @@ set_globacom_account(){
 	USERNAME=`uci get voip.$ID.username`
 	NAME=$USERNAME
 	uci set voip.$ID.name=$NAME
+	PORT="5060"
 	REGISTER=`uci get voip.$ID.register`
 	HOST=`uci get voip.$ID.host`
 	SECRET=`uci get voip.$ID.secret` # Maybe empty
@@ -106,6 +108,7 @@ cat >> $TMP_SIP_USER_FILE << EOF
 [$NAME]
 host=$HOST
 secret=$SECRET
+port=5060
 defaultuser=$USERNAME
 fromuser=$USERNAME
 fromdomain=$HOST
@@ -158,6 +161,7 @@ cat >> $TMP_SIP_USER_FILE << EOF
 [$NAME]
 host=$HOST
 secret=$SECRET
+port=5060
 defaultuser=$USERNAME
 fromuser=$PHONENUM
 fromdomain=$HOST

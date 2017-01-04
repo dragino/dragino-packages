@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dragino-yun-scripts
-PKG_VERSION:=1.3
+PKG_VERSION:=1.4
 PKG_RELEASE:=2
 
 include $(INCLUDE_DIR)/package.mk
@@ -36,6 +36,7 @@ define Package/dragino-yun-scripts/install
 	$(INSTALL_BIN) ./files/usr/bin/wifi-reset-button-released $(1)/usr/bin/
 	$(INSTALL_BIN) ./files/usr/bin/special-storage-available $(1)/usr/bin/
 	$(INSTALL_BIN) ./files/usr/bin/pretty-wifi-info.lua $(1)/usr/bin
+	$(INSTALL_BIN) ./files/usr/bin/reset_bridge_at_boot $(1)/usr/bin
 
 	$(INSTALL_BIN) ./files/etc/init.d/rename-wifi-if-access-point $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/etc/init.d/generate_new_gpg_key $(1)/etc/init.d

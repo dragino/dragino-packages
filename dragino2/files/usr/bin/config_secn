@@ -93,6 +93,8 @@ if [ ! -z $VENDOR ] && [ ! -z $PRODUCT ]; then
 cat >> /etc/modules.d/60-usb-serial << EOF
 usbserial vendor=0x$VENDOR product=0x$PRODUCT
 EOF
+rmmod usbserial
+insmod usbserial vendor=0x$VENDOR product=0x$PRODUCT
 fi
 	
 # Get modem params

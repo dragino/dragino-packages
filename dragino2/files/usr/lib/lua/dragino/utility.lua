@@ -130,7 +130,7 @@ end
 --@return USB Manufacture, Vendor ID and Product ID
 function getUSBInfo()
 	local USB_INFO=util.exec('cat /sys/kernel/debug/usb/devices | grep -A 1 "P:  Vendor"')
-	local start = string.find(USB_INFO,"%-%-")
+	local start = string.find(USB_INFO,"Vendor=05c6")
 	if start == nil then return nil end
 	u_man=string.match(USB_INFO,"Manufacturer=([%w%s%.%_]+[%w])",start)
 	u_vid=string.match(USB_INFO,"Vendor=([%w]+)",start)

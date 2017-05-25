@@ -1,0 +1,10 @@
+config gpstrack 'gpswox'
+   option deviceID  '1780086'
+   option username  'dragino'
+   option password  'dragino'
+   option frequency  '6'
+   option status    'disable'
+   option user_api_hash '8033a8484a2eb7067e943310fd87cf15'
+   option server  '3'
+   option save_username "unknown"
+   option valid_api "unvalid"

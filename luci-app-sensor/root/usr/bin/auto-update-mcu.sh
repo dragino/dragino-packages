@@ -33,8 +33,8 @@ fi
 count=1
 while [ $count -le $retry_count ] ;do
 	logger "MCU Auto Update: Download Update Information from $update_url (try $count/$retry_count)"
-	wget $update_info_url -O $tmp_update_info 2>/var/mcu/download_tmp
-	result=`cat /var/mcu/download_tmp | grep "100%"`
+	wget $update_info_url -O $tmp_update_info 2>$tmp_dir/download_tmp
+	result=`cat $tmp_dir/download_tmp | grep "100%"`
 	if [ ! -z "$result" ]; then
 		break
 	fi 
@@ -61,14 +61,18 @@ logger "Find higher version $version in server, we will download the image $imag
 
 #Download the sketch used for auto update
 tmp_image=$tmp_dir/$image
-[ -f $tmp_image ] && rm $tmp_image
-wget $update_url/$image -O $tmp_image
-if [ ! -f $tmp_image ]; then
-	logger "MCU Auto Update: Fail to get sketch $image, Abort"
-	echo $image
-	exit 1
-fi
-logger "MCU Auto Update: $image downloaded"
+count=1
+while [ $count -le $retry_count ] ;do
+	[ -f $tmp_image ] && rm $tmp_image
+	logger "MCU Auto Update: Get image from $update_url/$image"
+	wget $update_url/$image -O $tmp_image 2>>$tmp_dir/download_tmp
+	sleep 10
+	[ $(du $tmp_image -k | awk '{print $1}') != "0" ] && break
+	count=`expr $count + 1`
+	logger "MCU Auto Update: Fail to get sketch $image, try $count"
+	[ $count -eq 4 ] && exit 1
+done
+	logger "MCU Auto Update: $image downloaded"
 
 #Check md5sum 
 sketch_md5=`md5sum $tmp_image | awk '{print $1}'`

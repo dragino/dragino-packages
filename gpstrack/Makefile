@@ -26,8 +26,8 @@ define Build/Prepare
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/etc/conf
-	$(CP) $(PKG_BUILD_DIR)/gpstrack $(1)/etc/conf
+	$(INSTALL_DIR) $(1)/etc/config
+	$(CP) $(PKG_BUILD_DIR)/gpstrack $(1)/etc/config
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_BUILD_DIR)/*.sh $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/admin

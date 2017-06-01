@@ -30,28 +30,4 @@ if [ "$username" != "$save_username" ] or [ "$valid_api" != "valid" ]; then
     fi
 fi
 
-if [ "$GPSWOX_STATUS" = "disable" ]; then
-    [ -f /etc/crontab/send_gps_data.cron ] && rm -rf /etc/crontab/send_gps_data.cron
-    exit 0
-fi
-
-let fre=`uci get gpstrack.gpswox.frequency`
-
-## if less than a minute
-
-if [ $fre -lt 60 ]; then 
-
-cat > /etc/crontab/send_gps_data.cron << EOF
-* * * * * /usr/bin/send_gps_data.sh
-EOF
-
-else
-frequency=`expr $fre / 60`
-
-cat > /etc/crontab/send_gps_data.cron << EOF
-*/$frequency * * * * /usr/bin/send_gps_data.sh
-EOF
-
-fi
-
 exit 0

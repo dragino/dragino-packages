@@ -14,7 +14,7 @@ uci add ucitrack secn
 uci	set ucitrack.@secn[0].exec=/usr/bin/config_secn
 
 uci add ucitrack gpstrack
-uci	set ucitrack.@secn[0].exec=/usr/bin/get_gpswox_api_hash.sh
+uci	set ucitrack.@gpstrack[0].exec=/usr/bin/get_gpswox_api_hash.sh
 uci	commit
 
 exit 0

@@ -8,14 +8,10 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=cpu-mcu-bridge
-PKG_VERSION:=1.6.1-git
+PKG_VERSION:=1.0.0
 PKG_RELEASE:=1
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/arduino/YunBridge.git
-PKG_SOURCE_VERSION:=f94eb0d6bac5843703b1e482d0a85113087b8d6e
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -28,6 +24,12 @@ endef
 
 define Package/cpu-mcu-bridge/description
  Bridge lets linux and arduino communicate
+endef
+
+define Build/Prepare
+        mkdir -p $(PKG_BUILD_DIR)
+	chmod +x ./src/*.sh
+        $(CP) ./dragino-yun-bridge/* $(PKG_BUILD_DIR)/
 endef
 
 define Build/Compile

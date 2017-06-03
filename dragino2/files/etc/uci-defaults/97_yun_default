@@ -1,0 +1,4 @@
+#!/bin/sh
+rm /etc/avahi/services/http.service
+
+exit 0

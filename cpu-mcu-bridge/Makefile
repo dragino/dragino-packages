@@ -28,7 +28,6 @@ endef
 
 define Build/Prepare
         mkdir -p $(PKG_BUILD_DIR)
-	chmod +x ./src/*.sh
         $(CP) ./dragino-yun-bridge/* $(PKG_BUILD_DIR)/
 endef
 

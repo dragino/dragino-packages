@@ -16,23 +16,22 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
-  SECTION:=utils
-  CATEGORY:=Utilities
-  TITLE:=$(PKG_NAME)
-  DEPENDS:=+luci
+	SECTION:=utils
+	CATEGORY:=Utilities
+	TITLE:=$(PKG_NAME)
+	DEPENDS:=+luci
 endef
 
 define Package/$(PKG_NAME)/description
- luci secn module
+	luci secn module
 endef
 
 define Build/Prepare
-        mkdir -p $(PKG_BUILD_DIR)
-        $(CP) ./luasrc/??* $(PKG_BUILD_DIR)/
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./luasrc/??* $(PKG_BUILD_DIR)/
 endef
 
 define Build/Compile
-	# NOOP
 endef
 
 define Package/$(PKG_NAME)/install

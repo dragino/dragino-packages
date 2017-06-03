@@ -1,5 +1,6 @@
 local sys = require "luci.sys"
-require("uci")
+
+require "uci"
 
 m = Map("gpstrack", translate("Gpstrack settings"), translate("input correct username and password provide by gpstrack vendor"))
 
@@ -7,7 +8,6 @@ s = m:section(NamedSection, "gpswox", "gpstrack", translate("GPSWOX"))
 
 local name = s:option(Value, "username", translate("Username"),translate("Username of gpswox.com"))
 s:option(Value, "password", translate("Password"),translate("Password of gpswox.com"))
-
 
 local t = s:option(ListValue, "server", translate("Map Server"))
     t:value("1", "Europe Tracking Server")
@@ -20,5 +20,17 @@ local ss = s:option(Flag, "status", translate("Service status"),translate("enabl
     ss.disabled = "disable"
     ss.default  = ss.disabled
     ss.rmempty  = false
+
+uci = uci:cursor()
+
+local savename = uci:get("gpstrack", "gpswox", "save_username")
+
+local valid = uci:get("gpstrack", "gpswox", "valid_api")
+
+uci:set("gpstrack", "gpswox", "save_username", savename)
+
+uci:set("gpstrack", "gpswox", "valid_api", valid)
+
+uci:commit("gpstrack")
 
 return m

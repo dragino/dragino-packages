@@ -15,5 +15,5 @@ $Id$
 module("luci.controller.admin.gpstrack", package.seeall)
 
 function index()
-	entry({"admin", "gpstrack"}, cbi("gpstrack/gpswox"), "Gpstrack setting", 40).dependent=false
+	entry({"admin", "gpstrack"}, cbi("gpstrack/gpswox"), "Gpstrack", 40).dependent=false
 end

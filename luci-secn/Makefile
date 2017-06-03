@@ -36,10 +36,10 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/model/??* $(1)/usr/lib/lua/luci/model
+	$(CP) $(PKG_BUILD_DIR)/model/??* $(1)/usr/lib/lua/luci/model
 
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/view/??* $(1)/usr/lib/lua/luci/view
+	$(CP) $(PKG_BUILD_DIR)/view/??* $(1)/usr/lib/lua/luci/view
 endef
 
-$(eval $(call BuildPackage,luci-secn))
+$(eval $(call BuildPackage,$(PKG_NAME)))

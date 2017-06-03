@@ -18,7 +18,7 @@
 #             IP : 107.170.92.234 (USA)
 #             IP : 128.199.127.94 (Asia)
 
-while getopts 'd:l:n:a:' OPTION
+while getopts ':d:l:n:a:h:' OPTION
 do
 	case $OPTION in
 	d)	uniqueID="$OPTARG"
@@ -29,7 +29,7 @@ do
 		;;
 	a)	altitude="$OPTARG"
 		;;
-	h|?)	printf "Send gps data to gpstracking server \n\n"
+	h|*)	printf "Send gps data to gpstracking server \n\n"
 		printf "Usage: %s -d devicdId -l latitude -n logitude -a altitude \n" $(basename $0) >&2
 		printf "       -d: deviceID\n"
 		printf "       -l: latitude\n"
@@ -41,7 +41,7 @@ do
 	esac
 done
 
-([ -z "$uniqueID" ] || [ -z "$latitude" ] || [ -z "$longitude" ] || [ -z "$altitude" ]) && exit 1
+([ -z "$uniqueID" ] || [ -z "$latitude" ] || [ -z "$longitude" ] || [ -z "$altitude" ]) && logger "$0 - missing arguments" && exit 1
 
 ## gpswox tracking server
 server=`uci get gpstrack.gpswox.server`

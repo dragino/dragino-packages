@@ -21,7 +21,6 @@ endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	chmod +x ./src/*.sh
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
 
@@ -32,7 +31,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(CP) $(PKG_BUILD_DIR)/gpstrack $(1)/etc/config
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(CP) $(PKG_BUILD_DIR)/*.sh $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/*.sh $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/admin
 	$(CP) $(PKG_BUILD_DIR)/gpstrack.lua $(1)/usr/lib/lua/luci/controller/admin
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/gpstrack

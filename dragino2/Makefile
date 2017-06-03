@@ -10,12 +10,12 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 include $(INCLUDE_DIR)/package.mk
 
 define Package/dragino2
-  SECTION:=utils
-  CATEGORY:=Utilities
-  DEPENDS:=
-  TITLE:=Dragino -- OpenWrt Sensor IoT Project
-  URL:=http://www.dragino.com
-  MAINTAINER:=Edwin Chen <edwin@dragino.com>
+	SECTION:=utils
+	CATEGORY:=Utilities
+	DEPENDS:=
+	TITLE:=Dragino -- OpenWrt Sensor IoT Project
+	URL:=http://www.dragino.com
+	MAINTAINER:=Edwin Chen <edwin@dragino.com>
 endef
 
 define Package/dragino2/description
@@ -40,7 +40,7 @@ endef
 
 define Package/dragino2/install
 	$(INSTALL_DIR) $(1)/etc
-	cp -f $(PKG_BUILD_DIR)/etc/* $(1)/etc/
+	cp -rf $(PKG_BUILD_DIR)/etc/* $(1)/etc/
 	
 	$(INSTALL_DIR) $(1)/etc/triggerhappy
 	$(CP) $(PKG_BUILD_DIR)/etc/triggerhappy/* $(1)/etc/triggerhappy/

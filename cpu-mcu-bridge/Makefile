@@ -15,27 +15,26 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/cpu-mcu-bridge
-  SECTION:=utils
-  CATEGORY:=Utilities
-  TITLE:=CPU-MCU Bridge
-  DEPENDS:=+python-light
+define Package/$(PKG_NAME)
+	SECTION:=utils
+	CATEGORY:=Utilities
+	TITLE:=CPU-MCU Bridge
+	DEPENDS:=+python-light
 endef
 
-define Package/cpu-mcu-bridge/description
- Bridge lets linux and arduino communicate
+define Package/$(PKG_NAME)/description
+	Bridge lets linux and arduino communicate
 endef
 
 define Build/Prepare
-        mkdir -p $(PKG_BUILD_DIR)
-        $(CP) ./dragino-yun-bridge/* $(PKG_BUILD_DIR)/
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./dragino-yun-bridge/??* $(PKG_BUILD_DIR)/
 endef
 
 define Build/Compile
-	# NOOP
 endef
 
-define Package/cpu-mcu-bridge/install
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/python2.7/bridge
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/bridge/*.py $(1)/usr/lib/python2.7/bridge
 
@@ -43,4 +42,4 @@ define Package/cpu-mcu-bridge/install
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/bridge/php/*.php $(1)/usr/lib/php/bridge
 endef
 
-$(eval $(call BuildPackage,cpu-mcu-bridge))
+$(eval $(call BuildPackage,$(PKG_NAME)))

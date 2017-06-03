@@ -26,11 +26,13 @@ define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)/etc
 	mkdir -p $(PKG_BUILD_DIR)/lib
+	mkdir -p $(PKG_BUILD_DIR)/bin
 	mkdir -p $(PKG_BUILD_DIR)/usr/bin
 	mkdir -p $(PKG_BUILD_DIR)/www
 	mkdir -p $(PKG_BUILD_DIR)/usr/lib/lua/dragino/iot
 	$(CP) ./files/etc/* $(PKG_BUILD_DIR)/etc
 	$(CP) ./files/usr/* $(PKG_BUILD_DIR)/usr
+	$(CP) ./files/bin/* $(PKG_BUILD_DIR)/bin
 	$(CP) ./files/lib/* $(PKG_BUILD_DIR)/lib
 	$(CP) ./files/www/* $(PKG_BUILD_DIR)/www
 endef

@@ -98,7 +98,7 @@ class RESET_Command:
     if data[1:4] != '100':
       call(['/usr/bin/blink-stop'])
       return chr(2)
-    call(['/usr/bin/brilink-stop'])
+    call(['/usr/bin/blink-stop'])
     return chr(0) + '161' # send the actual bridge version
     
 class PacketReader:

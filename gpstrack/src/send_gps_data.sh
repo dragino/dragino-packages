@@ -18,7 +18,7 @@
 #             IP : 107.170.92.234 (USA)
 #             IP : 128.199.127.94 (Asia)
 
-while getopts ':d:l:n:a:h:' OPTION
+while getopts 'd:l:n:a:' OPTION
 do
 	case $OPTION in
 	d)	uniqueID="$OPTARG"
@@ -29,43 +29,44 @@ do
 		;;
 	a)	altitude="$OPTARG"
 		;;
-	h|*)	printf "Send gps data to gpstracking server \n\n"
+	s)	speed="$OPTARG"
+		;;
+	c)	course="$OPTARG"
+		;;
+	b)  battery="$OPTARG"
+		;;
+	h|?)	printf "Send gps data to gpstracking server \n\n"
 		printf "Usage: %s -d devicdId -l latitude -n logitude -a altitude \n" $(basename $0) >&2
 		printf "       -d: deviceID\n"
-		printf "       -l: latitude\n"
-		printf "       -n: longitude\n"
+		printf "       -l: latitude xx.xxxxxx\n"
+		printf "       -n: longitude xx.xxxxxx\n"
 		printf "       -a: altitude\n"
+		printf "       -s: speed\n"
+		printf "       -c: course\n"
+		printf "       -b: battery\n"
 		printf "\n"
 		exit 1
 		;;
 	esac
 done
 
-([ -z "$uniqueID" ] || [ -z "$latitude" ] || [ -z "$longitude" ] || [ -z "$altitude" ]) && logger "$0 - missing arguments" && exit 1
+([ -z "$uniqueID" ] || [ -z "$latitude" ] || [ -z "$longitude" ] || [ -z "$altitude" ]) && exit 1
+
+##make sure always has api_hash
+/usr/bin/get_gpswox_api_hash
 
 ## gpswox tracking server
-server=`uci get gpstrack.gpswox.server`
-
-case $server in 
-    1) ip="109.235.68.205"
-        ;;
-    2) ip="107.170.92.234"
-        ;;
-    *) ip="128.199.127.94"
-        ;;
-esac
-
-user_api_hash=`uci get gpstrack.gpswox.user_api_hash`
-
-uniqueId=`uci get gpstrack.gpswox.deviceID`                                                                           
+ip=`uci get gpstrack.gpswox.server`
+user_api_hash=`uci get gpstrack.gpswox.user_api_hash`                                                                        
                                                                                                                       
 ## {"battery":"0%"} ##
+[ -z "$battery" ] && battery=0
 
-attributes="7B%22battery%22:%220%22%7D"
+attributes="7B%22battery%22:%22$battery22%7D"
 
-speed=0
+[ -z "$speed" ] && speed=0
 
-course=0
+[ -z "$course" ] && course=0
 
 fixTime=`date +%s`"000"
 

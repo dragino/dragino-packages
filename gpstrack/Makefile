@@ -35,7 +35,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/admin
 	$(CP) $(PKG_BUILD_DIR)/gpstrack.lua $(1)/usr/lib/lua/luci/controller/admin
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/gpstrack
-	$(CP) $(PKG_BUILD_DIR)/gpswox.lua $(1)/usr/lib/lua/luci/model/cbi/gpstrack
+	$(CP) $(PKG_BUILD_DIR)/gps.lua $(1)/usr/lib/lua/luci/model/cbi/gpstrack
 
 endef
 

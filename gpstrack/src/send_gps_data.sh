@@ -53,7 +53,7 @@ done
 ([ -z "$uniqueID" ] || [ -z "$latitude" ] || [ -z "$longitude" ] || [ -z "$altitude" ]) && exit 1
 
 ##make sure always has api_hash
-/usr/bin/get_gpswox_api_hash
+/usr/bin/get_gpswox_api_hash.sh
 
 ## gpswox tracking server
 ip=`uci get gpstrack.gpswox.server`

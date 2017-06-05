@@ -34,8 +34,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/*.sh $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/admin
 	$(CP) $(PKG_BUILD_DIR)/gpstrack.lua $(1)/usr/lib/lua/luci/controller/admin
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/gpstrack
-	$(CP) $(PKG_BUILD_DIR)/gps.lua $(1)/usr/lib/lua/luci/model/cbi/gpstrack
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/admin_sensor
+	$(CP) $(PKG_BUILD_DIR)/gps.lua $(1)/usr/lib/lua/luci/model/cbi/admin_sensor
 
 endef
 

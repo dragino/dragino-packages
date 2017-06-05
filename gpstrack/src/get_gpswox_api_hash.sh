@@ -12,10 +12,10 @@ password=`uci get gpstrack.gpswox.password`
 save_username=`uci get gpstrack.gpswox.save_username`
 valid_api=`uci get gpstrack.gpswox.valid_api`
 
-if [ "$username" != "$save_username" ] or [ "$valid_api" != "valid" ] ; then
+if [ "$username" != "$save_username" ] || [ "$valid_api" != "valid" ] ; then
     ret_reqapi=`curl -d "email=$username&password=$password" http://www.gpswox.com/api/login`
-    ret_status=`echo "$ret_reapi" | cut -d : -f 2 | cut -d \, -f 1`
-    user_api_hash=`echo "$ret_reapi" | cut -d : -f 3 | cut -d \" -f 2`
+    ret_status=`echo "$ret_reqapi" | cut -d : -f 2 | cut -d \, -f 1`
+    user_api_hash=`echo "$ret_reqapi" | cut -d : -f 3 | cut -d \" -f 2`
 	
     if [ "$ret_status" = "1" ]; then
 
@@ -25,7 +25,8 @@ if [ "$username" != "$save_username" ] or [ "$valid_api" != "valid" ] ; then
 
         uci commit gpstrack
     else
-        exit 0
+        logger "$0 - get gpswox user_api_hash error!"
+        exit 1
     fi
 fi
 

@@ -1,6 +1,3 @@
-local sys = require "luci.sys"
-require("uci")
-
 m = Map("gpstrack", translate("GPS Track Server"), translate("Input correct username and password provide by gpstrack vendor"))
 
 s = m:section(NamedSection, "general", "gpstrack", translate("GPS Service"))

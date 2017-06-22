@@ -1,0 +1,4 @@
+config settings 'general'
+    option server 'router.eu.thethings.network'
+    option port '1700'
+    option gateway_id 'a84041168f24ff'

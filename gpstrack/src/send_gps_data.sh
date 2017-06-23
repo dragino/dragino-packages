@@ -18,7 +18,7 @@
 #             IP : 107.170.92.234 (USA)
 #             IP : 128.199.127.94 (Asia)
 
-while getopts 'd:l:n:a:' OPTION
+while getopts 'd:l:n:a:s:c:b:h:' OPTION
 do
 	case $OPTION in
 	d)	uniqueID="$OPTARG"

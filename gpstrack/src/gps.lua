@@ -14,7 +14,7 @@ local pass = s:option(Value, "password", translate("Password"),translate("Passwo
 pass.password = true
 
 local t = s:option(ListValue, "server", translate("Map Server"))
-t:value("109.235.68.205", "Europe Tracking Server")
+t:value("109.235.65.195", "Europe Tracking Server")
 t:value("107.170.92.234", "USA Tracking Server")
 t:value("128.199.127.94", "Asia Tracking Server")
 t.default = "128.199.127.94"

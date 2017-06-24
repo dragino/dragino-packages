@@ -70,7 +70,7 @@ attributes="7B%22battery%22:%22$battery22%7D"
 
 fixTime=`date +%s`"000"
 
-data="?user_api_hash=$user_api_hash&fixTime=$fixTime&valid=1&uniqueID=$uniqueID&latitude=$latitude&longitude=$longitude&attributes=$attributes&speed=$speed&altitude=$altitude&course=$course&protocol=iOS"
+data="?user_api_hash=$user_api_hash&fixTime=$fixTime&valid=1&uniqueId=$uniqueID&latitude=$latitude&longitude=$longitude&attributes=$attributes&speed=$speed&altitude=$altitude&course=$course&protocol=iOS"
 
 req="http://$ip/insert.php"
 

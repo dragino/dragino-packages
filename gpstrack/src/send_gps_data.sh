@@ -74,7 +74,7 @@ data="?user_api_hash=$user_api_hash&fixTime=$fixTime&valid=1&uniqueId=$uniqueID&
 
 req="http://$ip/insert.php"
 
-curl "$req$data"
+curl --user-agent "GPS%20Tracker/1.0 CFNetwork/811.5.4 Darwin/16.6.0" "$req$data"
 
 exit 0
 

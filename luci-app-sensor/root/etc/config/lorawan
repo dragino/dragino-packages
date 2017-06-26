@@ -1,0 +1,9 @@
+
+config settings 'general'
+	option port '1700'
+
+config settings 'radio'
+	option SF '7'
+	option coderate '5'
+	option BW '7'
+

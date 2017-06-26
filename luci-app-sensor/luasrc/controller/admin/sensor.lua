@@ -19,12 +19,13 @@ module("luci.controller.admin.sensor", package.seeall)
 function index()
 	local uci = luci.model.uci.cursor()
 	local string =string
-	entry({"admin", "sensor"}, alias("admin", "sensor", "service"), _("Sensor"), 30).index = true
-	entry({"admin", "sensor", "service"}, cbi("admin_sensor/service"), _("IoT Service"), 1)
+	entry({"admin", "sensor"}, alias("admin", "sensor", "mqtt"), _("Sensor"), 30).index = true
+	--entry({"admin", "sensor", "service"}, cbi("admin_sensor/service"), _("IoT Service"), 1)
+	entry({"admin", "sensor", "mqtt"}, cbi("admin_sensor/mqtt"), _("MQTT"), 1)
 	entry({"admin", "sensor", "poweruart"}, cbi("admin_sensor/poweruart"), _("PowerUART"), 2)
 	entry({"admin", "sensor", "mcu"}, cbi("admin_sensor/mcu"), _("MicroController"), 3)
 	entry({"admin", "sensor", "flashmcu"}, call("upload_sketch"), _("Flash MCU"), 4)
-	entry({"admin", "sensor", "LoRaWAN"}, cbi("admin_sensor/LoRaWAN"), _("LoRaWAN"), 5)
+	entry({"admin", "sensor", "LoRaWAN"}, cbi("admin_sensor/LoRaWAN"), _("LoRa / LoRaWAN"), 5)
 
 	--entry({"admin", "sensor", "rfgateway"}, cbi("admin_sensor/rfgateway"), _("RF Radio Gateway"), 4)
 

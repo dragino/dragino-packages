@@ -21,11 +21,14 @@ function index()
 	local string =string
 	entry({"admin", "sensor"}, alias("admin", "sensor", "mqtt"), _("Sensor"), 30).index = true
 	--entry({"admin", "sensor", "service"}, cbi("admin_sensor/service"), _("IoT Service"), 1)
-	entry({"admin", "sensor", "mqtt"}, cbi("admin_sensor/mqtt"), _("MQTT"), 1)
-	entry({"admin", "sensor", "poweruart"}, cbi("admin_sensor/poweruart"), _("PowerUART"), 2)
-	entry({"admin", "sensor", "mcu"}, cbi("admin_sensor/mcu"), _("MicroController"), 3)
-	entry({"admin", "sensor", "flashmcu"}, call("upload_sketch"), _("Flash MCU"), 4)
-	entry({"admin", "sensor", "LoRaWAN"}, cbi("admin_sensor/LoRaWAN"), _("LoRa / LoRaWAN"), 5)
+	entry({"admin", "sensor", "iotserver"}, cbi("admin_sensor/iotserver"), _("IOT Server"), 1)
+	entry({"admin", "sensor", "mqtt"}, cbi("admin_sensor/mqtt"), _("MQTT"), 2)
+	entry({"admin", "sensor", "poweruart"}, cbi("admin_sensor/poweruart"), _("PowerUART"), 5)
+	entry({"admin", "sensor", "mcu"}, cbi("admin_sensor/mcu"), _("MicroController"), 8)
+	entry({"admin", "sensor", "flashmcu"}, call("upload_sketch"), _("Flash MCU"), 10)
+	entry({"admin", "sensor", "LoRaWAN"}, cbi("admin_sensor/LoRaWAN"), _("LoRa / LoRaWAN"), 15)
+        entry({"admin", "sensor", "sdata"}, template("admin_status/sdata"), _("Sensor Data"), 20).leaf = true
+        entry({"admin", "sensor", "sdata_action"}, post("sdata_action")).leaf = true
 
 	--entry({"admin", "sensor", "rfgateway"}, cbi("admin_sensor/rfgateway"), _("RF Radio Gateway"), 4)
 
@@ -82,4 +85,8 @@ function upload_sketch()
   else
     luci.template.render("dragino/flashmcu")
   end
+end
+
+function sdata_action()
+    luci.http.redirect(luci.dispatcher.build_url("admin/sensor/sdata"))
 end

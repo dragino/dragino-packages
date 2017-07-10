@@ -1,0 +1,48 @@
+<%-
+
+        local fs = require "nixio.fs"
+	local io = require "io"
+
+        mode = luci.dispatcher.context.requestpath                                                            
+        mode = tonumber(mode[#mode] ~= "iptables" and mode[#mode]) or 1
+
+        local flag = "r"
+
+        if (mode == 2) then
+          flag = "rb"
+        end
+
+        file = io.open("/var/iot/data", flag)
+        if file then
+          sdata = file:read("*a")
+        else
+          sdata = "No Data"
+        end
+-%>
+
+<%+header%>
+
+<style type="text/css">
+	span:target {
+		color: blue;
+		text-decoration: underline;
+	}
+</style>
+
+<h2 name="content"><%:Sensor Data%></h2>
+<br />
+
+<ul class="cbi-tabmenu">
+        <li class="cbi-tab<%= mode ~= 1 and "-disabled" %>"><a href="<%=url("admin/status/sdata/1")%>"><%:For ASCII File%></a></li>
+        <li class="cbi-tab<%= mode ~= 2 and "-disabled" %>"><a href="<%=url("admin/status/sdata/2")%>"><%:For Binary File%></a></li>
+</ul>
+
+<form method="post" action="<%=url("admin/status/sdata_action")%>"">              
+  <input type="hidden" name="family" value="<%=mode%>" />
+</form>
+
+<div id="content_syslog">
+  <textarea readonly="readonly" wrap="off" rows="<%=sdata:cmatch("\n")+2%>" id="syslog"><%=sdata:pcdata()%></textarea>
+</div>
+
+<%+footer%>

@@ -220,7 +220,7 @@ function Dispatch_Data_to_Sensor_Channel(raw,channel_table)
 end
 
 --Base64 encode and decode
-function base64.b64encode(source_str)  
+function b64encode(source_str)  
     local b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'  
     local s64 = ''  
     local str = source_str  
@@ -252,7 +252,7 @@ function base64.b64encode(source_str)
     return s64  
 end  
   
-function base64.b64decode(str64)  
+function b64decode(str64)  
     local b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'  
     local temp={}  
     for i=1,64 do  

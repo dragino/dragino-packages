@@ -1,5 +1,7 @@
 
-m = Map("sensor", translate("Select IoT Server"), translate("Select IoT Server"))
+m = Map("sensor", translate("Select IoT Server"), translate("Select the IoT Server type to connect"))
+
+s = m:section(NamedSection, "general", "sensor", translate("Select IoT Server"))
 local sv = s:option(ListValue, "server", translate("IoT Server"))
 sv.placeholder = "Select IoT server"
 sv.default = "MQTT"

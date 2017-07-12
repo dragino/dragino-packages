@@ -84,7 +84,7 @@ sbw:value("7", "125 kHz")
 sbw:value("8", "250 kHz")
 sbw:value("9", "500 kHz")
 
-local prb = s:option(Value, "preamble", translate("Preamble Length"))
+local prb = s:option(Value, "preamble", translate("Preamble Length"), translate("Length range: 6 ~ 65536"))
 prb.placeholder = "6 ~ 65536"
 prb.default = "6"
 

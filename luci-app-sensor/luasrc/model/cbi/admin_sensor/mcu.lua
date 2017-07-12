@@ -46,11 +46,11 @@ board:value('mega2560','Arduino Mega2560')
 board:value('teensy31','Teensy 3.1/3.2')
 board:value('undefined','Undefined')
 
-local vs = s:option(Value, "mcu_version", translate("MCU Version"),translate("MCU Image Version")
+local vs = s:option(Value, "mcu_version", translate("MCU Version"),translate("MCU Image Version"))
 local mvs = "Undefined"
 file = io.open("/var/avr/fw_version", "r")
 if file then
-    mvs = file.read("*a")
+    mvs = file:read("*a")
     io.close(file)
     if not mvs then
         mvs = "Undefined"

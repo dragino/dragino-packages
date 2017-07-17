@@ -1,23 +1,23 @@
 #!/usr/bin/lua
 
-require("base64")
 require("uci") 
+local utility = require "dragino.utility"
 
 if (arg[1] == nil) then
-    return print(string.format("Usage: lua %s options packetsize freq", arg[0]))
+    return print(string.format("Usage: lua %s stat packetsize freq", arg[0]))
 end
 
 local x = uci.cursor() 
-local ip = x:get("LoRaWAN", "general", "server")
-local port = x:get("LoRaWAN", "general", "port")
-local gatewayID = x:get("LoRaWAN", "general", "gateway_id")
-local email = x:get("LoRaWAN", "general", "mail")
-local lati = x:get("LoRaWAN", "general", "lati")
-local long = x:get("LoRaWAN", "general", "long")
-local SF = x:get("LoRaWAN", "radio", "SF")
-local frequency = x:get("LoRaWAN", "radio", "frequency")
-local coderate = x:get("LoRaWAN", "radio", "coderate")
-local BW = x:get("LoRaWAN", "radio", "BW")
+local ip = x:get("lorawan", "general", "server")
+local port = x:get("lorawan", "general", "port")
+local gatewayID = x:get("lorawan", "general", "gateway_id")
+local email = x:get("lorawan", "general", "mail")
+local lati = x:get("lorawan", "general", "lati")
+local long = x:get("lorawan", "general", "long")
+local SF = x:get("lorawan", "radio", "SF")
+local frequency = x:get("lorawan", "radio", "frequency")
+local coderate = x:get("lorawan", "radio", "coderate")
+local BW = x:get("lorawan", "radio", "BW")
 
 --[[
 local ip = "192.168.204.132"
@@ -52,7 +52,7 @@ if (arg[1] == "stat") then
     stat[1] = "{\"stat\":{" 
     stat[2] =  "\"time\":" .. "\"" .. os.date("\%Y-\%m-\%d \%H:\%M:\%S GMT", os.time()) .."\"," 
     stat[3] =  "\"lati\":" .. lati .."," 
-    stat[4] =  "\"long\":35.479," 
+    stat[4] =  "\"long\":" .. long .."," 
     stat[5] =  "\"alti\":0," 
     stat[6] =  "\"rxnb\":0," 
     stat[7] =  "\"rxok\":0," 
@@ -92,7 +92,7 @@ else
         f:close()
     end
 
-    head = head .. table.concat(rxpk) .. base64.b64encode(data1) .. "\"}]}"
+    head = head .. table.concat(rxpk) .. utility.b64encode(data1) .. "\"}]}"
 
     rxpk = nil
 

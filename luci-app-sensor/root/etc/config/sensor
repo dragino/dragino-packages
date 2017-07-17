@@ -1,3 +1,6 @@
+config settings 'general'
+        option iotserver 'MQTT'
+        option pfw_debug '0'
 
 config settings 'service'
 	option server 'Xively'

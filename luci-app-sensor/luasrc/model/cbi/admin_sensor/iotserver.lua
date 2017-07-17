@@ -10,4 +10,9 @@ sv:value("MQTT",  "MQTT Server")
 sv:value("GPSWOX",  "GPSWOX Server")
 sv:value("TCP/IP",  "TCP/IP Protocol")
 
+local debug = s:option(Flag, "pfw_debug", translate('Debugger'),translate("TTN  Packet Forwarder Debugger"))
+debug.enabled  = "1"
+debug.disabled = "0"
+debug.default  = debug.disabled
+
 return m

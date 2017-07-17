@@ -6,15 +6,22 @@
         mode = luci.dispatcher.context.requestpath                                                            
         mode = tonumber(mode[#mode] ~= "iptables" and mode[#mode]) or 1
 
-        local flag = "r"
-
-        if (mode == 2) then
-          flag = "rb"
+        file = io.open("/var/iot/data", "rb")
+        if file then
+          if (mode == 1) then
+            os.execute("cat /var/iot/data > /tmp/tmpdata")
+          elseif (mode == 2) then
+            os.execute("hexdump /var/iot/data > /tmp/tmpdata")
+          else
+            os.execute("xxd -b -c 4 /var/iot/data | awk '{print $2$3$4$5}' > /tmp/tmpdata")
+          end  
+          file:close()
         end
 
-        file = io.open("/var/iot/data", flag)
+        file = io.open("/tmp/tmpdata", "rb")
         if file then
           sdata = file:read("*a")
+          file:close()
         else
           sdata = "No Data"
         end
@@ -30,14 +37,16 @@
 </style>
 
 <h2 name="content"><%:Sensor Data%></h2>
+<h4 name="content"><%:Shows data in /var/iot/data%></h4>
 <br />
 
 <ul class="cbi-tabmenu">
-        <li class="cbi-tab<%= mode ~= 1 and "-disabled" %>"><a href="<%=url("admin/status/sdata/1")%>"><%:For ASCII File%></a></li>
-        <li class="cbi-tab<%= mode ~= 2 and "-disabled" %>"><a href="<%=url("admin/status/sdata/2")%>"><%:For Binary File%></a></li>
+        <li class="cbi-tab<%= mode ~= 1 and "-disabled" %>"><a href="<%=url("admin/sensor/sdata/1")%>"><%:ASCII%></a></li>
+        <li class="cbi-tab<%= mode ~= 2 and "-disabled" %>"><a href="<%=url("admin/sensor/sdata/2")%>"><%:Hex%></a></li>
+        <li class="cbi-tab<%= mode ~= 3 and "-disabled" %>"><a href="<%=url("admin/sensor/sdata/3")%>"><%:Binary%></a></li>
 </ul>
 
-<form method="post" action="<%=url("admin/status/sdata_action")%>"">              
+<form method="post" action="<%=url("admin/sensor/sdata_action")%>"">              
   <input type="hidden" name="family" value="<%=mode%>" />
 </form>
 

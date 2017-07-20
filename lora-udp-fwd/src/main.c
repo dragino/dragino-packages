@@ -4,7 +4,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <string.h>
+#include <stdarg.h>
 #include <errno.h>
 #include <unistd.h>
 #include <signal.h>
@@ -25,9 +27,10 @@ typedef bool boolean;
 
 char b64[256];
 
-struct sockaddr_in si_other;
-int s, slen=sizeof(si_other);
+/* socket for connect to server */
+struct addrinfo *res;
 struct ifreq ifr;
+int s;
 
 /* Set center frequency */
 uint32_t  freq = 868100000; /* in Mhz! (868.1) */
@@ -50,6 +53,8 @@ char port[CHARLEN] = "port";
 char sf[CHARLEN] = "SF";
 char bw[CHARLEN] = "BW";
 char coderate[CHARLEN] = "coderate";
+char frequency[CHARLEN] = "rx_frequency";
+char pfwd_debug[CHARLEN] = "pfwd_debug";
 
 #define BUFLEN 2048  //Max length of buffer
 
@@ -110,12 +115,48 @@ cleanup:
 /* signal for hangup receive message */
 void sigalrm(int signo)
 {
+
+}
+
+void Syslog(int type, char *fmt, ...)
+{
+    int debug = 0;
+
+    debug = atoi(pfwd_debug);
+    if (debug) {
+        va_list ap;
+        int ind = 0;
+        char *s;
+        char buf[BUFLEN] = {'\0'};
+
+        va_start(ap, fmt);
+
+        while (*fmt) {
+            if (*fmt == '%') {
+                s = va_arg(ap, char *);
+                strcpy((buf + ind), s);
+                ind = ind + strlen(s);
+                *fmt++;
+            } else {
+                buf[ind] = *fmt;
+                ind++;
+            }
+
+            *fmt++;
+        }
+
+        va_end(ap);
+
+        syslog(type, "%s", buf);
+
+        bzero(buf, BUFLEN);
+    }
 }
 
 void die(const char *s)
 {
-    perror(s);
     closelog();
+    freeaddrinfo(res);
     exit(1);
 }
 
@@ -150,11 +191,9 @@ void sendudp(char *msg, int length) {
     /*send the update*/
     int n;
 
-    inet_aton(server , &si_other.sin_addr);
-
-    if (sendto(s, (char *)msg, length, 0 , (struct sockaddr *) &si_other, slen)==-1)
+    if (sendto(s, (char *)msg, length, 0 , res->ai_addr, res->ai_addrlen) == -1)
     {
-        syslog(LOG_ERR, "lora: sendudp error");
+        Syslog(LOG_ERR, "lora: sendudp error");
         die("sendto()");
     }
 
@@ -164,7 +203,7 @@ void sendudp(char *msg, int length) {
         if (errno != EINTR)
             alarm(0);
     } else
-        syslog(LOG_INFO, "receive from udp server %s", buf);
+        Syslog(LOG_INFO, "receive from udp server %s", buf);
 
     alarm(0);
 
@@ -220,7 +259,7 @@ void sendstat(int mac) {
     stat_index += j;
     status_report[stat_index] = 0; /* add string terminator, for safety */
 
-    syslog(LOG_INFO, "stat update: %s\n", (char *)(status_report + 12)); /* DEBUG: display JSON stat */
+    Syslog(LOG_INFO, "stat update: %s", (char *)(status_report + 12)); /* DEBUG: display JSON stat */
 
     //send the update
     sendudp(status_report, stat_index);
@@ -272,18 +311,18 @@ void sendrxpk(int mac) {
     strftime(stat_timestamp, sizeof stat_timestamp, "%F %T %Z", gmtime(&t));
 
     if ((fd = open(DATAFILE, O_RDONLY)) < 0 ){
-        syslog(LOG_ERR, "can't open data file!");
+        Syslog(LOG_ERR, "can't open data file!");
         die("open data file");
     } else {
         if (read(fd, data, TX_BUFF_SIZE - 64) != 0){
-            syslog(LOG_ERR, "can't read data file!");
+            Syslog(LOG_ERR, "can't read data file!");
             die("read data file");
         }
         size = bin_to_b64((uint8_t *)data, strlen(data), (char *)(b64), 341);
     }
 
     if (close(fd) != 0)
-        syslog(LOG_ERR, "can't close data file!");
+        Syslog(LOG_ERR, "can't close data file!");
 
     j = snprintf((char *)(rxpk + rxpk_index), TX_BUFF_SIZE-rxpk_index, "{\"rxpk\":[{\"tmst\":\"%s\",\"chan\": 0,\"rfch\": 0,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"%s %s\",\"codr\":\"%s\",\"lsnr\":9,\"rssi\":%d,\"size\":%d,\"data\":\"%s\"}]}", stat_timestamp, freq, sf, bw, coderate, rssi, size, b64);
     rxpk_index += j;
@@ -305,19 +344,18 @@ void debug_uci_value() {
 
 int main (int argc, char *argv[]) {
 
-    struct timeval nowtime;
-    uint32_t lasttime;
-
     struct sigaction sa;
 
-    int PORT = 1700;
+    struct addrinfo hints; 
+
+    int n;
 
     int mac = 0; /*default gatewayid form uci option value */
 
     openlog("lora_udp_fwd", LOG_CONS | LOG_PID, 0);
 
     if (argc < 2){
-        syslog(LOG_ERR, "%s: need argument", argv[0]);
+        Syslog(LOG_ERR, "%s: need argument", argv[0]);
         closelog();
         exit(1);
     }
@@ -326,71 +364,83 @@ int main (int argc, char *argv[]) {
     sa.sa_flags = 0;
     sigemptyset(&sa.sa_mask);
     if (sigaction(SIGALRM, &sa, NULL) < 0)
-        syslog(LOG_ERR, "%s: install SIGALRM error", argv[0]);
+        Syslog(LOG_INFO, "%s: install SIGALRM error", argv[0]);
 
     if (!get_option_value("general", server)){
-        syslog(LOG_ERR, "%s: get option server=%s", argv[0], server);
-        die(server);
+        Syslog(LOG_INFO, "%s: get option server=%s", argv[0], server);
+        strcpy(server, "52.169.76.203");  /*set default:router.eu.thethings.network*/
     }
 
     if (!get_option_value("general", port)){
-        syslog(LOG_ERR, "%s: get option port=%s", argv[0], port);
-        die(port);
+        Syslog(LOG_ERR, "%s: get option port=%s", argv[0], port);
+        strcpy(port, "1700");
     }
 
     if (!get_option_value("general", email)){
-        syslog(LOG_NOTICE, "%s: get option email=%s", argv[0], email);
+        Syslog(LOG_NOTICE, "%s: get option email=%s", argv[0], email);
     }
 
     if (!get_option_value("general", gatewayid)){
-        syslog(LOG_NOTICE, "%s: get option gatewayid=%s", argv[0], gatewayid);
+        Syslog(LOG_NOTICE, "%s: get option gatewayid=%s", argv[0], gatewayid);
     } 
 
     if (!get_option_value("general", LAT)){
-        syslog(LOG_NOTICE, "%s: get option lat=%s", argv[0], LAT);
+        Syslog(LOG_NOTICE, "%s: get option lat=%s", argv[0], LAT);
     }
 
     if (!get_option_value("general", LON)){
-        syslog(LOG_NOTICE, "%s: get option lon=%s", argv[0], LON);
+        Syslog(LOG_NOTICE, "%s: get option lon=%s", argv[0], LON);
+    }
+
+    if (!get_option_value("general", pfwd_debug)){
+        Syslog(LOG_NOTICE, "get option pfwd_debug=%s", pfwd_debug);
     }
 
     if (!get_option_value("radio", sf)){
-        syslog(LOG_NOTICE, "%s: get option sf=%s", argv[0], sf);
+        Syslog(LOG_NOTICE, "%s: get option sf=%s", argv[0], sf);
     }
 
     if (!get_option_value("radio", coderate)){
-        syslog(LOG_NOTICE, "%s: get option coderate=%s", argv[0], coderate);
+        Syslog(LOG_NOTICE, "%s: get option coderate=%s", argv[0], coderate);
     }
 
     if (!get_option_value("radio", bw)){
-        syslog(LOG_ERR, "%s: get option bw=%s", argv[0], bw);
-        die(bw);
+        Syslog(LOG_NOTICE, "%s: get option bw=%s", argv[0], bw);
+    }
+
+    if (!get_option_value("radio", frequency)){
+        Syslog(LOG_NOTICE, "%s: get option frequency=%s", argv[0], bw);
+        strcpy(frequency, "868100000"); /* default frequency*/
     }
 
     lat = atof(LAT);
     lon = atof(LON);
-    PORT = atoi(port);
+    freq = atof(frequency);
 
     /* uci value print 
     debug_uci_value();*/
 
-    if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
-        syslog(LOG_ERR, "%s: socket error", argv[0]);
+    if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
+        Syslog(LOG_ERR, "%s: socket error", argv[0]);
         die("socket");
     }
 
-    memset((char *) &si_other, 0, sizeof(si_other));
-    si_other.sin_family = AF_INET;
-    si_other.sin_port = htons(PORT);
+    bzero(&hints, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
 
     ifr.ifr_addr.sa_family = AF_INET;
     strncpy(ifr.ifr_name, "eth1", IFNAMSIZ-1);  /* can we rely on eth0? */
     ioctl(s, SIOCGIFHWADDR, &ifr);
 
+    if ((n = getaddrinfo(server, port, &hints, &res)) != 0){
+        Syslog(LOG_ERR, "error for %s:%s, %s", server, port, gai_strerror(n));
+        die("getaddrinfo");
+    }
+    
     if (strlen(gatewayid) != 16) {  /*use mac for gatewayid,  gatewayid len is 16 bytes */
 
-        syslog(LOG_NOTICE, "%s-Gateway ID: %.2x:%.2x:%.2x:ff:ff:%.2x:%.2x:%.2x\n",
-               argv[0],
+        syslog(LOG_NOTICE, "Gateway ID: %2x:%2x:%2x:ff:ff:%2x:%2x:%2x\n",
                (unsigned char)ifr.ifr_hwaddr.sa_data[0],
                (unsigned char)ifr.ifr_hwaddr.sa_data[1],
                (unsigned char)ifr.ifr_hwaddr.sa_data[2],
@@ -399,10 +449,11 @@ int main (int argc, char *argv[]) {
                (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
          mac = 1;
     } else {
-        syslog(LOG_NOTICE, "%s-Gateway ID: %s", argv[0], gatewayid);
+        Syslog(LOG_NOTICE, "Gateway ID: %s", gatewayid);
     }
 
-    syslog(LOG_NOTICE, "%s: Listening at %s on %.6lf Mhz.\n", argv[0], sf, (double)freq/1000000);
+
+    syslog(LOG_NOTICE, "Listening at %s on %.6lf Mhz.\n", sf, (double)freq/1000000);
 
     //sendstat(mac);
     
@@ -411,20 +462,9 @@ int main (int argc, char *argv[]) {
     else
         sendrxpk(mac);
 
-   /*
-    while(1) {
-
-        gettimeofday(&nowtime, NULL);
-        uint32_t nowseconds = (uint32_t)(nowtime.tv_sec);
-        if (nowseconds - lasttime >= 30) {
-            lasttime = nowseconds;
-            sendstat(mac);
-        }
-        sleep(1);
-    }
-    */
-
     closelog();
+    
+    freeaddrinfo(res);
 
     return (0);
 

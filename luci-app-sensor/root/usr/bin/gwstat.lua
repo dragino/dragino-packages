@@ -38,6 +38,10 @@ d = string.format("%c", math.random(1,255))
 
 head = head .. d
 
+d = string.format("%c", 0)
+
+head = head .. d
+
 local len = string.len(gatewayID)
 
 for i = 1, len, 2 do
@@ -65,6 +69,8 @@ if (arg[1] == "stat") then
     stat[14] =  "\"desc\":\"\"" 
     stat[15] =  "}}" 
 
+    print(table.concat(stat))
+
     head = head .. table.concat(stat)
 
     stat = nil
@@ -90,17 +96,12 @@ else
     if f then
         data1 = f:read("*a")
         f:close()
+        head = head .. table.concat(rxpk) .. utility.b64encode(data1) .. "\"}]}"
     end
-
-    head = head .. table.concat(rxpk) .. utility.b64encode(data1) .. "\"}]}"
 
     rxpk = nil
 
 end
-
--- print test:
-print(head)
-
 
 -- sendto UDP Server
 socket = require "nixio".socket 

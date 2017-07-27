@@ -1,0 +1,55 @@
+diff -uNr a/src/optparse.c b/src/optparse.c
+--- a/src/optparse.c	2017-04-24 00:03:08.000000000 +0800
++++ b/src/optparse.c	2017-07-27 16:23:00.022384911 +0800
+@@ -51,8 +51,9 @@
+ static void
+ permute(struct optparse *options, int index)
+ {
++    int i;
+     char *nonoption = options->argv[index];
+-    for (int i = index; i < options->optind - 1; i++)
++    for (i = index; i < options->optind - 1; i++)
+         options->argv[i] = options->argv[i + 1];
+     options->argv[options->optind - 1] = nonoption;
+ }
+@@ -156,11 +157,12 @@
+ static void
+ optstring_from_long(const struct optparse_long *longopts, char *optstring)
+ {
++    int i, a;
+     char *p = optstring;
+-    for (int i = 0; !longopts_end(longopts, i); i++) {
++    for (i = 0; !longopts_end(longopts, i); i++) {
+         if (longopts[i].shortname) {
+             *p++ = longopts[i].shortname;
+-            for (int a = 0; a < (int)longopts[i].argtype; a++)
++            for (a = 0; a < (int)longopts[i].argtype; a++)
+                 *p++ = ':';
+         }
+     }
+@@ -196,13 +198,14 @@
+               const struct optparse_long *longopts,
+               int *longindex)
+ {
++    int i ;
+     char optstring[96 * 3 + 1]; /* 96 ASCII printable characters */
+     optstring_from_long(longopts, optstring);
+     int result = optparse(options, optstring);
+     if (longindex != 0) {
+         *longindex = -1;
+         if (result != -1)
+-            for (int i = 0; !longopts_end(longopts, i); i++)
++            for (i = 0; !longopts_end(longopts, i); i++)
+                 if (longopts[i].shortname == options->optopt)
+                     *longindex = i;
+     }
+@@ -241,7 +244,8 @@
+     options->optarg = 0;
+     option += 2; /* skip "--" */
+     options->optind++;
+-    for (int i = 0; !longopts_end(longopts, i); i++) {
++    int i;
++    for (i = 0; !longopts_end(longopts, i); i++) {
+         const char *name = longopts[i].longname;
+         if (longopts_match(name, option)) {
+             if (longindex)

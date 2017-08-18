@@ -310,11 +310,11 @@ void sendrxpk(int mac) {
     t = time(NULL);
     strftime(stat_timestamp, sizeof stat_timestamp, "%F %T %Z", gmtime(&t));
 
-    if ((fd = open(DATAFILE, O_RDONLY)) < 0 ){
+    if ((fd = open(DATAFILE, O_CREAT|O_RDWR)) < 0 ){
         Syslog(LOG_ERR, "can't open data file!");
         die("open data file");
     } else {
-        if (read(fd, data, TX_BUFF_SIZE - 64) != 0){
+        if (read(fd, data, TX_BUFF_SIZE - 64) < 0){
             Syslog(LOG_ERR, "can't read data file!");
             die("read data file");
         }
@@ -324,10 +324,13 @@ void sendrxpk(int mac) {
     if (close(fd) != 0)
         Syslog(LOG_ERR, "can't close data file!");
 
-    j = snprintf((char *)(rxpk + rxpk_index), TX_BUFF_SIZE-rxpk_index, "{\"rxpk\":[{\"tmst\":\"%s\",\"chan\": 0,\"rfch\": 0,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"%s %s\",\"codr\":\"%s\",\"lsnr\":9,\"rssi\":%d,\"size\":%d,\"data\":\"%s\"}]}", stat_timestamp, freq, sf, bw, coderate, rssi, size, b64);
-    rxpk_index += j;
-    rxpk[rxpk_index] = 0; /* add string terminator, for safety */
+    Syslog(LOG_NOTICE, "b64: %s", b64);
 
+    j = snprintf((char *)(rxpk + rxpk_index), TX_BUFF_SIZE - rxpk_index, "{\"rxpk\":[{\"tmst\":\"%s\",\"chan\": 0,\"rfch\": 0,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"%s %s\",\"codr\":\"%s\",\"lsnr\":9,\"rssi\":%d,\"size\":%d,\"data\":\"%s\"}]}", stat_timestamp, freq, sf, bw, coderate, rssi, size, b64);
+    rxpk_index += j;
+    rxpk[rxpk_index] = '\0'; /* add string terminator, for safety */
+
+    Syslog(LOG_NOTICE, "rxpk: %s", (char *)(rxpk + 12));
     sendudp(rxpk, rxpk_index);
 }
 

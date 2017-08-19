@@ -6,7 +6,6 @@ uci set system.@system[0].device=$(hexdump -v -e '1/1 "%.2x"' -s $((0x120)) -n 1
 hostname_prefix=$(uci get system.vendor.hostname)
 uci set system.@system[0].hostname=$hostname_prefix-$(hexdump -v -e '1/1 "%.2x"' -s $((0x1005)) -n 3 /dev/mtd6)
 echo $(uci get system.@system[0].hostname) > /proc/sys/kernel/hostname
-uci commit
 
 rename_network_on_first_boot
 
@@ -15,6 +14,10 @@ uci	set ucitrack.@secn[0].exec=/usr/bin/config_secn
 
 uci add ucitrack gpstrack
 uci	set ucitrack.@gpstrack[0].exec=/usr/bin/get_gpswox_api_hash.sh
+
+uci add ucitrack lorawan
+uci	set ucitrack.@lorawan[0].exec=/usr/bin/reset-mcu
+
 uci	commit
 
 exit 0

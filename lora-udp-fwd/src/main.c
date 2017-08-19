@@ -266,15 +266,12 @@ void sendstat(int mac) {
 
 }
 
-void sendrxpk(int mac) {
+void sendrxpk(int mac, int rssi, int size) {
     static char rxpk[TX_BUFF_SIZE]; /* status report as a JSON object */
-    char stat_timestamp[24];
     char data[TX_BUFF_SIZE - 64];
-    time_t t;
 
     int rxpk_index=0;
     int fd;
-    int rssi, size;
     int dec, i, j;
 
     /* pre-fill the data buffer with fixed fields */
@@ -307,27 +304,48 @@ void sendrxpk(int mac) {
     rxpk_index = 12; /* 12-byte header */
 
     /* get timestamp for statistics */
-    t = time(NULL);
-    strftime(stat_timestamp, sizeof stat_timestamp, "%F %T %Z", gmtime(&t));
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    uint32_t tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
 
     if ((fd = open(DATAFILE, O_CREAT|O_RDWR)) < 0 ){
         Syslog(LOG_ERR, "can't open data file!");
         die("open data file");
     } else {
-        if (read(fd, data, TX_BUFF_SIZE - 64) < 0){
+        if ((i = read(fd, data, TX_BUFF_SIZE - 64)) < 0){
             Syslog(LOG_ERR, "can't read data file!");
             die("read data file");
         }
-        size = bin_to_b64((uint8_t *)data, strlen(data), (char *)(b64), 341);
+        /*
+        size = bin_to_b64((uint8_t *)data, i, (char *)(b64), 341);
+        */
     }
 
     if (close(fd) != 0)
         Syslog(LOG_ERR, "can't close data file!");
 
-    Syslog(LOG_NOTICE, "b64: %s", b64);
+    j = snprintf((char *)(rxpk + rxpk_index), TX_BUFF_SIZE - rxpk_index, "{\"rxpk\":[{\"tmst\":%u,\"chan\": 0,\"rfch\": 0,\"freq\":%u,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%sBW125\",\"codr\":\"4/%s\",\"lsnr\":9", tmst, freq, sf, coderate);
 
-    j = snprintf((char *)(rxpk + rxpk_index), TX_BUFF_SIZE - rxpk_index, "{\"rxpk\":[{\"tmst\":\"%s\",\"chan\": 0,\"rfch\": 0,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"%s %s\",\"codr\":\"%s\",\"lsnr\":9,\"rssi\":%d,\"size\":%d,\"data\":\"%s\"}]}", stat_timestamp, freq, sf, bw, coderate, rssi, size, b64);
     rxpk_index += j;
+
+    j = snprintf((char *)(rxpk + rxpk_index), TX_BUFF_SIZE - rxpk_index, ",\"rssi\":%d,\"size\":%u", rssi, size);
+
+    rxpk_index += j;
+
+    memcpy((void *)(rxpk + rxpk_index), (void *)",\"data\":\"", 9);
+    rxpk_index += 9;
+
+    j = bin_to_b64((uint8_t *)data, i, rxpk + rxpk_index, 341);
+
+    rxpk_index += j;
+    rxpk[rxpk_index] = '"';
+    ++rxpk_index;
+    rxpk[rxpk_index] = '}';
+    ++rxpk_index;
+    rxpk[rxpk_index] = ']';
+    ++rxpk_index;
+    rxpk[rxpk_index] = '}';
+    ++rxpk_index;
     rxpk[rxpk_index] = '\0'; /* add string terminator, for safety */
 
     Syslog(LOG_NOTICE, "rxpk: %s", (char *)(rxpk + 12));
@@ -343,6 +361,7 @@ void debug_uci_value() {
     printf("lon: %f\n", lon);
     printf("sf: %s\n", sf);
     printf("bw: %s\n", bw);
+    printf("code: %s\n", coderate);
 }
 
 int main (int argc, char *argv[]) {
@@ -412,7 +431,7 @@ int main (int argc, char *argv[]) {
     }
 
     if (!get_option_value("radio", frequency)){
-        Syslog(LOG_NOTICE, "%s: get option frequency=%s", argv[0], bw);
+        Syslog(LOG_NOTICE, "%s: get option frequency=%s", argv[0], frequency);
         strcpy(frequency, "868100000"); /* default frequency*/
     }
 
@@ -421,7 +440,8 @@ int main (int argc, char *argv[]) {
     freq = atof(frequency);
 
     /* uci value print 
-    debug_uci_value();*/
+    debug_uci_value();
+    */
 
     if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
         Syslog(LOG_ERR, "%s: socket error", argv[0]);
@@ -463,7 +483,10 @@ int main (int argc, char *argv[]) {
     if(!strcmp("stat", argv[1]))  /* send gateway status to UDP server */ 
         sendstat(mac);
     else
-        sendrxpk(mac);
+        if (argc < 4) 
+            printf("Usage: %s rxpk rssi size\n", argv[0]);
+        else
+            sendrxpk(mac, atoi(argv[2]), atoi(argv[3]));
 
     closelog();
     

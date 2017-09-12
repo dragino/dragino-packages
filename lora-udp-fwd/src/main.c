@@ -14,56 +14,59 @@
 #include <syslog.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
 #include <sys/ioctl.h>
 #include <net/if.h>
-
 #include <uci.h>
-
 #include "base64.h"
 
-
-typedef bool boolean;
-
-char b64[256];
+static char b64[256];
 
 /* socket for connect to server */
-struct addrinfo *res;
-struct ifreq ifr;
-int s;
+static struct addrinfo *res;
+static struct ifreq ifr;
+static int sock_up, sock_down;
 
 /* Set center frequency */
-uint32_t  freq = 868100000; /* in Mhz! (868.1) */
+static uint32_t  freq = 868100000; /* in Mhz! (868.1) */
 
 /* Set location */
-float lat=0.0;
-float lon=0.0;
-int   alt=0;
+static float lat=0.0;
+static float lon=0.0;
+static int   alt=0;
 
 #define CHARLEN 64  /* Length of uci option value */  
 /* Informal status fields */
 static char platform[CHARLEN] = "LG01/OLG01";  /* platform definition */
-char description[CHARLEN] = "";                        /* used for free form description */
-char server[CHARLEN] = "server";
-char email[CHARLEN]  = "mail";                        /* used for contact email */
-char LAT[CHARLEN] = "lati";
-char LON[CHARLEN] = "long";
-char gatewayid[CHARLEN] = "gateway_id";
-char port[CHARLEN] = "port";
-char sf[CHARLEN] = "SF";
-char bw[CHARLEN] = "BW";
-char coderate[CHARLEN] = "coderate";
-char frequency[CHARLEN] = "rx_frequency";
-char pfwd_debug[CHARLEN] = "pfwd_debug";
+static char description[CHARLEN] = "";                        /* used for free form description */
+static char server[CHARLEN] = "server";
+static char email[CHARLEN]  = "mail";                        /* used for contact email */
+static char LAT[CHARLEN] = "lati";
+static char LON[CHARLEN] = "long";
+static char gatewayid[CHARLEN] = "gateway_id";
+static char port[CHARLEN] = "port";
+static char sf[CHARLEN] = "SF";
+static char bw[CHARLEN] = "BW";
+static char coderate[CHARLEN] = "coderate";
+static char frequency[CHARLEN] = "rx_frequency";
+static char pfwd_debug[CHARLEN] = "pfwd_debug";
+
+static uint32_t net_mac_h; /* Most Significant Nibble, network order */
+static uint32_t net_mac_l; /* Least Significant Nibble, network order */
 
 #define BUFLEN 2048  //Max length of buffer
 
 #define TX_BUFF_SIZE  2048
 #define STATUS_SIZE	  1024
 
-#define TIMEOUT 10
+#define PUSH_TIMEOUT_MS     100
+#define PULL_TIMEOUT_MS     200
+
+static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; /* cut in half, critical for throughput */
+static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; /* non critical for throughput */
 
 #define DATAFILE "/var/iot/data"
+
+#define DLPATH "/var/iot/dldata"
 
 #define PROTOCOL_VERSION  1
 #define PKT_PUSH_DATA 0
@@ -94,10 +97,11 @@ bool get_option_value(const char *section, char *option)
 
     uci_foreach_element(&pkg->sections, e)
     {
-        struct uci_section *s = uci_to_section(e);
+        struct uci_section *st = uci_to_section(e);
 
-        if(!strcmp(section, s->e.name))  /* compare section name */ {
-            if (NULL != (value = uci_lookup_option_string(ctx, s, option))) {
+        if(!strcmp(section, st->e.name))  /* compare section name */ {
+            if (NULL != (value = uci_lookup_option_string(ctx, st, option))) {
+                     bzero(option, CHARLEN);
                      strncpy(option, value, CHARLEN); 
                      ret = true;
                      break;
@@ -112,30 +116,32 @@ cleanup:
 }
 
 
-/* signal for hangup receive message */
+/* signal for hangup receive message 
 void sigalrm(int signo)
 {
 
 }
+*/
 
 void Syslog(int type, char *fmt, ...)
 {
     int debug = 0;
 
     debug = atoi(pfwd_debug);
+
     if (debug) {
         va_list ap;
         int ind = 0;
-        char *s;
+        char *st;
         char buf[BUFLEN] = {'\0'};
 
         va_start(ap, fmt);
 
         while (*fmt) {
             if (*fmt == '%') {
-                s = va_arg(ap, char *);
-                strcpy((buf + ind), s);
-                ind = ind + strlen(s);
+                st = va_arg(ap, char *);
+                strcpy((buf + ind), st);
+                ind = ind + strlen(st);
                 *fmt++;
             } else {
                 buf[ind] = *fmt;
@@ -153,64 +159,259 @@ void Syslog(int type, char *fmt, ...)
     }
 }
 
-void die(const char *s)
+void die(const char *st)
 {
     closelog();
     freeaddrinfo(res);
     exit(1);
 }
 
-boolean receivePkt(char *payload)
-{
-    return true;
-}
-
-/* convert dex to dec */
+/* convert hex to dec */
 int todec(char ch)
 {
-    if(ch >= '0' && ch <= '9')
-    {
+    if(ch >= '0' && ch <= '9') {
         return ch - '0';
     }
-    if(ch >= 'A' && ch <='F') 
-    {
+
+    if(ch >= 'A' && ch <='F') {
         return ch - 'A' + 10;
     }
-    if(ch >= 'a' && ch <= 'f')
-    {
+
+    if(ch >= 'a' && ch <= 'f') {
         return ch - 'a' + 10;
     }
+
     return -1;
+}
+
+void parser_txpk(char *buff, char *name, char *opt)
+{
+    int i = 0;
+
+    char tmp[BUFLEN]; 
+
+    char * pt_name;
+
+    strncpy(tmp, buff, sizeof(tmp));
+
+    printf("parser %s\n", opt);
+
+    if (NULL != (pt_name = strstr(tmp, opt))) { /* txpk is json obj such as: "txpk": {  "size": 17,  "data": "IPqAKXQmYVCDy8K3k4"}*/
+        while (*pt_name != ':') 
+            pt_name++;
+        while (*pt_name != ',') {
+            if (*pt_name == '}') break;
+            if (*pt_name == ':' || *pt_name == ' ' || *pt_name == '"') {
+                pt_name++;
+                continue;
+            } else {
+                name[i] = *pt_name;
+                pt_name++;
+                i++;
+            }
+        }
+        name[i] = '\0';
+    }
+
+    printf("parser %s: %s\n", opt, name);
+}
+
+static double difftimespec(struct timespec end, struct timespec beginning) {
+	double x;
+	
+	x = 1E-9 * (double)(end.tv_nsec - beginning.tv_nsec);
+	x += (double)(end.tv_sec - beginning.tv_sec);
+	
+	return x;
 }
 
 
 /* sendto udp server */
-void sendudp(char *msg, int length) {
+void sendudp(char *msg, int length, int h, int l) 
+{
+    int i, j;
 
     char buf[BUFLEN];
-    /*send the update*/
-    int n;
+    uint8_t buff_ack[32]; /* buffer to receive acknowledges */
 
-    if (sendto(s, (char *)msg, length, 0 , res->ai_addr, res->ai_addrlen) == -1)
-    {
-        Syslog(LOG_ERR, "lora: sendudp error");
-        die("sendto()");
+    struct addrinfo *q; 
+
+    /* ping measurement variables */
+    struct timespec send_time;
+    struct timespec recv_time;
+
+    for (q = res; q != NULL; q = q->ai_next) {
+        sock_up = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
+        if (sock_down == -1) continue; /* try next field */
+        else break; /* success, get out of loop */
+    }   
+
+    if (connect(sock_up, q->ai_addr, q->ai_addrlen) != 0) { 
+        Syslog(LOG_ERR, "ERROR: [down] connect returned %s", strerror(errno));
+        die("[up]connect");
     }
 
-    alarm(TIMEOUT);
+    if (setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, \
+                (void *)&push_timeout_half, sizeof(push_timeout_half)) != 0) {
+        Syslog(LOG_ERR, "ERROR: [up] setsockopt returned %s", strerror(errno));
+        die("[up]setsockopt");
+    }
 
-    if ((n = recvfrom(s, buf, BUFLEN, 0, NULL, NULL)) < 0) {
-        if (errno != EINTR)
-            alarm(0);
-    } else
-        Syslog(LOG_INFO, "receive from udp server %s", buf);
+    /*if (sendto(sock_up, (char *)msg, length, 0 , res->ai_addr, res->ai_addrlen) == -1) */
+    if (send(sock_up, (void *)msg, length, 0) == -1) {
+        Syslog(LOG_ERR, "[up] sendudp error");
+        die("[up]sendto()");
+    }
 
-    alarm(0);
+    clock_gettime(CLOCK_MONOTONIC, &send_time);
+
+	/* wait for acknowledge (in 2 times, to catch extra packets) */
+	for (i=0; i<2; ++i) {
+		j = recv(sock_up, (void *)buff_ack, sizeof(buff_ack), 0);
+		clock_gettime(CLOCK_MONOTONIC, &recv_time);
+		if (j == -1) {
+			if (errno == EAGAIN) { /* timeout */
+			    //Syslog(LOG_INFO, "[up]: server connection timeout");
+				continue;
+			} else { /* server connection error */
+			    Syslog(LOG_ERR, "ERROR[up]: server connection error");
+				break;
+			}
+		} else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
+			Syslog(LOG_WARNING, "WARNING: [up] ignored invalid non-ACL packet");
+			continue;
+		} else if ((buff_ack[1] != (uint8_t)h) || (buff_ack[2] != (uint8_t)l)) {
+			Syslog(LOG_WARNING, "WARNING: [up] ignored out-of sync ACK packet");
+			continue;
+		} else {
+			Syslog(LOG_INFO, "INFO: [up] PUSH_ACK received in %i ms", (int)(1000 * difftimespec(recv_time, send_time)));
+			break;
+		}
+	}
+}
+
+void pull_data()
+{
+    int i, j, dec; 
+
+    int keepalive_time = 5;
+
+    struct addrinfo *q; 
+
+	/* local timekeeping variables */
+	struct timespec send_time; /* time of the pull request */
+	struct timespec recv_time; /* time of return from recv socket call */
+
+	/* data buffers */
+	uint8_t buff_down[BUFLEN]; /* buffer to receive downstream packets */
+	uint8_t buff_req[16]; /* buffer to compose pull requests */
+	int msg_len;
+
+	/* protocol variables */
+	uint8_t token_h; /* random token for acknowledgement matching */
+	uint8_t token_l; /* random token for acknowledgement matching */
+	bool req_ack = false; /* keep track of whether PULL_DATA was acknowledged or not */
+
+    /* for parser b64 to bin */
+    char down_size[8] = "0";
+    char down_data[STATUS_SIZE] = {'\0'};
+	uint8_t payload[STATUS_SIZE] = {'\0'}; 
+
+    for (q = res; q != NULL; q = q->ai_next) {
+        sock_down = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
+        if (sock_down == -1) continue; /* try next field */
+        else break; /* success, get out of loop */
+    }   
+
+    if (connect(sock_down, q->ai_addr, q->ai_addrlen) != 0) 
+        Syslog(LOG_ERR, "ERROR: [down] connect returned %s", strerror(errno));
+
+   if (setsockopt(sock_down, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof pull_timeout) != 0)
+       Syslog(LOG_ERR, "ERROR: [down] setsockopt returned %s", strerror(errno));
+
+	/* pre-fill the pull request buffer with fixed fields */
+	buff_req[0] = PROTOCOL_VERSION;
+	buff_req[3] = PKT_PULL_DATA;
+
+    *(uint32_t *)(buff_req + 4) = net_mac_h; 
+    *(uint32_t *)(buff_req + 8) = net_mac_l; 
+
+	/* generate random token for request */
+    token_h = (uint8_t)rand(); /* random token */
+	token_l = (uint8_t)rand(); /* random token */
+	buff_req[1] = token_h;
+	buff_req[2] = token_l;
+
+    /* for debug */
+    FILE *fp;
+    if ((fp = fopen("/var/iot/pull_data", "w+")) > 0) {
+        fwrite(buff_req, 1, 12, fp);
+        fclose(fp);
+    }
+
+	/* send PULL request and record time */
+	if (send(sock_down, (void *)buff_req, sizeof(buff_req), 0) == -1) {
+        Syslog(LOG_ERR, "[down]send Pull request error");
+        die("ERRORS");
+    }
+
+	clock_gettime(CLOCK_MONOTONIC, &send_time);
+
+	/* listen to packets and process them until a new PULL request must be sent */
+	recv_time = send_time;
+	while ((int)difftimespec(recv_time, send_time) < keepalive_time) {
+		/* try to receive a datagram */
+		msg_len = recv(sock_down, (void *)buff_down, (sizeof buff_down) - 1, 0);
+		clock_gettime(CLOCK_MONOTONIC, &recv_time);
+
+		/* if no network message was received, got back to listening sock_down socket */
+		if (msg_len == -1) {
+			//Syslog(LOG_WARNING, "[down]recv returned %s", strerror(errno)); /* too verbose */
+			continue;
+		}
+
+		/* if the datagram is an ACK, check token */
+		if (buff_down[3] == PKT_PULL_ACK) {
+			if ((buff_down[1] == token_h) && (buff_down[2] == token_l)) {
+				if (req_ack) {
+					Syslog(LOG_INFO, "INFO: [down] duplicate ACK received :)");
+				} else { /* if that packet was not already acknowledged */
+					Syslog(LOG_INFO, "INFO: [down] PULL_ACK received in %i ms", (int)(1000 * difftimespec(recv_time, send_time)));
+				}
+			} else { /* out-of-sync token */
+				Syslog(LOG_INFO, "INFO: [down] received out-of-sync ACK");
+			}
+			continue;
+		}
+
+		/* the datagram is a PULL_RESP */
+		buff_down[msg_len] = 0; /* add string terminator, just to be safe */
+		Syslog(LOG_INFO, "INFO: [down] PULL_RESP received :)"); /* very verbose */
+		// printf("\nJSON down: %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+        parser_txpk((char *)(buff_down + 4), down_size, "size");
+        parser_txpk((char *)(buff_down + 4), down_data, "data");
+
+		Syslog(LOG_INFO, "INFO: [down] PULL_RESP parser data: %s", down_data); 
+
+		i = b64_to_bin(down_data, strlen(down_data), payload, sizeof(payload));
+
+        if (i != atoi(down_size))
+            Syslog(LOG_INFO, "WARNING: [down] mismatch between .size and .data size once converter to binary");
+        else {
+            FILE *fp;
+            if ((fp = fopen(DLPATH, "w+")) > 0) {
+                if (fwrite(payload, 1, i, fp) < i) 
+                    Syslog(LOG_INFO, "downlink message fail to write");
+                fclose(fp);
+            } else
+                Syslog(LOG_INFO, "fail to open %s", DLPATH);
+        }
+    } /* end while */
 
 }
 
-void sendstat(int mac) {
-
+void sendstat()
+{
     static char status_report[STATUS_SIZE]; /* status report as a JSON object */
     char stat_timestamp[24];
     time_t t;
@@ -221,6 +422,7 @@ void sendstat(int mac) {
 
     /* pre-fill the data buffer with fixed fields */
     status_report[0] = PROTOCOL_VERSION;
+
     /* start composing datagram with the header */
     uint8_t token_h = (uint8_t)rand(); /* random token */
     uint8_t token_l = (uint8_t)rand(); /* random token */
@@ -229,25 +431,17 @@ void sendstat(int mac) {
 
     status_report[3] = PKT_PUSH_DATA;
 
-    if (!mac) {
-        for (i = 0, j = 0; i < 16; i = i + 2, j++) {
-            dec = 0;
-            dec = todec(gatewayid[i]) * 16 + todec(gatewayid[i + 1]);
-            /*
-            printf("id[%d][%d] = %c%c TO dec: %d\n",  i, i+1, (char)gatewayid[i], (char)gatewayid[i+1], dec); 
-            */
-            status_report[4 + j] = (unsigned char)dec;
-        }
-    } else {
-        status_report[4] = (unsigned char)ifr.ifr_hwaddr.sa_data[0];
-        status_report[5] = (unsigned char)ifr.ifr_hwaddr.sa_data[1];
-        status_report[6] = (unsigned char)ifr.ifr_hwaddr.sa_data[2];
-        status_report[7] = 0xFF;
-        status_report[8] = 0xFF;
-        status_report[9] = (unsigned char)ifr.ifr_hwaddr.sa_data[3];
-        status_report[10] = (unsigned char)ifr.ifr_hwaddr.sa_data[4];
-        status_report[11] = (unsigned char)ifr.ifr_hwaddr.sa_data[5];
+    /* fill GEUI  8bytes */
+    *(uint32_t *)(status_report + 4) = net_mac_h; 
+    *(uint32_t *)(status_report + 8) = net_mac_l; 
+
+    /*
+    for (i = 0, j = 0; i < 16; i = i + 2, j++) {
+        dec = 0;
+        dec = todec(gatewayid[i]) * 16 + todec(gatewayid[i + 1]);
+        status_report[4 + j] = (unsigned char)dec;
     }
+    */
 
     stat_index = 12; /* 12-byte header */
 
@@ -262,11 +456,11 @@ void sendstat(int mac) {
     Syslog(LOG_INFO, "stat update: %s", (char *)(status_report + 12)); /* DEBUG: display JSON stat */
 
     //send the update
-    sendudp(status_report, stat_index);
+    sendudp(status_report, stat_index, token_h, token_l);
 
 }
 
-void sendrxpk(int mac, int rssi, int size) {
+void sendrxpk(int rssi, int size) {
     static char rxpk[TX_BUFF_SIZE]; /* status report as a JSON object */
     char data[TX_BUFF_SIZE - 64];
 
@@ -276,6 +470,7 @@ void sendrxpk(int mac, int rssi, int size) {
 
     /* pre-fill the data buffer with fixed fields */
     rxpk[0] = PROTOCOL_VERSION;
+
     /* start composing datagram with the header */
     uint8_t token_h = (uint8_t)rand(); /* random token */
     uint8_t token_l = (uint8_t)rand(); /* random token */
@@ -284,22 +479,8 @@ void sendrxpk(int mac, int rssi, int size) {
 
     rxpk[3] = PKT_PUSH_DATA;
 
-    if (!mac) {
-        for (i = 0, j = 0; i < 16; i = i + 2, j++) {
-            dec = 0;
-            dec = todec(gatewayid[i]) * 16 + todec(gatewayid[i + 1]);
-            rxpk[4 + j] = (unsigned char)dec;
-        }
-    } else {
-        rxpk[4] = (unsigned char)ifr.ifr_hwaddr.sa_data[0];
-        rxpk[5] = (unsigned char)ifr.ifr_hwaddr.sa_data[1];
-        rxpk[6] = (unsigned char)ifr.ifr_hwaddr.sa_data[2];
-        rxpk[7] = 0xFF;
-        rxpk[8] = 0xFF;
-        rxpk[9] = (unsigned char)ifr.ifr_hwaddr.sa_data[3];
-        rxpk[10] = (unsigned char)ifr.ifr_hwaddr.sa_data[4];
-        rxpk[11] = (unsigned char)ifr.ifr_hwaddr.sa_data[5];
-    }
+    *(uint32_t *)(rxpk + 4) = net_mac_h; 
+    *(uint32_t *)(rxpk + 8) = net_mac_l; 
 
     rxpk_index = 12; /* 12-byte header */
 
@@ -316,6 +497,7 @@ void sendrxpk(int mac, int rssi, int size) {
             Syslog(LOG_ERR, "can't read data file!");
             die("read data file");
         }
+
         /*
         size = bin_to_b64((uint8_t *)data, i, (char *)(b64), 341);
         */
@@ -349,7 +531,12 @@ void sendrxpk(int mac, int rssi, int size) {
     rxpk[rxpk_index] = '\0'; /* add string terminator, for safety */
 
     Syslog(LOG_NOTICE, "rxpk: %s", (char *)(rxpk + 12));
-    sendudp(rxpk, rxpk_index);
+    sendudp(rxpk, rxpk_index, token_h, token_l);
+
+    uint8_t otaa;
+    otaa = data[0] & 0X07;
+    if (otaa == 0x00)   /* MHDR for otaa requrie is 000 */
+        pull_data();
 }
 
 void debug_uci_value() {
@@ -366,13 +553,16 @@ void debug_uci_value() {
 
 int main (int argc, char *argv[]) {
 
+    /*
     struct sigaction sa;
+    */
 
     struct addrinfo hints; 
 
     int n;
 
-    int mac = 0; /*default gatewayid form uci option value */
+    uint64_t lgwm = 0; /* Lora gateway MAC address */
+    unsigned long long ull = 0;
 
     openlog("lora_udp_fwd", LOG_CONS | LOG_PID, 0);
 
@@ -382,11 +572,13 @@ int main (int argc, char *argv[]) {
         exit(1);
     }
 
+    /*
     sa.sa_handler = sigalrm;
     sa.sa_flags = 0;
     sigemptyset(&sa.sa_mask);
     if (sigaction(SIGALRM, &sa, NULL) < 0)
         Syslog(LOG_INFO, "%s: install SIGALRM error", argv[0]);
+    */
 
     if (!get_option_value("general", server)){
         Syslog(LOG_INFO, "%s: get option server=%s", argv[0], server);
@@ -443,50 +635,49 @@ int main (int argc, char *argv[]) {
     debug_uci_value();
     */
 
-    if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
+    /*
+    if ((sock_up = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1){
         Syslog(LOG_ERR, "%s: socket error", argv[0]);
         die("socket");
     }
+    */
 
     bzero(&hints, sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_DGRAM;
 
+    /*
     ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, "eth1", IFNAMSIZ-1);  /* can we rely on eth0? */
-    ioctl(s, SIOCGIFHWADDR, &ifr);
+    strncpy(ifr.ifr_name, "eth1", IFNAMSIZ-1);  
+    ioctl(sock_up, SIOCGIFHWADDR, &ifr);
+    */
 
     if ((n = getaddrinfo(server, port, &hints, &res)) != 0){
-        Syslog(LOG_ERR, "error for %s:%s, %s", server, port, gai_strerror(n));
+        Syslog(LOG_ERR, "failed to open socket to any of %s:%s, %s", server, port, gai_strerror(n));
         die("getaddrinfo");
     }
-    
-    if (strlen(gatewayid) != 16) {  /*use mac for gatewayid,  gatewayid len is 16 bytes */
 
-        syslog(LOG_NOTICE, "Gateway ID: %2x:%2x:%2x:ff:ff:%2x:%2x:%2x\n",
-               (unsigned char)ifr.ifr_hwaddr.sa_data[0],
-               (unsigned char)ifr.ifr_hwaddr.sa_data[1],
-               (unsigned char)ifr.ifr_hwaddr.sa_data[2],
-               (unsigned char)ifr.ifr_hwaddr.sa_data[3],
-               (unsigned char)ifr.ifr_hwaddr.sa_data[4],
-               (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
-         mac = 1;
-    } else {
-        Syslog(LOG_NOTICE, "Gateway ID: %s", gatewayid);
+    
+    if (strlen(gatewayid) != 16) {  /*make sure gatewayid len equal 16 bytes */
+        Syslog(LOG_ERR, "[GEUI] GatewayID: %s ERR", gatewayid);
+        die("GEUI error");
     }
 
+    sscanf(gatewayid, "%llx", &ull);
+    lgwm = ull;
 
-    syslog(LOG_NOTICE, "Listening at %s on %.6lf Mhz.\n", sf, (double)freq/1000000);
+    net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (lgwm>>32)));
+    net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  lgwm  ));
 
-    //sendstat(mac);
-    
+    syslog(LOG_NOTICE, "Listening at SF%sBW125 on %.6lf Mhz.\n", sf, (double)freq/1000000);
+
     if(!strcmp("stat", argv[1]))  /* send gateway status to UDP server */ 
-        sendstat(mac);
+        sendstat();
     else
         if (argc < 4) 
             printf("Usage: %s rxpk rssi size\n", argv[0]);
         else
-            sendrxpk(mac, atoi(argv[2]), atoi(argv[3]));
+            sendrxpk(atoi(argv[2]), atoi(argv[3]));
 
     closelog();
     

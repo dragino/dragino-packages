@@ -6,16 +6,11 @@ UARTMODE=`uci get sensor.poweruart.uartmode`
 
 start()
 {
-	# FXS module version
-	if [ ! -f /lib/modules/*/dragino2_si3217x.ko ]; then
-		echo 24 > /sys/class/gpio/export
-		echo "high" > /sys/class/gpio/gpio24/direction
-	fi
 		
 	[ ! -d /var/iot/channels ] && mkdir -p /var/iot/channels
 	load_uart
 
-        reset_bridge_at_boot &
+    reset_bridge_at_boot &
 	
     # configure USB modem.
 	/usr/bin/config_usb_modem.sh

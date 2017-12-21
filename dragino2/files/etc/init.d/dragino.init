@@ -13,9 +13,10 @@ start()
 	fi
 		
 	[ ! -d /var/iot/channels ] && mkdir -p /var/iot/channels
+
 	load_uart
 
-        reset_bridge_at_boot &
+    reset_bridge_at_boot &
 	
     # configure USB modem.
 	/usr/bin/config_usb_modem.sh
@@ -28,7 +29,6 @@ start()
 restart() {
 	load_uart
 }
-
 
 
 load_uart() {
@@ -49,4 +49,5 @@ load_uart() {
 	elif [ $UARTMODE = "noconsole" ]; then
 		/usr/bin/set_uart_console 0	
 	fi
+
 }

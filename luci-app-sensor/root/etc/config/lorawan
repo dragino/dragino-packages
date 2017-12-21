@@ -6,6 +6,7 @@ config settings 'general'
 
 config settings 'radio'
 	option SF '7'
+	option TXSF '9'
 	option coderate '5'
 	option BW '7'
 

@@ -29,7 +29,7 @@ stop_pkt_fwd() {
 
 start_pkt_fwd() {
 
-	if [ $LORAWAN = "LoraWAN" ]; then
+	if [ $LORAMODE = "LoraWAN" ]; then
 	    if [ $LORALOG = "1" ]; then
 		    /usr/bin/lg01_pkt_fwd 2>&1 > /var/iot/log &
         else

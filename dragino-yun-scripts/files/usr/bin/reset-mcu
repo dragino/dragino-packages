@@ -6,3 +6,7 @@ echo 1 > /sys/class/gpio/gpio20/value
 echo 0 > /sys/class/gpio/gpio20/value
 echo 20 > /sys/class/gpio/unexport
 
+sleep 1
+
+/etc/ini.d/loragateway restart
+

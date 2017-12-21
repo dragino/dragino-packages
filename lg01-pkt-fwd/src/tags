@@ -1,0 +1,182 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ARRAY_MAX_CAPACITY	parson.c	34;"	d	file:
+ARRAY_SIZE	base64.c	29;"	d	file:
+BUFLEN	main.c	56;"	d	file:
+CHARLEN	main.c	37;"	d	file:
+CRIT	base64.c	30;"	d	file:
+DATAFILE	main.c	67;"	d	file:
+DEBUG	base64.c	33;"	d	file:
+DLPATH	main.c	69;"	d	file:
+ERROR	parson.c	31;"	d	file:
+JSONArray	parson.h	/^    JSONArray   = 5,$/;"	e	enum:json_value_type
+JSONBoolean	parson.h	/^    JSONBoolean = 6$/;"	e	enum:json_value_type
+JSONError	parson.h	/^    JSONError   = 0,$/;"	e	enum:json_value_type
+JSONNull	parson.h	/^    JSONNull    = 1,$/;"	e	enum:json_value_type
+JSONNumber	parson.h	/^    JSONNumber  = 3,$/;"	e	enum:json_value_type
+JSONObject	parson.h	/^    JSONObject  = 4,$/;"	e	enum:json_value_type
+JSONString	parson.h	/^    JSONString  = 2,$/;"	e	enum:json_value_type
+JSON_Array	parson.h	/^typedef struct json_array_t  JSON_Array;$/;"	t	typeref:struct:json_array_t
+JSON_Object	parson.h	/^typedef struct json_object_t JSON_Object;$/;"	t	typeref:struct:json_object_t
+JSON_Value	parson.h	/^typedef struct json_value_t  JSON_Value;$/;"	t	typeref:struct:json_value_t
+JSON_Value_Type	parson.h	/^} JSON_Value_Type;$/;"	t	typeref:enum:json_value_type
+JSON_Value_Value	parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_value_value	file:
+LAT	main.c	/^static char LAT[CHARLEN] = "lati";$/;"	v	file:
+LON	main.c	/^static char LON[CHARLEN] = "long";$/;"	v	file:
+MAX	parson.c	40;"	d	file:
+MAX_NESTING	parson.c	36;"	d	file:
+OBJECT_MAX_CAPACITY	parson.c	35;"	d	file:
+PARSON_VERSION	parson.h	34;"	d
+PKT_PULL_ACK	main.c	76;"	d	file:
+PKT_PULL_DATA	main.c	74;"	d	file:
+PKT_PULL_RESP	main.c	75;"	d	file:
+PKT_PUSH_ACK	main.c	73;"	d	file:
+PKT_PUSH_DATA	main.c	72;"	d	file:
+PROTOCOL_VERSION	main.c	71;"	d	file:
+PULL_TIMEOUT_MS	main.c	62;"	d	file:
+PUSH_TIMEOUT_MS	main.c	61;"	d	file:
+STARTING_CAPACITY	parson.c	33;"	d	file:
+STATUS_SIZE	main.c	59;"	d	file:
+SUCCESS	parson.c	32;"	d	file:
+Syslog	main.c	/^void Syslog(int type, char *fmt, ...)$/;"	f
+TX_BUFF_SIZE	main.c	58;"	d	file:
+UCI_CONFIG_FILE	main.c	84;"	d	file:
+_BASE64_H	base64.h	18;"	d
+alt	main.c	/^static int   alt=0;$/;"	v	file:
+array	parson.c	/^    JSON_Array  *array;$/;"	m	union:json_value_value	file:
+b64	main.c	/^static char b64[256];$/;"	v	file:
+b64_to_bin	base64.c	/^int b64_to_bin(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
+b64_to_bin_nopad	base64.c	/^int b64_to_bin_nopad(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
+bin_to_b64	base64.c	/^int bin_to_b64(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
+bin_to_b64_nopad	base64.c	/^int bin_to_b64_nopad(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
+boolean	parson.c	/^    int          boolean;$/;"	m	union:json_value_value	file:
+bw	main.c	/^static char bw[CHARLEN] = "BW";$/;"	v	file:
+capacity	parson.c	/^    size_t       capacity;$/;"	m	struct:json_array_t	file:
+capacity	parson.c	/^    size_t       capacity;$/;"	m	struct:json_object_t	file:
+char_to_code	base64.c	/^uint8_t char_to_code(char x) {$/;"	f
+code_62	base64.c	/^static char code_62 = '+';	\/* RFC 1421 standard character for code 62 *\/$/;"	v	file:
+code_63	base64.c	/^static char code_63 = '\/';	\/* RFC 1421 standard character for code 63 *\/$/;"	v	file:
+code_pad	base64.c	/^static char code_pad = '=';	\/* RFC 1421 padding character if padding *\/$/;"	v	file:
+code_to_char	base64.c	/^char code_to_char(uint8_t x) {$/;"	f
+coderate	main.c	/^static char coderate[CHARLEN] = "coderate";$/;"	v	file:
+count	parson.c	/^    size_t       count;$/;"	m	struct:json_array_t	file:
+count	parson.c	/^    size_t       count;$/;"	m	struct:json_object_t	file:
+ctx	main.c	/^static struct uci_context * ctx = NULL; $/;"	v	typeref:struct:uci_context	file:
+debug_uci_value	main.c	/^void debug_uci_value() {$/;"	f
+description	main.c	/^static char description[CHARLEN] = "";                        \/* used for free form description *\/$/;"	v	file:
+die	main.c	/^void die(const char *st)$/;"	f
+difftimespec	main.c	/^static double difftimespec(struct timespec end, struct timespec beginning) {$/;"	f	file:
+email	main.c	/^static char email[CHARLEN]  = "mail";                        \/* used for contact email *\/$/;"	v	file:
+freq	main.c	/^static uint32_t  freq = 868100000; \/* in Mhz! (868.1) *\/$/;"	v	file:
+frequency	main.c	/^static char frequency[CHARLEN] = "rx_frequency";$/;"	v	file:
+gatewayid	main.c	/^static char gatewayid[CHARLEN] = "gateway_id";$/;"	v	file:
+get_option_value	main.c	/^bool get_option_value(const char *section, char *option)$/;"	f
+get_processed_string	parson.c	/^static const char * get_processed_string(const char **string) {$/;"	f	file:
+ifr	main.c	/^static struct ifreq ifr;$/;"	v	typeref:struct:ifreq	file:
+is_decimal	parson.c	/^static int is_decimal(const char *string, size_t length) {$/;"	f	file:
+is_utf	parson.c	/^static int is_utf(const unsigned char *s) {$/;"	f	file:
+items	parson.c	/^    JSON_Value **items;$/;"	m	struct:json_array_t	file:
+json_array_add	parson.c	/^static int json_array_add(JSON_Array *array, JSON_Value *value) {$/;"	f	file:
+json_array_free	parson.c	/^static void json_array_free(JSON_Array *array) {$/;"	f	file:
+json_array_get_array	parson.c	/^JSON_Array * json_array_get_array(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_boolean	parson.c	/^int json_array_get_boolean(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_count	parson.c	/^size_t json_array_get_count(const JSON_Array *array) {$/;"	f
+json_array_get_number	parson.c	/^double json_array_get_number(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_object	parson.c	/^JSON_Object * json_array_get_object(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_string	parson.c	/^const char * json_array_get_string(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_value	parson.c	/^JSON_Value * json_array_get_value(const JSON_Array *array, size_t index) {$/;"	f
+json_array_init	parson.c	/^static JSON_Array * json_array_init(void) {$/;"	f	file:
+json_array_resize	parson.c	/^static int json_array_resize(JSON_Array *array, size_t capacity) {$/;"	f	file:
+json_array_t	parson.c	/^struct json_array_t {$/;"	s	file:
+json_object_add	parson.c	/^static int json_object_add(JSON_Object *object, const char *name, JSON_Value *value) {$/;"	f	file:
+json_object_dotget_array	parson.c	/^JSON_Array * json_object_dotget_array(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_boolean	parson.c	/^int json_object_dotget_boolean(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_number	parson.c	/^double json_object_dotget_number(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_object	parson.c	/^JSON_Object * json_object_dotget_object(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_string	parson.c	/^const char * json_object_dotget_string(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_value	parson.c	/^JSON_Value * json_object_dotget_value(const JSON_Object *object, const char *name) {$/;"	f
+json_object_free	parson.c	/^static void json_object_free(JSON_Object *object) {$/;"	f	file:
+json_object_get_array	parson.c	/^JSON_Array * json_object_get_array(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_boolean	parson.c	/^int json_object_get_boolean(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_count	parson.c	/^size_t json_object_get_count(const JSON_Object *object) {$/;"	f
+json_object_get_name	parson.c	/^const char * json_object_get_name(const JSON_Object *object, size_t index) {$/;"	f
+json_object_get_number	parson.c	/^double json_object_get_number(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_object	parson.c	/^JSON_Object * json_object_get_object(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_string	parson.c	/^const char * json_object_get_string(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_value	parson.c	/^JSON_Value * json_object_get_value(const JSON_Object *object, const char *name) {$/;"	f
+json_object_init	parson.c	/^static JSON_Object * json_object_init(void) {$/;"	f	file:
+json_object_nget_value	parson.c	/^static JSON_Value * json_object_nget_value(const JSON_Object *object, const char *name, size_t n) {$/;"	f	file:
+json_object_resize	parson.c	/^static int json_object_resize(JSON_Object *object, size_t capacity) {$/;"	f	file:
+json_object_t	parson.c	/^struct json_object_t {$/;"	s	file:
+json_parse_file	parson.c	/^JSON_Value * json_parse_file(const char *filename) {$/;"	f
+json_parse_file_with_comments	parson.c	/^JSON_Value * json_parse_file_with_comments(const char *filename) {$/;"	f
+json_parse_string	parson.c	/^JSON_Value * json_parse_string(const char *string) {$/;"	f
+json_parse_string_with_comments	parson.c	/^JSON_Value * json_parse_string_with_comments(const char *string) {$/;"	f
+json_value_free	parson.c	/^void json_value_free(JSON_Value *value) {$/;"	f
+json_value_get_array	parson.c	/^JSON_Array * json_value_get_array(const JSON_Value *value) {$/;"	f
+json_value_get_boolean	parson.c	/^int json_value_get_boolean(const JSON_Value *value) {$/;"	f
+json_value_get_number	parson.c	/^double json_value_get_number(const JSON_Value *value) {$/;"	f
+json_value_get_object	parson.c	/^JSON_Object * json_value_get_object(const JSON_Value *value) {$/;"	f
+json_value_get_string	parson.c	/^const char * json_value_get_string(const JSON_Value *value) {$/;"	f
+json_value_get_type	parson.c	/^JSON_Value_Type json_value_get_type(const JSON_Value *value) {$/;"	f
+json_value_init_array	parson.c	/^static JSON_Value * json_value_init_array(void) {$/;"	f	file:
+json_value_init_boolean	parson.c	/^static JSON_Value * json_value_init_boolean(int boolean) {$/;"	f	file:
+json_value_init_null	parson.c	/^static JSON_Value * json_value_init_null(void) {$/;"	f	file:
+json_value_init_number	parson.c	/^static JSON_Value * json_value_init_number(double number) {$/;"	f	file:
+json_value_init_object	parson.c	/^static JSON_Value * json_value_init_object(void) {$/;"	f	file:
+json_value_init_string	parson.c	/^static JSON_Value * json_value_init_string(const char *string) {$/;"	f	file:
+json_value_t	parson.c	/^struct json_value_t {$/;"	s	file:
+json_value_type	parson.h	/^typedef enum json_value_type {$/;"	g
+json_value_value	parson.c	/^typedef union json_value_value {$/;"	u	file:
+lat	main.c	/^static float lat=0.0;$/;"	v	file:
+lon	main.c	/^static float lon=0.0;$/;"	v	file:
+main	main.c	/^int main (int argc, char *argv[]) {$/;"	f
+names	parson.c	/^    const char **names;$/;"	m	struct:json_object_t	file:
+net_mac_h	main.c	/^static uint32_t net_mac_h; \/* Most Significant Nibble, network order *\/$/;"	v	file:
+net_mac_l	main.c	/^static uint32_t net_mac_l; \/* Least Significant Nibble, network order *\/$/;"	v	file:
+null	parson.c	/^    int          null;$/;"	m	union:json_value_value	file:
+number	parson.c	/^    double       number;$/;"	m	union:json_value_value	file:
+object	parson.c	/^    JSON_Object *object;$/;"	m	union:json_value_value	file:
+parse_array_value	parson.c	/^static JSON_Value * parse_array_value(const char **string, size_t nesting) {$/;"	f	file:
+parse_boolean_value	parson.c	/^static JSON_Value * parse_boolean_value(const char **string) {$/;"	f	file:
+parse_null_value	parson.c	/^static JSON_Value * parse_null_value(const char **string) {$/;"	f	file:
+parse_number_value	parson.c	/^static JSON_Value * parse_number_value(const char **string) {$/;"	f	file:
+parse_object_value	parson.c	/^static JSON_Value * parse_object_value(const char **string, size_t nesting) {$/;"	f	file:
+parse_string_value	parson.c	/^static JSON_Value * parse_string_value(const char **string) {$/;"	f	file:
+parse_value	parson.c	/^static JSON_Value * parse_value(const char **string, size_t nesting) {$/;"	f	file:
+parser_txpk	main.c	/^void parser_txpk(char *buff, char *name, char *opt)$/;"	f
+parson_free	parson.c	43;"	d	file:
+parson_malloc	parson.c	42;"	d	file:
+parson_parson_h	parson.h	25;"	d
+parson_realloc	parson.c	44;"	d	file:
+parson_strndup	parson.c	/^static char * parson_strndup(const char *string, size_t n) {$/;"	f	file:
+pfwd_debug	main.c	/^static char pfwd_debug[CHARLEN] = "pfwd_debug";$/;"	v	file:
+platform	main.c	/^static char platform[CHARLEN] = "LG01\/OLG01";  \/* platform definition *\/$/;"	v	file:
+port	main.c	/^static char port[CHARLEN] = "port";$/;"	v	file:
+pull_data	main.c	/^void pull_data()$/;"	f
+pull_timeout	main.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+push_timeout_half	main.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+read_file	parson.c	/^static char * read_file(const char * filename) {$/;"	f	file:
+remove_comments	parson.c	/^static void remove_comments(char *string, const char *start_token, const char *end_token) {$/;"	f	file:
+res	main.c	/^static struct addrinfo *res;$/;"	v	typeref:struct:addrinfo	file:
+sendrxpk	main.c	/^void sendrxpk(int rssi, int size) {$/;"	f
+sendstat	main.c	/^void sendstat()$/;"	f
+sendudp	main.c	/^void sendudp(char *msg, int length, int h, int l) $/;"	f
+server	main.c	/^static char server[CHARLEN] = "server";$/;"	v	file:
+sf	main.c	/^static char sf[CHARLEN] = "SF";$/;"	v	file:
+sizeof_token	parson.c	37;"	d	file:
+skip_char	parson.c	38;"	d	file:
+skip_quotes	parson.c	/^static void skip_quotes(const char **string) {$/;"	f	file:
+skip_whitespaces	parson.c	39;"	d	file:
+sock_down	main.c	/^static int sock_up, sock_down;$/;"	v	file:
+sock_up	main.c	/^static int sock_up, sock_down;$/;"	v	file:
+string	parson.c	/^    const char  *string;$/;"	m	union:json_value_value	file:
+todec	main.c	/^int todec(char ch)$/;"	f
+try_realloc	parson.c	/^static int try_realloc(void **ptr, size_t new_size) {$/;"	f	file:
+type	parson.c	/^    JSON_Value_Type     type;$/;"	m	struct:json_value_t	file:
+value	parson.c	/^    JSON_Value_Value    value;$/;"	m	struct:json_value_t	file:
+values	parson.c	/^    JSON_Value **values;$/;"	m	struct:json_object_t	file:

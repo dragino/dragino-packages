@@ -63,15 +63,15 @@ sf:value("11", "SF11")
 sf:value("12", "SF12")
 
 local tx_sf = s:option(ListValue, "TXSF", translate("Transmit Spreading Factor"))
-sf.placeholder = "Spreading Factor"
-sf.default = "9"
-sf:value("6", "SF6")
-sf:value("7", "SF7")
-sf:value("8", "SF8")
-sf:value("9", "SF9")
-sf:value("10", "SF10")
-sf:value("11", "SF11")
-sf:value("12", "SF12")
+tx_sf.placeholder = "Spreading Factor"
+tx_sf.default = "9"
+tx_sf:value("6", "SF6")
+tx_sf:value("7", "SF7")
+tx_sf:value("8", "SF8")
+tx_sf:value("9", "SF9")
+tx_sf:value("10", "SF10")
+tx_sf:value("11", "SF11")
+tx_sf:value("12", "SF12")
 
 local codr = s:option(ListValue, "coderate", translate("Coding Rate"))
 codr.placeholder = "Coding Rate"

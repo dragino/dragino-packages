@@ -1,7 +1,7 @@
 #!/bin/sh /etc/rc.common
 # Copyright (c) 2015 Edwin Chen <edwin@dragino.com>
 
-START=100
+START=99
 LORAMODE=`uci get lorawan.general.server_type`
 LORALOG=`uci get lorawan.general.pfwd_debug`
 

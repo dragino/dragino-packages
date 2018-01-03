@@ -15,8 +15,8 @@ uci	set ucitrack.@secn[0].exec=/usr/bin/config_secn
 uci add ucitrack gpstrack
 uci	set ucitrack.@gpstrack[0].exec=/usr/bin/get_gpswox_api_hash.sh
 
-uci add ucitrack lorawan
-uci	set ucitrack.@lorawan[0].exec=/usr/bin/reset-mcu
+uci add ucitrack gateway
+uci	set ucitrack.@gateway[0].exec=/usr/bin/reset-gateway
 
 uci	commit
 

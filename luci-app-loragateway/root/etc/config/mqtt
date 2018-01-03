@@ -1,0 +1,4 @@
+
+config settings 'general'
+	option port '1700'
+

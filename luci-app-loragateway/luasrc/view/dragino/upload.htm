@@ -1,0 +1,41 @@
+<%
+local http = require("luci.http")
+http.prepare_content("text/html; charset=utf-8")
+
+local uci = require('luci.model.uci')
+uci = uci.cursor()
+MODEL = uci:get('system.vendor.web_model')
+
+-%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<%+header%>
+<body>
+<div id="container">
+  <div id="header">
+  <div id="content">
+    <div class="wrapper divide">
+      <h2>Upload Result:</h2>
+    </div>
+	<br>
+    <div class="wrapper divide">
+      <p><%= merge_output %></p>
+
+      <% if string.len(kill_bridge_output) > 0 then %>
+      <p>Error while killing bridge</p>
+      <textarea rows="5" readonly="readonly"><%= kill_bridge_output %></textarea>
+      <% else %>
+      <p>Previously running Bridge terminated.</p>
+      <% end %>
+
+      <% if string.len(run_avrdude_output) > 0 then %>
+      <p>Error while running avrdude</p>
+      <textarea rows="5" readonly="readonly"><%= run_avrdude_output %></textarea>
+      <% else %>
+      <p>Sketch uploaded succesfully.</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+</body>
+<%+footer%>

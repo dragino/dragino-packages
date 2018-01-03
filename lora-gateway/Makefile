@@ -57,10 +57,11 @@ define Package/lora-gateway/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_tx_continuous/util_tx_continuous $(1)/usr/lora
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/reset_lgw.sh $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/update_gwid.sh $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lora_pkt_fwd/lora_pkt_fwd $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/lora
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/*conf.json $(1)/etc/lora
+	$(INSTALL_DIR) $(1)/etc/lora/cfg
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/cfg/*.json* $(1)/etc/lora/cfg
 endef
 
 $(eval $(call BuildPackage,lora-gateway))

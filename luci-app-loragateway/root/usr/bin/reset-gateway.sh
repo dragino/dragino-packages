@@ -21,23 +21,24 @@ if [[ ! -z ${gwid} ]]; then
         GWID_END=$(cat /sys/class/net/eth0/address | awk -F\: '{print $4$5$6}')
         sed -i 's/\(^\s*"gateway_ID":\s*"\).\{16\}"\s*\(,\?\).*$/\1'${GWID_BEGIN}${GWID_MIDFIX}${GWID_END}'"\2/' /etc/lora/local_conf.json
     fi
-    sed -i 's/\(^\s*"gateway_ID":\s*"\).\{16\}"\s*\(,\?\).*$/\1'${gwid}'"\2/' /etc/lora/local_conf.json
+    sed -i 's/\("gateway_ID":."\).\{16\}/\1'${gwid}'/' /etc/lora/local_conf.json
 fi
 
 if [[ ! -z ${server} ]]; then
-    sed -i -i 's/\(^\s*"server_address":\s*"\).\{16\}"\s*\(,\?\).*$/\1'${server}'"\2/' /etc/lora/global_conf.json
+    sed -i -i 's/\("server_address":."\).*$/\1'${server}'",/' /etc/lora/global_conf.json
 fi
 
 if [[ ! -z ${upp} ]]; then
-    sed -i -i 's/\(^\s*"serv_port_up":\s*"\).\{16\}"\s*\(,\?\).*$/\1'${upp}'"\2/' /etc/lora/global_conf.json
+    sed -i -i 's/\("serv_port_up":.\).*$/\1'${upp}',/' /etc/lora/global_conf.json
 fi
 
 if [[ ! -z ${dwp} ]]; then
-    sed -i -i 's/\(^\s*"serv_port_down":\s*"\).\{16\}"\s*\(,\?\).*$/\1'${dwp}'"\2/' /etc/lora/global_conf.json
+    sed -i -i 's/\("serv_port_down":.\).*$/\1'${dwp}',/' /etc/lora/global_conf.json
 fi
+
 
 sleep 1
 
-/etc/init.d/lg08 start
+/etc/init.d/lg08 start 
 
-
+exit 0

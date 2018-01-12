@@ -4,7 +4,7 @@
 
 sleep 1
 
-server=`uci get gateway.general.serverl`
+server=`uci get gateway.general.server`
 upp=`uci get gateway.general.upp`
 dwp=`uci get gateway.general.dwp`
 gwid=`uci get gateway.general.gwid`

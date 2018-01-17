@@ -1,4 +1,14 @@
 
 config settings 'general'
-	option port '1700'
+	option server_type 'general'
+	option user_name ''
+	option password ''
+	option client_id ''
+	option routine_script 'mqtt_process.sh'
+
+config servers 'thingspeak'
+	option server 'mqtt.thingspeak.com'
+	option port '1883'
+	option topic_format 'channels/CHANNEL/publish/WRITE_API'
+	option data_format 'DATA&status=MQTTPUBLISH'
 

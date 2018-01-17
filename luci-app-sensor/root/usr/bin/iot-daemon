@@ -1,0 +1,46 @@
+#!/bin/sh
+
+
+start_iot_services()
+{
+	IOT_DIR="/etc/iot/scripts/"
+	
+	#Kill all script
+	ALL_SERVICES="mqtt tcpip"
+	for serv in $ALL_SERVICES; do
+		script_name=`uci get $serv.general.routine_script`
+		script=$IOT_DIR$script_name
+		
+		# Kill possible running daemon;
+		servpid=`ps w| grep $script | grep -v grep | awk '{print $1}'`
+		if [[ ! -z $servpid ]]; then 
+			kill $servpid
+		fi
+		
+	done
+	
+	#Check What Service we use
+	service=`uci get iot-services.general.server_type`
+	if [ "$service" != "disabled" ];then
+		script_name=`uci get $service.general.routine_script`
+		script=$IOT_DIR$script_name
+		
+		# Kill possible running daemon;
+		servpid=`ps w| grep $script | grep -v grep | awk '{print $1}'`
+		if [[ ! -z $servpid ]]; then 
+			kill $servpid
+		fi
+		
+		#start services 
+		#check script type
+		if [ "${script%.lua}" != "$script" ]; then
+			lua $script &
+		else
+			$script &
+		fi 
+	fi
+}
+
+start_iot_services
+
+#check_mcu_alive

@@ -13,22 +13,40 @@ $Id: mqtt.lua 5948 2010-03-27 14:54:06Z jow $
 ]]--
 
 local uci = luci.model.uci.cursor()
+local server_t
 
 m = Map("mqtt", translate("MQTT Server Settings"), translate("Configuration to communicate with MQTT server"))
 
-s = m:section(NamedSection, "general", "lorawan", translate("MQTT Server Settings"))
+s = m:section(NamedSection, "general", "mqtt", translate("Configure MQTT Server"))
+
+local st = s:option(ListValue, "server_type", translate("Select Server"))
+st.placeholder = "Select MQTT Server"
+st.default = "general"
+st:value("general",  "General Server")
+st:value("thingspeak",  "ThingSpeak MQTT")
+--function st.write(self,section,value)
+--	server_t = value
+--	m.uci:set("mqtt","general","server_type",value)
+--	m.uci:set("mqtt","general","server","mqtt.thingspeak.com")
+--	if (value == "thingspeak") then
+--		m.uci:set("mqtt","general","server","mqtt.thingspeak.com")
+--	end
+--end
+
 local sv = s:option(Value, "server", translate("Server Address"))
 sv.datatype = "host"
 sv.placeholder = "Domain or IP"
+sv:depends("server_type","general")
+--sv.rmempty  = false
 
 local sp = s:option(Value, "port", translate("Server Port"))
 sp.datatype = "port"
 sp.default = "1883"
-
+sp:depends("server_type","general")
+--sp.rmempty  = false
 
 local user = s:option(Value, "user_name", translate("User Name"))
 user.placeholder = "MQTT User Name"
-
 
 local password = s:option(Value, "password", translate("Password"))
 password.placeholder = "MQTT password"
@@ -36,20 +54,56 @@ password.placeholder = "MQTT password"
 local cid = s:option(Value, "client_id", translate("Client ID"))
 cid.placeholder = "MQTT Client ID"
 
-local pub_topic = s:option(Value, "pub_topic", translate("Publish Topic"))
-pub_topic.placeholder = "MQTT publish topic"
+local api_key = s:option(Value, "api_key", translate("API Key"))
+api_key.placeholder = "MQTT API Key"
+api_key:depends("server_type","general")
 
-local en_sub = s:option(Flag, "en_sub", translate("Enabled Subscribe"))
-en_sub.enabled  = "1"
-en_sub.disabled = "0"
-en_sub.default  = en_sub.disable
-en_sub.rmempty  = false
+local topic_format = s:option(Value, "topic_format", translate("Topic Format"))
+topic_format.placeholder = "MQTT publish topic format"
+topic_format:depends("server_type","general")
 
-local sub_topic = s:option(Value, "sub_topic", translate("Subscribe Topic"))
-sub_topic.placeholder = "MQTT subscribe topic"
+local data_format = s:option(Value, "data_format", translate("Data String Format"))
+data_format.placeholder = "MQTT publish data format"
+data_format:depends("server_type","general")
 
-local sub_action = s:option(Value, "action", translate("Downlink Action"),translate("Action when there subscribed topic update"))
+--local en_sub = s:option(Flag, "en_sub", translate("Enabled Subscribe"))
+--en_sub.enabled  = "1"
+--en_sub.disabled = "0"
+--en_sub.default  = en_sub.disable
+--en_sub.rmempty  = false
 
+--local sub_topic = s:option(Value, "sub_topic", translate("Subscribe Topic"))
+--sub_topic.placeholder = "MQTT subscribe topic"
 
+--local sub_action = s:option(Value, "action", translate("Downlink Action"),translate("Action when there subscribed topic update"))
+
+channels = m:section(TypedSection, "channels", translate("MQTT Channel"),translate("Match between Local Channel and remote channel"))
+channels.anonymous = true
+channels.addremove=true
+channels.template = "cbi/tblsection"
+channels.extedit  = luci.dispatcher.build_url("admin/sensor/channel/%s")
+
+channels.create = function(...)
+	local sid = TypedSection.create(...)
+	if sid then
+		luci.http.redirect(channels.extedit % sid)
+		return
+	end
+end
+
+local local_id = channels:option(DummyValue, "Local_Channel", translate("Local Channel in /var/iot/channels/"))
+local_id.cfgvalue = function(self, section)
+	return m.uci:get("mqtt", section, "local_id")
+end
+
+local remote_id = channels:option(DummyValue, "Remote_Channel", translate("Remote Channel in IoT Server"))
+remote_id.cfgvalue = function(self, section)
+	return m.uci:get("mqtt", section, "remote_id")
+end
+
+local write_api_key = channels:option(DummyValue, "Write_API_Key", translate("Write API Key"))
+write_api_key.cfgvalue = function(self, section)
+	return m.uci:get("mqtt", section, "write_api_key")
+end
 
 return m

@@ -1,7 +1,9 @@
 #!/bin/sh
 
 #Check If we have set debug
-DEBUG=`uci get iot-services.general.debug`
+DEBUG=`uci get iot-services.general.debug` 
+DEBUG=`echo $DEBUG| awk '{print int($0)}'`
+
 UPDATE_INTERVAL=5
 
 old=`date +%s`
@@ -49,8 +51,9 @@ else
 	data_format=`uci get mqtt.$server_type.data_format`
 fi
 
-[ $DEBUG == "1" ] && logger "[IoT.MQTT]: " "Server:Port" $server:$port
-[ $DEBUG == "1" ] && logger "[IoT.MQTT]: " "Topic Format: " $pub_format
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Server:Port" $server:$port
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Topic Format: " $pub_format
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Data Format: " $data_format
 
 
 #Run Forever
@@ -60,23 +63,31 @@ do
 	if [ `expr $now - $old` -gt $UPDATE_INTERVAL ];then
 		old=`date +%s`
 		CID=`ls /var/iot/channels/`
-		[ $DEBUG == "1" ] && logger "[IoT.MQTT]: " "Check for sensor update"
-		[ $DEBUG == "1" ] && logger "[IoT.MQTT]: " "Found Local Channels:" $CID
+		[ $DEBUG -ge 2 ] && logger "[IoT.MQTT]: " "Check for sensor update"
+		[ $DEBUG -ge 2 ] && logger "[IoT.MQTT]: " "Found Local Channels:" $CID
 		for channel in $CID; do
 			if [ "`uci get mqtt.$channel.local_id`" == "$channel" ]; then
-				[ $DEBUG == "1" ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
+				[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
 				#Replace Channel ID if we find macro CHANNEL
-				topic=`echo ${pub_format/CHANNEL/$channel}`
+				remote_id=`uci get mqtt.$channel.remote_id`
+				topic=`echo ${pub_format/CHANNEL/$remote_id}`
 			
-				#Replace Channel ID if we find macro CHANNEL
+				#Replace Channel ID if we find macro WRITE_API
 				channel_API=`uci get mqtt.$channel.write_api_key`
 				topic=`echo ${topic/WRITE_API/$channel_API}`
-				[ $DEBUG == "1" ] && logger "[IoT.MQTT]: " "[-t] $topic"	
+				
+				#Replace username if we find macro USERNAME
+				topic=`echo ${topic/USERNAME/$user}`
+				
+				#Replace clientID if we find macro CLIENTID
+				topic=`echo ${topic/CLIENTID/$clientID}`				
+				
+				[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "[-t] $topic"	
 
 				#General MQTT Update Data
 				data=`cat /var/iot/channels/$channel`
 				mqtt_data=`echo ${data_format/DATA/$data}`
-				[ $DEBUG == "1" ] && logger "[IoT.MQTT]: " "[-m] $mqtt_data"
+				[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "[-m] $mqtt_data"
 				
 				### Send MQTT Command
 				mosquitto_pub -h $server -p $port -u $user -P $pass  -i $clientID -t $topic -m $mqtt_data
@@ -84,7 +95,8 @@ do
 				### Delete the Channel info
 				rm /var/iot/channels/$channel
 			else
-				[ $DEBUG == "1" ] && logger "[IoT.MQTT]: " "Do Not Find Match Entry for $channel" 
+				[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Do Not Find Match Entry for $channel" 
+				rm /var/iot/channels/$channel
 			fi
 		done
 	fi

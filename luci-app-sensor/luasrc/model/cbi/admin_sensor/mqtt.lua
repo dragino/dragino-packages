@@ -23,7 +23,9 @@ local st = s:option(ListValue, "server_type", translate("Select Server"))
 st.placeholder = "Select MQTT Server"
 st.default = "general"
 st:value("general",  "General Server")
+st:value("lewei50",  "Lewei50")
 st:value("thingspeak",  "ThingSpeak MQTT")
+st:value("mydevices",  "myDevices")
 --function st.write(self,section,value)
 --	server_t = value
 --	m.uci:set("mqtt","general","server_type",value)
@@ -33,36 +35,36 @@ st:value("thingspeak",  "ThingSpeak MQTT")
 --	end
 --end
 
-local sv = s:option(Value, "server", translate("Server Address"))
+local sv = s:option(Value, "server", translate("Broker Address [-h]"))
 sv.datatype = "host"
 sv.placeholder = "Domain or IP"
 sv:depends("server_type","general")
 --sv.rmempty  = false
 
-local sp = s:option(Value, "port", translate("Server Port"))
+local sp = s:option(Value, "port", translate("Broker Port [-p]"))
 sp.datatype = "port"
 sp.default = "1883"
 sp:depends("server_type","general")
 --sp.rmempty  = false
 
-local user = s:option(Value, "user_name", translate("User Name"))
+local user = s:option(Value, "user_name", translate("User Name [-u]"))
 user.placeholder = "MQTT User Name"
 
-local password = s:option(Value, "password", translate("Password"))
+local password = s:option(Value, "password", translate("Password [-P]"))
 password.placeholder = "MQTT password"
 
-local cid = s:option(Value, "client_id", translate("Client ID"))
+local cid = s:option(Value, "client_id", translate("Client ID [-i]"))
 cid.placeholder = "MQTT Client ID"
 
-local api_key = s:option(Value, "api_key", translate("API Key"))
-api_key.placeholder = "MQTT API Key"
-api_key:depends("server_type","general")
+--local api_key = s:option(Value, "api_key", translate("API Key"))
+--api_key.placeholder = "MQTT API Key"
+--api_key:depends("server_type","general")
 
-local topic_format = s:option(Value, "topic_format", translate("Topic Format"))
+local topic_format = s:option(Value, "topic_format", translate("Topic Format [-t]"))
 topic_format.placeholder = "MQTT publish topic format"
 topic_format:depends("server_type","general")
 
-local data_format = s:option(Value, "data_format", translate("Data String Format"))
+local data_format = s:option(Value, "data_format", translate("Data String Format [-m]"))
 data_format.placeholder = "MQTT publish data format"
 data_format:depends("server_type","general")
 

@@ -11,4 +11,16 @@ config servers 'thingspeak'
 	option port '1883'
 	option topic_format 'channels/CHANNEL/publish/WRITE_API'
 	option data_format 'DATA&status=MQTTPUBLISH'
+	
+config servers 'mydevices'
+	option server 'mqtt.mydevices.com'
+	option port '1883'
+	option topic_format 'v1/USERNAME/things/CLIENTID/data/CHANNEL'
+	option data_format 'DATA'
+	
+config servers 'lewei50'
+	option server 'mqtt.lewei50.com'
+	option port '1883'
+	option topic_format '/lw/u/CLIENTID_CHANNEL'
+	option data_format 'DATA'
 

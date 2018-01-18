@@ -1,5 +1,31 @@
 #!/bin/sh
 
+#Check If we have set debug
+DEBUG=`uci get iot-services.general.debug` 
+DEBUG=`echo $DEBUG| awk '{print int($0)}'`
+DNS_HOST="www.google.com www.163.com"
+
+check_net_status()
+{
+	if [ ! -z "`fping -e 8.8.8.8 | grep alive`" ]; then
+		logger "[IoT]:  Internet Connection Check: OK"
+	else 
+		logger "[IoT]:  Internet Connection Check: FAIL"
+	fi
+	
+	DNS_OK=0
+	for host in $DNS_HOST; do
+		if [ ! -z "`fping -e $host | grep alive`" ]; then
+			DNS_OK=1
+			logger "[IoT]:  DNS Resolve Check: OK"
+			break
+		fi
+	done
+	
+	if [ $DNS_OK -eq 0 ];	then
+		logger "[IoT]:  DNS Resolve Check: FAIL"
+	fi
+}
 
 start_iot_services()
 {
@@ -41,6 +67,7 @@ start_iot_services()
 	fi
 }
 
+check_net_status
 start_iot_services
 
 #check_mcu_alive

@@ -11,9 +11,10 @@ sv:value("mqtt",  "MQTT Server")
 sv:value("GPSWOX",  "GPSWOX Server")
 sv:value("TCP/IP",  "TCP/IP Protocol")
 
-local debug = s:option(Flag, "debug", translate('Enable Log Info'),translate("Show Log in System Log"))
-debug.enabled  = "1"
-debug.disabled = "0"
-debug.default  = debug.disabled
+local debug = s:option(ListValue, "debug", translate('Log Debug Info'),translate("Show Log in System Log"))
+debug.default  = "0"
+debug:value("0",  "Disable Debug Info")
+debug:value("1",  "Level 1")
+debug:value("2",  "Level 2")
 
 return m

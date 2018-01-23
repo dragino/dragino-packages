@@ -1,18 +1,20 @@
 
-m = Map("lorawan", translate("Select IoT Server"), translate("Select the IoT Server type to connect"))
+m = Map("iot-services", translate("Select IoT Server"), translate("Select the IoT Server type to connect"))
 
-s = m:section(NamedSection, "general", "lorawan", translate("Select IoT Server"))
+s = m:section(NamedSection, "general", "iot-services", translate("Select IoT Server"))
 local sv = s:option(ListValue, "server_type", translate("IoT Server"))
 sv.placeholder = "Select IoT server"
-sv.default = "MQTT"
-sv:value("LoraWAN",  "LoraWAN")
-sv:value("MQTT",  "MQTT Server")
+sv.default = "mqtt"
+sv:value("disabled",  "Disable")
+sv:value("LoraWAN",  "LoRaWAN")
+sv:value("mqtt",  "MQTT Server")
 sv:value("GPSWOX",  "GPSWOX Server")
 sv:value("TCP/IP",  "TCP/IP Protocol")
 
-local debug = s:option(Flag, "pfwd_debug", translate('Debugger'),translate("TTN  Packet Forwarder Debugger"))
-debug.enabled  = "1"
-debug.disabled = "0"
-debug.default  = debug.disabled
+local debug = s:option(ListValue, "debug", translate('Log Debug Info'),translate("Show Log in System Log"))
+debug.default  = "0"
+debug:value("0",  "Disable Debug Info")
+debug:value("1",  "Level 1")
+debug:value("2",  "Level 2")
 
 return m

@@ -1,4 +1,26 @@
 
 config settings 'general'
-	option port '1700'
+	option server_type 'general'
+	option user_name ''
+	option password ''
+	option client_id ''
+	option routine_script 'mqtt_process.sh'
+
+config servers 'thingspeak'
+	option server 'mqtt.thingspeak.com'
+	option port '1883'
+	option topic_format 'channels/CHANNEL/publish/WRITE_API'
+	option data_format 'DATA&status=MQTTPUBLISH'
+	
+config servers 'mydevices'
+	option server 'mqtt.mydevices.com'
+	option port '1883'
+	option topic_format 'v1/USERNAME/things/CLIENTID/data/CHANNEL'
+	option data_format 'DATA'
+	
+config servers 'lewei50'
+	option server 'mqtt.lewei50.com'
+	option port '1883'
+	option topic_format '/lw/u/CLIENTID_CHANNEL'
+	option data_format 'DATA'
 

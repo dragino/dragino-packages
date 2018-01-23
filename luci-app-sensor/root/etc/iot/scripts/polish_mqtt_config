@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. /lib/functions.sh
+
+polish_channel() {
+    local section="$1"
+    local _id
+
+    config_get _id "$section" "local_id"
+	if [ -n "$_id" ]; then
+		uci rename mqtt.$section=$_id
+	else
+		uci delete mqtt.$section
+	fi
+}
+config_load mqtt
+config_foreach polish_channel channels
+
+uci commit mqtt
+
+/etc/init.d/iotd restart

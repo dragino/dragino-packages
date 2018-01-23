@@ -135,7 +135,7 @@ function getUSBInfo()
         then 
             start = string.find(USB_INFO,"Vendor=2c7c")
     end
-	if start == nil return nil end
+	if start == nil then return nil end
 	u_man=string.match(USB_INFO,"Manufacturer=([%w%s%.%_]+[%w])",start)
 	u_vid=string.match(USB_INFO,"Vendor=([%w]+)",start)
 	u_pid=string.match(USB_INFO,"ProdID=([%w]+)",start)

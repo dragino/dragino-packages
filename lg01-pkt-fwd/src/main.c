@@ -120,7 +120,7 @@ static int   alt=0;
 /* lora packages data */
 #define UPCFGPATH "/var/iot/cfgdata"
 #define UPPATH "/var/iot/data"
-#define DLPATH "/var/iot/dldata"
+static char dlpath[32];
 
 /* values available for the 'modulation' parameters */
 /* NOTE: arbitrary values */
@@ -945,7 +945,7 @@ void thread_up(void) {
         } else 
             close(fd);
 
-        wait_ms(10 * FETCH_SLEEP_MS); /* wait 5 seconds after receive a packet */
+        wait_ms(4 * FETCH_SLEEP_MS); /* wait 2 seconds after receive a packet */
         //MSG("INFO: [up]return loop\n");
 	}
 	MSG("\nINFO: End of upstream thread\n");
@@ -1108,8 +1108,16 @@ void thread_down(void) {
 			}
 
             strncpy(payload, txpkt.payload, txpkt.size);
+
+            memset(dlpath, 0, sizeof(dlpath));
             
-            if ((fd = open(DLPATH, O_CREAT|O_RDWR|O_TRUNC)) < 0 ){
+            if ((uint8_t)payload[0] == 32)
+                strcpy(dlpath, "/var/iot/dldata");
+            else {
+                sprintf(dlpath, "/var/iot/%x%x%x%x", payload[1], payload[2], payload[3], payload[4]);
+            }
+            
+            if ((fd = open(dlpath, O_CREAT|O_RDWR|O_TRUNC)) < 0 ){
                 MSG("WARNING: [down]can't open downstream data file for write!");
                 continue;
             } else {

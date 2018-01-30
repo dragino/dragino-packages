@@ -324,3 +324,5 @@ sleep 5
 /etc/init.d/config_secn-2 start
 
 /etc/init.d/set-mesh-gw-mode.sh start
+
+/etc/init.d/loragateway restart

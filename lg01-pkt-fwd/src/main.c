@@ -969,7 +969,6 @@ void thread_down(void) {
 	
 	/* data buffers */
 	uint8_t buff_down[1024]; /* buffer to receive downstream packets */
-	uint8_t payload[512]; 
 	uint8_t buff_req[12]; /* buffer to compose pull requests */
 	int msg_len;
 	
@@ -1107,21 +1106,19 @@ void thread_down(void) {
 				MSG("WARNING: [down] mismatch between .size and .data size once converter to binary\n");
 			}
 
-            strncpy(payload, txpkt.payload, txpkt.size);
-
             memset(dlpath, 0, sizeof(dlpath));
             
-            if ((uint8_t)payload[0] == 32)
+            if ((uint8_t)txpkt.payload[0] == 32) //hex 0x20 = 32
                 strcpy(dlpath, "/var/iot/dldata");
             else {
-                sprintf(dlpath, "/var/iot/%x%x%x%x", payload[1], payload[2], payload[3], payload[4]);
+                sprintf(dlpath, "/var/iot/%x%x%x%x", txpkt.payload[1], txpkt.payload[2], txpkt.payload[3], txpkt.payload[4]);
             }
             
             if ((fd = open(dlpath, O_CREAT|O_RDWR|O_TRUNC)) < 0 ){
                 MSG("WARNING: [down]can't open downstream data file for write!");
                 continue;
             } else {
-                if ((i = write(fd, payload, txpkt.size)) < txpkt.size){
+                if ((i = write(fd, txpkt.payload, txpkt.size)) < txpkt.size){
                     close(fd);
                     MSG("WARNING: [down]write downstream data file error!");
                     continue;
@@ -1135,7 +1132,7 @@ void thread_down(void) {
             char tmp[4];
             for (i = 0; i < txpkt.size; i++) {
                 memset(tmp, 0, sizeof(tmp));
-                sprintf(tmp, "%x", payload[i]);
+                sprintf(tmp, "%x", txpkt.payload[i]);
                 if (strlen(tmp) == 2)
                     printf("%s", tmp);
                 else

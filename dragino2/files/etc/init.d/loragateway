@@ -7,6 +7,7 @@ LORALOG=`uci get lorawan.general.pfwd_debug`
 
 start()
 {
+    stop_pkt_fwd
 	start_pkt_fwd
 }
 
@@ -22,7 +23,7 @@ stop() {
 stop_pkt_fwd() {
 	lorapid=`ps w| grep lg01_pkt_fwd | grep -v grep | awk '{print $1}'`
 	if [[ ! -z $lorapid ]]; then 
-		kill -9 $lorapid
+        killall lg01_pkt_fwd > /dev/null
 	fi
 }
 

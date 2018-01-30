@@ -420,7 +420,7 @@ void sendpacket()
 
 void emitpacket()
 {
-  int i = 0;
+  int i = 0, j = 0;
 
   File dwFile = FileSystem.open(dwdata); /* dldata file save the downstream data */
 
@@ -437,7 +437,7 @@ void emitpacket()
     return;
 
   if ( debug > 0 ) {
-    int j;
+    
     Console.println(F("Downlink Message:"));
     for (j = 0; j < i; j++) {
       Console.print(F("["));
@@ -449,9 +449,9 @@ void emitpacket()
     Console.println();
   }
 
-  for (i = 0; i < 2; i++) {     // send data down two times every frequency
+  for (j = 0; j < 2; j++) {     // send data down two times every frequency
     LoRa.beginPacket();
-    LoRa.print(packet);
+    LoRa.write(packet, i);
     LoRa.endPacket();
     delay(500);
 
@@ -460,7 +460,7 @@ void emitpacket()
     delay(100);
 
     LoRa.beginPacket();
-    LoRa.print(packet);
+    LoRa.write(packet, i);
     LoRa.endPacket();
 
     delay(200);

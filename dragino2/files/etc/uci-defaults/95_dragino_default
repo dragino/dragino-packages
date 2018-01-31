@@ -9,14 +9,13 @@ echo $(uci get system.@system[0].hostname) > /proc/sys/kernel/hostname
 
 rename_network_on_first_boot
 
-uci add ucitrack secn
 uci	set ucitrack.@secn[0].exec=/usr/bin/config_secn
 
-uci add ucitrack gpstrack
 uci	set ucitrack.@gpstrack[0].exec=/usr/bin/get_gpswox_api_hash.sh
 
-uci add ucitrack lorawan
 uci	set ucitrack.@lorawan[0].exec=/usr/bin/reset-mcu
+
+uci	set ucitrack.@iot-services[0].exec=/usr/bin/reset-mcu
 
 uci	commit
 

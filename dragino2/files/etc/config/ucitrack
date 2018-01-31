@@ -72,3 +72,11 @@ config tinyproxy
 
 config 6relayd
 	option init 6relayd
+
+config secn
+
+config gpstrack
+
+config lorawan
+
+config iot-services

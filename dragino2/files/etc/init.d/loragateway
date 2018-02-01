@@ -8,12 +8,14 @@ LORALOG=`uci get iot-services.general.debug`
 start()
 {
     stop_pkt_fwd
-	start_pkt_fwd
+    sleep 3
+    start_pkt_fwd
 }
 
 restart() {
     stop_pkt_fwd
-	start_pkt_fwd
+    sleep 3
+    start_pkt_fwd
 }
 
 stop() {
@@ -22,7 +24,7 @@ stop() {
 
 stop_pkt_fwd() {
 	lorapid=`ps w| grep lg01_pkt_fwd | grep -v grep | awk '{print $1}'`
-	if [[ ! -z $lorapid ]]; then 
+	if [[ ! -z "$lorapid" ]]; then 
         killall lg01_pkt_fwd > /dev/null
 	fi
 }
@@ -30,8 +32,8 @@ stop_pkt_fwd() {
 
 start_pkt_fwd() {
 
-	if [ $LORAMODE = "LoraWAN" ]; then
-	    if [ $LORALOG = "1" ]; then
+	if [ "$LORAMODE" = "LoraWAN" ]; then
+	    if [ "$LORALOG" = "1" ]; then
 		    /usr/bin/lg01_pkt_fwd 2>&1 > /var/iot/log &
         else
 		    /usr/bin/lg01_pkt_fwd 2>&1 > /dev/null &

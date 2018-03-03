@@ -23,6 +23,7 @@ config network
 	option init network
 	list affects dhcp
 	list affects radvd
+	list affects iot-services
 
 config wireless
 	list affects network

@@ -7,7 +7,7 @@ DNS_HOST="www.google.com www.163.com"
 
 check_net_status()
 {
-	if [ ! -z "`fping -e 8.8.8.8 | grep alive`" ]; then
+	if [ ! -z "`fping -c 1 -e 8.8.8.8 | grep alive`" ]; then
 		logger "[IoT]:  Internet Connection Check: OK"
 	else 
 		logger "[IoT]:  Internet Connection Check: FAIL"
@@ -15,7 +15,7 @@ check_net_status()
 	
 	DNS_OK=0
 	for host in $DNS_HOST; do
-		if [ ! -z "`fping -e $host | grep alive`" ]; then
+		if [ ! -z "`fping -c 1 -e $host | grep alive`" ]; then
 			DNS_OK=1
 			logger "[IoT]:  DNS Resolve Check: OK"
 			break
@@ -39,8 +39,8 @@ start_iot_services()
 		
 		# Kill possible running daemon;
 		servpid=`ps w| grep $script | grep -v grep | awk '{print $1}'`
-		if [[ ! -z $servpid ]]; then 
-			kill $servpid
+		if [[ ! -z "$servpid" ]]; then 
+			killall $script_name
 		fi
 		
 	done
@@ -53,8 +53,8 @@ start_iot_services()
 		
 		# Kill possible running daemon;
 		servpid=`ps w| grep $script | grep -v grep | awk '{print $1}'`
-		if [[ ! -z $servpid ]]; then 
-			kill $servpid
+		if [[ ! -z "$servpid" ]]; then 
+			killall $script_name
 		fi
 		
 		#start services 
@@ -62,7 +62,7 @@ start_iot_services()
 		if [ "${script%.lua}" != "$script" ]; then
 			lua $script &
 		else
-			$script &
+            $script 2>&1 > /dev/null &
 		fi 
 	fi
 }

@@ -31,8 +31,8 @@ define Build/Prepare
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/bin
-	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/etc/iot/scripts
+	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/etc/iot/scripts
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

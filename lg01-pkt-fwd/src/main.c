@@ -121,6 +121,7 @@ static int   alt=0;
 #define UPCFGPATH "/var/iot/cfgdata"
 #define UPPATH "/var/iot/data"
 static char dlpath[32];
+static int roundtrip = 1;
 
 /* values available for the 'modulation' parameters */
 /* NOTE: arbitrary values */
@@ -1107,10 +1108,14 @@ void thread_down(void) {
 			}
 
             memset(dlpath, 0, sizeof(dlpath));
+
             
-            if ((uint8_t)txpkt.payload[0] == 32) //hex 0x20 = 32
-                strcpy(dlpath, "/var/iot/dldata");
-            else {
+            if ((uint8_t)txpkt.payload[0] == 32) {//hex 0x20 = 32
+                if (roundtrip > 5) 
+                    roundtrip = 1;
+                sprintf(dlpath, "/var/iot/dldata%d", roundtrip);
+                roundtrip++; 
+            } else {
                 sprintf(dlpath, "/var/iot/%x%x%x%x", txpkt.payload[1], txpkt.payload[2], txpkt.payload[3], txpkt.payload[4]);
             }
             

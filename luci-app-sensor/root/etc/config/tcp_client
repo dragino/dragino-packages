@@ -4,5 +4,6 @@ config settings 'general'
 	option server_port ''
 	option update_interval ''
 	option keep_alive_interval ''
+    option routine_script 'tcp_client'
 
 

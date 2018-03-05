@@ -1,8 +1,7 @@
 
 config settings 'general'
 	option port '1700'
-    option server_type 'MQTT'
-    option pfwd_debug '0'
+    option routine_script 'lg01_pkt_fwd'
 
 config settings 'radio'
 	option SF '7'

@@ -6,10 +6,10 @@ local sv = s:option(ListValue, "server_type", translate("IoT Server"))
 sv.placeholder = "Select IoT server"
 sv.default = "mqtt"
 sv:value("disabled",  "Disable")
-sv:value("LoraWAN",  "LoRaWAN")
+sv:value("lorawan",  "LoRaWAN")
 sv:value("mqtt",  "MQTT Server")
-sv:value("GPSWOX",  "GPSWOX Server")
-sv:value("TCP/IP",  "TCP/IP Protocol")
+sv:value("gpstrack",  "GPSWOX Server")
+sv:value("tcp_client",  "TCP/IP Protocol")
 
 local debug = s:option(ListValue, "debug", translate('Log Debug Info'),translate("Show Log in System Log"))
 debug.default  = "0"

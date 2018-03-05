@@ -27,7 +27,7 @@ function index()
 	entry({"admin", "sensor", "poweruart"}, cbi("admin_sensor/poweruart"), _("PowerUART"), 5)
 	entry({"admin", "sensor", "mcu"}, cbi("admin_sensor/mcu"), _("MicroController"), 8)
 	entry({"admin", "sensor", "flashmcu"}, call("upload_sketch"), _("Flash MCU"), 10)
-	entry({"admin", "sensor", "LoRaWAN"}, cbi("admin_sensor/LoRaWAN"), _("LoRa / LoRaWAN"), 15)
+	entry({"admin", "sensor", "lorawan"}, cbi("admin_sensor/lorawan"), _("LoRa / LoraWAN"), 15)
 	entry({"admin", "sensor", "tcp_client"}, cbi("admin_sensor/tcp_client"), _("TCP Client"), 16)
     entry({"admin", "sensor", "sdata"}, template("admin_status/sdata"), _("Sensor Data"), 20).leaf = true
 	entry({"admin", "sensor", "sdata_action"}, post("sdata_action")).leaf = true

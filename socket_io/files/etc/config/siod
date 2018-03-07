@@ -1,6 +1,0 @@
-
-package 'siod'
-
-config parameters 'siod_id'
-	option id	'1000'
-

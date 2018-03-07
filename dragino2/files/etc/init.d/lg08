@@ -5,6 +5,9 @@ START=98
 
 start()
 {
+    stop_lg08
+    sleep 1
+    reset_pin
     start_lg08
 }
 
@@ -14,6 +17,8 @@ stop() {
 
 restart() {
     stop_lg08
+    sleep 1
+    reset_pin
     start_lg08
 }
 
@@ -28,7 +33,7 @@ start_lg08() {
 
 stop_lg08() {
     lorapid=`ps w| grep lora_pkt_fwd | grep -v grep | awk '{print $1}'`
-	if [[ ! -z $lorapid ]]; then 
-		kill -9 $lorapid
+	if [[ ! -z "$lorapid" ]]; then 
+		kill -9 lora_pkt_fwd
 	fi
 }

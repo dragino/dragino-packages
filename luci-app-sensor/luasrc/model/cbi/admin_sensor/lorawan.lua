@@ -39,7 +39,7 @@ lati.placeholder = "Location Info"
 local long = s:option(Value, "long", translate("Longtitude"))
 long.placeholder = "Location Info"
 
-s = m:section(NamedSection, "radio", "LoRaWAN", translate("Radio Settings"),translate("Radio settings requires MCU side sketch support"))
+s = m:section(NamedSection, "radio", "lorawan", translate("Radio Settings"),translate("Radio settings requires MCU side sketch support"))
 local tx_fre = s:option(Value, "tx_frequency", translate("TX Frequency"),translate("Gateway's LoRa TX Frequency"))
 tx_fre.placeholder = "9 digits Frequency, etc:868100000"
 tx_fre.datatype = "rangelength(9,9)"

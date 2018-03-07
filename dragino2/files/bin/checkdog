@@ -1,0 +1,37 @@
+#!/bin/sh
+
+restart_service() {
+    IOT_DIR="/etc/iot/scripts/"
+    service=`uci get iot-services.general.server_type`
+    if [ "$service" != "disabled" ];then
+        script_name=`uci get $service.general.routine_script`
+        script=$IOT_DIR$script_name
+        servpid=`ps w| grep $script_name | grep -v grep | awk '{print $1}'`
+        if [[ -z "$servpid" ]]; then
+            if [ "${script%.lua}" != "$script" ]; then
+                lua $script &
+            else
+                $script 2>&1 > /dev/null &
+            fi
+        fi
+    fi
+}
+
+run_reset_mcu()
+{
+    dogfile="/var/iot/dog"
+    if [ -f "$dogfile" ]; then
+        let current=`date +%s`
+        let feedtime=`cat "$dogfile"`  
+        if [[ ! -z "$feedtime" ]]; then
+            pass=`expr $current - $feedtime`  
+            if [ $pass -lt 300 ]; then
+                reset-mcu
+            fi
+        fi
+    fi
+}
+        
+restart_service
+
+

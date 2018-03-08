@@ -1,0 +1,73 @@
+#!/bin/sh
+
+#Check If we have set debug
+DEBUG=`uci get iot-services.general.debug` 
+DEBUG=`echo $DEBUG| awk '{print int($0)}'`
+DNS_HOST="www.google.com www.163.com"
+
+check_net_status()
+{
+	if [ ! -z "`fping -c 1 -e 8.8.8.8 | grep alive`" ]; then
+		logger "[IoT]:  Internet Connection Check: OK"
+	else 
+		logger "[IoT]:  Internet Connection Check: FAIL"
+	fi
+	
+	DNS_OK=0
+	for host in $DNS_HOST; do
+		if [ ! -z "`fping -c 1 -e $host | grep alive`" ]; then
+			DNS_OK=1
+			logger "[IoT]:  DNS Resolve Check: OK"
+			break
+		fi
+	done
+	
+	if [ $DNS_OK -eq 0 ];	then
+		logger "[IoT]:  DNS Resolve Check: FAIL"
+	fi
+}
+
+start_iot_services()
+{
+	IOT_DIR="/etc/iot/scripts/"
+	
+	#Kill all script
+	ALL_SERVICES="mqtt tcpip"
+	for serv in $ALL_SERVICES; do
+		script_name=`uci get $serv.general.routine_script`
+		script=$IOT_DIR$script_name
+		
+		# Kill possible running daemon;
+		servpid=`ps w| grep $script | grep -v grep | awk '{print $1}'`
+		if [[ ! -z "$servpid" ]]; then 
+			killall $script_name
+		fi
+		
+	done
+	
+	#Check What Service we use
+	service=`uci get iot-services.general.server_type`
+	if [ "$service" != "disabled" ];then
+		script_name=`uci get $service.general.routine_script`
+		script=$IOT_DIR$script_name
+		
+		# Kill possible running daemon;
+		servpid=`ps w| grep $script | grep -v grep | awk '{print $1}'`
+		if [[ ! -z "$servpid" ]]; then 
+			killall $script_name
+		fi
+		
+		#start services 
+		#check script type
+		if [ "${script%.lua}" != "$script" ]; then
+			lua $script &
+		else
+            $script 2>&1 > /dev/null &
+		fi 
+	fi
+}
+
+check_net_status
+start_iot_services
+
+#check_mcu_alive

@@ -20,9 +20,10 @@ function index()
 	local uci = luci.model.uci.cursor()
 	local string =string
 	entry({"admin", "gateway"}, alias("admin", "gateway", "gateway"), _("Gateway"), 30).index = true
+	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/gateway"), _("LoRaWan / GateWay"), 15)
 	entry({"admin", "gateway", "iotserver"}, cbi("admin_gateway/iotserver"), _("IOT Server"), 1)
 	entry({"admin", "gateway", "mqtt"}, cbi("admin_gateway/mqtt"), _("MQTT"), 2)
-	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/gateway"), _("LoRaWan / GateWay"), 15)
+	entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("LoRaWan / Tcp_Client"), 15)
 	
 end
 

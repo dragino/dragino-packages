@@ -24,8 +24,8 @@ run_reset_mcu()
         let current=`date +%s`
         let feedtime=`cat "$dogfile"`  
         if [[ ! -z "$feedtime" ]]; then
-            pass=`expr $current - $feedtime`  
-            if [ $pass -lt 300 ]; then
+            let pass=`expr $current - $feedtime`  
+            if [ $pass -gt 300 ]; then
                 reset-mcu
             fi
         fi

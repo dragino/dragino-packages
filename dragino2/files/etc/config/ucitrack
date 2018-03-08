@@ -76,4 +76,4 @@ config 6relayd
 	option init 6relayd
 
 config gateway
-    option init lg08
+    option exec /usr/bin/restart-lora

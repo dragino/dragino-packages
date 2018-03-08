@@ -23,6 +23,8 @@ config network
 	option init network
 	list affects dhcp
 	list affects radvd
+	list affects gateway
+	list affects iot-services
 
 config wireless
 	list affects network
@@ -72,3 +74,6 @@ config tinyproxy
 
 config 6relayd
 	option init 6relayd
+
+config gateway
+    option init reset_gateway

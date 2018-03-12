@@ -258,6 +258,13 @@ void thread_valid(void);
 void thread_jit(void);
 void thread_timersync(void);
 
+/* log file management */
+time_t now_time;
+time_t log_start_time;
+static int time_check = 0; /* variable used to limit the number of calls to time() function */
+FILE * pktlog_file = NULL;
+char log_file_name[64];
+
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
 
@@ -970,6 +977,24 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
     return send(sock_down, (void *)buff_ack, buff_index, 0);
 }
 
+/* open log file */
+void open_log(void) {
+    int i;
+    char iso_date[20];
+
+    strftime(iso_date, ARRAY_SIZE(iso_date), "%Y%m%dT%H%M%SZ", gmtime(&now_time)); /* format yyyymmddThhmmssZ */
+
+    log_start_time = now_time; /* keep track of when the log was started, for log rotation */
+    sprintf(log_file_name, "pktlog_%s.log", iso_date);
+    pktlog_file = fopen(log_file_name, "w+"); /* create log file, append if file already exist */
+    if (pktlog_file == NULL) {
+        MSG("ERROR: impossible to create log file %s\n", log_file_name);
+        exit(EXIT_FAILURE);
+    }
+
+    MSG("INFO: Now writing to log file %s\n", log_file_name);
+    return;
+}
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
@@ -978,6 +1003,8 @@ int main(void)
     struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
     int i; /* loop variable and temporary variable for return value */
     int x;
+
+    FILE * report_file;
 
     /* configuration file related */
     char *global_cfg_path= "/etc/lora/global_conf.json"; /* contain global (typ. network-wide) configuration */
@@ -1024,6 +1051,9 @@ int main(void)
     uint32_t cp_nb_beacon_queued = 0;
     uint32_t cp_nb_beacon_sent = 0;
     uint32_t cp_nb_beacon_rejected = 0;
+
+    /* clock and log rotation management */
+    int log_rotate_interval = 3600 * 12; /* by default, rotation every 12 hours */
 
     /* GPS coordinates variables */
     bool coord_ok = false;
@@ -1190,6 +1220,10 @@ int main(void)
     }
     freeaddrinfo(result);
 
+    /* opening log file and writing CSV header*/
+    time(&now_time);
+    open_log();
+
     /* starting the concentrator */
     i = lgw_start();
     if (i == LGW_HAL_SUCCESS) {
@@ -1340,31 +1374,35 @@ int main(void)
             cp_gps_coord = reference_coord;
         }
 
-        /* display a report */
-        /*
-        printf("\n##### %s #####\n", stat_timestamp);
-        printf("### [UPSTREAM] ###\n");
-        printf("# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
-        printf("# CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
-        printf("# RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
-        printf("# PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
-        printf("# PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
-        printf("### [DOWNSTREAM] ###\n");
-        printf("# PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
-        printf("# PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
-        printf("# RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
-        printf("# TX errors: %u\n", cp_nb_tx_fail);
-        if (cp_nb_tx_requested != 0 ) {
-            printf("# TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_packet);
-            printf("# TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_beacon);
-            printf("# TX rejected (too late): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_late);
-            printf("# TX rejected (too early): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_early);
+        report_file = fopen("/var/log/gw_report.log", "w+");
+        if (pktlog_file == NULL) {
+            MSG("ERROR: impossible to create log file gw_report.log\n");
+        } else {
+            /* display a report */
+            fprintf(report_file, "\n##### %s #####\n", stat_timestamp);
+            fprintf(report_file, "### [UPSTREAM] ###\n");
+            fprintf(report_file, "# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
+            fprintf(report_file, "# CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
+            fprintf(report_file, "# RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
+            fprintf(report_file, "# PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
+            fprintf(report_file, "# PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
+            fprintf(report_file, "### [DOWNSTREAM] ###\n");
+            fprintf(report_file, "# PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
+            fprintf(report_file, "# PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
+            fprintf(report_file, "# RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
+            fprintf(report_file, "# TX errors: %u\n", cp_nb_tx_fail);
+            if (cp_nb_tx_requested != 0 ) {
+                fprintf(report_file, "# TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_packet);
+                fprintf(report_file, "# TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_beacon);
+                fprintf(report_file, "# TX rejected (too late): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_late);
+                fprintf(report_file, "# TX rejected (too early): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_early);
+            }
+            fprintf(report_file, "# BEACON queued: %u\n", cp_nb_beacon_queued);
+            fprintf(report_file, "# BEACON sent so far: %u\n", cp_nb_beacon_sent);
+            fprintf(report_file, "# BEACON rejected: %u\n", cp_nb_beacon_rejected);
+            fprintf(report_file, "### [JIT] ###\n");
+            fclose(report_file);
         }
-        printf("# BEACON queued: %u\n", cp_nb_beacon_queued);
-        printf("# BEACON sent so far: %u\n", cp_nb_beacon_sent);
-        printf("# BEACON rejected: %u\n", cp_nb_beacon_rejected);
-        printf("### [JIT] ###\n");
-        */
         /* get timestamp captured on PPM pulse  */
         pthread_mutex_lock(&mx_concent);
         i = lgw_get_trigcnt(&trig_tstamp);
@@ -1404,6 +1442,16 @@ int main(void)
         }
         report_ready = true;
         pthread_mutex_unlock(&mx_stat_rep);
+
+        /* check time and rotate log file if necessary */
+        if (time_check >= 8 * 64) {
+            time_check = 0;
+            time(&now_time);
+            if (difftime(now_time, log_start_time) > log_rotate_interval) {
+                fclose(pktlog_file);
+                open_log();
+            }
+        }
     }
 
     /* wait for upstream thread to finish (1 fetch cycle max) */
@@ -1436,6 +1484,8 @@ int main(void)
             MSG("WARNING: failed to stop concentrator successfully\n");
         }
     }
+
+    fclose(pktlog_file);
 
     MSG("INFO: Exiting packet forwarder program\n");
     exit(EXIT_SUCCESS);
@@ -1846,7 +1896,9 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = 0; /* add string terminator, for safety */
 
-        printf("\nJSON up: %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        fprintf(pktlog_file, "%s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        fprintf(pktlog_file, "=======up=================up=================up========\n"); /* DEBUG: display JSON payload */
+        ++time_check;
 
         /* send datagram to server */
         send(sock_up, (void *)buff_up, buff_index, 0);
@@ -2228,7 +2280,8 @@ void thread_down(void) {
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
             MSG("INFO: [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
-            printf("\nJSON down: %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+            fprintf(pktlog_file, "%s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+            fprintf(pktlog_file, "========down=============down===============down========\n"); /* DEBUG: display JSON payload */
 
             /* initialize TX struct and try to parse JSON */
             memset(&txpkt, 0, sizeof txpkt);

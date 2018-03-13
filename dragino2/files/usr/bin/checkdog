@@ -19,16 +19,9 @@ restart_service() {
 
 run_restart_lora_fwd()
 {
-    dogfile="/var/iot/dog"
-    if [ -f "$dogfile" ]; then
-        let current=`date +%s`
-        let feedtime=`cat "$dogfile"`  
-        if [[ ! -z "$feedtime" ]]; then
-            let pass=`expr $current - $feedtime`  
-            if [ $pass -gt 300 ]; then
-                /etc/init.d/lg08 restart
-            fi
-        fi
+    loraid=`ps w| grep lora_pkt_fwd | grep -v grep | awk '{print $1}'`
+    if [[ -z "$loraid" ]]; then
+        /etc/init.d/lg08 restart
     fi
 }
         

@@ -28,7 +28,7 @@ reset_pin() {
 }
 
 start_lg08() {
-    /usr/bin/lora_pkt_fwd 2>&1 > /var/log/lora_pkt.log & 
+    /usr/bin/lora_pkt_fwd 2>&1 > /var/log/gw_debug.log & 
 }
 
 stop_lg08() {

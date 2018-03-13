@@ -296,17 +296,17 @@ static int parse_SX1301_configuration(const char * conf_file) {
     /* try to parse JSON */
     root_val = json_parse_file_with_comments(conf_file);
     if (root_val == NULL) {
-        MSG("ERROR: %s is not a valid JSON file\n", conf_file);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: %s is not a valid JSON file\n", conf_file);
         exit(EXIT_FAILURE);
     }
 
     /* point to the gateway configuration object */
     conf_obj = json_object_get_object(json_value_get_object(root_val), conf_obj_name);
     if (conf_obj == NULL) {
-        MSG("INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
+        MSG_DEBUG(DEBUG_INFO, "INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
         return -1;
     } else {
-        MSG("INFO: %s does contain a JSON object named %s, parsing SX1301 parameters\n", conf_file, conf_obj_name);
+        MSG_DEBUG(DEBUG_INFO, "INFO: %s does contain a JSON object named %s, parsing SX1301 parameters\n", conf_file, conf_obj_name);
     }
 
     /* set board configuration */
@@ -315,20 +315,20 @@ static int parse_SX1301_configuration(const char * conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         boardconf.lorawan_public = (bool)json_value_get_boolean(val);
     } else {
-        MSG("WARNING: Data type for lorawan_public seems wrong, please check\n");
+        MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for lorawan_public seems wrong, please check\n");
         boardconf.lorawan_public = false;
     }
     val = json_object_get_value(conf_obj, "clksrc"); /* fetch value (if possible) */
     if (json_value_get_type(val) == JSONNumber) {
         boardconf.clksrc = (uint8_t)json_value_get_number(val);
     } else {
-        MSG("WARNING: Data type for clksrc seems wrong, please check\n");
+        MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for clksrc seems wrong, please check\n");
         boardconf.clksrc = 0;
     }
-    MSG("INFO: lorawan_public %d, clksrc %d\n", boardconf.lorawan_public, boardconf.clksrc);
+    MSG_DEBUG(DEBUG_INFO, "INFO: lorawan_public %d, clksrc %d\n", boardconf.lorawan_public, boardconf.clksrc);
     /* all parameters parsed, submitting configuration to the HAL */
     if (lgw_board_setconf(boardconf) != LGW_HAL_SUCCESS) {
-        MSG("ERROR: Failed to configure board\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: Failed to configure board\n");
         return -1;
     }
 
@@ -336,13 +336,13 @@ static int parse_SX1301_configuration(const char * conf_file) {
     memset(&lbtconf, 0, sizeof lbtconf); /* initialize configuration structure */
     conf_lbt_obj = json_object_get_object(conf_obj, "lbt_cfg"); /* fetch value (if possible) */
     if (conf_lbt_obj == NULL) {
-        MSG("INFO: no configuration for LBT\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for LBT\n");
     } else {
         val = json_object_get_value(conf_lbt_obj, "enable"); /* fetch value (if possible) */
         if (json_value_get_type(val) == JSONBoolean) {
             lbtconf.enable = (bool)json_value_get_boolean(val);
         } else {
-            MSG("WARNING: Data type for lbt_cfg.enable seems wrong, please check\n");
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for lbt_cfg.enable seems wrong, please check\n");
             lbtconf.enable = false;
         }
         if (lbtconf.enable == true) {
@@ -350,27 +350,27 @@ static int parse_SX1301_configuration(const char * conf_file) {
             if (json_value_get_type(val) == JSONNumber) {
                 lbtconf.rssi_target = (int8_t)json_value_get_number(val);
             } else {
-                MSG("WARNING: Data type for lbt_cfg.rssi_target seems wrong, please check\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for lbt_cfg.rssi_target seems wrong, please check\n");
                 lbtconf.rssi_target = 0;
             }
             val = json_object_get_value(conf_lbt_obj, "sx127x_rssi_offset"); /* fetch value (if possible) */
             if (json_value_get_type(val) == JSONNumber) {
                 lbtconf.rssi_offset = (int8_t)json_value_get_number(val);
             } else {
-                MSG("WARNING: Data type for lbt_cfg.sx127x_rssi_offset seems wrong, please check\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for lbt_cfg.sx127x_rssi_offset seems wrong, please check\n");
                 lbtconf.rssi_offset = 0;
             }
             /* set LBT channels configuration */
             conf_array = json_object_get_array(conf_lbt_obj, "chan_cfg");
             if (conf_array != NULL) {
                 lbtconf.nb_channel = json_array_get_count( conf_array );
-                MSG("INFO: %u LBT channels configured\n", lbtconf.nb_channel);
+                MSG_DEBUG(DEBUG_INFO, "INFO: %u LBT channels configured\n", lbtconf.nb_channel);
             }
             for (i = 0; i < (int)lbtconf.nb_channel; i++) {
                 /* Sanity check */
                 if (i >= LBT_CHANNEL_FREQ_NB)
                 {
-                    MSG("ERROR: LBT channel %d not supported, skip it\n", i );
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR: LBT channel %d not supported, skip it\n", i );
                     break;
                 }
                 /* Get LBT channel configuration object from array */
@@ -381,7 +381,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
                 if (json_value_get_type(val) == JSONNumber) {
                     lbtconf.channels[i].freq_hz = (uint32_t)json_value_get_number(val);
                 } else {
-                    MSG("WARNING: Data type for lbt_cfg.channels[%d].freq_hz seems wrong, please check\n", i);
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for lbt_cfg.channels[%d].freq_hz seems wrong, please check\n", i);
                     lbtconf.channels[i].freq_hz = 0;
                 }
 
@@ -390,18 +390,18 @@ static int parse_SX1301_configuration(const char * conf_file) {
                 if (json_value_get_type(val) == JSONNumber) {
                     lbtconf.channels[i].scan_time_us = (uint16_t)json_value_get_number(val);
                 } else {
-                    MSG("WARNING: Data type for lbt_cfg.channels[%d].scan_time_us seems wrong, please check\n", i);
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for lbt_cfg.channels[%d].scan_time_us seems wrong, please check\n", i);
                     lbtconf.channels[i].scan_time_us = 0;
                 }
             }
 
             /* all parameters parsed, submitting configuration to the HAL */
             if (lgw_lbt_setconf(lbtconf) != LGW_HAL_SUCCESS) {
-                MSG("ERROR: Failed to configure LBT\n");
+                MSG_DEBUG(DEBUG_ERROR, "ERROR: Failed to configure LBT\n");
                 return -1;
             }
         } else {
-            MSG("INFO: LBT is disabled\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: LBT is disabled\n");
         }
     }
 
@@ -411,11 +411,11 @@ static int parse_SX1301_configuration(const char * conf_file) {
         if (json_value_get_type(val) == JSONNumber) {
             antenna_gain = (int8_t)json_value_get_number(val);
         } else {
-            MSG("WARNING: Data type for antenna_gain seems wrong, please check\n");
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for antenna_gain seems wrong, please check\n");
             antenna_gain = 0;
         }
     }
-    MSG("INFO: antenna_gain %d dBi\n", antenna_gain);
+    MSG_DEBUG(DEBUG_INFO, "INFO: antenna_gain %d dBi\n", antenna_gain);
 
     /* set configuration for tx gains */
     memset(&txlut, 0, sizeof txlut); /* initialize configuration structure */
@@ -423,7 +423,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         snprintf(param_name, sizeof param_name, "tx_lut_%i", i); /* compose parameter path inside JSON structure */
         val = json_object_get_value(conf_obj, param_name); /* fetch value (if possible) */
         if (json_value_get_type(val) != JSONObject) {
-            MSG("INFO: no configuration for tx gain lut %i\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for tx gain lut %i\n", i);
             continue;
         }
         txlut.size++; /* update TX LUT size based on JSON object found in configuration file */
@@ -433,7 +433,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         if (json_value_get_type(val) == JSONNumber) {
             txlut.lut[i].pa_gain = (uint8_t)json_value_get_number(val);
         } else {
-            MSG("WARNING: Data type for %s[%d] seems wrong, please check\n", param_name, i);
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for %s[%d] seems wrong, please check\n", param_name, i);
             txlut.lut[i].pa_gain = 0;
         }
         snprintf(param_name, sizeof param_name, "tx_lut_%i.dac_gain", i);
@@ -448,7 +448,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         if (json_value_get_type(val) == JSONNumber) {
             txlut.lut[i].dig_gain = (uint8_t)json_value_get_number(val);
         } else {
-            MSG("WARNING: Data type for %s[%d] seems wrong, please check\n", param_name, i);
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for %s[%d] seems wrong, please check\n", param_name, i);
             txlut.lut[i].dig_gain = 0;
         }
         snprintf(param_name, sizeof param_name, "tx_lut_%i.mix_gain", i);
@@ -456,7 +456,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         if (json_value_get_type(val) == JSONNumber) {
             txlut.lut[i].mix_gain = (uint8_t)json_value_get_number(val);
         } else {
-            MSG("WARNING: Data type for %s[%d] seems wrong, please check\n", param_name, i);
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for %s[%d] seems wrong, please check\n", param_name, i);
             txlut.lut[i].mix_gain = 0;
         }
         snprintf(param_name, sizeof param_name, "tx_lut_%i.rf_power", i);
@@ -464,19 +464,19 @@ static int parse_SX1301_configuration(const char * conf_file) {
         if (json_value_get_type(val) == JSONNumber) {
             txlut.lut[i].rf_power = (int8_t)json_value_get_number(val);
         } else {
-            MSG("WARNING: Data type for %s[%d] seems wrong, please check\n", param_name, i);
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for %s[%d] seems wrong, please check\n", param_name, i);
             txlut.lut[i].rf_power = 0;
         }
     }
     /* all parameters parsed, submitting configuration to the HAL */
     if (txlut.size > 0) {
-        MSG("INFO: Configuring TX LUT with %u indexes\n", txlut.size);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Configuring TX LUT with %u indexes\n", txlut.size);
         if (lgw_txgain_setconf(&txlut) != LGW_HAL_SUCCESS) {
-            MSG("ERROR: Failed to configure concentrator TX Gain LUT\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: Failed to configure concentrator TX Gain LUT\n");
             return -1;
         }
     } else {
-        MSG("WARNING: No TX gain LUT defined\n");
+        MSG_DEBUG(DEBUG_WARNING, "WARNING: No TX gain LUT defined\n");
     }
 
     /* set configuration for RF chains */
@@ -485,7 +485,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         snprintf(param_name, sizeof param_name, "radio_%i", i); /* compose parameter path inside JSON structure */
         val = json_object_get_value(conf_obj, param_name); /* fetch value (if possible) */
         if (json_value_get_type(val) != JSONObject) {
-            MSG("INFO: no configuration for radio %i\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for radio %i\n", i);
             continue;
         }
         /* there is an object to configure that radio, let's parse it */
@@ -497,7 +497,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             rfconf.enable = false;
         }
         if (rfconf.enable == false) { /* radio disabled, nothing else to parse */
-            MSG("INFO: radio %i disabled\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO: radio %i disabled\n", i);
         } else  { /* radio enabled, will parse the other parameters */
             snprintf(param_name, sizeof param_name, "radio_%i.freq", i);
             rfconf.freq_hz = (uint32_t)json_object_dotget_number(conf_obj, param_name);
@@ -510,7 +510,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             } else if (!strncmp(str, "SX1257", 6)) {
                 rfconf.type = LGW_RADIO_TYPE_SX1257;
             } else {
-                MSG("WARNING: invalid radio type: %s (should be SX1255 or SX1257)\n", str);
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: invalid radio type: %s (should be SX1255 or SX1257)\n", str);
             }
             snprintf(param_name, sizeof param_name, "radio_%i.tx_enable", i);
             val = json_object_dotget_value(conf_obj, param_name);
@@ -523,7 +523,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
                     snprintf(param_name, sizeof param_name, "radio_%i.tx_freq_max", i);
                     tx_freq_max[i] = (uint32_t)json_object_dotget_number(conf_obj, param_name);
                     if ((tx_freq_min[i] == 0) || (tx_freq_max[i] == 0)) {
-                        MSG("WARNING: no frequency range specified for TX rf chain %d\n", i);
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: no frequency range specified for TX rf chain %d\n", i);
                     }
                     /* ... and the notch filter frequency to be set */
                     snprintf(param_name, sizeof param_name, "radio_%i.tx_notch_freq", i);
@@ -532,11 +532,11 @@ static int parse_SX1301_configuration(const char * conf_file) {
             } else {
                 rfconf.tx_enable = false;
             }
-            MSG("INFO: radio %i enabled (type %s), center frequency %u, RSSI offset %f, tx enabled %d, tx_notch_freq %u\n", i, str, rfconf.freq_hz, rfconf.rssi_offset, rfconf.tx_enable, rfconf.tx_notch_freq);
+            MSG_DEBUG(DEBUG_INFO, "INFO: radio %i enabled (type %s), center frequency %u, RSSI offset %f, tx enabled %d, tx_notch_freq %u\n", i, str, rfconf.freq_hz, rfconf.rssi_offset, rfconf.tx_enable, rfconf.tx_notch_freq);
         }
         /* all parameters parsed, submitting configuration to the HAL */
         if (lgw_rxrf_setconf(i, rfconf) != LGW_HAL_SUCCESS) {
-            MSG("ERROR: invalid configuration for radio %i\n", i);
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for radio %i\n", i);
             return -1;
         }
     }
@@ -547,7 +547,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         snprintf(param_name, sizeof param_name, "chan_multiSF_%i", i); /* compose parameter path inside JSON structure */
         val = json_object_get_value(conf_obj, param_name); /* fetch value (if possible) */
         if (json_value_get_type(val) != JSONObject) {
-            MSG("INFO: no configuration for Lora multi-SF channel %i\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for Lora multi-SF channel %i\n", i);
             continue;
         }
         /* there is an object to configure that Lora multi-SF channel, let's parse it */
@@ -559,18 +559,18 @@ static int parse_SX1301_configuration(const char * conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) { /* Lora multi-SF channel disabled, nothing else to parse */
-            MSG("INFO: Lora multi-SF channel %i disabled\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO: Lora multi-SF channel %i disabled\n", i);
         } else  { /* Lora multi-SF channel enabled, will parse the other parameters */
             snprintf(param_name, sizeof param_name, "chan_multiSF_%i.radio", i);
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, param_name);
             snprintf(param_name, sizeof param_name, "chan_multiSF_%i.if", i);
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, param_name);
             // TODO: handle individual SF enabling and disabling (spread_factor)
-            MSG("INFO: Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 7 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
+            MSG_DEBUG(DEBUG_INFO, "INFO: Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 7 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
         }
         /* all parameters parsed, submitting configuration to the HAL */
         if (lgw_rxif_setconf(i, ifconf) != LGW_HAL_SUCCESS) {
-            MSG("ERROR: invalid configuration for Lora multi-SF channel %i\n", i);
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for Lora multi-SF channel %i\n", i);
             return -1;
         }
     }
@@ -579,7 +579,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     memset(&ifconf, 0, sizeof ifconf); /* initialize configuration structure */
     val = json_object_get_value(conf_obj, "chan_Lora_std"); /* fetch value (if possible) */
     if (json_value_get_type(val) != JSONObject) {
-        MSG("INFO: no configuration for Lora standard channel\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for Lora standard channel\n");
     } else {
         val = json_object_dotget_value(conf_obj, "chan_Lora_std.enable");
         if (json_value_get_type(val) == JSONBoolean) {
@@ -588,7 +588,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) {
-            MSG("INFO: Lora standard channel %i disabled\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO: Lora standard channel %i disabled\n", i);
         } else  {
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, "chan_Lora_std.radio");
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, "chan_Lora_std.if");
@@ -609,10 +609,10 @@ static int parse_SX1301_configuration(const char * conf_file) {
                 case 12: ifconf.datarate = DR_LORA_SF12; break;
                 default: ifconf.datarate = DR_UNDEFINED;
             }
-            MSG("INFO: Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf);
+            MSG_DEBUG(DEBUG_INFO, "INFO: Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf);
         }
         if (lgw_rxif_setconf(8, ifconf) != LGW_HAL_SUCCESS) {
-            MSG("ERROR: invalid configuration for Lora standard channel\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for Lora standard channel\n");
             return -1;
         }
     }
@@ -621,7 +621,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     memset(&ifconf, 0, sizeof ifconf); /* initialize configuration structure */
     val = json_object_get_value(conf_obj, "chan_FSK"); /* fetch value (if possible) */
     if (json_value_get_type(val) != JSONObject) {
-        MSG("INFO: no configuration for FSK channel\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for FSK channel\n");
     } else {
         val = json_object_dotget_value(conf_obj, "chan_FSK.enable");
         if (json_value_get_type(val) == JSONBoolean) {
@@ -630,7 +630,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) {
-            MSG("INFO: FSK channel %i disabled\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO: FSK channel %i disabled\n", i);
         } else  {
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, "chan_FSK.radio");
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, "chan_FSK.if");
@@ -652,10 +652,10 @@ static int parse_SX1301_configuration(const char * conf_file) {
             else if (bw <= 500000) ifconf.bandwidth = BW_500KHZ;
             else ifconf.bandwidth = BW_UNDEFINED;
 
-            MSG("INFO: FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
+            MSG_DEBUG(DEBUG_INFO, "INFO: FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
         }
         if (lgw_rxif_setconf(9, ifconf) != LGW_HAL_SUCCESS) {
-            MSG("ERROR: invalid configuration for FSK channel\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for FSK channel\n");
             return -1;
         }
     }
@@ -675,17 +675,17 @@ static int parse_gateway_configuration(const char * conf_file) {
     /* try to parse JSON */
     root_val = json_parse_file_with_comments(conf_file);
     if (root_val == NULL) {
-        MSG("ERROR: %s is not a valid JSON file\n", conf_file);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: %s is not a valid JSON file\n", conf_file);
         exit(EXIT_FAILURE);
     }
 
     /* point to the gateway configuration object */
     conf_obj = json_object_get_object(json_value_get_object(root_val), conf_obj_name);
     if (conf_obj == NULL) {
-        MSG("INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
+        MSG_DEBUG(DEBUG_INFO, "INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
         return -1;
     } else {
-        MSG("INFO: %s does contain a JSON object named %s, parsing gateway parameters\n", conf_file, conf_obj_name);
+        MSG_DEBUG(DEBUG_INFO, "INFO: %s does contain a JSON object named %s, parsing gateway parameters\n", conf_file, conf_obj_name);
     }
 
     /* gateway unique identifier (aka MAC address) (optional) */
@@ -693,47 +693,47 @@ static int parse_gateway_configuration(const char * conf_file) {
     if (str != NULL) {
         sscanf(str, "%llx", &ull);
         lgwm = ull;
-        MSG("INFO: gateway MAC address is configured to %016llX\n", ull);
+        MSG_DEBUG(DEBUG_INFO, "INFO: gateway MAC address is configured to %016llX\n", ull);
     }
 
     /* server hostname or IP address (optional) */
     str = json_object_get_string(conf_obj, "server_address");
     if (str != NULL) {
         strncpy(serv_addr, str, sizeof serv_addr);
-        MSG("INFO: server hostname or IP address is configured to \"%s\"\n", serv_addr);
+        MSG_DEBUG(DEBUG_INFO, "INFO: server hostname or IP address is configured to \"%s\"\n", serv_addr);
     }
 
     /* get up and down ports (optional) */
     val = json_object_get_value(conf_obj, "serv_port_up");
     if (val != NULL) {
         snprintf(serv_port_up, sizeof serv_port_up, "%u", (uint16_t)json_value_get_number(val));
-        MSG("INFO: upstream port is configured to \"%s\"\n", serv_port_up);
+        MSG_DEBUG(DEBUG_INFO, "INFO: upstream port is configured to \"%s\"\n", serv_port_up);
     }
     val = json_object_get_value(conf_obj, "serv_port_down");
     if (val != NULL) {
         snprintf(serv_port_down, sizeof serv_port_down, "%u", (uint16_t)json_value_get_number(val));
-        MSG("INFO: downstream port is configured to \"%s\"\n", serv_port_down);
+        MSG_DEBUG(DEBUG_INFO, "INFO: downstream port is configured to \"%s\"\n", serv_port_down);
     }
 
     /* get keep-alive interval (in seconds) for downstream (optional) */
     val = json_object_get_value(conf_obj, "keepalive_interval");
     if (val != NULL) {
         keepalive_time = (int)json_value_get_number(val);
-        MSG("INFO: downstream keep-alive interval is configured to %u seconds\n", keepalive_time);
+        MSG_DEBUG(DEBUG_INFO, "INFO: downstream keep-alive interval is configured to %u seconds\n", keepalive_time);
     }
 
     /* get interval (in seconds) for statistics display (optional) */
     val = json_object_get_value(conf_obj, "stat_interval");
     if (val != NULL) {
         stat_interval = (unsigned)json_value_get_number(val);
-        MSG("INFO: statistics display interval is configured to %u seconds\n", stat_interval);
+        MSG_DEBUG(DEBUG_INFO, "INFO: statistics display interval is configured to %u seconds\n", stat_interval);
     }
 
     /* get time-out value (in ms) for upstream datagrams (optional) */
     val = json_object_get_value(conf_obj, "push_timeout_ms");
     if (val != NULL) {
         push_timeout_half.tv_usec = 500 * (long int)json_value_get_number(val);
-        MSG("INFO: upstream PUSH_DATA time-out is configured to %u ms\n", (unsigned)(push_timeout_half.tv_usec / 500));
+        MSG_DEBUG(DEBUG_INFO, "INFO: upstream PUSH_DATA time-out is configured to %u ms\n", (unsigned)(push_timeout_half.tv_usec / 500));
     }
 
     /* packet filtering parameters */
@@ -741,40 +741,40 @@ static int parse_gateway_configuration(const char * conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         fwd_valid_pkt = (bool)json_value_get_boolean(val);
     }
-    MSG("INFO: packets received with a valid CRC will%s be forwarded\n", (fwd_valid_pkt ? "" : " NOT"));
+    MSG_DEBUG(DEBUG_INFO, "INFO: packets received with a valid CRC will%s be forwarded\n", (fwd_valid_pkt ? "" : " NOT"));
     val = json_object_get_value(conf_obj, "forward_crc_error");
     if (json_value_get_type(val) == JSONBoolean) {
         fwd_error_pkt = (bool)json_value_get_boolean(val);
     }
-    MSG("INFO: packets received with a CRC error will%s be forwarded\n", (fwd_error_pkt ? "" : " NOT"));
+    MSG_DEBUG(DEBUG_INFO, "INFO: packets received with a CRC error will%s be forwarded\n", (fwd_error_pkt ? "" : " NOT"));
     val = json_object_get_value(conf_obj, "forward_crc_disabled");
     if (json_value_get_type(val) == JSONBoolean) {
         fwd_nocrc_pkt = (bool)json_value_get_boolean(val);
     }
-    MSG("INFO: packets received with no CRC will%s be forwarded\n", (fwd_nocrc_pkt ? "" : " NOT"));
+    MSG_DEBUG(DEBUG_INFO, "INFO: packets received with no CRC will%s be forwarded\n", (fwd_nocrc_pkt ? "" : " NOT"));
 
     /* GPS module TTY path (optional) */
     str = json_object_get_string(conf_obj, "gps_tty_path");
     if (str != NULL) {
         strncpy(gps_tty_path, str, sizeof gps_tty_path);
-        MSG("INFO: GPS serial port path is configured to \"%s\"\n", gps_tty_path);
+        MSG_DEBUG(DEBUG_INFO, "INFO: GPS serial port path is configured to \"%s\"\n", gps_tty_path);
     }
 
     /* get reference coordinates */
     val = json_object_get_value(conf_obj, "ref_latitude");
     if (val != NULL) {
         reference_coord.lat = (double)json_value_get_number(val);
-        MSG("INFO: Reference latitude is configured to %f deg\n", reference_coord.lat);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Reference latitude is configured to %f deg\n", reference_coord.lat);
     }
     val = json_object_get_value(conf_obj, "ref_longitude");
     if (val != NULL) {
         reference_coord.lon = (double)json_value_get_number(val);
-        MSG("INFO: Reference longitude is configured to %f deg\n", reference_coord.lon);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Reference longitude is configured to %f deg\n", reference_coord.lon);
     }
     val = json_object_get_value(conf_obj, "ref_altitude");
     if (val != NULL) {
         reference_coord.alt = (short)json_value_get_number(val);
-        MSG("INFO: Reference altitude is configured to %i meters\n", reference_coord.alt);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Reference altitude is configured to %i meters\n", reference_coord.alt);
     }
 
     /* Gateway GPS coordinates hardcoding (aka. faking) option */
@@ -782,9 +782,9 @@ static int parse_gateway_configuration(const char * conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         gps_fake_enable = (bool)json_value_get_boolean(val);
         if (gps_fake_enable == true) {
-            MSG("INFO: fake GPS is enabled\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: fake GPS is enabled\n");
         } else {
-            MSG("INFO: fake GPS is disabled\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: fake GPS is disabled\n");
         }
     }
 
@@ -793,10 +793,10 @@ static int parse_gateway_configuration(const char * conf_file) {
     if (val != NULL) {
         beacon_period = (uint32_t)json_value_get_number(val);
         if ((beacon_period > 0) && (beacon_period < 6)) {
-            MSG("ERROR: invalid configuration for Beacon period, must be >= 6s\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for Beacon period, must be >= 6s\n");
             return -1;
         } else {
-            MSG("INFO: Beaconing period is configured to %u seconds\n", beacon_period);
+            MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing period is configured to %u seconds\n", beacon_period);
         }
     }
 
@@ -804,56 +804,56 @@ static int parse_gateway_configuration(const char * conf_file) {
     val = json_object_get_value(conf_obj, "beacon_freq_hz");
     if (val != NULL) {
         beacon_freq_hz = (uint32_t)json_value_get_number(val);
-        MSG("INFO: Beaconing signal will be emitted at %u Hz\n", beacon_freq_hz);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing signal will be emitted at %u Hz\n", beacon_freq_hz);
     }
 
     /* Number of beacon channels (optional) */
     val = json_object_get_value(conf_obj, "beacon_freq_nb");
     if (val != NULL) {
         beacon_freq_nb = (uint8_t)json_value_get_number(val);
-        MSG("INFO: Beaconing channel number is set to %u\n", beacon_freq_nb);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing channel number is set to %u\n", beacon_freq_nb);
     }
 
     /* Frequency step between beacon channels (optional) */
     val = json_object_get_value(conf_obj, "beacon_freq_step");
     if (val != NULL) {
         beacon_freq_step = (uint32_t)json_value_get_number(val);
-        MSG("INFO: Beaconing channel frequency step is set to %uHz\n", beacon_freq_step);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing channel frequency step is set to %uHz\n", beacon_freq_step);
     }
 
     /* Beacon datarate (optional) */
     val = json_object_get_value(conf_obj, "beacon_datarate");
     if (val != NULL) {
         beacon_datarate = (uint8_t)json_value_get_number(val);
-        MSG("INFO: Beaconing datarate is set to SF%d\n", beacon_datarate);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing datarate is set to SF%d\n", beacon_datarate);
     }
 
     /* Beacon modulation bandwidth (optional) */
     val = json_object_get_value(conf_obj, "beacon_bw_hz");
     if (val != NULL) {
         beacon_bw_hz = (uint32_t)json_value_get_number(val);
-        MSG("INFO: Beaconing modulation bandwidth is set to %dHz\n", beacon_bw_hz);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing modulation bandwidth is set to %dHz\n", beacon_bw_hz);
     }
 
     /* Beacon TX power (optional) */
     val = json_object_get_value(conf_obj, "beacon_power");
     if (val != NULL) {
         beacon_power = (int8_t)json_value_get_number(val);
-        MSG("INFO: Beaconing TX power is set to %ddBm\n", beacon_power);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing TX power is set to %ddBm\n", beacon_power);
     }
 
     /* Beacon information descriptor (optional) */
     val = json_object_get_value(conf_obj, "beacon_infodesc");
     if (val != NULL) {
         beacon_infodesc = (uint8_t)json_value_get_number(val);
-        MSG("INFO: Beaconing information descriptor is set to %u\n", beacon_infodesc);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing information descriptor is set to %u\n", beacon_infodesc);
     }
 
     /* Auto-quit threshold (optional) */
     val = json_object_get_value(conf_obj, "autoquit_threshold");
     if (val != NULL) {
         autoquit_threshold = (uint32_t)json_value_get_number(val);
-        MSG("INFO: Auto-quit after %u non-acknowledged PULL_DATA\n", autoquit_threshold);
+        MSG_DEBUG(DEBUG_INFO, "INFO: Auto-quit after %u non-acknowledged PULL_DATA\n", autoquit_threshold);
     }
 
     /* free JSON parsing data structure */
@@ -981,13 +981,13 @@ void open_log(void) {
     int i;
 
     log_start_time = now_time; /* keep track of when the log was started, for log rotation */
-    pktlog_file = fopen("pktfwd.log", "w+"); /* create log file, append if file already exist */
+    pktlog_file = fopen("/var/log/pktfwd.log", "w+"); /* create log file, append if file already exist */
     if (pktlog_file == NULL) {
-        MSG("ERROR: impossible to create log file pktfwd.log\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: impossible to create log file pktfwd.log\n");
         exit(EXIT_FAILURE);
     }
 
-    MSG("INFO: Now writing to log file pktfwd.log\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO: Now writing to log file pktfwd.log\n");
     return;
 }
 /* -------------------------------------------------------------------------- */
@@ -999,7 +999,7 @@ int main(void)
     int i; /* loop variable and temporary variable for return value */
     int x;
 
-    FILE * report_file;
+    FILE *report_file, *tmpfp;
 
     /* configuration file related */
     char *global_cfg_path= "/etc/lora/global_conf.json"; /* contain global (typ. network-wide) configuration */
@@ -1072,17 +1072,17 @@ int main(void)
 
     /* display host endianness */
     #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-        MSG("INFO: Little endian host\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO: Little endian host\n");
     #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-        MSG("INFO: Big endian host\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO: Big endian host\n");
     #else
-        MSG("INFO: Host endianness unknown\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO: Host endianness unknown\n");
     #endif
 
     /* load configuration files */
     if (access(debug_cfg_path, R_OK) == 0) { /* if there is a debug conf, parse only the debug conf */
-        MSG("INFO: found debug configuration file %s, parsing it\n", debug_cfg_path);
-        MSG("INFO: other configuration files will be ignored\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO: found debug configuration file %s, parsing it\n", debug_cfg_path);
+        MSG_DEBUG(DEBUG_INFO, "INFO: other configuration files will be ignored\n");
         x = parse_SX1301_configuration(debug_cfg_path);
         if (x != 0) {
             exit(EXIT_FAILURE);
@@ -1092,7 +1092,7 @@ int main(void)
             exit(EXIT_FAILURE);
         }
     } else if (access(global_cfg_path, R_OK) == 0) { /* if there is a global conf, parse it and then try to parse local conf  */
-        MSG("INFO: found global configuration file %s, parsing it\n", global_cfg_path);
+        MSG_DEBUG(DEBUG_INFO, "INFO: found global configuration file %s, parsing it\n", global_cfg_path);
         x = parse_SX1301_configuration(global_cfg_path);
         if (x != 0) {
             exit(EXIT_FAILURE);
@@ -1102,13 +1102,13 @@ int main(void)
             exit(EXIT_FAILURE);
         }
         if (access(local_cfg_path, R_OK) == 0) {
-            MSG("INFO: found local configuration file %s, parsing it\n", local_cfg_path);
-            MSG("INFO: redefined parameters will overwrite global parameters\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: found local configuration file %s, parsing it\n", local_cfg_path);
+            MSG_DEBUG(DEBUG_INFO, "INFO: redefined parameters will overwrite global parameters\n");
             parse_SX1301_configuration(local_cfg_path);
             parse_gateway_configuration(local_cfg_path);
         }
     } else if (access(local_cfg_path, R_OK) == 0) { /* if there is only a local conf, parse it and that's all */
-        MSG("INFO: found local configuration file %s, parsing it\n", local_cfg_path);
+        MSG_DEBUG(DEBUG_INFO, "INFO: found local configuration file %s, parsing it\n", local_cfg_path);
         x = parse_SX1301_configuration(local_cfg_path);
         if (x != 0) {
             exit(EXIT_FAILURE);
@@ -1118,7 +1118,7 @@ int main(void)
             exit(EXIT_FAILURE);
         }
     } else {
-        MSG("ERROR: [main] failed to find any configuration file named %s, %s OR %s\n", global_cfg_path, local_cfg_path, debug_cfg_path);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] failed to find any configuration file named %s, %s OR %s\n", global_cfg_path, local_cfg_path, debug_cfg_path);
         exit(EXIT_FAILURE);
     }
 
@@ -1126,11 +1126,11 @@ int main(void)
     if (gps_tty_path[0] != '\0') { /* do not try to open GPS device if no path set */
         i = lgw_gps_enable(gps_tty_path, "ubx7", 0, &gps_tty_fd); /* HAL only supports u-blox 7 for now */
         if (i != LGW_GPS_SUCCESS) {
-            printf("WARNING: [main] impossible to open %s for GPS sync (check permissions)\n", gps_tty_path);
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: [main] impossible to open %s for GPS sync (check permissions)\n", gps_tty_path);
             gps_enabled = false;
             gps_ref_valid = false;
         } else {
-            printf("INFO: [main] TTY port %s open for GPS synchronization\n", gps_tty_path);
+            MSG_DEBUG(DEBUG_INFO, "INFO: [main] TTY port %s open for GPS synchronization\n", gps_tty_path);
             gps_enabled = true;
             gps_ref_valid = false;
         }
@@ -1154,7 +1154,7 @@ int main(void)
     /* look for server address w/ upstream port */
     i = getaddrinfo(serv_addr, serv_port_up, &hints, &result);
     if (i != 0) {
-        MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", serv_addr, serv_port_up, gai_strerror(i));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", serv_addr, serv_port_up, gai_strerror(i));
         exit(EXIT_FAILURE);
     }
 
@@ -1165,11 +1165,11 @@ int main(void)
         else break; /* success, get out of loop */
     }
     if (q == NULL) {
-        MSG("ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", serv_addr, serv_port_up);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", serv_addr, serv_port_up);
         i = 1;
         for (q=result; q!=NULL; q=q->ai_next) {
             getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-            MSG("INFO: [up] result %i host:%s service:%s\n", i, host_name, port_name);
+            MSG_DEBUG(DEBUG_INFO, "INFO: [up] result %i host:%s service:%s\n", i, host_name, port_name);
             ++i;
         }
         exit(EXIT_FAILURE);
@@ -1178,7 +1178,7 @@ int main(void)
     /* connect so we can send/receive packet with the server only */
     i = connect(sock_up, q->ai_addr, q->ai_addrlen);
     if (i != 0) {
-        MSG("ERROR: [up] connect returned %s\n", strerror(errno));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] connect returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     freeaddrinfo(result);
@@ -1186,7 +1186,7 @@ int main(void)
     /* look for server address w/ downstream port */
     i = getaddrinfo(serv_addr, serv_port_down, &hints, &result);
     if (i != 0) {
-        MSG("ERROR: [down] getaddrinfo on address %s (port %s) returned %s\n", serv_addr, serv_port_up, gai_strerror(i));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [down] getaddrinfo on address %s (port %s) returned %s\n", serv_addr, serv_port_up, gai_strerror(i));
         exit(EXIT_FAILURE);
     }
 
@@ -1197,11 +1197,11 @@ int main(void)
         else break; /* success, get out of loop */
     }
     if (q == NULL) {
-        MSG("ERROR: [down] failed to open socket to any of server %s addresses (port %s)\n", serv_addr, serv_port_up);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [down] failed to open socket to any of server %s addresses (port %s)\n", serv_addr, serv_port_up);
         i = 1;
         for (q=result; q!=NULL; q=q->ai_next) {
             getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-            MSG("INFO: [down] result %i host:%s service:%s\n", i, host_name, port_name);
+            MSG_DEBUG(DEBUG_INFO, "INFO: [down] result %i host:%s service:%s\n", i, host_name, port_name);
             ++i;
         }
         exit(EXIT_FAILURE);
@@ -1210,7 +1210,7 @@ int main(void)
     /* connect so we can send/receive packet with the server only */
     i = connect(sock_down, q->ai_addr, q->ai_addrlen);
     if (i != 0) {
-        MSG("ERROR: [down] connect returned %s\n", strerror(errno));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [down] connect returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     freeaddrinfo(result);
@@ -1222,31 +1222,31 @@ int main(void)
     /* starting the concentrator */
     i = lgw_start();
     if (i == LGW_HAL_SUCCESS) {
-        MSG("INFO: [main] concentrator started, packet can now be received\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO: [main] concentrator started, packet can now be received\n");
     } else {
-        MSG("ERROR: [main] failed to start the concentrator\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] failed to start the concentrator\n");
         exit(EXIT_FAILURE);
     }
 
     /* spawn threads to manage upstream and downstream */
     i = pthread_create( &thrid_up, NULL, (void * (*)(void *))thread_up, NULL);
     if (i != 0) {
-        MSG("ERROR: [main] impossible to create upstream thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create upstream thread\n");
         exit(EXIT_FAILURE);
     }
     i = pthread_create( &thrid_down, NULL, (void * (*)(void *))thread_down, NULL);
     if (i != 0) {
-        MSG("ERROR: [main] impossible to create downstream thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create downstream thread\n");
         exit(EXIT_FAILURE);
     }
     i = pthread_create( &thrid_jit, NULL, (void * (*)(void *))thread_jit, NULL);
     if (i != 0) {
-        MSG("ERROR: [main] impossible to create JIT thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create JIT thread\n");
         exit(EXIT_FAILURE);
     }
     i = pthread_create( &thrid_timersync, NULL, (void * (*)(void *))thread_timersync, NULL);
     if (i != 0) {
-        MSG("ERROR: [main] impossible to create Timer Sync thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create Timer Sync thread\n");
         exit(EXIT_FAILURE);
     }
 
@@ -1254,12 +1254,12 @@ int main(void)
     if (gps_enabled == true) {
         i = pthread_create( &thrid_gps, NULL, (void * (*)(void *))thread_gps, NULL);
         if (i != 0) {
-            MSG("ERROR: [main] impossible to create GPS thread\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create GPS thread\n");
             exit(EXIT_FAILURE);
         }
         i = pthread_create( &thrid_valid, NULL, (void * (*)(void *))thread_valid, NULL);
         if (i != 0) {
-            MSG("ERROR: [main] impossible to create validation thread\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create validation thread\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -1370,11 +1370,11 @@ int main(void)
         }
 
         report_file = fopen("/var/log/gw_report.log", "w+");
-        if (pktlog_file == NULL) {
-            MSG("ERROR: impossible to create log file gw_report.log\n");
+        if (report_file == NULL) {
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: impossible to create log file gw_report.log\n");
         } else {
             /* display a report */
-            fprintf(report_file, "\n##### %s #####\n", stat_timestamp);
+            fprintf(report_file, "\n################## Report ## %s ##################\n", stat_timestamp);
             fprintf(report_file, "### [UPSTREAM] ###\n");
             fprintf(report_file, "# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
             fprintf(report_file, "# CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
@@ -1403,30 +1403,30 @@ int main(void)
         i = lgw_get_trigcnt(&trig_tstamp);
         pthread_mutex_unlock(&mx_concent);
         if (i != LGW_HAL_SUCCESS) {
-            printf("# SX1301 time (PPS): unknown\n");
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: # SX1301 time (PPS): unknown\n");
         } else {
-            printf("# SX1301 time (PPS): %u\n", trig_tstamp);
+            MSG_DEBUG(DEBUG_INFO, "INFO: # SX1301 time (PPS): %u\n", trig_tstamp);
         }
         jit_print_queue (&jit_queue, false, DEBUG_LOG);
-        printf("### [GPS] ###\n");
+        MSG_DEBUG(DEBUG_GPS, "### [GPS] ###\n");
         if (gps_enabled == true) {
             /* no need for mutex, display is not critical */
             if (gps_ref_valid == true) {
-                printf("# Valid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
+                MSG_DEBUG(DEBUG_GPS, "# Valid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
             } else {
-                printf("# Invalid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
+                MSG_DEBUG(DEBUG_GPS, "# Invalid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
             }
             if (coord_ok == true) {
-                printf("# GPS coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
+                MSG_DEBUG(DEBUG_GPS, "# GPS coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
             } else {
-                printf("# no valid GPS coordinates available yet\n");
+                MSG_DEBUG(DEBUG_GPS, "# no valid GPS coordinates available yet\n");
             }
         } else if (gps_fake_enable == true) {
-            printf("# GPS *FAKE* coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
+            MSG_DEBUG(DEBUG_GPS, "# GPS *FAKE* coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
         } else {
-            printf("# GPS sync is disabled\n");
+            MSG_DEBUG(DEBUG_GPS, "# GPS sync is disabled\n");
         }
-        printf("##### END #####\n");
+        MSG_DEBUG(DEBUG_GPS, "##### END #####\n");
 
         /* generate a JSON report (will be sent to server by upstream thread) */
         pthread_mutex_lock(&mx_stat_rep);
@@ -1445,6 +1445,9 @@ int main(void)
             if (difftime(now_time, log_start_time) > log_rotate_interval) {
                 fclose(pktlog_file);
                 open_log();
+                tmpfp = fopen("/var/log/gw_debug.log", "w+"); /* clear log file*/
+                if(tmpfp)
+                    fclose(tmpfp);
             }
         }
     }
@@ -1460,9 +1463,9 @@ int main(void)
 
         i = lgw_gps_disable(gps_tty_fd);
         if (i == LGW_HAL_SUCCESS) {
-            MSG("INFO: GPS closed successfully\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: GPS closed successfully\n");
         } else {
-            MSG("WARNING: failed to close GPS successfully\n");
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: failed to close GPS successfully\n");
         }
     }
 
@@ -1474,15 +1477,15 @@ int main(void)
         /* stop the hardware */
         i = lgw_stop();
         if (i == LGW_HAL_SUCCESS) {
-            MSG("INFO: concentrator stopped successfully\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: concentrator stopped successfully\n");
         } else {
-            MSG("WARNING: failed to stop concentrator successfully\n");
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: failed to stop concentrator successfully\n");
         }
     }
 
     fclose(pktlog_file);
 
-    MSG("INFO: Exiting packet forwarder program\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO: Exiting packet forwarder program\n");
     exit(EXIT_SUCCESS);
 }
 
@@ -1531,7 +1534,7 @@ void thread_up(void) {
     /* set upstream socket RX timeout */
     i = setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof push_timeout_half);
     if (i != 0) {
-        MSG("ERROR: [up] setsockopt returned %s\n", strerror(errno));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] setsockopt returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -1548,7 +1551,7 @@ void thread_up(void) {
         nb_pkt = lgw_receive(NB_PKT_MAX, rxpkt);
         pthread_mutex_unlock(&mx_concent);
         if (nb_pkt == LGW_HAL_ERROR) {
-            MSG("ERROR: [up] failed packet fetch, exiting\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] failed packet fetch, exiting\n");
             exit(EXIT_FAILURE);
         }
 
@@ -1604,7 +1607,7 @@ void thread_up(void) {
             switch(p->status) {
                 case STAT_CRC_OK:
                     meas_nb_rx_ok += 1;
-                    printf( "\nINFO: Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
+                    MSG_DEBUG(DEBUG_INFO, "INFO: Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
                     if (!fwd_valid_pkt) {
                         pthread_mutex_unlock(&mx_meas_up);
                         continue; /* skip that packet */
@@ -1625,7 +1628,7 @@ void thread_up(void) {
                     }
                     break;
                 default:
-                    MSG("WARNING: [up] received packet with unknown status %u (size %u, modulation %u, BW %u, DR %u, RSSI %.1f)\n", p->status, p->size, p->modulation, p->bandwidth, p->datarate, p->rssi);
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] received packet with unknown status %u (size %u, modulation %u, BW %u, DR %u, RSSI %.1f)\n", p->status, p->size, p->modulation, p->bandwidth, p->datarate, p->rssi);
                     pthread_mutex_unlock(&mx_meas_up);
                     continue; /* skip that packet */
                     // exit(EXIT_FAILURE);
@@ -1649,7 +1652,7 @@ void thread_up(void) {
             if (j > 0) {
                 buff_index += j;
             } else {
-                MSG("ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
                 exit(EXIT_FAILURE);
             }
 
@@ -1664,7 +1667,7 @@ void thread_up(void) {
                     if (j > 0) {
                         buff_index += j;
                     } else {
-                        MSG("ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -1677,7 +1680,7 @@ void thread_up(void) {
                     if (j > 0) {
                         buff_index += j;
                     } else {
-                        MSG("ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -1688,7 +1691,7 @@ void thread_up(void) {
             if (j > 0) {
                 buff_index += j;
             } else {
-                MSG("ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
                 exit(EXIT_FAILURE);
             }
 
@@ -1707,7 +1710,7 @@ void thread_up(void) {
                     buff_index += 9;
                     break;
                 default:
-                    MSG("ERROR: [up] received packet with unknown status\n");
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] received packet with unknown status\n");
                     memcpy((void *)(buff_up + buff_index), (void *)",\"stat\":?", 9);
                     buff_index += 9;
                     exit(EXIT_FAILURE);
@@ -1745,7 +1748,7 @@ void thread_up(void) {
                         buff_index += 13;
                         break;
                     default:
-                        MSG("ERROR: [up] lora packet with unknown datarate\n");
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] lora packet with unknown datarate\n");
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF?", 12);
                         buff_index += 12;
                         exit(EXIT_FAILURE);
@@ -1764,7 +1767,7 @@ void thread_up(void) {
                         buff_index += 6;
                         break;
                     default:
-                        MSG("ERROR: [up] lora packet with unknown bandwidth\n");
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] lora packet with unknown bandwidth\n");
                         memcpy((void *)(buff_up + buff_index), (void *)"BW?\"", 4);
                         buff_index += 4;
                         exit(EXIT_FAILURE);
@@ -1793,7 +1796,7 @@ void thread_up(void) {
                         buff_index += 13;
                         break;
                     default:
-                        MSG("ERROR: [up] lora packet with unknown coderate\n");
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] lora packet with unknown coderate\n");
                         memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"?\"", 11);
                         buff_index += 11;
                         exit(EXIT_FAILURE);
@@ -1804,7 +1807,7 @@ void thread_up(void) {
                 if (j > 0) {
                     buff_index += j;
                 } else {
-                    MSG("ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
                     exit(EXIT_FAILURE);
                 }
             } else if (p->modulation == MOD_FSK) {
@@ -1816,11 +1819,11 @@ void thread_up(void) {
                 if (j > 0) {
                     buff_index += j;
                 } else {
-                    MSG("ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
                     exit(EXIT_FAILURE);
                 }
             } else {
-                MSG("ERROR: [up] received packet with unknown modulation\n");
+                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] received packet with unknown modulation\n");
                 exit(EXIT_FAILURE);
             }
 
@@ -1829,7 +1832,7 @@ void thread_up(void) {
             if (j > 0) {
                 buff_index += j;
             } else {
-                MSG("ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
                 exit(EXIT_FAILURE);
             }
 
@@ -1840,7 +1843,7 @@ void thread_up(void) {
             if (j>=0) {
                 buff_index += j;
             } else {
-                MSG("ERROR: [up] bin_to_b64 failed line %u\n", (__LINE__ - 5));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] bin_to_b64 failed line %u\n", (__LINE__ - 5));
                 exit(EXIT_FAILURE);
             }
             buff_up[buff_index] = '"';
@@ -1881,7 +1884,7 @@ void thread_up(void) {
             if (j > 0) {
                 buff_index += j;
             } else {
-                MSG("ERROR: [up] snprintf failed line %u\n", (__LINE__ - 5));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 5));
                 exit(EXIT_FAILURE);
             }
         }
@@ -1913,20 +1916,20 @@ void thread_up(void) {
                     break;
                 }
             } else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
-                //MSG("WARNING: [up] ignored invalid non-ACL packet\n");
+                //MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] ignored invalid non-ACL packet\n");
                 continue;
             } else if ((buff_ack[1] != token_h) || (buff_ack[2] != token_l)) {
-                //MSG("WARNING: [up] ignored out-of sync ACK packet\n");
+                //MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] ignored out-of sync ACK packet\n");
                 continue;
             } else {
-                MSG("INFO: [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                MSG_DEBUG(DEBUG_INFO, "INFO: [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
                 meas_up_ack_rcv += 1;
                 break;
             }
         }
         pthread_mutex_unlock(&mx_meas_up);
     }
-    MSG("\nINFO: End of upstream thread\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO: End of upstream thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1995,7 +1998,7 @@ void thread_down(void) {
     /* set downstream socket RX timeout */
     i = setsockopt(sock_down, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof pull_timeout);
     if (i != 0) {
-        MSG("ERROR: [down] setsockopt returned %s\n", strerror(errno));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: [down] setsockopt returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -2023,7 +2026,7 @@ void thread_down(void) {
             break;
         default:
             /* should not happen */
-            MSG("ERROR: unsupported bandwidth for beacon\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: unsupported bandwidth for beacon\n");
             exit(EXIT_FAILURE);
     }
     switch (beacon_datarate) {
@@ -2049,7 +2052,7 @@ void thread_down(void) {
             break;
         default:
             /* should not happen */
-            MSG("ERROR: unsupported datarate for beacon\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: unsupported datarate for beacon\n");
             exit(EXIT_FAILURE);
     }
     beacon_pkt.size = beacon_RFU1_size + 4 + 2 + 7 + beacon_RFU2_size + 2;
@@ -2109,7 +2112,7 @@ void thread_down(void) {
         /* auto-quit if the threshold is crossed */
         if ((autoquit_threshold > 0) && (autoquit_cnt >= autoquit_threshold)) {
             exit_sig = true;
-            MSG("INFO: [down] the last %u PULL_DATA were not ACKed, exiting application\n", autoquit_threshold);
+            MSG_DEBUG(DEBUG_INFO, "INFO: [down] the last %u PULL_DATA were not ACKed, exiting application\n", autoquit_threshold);
             break;
         }
 
@@ -2214,8 +2217,8 @@ void thread_down(void) {
                         last_beacon_gps_time.tv_sec = next_beacon_gps_time.tv_sec; /* keep this beacon time as reference for next one to be programmed */
 
                         /* display beacon payload */
-                        MSG("INFO: Beacon queued (count_us=%u, freq_hz=%u, size=%u):\n", beacon_pkt.count_us, beacon_pkt.freq_hz, beacon_pkt.size);
-                        printf( "   => " );
+                        MSG_DEBUG(DEBUG_INFO, "INFO: Beacon queued (count_us=%u, freq_hz=%u, size=%u):\n", beacon_pkt.count_us, beacon_pkt.freq_hz, beacon_pkt.size);
+                        MSG( "   => " );
                         for (i = 0; i < beacon_pkt.size; ++i) {
                             MSG("%02X ", beacon_pkt.payload[i]);
                         }
@@ -2242,13 +2245,13 @@ void thread_down(void) {
 
             /* if no network message was received, got back to listening sock_down socket */
             if (msg_len == -1) {
-                //MSG("WARNING: [down] recv returned %s\n", strerror(errno)); /* too verbose */
+                //MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] recv returned %s\n", strerror(errno)); /* too verbose */
                 continue;
             }
 
             /* if the datagram does not respect protocol, just ignore it */
             if ((msg_len < 4) || (buff_down[0] != PROTOCOL_VERSION) || ((buff_down[3] != PKT_PULL_RESP) && (buff_down[3] != PKT_PULL_ACK))) {
-                MSG("WARNING: [down] ignoring invalid packet len=%d, protocol_version=%d, id=%d\n",
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] ignoring invalid packet len=%d, protocol_version=%d, id=%d\n",
                         msg_len, buff_down[0], buff_down[3]);
                 continue;
             }
@@ -2257,24 +2260,24 @@ void thread_down(void) {
             if (buff_down[3] == PKT_PULL_ACK) {
                 if ((buff_down[1] == token_h) && (buff_down[2] == token_l)) {
                     if (req_ack) {
-                        MSG("INFO: [down] duplicate ACK received :)\n");
+                        MSG_DEBUG(DEBUG_INFO, "INFO: [down] duplicate ACK received :)\n");
                     } else { /* if that packet was not already acknowledged */
                         req_ack = true;
                         autoquit_cnt = 0;
                         pthread_mutex_lock(&mx_meas_dw);
                         meas_dw_ack_rcv += 1;
                         pthread_mutex_unlock(&mx_meas_dw);
-                        MSG("INFO: [down] PULL_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                        MSG_DEBUG(DEBUG_INFO, "INFO: [down] PULL_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
                     }
                 } else { /* out-of-sync token */
-                    MSG("INFO: [down] received out-of-sync ACK\n");
+                    MSG_DEBUG(DEBUG_INFO, "INFO: [down] received out-of-sync ACK\n");
                 }
                 continue;
             }
 
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
-            MSG("INFO: [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
+            MSG_DEBUG(DEBUG_INFO, "INFO: [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
             fprintf(pktlog_file, "%s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
             fprintf(pktlog_file, "========down===========down===========down========\n"); /* DEBUG: display JSON payload */
 
@@ -2282,14 +2285,14 @@ void thread_down(void) {
             memset(&txpkt, 0, sizeof txpkt);
             root_val = json_parse_string_with_comments((const char *)(buff_down + 4)); /* JSON offset */
             if (root_val == NULL) {
-                MSG("WARNING: [down] invalid JSON, TX aborted\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] invalid JSON, TX aborted\n");
                 continue;
             }
 
             /* look for JSON sub-object 'txpk' */
             txpk_obj = json_object_get_object(json_value_get_object(root_val), "txpk");
             if (txpk_obj == NULL) {
-                MSG("WARNING: [down] no \"txpk\" object in JSON, TX aborted\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no \"txpk\" object in JSON, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -2300,7 +2303,7 @@ void thread_down(void) {
                 /* TX procedure: send immediately */
                 sent_immediate = true;
                 downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_C;
-                MSG("INFO: [down] a packet will be sent in \"immediate\" mode\n");
+                MSG_DEBUG(DEBUG_INFO, "INFO: [down] a packet will be sent in \"immediate\" mode\n");
             } else {
                 sent_immediate = false;
                 val = json_object_get_value(txpk_obj,"tmst");
@@ -2314,7 +2317,7 @@ void thread_down(void) {
                     /* TX procedure: send on GPS time (converted to timestamp value) */
                     val = json_object_get_value(txpk_obj, "tmms");
                     if (val == NULL) {
-                        MSG("WARNING: [down] no mandatory \"txpk.tmst\" or \"txpk.tmms\" objects in JSON, TX aborted\n");
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.tmst\" or \"txpk.tmms\" objects in JSON, TX aborted\n");
                         json_value_free(root_val);
                         continue;
                     }
@@ -2325,7 +2328,7 @@ void thread_down(void) {
                             pthread_mutex_unlock(&mx_timeref);
                         } else {
                             pthread_mutex_unlock(&mx_timeref);
-                            MSG("WARNING: [down] no valid GPS time reference yet, impossible to send packet on specific GPS time, TX aborted\n");
+                            MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no valid GPS time reference yet, impossible to send packet on specific GPS time, TX aborted\n");
                             json_value_free(root_val);
 
                             /* send acknoledge datagram to server */
@@ -2333,7 +2336,7 @@ void thread_down(void) {
                             continue;
                         }
                     } else {
-                        MSG("WARNING: [down] GPS disabled, impossible to send packet on specific GPS time, TX aborted\n");
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] GPS disabled, impossible to send packet on specific GPS time, TX aborted\n");
                         json_value_free(root_val);
 
                         /* send acknoledge datagram to server */
@@ -2352,11 +2355,11 @@ void thread_down(void) {
                     /* transform GPS time to timestamp */
                     i = lgw_gps2cnt(local_ref, gps_tx, &(txpkt.count_us));
                     if (i != LGW_GPS_SUCCESS) {
-                        MSG("WARNING: [down] could not convert GPS time to timestamp, TX aborted\n");
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] could not convert GPS time to timestamp, TX aborted\n");
                         json_value_free(root_val);
                         continue;
                     } else {
-                        MSG("INFO: [down] a packet will be sent on timestamp value %u (calculated from GPS time)\n", txpkt.count_us);
+                        MSG_DEBUG(DEBUG_INFO, "INFO: [down] a packet will be sent on timestamp value %u (calculated from GPS time)\n", txpkt.count_us);
                     }
 
                     /* GPS timestamp is given, we consider it is a Class B downlink */
@@ -2373,7 +2376,7 @@ void thread_down(void) {
             /* parse target frequency (mandatory) */
             val = json_object_get_value(txpk_obj,"freq");
             if (val == NULL) {
-                MSG("WARNING: [down] no mandatory \"txpk.freq\" object in JSON, TX aborted\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.freq\" object in JSON, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -2382,7 +2385,7 @@ void thread_down(void) {
             /* parse RF chain used for TX (mandatory) */
             val = json_object_get_value(txpk_obj,"rfch");
             if (val == NULL) {
-                MSG("WARNING: [down] no mandatory \"txpk.rfch\" object in JSON, TX aborted\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.rfch\" object in JSON, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -2397,7 +2400,7 @@ void thread_down(void) {
             /* Parse modulation (mandatory) */
             str = json_object_get_string(txpk_obj, "modu");
             if (str == NULL) {
-                MSG("WARNING: [down] no mandatory \"txpk.modu\" object in JSON, TX aborted\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.modu\" object in JSON, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -2408,13 +2411,13 @@ void thread_down(void) {
                 /* Parse Lora spreading-factor and modulation bandwidth (mandatory) */
                 str = json_object_get_string(txpk_obj, "datr");
                 if (str == NULL) {
-                    MSG("WARNING: [down] no mandatory \"txpk.datr\" object in JSON, TX aborted\n");
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.datr\" object in JSON, TX aborted\n");
                     json_value_free(root_val);
                     continue;
                 }
                 i = sscanf(str, "SF%2hdBW%3hd", &x0, &x1);
                 if (i != 2) {
-                    MSG("WARNING: [down] format error in \"txpk.datr\", TX aborted\n");
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] format error in \"txpk.datr\", TX aborted\n");
                     json_value_free(root_val);
                     continue;
                 }
@@ -2426,7 +2429,7 @@ void thread_down(void) {
                     case 11: txpkt.datarate = DR_LORA_SF11; break;
                     case 12: txpkt.datarate = DR_LORA_SF12; break;
                     default:
-                        MSG("WARNING: [down] format error in \"txpk.datr\", invalid SF, TX aborted\n");
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] format error in \"txpk.datr\", invalid SF, TX aborted\n");
                         json_value_free(root_val);
                         continue;
                 }
@@ -2435,7 +2438,7 @@ void thread_down(void) {
                     case 250: txpkt.bandwidth = BW_250KHZ; break;
                     case 500: txpkt.bandwidth = BW_500KHZ; break;
                     default:
-                        MSG("WARNING: [down] format error in \"txpk.datr\", invalid BW, TX aborted\n");
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] format error in \"txpk.datr\", invalid BW, TX aborted\n");
                         json_value_free(root_val);
                         continue;
                 }
@@ -2443,7 +2446,7 @@ void thread_down(void) {
                 /* Parse ECC coding rate (optional field) */
                 str = json_object_get_string(txpk_obj, "codr");
                 if (str == NULL) {
-                    MSG("WARNING: [down] no mandatory \"txpk.codr\" object in json, TX aborted\n");
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.codr\" object in json, TX aborted\n");
                     json_value_free(root_val);
                     continue;
                 }
@@ -2454,7 +2457,7 @@ void thread_down(void) {
                 else if (strcmp(str, "4/8") == 0) txpkt.coderate = CR_LORA_4_8;
                 else if (strcmp(str, "1/2") == 0) txpkt.coderate = CR_LORA_4_8;
                 else {
-                    MSG("WARNING: [down] format error in \"txpk.codr\", TX aborted\n");
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] format error in \"txpk.codr\", TX aborted\n");
                     json_value_free(root_val);
                     continue;
                 }
@@ -2485,7 +2488,7 @@ void thread_down(void) {
                 /* parse FSK bitrate (mandatory) */
                 val = json_object_get_value(txpk_obj,"datr");
                 if (val == NULL) {
-                    MSG("WARNING: [down] no mandatory \"txpk.datr\" object in JSON, TX aborted\n");
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.datr\" object in JSON, TX aborted\n");
                     json_value_free(root_val);
                     continue;
                 }
@@ -2494,7 +2497,7 @@ void thread_down(void) {
                 /* parse frequency deviation (mandatory) */
                 val = json_object_get_value(txpk_obj,"fdev");
                 if (val == NULL) {
-                    MSG("WARNING: [down] no mandatory \"txpk.fdev\" object in JSON, TX aborted\n");
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.fdev\" object in JSON, TX aborted\n");
                     json_value_free(root_val);
                     continue;
                 }
@@ -2514,7 +2517,7 @@ void thread_down(void) {
                 }
 
             } else {
-                MSG("WARNING: [down] invalid modulation in \"txpk.modu\", TX aborted\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] invalid modulation in \"txpk.modu\", TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -2522,7 +2525,7 @@ void thread_down(void) {
             /* Parse payload length (mandatory) */
             val = json_object_get_value(txpk_obj,"size");
             if (val == NULL) {
-                MSG("WARNING: [down] no mandatory \"txpk.size\" object in JSON, TX aborted\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.size\" object in JSON, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -2531,13 +2534,13 @@ void thread_down(void) {
             /* Parse payload data (mandatory) */
             str = json_object_get_string(txpk_obj, "data");
             if (str == NULL) {
-                MSG("WARNING: [down] no mandatory \"txpk.data\" object in JSON, TX aborted\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.data\" object in JSON, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
             i = b64_to_bin(str, strlen(str), txpkt.payload, sizeof txpkt.payload);
             if (i != txpkt.size) {
-                MSG("WARNING: [down] mismatch between .size and .data size once converter to binary\n");
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] mismatch between .size and .data size once converter to binary\n");
             }
 
             /* free the JSON parse tree from memory */
@@ -2561,7 +2564,7 @@ void thread_down(void) {
             jit_result = JIT_ERROR_OK;
             if ((txpkt.freq_hz < tx_freq_min[txpkt.rf_chain]) || (txpkt.freq_hz > tx_freq_max[txpkt.rf_chain])) {
                 jit_result = JIT_ERROR_TX_FREQ;
-                MSG("ERROR: Packet REJECTED, unsupported frequency - %u (min:%u,max:%u)\n", txpkt.freq_hz, tx_freq_min[txpkt.rf_chain], tx_freq_max[txpkt.rf_chain]);
+                MSG_DEBUG(DEBUG_ERROR, "ERROR: Packet REJECTED, unsupported frequency - %u (min:%u,max:%u)\n", txpkt.freq_hz, tx_freq_min[txpkt.rf_chain], tx_freq_max[txpkt.rf_chain]);
             }
             if (jit_result == JIT_ERROR_OK) {
                 for (i=0; i<txlut.size; i++) {
@@ -2573,7 +2576,7 @@ void thread_down(void) {
                 if (i == txlut.size) {
                     /* this RF power is not supported */
                     jit_result = JIT_ERROR_TX_POWER;
-                    MSG("ERROR: Packet REJECTED, unsupported RF power for TX - %d\n", txpkt.rf_power);
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR: Packet REJECTED, unsupported RF power for TX - %d\n", txpkt.rf_power);
                 }
             }
 
@@ -2583,7 +2586,7 @@ void thread_down(void) {
                 get_concentrator_time(&current_concentrator_time, current_unix_time);
                 jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
                 if (jit_result != JIT_ERROR_OK) {
-                    printf("ERROR: Packet REJECTED (jit error=%d)\n", jit_result);
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR: Packet REJECTED (jit error=%d)\n", jit_result);
                 }
                 pthread_mutex_lock(&mx_meas_dw);
                 meas_nb_tx_requested += 1;
@@ -2594,25 +2597,25 @@ void thread_down(void) {
             send_tx_ack(buff_down[1], buff_down[2], jit_result);
         }
     }
-    MSG("\nINFO: End of downstream thread\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO: End of downstream thread\n");
 }
 
 void print_tx_status(uint8_t tx_status) {
     switch (tx_status) {
         case TX_OFF:
-            MSG("INFO: [jit] lgw_status returned TX_OFF\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned TX_OFF\n");
             break;
         case TX_FREE:
-            MSG("INFO: [jit] lgw_status returned TX_FREE\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned TX_FREE\n");
             break;
         case TX_EMITTING:
-            MSG("INFO: [jit] lgw_status returned TX_EMITTING\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned TX_EMITTING\n");
             break;
         case TX_SCHEDULED:
-            MSG("INFO: [jit] lgw_status returned TX_SCHEDULED\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned TX_SCHEDULED\n");
             break;
         default:
-            MSG("INFO: [jit] lgw_status returned UNKNOWN (%d)\n", tx_status);
+            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned UNKNOWN (%d)\n", tx_status);
             break;
     }
 }
@@ -2654,7 +2657,7 @@ void thread_jit(void) {
                         pthread_mutex_lock(&mx_meas_dw);
                         meas_nb_beacon_sent += 1;
                         pthread_mutex_unlock(&mx_meas_dw);
-                        MSG("INFO: Beacon dequeued (count_us=%u)\n", pkt.count_us);
+                        MSG_DEBUG(DEBUG_INFO, "INFO: Beacon dequeued (count_us=%u)\n", pkt.count_us);
                     }
 
                     /* check if concentrator is free for sending new packet */
@@ -2662,14 +2665,14 @@ void thread_jit(void) {
                     result = lgw_status(TX_STATUS, &tx_status);
                     pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
                     if (result == LGW_HAL_ERROR) {
-                        MSG("WARNING: [jit] lgw_status failed\n");
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_status failed\n");
                     } else {
                         if (tx_status == TX_EMITTING) {
-                            MSG("ERROR: concentrator is currently emitting\n");
+                            MSG_DEBUG(DEBUG_ERROR, "ERROR: concentrator is currently emitting\n");
                             print_tx_status(tx_status);
                             continue;
                         } else if (tx_status == TX_SCHEDULED) {
-                            MSG("WARNING: a downlink was already scheduled, overwritting it...\n");
+                            MSG_DEBUG(DEBUG_WARNING, "WARNING: a downlink was already scheduled, overwritting it...\n");
                             print_tx_status(tx_status);
                         } else {
                             /* Nothing to do */
@@ -2684,7 +2687,7 @@ void thread_jit(void) {
                         pthread_mutex_lock(&mx_meas_dw);
                         meas_nb_tx_fail += 1;
                         pthread_mutex_unlock(&mx_meas_dw);
-                        MSG("WARNING: [jit] lgw_send failed\n");
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_send failed\n");
                         continue;
                     } else {
                         pthread_mutex_lock(&mx_meas_dw);
@@ -2693,13 +2696,13 @@ void thread_jit(void) {
                         MSG_DEBUG(DEBUG_PKT_FWD, "lgw_send done: count_us=%u\n", pkt.count_us);
                     }
                 } else {
-                    MSG("ERROR: jit_dequeue failed with %d\n", jit_result);
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR: jit_dequeue failed with %d\n", jit_result);
                 }
             }
         } else if (jit_result == JIT_ERROR_EMPTY) {
             /* Do nothing, it can happen */
         } else {
-            MSG("ERROR: jit_peek failed with %d\n", jit_result);
+            MSG_DEBUG(DEBUG_ERROR, "ERROR: jit_peek failed with %d\n", jit_result);
         }
     }
 }
@@ -2715,7 +2718,7 @@ static void gps_process_sync(void) {
 
     /* get GPS time for synchronization */
     if (i != LGW_GPS_SUCCESS) {
-        MSG("WARNING: [gps] could not get GPS time from GPS\n");
+        MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] could not get GPS time from GPS\n");
         return;
     }
 
@@ -2724,7 +2727,7 @@ static void gps_process_sync(void) {
     i = lgw_get_trigcnt(&trig_tstamp);
     pthread_mutex_unlock(&mx_concent);
     if (i != LGW_HAL_SUCCESS) {
-        MSG("WARNING: [gps] failed to read concentrator timestamp\n");
+        MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] failed to read concentrator timestamp\n");
         return;
     }
 
@@ -2733,7 +2736,7 @@ static void gps_process_sync(void) {
     i = lgw_gps_sync(&time_reference_gps, trig_tstamp, utc, gps_time);
     pthread_mutex_unlock(&mx_timeref);
     if (i != LGW_GPS_SUCCESS) {
-        MSG("WARNING: [gps] GPS out of sync, keeping previous time reference\n");
+        MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] GPS out of sync, keeping previous time reference\n");
     }
 }
 
@@ -2774,7 +2777,7 @@ void thread_gps(void) {
         /* blocking non-canonical read on serial port */
         ssize_t nb_char = read(gps_tty_fd, serial_buff + wr_idx, LGW_GPS_MIN_MSG_SIZE);
         if (nb_char <= 0) {
-            MSG("WARNING: [gps] read() returned value %d\n", nb_char);
+            MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] read() returned value %d\n", nb_char);
             continue;
         }
         wr_idx += (size_t)nb_char;
@@ -2800,7 +2803,7 @@ void thread_gps(void) {
                         frame_size = 0;
                     } else if (latest_msg == INVALID) {
                         /* message header received but message appears to be corrupted */
-                        MSG("WARNING: [gps] could not get a valid message from GPS (no time)\n");
+                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] could not get a valid message from GPS (no time)\n");
                         frame_size = 0;
                     } else if (latest_msg == UBX_NAV_TIMEGPS) {
                         gps_process_sync();
@@ -2849,7 +2852,7 @@ void thread_gps(void) {
             wr_idx -= LGW_GPS_MIN_MSG_SIZE;
         }
     }
-    MSG("\nINFO: End of GPS thread\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO: End of GPS thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -2933,7 +2936,7 @@ void thread_valid(void) {
         }
         // printf("Time ref: %s, XTAL correct: %s (%.15lf)\n", ref_valid_local?"valid":"invalid", xtal_correct_ok?"valid":"invalid", xtal_correct); // DEBUG
     }
-    MSG("\nINFO: End of validation thread\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO: End of validation thread\n");
 }
 
 /* --- EOF ------------------------------------------------------------------ */

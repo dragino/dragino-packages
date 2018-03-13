@@ -319,8 +319,10 @@ sleep 1
 /etc/init.d/network restart
 
 # wait till the network completey start and process next
-sleep 5
+sleep 2
 
 /etc/init.d/config_secn-2 start
 
 /etc/init.d/set-mesh-gw-mode.sh start
+
+/etc/init.d/lg08 restart

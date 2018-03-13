@@ -288,7 +288,7 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, struct timeval *time, st
                     err_collision = JIT_ERROR_COLLISION_BEACON;
                     break;
                 default:
-                    MSG("ERROR: Unknown packet type, should not occur, BUG?\n");
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR: Unknown packet type, should not occur, BUG?\n");
                     assert(0);
                     break;
             }
@@ -322,17 +322,17 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, struct timeval *time, st
 
 enum jit_error_e jit_dequeue(struct jit_queue_s *queue, int index, struct lgw_pkt_tx_s *packet, enum jit_pkt_type_e *pkt_type) {
     if (packet == NULL) {
-        MSG("ERROR: invalid parameter\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid parameter\n");
         return JIT_ERROR_INVALID;
     }
 
     if ((index < 0) || (index >= JIT_QUEUE_MAX)) {
-        MSG("ERROR: invalid parameter\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid parameter\n");
         return JIT_ERROR_INVALID;
     }
 
     if (jit_queue_is_empty(queue)) {
-        MSG("ERROR: cannot dequeue packet, JIT queue is empty\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: cannot dequeue packet, JIT queue is empty\n");
         return JIT_ERROR_EMPTY;
     }
 
@@ -371,7 +371,7 @@ enum jit_error_e jit_peek(struct jit_queue_s *queue, struct timeval *time, int *
     uint32_t time_us;
 
     if ((time == NULL) || (pkt_idx == NULL)) {
-        MSG("ERROR: invalid parameter\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid parameter\n");
         return JIT_ERROR_INVALID;
     }
 
@@ -397,9 +397,9 @@ enum jit_error_e jit_peek(struct jit_queue_s *queue, struct timeval *time, int *
             queue->num_pkt--;
             if (queue->nodes[i].pkt_type == JIT_PKT_TYPE_BEACON) {
                 queue->num_beacon--;
-                MSG("WARNING: --- Beacon dropped (current_time=%u, packet_time=%u) ---\n", time_us, queue->nodes[i].pkt.count_us);
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: --- Beacon dropped (current_time=%u, packet_time=%u) ---\n", time_us, queue->nodes[i].pkt.count_us);
             } else {
-                MSG("WARNING: --- Packet dropped (current_time=%u, packet_time=%u) ---\n", time_us, queue->nodes[i].pkt.count_us);
+                MSG_DEBUG(DEBUG_WARNING, "WARNING: --- Packet dropped (current_time=%u, packet_time=%u) ---\n", time_us, queue->nodes[i].pkt.count_us);
             }
 
             /* Replace dropped packet with last packet of the queue */

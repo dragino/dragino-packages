@@ -1067,8 +1067,10 @@ int main(void)
     float dw_ack_ratio;
 
     /* display version informations */
-    MSG("*** Beacon Packet Forwarder for Lora Gateway ***\nVersion: " VERSION_STRING "\n");
-    MSG("*** Lora concentrator HAL library version info ***\n%s\n***\n", lgw_version_info());
+    time(&now_time);
+    strftime(stat_timestamp, sizeof(stat_timestamp), "%Y%m%d%H%M%S", gmtime(&now_time)); /* format yyyymmddThhmmssZ */
+    MSG("Starting Packet Forwarder at %s\n", stat_timestamp);
+    //MSG("*** Lora concentrator HAL library version info ***\n%s\n***\n", lgw_version_info());
 
     /* display host endianness */
     #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -1374,7 +1376,7 @@ int main(void)
             MSG_DEBUG(DEBUG_ERROR, "ERROR: impossible to create log file gw_report.log\n");
         } else {
             /* display a report */
-            fprintf(report_file, "\n################## Report ## %s ##################\n", stat_timestamp);
+            fprintf(report_file, "\n################## Report at: %s ##################\n", stat_timestamp);
             fprintf(report_file, "### [UPSTREAM] ###\n");
             fprintf(report_file, "# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
             fprintf(report_file, "# CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
@@ -1895,7 +1897,7 @@ void thread_up(void) {
         buff_up[buff_index] = 0; /* add string terminator, for safety */
 
         fprintf(pktlog_file, "%s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
-        fprintf(pktlog_file, "=======up==============up=============up========\n"); /* DEBUG: display JSON payload */
+        fprintf(pktlog_file, ">-----------------------------------------------------------------\n"); 
         ++time_check;
 
         /* send datagram to server */
@@ -2279,7 +2281,7 @@ void thread_down(void) {
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
             MSG_DEBUG(DEBUG_INFO, "INFO: [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
             fprintf(pktlog_file, "%s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
-            fprintf(pktlog_file, "========down===========down===========down========\n"); /* DEBUG: display JSON payload */
+            fprintf(pktlog_file, "<-----------------------------------------------------------------\n"); 
 
             /* initialize TX struct and try to parse JSON */
             memset(&txpkt, 0, sizeof txpkt);

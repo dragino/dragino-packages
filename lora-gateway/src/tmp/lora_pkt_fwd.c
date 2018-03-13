@@ -129,6 +129,7 @@ static bool fwd_nocrc_pkt = false; /* packets with NO PAYLOAD CRC are NOT forwar
 
 /* network configuration variables */
 static uint64_t lgwm = 0; /* Lora gateway MAC address */
+static char lgwm_str[17]; /* Lora gateway string */
 static char serv_addr[64] = STR(DEFAULT_SERVER); /* address of the server (host name or IPv4/IPv6) */
 static char serv_port_up[8] = STR(DEFAULT_PORT_UP); /* server port for upstream traffic */
 static char serv_port_down[8] = STR(DEFAULT_PORT_DW); /* server port for downstream traffic */
@@ -261,8 +262,12 @@ void thread_timersync(void);
 /* log file management */
 time_t now_time;
 time_t log_start_time;
-static int time_check = 0; /* variable used to limit the number of calls to time() function */
-FILE * pktlog_file = NULL;
+
+FILE * log_file = NULL;
+char log_file_name[64];
+void open_log(void);
+
+
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
@@ -976,20 +981,33 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
     return send(sock_down, (void *)buff_ack, buff_index, 0);
 }
 
-/* open log file */
+
+/* log file */
+
 void open_log(void) {
     int i;
+    char iso_date[20];
 
+    strftime(iso_date,ARRAY_SIZE(iso_date),"%Y%m%dT%H%M%SZ",gmtime(&now_time)); /* format yyyymmddThhmmssZ */
     log_start_time = now_time; /* keep track of when the log was started, for log rotation */
-    pktlog_file = fopen("pktfwd.log", "w+"); /* create log file, append if file already exist */
-    if (pktlog_file == NULL) {
-        MSG("ERROR: impossible to create log file pktfwd.log\n");
+
+    sprintf(log_file_name, "/var/log/pkt_log_%s.csv", iso_date);
+    log_file = fopen(log_file_name, "a"); /* create log file, append if file already exist */
+    if (log_file == NULL) {
+        MSG("ERROR: impossible to create log file %s\n", log_file_name);
         exit(EXIT_FAILURE);
     }
 
-    MSG("INFO: Now writing to log file pktfwd.log\n");
+    i = fprintf(log_file, "\"gateway ID\",\"UTC timestamp\",\"us count\",\"frequency\",\"RF chain\",\"RX chain\",\"status\",\"size\",\"modulation\",\"bandwidth\",\"datarate\",\"coderate\",\"RSSI\",\"SNR\"\n");
+    if (i < 0) {
+        MSG("ERROR: impossible to write to log file %s\n", log_file_name);
+        exit(EXIT_FAILURE);
+    }
+
+    MSG("INFO: Now writing to log file %s\n", log_file_name);
     return;
 }
+
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
@@ -998,8 +1016,6 @@ int main(void)
     struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
     int i; /* loop variable and temporary variable for return value */
     int x;
-
-    FILE * report_file;
 
     /* configuration file related */
     char *global_cfg_path= "/etc/lora/global_conf.json"; /* contain global (typ. network-wide) configuration */
@@ -1046,9 +1062,6 @@ int main(void)
     uint32_t cp_nb_beacon_queued = 0;
     uint32_t cp_nb_beacon_sent = 0;
     uint32_t cp_nb_beacon_rejected = 0;
-
-    /* clock and log rotation management */
-    int log_rotate_interval = 3600; /* by default, rotation every 1 hour */
 
     /* GPS coordinates variables */
     bool coord_ok = false;
@@ -1215,10 +1228,6 @@ int main(void)
     }
     freeaddrinfo(result);
 
-    /* opening log file and writing CSV header*/
-    time(&now_time);
-    open_log();
-
     /* starting the concentrator */
     i = lgw_start();
     if (i == LGW_HAL_SUCCESS) {
@@ -1227,6 +1236,7 @@ int main(void)
         MSG("ERROR: [main] failed to start the concentrator\n");
         exit(EXIT_FAILURE);
     }
+
 
     /* spawn threads to manage upstream and downstream */
     i = pthread_create( &thrid_up, NULL, (void * (*)(void *))thread_up, NULL);
@@ -1369,11 +1379,11 @@ int main(void)
             cp_gps_coord = reference_coord;
         }
 
-        report_file = fopen("/var/log/gw_report.log", "w+");
-        if (pktlog_file == NULL) {
-            MSG("ERROR: impossible to create log file gw_report.log\n");
+        report_file = fopen("/var/log/gw_report_log", "w+"); 
+        if (report_file == NULL) {
+            MSG("ERROR: impossible to create log file lora_report\n");
         } else {
-            /* display a report */
+            /* log a report */
             fprintf(report_file, "\n##### %s #####\n", stat_timestamp);
             fprintf(report_file, "### [UPSTREAM] ###\n");
             fprintf(report_file, "# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
@@ -1396,8 +1406,9 @@ int main(void)
             fprintf(report_file, "# BEACON sent so far: %u\n", cp_nb_beacon_sent);
             fprintf(report_file, "# BEACON rejected: %u\n", cp_nb_beacon_rejected);
             fprintf(report_file, "### [JIT] ###\n");
-            fclose(report_file);
+            fclose(report_file); // close report file 
         }
+
         /* get timestamp captured on PPM pulse  */
         pthread_mutex_lock(&mx_concent);
         i = lgw_get_trigcnt(&trig_tstamp);
@@ -1437,16 +1448,6 @@ int main(void)
         }
         report_ready = true;
         pthread_mutex_unlock(&mx_stat_rep);
-
-        /* check time and rotate log file if necessary */
-        if (time_check >= 64) {
-            time_check = 0;
-            time(&now_time);
-            if (difftime(now_time, log_start_time) > log_rotate_interval) {
-                fclose(pktlog_file);
-                open_log();
-            }
-        }
     }
 
     /* wait for upstream thread to finish (1 fetch cycle max) */
@@ -1479,8 +1480,6 @@ int main(void)
             MSG("WARNING: failed to stop concentrator successfully\n");
         }
     }
-
-    fclose(pktlog_file);
 
     MSG("INFO: Exiting packet forwarder program\n");
     exit(EXIT_SUCCESS);
@@ -1528,12 +1527,26 @@ void thread_up(void) {
     uint32_t mote_addr = 0;
     uint16_t mote_fcnt = 0;
 
+    /* local timestamp variables until we get accurate GPS time */
+    struct timespec fetch_time;
+    char fetch_timestamp[30];
+    struct tm * x;
+
+    int log_rotate_interval = 3600; /* by default, rotation every hour */
+    int time_check = 0; /* variable used to limit the number of calls to time() function */
+
     /* set upstream socket RX timeout */
     i = setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof push_timeout_half);
     if (i != 0) {
         MSG("ERROR: [up] setsockopt returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
+
+    /* transform the MAC address into a string */
+    sprintf(lgwm_str, "%08X%08X", (uint32_t)(lgwm >> 32), (uint32_t)(lgwm & 0xFFFFFFFF));
+
+    time(&now_time);
+    open_log();
 
     /* pre-fill the data buffer with fixed fields */
     buff_up[0] = PROTOCOL_VERSION;
@@ -1568,6 +1581,10 @@ void thread_up(void) {
             ref_ok = gps_ref_valid;
             local_ref = time_reference_gps;
             pthread_mutex_unlock(&mx_timeref);
+            clock_gettime(CLOCK_REALTIME, &fetch_time);
+            x = gmtime(&(fetch_time.tv_sec));
+            sprintf(fetch_timestamp,"%04i-%02i-%02i %02i:%02i:%02i.%03liZ",(x->tm_year)+1900,(x->tm_mon)+1,x->tm_mday,x->tm_hour,x->tm_min,x->tm_sec,(fetch_time.tv_nsec)/1000000); /* ISO 8601 format */
+
         } else {
             ref_ok = false;
         }
@@ -1588,6 +1605,25 @@ void thread_up(void) {
         for (i=0; i < nb_pkt; ++i) {
             p = &rxpkt[i];
 
+            /* writing gateway ID */
+            fprintf(log_file, "\"%08X%08X\",", (uint32_t)(lgwm >> 32), (uint32_t)(lgwm & 0xFFFFFFFF));
+
+            /* writing UTC timestamp*/
+            fprintf(log_file, "\"%s\",", fetch_timestamp);
+            // TODO: replace with GPS time when available
+
+            /* writing internal clock */
+            fprintf(log_file, "%10u,", p->count_us);
+
+            /* writing RX frequency */
+            fprintf(log_file, "%10u,", p->freq_hz);
+
+            /* writing RF chain */
+            fprintf(log_file, "%u,", p->rf_chain);
+
+            /* writing RX modem/IF chain */
+            fprintf(log_file, "%2d,", p->if_chain);
+
             /* Get mote information from current packet (addr, fcnt) */
             /* FHDR - DevAddr */
             mote_addr  = p->payload[1];
@@ -1604,11 +1640,12 @@ void thread_up(void) {
             switch(p->status) {
                 case STAT_CRC_OK:
                     meas_nb_rx_ok += 1;
-                    printf( "\nINFO: Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
+                    //printf( "\nINFO: Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
                     if (!fwd_valid_pkt) {
                         pthread_mutex_unlock(&mx_meas_up);
                         continue; /* skip that packet */
                     }
+                    fputs("\"CRC_OK\" ,", log_file); 
                     break;
                 case STAT_CRC_BAD:
                     meas_nb_rx_bad += 1;
@@ -1616,6 +1653,7 @@ void thread_up(void) {
                         pthread_mutex_unlock(&mx_meas_up);
                         continue; /* skip that packet */
                     }
+                    fputs("\"CRC_BAD\",", log_file);
                     break;
                 case STAT_NO_CRC:
                     meas_nb_rx_nocrc += 1;
@@ -1623,13 +1661,19 @@ void thread_up(void) {
                         pthread_mutex_unlock(&mx_meas_up);
                         continue; /* skip that packet */
                     }
+                    fputs("\"NO_CRC\" ,", log_file);
                     break;
                 default:
-                    MSG("WARNING: [up] received packet with unknown status %u (size %u, modulation %u, BW %u, DR %u, RSSI %.1f)\n", p->status, p->size, p->modulation, p->bandwidth, p->datarate, p->rssi);
+                    //MSG("WARNING: [up] received packet with unknown status %u (size %u, modulation %u, BW %u, DR %u, RSSI %.1f)\n", p->status, p->size, p->modulation, p->bandwidth, p->datarate, p->rssi);
                     pthread_mutex_unlock(&mx_meas_up);
+                    fputs("\"UNDEF\"  ,", log_file);
                     continue; /* skip that packet */
                     // exit(EXIT_FAILURE);
             }
+
+            /* writing payload size */
+            fprintf(log_file, "%3u,", p->size);
+
             meas_up_pkt_fwd += 1;
             meas_up_payload_byte += p->size;
             pthread_mutex_unlock(&mx_meas_up);
@@ -1715,36 +1759,44 @@ void thread_up(void) {
 
             /* Packet modulation, 13-14 useful chars */
             if (p->modulation == MOD_LORA) {
+                fputs("\"LORA\",", log_file);
                 memcpy((void *)(buff_up + buff_index), (void *)",\"modu\":\"LORA\"", 14);
                 buff_index += 14;
 
                 /* Lora datarate & bandwidth, 16-19 useful chars */
                 switch (p->datarate) {
                     case DR_LORA_SF7:
+                        fputs("\"SF7\"   ,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF7", 12);
                         buff_index += 12;
                         break;
                     case DR_LORA_SF8:
+                        fputs("\"SF8\"   ,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF8", 12);
                         buff_index += 12;
                         break;
                     case DR_LORA_SF9:
+                        fputs("\"SF9\"   ,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF9", 12);
                         buff_index += 12;
                         break;
                     case DR_LORA_SF10:
+                        fputs("\"SF10\"   ,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF10", 13);
                         buff_index += 13;
                         break;
                     case DR_LORA_SF11:
+                        fputs("\"SF11\"   ,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF11", 13);
                         buff_index += 13;
                         break;
                     case DR_LORA_SF12:
+                        fputs("\"SF12\"   ,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF12", 13);
                         buff_index += 13;
                         break;
                     default:
+                        fputs("\"ERR\"   ,", log_file);
                         MSG("ERROR: [up] lora packet with unknown datarate\n");
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF?", 12);
                         buff_index += 12;
@@ -1752,18 +1804,22 @@ void thread_up(void) {
                 }
                 switch (p->bandwidth) {
                     case BW_125KHZ:
+                        fputs("125000,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)"BW125\"", 6);
                         buff_index += 6;
                         break;
                     case BW_250KHZ:
+                        fputs("250000,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)"BW250\"", 6);
                         buff_index += 6;
                         break;
                     case BW_500KHZ:
+                        fputs("500000,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)"BW500\"", 6);
                         buff_index += 6;
                         break;
                     default:
+                        fputs("-1    ,", log_file);
                         MSG("ERROR: [up] lora packet with unknown bandwidth\n");
                         memcpy((void *)(buff_up + buff_index), (void *)"BW?\"", 4);
                         buff_index += 4;
@@ -1773,26 +1829,32 @@ void thread_up(void) {
                 /* Packet ECC coding rate, 11-13 useful chars */
                 switch (p->coderate) {
                     case CR_LORA_4_5:
+                        fputs("\"4/5\",", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/5\"", 13);
                         buff_index += 13;
                         break;
                     case CR_LORA_4_6:
+                        fputs("\"2/3\",", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/6\"", 13);
                         buff_index += 13;
                         break;
                     case CR_LORA_4_7:
+                        fputs("\"4/7\",", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/7\"", 13);
                         buff_index += 13;
                         break;
                     case CR_LORA_4_8:
+                        fputs("\"1/2\",", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/8\"", 13);
                         buff_index += 13;
                         break;
                     case 0: /* treat the CR0 case (mostly false sync) */
+                        fputs("\"\"   ,", log_file);
                         memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"OFF\"", 13);
                         buff_index += 13;
                         break;
                     default:
+                        fputs("\"ERR\",", log_file);
                         MSG("ERROR: [up] lora packet with unknown coderate\n");
                         memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"?\"", 11);
                         buff_index += 11;
@@ -1808,6 +1870,10 @@ void thread_up(void) {
                     exit(EXIT_FAILURE);
                 }
             } else if (p->modulation == MOD_FSK) {
+                fputs("\"FSK\" ,", log_file);
+                fprintf(log_file, "\"%6u\",", p->datarate);
+                fputs("0     ,", log_file);  //bandwidth
+                fputs("0     ,", log_file);  //coderate
                 memcpy((void *)(buff_up + buff_index), (void *)",\"modu\":\"FSK\"", 13);
                 buff_index += 13;
 
@@ -1820,9 +1886,16 @@ void thread_up(void) {
                     exit(EXIT_FAILURE);
                 }
             } else {
+                fputs("\"ERR\" ,", log_file);
                 MSG("ERROR: [up] received packet with unknown modulation\n");
                 exit(EXIT_FAILURE);
             }
+
+            /* writing packet RSSI */
+            fprintf(log_file, "%+.0f,", p->rssi);
+
+            /* writing packet average SNR */
+            fprintf(log_file, "%+5.1f,", p->snr);
 
             /* Packet RSSI, payload size, 18-23 useful chars */
             j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE-buff_index, ",\"rssi\":%.0f,\"size\":%u", p->rssi, p->size);
@@ -1850,6 +1923,19 @@ void thread_up(void) {
             buff_up[buff_index] = '}';
             ++buff_index;
             ++pkt_in_dgram;
+            
+            /* writing hex-encoded payload (bundled in 32-bit words) */
+            /*
+            fputs("\"", log_file);
+            for (j = 0; j < p->size; ++j) {
+                if ((j > 0) && (j%4 == 0)) fputs("-", log_file);
+                fprintf(log_file, "%02X", p->payload[j]);
+            }
+            */
+
+            /* end of log file line */
+            fputs("\n", log_file);
+            fflush(log_file);
         }
 
         /* restart fetch sequence without sending empty JSON if all packets have been filtered out */
@@ -1891,9 +1977,7 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = 0; /* add string terminator, for safety */
 
-        fprintf(pktlog_file, "%s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
-        fprintf(pktlog_file, "=======up==============up=============up========\n"); /* DEBUG: display JSON payload */
-        ++time_check;
+        printf("\nJSON up: %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
 
         /* send datagram to server */
         send(sock_up, (void *)buff_up, buff_index, 0);
@@ -1925,7 +2009,19 @@ void thread_up(void) {
             }
         }
         pthread_mutex_unlock(&mx_meas_up);
+
+        ++time_check;
+        if (time_check >= 8) {
+            time_check = 0;
+            time(&now_time);
+            if (difftime(now_time, log_start_time) > log_rotate_interval) {
+                fclose(log_file);
+                open_log();
+            }
+        }
+    
     }
+
     MSG("\nINFO: End of upstream thread\n");
 }
 
@@ -2275,8 +2371,7 @@ void thread_down(void) {
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
             MSG("INFO: [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
-            fprintf(pktlog_file, "%s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
-            fprintf(pktlog_file, "========down===========down===========down========\n"); /* DEBUG: display JSON payload */
+            fprintf(down_log_file, "\nJSON down: %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 
             /* initialize TX struct and try to parse JSON */
             memset(&txpkt, 0, sizeof txpkt);

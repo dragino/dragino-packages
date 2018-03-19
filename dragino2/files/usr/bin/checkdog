@@ -34,5 +34,8 @@ run_reset_mcu()
         
 restart_service
 
-run_reset_mcu
+mcu_watchdog=`uci get sensor.mcu.mcu_watchdog`
+if [ "$mcu_watchdog" != "disable" ]; then
+    run_reset_mcu
+fi
 

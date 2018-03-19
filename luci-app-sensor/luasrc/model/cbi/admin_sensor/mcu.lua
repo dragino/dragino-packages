@@ -64,6 +64,12 @@ uo.disabled = "disable"
 uo.default  = uo.disabled
 uo.rmempty  = false
 
+local wd = s:option(Flag, "mcu_watchdog", translate("MCU Watchdog"),translate("Reset MCU while sketch hang up"))
+wd.enabled  = "enable"
+wd.disabled = "disable"
+wd.default  = wd.disabled
+wd.rmempty  = false
+
 s = m:section(NamedSection, "auto_update", "sensor", translate('<abbr title=\"'..Auto_update_helper..'\">Auto Update MCU Image</abbr>'))
 local ab = s:option(Flag, "update_on_boot", translate('Auto Update On Boot'),translate("Auto update once device boot"))
 ab.enabled  = "1"

@@ -325,4 +325,4 @@ sleep 5
 
 /etc/init.d/set-mesh-gw-mode.sh start
 
-/etc/init.d/loragateway restart
+/etc/init.d/iotd restart

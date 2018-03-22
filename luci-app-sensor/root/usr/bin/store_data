@@ -1,0 +1,8 @@
+#!/bin/sh
+#Store Sensor Data to Local IoT Channel. 
+DEBUG=`uci get iot-services.general.debug` 
+path="/var/iot/channels/"$1
+
+[ $DEBUG -ge 1 ] && logger "[IoT]: Store data $2 to $path" 
+echo $2 > "$path"
+

@@ -74,6 +74,3 @@ config tinyproxy
 config 6relayd
 	option init 6relayd
 
-config mqtt
-    option exec '/etc/iot/scripts/polish_mqtt_config'
-

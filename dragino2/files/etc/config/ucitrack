@@ -11,6 +11,7 @@ config sensor
 	option init dragino
 	
 config iot-services
+	option exec /usr/bin/reset-mcu
 	option init iotd
 	
 config xively
@@ -74,6 +75,5 @@ config tinyproxy
 config 6relayd
 	option init 6relayd
 
-config mqtt
-    option exec '/etc/iot/scripts/polish_mqtt_config'
-
+config lorawan
+    list affects iot-services

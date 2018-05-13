@@ -19,5 +19,4 @@ uci add ucitrack mqtt
 uci	set ucitrack.@mqtt[0].exec=/etc/iot/scripts/polish_mqtt_config
 
 uci	commit
-
 exit 0

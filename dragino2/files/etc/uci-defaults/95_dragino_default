@@ -15,8 +15,18 @@ uci	set ucitrack.@secn[0].exec=/usr/bin/config_secn
 uci add ucitrack gpstrack
 uci	set ucitrack.@gpstrack[0].exec=/usr/bin/get_gpswox_api_hash.sh
 
+<<<<<<< HEAD
 uci add ucitrack mqtt
 uci	set ucitrack.@mqtt[0].exec=/etc/iot/scripts/polish_mqtt_config
+=======
+uci add ucitrack lorawan
+uci	set ucitrack.@lorawan[0].exec=/usr/bin/reset-mcu
+
+uci add ucitrack mqtt
+uci set ucitrack.@mqtt[0].exec=/etc/iot/scripts/polish_mqtt_config
+
+uci	set ucitrack.@iot-services[0].exec=/usr/bin/reset-mcu
+>>>>>>> 52ee27058f3c5b08f21f2647ba2385faf1493d58
 
 uci	commit
 exit 0

@@ -76,5 +76,8 @@ config tinyproxy
 config 6relayd
 	option init 6relayd
 
+<<<<<<< HEAD
 config lorawan
     list affects iot-services
+=======
+>>>>>>> 52ee27058f3c5b08f21f2647ba2385faf1493d58

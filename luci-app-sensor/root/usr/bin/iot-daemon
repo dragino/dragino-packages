@@ -7,7 +7,7 @@ DNS_HOST="www.google.com www.163.com"
 
 check_net_status()
 {
-	if [ ! -z "`fping -c 1 -e 8.8.8.8 | grep alive`" ]; then
+	if [ ! -z "`fping 8.8.8.8 | grep alive`" ]; then
 		logger "[IoT]:  Internet Connection Check: OK"
 	else 
 		logger "[IoT]:  Internet Connection Check: FAIL"
@@ -15,7 +15,7 @@ check_net_status()
 	
 	DNS_OK=0
 	for host in $DNS_HOST; do
-		if [ ! -z "`fping -c 1 -e $host | grep alive`" ]; then
+		if [ ! -z "`fping $host | grep alive`" ]; then
 			DNS_OK=1
 			logger "[IoT]:  DNS Resolve Check: OK"
 			break

@@ -1,21 +1,38 @@
-# lg02_pkt_fwd
+include $(TOPDIR)/rules.mk
 
-all: lg02_pkt_fwd
+PKG_NAME:=lg02_pkt_fwd
+PKG_VERSION:=1.0.0
+PKG_RELEASE:=1
 
-lg02_pkt_fwd: base64.o parson.o radio.o main.o
-	$(CC) main.o base64.o parson.o radio.o $(LIBS) -luci -lrt -ldl -lpthread -o lg02_pkt_fwd
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c main.c
+TARGET_LDFLAGS:= -lpthread  
 
-base64.o: base64.c
-	$(CC) $(CFLAGS) -c base64.c
+include $(INCLUDE_DIR)/package.mk
 
-parson.o: parson.c
-	$(CC) $(CFLAGS) -c parson.c
+define Package/$(PKG_NAME)    
+	SECTION:=utils
+	CATEGORY:=Utilities
+	TITLE:=$(PKG_NAME)
+	MAINTAINER:=Mazilo <myEmail.add>
+	DEPENDS:=+libuci +libpthread +librt
+endef
 
-radio.o: radio.c
-	$(CC) $(CFLAGS) -c radio.c
+define Package/$(PKG_NAME)/description
+	Lora singe packeage forward
+endef
 
-clean:
-	rm *.o lg02_pkt_fwd	
+CONFIGURE_VARS+= \
+	CC="$(TOOLCHAIN_DIR)/bin/$(TARGET_CC)"
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
+endef
+
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
+endef
+
+$(eval $(call BuildPackage,$(PKG_NAME)))

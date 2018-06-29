@@ -18,14 +18,28 @@ module("luci.controller.admin.gateway", package.seeall)
 
 function index()
 	local uci = luci.model.uci.cursor()
+	local sys = require ('luci.sys')
+
+	--read hardware board model
+	local board_file = io.open("/var/iot/board", "r")
+	if nil == board_file then
+		f_board = nil
+	else
+		f_board = board_file:read("*l")
+	end
+
 	local string =string
-	entry({"admin", "gateway"}, alias("admin", "gateway", "gateway"), _("Gateway"), 30).index = true
-	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/gateway"), _("LoRaWan / GateWay"), 1)
-	entry({"admin", "gateway", "iotserver"}, cbi("admin_gateway/iotserver"), _("IOT Server"), 2)
+	entry({"admin", "gateway"}, alias("admin", "gateway", "iotserver"), _("Service"), 30).index = true
+	entry({"admin", "gateway", "iotserver"}, cbi("admin_gateway/iotserver"), _("IOT Server"), 1)
+	if f_board == 'lg02' then
+	    entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg02"), _("LoRaWan / GateWay"), 2)
+    else
+	    entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg08"), _("LoRaWan / GateWay"), 2)
+        entry({"admin", "gateway", "lgwlog"}, template("admin_status/lgwlog"), _("Lora Log"), 20).leaf = true
+        entry({"admin", "gateway", "lgwlog_action"}, post("lgwlog_action")).leaf = true
+    end
 	entry({"admin", "gateway", "mqtt"}, cbi("admin_gateway/mqtt"), _("MQTT"), 3)
 	entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("Tcp_Client"), 4)
-    entry({"admin", "gateway", "lgwlog"}, template("admin_status/lgwlog"), _("Lora Log"), 20).leaf = true
-    entry({"admin", "gateway", "lgwlog_action"}, post("lgwlog_action")).leaf = true
 	
 end
 

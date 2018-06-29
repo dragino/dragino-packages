@@ -1,16 +1,18 @@
-m = Map("iot-services", translate("Select IoT Server"), translate("Select the IoT Server type to connect"))
+m = Map("iot-services", translate("Select IoT Service"), translate("Select a IoT Service"))
 
-s = m:section(NamedSection, "general", "iot-services", translate("Select IoT Server"))
-local sv = s:option(ListValue, "server_type", translate("IoT Server"))
-sv.placeholder = "Select IoT server"
+s = m:section(NamedSection, "general", "iot-services", translate("Select IoT Service"))
+local sv = s:option(ListValue, "server_type", translate("IoT Service"))
+sv.placeholder = "Select IoT service"
 sv.default = "mqtt"
-sv:value("mqtt",  "MQTT Server")
-sv:value("gpstrack",  "GPSWOX Server")
-sv:value("tcp_client",  "TCP/IP Protocol")
+sv:value("lorawan",  "Lorawan/RAW packets forwarder")
+sv:value("relay",  "Lorawan/RAW packets relay")
+sv:value("mqtt",  "LoraRAW forward to MQTT server")
+sv:value("tcpudp",  "LoraRAW forward to TCP/UDP server")
 
-local debug = s:option(Flag, "pfwd_debug", translate('Debugger'),translate("TTN  Packet Forwarder Debugger"))
-debug.enabled  = "1"
-debug.disabled = "0"
-debug.default  = debug.disabled
+local debug = s:option(ListValue, "logdebug", translate("Debug level"))
+debug.default  = "0"
+debug.value("0", "LEVEL0 only error message output");
+debug.value("1", "LEVEL1 little debug message output");
+debug.value("2", "LEVEL2 more verbose output");
 
 return m

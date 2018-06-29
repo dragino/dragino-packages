@@ -1,0 +1,400 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ARRAY_MAX_CAPACITY	parson.c	34;"	d	file:
+ARRAY_SIZE	base64.c	29;"	d	file:
+ASSERT	radio.h	37;"	d
+CRIT	base64.c	30;"	d	file:
+DEBUG	base64.c	33;"	d	file:
+DEFAULT_KEEPALIVE	main.c	39;"	d	file:
+DEFAULT_STAT	main.c	40;"	d	file:
+ERROR	parson.c	31;"	d	file:
+FETCH_SLEEP_MS	main.c	43;"	d	file:
+GPIO_IN	radio.h	221;"	d
+GPIO_OUT	radio.h	220;"	d
+HIGH	radio.h	218;"	d
+IMMEDIATE	main.c	117;"	d	file:
+IRQ_LORA_CDDETD_MASK	radio.h	108;"	d
+IRQ_LORA_CDDONE_MASK	radio.h	106;"	d
+IRQ_LORA_CRCERR_MASK	radio.h	103;"	d
+IRQ_LORA_FHSSCH_MASK	radio.h	107;"	d
+IRQ_LORA_HEADER_MASK	radio.h	104;"	d
+IRQ_LORA_RXDONE_MASK	radio.h	102;"	d
+IRQ_LORA_RXTOUT_MASK	radio.h	101;"	d
+IRQ_LORA_TXDONE_MASK	radio.h	105;"	d
+JSONArray	parson.h	/^    JSONArray   = 5,$/;"	e	enum:json_value_type
+JSONBoolean	parson.h	/^    JSONBoolean = 6$/;"	e	enum:json_value_type
+JSONError	parson.h	/^    JSONError   = 0,$/;"	e	enum:json_value_type
+JSONNull	parson.h	/^    JSONNull    = 1,$/;"	e	enum:json_value_type
+JSONNumber	parson.h	/^    JSONNumber  = 3,$/;"	e	enum:json_value_type
+JSONObject	parson.h	/^    JSONObject  = 4,$/;"	e	enum:json_value_type
+JSONString	parson.h	/^    JSONString  = 2,$/;"	e	enum:json_value_type
+JSON_Array	parson.h	/^typedef struct json_array_t  JSON_Array;$/;"	t	typeref:struct:json_array_t
+JSON_Object	parson.h	/^typedef struct json_object_t JSON_Object;$/;"	t	typeref:struct:json_object_t
+JSON_Value	parson.h	/^typedef struct json_value_t  JSON_Value;$/;"	t	typeref:struct:json_value_t
+JSON_Value_Type	parson.h	/^} JSON_Value_Type;$/;"	t	typeref:enum:json_value_type
+JSON_Value_Value	parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_value_value	file:
+LAT	main.c	/^static char LAT[16] = "lati";$/;"	v	file:
+LNA_LOW_GAIN	radio.h	84;"	d
+LNA_MAX_GAIN	radio.h	82;"	d
+LNA_OFF_GAIN	radio.h	83;"	d
+LOCKFILE	main.c	364;"	d	file:
+LOCKMODE	main.c	365;"	d	file:
+LON	main.c	/^static char LON[16] = "long";$/;"	v	file:
+LORA_MAC_PREAMBLE	radio.h	77;"	d
+LOW	radio.h	217;"	d
+MAP_DIO0_LORA_RXDONE	radio.h	112;"	d
+MAP_DIO0_LORA_TXDONE	radio.h	113;"	d
+MAP_DIO1_LORA_NOP	radio.h	115;"	d
+MAP_DIO1_LORA_RXTOUT	radio.h	114;"	d
+MAP_DIO2_LORA_NOP	radio.h	116;"	d
+MAX	parson.c	40;"	d	file:
+MAXLINE	radio.h	139;"	d
+MAX_NESTING	parson.c	36;"	d	file:
+MIN_FSK_PREAMB	main.c	57;"	d	file:
+MIN_LORA_PREAMB	main.c	55;"	d	file:
+MOD_FSK	main.c	114;"	d	file:
+MOD_LORA	main.c	113;"	d	file:
+MOD_UNDEFINED	main.c	112;"	d	file:
+MSG	main.c	29;"	d	file:
+NB_PKT_MAX	main.c	53;"	d	file:
+OBJECT_MAX_CAPACITY	parson.c	35;"	d	file:
+ON_GPS	main.c	119;"	d	file:
+OPMODE_CAD	radio.h	97;"	d
+OPMODE_FSRX	radio.h	94;"	d
+OPMODE_FSTX	radio.h	92;"	d
+OPMODE_LORA	radio.h	88;"	d
+OPMODE_MASK	radio.h	89;"	d
+OPMODE_RX	radio.h	95;"	d
+OPMODE_RX_SINGLE	radio.h	96;"	d
+OPMODE_SLEEP	radio.h	90;"	d
+OPMODE_STANDBY	radio.h	91;"	d
+OPMODE_TX	radio.h	93;"	d
+PARSON_VERSION	parson.h	35;"	d
+PAYLOAD_LENGTH	radio.h	74;"	d
+PKT_PULL_ACK	main.c	51;"	d	file:
+PKT_PULL_DATA	main.c	49;"	d	file:
+PKT_PULL_RESP	main.c	50;"	d	file:
+PKT_PUSH_ACK	main.c	48;"	d	file:
+PKT_PUSH_DATA	main.c	47;"	d	file:
+PROTOCOL_VERSION	main.c	45;"	d	file:
+PULL_TIMEOUT_MS	main.c	42;"	d	file:
+PUSH_TIMEOUT_MS	main.c	41;"	d	file:
+QUEUESIZE	radio.h	210;"	d
+READ_ACCESS	radio.h	223;"	d
+REG_DETECTION_OPTIMIZE	radio.h	68;"	d
+REG_DETECTION_THRESHOLD	radio.h	69;"	d
+REG_DIO_MAPPING_1	radio.h	51;"	d
+REG_DIO_MAPPING_2	radio.h	52;"	d
+REG_FIFO	radio.h	43;"	d
+REG_FIFO_ADDR_PTR	radio.h	45;"	d
+REG_FIFO_RX_BASE_AD	radio.h	47;"	d
+REG_FIFO_RX_CURRENT_ADDR	radio.h	49;"	d
+REG_FIFO_TX_BASE_AD	radio.h	46;"	d
+REG_FRF_LSB	radio.h	128;"	d
+REG_FRF_MID	radio.h	127;"	d
+REG_FRF_MSB	radio.h	126;"	d
+REG_HOP_PERIOD	radio.h	61;"	d
+REG_INVERTIQ	radio.h	133;"	d
+REG_IRQ_FLAGS	radio.h	50;"	d
+REG_IRQ_FLAGS_MASK	radio.h	59;"	d
+REG_LNA	radio.h	81;"	d
+REG_MAX_PAYLOAD_LENGTH	radio.h	60;"	d
+REG_MODEM_CONFIG	radio.h	53;"	d
+REG_MODEM_CONFIG2	radio.h	54;"	d
+REG_MODEM_CONFIG3	radio.h	55;"	d
+REG_OPMODE	radio.h	44;"	d
+REG_PACONFIG	radio.h	130;"	d
+REG_PADAC	radio.h	64;"	d
+REG_PARAMP	radio.h	131;"	d
+REG_PAYLOAD_LENGTH	radio.h	58;"	d
+REG_PKTRSSI	radio.h	65;"	d
+REG_PKT_SNR_VALUE	radio.h	57;"	d
+REG_PREAMBLE_LSB	radio.h	72;"	d
+REG_PREAMBLE_MSB	radio.h	71;"	d
+REG_RSSI	radio.h	66;"	d
+REG_RX_NB_BYTES	radio.h	48;"	d
+REG_SYMB_TIMEOUT_LSB	radio.h	56;"	d
+REG_SYNC_WORD	radio.h	62;"	d
+REG_VERSION	radio.h	63;"	d
+RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1	radio.h	136;"	d
+RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2	radio.h	137;"	d
+RXMODE_RSSI	radio.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
+RXMODE_SCAN	radio.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
+RXMODE_SINGLE	radio.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
+SF10	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
+SF11	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
+SF12	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
+SF7	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
+SF8	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
+SF9	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
+SPI_DEV_RX	radio.h	226;"	d
+SPI_DEV_TX	radio.h	227;"	d
+SPI_SPEED	radio.h	225;"	d
+STARTING_CAPACITY	parson.c	33;"	d	file:
+STATUS_SIZE	main.c	61;"	d	file:
+STD_FSK_PREAMB	main.c	58;"	d	file:
+STD_LORA_PREAMB	main.c	56;"	d	file:
+SUCCESS	parson.c	32;"	d	file:
+SX1276_MC2_RX_PAYLOAD_CRCON	radio.h	119;"	d
+SX1276_MC3_AGCAUTO	radio.h	123;"	d
+SX1276_MC3_LOW_DATA_RATE_OPTIMIZE	radio.h	122;"	d
+TIMESTAMPED	main.c	118;"	d	file:
+TRACE	main.c	30;"	d	file:
+TX_BUFF_SIZE	main.c	60;"	d	file:
+UCI_CONFIG_FILE	main.c	169;"	d	file:
+VERSION_STRING	main.c	36;"	d	file:
+WRITE_ACCESS	radio.h	224;"	d
+_BASE64_H	base64.h	18;"	d
+_RADIO_H	radio.h	13;"	d
+_XOPEN_SOURCE	main.c	7;"	d	file:
+_XOPEN_SOURCE	main.c	9;"	d	file:
+already_running	main.c	/^static int already_running(void)$/;"	f	file:
+alt	main.c	/^static int   alt=0;$/;"	v	file:
+array	parson.c	/^    JSON_Array  *array;$/;"	m	union:json_value_value	file:
+autoquit_threshold	main.c	/^static uint32_t autoquit_threshold = 0; \/* enable auto-quit after a number of non-acknowledged PULL_DATA (0 = disabled)*\/$/;"	v	file:
+b64_to_bin	base64.c	/^int b64_to_bin(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
+b64_to_bin_nopad	base64.c	/^int b64_to_bin_nopad(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
+bandwidth	radio.h	/^    uint8_t     bandwidth;      \/*!> modulation bandwidth (LoRa only) *\/$/;"	m	struct:pkt_tx_s
+bin_to_b64	base64.c	/^int bin_to_b64(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
+bin_to_b64_nopad	base64.c	/^int bin_to_b64_nopad(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
+boolean	parson.c	/^    int          boolean;$/;"	m	union:json_value_value	file:
+bw	radio.h	/^    uint32_t bw;$/;"	m	struct:__anon2
+capacity	parson.c	/^    size_t       capacity;$/;"	m	struct:json_array_t	file:
+capacity	parson.c	/^    size_t       capacity;$/;"	m	struct:json_object_t	file:
+char_to_code	base64.c	/^uint8_t char_to_code(char x) {$/;"	f
+code_62	base64.c	/^static char code_62 = '+';	\/* RFC 1421 standard character for code 62 *\/$/;"	v	file:
+code_63	base64.c	/^static char code_63 = '\/';	\/* RFC 1421 standard character for code 63 *\/$/;"	v	file:
+code_pad	base64.c	/^static char code_pad = '=';	\/* RFC 1421 padding character if padding *\/$/;"	v	file:
+code_to_char	base64.c	/^char code_to_char(uint8_t x) {$/;"	f
+coderate	radio.h	/^    uint8_t     coderate;       \/*!> error-correcting code of the packet (LoRa only) *\/$/;"	m	struct:pkt_tx_s
+configPower	radio.c	/^static void configPower (uint8_t spidev, int8_t pw) {$/;"	f	file:
+count	parson.c	/^    size_t       count;$/;"	m	struct:json_array_t	file:
+count	parson.c	/^    size_t       count;$/;"	m	struct:json_object_t	file:
+count_us	radio.h	/^    uint32_t    count_us;       \/*!> timestamp or delay in microseconds for TX trigger *\/$/;"	m	struct:pkt_tx_s
+cr	radio.h	/^    uint8_t cr;$/;"	m	struct:__anon2
+crc	radio.h	/^    uint16_t    crc;          \/*!> CRC that was received in the payload *\/$/;"	m	struct:pkt_rx_s
+crc	radio.h	/^    uint8_t crc;$/;"	m	struct:__anon2
+crccheck	radio.c	/^void crccheck(uint8_t spidev, uint8_t crc)$/;"	f
+ctx	main.c	/^static struct uci_context * ctx = NULL; $/;"	v	typeref:struct:uci_context	file:
+daemonize	init.c	/^daemonize(const char *cmd)$/;"	f
+daemonize	main.c	/^static void daemonize(const char *cmd)$/;"	f	file:
+datarate	radio.h	/^    uint32_t    datarate;       \/*!> TX datarate (baudrate for FSK, SF for LoRa) *\/$/;"	m	struct:pkt_tx_s
+desc	radio.h	/^    char desc[8];$/;"	m	struct:__anon2
+description	main.c	/^static char description[16] = "";                        \/* used for free form description *\/$/;"	v	file:
+difftimespec	main.c	/^static double difftimespec(struct timespec end, struct timespec beginning) {$/;"	f	file:
+digitalRead	radio.c	/^int digitalRead(int gpio) {$/;"	f
+digitalWrite	radio.c	/^void digitalWrite(int gpio, int state)$/;"	f
+dio	radio.h	/^    uint8_t dio[3];$/;"	m	struct:__anon2
+email	main.c	/^static char email[32]  = "mail";                        \/* used for contact email *\/$/;"	v	file:
+empty	radio.h	/^    uint8_t     empty;        \/*!> empty label *\/$/;"	m	struct:pkt_rx_s
+err_doit	main.c	/^static void err_doit(int errnoflag, int error, const char *fmt, va_list ap)$/;"	f	file:
+err_quit	main.c	/^static void err_quit(const char *fmt, ...)$/;"	f	file:
+exit_sig	main.c	/^volatile bool exit_sig = false; \/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) *\/$/;"	v
+f_dev	radio.h	/^    uint8_t     f_dev;          \/*!> frequency deviation, in kHz (FSK only) *\/$/;"	m	struct:pkt_tx_s
+freq	radio.h	/^    uint32_t freq;$/;"	m	struct:__anon2
+freq_hz	radio.h	/^    uint32_t    freq_hz;        \/*!> center frequency of TX *\/$/;"	m	struct:pkt_tx_s
+fwd_error_pkt	main.c	/^static bool fwd_error_pkt = false; \/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	v	file:
+fwd_nocrc_pkt	main.c	/^static bool fwd_nocrc_pkt = false; \/* packets with NO PAYLOAD CRC are NOT forwarded *\/$/;"	v	file:
+fwd_valid_pkt	main.c	/^static bool fwd_valid_pkt = true; \/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	v	file:
+gatewayid	main.c	/^static char gatewayid[64] = "gateway_id";$/;"	v	file:
+get_config	main.c	/^static bool get_config(const char *section, char *option, int len) {$/;"	f	file:
+get_processed_string	parson.c	/^static const char * get_processed_string(const char **string) {$/;"	f	file:
+get_radio_version	radio.c	/^bool get_radio_version(radiodev *radiodev)$/;"	f
+gpio_config	radio.c	/^const bool gpio_config[28] = {$/;"	v
+gpio_get_state	radio.c	/^static int gpio_get_state(int gpio) {$/;"	f	file:
+gpio_release	radio.c	/^static bool gpio_release(int gpio) {$/;"	f	file:
+gpio_reserve	radio.c	/^static bool gpio_reserve(int gpio) {$/;"	f	file:
+gpio_set_direction	radio.c	/^static bool gpio_set_direction(int gpio, int direction) {$/;"	f	file:
+gpio_set_state	radio.c	/^static bool gpio_set_state(int gpio, int state) {$/;"	f	file:
+invert_pol	radio.h	/^    bool        invert_pol;     \/*!> invert signal polarity, for orthogonal downlinks (LoRa only) *\/$/;"	m	struct:pkt_tx_s
+invertio	radio.h	/^    uint8_t invertio;$/;"	m	struct:__anon2
+is_decimal	parson.c	/^static int is_decimal(const char *string, size_t length) {$/;"	f	file:
+is_utf	parson.c	/^static int is_utf(const unsigned char *s) {$/;"	f	file:
+items	parson.c	/^    JSON_Value **items;$/;"	m	struct:json_array_t	file:
+json_array_add	parson.c	/^static int json_array_add(JSON_Array *array, JSON_Value *value) {$/;"	f	file:
+json_array_free	parson.c	/^static void json_array_free(JSON_Array *array) {$/;"	f	file:
+json_array_get_array	parson.c	/^JSON_Array * json_array_get_array(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_boolean	parson.c	/^int json_array_get_boolean(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_count	parson.c	/^size_t json_array_get_count(const JSON_Array *array) {$/;"	f
+json_array_get_number	parson.c	/^double json_array_get_number(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_object	parson.c	/^JSON_Object * json_array_get_object(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_string	parson.c	/^const char * json_array_get_string(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_value	parson.c	/^JSON_Value * json_array_get_value(const JSON_Array *array, size_t index) {$/;"	f
+json_array_init	parson.c	/^static JSON_Array * json_array_init(void) {$/;"	f	file:
+json_array_resize	parson.c	/^static int json_array_resize(JSON_Array *array, size_t capacity) {$/;"	f	file:
+json_array_t	parson.c	/^struct json_array_t {$/;"	s	file:
+json_object_add	parson.c	/^static int json_object_add(JSON_Object *object, const char *name, JSON_Value *value) {$/;"	f	file:
+json_object_dotget_array	parson.c	/^JSON_Array * json_object_dotget_array(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_boolean	parson.c	/^int json_object_dotget_boolean(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_number	parson.c	/^double json_object_dotget_number(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_object	parson.c	/^JSON_Object * json_object_dotget_object(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_string	parson.c	/^const char * json_object_dotget_string(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_value	parson.c	/^JSON_Value * json_object_dotget_value(const JSON_Object *object, const char *name) {$/;"	f
+json_object_free	parson.c	/^static void json_object_free(JSON_Object *object) {$/;"	f	file:
+json_object_get_array	parson.c	/^JSON_Array * json_object_get_array(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_boolean	parson.c	/^int json_object_get_boolean(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_count	parson.c	/^size_t json_object_get_count(const JSON_Object *object) {$/;"	f
+json_object_get_name	parson.c	/^const char * json_object_get_name(const JSON_Object *object, size_t index) {$/;"	f
+json_object_get_number	parson.c	/^double json_object_get_number(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_object	parson.c	/^JSON_Object * json_object_get_object(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_string	parson.c	/^const char * json_object_get_string(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_value	parson.c	/^JSON_Value * json_object_get_value(const JSON_Object *object, const char *name) {$/;"	f
+json_object_init	parson.c	/^static JSON_Object * json_object_init(void) {$/;"	f	file:
+json_object_nget_value	parson.c	/^static JSON_Value * json_object_nget_value(const JSON_Object *object, const char *name, size_t n) {$/;"	f	file:
+json_object_resize	parson.c	/^static int json_object_resize(JSON_Object *object, size_t capacity) {$/;"	f	file:
+json_object_t	parson.c	/^struct json_object_t {$/;"	s	file:
+json_parse_file	parson.c	/^JSON_Value * json_parse_file(const char *filename) {$/;"	f
+json_parse_file_with_comments	parson.c	/^JSON_Value * json_parse_file_with_comments(const char *filename) {$/;"	f
+json_parse_string	parson.c	/^JSON_Value * json_parse_string(const char *string) {$/;"	f
+json_parse_string_with_comments	parson.c	/^JSON_Value * json_parse_string_with_comments(const char *string) {$/;"	f
+json_value_free	parson.c	/^void json_value_free(JSON_Value *value) {$/;"	f
+json_value_get_array	parson.c	/^JSON_Array * json_value_get_array(const JSON_Value *value) {$/;"	f
+json_value_get_boolean	parson.c	/^int json_value_get_boolean(const JSON_Value *value) {$/;"	f
+json_value_get_number	parson.c	/^double json_value_get_number(const JSON_Value *value) {$/;"	f
+json_value_get_object	parson.c	/^JSON_Object * json_value_get_object(const JSON_Value *value) {$/;"	f
+json_value_get_string	parson.c	/^const char * json_value_get_string(const JSON_Value *value) {$/;"	f
+json_value_get_type	parson.c	/^JSON_Value_Type json_value_get_type(const JSON_Value *value) {$/;"	f
+json_value_init_array	parson.c	/^static JSON_Value * json_value_init_array(void) {$/;"	f	file:
+json_value_init_boolean	parson.c	/^static JSON_Value * json_value_init_boolean(int boolean) {$/;"	f	file:
+json_value_init_null	parson.c	/^static JSON_Value * json_value_init_null(void) {$/;"	f	file:
+json_value_init_number	parson.c	/^static JSON_Value * json_value_init_number(double number) {$/;"	f	file:
+json_value_init_object	parson.c	/^static JSON_Value * json_value_init_object(void) {$/;"	f	file:
+json_value_init_string	parson.c	/^static JSON_Value * json_value_init_string(const char *string) {$/;"	f	file:
+json_value_t	parson.c	/^struct json_value_t {$/;"	s	file:
+json_value_type	parson.h	/^typedef enum json_value_type {$/;"	g
+json_value_value	parson.c	/^typedef union json_value_value {$/;"	u	file:
+keepalive_time	main.c	/^static int keepalive_time = DEFAULT_KEEPALIVE; \/* send a PULL_DATA request every X seconds, negative = disabled *\/$/;"	v	file:
+lat	main.c	/^static float lat=0.0;$/;"	v	file:
+lgw_spi_open	radio.c	/^int lgw_spi_open(char *spi_path) {$/;"	f
+lgw_spi_r	radio.c	/^static int lgw_spi_r(uint8_t spidev, uint8_t address, uint8_t *data) {$/;"	f	file:
+lgw_spi_w	radio.c	/^static int lgw_spi_w(uint8_t spidev, uint8_t address, uint8_t data) {$/;"	f	file:
+lgwm	main.c	/^static uint64_t lgwm = 0; \/* Lora gateway MAC address *\/$/;"	v	file:
+lockfile	main.c	/^static int lockfile(int fd)$/;"	f	file:
+lon	main.c	/^static float lon=0.0;$/;"	v	file:
+main	main.c	/^int main(int argc, char *argv[])$/;"	f
+meas_dw_ack_rcv	main.c	/^static uint32_t meas_dw_ack_rcv = 0; \/* number of PULL requests acknowledged for downstream traffic *\/$/;"	v	file:
+meas_dw_dgram_rcv	main.c	/^static uint32_t meas_dw_dgram_rcv = 0; \/* count PULL response packets received for downstream traffic *\/$/;"	v	file:
+meas_dw_network_byte	main.c	/^static uint32_t meas_dw_network_byte = 0; \/* sum of UDP bytes sent for upstream traffic *\/$/;"	v	file:
+meas_dw_payload_byte	main.c	/^static uint32_t meas_dw_payload_byte = 0; \/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v	file:
+meas_dw_pull_sent	main.c	/^static uint32_t meas_dw_pull_sent = 0; \/* number of PULL requests sent for downstream traffic *\/$/;"	v	file:
+meas_nb_rx_bad	main.c	/^static uint32_t meas_nb_rx_bad = 0; \/* count packets received with PAYLOAD CRC ERROR *\/$/;"	v	file:
+meas_nb_rx_nocrc	main.c	/^static uint32_t meas_nb_rx_nocrc = 0; \/* count packets received with NO PAYLOAD CRC *\/$/;"	v	file:
+meas_nb_rx_ok	main.c	/^static uint32_t meas_nb_rx_ok = 0; \/* count packets received with PAYLOAD CRC OK *\/$/;"	v	file:
+meas_nb_rx_rcv	main.c	/^static uint32_t meas_nb_rx_rcv = 0; \/* count packets received *\/$/;"	v	file:
+meas_nb_tx_fail	main.c	/^static uint32_t meas_nb_tx_fail = 0; \/* count packets were TX failed for other reasons *\/$/;"	v	file:
+meas_nb_tx_ok	main.c	/^static uint32_t meas_nb_tx_ok = 0; \/* count packets emitted successfully *\/$/;"	v	file:
+meas_up_ack_rcv	main.c	/^static uint32_t meas_up_ack_rcv = 0; \/* number of datagrams acknowledged for upstream traffic *\/$/;"	v	file:
+meas_up_dgram_sent	main.c	/^static uint32_t meas_up_dgram_sent = 0; \/* number of datagrams sent for upstream traffic *\/$/;"	v	file:
+meas_up_network_byte	main.c	/^static uint32_t meas_up_network_byte = 0; \/* sum of UDP bytes sent for upstream traffic *\/$/;"	v	file:
+meas_up_payload_byte	main.c	/^static uint32_t meas_up_payload_byte = 0; \/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v	file:
+meas_up_pkt_fwd	main.c	/^static uint32_t meas_up_pkt_fwd = 0; \/* number of radio packet forwarded to the server *\/$/;"	v	file:
+modulation	radio.h	/^    uint8_t     modulation;     \/*!> modulation to use for the packet *\/$/;"	m	struct:pkt_tx_s
+mx_concent	main.c	/^static pthread_mutex_t mx_concent = PTHREAD_MUTEX_INITIALIZER; \/* control access to the concentrator *\/$/;"	v	file:
+mx_meas_dw	main.c	/^static pthread_mutex_t mx_meas_dw = PTHREAD_MUTEX_INITIALIZER; \/* control access to the downstream measurements *\/$/;"	v	file:
+mx_meas_up	main.c	/^static pthread_mutex_t mx_meas_up = PTHREAD_MUTEX_INITIALIZER; \/* control access to the upstream measurements *\/$/;"	v	file:
+names	parson.c	/^    const char **names;$/;"	m	struct:json_object_t	file:
+net_mac_h	main.c	/^static uint32_t net_mac_h; \/* Most Significant Nibble, network order *\/$/;"	v	file:
+net_mac_l	main.c	/^static uint32_t net_mac_l; \/* Least Significant Nibble, network order *\/$/;"	v	file:
+no_crc	radio.h	/^    bool        no_crc;         \/*!> if true, do not send a CRC in the packet *\/$/;"	m	struct:pkt_tx_s
+no_header	radio.h	/^    bool        no_header;      \/*!> if true, enable implicit header mode (LoRa), fixed length (FSK) *\/$/;"	m	struct:pkt_tx_s
+nss	radio.h	/^    uint8_t nss;$/;"	m	struct:__anon2
+null	parson.c	/^    int          null;$/;"	m	union:json_value_value	file:
+number	parson.c	/^    double       number;$/;"	m	union:json_value_value	file:
+object	parson.c	/^    JSON_Object *object;$/;"	m	union:json_value_value	file:
+opmode	radio.c	/^static void opmode (uint8_t spidev, uint8_t mode) {$/;"	f	file:
+opmodeLora	radio.c	/^static void opmodeLora(uint8_t spidev) {$/;"	f	file:
+parse_array_value	parson.c	/^static JSON_Value * parse_array_value(const char **string, size_t nesting) {$/;"	f	file:
+parse_boolean_value	parson.c	/^static JSON_Value * parse_boolean_value(const char **string) {$/;"	f	file:
+parse_null_value	parson.c	/^static JSON_Value * parse_null_value(const char **string) {$/;"	f	file:
+parse_number_value	parson.c	/^static JSON_Value * parse_number_value(const char **string) {$/;"	f	file:
+parse_object_value	parson.c	/^static JSON_Value * parse_object_value(const char **string, size_t nesting) {$/;"	f	file:
+parse_string_value	parson.c	/^static JSON_Value * parse_string_value(const char **string) {$/;"	f	file:
+parse_value	parson.c	/^static JSON_Value * parse_value(const char **string, size_t nesting) {$/;"	f	file:
+parson_free	parson.c	43;"	d	file:
+parson_malloc	parson.c	42;"	d	file:
+parson_parson_h	parson.h	25;"	d
+parson_realloc	parson.c	44;"	d	file:
+parson_strndup	parson.c	/^static char * parson_strndup(const char *string, size_t n) {$/;"	f	file:
+payload	radio.h	/^    uint8_t     payload[128];   \/*!> buffer containing the payload *\/$/;"	m	struct:pkt_tx_s
+payload	radio.h	/^    uint8_t     payload[128]; \/*!> buffer containing the payload *\/$/;"	m	struct:pkt_rx_s
+pkt_alloc	main.c	/^static struct pkt_rx_s *pkt_alloc(void) {$/;"	f	file:
+pkt_rx_s	radio.h	/^struct pkt_rx_s {$/;"	s
+pkt_tx_s	radio.h	/^struct pkt_tx_s {$/;"	s
+pktdebug	main.c	/^static char pktdebug[4] = "yes";          \/* debug info option *\/$/;"	v	file:
+pktrx	main.c	/^static struct pkt_rx_s pktrx[QUEUESIZE]; \/* allocat queuesize struct of pkt_rx_s *\/$/;"	v	typeref:struct:pkt_rx_s	file:
+pktrx_clean	main.c	/^static void pktrx_clean(struct pkt_rx_s *rx) {$/;"	f	file:
+platform	main.c	/^static char platform[16] = "LG02\/OLG02";  \/* platform definition *\/$/;"	v	file:
+port	main.c	/^static char port[8] = "port"; \/* server port for upstream traffic *\/$/;"	v	file:
+preamble	radio.h	/^    uint16_t    preamble;       \/*!> set the preamble length, 0 for default *\/$/;"	m	struct:pkt_tx_s
+prev	main.c	/^static int pt = 0, prev = 0;  \/* pt is point of receive packet postion,  prev is point of process packet thread*\/$/;"	v	file:
+prlen	radio.h	/^    uint8_t prlen;$/;"	m	struct:__anon2
+pt	main.c	/^static int pt = 0, prev = 0;  \/* pt is point of receive packet postion,  prev is point of process packet thread*\/$/;"	v	file:
+pull_timeout	main.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+push_timeout_half	main.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+quit_sig	main.c	/^volatile bool quit_sig = false; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v
+radiodev	radio.h	/^}radiodev; $/;"	t	typeref:struct:__anon2
+readReg	radio.c	/^static uint8_t readReg(uint8_t spidev, uint8_t addr)$/;"	f	file:
+read_file	parson.c	/^static char * read_file(const char * filename) {$/;"	f	file:
+received	radio.c	/^bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {$/;"	f
+remove_comments	parson.c	/^static void remove_comments(char *string, const char *start_token, const char *end_token) {$/;"	f	file:
+rf_chain	radio.h	/^    uint8_t     rf_chain;       \/*!> through which RF chain will the packet be sent *\/$/;"	m	struct:pkt_tx_s
+rf_power	radio.h	/^    int8_t      rf_power;       \/*!> TX power, in dBm *\/$/;"	m	struct:pkt_tx_s
+rssi	radio.h	/^    float       rssi;         \/*!> average packet RSSI in dB *\/$/;"	m	struct:pkt_rx_s
+rst	radio.h	/^    uint8_t rst;$/;"	m	struct:__anon2
+rx_freq	main.c	/^static char rx_freq[16] = "rx_freq";    \/* rx frequency of radio *\/$/;"	v	file:
+rxbw	main.c	/^static char rxbw[8] = "RXBW";$/;"	v	file:
+rxcr	main.c	/^static char rxcr[8] = "RXCR";$/;"	v	file:
+rxdev	main.c	/^radiodev *rxdev;$/;"	v
+rxlora	radio.c	/^void rxlora(int spidev, uint8_t rxmode)$/;"	f
+rxlorairqmask	radio.c	/^static const uint8_t rxlorairqmask[] = {$/;"	v	file:
+rxprlen	main.c	/^static char rxprlen[8] = "RXPRLEN";$/;"	v	file:
+rxsf	main.c	/^static char rxsf[8] = "RXSF";$/;"	v	file:
+selectreceiver	radio.c	/^static void selectreceiver(int pin)$/;"	f	file:
+serv_port_down	main.c	/^static char serv_port_down[8] = "1700"; \/* server port for downstream traffic *\/$/;"	v	file:
+serv_port_up	main.c	/^static char serv_port_up[8] = "1700"; \/* server port for downstream traffic *\/$/;"	v	file:
+server	main.c	/^static char server[64] = "server"; \/* address of the server (host name or IPv4\/IPv6) *\/$/;"	v	file:
+setcr	radio.c	/^void setcr(uint8_t spidev, int denominator)$/;"	f
+setfreq	radio.c	/^void setfreq(uint8_t spidev, long frequency)$/;"	f
+setprlen	radio.c	/^void setprlen(uint8_t spidev, long length)$/;"	f
+setsbw	radio.c	/^void setsbw(uint8_t spidev, long sbw)$/;"	f
+setsf	radio.c	/^void setsf(uint8_t spidev, int sf)$/;"	f
+setsyncword	radio.c	/^void setsyncword(uint8_t spidev, int sw)$/;"	f
+setup_channel	radio.c	/^void setup_channel(radiodev *radiodev)$/;"	f
+sf	radio.h	/^    uint8_t sf;$/;"	m	struct:__anon2
+sf_t	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	g
+sig_handler	main.c	/^static void sig_handler(int sigio) {$/;"	f	file:
+size	radio.h	/^    uint16_t    size;           \/*!> payload size in bytes *\/$/;"	m	struct:pkt_tx_s
+size	radio.h	/^    uint16_t    size;         \/*!> payload size in bytes *\/ $/;"	m	struct:pkt_rx_s
+sizeof_token	parson.c	37;"	d	file:
+skip_char	parson.c	38;"	d	file:
+skip_quotes	parson.c	/^static void skip_quotes(const char **string) {$/;"	f	file:
+skip_whitespaces	parson.c	39;"	d	file:
+snr	radio.h	/^    float       snr;          \/*!> average packet SNR, in dB (LoRa only) *\/$/;"	m	struct:pkt_rx_s
+sock_down	main.c	/^static int sock_down; \/* socket for downstream traffic *\/$/;"	v	file:
+sock_stat	main.c	/^static int sock_stat; \/* socket for upstream traffic *\/$/;"	v	file:
+sock_up	main.c	/^static int sock_up; \/* socket for upstream traffic *\/$/;"	v	file:
+spiport	radio.h	/^    uint8_t  spiport;$/;"	m	struct:__anon2
+stat_interval	main.c	/^static unsigned stat_interval = DEFAULT_STAT; \/* time interval (in sec) at which statistics are collected and displayed *\/$/;"	v	file:
+string	parson.c	/^    const char  *string;$/;"	m	union:json_value_value	file:
+thread_down	main.c	/^void thread_down(void) {$/;"	f
+thread_rec	main.c	/^void thread_rec(void) {$/;"	f
+thread_up	main.c	/^void thread_up(void) {$/;"	f
+try_realloc	parson.c	/^static int try_realloc(void **ptr, size_t new_size) {$/;"	f	file:
+tx_freq	main.c	/^static char tx_freq[16] = "tx_freq";    \/* tx frequency of radio *\/$/;"	v	file:
+tx_mode	radio.h	/^    uint8_t     tx_mode;        \/*!> select on what event\/time the TX is triggered *\/$/;"	m	struct:pkt_tx_s
+txbw	main.c	/^static char txbw[8] = "TXBW";$/;"	v	file:
+txcr	main.c	/^static char txcr[8] = "TXCR";$/;"	v	file:
+txdev	main.c	/^radiodev *txdev;$/;"	v
+txlora	radio.c	/^void txlora(uint8_t spidev, uint8_t *frame, uint8_t framelen) {$/;"	f
+txprlen	main.c	/^static char txprlen[8] = "TXPRLEN";$/;"	v	file:
+txsf	main.c	/^static char txsf[8] = "TXSF";$/;"	v	file:
+type	parson.c	/^    JSON_Value_Type     type;$/;"	m	struct:json_value_t	file:
+unselectreceiver	radio.c	/^static void unselectreceiver(int pin)$/;"	f	file:
+value	parson.c	/^    JSON_Value_Value    value;$/;"	m	struct:json_value_t	file:
+values	parson.c	/^    JSON_Value **values;$/;"	m	struct:json_object_t	file:
+wait_ms	main.c	/^static void wait_ms(unsigned long a) {$/;"	f	file:
+writeReg	radio.c	/^static void writeReg(uint8_t spidev, uint8_t addr, uint8_t value)$/;"	f	file:

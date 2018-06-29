@@ -88,7 +88,7 @@ uci set dhcp.lan.dhcp_option="1,$OPTION_SUBNET  3,$OPTION_ROUTER  6,$OPTION_DNS,
 VENDOR=`uci get secn.modem.vendor`
 PRODUCT=`uci get secn.modem.product`
 # Create the new usb-serial file
-rm /etc/modules.d/60-usb-serial
+rm -rf /etc/modules.d/60-usb-serial
 if [ ! -z $VENDOR ] && [ ! -z $PRODUCT ]; then
 cat >> /etc/modules.d/60-usb-serial << EOF
 usbserial vendor=0x$VENDOR product=0x$PRODUCT

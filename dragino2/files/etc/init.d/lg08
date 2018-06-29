@@ -5,35 +5,28 @@ START=98
 
 start()
 {
-    stop_lg08
+    stop_lg02
     sleep 1
-    reset_pin
-    start_lg08
+    start_lg02
 }
 
 stop() {
-    stop_lg08
+    stop_lg02
 }
 
 restart() {
-    stop_lg08
+    stop_lg02
     sleep 1
-    reset_pin
-    start_lg08
+    start_lg02
 }
 
-reset_pin() {
-    /usr/bin/reset_lgw.sh stop
-    /usr/bin/reset_lgw.sh start
+start_lg02() {
+    /usr/bin/lg02_pkt_fwd 
 }
 
-start_lg08() {
-    /usr/bin/lora_pkt_fwd 2>&1 > /var/log/gw_debug.log & 
-}
-
-stop_lg08() {
-    lorapid=`ps w| grep lora_pkt_fwd | grep -v grep | awk '{print $1}'`
+stop_lg02() {
+    lorapid=`ps w| grep lg02_pkt_fwd | grep -v grep | awk '{print $1}'`
 	if [[ ! -z "$lorapid" ]]; then 
-		killall lora_pkt_fwd
+		killall lg02_pkt_fwd
 	fi
 }

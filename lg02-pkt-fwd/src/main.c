@@ -85,11 +85,11 @@ static char serv_port_down[8] = "1700"; /* server port for downstream traffic */
 static char serv_port_up[8] = "1700"; /* server port for downstream traffic */
 static int keepalive_time = DEFAULT_KEEPALIVE; /* send a PULL_DATA request every X seconds, negative = disabled */
 static char platform[16] = "LG02/OLG02";  /* platform definition */
-static char description[16] = "";                        /* used for free form description */
-static char email[32]  = "mail";                        /* used for contact email */
-static char LAT[16] = "lati";
-static char LON[16] = "long";
-static char gatewayid[64] = "gateway_id";
+static char description[16] = "DESC";                        /* used for free form description */
+static char email[32]  = "email";                        /* used for contact email */
+static char LAT[16] = "LAT";
+static char LON[16] = "LON";
+static char gatewayid[64] = "GWID";
 static char rxsf[8] = "RXSF";
 static char txsf[8] = "TXSF";
 static char rxbw[8] = "RXBW";
@@ -98,9 +98,11 @@ static char rxcr[8] = "RXCR";
 static char txcr[8] = "TXCR";
 static char rxprlen[8] = "RXPRLEN";
 static char txprlen[8] = "TXPRLEN";
-static char rx_freq[16] = "rx_freq";    /* rx frequency of radio */
-static char tx_freq[16] = "tx_freq";    /* tx frequency of radio */
-static char pktdebug[4] = "yes";          /* debug info option */
+static char rx_freq[16] = "RXFREQ";            /* rx frequency of radio */
+static char tx_freq[16] = "TXFREQ";            /* tx frequency of radio */
+static char logdebug[4] = "DEB";          /* debug info option */
+
+static int debuglevel = 0;
 
 /* Set location */
 static float lat=0.0;
@@ -289,8 +291,7 @@ static void pktrx_clean(struct pkt_rx_s *rx) {
     memset(rx->payload, 0, sizeof(rx->payload));
 }
 
-static void daemonize(const char *cmd)
-{
+static void daemonize(const char *cmd) {
 	int					i, fd0, fd1, fd2;
 	pid_t				pid;
 	struct rlimit		rl;
@@ -459,12 +460,13 @@ int main(int argc, char *argv[])
     else
         cmd++;
 	
-    //daemonize(cmd);
+    daemonize(cmd);  /* daemon server */
     
     if (already_running()) {
         err_quit("%s has already running\n", cmd);
     }
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 	/* load configuration */
     if (!get_config("general", server, 64)){
         strcpy(server, "52.169.76.203");  /*set default:router.eu.thethings.network*/
@@ -485,7 +487,7 @@ int main(int argc, char *argv[])
     }
 
     if (!get_config("general", gatewayid, 64)){
-        strcpy(gatewayid, "a84041ffff16c21c");  /*set default:router.eu.thethings.network*/
+        strcpy(gatewayid, "a84041ffff16c21c");      /*set default:router.eu.thethings.network*/
         MSG("get option gatewayid=%s\n", gatewayid);
     } 
 
@@ -499,61 +501,65 @@ int main(int argc, char *argv[])
         MSG("get option lon=%s\n", LON);
     }
 
-    /*
-    if (!get_config("general", pfwd_debug, 4)){
-        MSG("get option pfwd_debug=%s", pfwd_debug);
-    }
-    */
-
-    if (!get_config("radio", rxsf, 8)){
-        strcpy(rxsf, "7");
-        MSG("get option rxsf=%s\n", rxsf);
+    if (!get_config("general", logdebug, 4)){
+        MSG("get option logdebug=%s", logdebug);
     }
 
-    if (!get_config("radio", txsf, 8)){
-        strcpy(txsf, "9");
-        MSG("get option txsf=%s\n", txsf);
-    }
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-    if (!get_config("radio", rxcr, 8)){
-        strcpy(rxcr, "5");
-        MSG("get option coderate=%s\n", rxcr);
-    }
-    
-    if (!get_config("radio", txcr, 8)){
-        strcpy(txcr, "5");
-        MSG("get option coderate=%s\n", txcr);
-    }
-
-    if (!get_config("radio", rxbw, 8)){
-        strcpy(rxbw, "125000");
-        MSG("get option rxbw=%s\n", rxbw);
-    }
-
-    if (!get_config("radio", txbw, 8)){
-        strcpy(txbw, "125000");
-        MSG("get option rxbw=%s\n", txbw);
-    }
-
-    if (!get_config("radio", rxprlen, 8)){
-        strcpy(rxprlen, "8");
-        MSG("get option rxbw=%s\n", rxprlen);
-    }
-
-    if (!get_config("radio", txprlen, 8)){
-        strcpy(txprlen, "8");
-        MSG("get option rxbw=%s\n", txprlen);
-    }
-
-    if (!get_config("radio", rx_freq, 16)){
+    if (!get_config("radio1", rx_freq, 16)){
         strcpy(rx_freq, "868100000"); /* default frequency*/
         MSG("get option rxfreq=%s ", rx_freq);
     }
 
-    if (!get_config("radio", tx_freq, 16)){
+    if (!get_config("radio1", rxsf, 8)){
+        strcpy(rxsf, "7");
+        MSG("get option rxsf=%s\n", rxsf);
+    }
+
+    if (!get_config("radio1", rxcr, 8)){
+        strcpy(rxcr, "5");
+        MSG("get option coderate=%s\n", rxcr);
+    }
+    
+    if (!get_config("radio1", rxbw, 8)){
+        strcpy(rxbw, "125000");
+        MSG("get option rxbw=%s\n", rxbw);
+    }
+
+    if (!get_config("radio1", rxprlen, 8)){
+        strcpy(rxprlen, "8");
+        MSG("get option rxprlen=%s\n", rxprlen);
+    }
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+    if (!get_config("radio2", tx_freq, 16)){
         strcpy(tx_freq, "869525000"); /* default frequency*/
         MSG("get option txfreq=%s\n", tx_freq);
     }
+
+    if (!get_config("radio2", txsf, 8)){
+        strcpy(txsf, "9");
+        MSG("get option txsf=%s\n", txsf);
+    }
+
+    if (!get_config("radio2", txcr, 8)){
+        strcpy(txcr, "5");
+        MSG("get option coderate=%s\n", txcr);
+    }
+
+    if (!get_config("radio2", txbw, 8)){
+        strcpy(txbw, "125000");
+        MSG("get option rxbw=%s\n", txbw);
+    }
+
+    if (!get_config("radio2", txprlen, 8)){
+        strcpy(txprlen, "8");
+        MSG("get option txprlen=%s\n", txprlen);
+    }
+
+    debuglevel = atoi(logdebug);
 
     lat = atof(LAT);
     lon = atof(LON);
@@ -561,12 +567,14 @@ int main(int argc, char *argv[])
     sscanf(gatewayid, "%llx", &ull);
     lgwm = ull;
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     /* init the queue of receive packets */
     for (i = 0; i < QUEUESIZE; i++) {  
         pktrx_clean(&pktrx[i]);
     }
 	
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     /* radio device init */
 
     rxdev = (radiodev *) malloc(sizeof(radiodev));
@@ -587,11 +595,12 @@ int main(int argc, char *argv[])
     rxdev->sf = atoi(rxsf);
     rxdev->bw = atol(rxbw);
     rxdev->cr = atoi(rxcr);
-    rxdev->crc = 1;
+    rxdev->crc = 1;  /* crc check */
     rxdev->prlen = atoi(rxprlen);
     rxdev->invertio = 0;
     strcpy(rxdev->desc, "RXRF");
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     txdev->nss = 24;
     txdev->rst = 23;
     txdev->dio[0] = 22;
@@ -613,6 +622,8 @@ int main(int argc, char *argv[])
 
     MSG("RX struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->spiport, rxdev->freq, rxdev->sf);
     MSG("TX struct: spiport=%d, freq=%ld, sf=%d\n", txdev->spiport, txdev->freq, txdev->sf);
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if(get_radio_version(rxdev) == false) 
         goto clean;
@@ -917,9 +928,11 @@ void thread_rec(void) {
             digitalWrite(rxdev->dio[0], 0);
             printf("Catch RXDONE, receive = %s\n", pktrx[pt].empty ? "Ready" : "Full");
             if (pktrx[pt].empty) {
-                if (received(rxdev->spiport, &pktrx[pt]) == true) 
+                if (received(rxdev->spiport, &pktrx[pt]) == true) {
+                    txlora(txdev->spiport, pktrx[pt].payload, pktrx[pt].size); /* trunking */
                     if (++pt >= QUEUESIZE)
                         pt = 0;
+                }
             }
 
             wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */

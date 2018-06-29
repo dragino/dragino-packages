@@ -19,7 +19,7 @@ restart_service() {
 
 run_restart_lora_fwd()
 {
-    loraid=`ps w| grep lora_pkt_fwd | grep -v grep | awk '{print $1}'`
+    loraid=`ps w| grep lg02_pkt_fwd | grep -v grep | awk '{print $1}'`
     if [[ -z "$loraid" ]]; then
         /etc/init.d/lg08 restart
     fi

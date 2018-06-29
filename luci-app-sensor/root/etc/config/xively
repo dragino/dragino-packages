@@ -1,4 +1,0 @@
-
-config settings 'general'
-	option update_interval '60'
-

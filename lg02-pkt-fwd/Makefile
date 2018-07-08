@@ -14,12 +14,13 @@ define Package/$(PKG_NAME)
 	SECTION:=utils
 	CATEGORY:=Utilities
 	TITLE:=$(PKG_NAME)
-	MAINTAINER:=Mazilo <myEmail.add>
+	MAINTAINER:=Dragino <support@dragino.com>
 	DEPENDS:=+libuci +libpthread +librt
 endef
 
 define Package/$(PKG_NAME)/description
-	Lora singe packeage forward
+	LoRa dual channels packet forwarder
+	For Dragino LG02/OLG02
 endef
 
 CONFIGURE_VARS+= \

@@ -923,20 +923,20 @@ clean:
 void thread_rec(void) {
     rxlora(rxdev->spiport, RXMODE_SCAN);
     MSG("Listening at SF%i on %.6lf Mhz. port%i\n", rxdev->sf, (double)(rxdev->freq)/1000000, rxdev->spiport);
-	while (!exit_sig && !quit_sig) {
-        if(digitalRead(rxdev->dio[0]) == 1) {
-            digitalWrite(rxdev->dio[0], 0);
-            printf("Catch RXDONE, receive = %s\n", pktrx[pt].empty ? "Ready" : "Full");
-            if (pktrx[pt].empty) {
-                if (received(rxdev->spiport, &pktrx[pt]) == true) {
-                    txlora(txdev->spiport, pktrx[pt].payload, pktrx[pt].size); /* trunking */
-                    if (++pt >= QUEUESIZE)
-                        pt = 0;
-                }
+    while (!exit_sig && !quit_sig) {
+    if(digitalRead(rxdev->dio[0]) == 1) {
+        digitalWrite(rxdev->dio[0], 0);
+        printf("Catch RXDONE, receive = %s\n", pktrx[pt].empty ? "Ready" : "Full");
+        if (pktrx[pt].empty) {
+            if (received(rxdev->spiport, &pktrx[pt]) == true) {
+                txlora(txdev->spiport, pktrx[pt].payload, pktrx[pt].size); /* trunking */
+                if (++pt >= QUEUESIZE)
+                    pt = 0;
             }
-
-            wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
         }
+
+        wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
+    }
     }
 }
 
@@ -982,100 +982,100 @@ void thread_up(void) {
 	
 	while (!exit_sig && !quit_sig) {
 
-        //MSG("INFO: [up] loop...\n");
-		/* fetch packets */
+            //MSG("INFO: [up] loop...\n");
+                    /* fetch packets */
 
-        if (pktrx[prev].empty) {
-            if (++prev >= QUEUESIZE)
+            if (pktrx[prev].empty) {
+                if (++prev >= QUEUESIZE)
+                    prev = 0;
+
+                wait_ms(FETCH_SLEEP_MS); /* wait a short time if no packets */
+                continue;
+            }
+
+                    /* local timestamp generation until we get accurate GPS time */
+                    clock_gettime(CLOCK_REALTIME, &fetch_time);
+                    x = gmtime(&(fetch_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
+                    snprintf(fetch_timestamp, sizeof fetch_timestamp, "%04i-%02i-%02iT%02i:%02i:%02i.%06liZ", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (fetch_time.tv_nsec)/1000); /* ISO 8601 format */
+                    
+            /* get timestamp for statistics */
+            struct timeval now;
+            gettimeofday(&now, NULL);
+            uint32_t tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
+
+            /* start composing datagram with the header */
+            token_h = (uint8_t)rand(); /* random token */
+            token_l = (uint8_t)rand(); /* random token */
+            buff_up[1] = token_h;
+            buff_up[2] = token_l;
+            buff_index = 12; /* 12-byte header */
+
+            j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"tmst\":%u,\"time\":\"%s\",\"chan\":7,\"rfch\":0,\"freq\":%u,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", tmst, fetch_timestamp, (double)(rxdev->freq)/1000000, rxdev->sf, rxcr);
+    
+            buff_index += j;
+
+            j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%f,\"size\":%u", pktrx[prev].rssi, pktrx[prev].size);
+                    
+            buff_index += j;
+
+            memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9);
+                    buff_index += 9;
+                    
+            j = bin_to_b64((uint8_t *)pktrx[prev].payload, pktrx[prev].size, (char *)(buff_up + buff_index), 341); /* 255 bytes = 340 chars in b64 + null char */
+
+            buff_index += j;
+            buff_up[buff_index] = '"';
+            ++buff_index;
+            buff_up[buff_index] = '}';
+            ++buff_index;
+            buff_up[buff_index] = ']';
+            ++buff_index;
+            buff_up[buff_index] = '}';
+            ++buff_index;
+            buff_up[buff_index] = '\0'; /* add string terminator, for safety */
+                    
+            MSG("\nINFO (JSON): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+                
+            /* send datagram to server */
+            send(sock_up, (void *)buff_up, buff_index, 0);
+            clock_gettime(CLOCK_MONOTONIC, &send_time);
+            pthread_mutex_lock(&mx_meas_up);
+            meas_up_dgram_sent += 1;
+            meas_up_network_byte += buff_index;
+            
+            /* wait for acknowledge (in 2 times, to catch extra packets) */
+            for (i=0; i<2; ++i) {
+                    j = recv(sock_up, (void *)buff_ack, sizeof buff_ack, 0);
+                    clock_gettime(CLOCK_MONOTONIC, &recv_time);
+                    if (j == -1) {
+                        if (errno == EAGAIN) { /* timeout */
+                                continue;
+                        } else { /* server connection error */
+                                break;
+                        }
+                    } else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
+                        //MSG("WARNING: [up] ignored invalid non-ACL packet\n");
+                        continue;
+                    } else if ((buff_ack[1] != token_h) || (buff_ack[2] != token_l)) {
+                        //MSG("WARNING: [up] ignored out-of sync ACK packet\n");
+                        continue;
+                    } else {
+                        MSG("INFO: [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                        meas_up_ack_rcv += 1;
+                        break;
+                    }
+            }
+            pthread_mutex_unlock(&mx_meas_up);
+
+            /* clear a packet */
+
+            pktrx_clean(&pktrx[prev]);
+
+            if (++prev <= QUEUESIZE)
                 prev = 0;
 
-            wait_ms(FETCH_SLEEP_MS); /* wait a short time if no packets */
-            continue;
-        }
-
-		/* local timestamp generation until we get accurate GPS time */
-		clock_gettime(CLOCK_REALTIME, &fetch_time);
-		x = gmtime(&(fetch_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
-		snprintf(fetch_timestamp, sizeof fetch_timestamp, "%04i-%02i-%02iT%02i:%02i:%02i.%06liZ", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (fetch_time.tv_nsec)/1000); /* ISO 8601 format */
-		
-        /* get timestamp for statistics */
-        struct timeval now;
-        gettimeofday(&now, NULL);
-        uint32_t tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
-
-		/* start composing datagram with the header */
-		token_h = (uint8_t)rand(); /* random token */
-		token_l = (uint8_t)rand(); /* random token */
-		buff_up[1] = token_h;
-		buff_up[2] = token_l;
-		buff_index = 12; /* 12-byte header */
-
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"tmst\":%u,\"time\":\"%s\",\"chan\":7,\"rfch\":0,\"freq\":%u,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", tmst, fetch_timestamp, rxdev->freq, rxdev->sf, rxcr);
-    
-        buff_index += j;
-
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%f,\"size\":%u", pktrx[prev].rssi, pktrx[prev].size);
-		
-        buff_index += j;
-
-        memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9);
-		buff_index += 9;
-		
-        j = bin_to_b64((uint8_t *)pktrx[prev].payload, pktrx[prev].size, (char *)(buff_up + buff_index), 341); /* 255 bytes = 340 chars in b64 + null char */
-
-        buff_index += j;
-        buff_up[buff_index] = '"';
-        ++buff_index;
-        buff_up[buff_index] = '}';
-        ++buff_index;
-        buff_up[buff_index] = ']';
-        ++buff_index;
-        buff_up[buff_index] = '}';
-        ++buff_index;
-        buff_up[buff_index] = '\0'; /* add string terminator, for safety */
-		
-	    MSG("\nINFO (JSON): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
-		
-		/* send datagram to server */
-		send(sock_up, (void *)buff_up, buff_index, 0);
-		clock_gettime(CLOCK_MONOTONIC, &send_time);
-		pthread_mutex_lock(&mx_meas_up);
-		meas_up_dgram_sent += 1;
-		meas_up_network_byte += buff_index;
-		
-		/* wait for acknowledge (in 2 times, to catch extra packets) */
-		for (i=0; i<2; ++i) {
-			j = recv(sock_up, (void *)buff_ack, sizeof buff_ack, 0);
-			clock_gettime(CLOCK_MONOTONIC, &recv_time);
-			if (j == -1) {
-				if (errno == EAGAIN) { /* timeout */
-					continue;
-				} else { /* server connection error */
-					break;
-				}
-			} else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
-				//MSG("WARNING: [up] ignored invalid non-ACL packet\n");
-				continue;
-			} else if ((buff_ack[1] != token_h) || (buff_ack[2] != token_l)) {
-				//MSG("WARNING: [up] ignored out-of sync ACK packet\n");
-				continue;
-			} else {
-				MSG("INFO: [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
-				meas_up_ack_rcv += 1;
-				break;
-			}
-		}
-		pthread_mutex_unlock(&mx_meas_up);
-
-        /* clear a packet */
-
-        pktrx_clean(&pktrx[prev]);
-
-        if (++prev <= QUEUESIZE)
-            prev = 0;
-
-        wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
-        //MSG("INFO: [up]return loop\n");
+            wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
+            //MSG("INFO: [up]return loop\n");
 	}
 	MSG("\nINFO: End of upstream thread\n");
 }

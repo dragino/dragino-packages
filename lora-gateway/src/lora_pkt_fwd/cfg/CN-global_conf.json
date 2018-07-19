@@ -7,83 +7,75 @@
 		"antenna_gain_desc": "antenna gain, in dBi",
 		"radio_0": {
 			"enable": true,
-			"type": "SX1257",
-			"freq": 867500000,
-			"rssi_offset": -166.0,
+			"type": "SX1255",
+			"freq": 486600000,
+			"rssi_offset": -176.0,
 			"tx_enable": true,
-			"tx_freq_min": 863000000,
-			"tx_freq_max": 870000000
+			"tx_freq_min": 470000000,
+			"tx_freq_max": 510000000
 		},
 		"radio_1": {
 			"enable": true,
-			"type": "SX1257",
-			"freq": 868500000,
-			"rssi_offset": -166.0,
+			"type": "SX1255",
+			"freq": 487400000,
+			"rssi_offset": -176.0,
 			"tx_enable": false
 		},
 		"chan_multiSF_0": {
-			"desc": "Lora MAC, 125kHz, all SF, 868.1 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 487.1 MHz",
 			"enable": true,
 			"radio": 1,
-			"if": -400000
+			"if": -300000
 		},
 		"chan_multiSF_1": {
-			"desc": "Lora MAC, 125kHz, all SF, 868.3 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 487.3 MHz",
 			"enable": true,
 			"radio": 1,
-			"if": -200000
+			"if": -100000
 		},
 		"chan_multiSF_2": {
-			"desc": "Lora MAC, 125kHz, all SF, 868.5 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 487.5 MHz",
 			"enable": true,
 			"radio": 1,
-			"if": 0
+			"if": 100000
 		},
 		"chan_multiSF_3": {
-			"desc": "Lora MAC, 125kHz, all SF, 867.1 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 487.7 MHz",
 			"enable": true,
-			"radio": 0,
-			"if": -400000
+			"radio": 1,
+			"if": 300000
 		},
 		"chan_multiSF_4": {
-			"desc": "Lora MAC, 125kHz, all SF, 867.3 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 486.3 MHz",
 			"enable": true,
 			"radio": 0,
-			"if": -200000
+			"if": -300000
 		},
 		"chan_multiSF_5": {
-			"desc": "Lora MAC, 125kHz, all SF, 867.5 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 486.5 MHz",
 			"enable": true,
 			"radio": 0,
-			"if": 0
+			"if": -100000
 		},
 		"chan_multiSF_6": {
-			"desc": "Lora MAC, 125kHz, all SF, 867.7 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 486.7 MHz",
 			"enable": true,
 			"radio": 0,
-			"if": 200000
+			"if": 100000
 		},
 		"chan_multiSF_7": {
-			"desc": "Lora MAC, 125kHz, all SF, 867.9 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 486.9 MHz",
 			"enable": true,
 			"radio": 0,
-			"if": 400000
+			"if": 300000
 		},
 		"chan_Lora_std": {
-			"desc": "Lora MAC, 250kHz, SF7, 868.3 MHz",
-			"enable": true,
-			"radio": 1,
-			"if": -200000,
-			"bandwidth": 250000,
-			"spread_factor": 7
+			"desc": "disabled",
+			"enable": false
 		},
 		"chan_FSK": {
-			"desc": "FSK 50kbps, 868.8 MHz",
-			"enable": true,
-			"radio": 1,
-			"if": 300000,
-			"bandwidth": 125000,
-			"datarate": 50000
+			"desc": "disabled",
+			"enable": false
 		},
 		"tx_lut_0": {
 			"desc": "TX gain table, index 0",
@@ -199,15 +191,14 @@
 		}
 	},
 	"gateway_conf": {
-		"server_address": "router.eu.thethings.network",
+		"server_address": "router.cn.thethings.network",
 		"serv_port_up": 1700,
 		"serv_port_down": 1700,
 		"servers": [ {
-			"server_address": "router.eu.thethings.network",
+			"server_address": "router.cn.thethings.network",
 			"serv_port_up": 1700,
 			"serv_port_down": 1700,
 			"serv_enabled": true
 		} ]
 	}
-
 }

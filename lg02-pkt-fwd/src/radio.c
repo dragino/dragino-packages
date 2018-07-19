@@ -717,7 +717,7 @@ bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
 
         for(i = 0; i < receivedCount; i++) {
             pkt_rx->payload[i] = (char)readReg(spidev, REG_FIFO);
-            printf("%c", pkt_rx->payload[i]);
+            printf("%02x", pkt_rx->payload[i]);
         }
 
         printf("\n");

@@ -865,7 +865,7 @@ void thread_up(void) {
 
         buff_index += j;
 
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%d,\"size\":%u", pktrx[prev].rssi, pktrx[prev].size);
+        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%.1f,\"size\":%u", pktrx[prev].rssi, pktrx[prev].size);
                 
         buff_index += j;
 

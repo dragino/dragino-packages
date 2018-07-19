@@ -168,7 +168,7 @@ static uint32_t autoquit_threshold = 0; /* enable auto-quit after a number of no
 
 static void sig_handler(int sigio);
 
-#define UCI_CONFIG_FILE "/etc/config/lorawan"
+#define UCI_CONFIG_FILE "/etc/config/gateway"
 static struct uci_context * ctx = NULL; 
 static bool get_config(const char *section, char *option, int len);
 
@@ -844,10 +844,10 @@ void thread_up(void) {
                 continue;
             }
 
-                    /* local timestamp generation until we get accurate GPS time */
-                    clock_gettime(CLOCK_REALTIME, &fetch_time);
-                    x = gmtime(&(fetch_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
-                    snprintf(fetch_timestamp, sizeof fetch_timestamp, "%04i-%02i-%02iT%02i:%02i:%02i.%06liZ", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (fetch_time.tv_nsec)/1000); /* ISO 8601 format */
+            /* local timestamp generation until we get accurate GPS time */
+            clock_gettime(CLOCK_REALTIME, &fetch_time);
+            x = gmtime(&(fetch_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
+            snprintf(fetch_timestamp, sizeof fetch_timestamp, "%04i-%02i-%02iT%02i:%02i:%02i.%06liZ", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (fetch_time.tv_nsec)/1000); /* ISO 8601 format */
                     
             /* get timestamp for statistics */
             struct timeval now;
@@ -861,7 +861,7 @@ void thread_up(void) {
             buff_up[2] = token_l;
             buff_index = 12; /* 12-byte header */
 
-            j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"tmst\":%u,\"time\":\"%s\",\"chan\":7,\"rfch\":0,\"freq\":%u,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", tmst, fetch_timestamp, (double)(rxdev->freq)/1000000, rxdev->sf, rxcr);
+            j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"tmst\":%u,\"time\":\"%s\",\"chan\":7,\"rfch\":0,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", tmst, fetch_timestamp, (double)(rxdev->freq)/1000000, rxdev->sf, rxcr);
     
             buff_index += j;
 

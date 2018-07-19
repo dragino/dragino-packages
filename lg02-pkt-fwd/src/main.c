@@ -42,7 +42,7 @@
 #define PULL_TIMEOUT_MS		200
 #define FETCH_SLEEP_MS		10	/* nb of ms waited when a fetch return no packets */
 
-#define	PROTOCOL_VERSION	1
+#define	PROTOCOL_VERSION	2
 
 #define PKT_PUSH_DATA	0
 #define PKT_PUSH_ACK	1
@@ -865,7 +865,7 @@ void thread_up(void) {
 
         buff_index += j;
 
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%u,\"size\":%u", pktrx[prev].rssi, pktrx[prev].size);
+        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%d,\"size\":%u", pktrx[prev].rssi, pktrx[prev].size);
                 
         buff_index += j;
 

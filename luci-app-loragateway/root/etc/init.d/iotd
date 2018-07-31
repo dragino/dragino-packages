@@ -5,10 +5,11 @@ STOP=45
 USE_PROCD=1
 
 init_board() {
-    /usr/bin/spirw
+    rmmod spi-gpio-custom
+    insmod spi-gpio-custom bus0=1,14,16,26,0,8000000,15 bus1=2,18,21,19,0,8000000,24
     sleep 1
+    /usr/bin/spirw
     board=`cat /var/iot/board`
-
     if [[ "$board" = "LG02" ]]; then
         process="lg02_pkt_fwd"
     elif [[ "$board" = "LG08" ]]; then

@@ -1,10 +1,5 @@
 
 config settings 'general'
-	option debug '0'
+	option logdebug '0'
 	option server_type 'general'
-
-config server 'tcp_client'
-	option display '1'
-	option enable '0'
-	option routine_script 'tcp_client.lua'
 

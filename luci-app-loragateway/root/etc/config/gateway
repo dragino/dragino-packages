@@ -1,6 +1,8 @@
 
 config settings 'general'
-	option port '1700'
-    option server_type 'MQTT'
-    option pfwd_debug '0'
+    option port '1700'
+
+config settings 'radio1'
+config settings 'radio2'
+
 

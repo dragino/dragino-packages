@@ -774,23 +774,20 @@ clean:
 void thread_rec(void) {
     rxlora(rxdev->spiport, RXMODE_SCAN);
     MSG("Listening at SF%i on %.6lf Mhz. port%i\n", rxdev->sf, (double)(rxdev->freq)/1000000, rxdev->spiport);
-    struct timeval now;
     while (!exit_sig && !quit_sig) {
-        if(digitalRead(rxdev->dio[0]) == 1) {
-            gettimeofday(&now, NULL);
-            uint32_t tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
-            printf("%u: Catch RXDONE, receive = %s\n", tmst, pktrx[pt].empty ? "Ready" : "Full");
-            if (pktrx[pt].empty) {
-                if (received(rxdev->spiport, &pktrx[pt]) == true) {
-                    //txlora(txdev->spiport, pktrx[pt].payload, pktrx[pt].size); /* trunking */
-                    if (++pt >= QUEUESIZE)
-                        pt = 0;
-                }
+    if(digitalRead(rxdev->dio[0]) == 1) {
+        digitalWrite(rxdev->dio[0], 0);
+        printf("Catch RXDONE, receive = %s\n", pktrx[pt].empty ? "Ready" : "Full");
+        if (pktrx[pt].empty) {
+            if (received(rxdev->spiport, &pktrx[pt]) == true) {
+                txlora(txdev->spiport, pktrx[pt].payload, pktrx[pt].size); /* trunking */
+                if (++pt >= QUEUESIZE)
+                    pt = 0;
             }
-            gettimeofday(&now, NULL);
-            tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
-            printf("%u: REC END dio=%d\n", tmst, digitalRead(rxdev->dio[0]));
         }
+
+        wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
+    }
     }
 }
 
@@ -1001,19 +998,11 @@ void thread_down(void) {
 	token_l = (uint8_t)rand(); /* random token */
 	buff_req[1] = token_h;
 	buff_req[2] = token_l;
-
-        i = 0;
-        for (;;) {
-            wait_ms(5000); /* wait a short time to resend lora data*/
-            sprintf(buff_down, "Retry%d", i++);
-            txlora(txdev->spiport, buff_down, strlen(buff_down));
-        }
-
 	
 	/* send PULL request and record time */
 	send(sock_down, (void *)buff_req, sizeof buff_req, 0);
 	clock_gettime(CLOCK_MONOTONIC, &send_time);
-        //MSG("INFO: [down] send pull_data, %ld\n", send_time.tv_nsec);
+    //MSG("INFO: [down] send pull_data, %ld\n", send_time.tv_nsec);
 	pthread_mutex_lock(&mx_meas_dw);
 	meas_dw_pull_sent += 1;
 	pthread_mutex_unlock(&mx_meas_dw);
@@ -1107,12 +1096,6 @@ void thread_down(void) {
                 printf("%02x", txpkt.payload[i]);
             }
             printf("\n");
-
-            for (i = 1; i < 4; i++) {
-                wait_ms(200); /* wait a short time to resend lora data*/
-                printf("Retry-%d\n", i);
-                txlora(txdev->spiport, txpkt.payload, txpkt.size);
-            }
 
 	    /* free the JSON parse tree from memory */
 	    json_value_free(root_val);

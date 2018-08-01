@@ -776,6 +776,14 @@ void txlora(uint8_t spidev, uint8_t *frame, uint8_t framelen) {
     writeReg(spidev, REG_FIFO_TX_BASE_AD, 0x00);
     writeReg(spidev, REG_FIFO_ADDR_PTR, 0x00);
 
+    /*  
+    int curlen = readReg(spidev, REG_PAYLOAD_LENGTH);
+
+    if ((curlen + framelen) > MAX_PAYLOADLEN) {
+        framelen = MAX_PAYLOADLEN - curlen;
+    }
+    */
+
     // write buffer to the radio FIFO
     for (i = 0; i < framelen; i++) { 
         writeReg(spidev, REG_FIFO, frame[i]);
@@ -783,22 +791,8 @@ void txlora(uint8_t spidev, uint8_t *frame, uint8_t framelen) {
 
     writeReg(spidev, REG_PAYLOAD_LENGTH, framelen);
 
-    printf("Trans: %s\n", (char *)frame);
-
     // now we actually start the transmission
     opmode(spidev, OPMODE_TX);
-
-    // wait for TX done
-    while(digitalRead(txdev->dio[0]) == 1);
-
-    // mask all IRQs
-    writeReg(spidev, REG_IRQ_FLAGS_MASK, 0xFF);
-
-    // clear all radio IRQ flags
-    writeReg(spidev, REG_IRQ_FLAGS, 0xFF);
-
-    // go from stanby to sleep
-    opmode(spidev, OPMODE_SLEEP);
 
 }
 

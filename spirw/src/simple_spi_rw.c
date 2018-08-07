@@ -492,8 +492,6 @@ int main () {
 
     lgw_spi_open();
 
-    mkdir("/var/iot", S_IRWXU);
-
     if ((fp = fopen("/var/iot/board", "w")) < 0) {
         perror("open board");
         close(spidev);

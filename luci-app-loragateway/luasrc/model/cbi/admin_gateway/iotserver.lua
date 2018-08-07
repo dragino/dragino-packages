@@ -1,8 +1,8 @@
 local uci = luci.model.uci.cursor()
 
-m = Map("iot-services", translate("IoT Service"))
+m = Map("gateway", translate("IoT Service"))
 
-s = m:section(NamedSection, "general", "iot-services")
+s = m:section(NamedSection, "general", "gateway")
 local sv = s:option(ListValue, "server_type", translate("IoT Service"))
 sv.placeholder = "Select IoT service"
 sv.default = "lorawan"

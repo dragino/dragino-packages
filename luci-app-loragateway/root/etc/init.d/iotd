@@ -5,11 +5,24 @@ STOP=45
 USE_PROCD=1
 
 init_board() {
+    if [ ! -d /var/iot ]; then 
+        mkdir /var/iot
+    fi
+    if [ ! -d /var/iot/channels ]; then
+        mkdir /var/iot/channels
+    fi
+
     rmmod spi-gpio-custom
     insmod spi-gpio-custom bus0=1,14,16,26,0,8000000,15 bus1=2,18,21,19,0,8000000,24
     sleep 1
+
     /usr/bin/spirw
+
     board=`cat /var/iot/board`
+
+    uci set system.vendor.web_model="$board"
+    uci commit
+
     if [[ "$board" = "LG02" ]]; then
         process="lg02_pkt_fwd"
     elif [[ "$board" = "LG08" ]]; then
@@ -40,5 +53,5 @@ reload_service() {
 
 service_triggers()
 {
-    procd_add_reload_trigger "network" "wireless"
+    procd_add_reload_trigger "network" "wireless" "gateway"
 }

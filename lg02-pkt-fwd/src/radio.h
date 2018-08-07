@@ -7,7 +7,7 @@
  * which accompanies this distribution, and is available at
  * http://www.dragino.com
  *
- */
+*/
 
 #ifndef _RADIO_H
 #define _RADIO_H
@@ -35,6 +35,32 @@
 #include <pthread.h>
 
 #define ASSERT(cond) if(!(cond)) {printf("%s:%d\n", __FILE__, __LINE__); exit(1);}
+
+/* values available for the 'tx_mode' parameter */
+#define IMMEDIATE       0
+#define TIMESTAMPED     1
+#define ON_GPS          2
+
+#define DEBUG_PKT_FWD   0
+#define DEBUG_JIT       1
+#define DEBUG_JIT_ERROR 1
+#define DEBUG_TIMERSYNC 0
+#define DEBUG_BEACON    0
+#define DEBUG_LOG       1
+#define DEBUG_INFO      1
+#define DEBUG_WARNING   1
+#define DEBUG_ERROR     1
+#define DEBUG_GPS       0
+
+#define MSG(args...)	        printf(args) /* message that is destined to the user */
+
+#define MSG_DEBUG(FLAG, fmt, ...)                                                               \
+    do {                                                                                       \
+        if (FLAG)                                                                                 \
+            fprintf(stdout, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
+    } while (0)
+
+#define TRACE() 		fprintf(stderr, "@ %s %d\n", __FUNCTION__, __LINE__);
 
 // ####################################################################
 // Registers Mapping
@@ -178,17 +204,10 @@ struct pkt_tx_s {
     uint32_t    freq_hz;        /*!> center frequency of TX */
     uint8_t     tx_mode;        /*!> select on what event/time the TX is triggered */
     uint32_t    count_us;       /*!> timestamp or delay in microseconds for TX trigger */
-    uint8_t     rf_chain;       /*!> through which RF chain will the packet be sent */
-    int8_t      rf_power;       /*!> TX power, in dBm */
-    uint8_t     modulation;     /*!> modulation to use for the packet */
-    uint8_t     bandwidth;      /*!> modulation bandwidth (LoRa only) */
-    uint32_t    datarate;       /*!> TX datarate (baudrate for FSK, SF for LoRa) */
-    uint8_t     coderate;       /*!> error-correcting code of the packet (LoRa only) */
-    bool        invert_pol;     /*!> invert signal polarity, for orthogonal downlinks (LoRa only) */
-    uint8_t     f_dev;          /*!> frequency deviation, in kHz (FSK only) */
-    uint16_t    preamble;       /*!> set the preamble length, 0 for default */
-    bool        no_crc;         /*!> if true, do not send a CRC in the packet */
-    bool        no_header;      /*!> if true, enable implicit header mode (LoRa), fixed length (FSK) */
+    uint32_t    bw;
+    int8_t      sf;
+    int8_t      cr;
+    uint16_t    prlen;
     uint16_t    size;           /*!> payload size in bytes */
     uint8_t     payload[128];   /*!> buffer containing the payload */
 };
@@ -275,7 +294,7 @@ bool received(uint8_t, struct pkt_rx_s *);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void txlora(uint8_t, uint8_t *, uint8_t); 
+void txlora(radiodev *, uint8_t *, uint8_t); 
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

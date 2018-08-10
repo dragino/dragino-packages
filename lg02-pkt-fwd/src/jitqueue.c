@@ -93,29 +93,39 @@ uint32_t time_on_air(struct pkt_tx_s *packet) {
     }
 
     /* Get bandwidth */
-    BW = (uint16_t)(packet->bw / 1E3);
+    val = bw_getval(packet->bandwidth);
+    if (val != -1) {
+        BW = (uint16_t)(val / 1E3);
+    } else {
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: Cannot compute time on air for this packet, unsupported bandwidth (0x%02X)\n", packet->bandwidth);
+        return 0;
+    }
 
     /* Get datarate */
-    SF = (uint8_t)packet->sf;
+    val = sf_getval(packet->datarate);
+    if (val != -1) {
+        SF = (uint8_t)val;
+    } else {
+        MSG_DEBUG(DEBUG_ERROR, "ERROR: Cannot compute time on air for this packet, unsupported datarate (0x%02X)\n", packet->datarate);
+        return 0;
+    }
 
     /* Duration of 1 symbol */
     Tsym = pow(2, SF) / BW;
 
     /* Duration of preamble */
-    Tpreamble = ((double)(packet->prlen) + 4.25) * Tsym;
+    Tpreamble = ((double)(packet->preamble) + 4.25) * Tsym;
 
     /* Duration of payload */
-    //H = (packet->no_header==false) ? 0 : 1; /* header is always enabled, except for beacons */
-    H = 0;
+    H = (packet->no_header==false) ? 0 : 1; /* header is always enabled, except for beacons */
     DE = (SF >= 11) ? 1 : 0; /* Low datarate optimization enabled for SF11 and SF12 */
 
-    payloadSymbNb = 8 + (ceil((double)(8*packet->size - 4*SF + 28 + 16 - 20*H) / (double)(4*(SF - 2*DE))) * (packet->cr + 4)); /* Explicitely cast to double to keep precision of the division */
+    payloadSymbNb = 8 + (ceil((double)(8*packet->size - 4*SF + 28 + 16 - 20*H) / (double)(4*(SF - 2*DE))) * (packet->coderate)); /* Explicitely cast to double to keep precision of the division */
 
     Tpayload = payloadSymbNb * Tsym;
 
     /* Duration of packet */
     Tpacket = Tpreamble + Tpayload;
-    
 
     return Tpacket;
 }

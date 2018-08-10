@@ -519,12 +519,12 @@ void setsyncword(uint8_t spidev, int sw)
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void crccheck(uint8_t spidev, uint8_t crc)
+void crccheck(uint8_t spidev, uint8_t nocrc)
 {
-    if (crc)
-        writeReg(spidev, REG_MODEM_CONFIG2, readReg(spidev, REG_MODEM_CONFIG2) | 0x04);
-    else
+    if (nocrc)
         writeReg(spidev, REG_MODEM_CONFIG2, readReg(spidev, REG_MODEM_CONFIG2) & 0xfb);
+    else
+        writeReg(spidev, REG_MODEM_CONFIG2, readReg(spidev, REG_MODEM_CONFIG2) | 0x04);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -622,6 +622,7 @@ void setup_channel(radiodev *radiodev)
     setsbw(radiodev->spiport, radiodev->bw);
     setcr(radiodev->spiport, radiodev->cr);
     setprlen(radiodev->spiport, radiodev->prlen);
+    setsyncword(radiodev->spiport, LORA_MAC_PREAMBLE);
 
     /* use inverted I/Q signal (prevent mote-to-mote communication) */
     
@@ -632,7 +633,7 @@ void setup_channel(radiodev *radiodev)
     
 
     /* CRC check */
-    crccheck(radiodev->spiport, radiodev->crc);
+    crccheck(radiodev->spiport, radiodev->nocrc);
 
     // Boost on , 150% LNA current
     writeReg(radiodev->spiport, REG_LNA, LNA_MAX_GAIN);
@@ -714,7 +715,6 @@ bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
             pkt_rx->payload[i] = (char)readReg(spidev, REG_FIFO);
             printf("%02x", pkt_rx->payload[i]);
         }
-
         printf("\n");
 
         uint8_t value = readReg(spidev, REG_PKT_SNR_VALUE);
@@ -745,7 +745,82 @@ bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void txlora(radiodev *radiodev, uint8_t *frame, uint8_t framelen) {
+void txlora(radiodev *radiodev, struct pkt_tx_s *pkt) {
+
+    opmode(radiodev->spiport, OPMODE_SLEEP);
+
+    setfreq(radiodev->spiport, pkt->freq_hz);
+    setsf(radiodev->spiport, sf_getval(pkt->datarate));
+    setsbw(radiodev->spiport, bw_getval(pkt->bandwidth));
+    setcr(radiodev->spiport, pkt->coderate);
+    setprlen(radiodev->spiport, pkt->preamble);
+    setsyncword(radiodev->spiport, LORA_MAC_PREAMBLE);
+
+    /* CRC check */
+    crccheck(radiodev->spiport, pkt->no_crc);
+
+    // Boost on , 150% LNA current
+    writeReg(radiodev->spiport, REG_LNA, LNA_MAX_GAIN);
+
+    // Auto AGC
+    writeReg(radiodev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
+
+    // configure output power,RFO pin Output power is limited to +14db
+    writeReg(radiodev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
+
+    if (pkt->invert_pol)
+        writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) | (1<<6));
+    else
+        writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) & ~(1<<6));
+
+    // select LoRa modem (from sleep mode)
+    opmodeLora(radiodev->spiport);
+
+    ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
+
+    // enter standby mode (required for FIFO loading))
+    opmode(radiodev->spiport, OPMODE_STANDBY);
+
+    // set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP
+    writeReg(radiodev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
+    // clear all radio IRQ flags
+    writeReg(radiodev->spiport, REG_IRQ_FLAGS, 0xFF);
+    // mask all IRQs but TxDone
+    writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, ~IRQ_LORA_TXDONE_MASK);
+
+    // initialize the payload size and address pointers
+    writeReg(radiodev->spiport, REG_FIFO_TX_BASE_AD, 0x00); writeReg(radiodev->spiport, REG_FIFO_ADDR_PTR, 0x00);
+
+    // write buffer to the radio FIFO
+    int i;
+
+    for (i = 0; i < pkt->size; i++) { 
+        writeReg(radiodev->spiport, REG_FIFO, pkt->payload[i]);
+    }
+
+    writeReg(radiodev->spiport, REG_PAYLOAD_LENGTH, pkt->size);
+
+    // now we actually start the transmission
+    opmode(radiodev->spiport, OPMODE_TX);
+
+    // wait for TX done
+    while(digitalRead(radiodev->dio[0]) == 0);
+
+    MSG("\nTransmit at SF%iBW%ld on %.6lf.\n", sf_getval(pkt->datarate), bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000);
+
+    // mask all IRQs
+    writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
+
+    // clear all radio IRQ flags
+    writeReg(radiodev->spiport, REG_IRQ_FLAGS, 0xFF);
+
+    // go from stanby to sleep
+    opmode(radiodev->spiport, OPMODE_SLEEP);
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
 
     // select LoRa modem (from sleep mode)
     opmodeLora(radiodev->spiport);
@@ -765,17 +840,16 @@ void txlora(radiodev *radiodev, uint8_t *frame, uint8_t framelen) {
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, ~IRQ_LORA_TXDONE_MASK);
 
     // initialize the payload size and address pointers
-    writeReg(radiodev->spiport, REG_FIFO_TX_BASE_AD, 0x00);
-    writeReg(radiodev->spiport, REG_FIFO_ADDR_PTR, 0x00);
+    writeReg(radiodev->spiport, REG_FIFO_TX_BASE_AD, 0x00); writeReg(radiodev->spiport, REG_FIFO_ADDR_PTR, 0x00);
 
     // write buffer to the radio FIFO
     int i;
 
-    for (i = 0; i < framelen; i++) { 
-        writeReg(radiodev->spiport, REG_FIFO, frame[i]);
+    for (i = 0; i < size; i++) { 
+        writeReg(radiodev->spiport, REG_FIFO, payload[i]);
     }
 
-    writeReg(radiodev->spiport, REG_PAYLOAD_LENGTH, framelen);
+    writeReg(radiodev->spiport, REG_PAYLOAD_LENGTH, size);
 
     // now we actually start the transmission
     opmode(radiodev->spiport, OPMODE_TX);
@@ -783,16 +857,111 @@ void txlora(radiodev *radiodev, uint8_t *frame, uint8_t framelen) {
     // wait for TX done
     while(digitalRead(radiodev->dio[0]) == 0);
 
+    MSG("\nTransmit at SF%iBW%ld on %.6lf.\n", radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000);
+
     // mask all IRQs
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
 
     // clear all radio IRQ flags
     writeReg(radiodev->spiport, REG_IRQ_FLAGS, 0xFF);
 
-    MSG_DEBUG(DEBUG_INFO, "Transmit at SF%i on %.6lf Mhz with %ld.\n", radiodev->sf, (double)(radiodev->freq)/1000000, radiodev->bw);
     // go from stanby to sleep
     opmode(radiodev->spiport, OPMODE_SLEEP);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+int lockfile(int fd)
+{
+    struct flock fl;
+
+    fl.l_type = F_WRLCK;
+    fl.l_start = 0;
+    fl.l_whence = SEEK_SET;
+    fl.l_len = 0;
+    return(fcntl(fd, F_SETLK, &fl));
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int already_running(void)
+{
+    int     fd;
+    char    buf[16];
+
+    fd = open(LOCKFILE, O_RDWR|O_CREAT, LOCKMODE);
+    if (fd < 0) {
+        syslog(LOG_ERR, "can't open %s: %s", LOCKFILE, strerror(errno));
+        exit(1);
+    }
+    if (lockfile(fd) < 0) {
+        if (errno == EACCES || errno == EAGAIN) {
+            close(fd);
+            return(1);
+        }
+        syslog(LOG_ERR, "can't lock %s: %s", LOCKFILE, strerror(errno));
+        exit(1);
+    }
+    ftruncate(fd, 0);
+    sprintf(buf, "%ld", (long)getpid());
+    write(fd, buf, strlen(buf)+1);
+    return(0);
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int32_t bw_getval(int x) {
+    switch (x) {
+        case BW_500KHZ: return 500000;
+        case BW_250KHZ: return 250000;
+        case BW_125KHZ: return 125000;
+        case BW_62K5HZ: return 62500;
+        case BW_31K2HZ: return 31200;
+        case BW_15K6HZ: return 15600;
+        case BW_7K8HZ : return 7800;
+        default: return -1;
+    }
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int32_t sf_getval(int x) {
+    switch (x) {
+        case DR_LORA_SF7: return 7;
+        case DR_LORA_SF8: return 8;
+        case DR_LORA_SF9: return 9;
+        case DR_LORA_SF10: return 10;
+        case DR_LORA_SF11: return 11;
+        case DR_LORA_SF12: return 12;
+        default: return -1;
+    }
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int32_t sf_toval(int x) {
+    switch (x) {
+        case 7: return DR_LORA_SF7; 
+        case 8: return DR_LORA_SF8; 
+        case 9: return DR_LORA_SF9;
+        case 10: return DR_LORA_SF10;
+        case 11: return DR_LORA_SF11;
+        case 12: return DR_LORA_SF12;
+        default: return -1;
+    }
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int32_t bw_toval(int x) {
+    switch (x) {
+        case 500000: return BW_500KHZ;
+        case 250000: return BW_250KHZ;
+        case 125000: return BW_125KHZ;
+        case 62500: return BW_62K5HZ;
+        case 31200: return BW_31K2HZ;
+        case 15600: return BW_15K6HZ;
+        case 7800: return BW_7K8HZ;
+        default: return -1;
+    }
+}

@@ -41,8 +41,8 @@
 #define TIMESTAMPED     1
 #define ON_GPS          2
 
-#define DEBUG_PKT_FWD   0
-#define DEBUG_JIT       1
+#define DEBUG_PKT_FWD   1
+#define DEBUG_JIT       0
 #define DEBUG_JIT_ERROR 1
 #define DEBUG_TIMERSYNC 0
 #define DEBUG_BEACON    0
@@ -53,7 +53,6 @@
 #define DEBUG_GPS       0
 
 #define MSG(args...)	        printf(args) /* message that is destined to the user */
-
 #define MSG_DEBUG(FLAG, fmt, ...)                                                               \
     do {                                                                                       \
         if (FLAG)                                                                                 \
@@ -61,6 +60,9 @@
     } while (0)
 
 #define TRACE() 		fprintf(stderr, "@ %s %d\n", __FUNCTION__, __LINE__);
+
+#define LOCKFILE "/var/run/lg02_lock.pid"
+#define LOCKMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)
 
 // ####################################################################
 // Registers Mapping
@@ -165,6 +167,36 @@
 #define MAXLINE 256
 
 
+/* values available for the 'bandwidth' parameters (LoRa & FSK) */
+/* NOTE: directly encode FSK RX bandwidth, do not change */
+#define BW_UNDEFINED    0
+#define BW_500KHZ       0x01
+#define BW_250KHZ       0x02
+#define BW_125KHZ       0x03
+#define BW_62K5HZ       0x04
+#define BW_31K2HZ       0x05
+#define BW_15K6HZ       0x06
+#define BW_7K8HZ        0x07
+
+/* values available for the 'datarate' parameters */
+/* NOTE: LoRa values used directly to code SF bitmask in 'multi' modem, do not change */
+#define DR_UNDEFINED    0
+#define DR_LORA_SF7     0x02
+#define DR_LORA_SF8     0x04
+#define DR_LORA_SF9     0x08
+#define DR_LORA_SF10    0x10
+#define DR_LORA_SF11    0x20
+#define DR_LORA_SF12    0x40
+#define DR_LORA_MULTI   0x7E
+
+/* values available for the 'coderate' parameters (LoRa only) */
+/* NOTE: arbitrary values */
+#define CR_UNDEFINED    0
+#define CR_LORA_4_5     5
+#define CR_LORA_4_6     6
+#define CR_LORA_4_7     7
+#define CR_LORA_4_8     8
+
 // ##################################################################
 // rxmode 
 // ##################################################################
@@ -187,7 +219,7 @@ typedef struct {
     uint32_t bw;
     uint8_t sf;
     uint8_t cr;
-    uint8_t crc;
+    uint8_t nocrc;
     uint8_t prlen;
     uint8_t invertio;
     char desc[8];
@@ -204,12 +236,15 @@ struct pkt_tx_s {
     uint32_t    freq_hz;        /*!> center frequency of TX */
     uint8_t     tx_mode;        /*!> select on what event/time the TX is triggered */
     uint32_t    count_us;       /*!> timestamp or delay in microseconds for TX trigger */
-    uint32_t    bw;
-    int8_t      sf;
-    int8_t      cr;
-    uint16_t    prlen;
+    uint8_t     bandwidth;      /*!> modulation bandwidth (LoRa only) */
+    uint32_t    datarate;       /*!> TX datarate (baudrate for FSK, SF for LoRa) */
+    uint8_t     coderate;       /*!> error-correcting code of the packet (LoRa only) */
+    bool        invert_pol;     /*!> invert signal polarity, for orthogonal downlinks (LoRa only) */
+    uint16_t    preamble;       /*!> set the preamble length, 0 for default */
+    bool        no_crc;         /*!> if true, do not send a CRC in the packet */
+    bool        no_header;      /*!> if true, enable implicit header mode (LoRa), fixed length (FSK) */
     uint16_t    size;           /*!> payload size in bytes */
-    uint8_t     payload[128];   /*!> buffer containing the payload */
+    uint8_t     payload[256];   /*!> buffer containing the payload */
 };
 
 /**
@@ -223,7 +258,7 @@ struct pkt_rx_s {
     float       rssi;         /*!> average packet RSSI in dB */
     uint16_t    crc;          /*!> CRC that was received in the payload */
     uint16_t    size;         /*!> payload size in bytes */ 
-    uint8_t     payload[128]; /*!> buffer containing the payload */
+    uint8_t     payload[256]; /*!> buffer containing the payload */
 };
 
 #define QUEUESIZE 8         /*!> size of queue */
@@ -294,10 +329,35 @@ bool received(uint8_t, struct pkt_rx_s *);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void txlora(radiodev *, uint8_t *, uint8_t); 
+void txlora(radiodev *, struct pkt_tx_s *); 
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+void single_tx(radiodev *, uint8_t *, int); 
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int32_t bw_getval(int); 
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int32_t bw_toval(int); 
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int32_t sf_getval(int);
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int32_t sf_toval(int);
+    
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int lockfile(int);
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+int already_running(void);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

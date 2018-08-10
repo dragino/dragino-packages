@@ -34,6 +34,7 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
+	$(CP) $(PKG_BUILD_DIR)/lg02_single_rx_tx $(1)/usr/bin
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

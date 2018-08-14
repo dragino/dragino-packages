@@ -59,7 +59,12 @@
             fprintf(stdout, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
     } while (0)
 
-#define TRACE() 		fprintf(stderr, "@ %s %d\n", __FUNCTION__, __LINE__);
+#define MSG_LOG(FLAG, args...)                                                               \
+    do {                                                                                      \
+        if (FLAG)                                                                             \
+            printf(args);                                                                      \
+    } while (0)
+
 
 #define LOCKFILE "/var/run/lg02_lock.pid"
 #define LOCKMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)

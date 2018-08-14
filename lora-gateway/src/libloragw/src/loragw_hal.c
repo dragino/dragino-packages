@@ -1738,7 +1738,7 @@ uint32_t lgw_time_on_air(struct lgw_pkt_tx_s *packet) {
         H = (packet->no_header==false) ? 0 : 1; /* header is always enabled, except for beacons */
         DE = (SF >= 11) ? 1 : 0; /* Low datarate optimization enabled for SF11 and SF12 */
 
-        payloadSymbNb = 8 + (ceil((double)(8*packet->size - 4*SF + 28 + 16 - 20*H) / (double)(4*(SF - 2*DE))) * (packet->coderate + 4)); /* Explicitely cast to double to keep precision of the division */
+        payloadSymbNb = 8 + (ceil((double)(8*packet->size - 4*SF + 28 + 16 - 20*H) / (double)(4*(SF - 2*DE))) * (packet->coderate)); /* Explicitely cast to double to keep precision of the division */
 
         Tpayload = payloadSymbNb * Tsym;
 

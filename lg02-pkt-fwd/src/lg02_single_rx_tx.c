@@ -15,20 +15,24 @@
 
 #include "radio.h"
 
+#define TX_MODE 0
+#define RX_MODE 1
+
+#define RADIO1    "/dev/spidev1.0"
+#define RADIO2    "/dev/spidev2.0"
+
+static char ver[8] = "0.1";
+
 /* lora configuration variables */
-static char rxsf[8] = "7";
-static char txsf[8] = "7";
-static char rxbw[8] = "125000";
-static char txbw[8] = "125000";
-static char rxcr[8] = "5";
-static char txcr[8] = "5";
-static char rxprlen[8] = "8";
-static char txprlen[8] = "8";
-static char rx_freq[16] = "868500000";            /* rx frequency of radio */
-static char tx_freq[16] = "868500000";            /* tx frequency of radio */
-static bool radioB = false;
+static char sf[8] = "7";
+static char bw[8] = "125000";
+static char cr[8] = "5";
+static char prlen[8] = "8";
+static char freq[16] = "868500000";            /* frequency of radio */
+static char radio[16] = RADIO1;
+static int mode = TX_MODE;
+static int device = 49;
 static bool getversion = false;
-static bool lg02 = false;
 
 /* signal handling variables */
 volatile bool exit_sig = false; /* 1 -> application terminates cleanly (shut down hardware, close open files, etc) */
@@ -36,8 +40,7 @@ volatile bool quit_sig = false; /* 1 -> application terminates without shutting 
 
 /* radio devices */
 
-radiodev *rxdev;
-radiodev *txdev;
+radiodev *loradev;
 
 void thread_rec(void);
 
@@ -49,7 +52,6 @@ static void sig_handler(int sigio) {
     } else if ((sigio == SIGINT) || (sigio == SIGTERM)) {
 	    exit_sig = true;
     }
-    return;
 }
 
 static void wait_ms(unsigned long a) {
@@ -69,14 +71,14 @@ static void wait_ms(unsigned long a) {
 }
 
 void print_help(void) {
-    printf("Usage: lg02_single_rx_tx   [-r radiodevice] \n");
+    printf("Usage: lg02_single_rx_tx   [-d radio_dev] select radio 1 or 2 (default:1) \n");
+	printf("                           [-t] set as tx\n");
+	printf("                           [-r] set as rx\n");
     printf("                           [-f frequence] (default:868500000)\n");
     printf("                           [-s spreadingFactor] (default: 7)\n");
     printf("                           [-b bandwidth] default: 125k \n");
-    printf("                           [-F frequence] (default:868500000)\n");
-    printf("                           [-S spreadingFactor] (default: 7)\n");
-    printf("                           [-B bandwidth] default: 125k \n");
-    printf("                           [-p payload]   \n");
+    printf("                           [-p payload ]  \n");
+    printf("                           [-v] show version \n");
     printf("                           [-h] show this help and exit \n");
 }
 
@@ -85,6 +87,9 @@ void print_help(void) {
 
 int main(int argc, char *argv[])
 {
+
+    struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
+	
     /* threads */
     pthread_t thrid_rec;
 
@@ -93,22 +98,33 @@ int main(int argc, char *argv[])
     char input[128] = {'\0'};
 
     // Make sure only one copy of the daemon is running.
-    if (already_running()) {
-        MSG_DEBUG(DEBUG_ERROR, "%s: already running!\n", argv[0]);
-        exit(1);
-    }
+    //if (already_running()) {
+      //  MSG_DEBUG(DEBUG_ERROR, "%s: already running!\n", argv[0]);
+      //  exit(1);
+    //}
 
-    while ((c = getopt(argc, argv, "trf:s:b:F:S:B:ph")) != -1) {
+    while ((c = getopt(argc, argv, "trd:m:f:s:b:p:vh")) != -1) {
         switch (c) {
-            case 't':
+            case 'v':
                 getversion = true;
                 break;
+            case 'd':
+		if (optarg)
+			device = optarg[0];
+		else {
+			print_help();
+			exit(1);
+		}
+                break;
+            case 't':
+                mode = TX_MODE;
+                break;
             case 'r':
-                radioB = true;
+                mode = RX_MODE;
                 break;
             case 'f':
                 if (optarg)
-                    strncpy(rx_freq, optarg, sizeof(rx_freq));
+                    strncpy(freq, optarg, sizeof(freq));
                 else {
                     print_help();
                     exit(1);
@@ -116,7 +132,7 @@ int main(int argc, char *argv[])
                 break;
             case 's':
                 if (optarg)
-                    strncpy(rxsf, optarg, sizeof(rxsf));
+                    strncpy(sf, optarg, sizeof(sf));
                 else {
                     print_help();
                     exit(1);
@@ -124,31 +140,7 @@ int main(int argc, char *argv[])
                 break;
             case 'b':
                 if (optarg)
-                    strncpy(rxbw, optarg, sizeof(rxbw));
-                else {
-                    print_help();
-                    exit(1);
-                }
-                break;
-            case 'F':
-                if (optarg)
-                    strncpy(tx_freq, optarg, sizeof(tx_freq));
-                else {
-                    print_help();
-                    exit(1);
-                }
-                break;
-            case 'S':
-                if (optarg)
-                    strncpy(txsf, optarg, sizeof(txsf));
-                else {
-                    print_help();
-                    exit(1);
-                }
-                break;
-            case 'B':
-                if (optarg)
-                    strncpy(txbw, optarg, sizeof(txbw));
+                    strncpy(bw, optarg, sizeof(bw));
                 else {
                     print_help();
                     exit(1);
@@ -170,98 +162,86 @@ int main(int argc, char *argv[])
         }
     }
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    /* radio device init */
-
-    rxdev = (radiodev *) malloc(sizeof(radiodev));
-
-    txdev = (radiodev *) malloc(sizeof(radiodev));
-    
-    rxdev->nss = 15;
-    rxdev->rst = 8;
-    rxdev->dio[0] = 7;
-    rxdev->dio[1] = 6;
-    rxdev->dio[2] = 0;
-    rxdev->spiport = lgw_spi_open(SPI_DEV_RX);
-    if (rxdev->spiport < 0) { 
-        printf("open spi_dev_tx error!\n");
-        goto clean;
-    }
-    rxdev->freq = atol(rx_freq);
-    rxdev->sf = atoi(rxsf);
-    rxdev->bw = atol(rxbw);
-    rxdev->cr = atoi(rxcr);
-    rxdev->nocrc = 1;  /* crc check */
-    rxdev->prlen = atoi(rxprlen);
-    rxdev->invertio = 0;
-    strcpy(rxdev->desc, "RXRF");
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    txdev->nss = 24;
-    txdev->rst = 23;
-    txdev->dio[0] = 22;
-    txdev->dio[1] = 20;
-    txdev->dio[2] = 0;
-    txdev->spiport = lgw_spi_open(SPI_DEV_TX);
-    if (txdev->spiport < 0) {
-        MSG("open spi_dev_tx error!\n");
-        goto clean;
-    }
-    txdev->freq = atol(tx_freq);
-    txdev->sf = atoi(txsf);
-    txdev->bw = atol(txbw);
-    txdev->cr = atoi(txcr);
-    txdev->nocrc = 1;
-    txdev->prlen = atoi(txprlen);
-    txdev->invertio = 0;
-    strcpy(txdev->desc, "TXRF");
-
-    MSG("RadioA struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->spiport, rxdev->freq, rxdev->sf);
-    MSG("RadioB struct: spiport=%d, freq=%ld, sf=%d\n", txdev->spiport, txdev->freq, txdev->sf);
-
-    if(!get_radio_version(rxdev))  
-        goto clean;
-
+	
     if (getversion) {
-        printf("RadioA 1276 detected\n");
-        if(get_radio_version(txdev))  
-            printf("RadioB 1276 detected\n");
+		printf("lg02_single_rx_tx ver: %s\n",ver);
+        exit(0);
+    }	
+
+	
+	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+    /* radio device SPI_DEV init */
+    loradev = (radiodev *) malloc(sizeof(radiodev));
+
+    if (device == 49){
+	loradev->nss = 15;
+	loradev->rst = 8;
+	loradev->dio[0] = 7;
+	loradev->dio[1] = 6;
+	loradev->dio[2] = 0;	
+	strncpy(radio, RADIO1, sizeof(radio));
+    }
+    else if ( device == 50){
+	loradev->nss = 24;
+	loradev->rst = 23;
+	loradev->dio[0] = 22;
+	loradev->dio[1] = 20;
+	loradev->dio[2] = 0;
+	strncpy(radio, RADIO2, sizeof(radio));	
+    }
+    loradev->spiport = lgw_spi_open(radio);
+    if (loradev->spiport < 0) { 
+        printf("opening %s error!\n",radio);
         goto clean;
     }
+    loradev->freq = atol(freq);
+    loradev->sf = atoi(sf);
+    loradev->bw = atol(bw);
+    loradev->cr = atoi(cr);
+    loradev->nocrc = 1;  /* crc check */
+    loradev->prlen = atoi(prlen);
+    loradev->invertio = 0;
+    strcpy(loradev->desc, "RXRF");	
 
-    if (strlen(input) < 1)
-        strcpy(input, "HELLO");
+    MSG("Radio struct: spi_dev=%s, spiport=%d, freq=%ld, sf=%d, bw=%ld, cr=%d\n", radio, loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr );
 
-    /* spawn threads to manage radio receive queue*/
-    MSG("Spawn threads to manage fifo payload...\n");
-    i = pthread_create( &thrid_rec, NULL, (void * (*)(void *))thread_rec, NULL);
-    if (i != 0) {
-	    MSG("ERROR: [main] impossible to create receive thread\n");
-	    exit(EXIT_FAILURE);
-    }
+    if(!get_radio_version(loradev))  
+        goto clean;
 
-    int count = 0;
-    radiodev *sdev;
+    /* configure signal handling */
+    //sigemptyset(&sigact.sa_mask);
+    //sigact.sa_flags = 0;
+    //sigact.sa_handler = sig_handler;
+    //sigaction(SIGQUIT, &sigact, NULL); /* Ctrl-\ */
+	//sigaction(SIGINT, &sigact, NULL); /* Ctrl-C */
+    //sigaction(SIGTERM, &sigact, NULL); /* default "kill" command */
 
-    if (!radioB) {
-        sdev = txdev;
-    } else {
-        sdev = rxdev;
-    }
 
-    uint8_t payload[256] = {'\0'};
+	if ( mode == TX_MODE ){
+		if (strlen(input) < 1)
+		    strcpy(input, "HELLO");	
+		radiodev *sdev;
+		sdev = loradev;
 
-    setup_channel(sdev);
+		uint8_t payload[256] = {'\0'};
 
-    while (!exit_sig && !quit_sig) {
-        snprintf(payload, sizeof(payload), "%s%d", input, count++);
-        single_tx(sdev, payload, strlen((char *)payload));
-	wait_ms(1000 * 10); // 10 seconds
-    }
+		setup_channel(sdev);
+		snprintf(payload, sizeof(payload), "%s", input);
+		single_tx(sdev, payload, strlen((char *)payload));
+	}
+	else if ( mode == RX_MODE){
+		/* spawn threads to manage radio receive queue*/
+		MSG("Spawn threads to manage fifo payload...\n");
+		i = pthread_create( &thrid_rec, NULL, (void * (*)(void *))thread_rec, NULL);
+		if (i != 0) {
+			MSG("ERROR: [main] impossible to create receive thread\n");
+			exit(EXIT_FAILURE);
+		}		
+		while (1);
+	}
 
 clean:
-    free(rxdev);
-    free(txdev);
+    free(loradev);
 	
     MSG("INFO: Exiting %s\n", argv[0]);
     exit(EXIT_SUCCESS);
@@ -273,12 +253,8 @@ void thread_rec(void) {
     struct pkt_rx_s rxpkt;
 
     radiodev *dev;
-
-    if (!radioB) {
-        dev = rxdev;
-    } else {
-        dev = txdev;
-    }
+	
+    dev = loradev;
 
     setup_channel(dev);
 

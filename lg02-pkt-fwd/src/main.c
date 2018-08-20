@@ -745,7 +745,8 @@ int main(int argc, char *argv[])
                         FILE *fp = NULL;
                         sprintf(fpath, "/var/iot/channels/%02x%02x%02x%02x", pktrx[pt].payload[0], pktrx[pt].payload[1], pktrx[pt].payload[2], pktrx[pt].payload[3]);
                         if ((fp = fopen(fpath, "w+")) != NULL) {
-                            fwrite(pktrx[pt].payload, sizeof(pktrx[pt].payload), 1, fp);
+                            fwrite(pktrx[pt].payload, 1, strlen(pktrx[pt].payload), fp);
+                            fflush(fp);
                             fclose(fp);
                         }
                         pktrx_clean(&pktrx[pt]);

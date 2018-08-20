@@ -30,6 +30,7 @@ static char cr[8] = "5";
 static char prlen[8] = "8";
 static char freq[16] = "868500000";            /* frequency of radio */
 static char radio[16] = RADIO1;
+static char filepath[32] = {'\0'};
 static int mode = TX_MODE;
 static int device = 49;
 static bool getversion = false;
@@ -41,8 +42,6 @@ volatile bool quit_sig = false; /* 1 -> application terminates without shutting 
 /* radio devices */
 
 radiodev *loradev;
-
-void thread_rec(void);
 
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
 
@@ -72,12 +71,13 @@ static void wait_ms(unsigned long a) {
 
 void print_help(void) {
     printf("Usage: lg02_single_rx_tx   [-d radio_dev] select radio 1 or 2 (default:1) \n");
-	printf("                           [-t] set as tx\n");
-	printf("                           [-r] set as rx\n");
+    printf("                           [-t] set as tx\n");
+    printf("                           [-r] set as rx\n");
     printf("                           [-f frequence] (default:868500000)\n");
     printf("                           [-s spreadingFactor] (default: 7)\n");
     printf("                           [-b bandwidth] default: 125k \n");
     printf("                           [-p payload ]  \n");
+    printf("                           [-o filepath ]  \n");
     printf("                           [-v] show version \n");
     printf("                           [-h] show this help and exit \n");
 }
@@ -90,12 +90,11 @@ int main(int argc, char *argv[])
 
     struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
 	
-    /* threads */
-    pthread_t thrid_rec;
-
     int c, i;
 
     char input[128] = {'\0'};
+
+    FILE *fp = NULL;
 
     // Make sure only one copy of the daemon is running.
     //if (already_running()) {
@@ -103,7 +102,7 @@ int main(int argc, char *argv[])
       //  exit(1);
     //}
 
-    while ((c = getopt(argc, argv, "trd:m:f:s:b:p:vh")) != -1) {
+    while ((c = getopt(argc, argv, "trd:m:f:s:b:p:o:vh")) != -1) {
         switch (c) {
             case 'v':
                 getversion = true;
@@ -154,6 +153,14 @@ int main(int argc, char *argv[])
                     exit(1);
                 }
                 break;
+            case 'o':
+                if (optarg)
+                    strncpy(filepath, optarg, sizeof(filepath));
+                else {
+                    print_help();
+                    exit(1);
+                }
+                break;
             case 'h':
             case '?':
             default:
@@ -189,11 +196,14 @@ int main(int argc, char *argv[])
 	loradev->dio[2] = 0;
 	strncpy(radio, RADIO2, sizeof(radio));	
     }
+
     loradev->spiport = lgw_spi_open(radio);
+
     if (loradev->spiport < 0) { 
         printf("opening %s error!\n",radio);
         goto clean;
     }
+
     loradev->freq = atol(freq);
     loradev->sf = atoi(sf);
     loradev->bw = atol(bw);
@@ -201,7 +211,7 @@ int main(int argc, char *argv[])
     loradev->nocrc = 1;  /* crc check */
     loradev->prlen = atoi(prlen);
     loradev->invertio = 0;
-    strcpy(loradev->desc, "RXRF");	
+    strcpy(loradev->desc, "RFDEV");	
 
     MSG("Radio struct: spi_dev=%s, spiport=%d, freq=%ld, sf=%d, bw=%ld, cr=%d\n", radio, loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr );
 
@@ -209,62 +219,55 @@ int main(int argc, char *argv[])
         goto clean;
 
     /* configure signal handling */
-    //sigemptyset(&sigact.sa_mask);
-    //sigact.sa_flags = 0;
-    //sigact.sa_handler = sig_handler;
-    //sigaction(SIGQUIT, &sigact, NULL); /* Ctrl-\ */
-	//sigaction(SIGINT, &sigact, NULL); /* Ctrl-C */
-    //sigaction(SIGTERM, &sigact, NULL); /* default "kill" command */
+    sigemptyset(&sigact.sa_mask);
+    sigact.sa_flags = 0;
+    sigact.sa_handler = sig_handler;
+    sigaction(SIGQUIT, &sigact, NULL); /* Ctrl-\ */
+    sigaction(SIGINT, &sigact, NULL); /* Ctrl-C */
+    sigaction(SIGTERM, &sigact, NULL); /* default "kill" command */
 
+    setup_channel(loradev);
 
-	if ( mode == TX_MODE ){
-		if (strlen(input) < 1)
-		    strcpy(input, "HELLO");	
-		radiodev *sdev;
-		sdev = loradev;
+    if ( mode == TX_MODE ){
+	uint8_t payload[256] = {'\0'};
 
-		uint8_t payload[256] = {'\0'};
+	if (strlen(input) < 1)
+	    strcpy(input, "HELLO DRAGINO");	
 
-		setup_channel(sdev);
-		snprintf(payload, sizeof(payload), "%s", input);
-		single_tx(sdev, payload, strlen((char *)payload));
-	}
-	else if ( mode == RX_MODE){
-		/* spawn threads to manage radio receive queue*/
-		MSG("Spawn threads to manage fifo payload...\n");
-		i = pthread_create( &thrid_rec, NULL, (void * (*)(void *))thread_rec, NULL);
-		if (i != 0) {
-			MSG("ERROR: [main] impossible to create receive thread\n");
-			exit(EXIT_FAILURE);
-		}		
-		while (1);
-	}
+	snprintf(payload, sizeof(payload), "%s", input);
+	single_tx(loradev, payload, strlen((char *)payload));
+    } else if ( mode == RX_MODE){
+
+        struct pkt_rx_s rxpkt;
+
+        rxlora(loradev->spiport, RXMODE_SCAN);
+
+        if (strlen(filepath) > 0) 
+            fp = fopen(filepath, "w+");
+
+        MSG("\nListening at SF%i on %.6lf Mhz. port%i\n", loradev->sf, (double)(loradev->freq)/1000000, loradev->spiport);
+        while (!exit_sig && !quit_sig) {
+            if(digitalRead(loradev->dio[0]) == 1) {
+                memset(rxpkt.payload, 0, sizeof(rxpkt.payload));
+                received(loradev->spiport, &rxpkt);
+                if (fp) {
+                    //fwrite(rxpkt.payload, 1, strlen(rxpkt.payload), fp);
+                    fprintf(fp, "%s\n", rxpkt.payload);
+                    fflush(fp);
+                }
+                fprintf(stderr, "echo received: %s\n", rxpkt.payload);
+            }
+        }
+
+    }
 
 clean:
+    if(fp)
+        fclose(fp);
+
     free(loradev);
 	
     MSG("INFO: Exiting %s\n", argv[0]);
     exit(EXIT_SUCCESS);
 }
 
-
-void thread_rec(void) {
-
-    struct pkt_rx_s rxpkt;
-
-    radiodev *dev;
-	
-    dev = loradev;
-
-    setup_channel(dev);
-
-    rxlora(dev->spiport, RXMODE_SCAN);
-
-    MSG("\nListening at SF%i on %.6lf Mhz. port%i\n", dev->sf, (double)(dev->freq)/1000000, dev->spiport);
-    while (!exit_sig && !quit_sig) {
-        if(digitalRead(dev->dio[0]) == 1) {
-            memset(rxpkt.payload, 0, sizeof(rxpkt.payload));
-            received(dev->spiport, &rxpkt);
-            }
-    }
-}

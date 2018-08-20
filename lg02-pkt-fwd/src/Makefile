@@ -6,7 +6,7 @@ lg02_pkt_fwd: base64.o parson.o radio.o jitqueue.o main.o
 	$(CC) main.o base64.o parson.o radio.o jitqueue.o $(LIBS) -luci -lrt -ldl -lpthread -o lg02_pkt_fwd
 
 lg02_single_rx_tx: radio.o
-	$(CC) $(CFLAGS) radio.o $(LIBS) -lrt -ldl -lpthread lg02_single_rx_tx.c -o lg02_single_rx_tx
+	$(CC) $(CFLAGS) radio.o $(LIBS) -lrt -ldl lg02_single_rx_tx.c -o lg02_single_rx_tx
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c

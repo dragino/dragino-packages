@@ -18,19 +18,39 @@ local mac="a84041efefef"
 m = Map("gateway", translate("LoRa Gateway Settings"), translate("Configuration to communicate with LoRa devices and LoRaWAN server"))
 
 s = m:section(NamedSection, "general", "lorawan", translate("LoRaWAN Server Settings"))
-local sv = s:option(Value, "server", translate("Server Address"))
+
+local sp = s:option(ListValue, "provider", translate("Service Provider"))
+sp.default = "ttn"
+sp:value("ttn", "The Things Network")
+sp:value("custom", "--custom--")
+
+local sv = s:option(Value, "custom_server", translate("Server Address"))
 sv.datatype = "host"
 sv.placeholder = "Domain or IP"
+sv:depends("provider","custom")
+
+local ttn_addr = s:option(ListValue, "ttn_server", translate("Server Address"))
+ttn_addr:depends("provider","ttn")
+ttn_addr.default = "router.eu.thethings.network"
+ttn_addr:value("router.eu.thethings.network", "ttn-router-eu")
+ttn_addr:value("router.us.thethings.network", "ttn-router-us-west")
+ttn_addr:value("router.as.thethings.network", "ttn-router-asia-se")
+ttn_addr:value("router.as1.thethings.network", "ttn-router-asia-se-1")
+ttn_addr:value("router.as2.thethings.network", "ttn-router-asia-se-2")
+ttn_addr:value("router.kr.thethings.network", "router.kr.thethings.network")
+ttn_addr:value("router.jp.thethings.network", "router.jp.thethings.network")
+ttn_addr:value("thethings.meshed.com.au", "ttn-router-asia-se")
+ttn_addr:value("as923.thethings.meshed.com.au", "meshed-router")
+ttn_addr:value("ttn.opennetworkinfrastructure.org", "switch-router")
+ttn_addr:value("router.cn.thethings.network", "router.cn.thethings.network")
 
 local sp = s:option(Value, "port", translate("Server Port"))
 sp.datatype = "port"
 sp.default = "1700"
 
-
 local gid = s:option(Value, "GWID", translate("Gateway ID"))
 gid.placeholder = "Gateway ID from Server"
 gid.default=mac
-
 
 local mail = s:option(Value, "email", translate("Mail Address"))
 mail.placeholder = "Mail address sent to Server"
@@ -41,6 +61,12 @@ lati.placeholder = "Location Info"
 local long = s:option(Value, "LON", translate("Longtitude"))
 long.placeholder = "Location Info"
 
+local mode = s:option(ListValue, "mode", translate("RadioMode"))
+mode.placeholder = "Radio Mode"
+mode.default = "0"
+mode:value("0", "A for RX, B for TX")
+mode:value("1", "B for RX, A for TX")
+mode:value("2", "Both for RX")
 
 s = m:section(NamedSection, "radio1", "lorawan", translate("Channel 1 Radio Settings"),translate("Radio settings for Channel 1"))
 local rx_fre = s:option(Value, "RXFREQ", translate("RX Frequency (Unit:Hz)"))
@@ -98,6 +124,10 @@ sbw:value("500000", "500 kHz")
 local prb = s:option(Value, "RXPRLEN", translate("Preamble Length"), translate("Length range: 6 ~ 65536"))
 prb.placeholder = "6 ~ 65536"
 prb.default = "8"
+
+local syncwd = s:option(Value, "syncwd", translate("LoRa Sync Word"))
+syncwd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
+syncwd.default = "52"
 
 local encry = s:option(Value, "encryption", translate("Encryption Key"))
 encry.placeholder = "Encryption Key"
@@ -157,6 +187,10 @@ sbw:value("250000", "250 kHz")
 local prb = s:option(Value, "TXPRLEN", translate("Preamble Length"), translate("Length range: 6 ~ 65536"))
 prb.placeholder = "6 ~ 65536"
 prb.default = "8"
+
+local syncwd = s:option(Value, "syncwd", translate("LoRa Sync Word"))
+syncwd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
+syncwd.default = "52"
 
 local encry = s:option(Value, "encryption", translate("Encryption Key"))
 encry.placeholder = "Encryption Key"

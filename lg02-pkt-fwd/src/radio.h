@@ -51,6 +51,7 @@
 #define DEBUG_ERROR     1
 #define DEBUG_GPS       0
 #define DEBUG_SPI       1
+#define DEBUG_UCI       1
 
 #define MSG(args...)	        printf(args) /* message that is destined to the user */
 #define MSG_DEBUG(FLAG, fmt, ...)                                                               \
@@ -107,7 +108,7 @@
 #define PAYLOAD_LENGTH              0x40
 
 // preamble for lora networks (nibbles swapped)
-#define LORA_MAC_PREAMBLE                  0x34
+#define LORA_MAC_PREAMBLE           0x34
 
 
 // LOW NOISE AMPLIFIER
@@ -226,6 +227,7 @@ typedef struct {
     uint8_t cr;
     uint8_t nocrc;
     uint8_t prlen;
+    uint8_t syncword;
     uint8_t invertio;
     char desc[8];
 }radiodev; 

@@ -109,8 +109,11 @@ static char rxprlen[8] = "RXPRLEN";
 static char txprlen[8] = "TXPRLEN";
 static char rx_freq[16] = "RXFREQ";            /* rx frequency of radio */
 static char tx_freq[16] = "TXFREQ";            /* tx frequency of radio */
+static char syncwd1[8] = "SYNCWD";            /* tx frequency of radio */
+static char syncwd2[8] = "SYNCWD";            /* tx frequency of radio */
 static char logdebug[4] = "DEB";          /* debug info option */
 static char server_type[16] = "server_type";          /* debug info option */
+static char radio_mode[8] = "mode";          /* debug info option */
 
 static int debuglevel = 0;
 
@@ -247,7 +250,6 @@ static bool get_config(const char *section, char *option, int len) {
             if (NULL != (value = uci_lookup_option_string(ctx, st, option))) {
 	         memset(option, 0, len);
                  strncpy(option, value, len); 
-                 //MSG("get config value here, option=%s, value=%s\n", option, value);
                  ret = true;
                  break;
             }
@@ -465,7 +467,7 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", provider, 16)){
         strcpy(provider, "ttn");  
-        MSG_LOG(DEBUG_INFO, "get option provider=%s\n", provider);
+        MSG_LOG(DEBUG_UCI, "get option provider=%s\n", provider);
     }
 
     snprintf(server, sizeof(server), "%s_server", provider); 
@@ -482,7 +484,7 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", port, 8)){
         strcpy(port, "1700");
-        MSG("get option port=%s\n", port);
+        MSG_LOG(DEBUG_UCI, "get option port=%s\n", port);
     }
 
     strcpy(serv_port_up, port);
@@ -490,86 +492,102 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", email, 32)){
         strcpy(email, "dragino@dragino.com");
-        MSG("get option email=%s\n", email);
+        MSG_LOG(DEBUG_UCI, "get option email=%s\n", email);
     }
 
     if (!get_config("general", gatewayid, 64)){
         strcpy(gatewayid, "a84041ffff16c21c");      /*set default:router.eu.thethings.network*/
-        MSG("get option gatewayid=%s\n", gatewayid);
+        MSG_LOG(DEBUG_UCI, "get option gatewayid=%s\n", gatewayid);
     } 
 
     if (!get_config("general", LAT, 16)){
         strcpy(LAT, "0");
-        MSG("get option lat=%s\n", LAT);
+        MSG_LOG(DEBUG_UCI, "get option lat=%s\n", LAT);
     }
 
     if (!get_config("general", LON, 16)){
         strcpy(LON, "0");
-        MSG("get option lon=%s\n", LON);
+        MSG_LOG(DEBUG_UCI, "get option lon=%s\n", LON);
     }
 
     if (!get_config("general", logdebug, 4)){
-        MSG("get option logdebug=%s\n", logdebug);
+        MSG_LOG(DEBUG_UCI, "get option logdebug=%s\n", logdebug);
     }
 
-    // server_type : 1.lorawan  2.relay  3.mqtt  4.tcpudp
+    /* server_type : 1.lorawan  2.relay  3.mqtt  4.tcpudp */
     if (!get_config("general", server_type, 16)){
         strcpy(server_type, "lorawan");
-        MSG("get option server_type=%s\n", server_type);
+        MSG_LOG(DEBUG_UCI, "get option server_type=%s\n", server_type);
+    }
+
+    /* mode: 0.A for RX, B for TX 1.B for RX, A for TX 2. both for RX, no TX */
+    if (!get_config("general", radio_mode, 8)){
+        strcpy(radio_mode, "0");
+        MSG_LOG(DEBUG_UCI, "get option radio_mode=%s\n", radio_mode);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if (!get_config("radio1", rx_freq, 16)){
         strcpy(rx_freq, "902320000"); /* default frequency*/
-        MSG("get option rxfreq=%s\n", rx_freq);
+        MSG_LOG(DEBUG_UCI, "get option rxfreq=%s\n", rx_freq);
     }
 
     if (!get_config("radio1", rxsf, 8)){
         strcpy(rxsf, "7");
-        MSG("get option rxsf=%s\n", rxsf);
+        MSG_LOG(DEBUG_UCI, "get option rxsf=%s\n", rxsf);
     }
 
     if (!get_config("radio1", rxcr, 8)){
         strcpy(rxcr, "5");
-        MSG("get option coderate=%s\n", rxcr);
+        MSG_LOG(DEBUG_UCI, "get option coderate=%s\n", rxcr);
     }
     
     if (!get_config("radio1", rxbw, 8)){
         strcpy(rxbw, "125000");
-        MSG("get option rxbw=%s\n", rxbw);
+        MSG_LOG(DEBUG_UCI, "get option rxbw=%s\n", rxbw);
     }
 
     if (!get_config("radio1", rxprlen, 8)){
         strcpy(rxprlen, "8");
-        MSG("get option rxprlen=%s\n", rxprlen);
+        MSG_LOG(DEBUG_UCI, "get option rxprlen=%s\n", rxprlen);
+    }
+
+    if (!get_config("radio1", syncwd1, 8)){
+        strcpy(syncwd1, "52");  //Value 0x34 is reserved for LoRaWAN networks
+        MSG_LOG(DEBUG_UCI, "get option syncword=0x%02x\n", syncwd1);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if (!get_config("radio2", tx_freq, 16)){
         strcpy(tx_freq, "923300000"); /* default frequency*/
-        MSG("get option txfreq=%s\n", tx_freq);
+        MSG_LOG(DEBUG_UCI, "get option txfreq=%s\n", tx_freq);
     }
 
     if (!get_config("radio2", txsf, 8)){
         strcpy(txsf, "9");
-        MSG("get option txsf=%s\n", txsf);
+        MSG_LOG(DEBUG_UCI, "get option txsf=%s\n", txsf);
     }
 
     if (!get_config("radio2", txcr, 8)){
         strcpy(txcr, "5");
-        MSG("get option coderate=%s\n", txcr);
+        MSG_LOG(DEBUG_UCI, "get option coderate=%s\n", txcr);
     }
 
     if (!get_config("radio2", txbw, 8)){
         strcpy(txbw, "125000");
-        MSG("get option rxbw=%s\n", txbw);
+        MSG_LOG(DEBUG_UCI, "get option rxbw=%s\n", txbw);
     }
 
     if (!get_config("radio2", txprlen, 8)){
         strcpy(txprlen, "8");
-        MSG("get option txprlen=%s\n", txprlen);
+        MSG_LOG(DEBUG_UCI, "get option txprlen=%s\n", txprlen);
+    }
+
+    if (!get_config("radio2", syncwd2, 8)){
+        strcpy(syncwd2, "52");  //Value 0x34 is reserved for LoRaWAN networks
+        MSG_LOG(DEBUG_UCI, "get option syncword2=0x%02x\n", syncwd2);
     }
 
     debuglevel = atoi(logdebug);
@@ -613,7 +631,7 @@ int main(int argc, char *argv[])
             strcpy(mconf.topic, "topic_format");  
         }
 
-        printf("MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s\n", mconf.host, mconf.port, \
+        MSG_LOG(DEBUG_INFO, "MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s\n", mconf.host, mconf.port, \
                                         mconf.username, mconf.password, mconf.topic);
     }
 
@@ -647,6 +665,7 @@ int main(int argc, char *argv[])
     rxdev->cr = atoi(rxcr);
     rxdev->nocrc = 0;  /* crc check */
     rxdev->prlen = atoi(rxprlen);
+    rxdev->syncword = atoi(syncwd1);
     rxdev->invertio = 0;
     strcpy(rxdev->desc, "RXRF");
 
@@ -667,11 +686,20 @@ int main(int argc, char *argv[])
     txdev->cr = atoi(txcr);
     txdev->nocrc = 0;
     txdev->prlen = atoi(txprlen);
+    txdev->syncword = atoi(syncwd2);
     txdev->invertio = 0;
     strcpy(txdev->desc, "TXRF");
 
-    MSG("RX struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->spiport, rxdev->freq, rxdev->sf);
-    MSG("TX struct: spiport=%d, freq=%ld, sf=%d\n", txdev->spiport, txdev->freq, txdev->sf);
+    radiodev *tmpdev;
+
+    if (strcmp(radio_mode, "1")) { /* swap radioA radioB */
+        tmpdev = rxdev;
+        rxdev = txdev;
+        txdev = tmpdev;
+    }
+
+    MSG("radioA struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->spiport, rxdev->freq, rxdev->sf);
+    MSG("radioB struct: spiport=%d, freq=%ld, sf=%d\n", txdev->spiport, txdev->freq, txdev->sf);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

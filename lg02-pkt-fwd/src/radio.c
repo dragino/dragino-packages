@@ -397,7 +397,7 @@ void setsf(uint8_t spidev, int sf)
     }
 
     writeReg(spidev, REG_MODEM_CONFIG2, (readReg(spidev, REG_MODEM_CONFIG2) & 0x0f) | ((sf << 4) & 0xf0));
-    MSG_LOG(DEBUG_SPI, "SF=0x%2x\n", readReg(spidev, REG_MODEM_CONFIG2));
+    MSG_LOG(DEBUG_SPI, "SF=0x%02x\n", sf, readReg(spidev, REG_MODEM_CONFIG2));
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -429,7 +429,6 @@ void setsbw(uint8_t spidev, long sbw)
     }
 
     writeReg(spidev, REG_MODEM_CONFIG, (readReg(spidev, REG_MODEM_CONFIG) & 0x0f) | (bw << 4));
-    MSG_LOG(DEBUG_SPI, "BW=0x%2x\n", readReg(spidev, REG_MODEM_CONFIG));
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -560,6 +559,8 @@ bool get_radio_version(radiodev *radiodev)
 void setup_channel(radiodev *radiodev)
 {
     opmode(radiodev->spiport, OPMODE_SLEEP);
+    opmodeLora(radiodev->spiport);
+    ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
     // setup lora
     printf("Setup %s Channel: freq = %d, sf = %d, spi = %d\n", radiodev->desc, radiodev->freq, radiodev->sf, radiodev->spiport);
     setfreq(radiodev->spiport, radiodev->freq);
@@ -595,7 +596,6 @@ void setup_channel(radiodev *radiodev)
 void rxlora(int spidev, uint8_t rxmode)
 {
 
-    opmodeLora(spidev);
     ASSERT((readReg(spidev, REG_OPMODE) & OPMODE_LORA) != 0);
 
     // enter standby mode (required for FIFO loading))
@@ -693,6 +693,10 @@ bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
 void txlora(radiodev *radiodev, struct pkt_tx_s *pkt) {
 
     opmode(radiodev->spiport, OPMODE_SLEEP);
+    // select LoRa modem (from sleep mode)
+    opmodeLora(radiodev->spiport);
+
+    ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
     setfreq(radiodev->spiport, pkt->freq_hz);
     setsf(radiodev->spiport, sf_getval(pkt->datarate));
@@ -717,11 +721,6 @@ void txlora(radiodev *radiodev, struct pkt_tx_s *pkt) {
         writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) | (1<<6));
     else
         writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) & ~(1<<6));
-
-    // select LoRa modem (from sleep mode)
-    opmodeLora(radiodev->spiport);
-
-    ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
     // enter standby mode (required for FIFO loading))
     opmode(radiodev->spiport, OPMODE_STANDBY);
@@ -766,9 +765,6 @@ void txlora(radiodev *radiodev, struct pkt_tx_s *pkt) {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
-
-    // select LoRa modem (from sleep mode)
-    opmodeLora(radiodev->spiport);
 
     ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 

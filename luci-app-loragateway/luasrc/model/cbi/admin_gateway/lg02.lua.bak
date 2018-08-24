@@ -69,11 +69,11 @@ mode:value("1", "B for RX, A for TX")
 mode:value("2", "Both for RX, No TX")
 
 s = m:section(NamedSection, "radio1", "lorawan", translate("Channel 1 Radio Settings"),translate("Radio settings for Channel 1"))
-local rx_fre = s:option(Value, "RXFREQ", translate("RadioA Frequency (Unit:Hz)"))
+local rx_fre = s:option(Value, "RXFREQ", translate("RX Frequency (Unit:Hz)"))
 rx_fre.placeholder = "9 digits Frequency, etc:868100000"
 rx_fre.datatype = "rangelength(9,9)"
 
-local rx_sf = s:option(ListValue, "RXSF", translate("RadioA Spreading Factor"))
+local rx_sf = s:option(ListValue, "RXSF", translate("RX Spreading Factor"))
 rx_sf.placeholder = "Spreading Factor"
 rx_sf.default = "7"
 rx_sf:value("6", "SF6")
@@ -84,7 +84,22 @@ rx_sf:value("10", "SF10")
 rx_sf:value("11", "SF11")
 rx_sf:value("12", "SF12")
 
-local codr = s:option(ListValue, "RXCR", translate("RadioA Coding Rate"))
+local tx_fre = s:option(Value, "TXFREQ", translate("TX Frequency (Unit:Hz)"))
+tx_fre.placeholder = "9 digits Frequency, etc:868100000"
+tx_fre.datatype = "rangelength(9,9)"
+
+local tx_sf = s:option(ListValue, "TXSF", translate("TX Spreading Factor"))
+tx_sf.placeholder = "Spreading Factor"
+tx_sf.default = "9"
+tx_sf:value("6", "SF6")
+tx_sf:value("7", "SF7")
+tx_sf:value("8", "SF8")
+tx_sf:value("9", "SF9")
+tx_sf:value("10", "SF10")
+tx_sf:value("11", "SF11")
+tx_sf:value("12", "SF12")
+
+local codr = s:option(ListValue, "RXCR", translate("Coding Rate"))
 codr.placeholder = "Coding Rate"
 codr.default = "5"
 codr:value("5", "4/5")
@@ -92,7 +107,7 @@ codr:value("6", "4/6")
 codr:value("7", "4/7")
 codr:value("8", "4/8")
 
-local sbw = s:option(ListValue, "RXBW", translate("RadioA Signal Bandwidth"))
+local sbw = s:option(ListValue, "RXBW", translate("Signal Bandwidth"))
 sbw.placeholder = "Signal Bandwidth"
 sbw.default = "125000"
 sbw:value("7800", "7.8 kHz")
@@ -106,11 +121,11 @@ sbw:value("125000", "125 kHz")
 sbw:value("250000", "250 kHz")
 sbw:value("500000", "500 kHz")
 
-local prb = s:option(Value, "RXPRLEN", translate("RadioA Preamble Length"), translate("Length range: 6 ~ 65536"))
+local prb = s:option(Value, "RXPRLEN", translate("Preamble Length"), translate("Length range: 6 ~ 65536"))
 prb.placeholder = "6 ~ 65536"
 prb.default = "8"
 
-local syncwd = s:option(Value, "syncwd", translate("RadioA LoRa Sync Word"), translate("Value 52(0x34) for LoRaWAN"))
+local syncwd = s:option(Value, "syncwd", translate("LoRa Sync Word"))
 syncwd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
 syncwd.default = "52"
 
@@ -118,11 +133,11 @@ local encry = s:option(Value, "encryption", translate("Encryption Key"))
 encry.placeholder = "Encryption Key"
 
 s = m:section(NamedSection, "radio2", "lorawan", translate("Channel 2 Radio Settings"),translate("Radio settings for Channel 2"))
-local tx_fre = s:option(Value, "TXFREQ", translate("RadioB Frequency (Unit:Hz)"))
+local tx_fre = s:option(Value, "TXFREQ", translate("TX Frequency (Unit:Hz)"))
 tx_fre.placeholder = "9 digits Frequency, etc:868100000"
 tx_fre.datatype = "rangelength(9,9)"
 
-local rx_sf = s:option(ListValue, "TXSF", translate("RadioB Spreading Factor"))
+local rx_sf = s:option(ListValue, "TXSF", translate("TX Spreading Factor"))
 rx_sf.placeholder = "Spreading Factor"
 rx_sf.default = "7"
 rx_sf:value("6", "SF6")
@@ -133,7 +148,22 @@ rx_sf:value("10", "SF10")
 rx_sf:value("11", "SF11")
 rx_sf:value("12", "SF12")
 
-local codr = s:option(ListValue, "TXCR", translate("RadioB Coding Rate"))
+local rx_fre = s:option(Value, "RXFREQ", translate("RX Frequency (Unit:Hz)"))
+rx_fre.placeholder = "9 digits Frequency, etc:868100000"
+rx_fre.datatype = "rangelength(9,9)"
+
+local tx_sf = s:option(ListValue, "RXSF", translate("RX Spreading Factor"))
+tx_sf.placeholder = "Spreading Factor"
+tx_sf.default = "9"
+tx_sf:value("6", "SF6")
+tx_sf:value("7", "SF7")
+tx_sf:value("8", "SF8")
+tx_sf:value("9", "SF9")
+tx_sf:value("10", "SF10")
+tx_sf:value("11", "SF11")
+tx_sf:value("12", "SF12")
+
+local codr = s:option(ListValue, "TXCR", translate("Coding Rate"))
 codr.placeholder = "Coding Rate"
 codr.default = "5"
 codr:value("5", "4/5")
@@ -141,7 +171,7 @@ codr:value("6", "4/6")
 codr:value("7", "4/7")
 codr:value("8", "4/8")
 
-local sbw = s:option(ListValue, "TXBW", translate("RadioB Signal Bandwidth"))
+local sbw = s:option(ListValue, "TXBW", translate("Signal Bandwidth"))
 sbw.placeholder = "Signal Bandwidth"
 sbw.default = "125000"
 sbw:value("7800", "7.8 kHz")
@@ -154,13 +184,13 @@ sbw:value("62500", "62.5 kHz")
 sbw:value("125000", "125 kHz")
 sbw:value("250000", "250 kHz")
 
-local prb = s:option(Value, "TXPRLEN", translate("RadioB Preamble Length"), translate("Length range: 6 ~ 65536"))
+local prb = s:option(Value, "TXPRLEN", translate("Preamble Length"), translate("Length range: 6 ~ 65536"))
 prb.placeholder = "6 ~ 65536"
 prb.default = "8"
 
-local swd = s:option(Value, "syncwd", translate("RadioB LoRa Sync Word"), translate("Value 52(0x34) for LoRaWAN"))
-swd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
-swd.default = "52"
+local syncwd = s:option(Value, "syncwd", translate("LoRa Sync Word"))
+syncwd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
+syncwd.default = "52"
 
 local encry = s:option(Value, "encryption", translate("Encryption Key"))
 encry.placeholder = "Encryption Key"

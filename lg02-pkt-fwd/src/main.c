@@ -520,7 +520,7 @@ int main(int argc, char *argv[])
         MSG_LOG(DEBUG_UCI, "get option server_type=%s\n", server_type);
     }
 
-    /* mode: 0.A for RX, B for TX 1.B for RX, A for TX 2. both for RX, no TX */
+    /* mode0.A for RX, B for TX mode1.B for RX, A for TX mode2. both for RX, no TX */
     if (!get_config("general", radio_mode, 8)){
         strcpy(radio_mode, "0");
         MSG_LOG(DEBUG_UCI, "get option radio_mode=%s\n", radio_mode);
@@ -692,7 +692,7 @@ int main(int argc, char *argv[])
 
     radiodev *tmpdev;
 
-    if (strcmp(radio_mode, "1")) { /* swap radioA radioB */
+    if (!strcmp(radio_mode, "1")) { /* swap radioA radioB */
         tmpdev = rxdev;
         rxdev = txdev;
         txdev = tmpdev;

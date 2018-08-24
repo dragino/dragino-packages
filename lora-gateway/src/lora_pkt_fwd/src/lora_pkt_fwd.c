@@ -52,6 +52,7 @@ Maintainer: Michael Coracin
 #include "timersync.h"
 #include "parson.h"
 #include "base64.h"
+#include "radio.h"
 #include "loragw_hal.h"
 #include "loragw_gps.h"
 #include "loragw_aux.h"
@@ -232,6 +233,10 @@ static int8_t antenna_gain = 0;
 static struct lgw_tx_gain_lut_s txlut; /* TX gain table */
 static uint32_t tx_freq_min[LGW_RF_CHAIN_NB]; /* lowest frequency supported by TX chain */
 static uint32_t tx_freq_max[LGW_RF_CHAIN_NB]; /* highest frequency supported by TX chain */
+
+/* TX RADIO sx1276 */
+radiodev *sxradio;
+static bool sx1276 = false;
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
@@ -1025,9 +1030,6 @@ int main(void)
     uint32_t cp_nb_beacon_sent = 0;
     uint32_t cp_nb_beacon_rejected = 0;
 
-    /* clock and log rotation management */
-    int log_rotate_interval = 3600; /* by default, rotation every 1 hour */
-
     /* GPS coordinates variables */
     bool coord_ok = false;
     struct coord_s cp_gps_coord = {0.0, 0.0, 0};
@@ -1036,7 +1038,7 @@ int main(void)
     uint32_t trig_tstamp;
 
     /* statistics variable */
-    time_t t;
+    time_t t, now_time;
     char stat_timestamp[24];
     float rx_ok_ratio;
     float rx_bad_ratio;
@@ -1195,9 +1197,23 @@ int main(void)
     }
     freeaddrinfo(result);
 
-    /* opening log file and writing CSV header*/
-    time(&now_time);
-    open_log();
+    /* init transifer radio device */
+    /* spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21 */
+    sxradio = (radiodev *) malloc(sizeof(radiodev));
+    sxradio->nss = 21;
+    sxradio->rst = 12;
+    sxradio->dio[0] = 7;
+    sxradio->dio[1] = 6;
+    sxradio->dio[2] = 8;
+    strcpy(sxradio->desc, "SPI_DEV_RADIO");
+    sxradio->spiport = spi_open(SPI_DEV_RADIO);
+    if (sxradio->spiport < 0) {
+        MSG_DEBUG(DEBUG_ERROR, "open spi_dev_sx1276 error!\n");
+        free(sxradio);
+    }
+
+    if(get_radio_version(sxradio))
+        sx1276 = true;
 
     /* starting the concentrator */
     i = lgw_start();
@@ -2616,41 +2632,49 @@ void thread_jit(void) {
                         MSG_DEBUG(DEBUG_INFO, "INFO: Beacon dequeued (count_us=%u)\n", pkt.count_us);
                     }
 
-                    /* check if concentrator is free for sending new packet */
-                    pthread_mutex_lock(&mx_concent); /* may have to wait for a fetch to finish */
-                    result = lgw_status(TX_STATUS, &tx_status);
-                    pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
-                    if (result == LGW_HAL_ERROR) {
-                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_status failed\n");
-                    } else {
-                        if (tx_status == TX_EMITTING) {
-                            MSG_DEBUG(DEBUG_ERROR, "ERROR: concentrator is currently emitting\n");
-                            print_tx_status(tx_status);
-                            continue;
-                        } else if (tx_status == TX_SCHEDULED) {
-                            MSG_DEBUG(DEBUG_WARNING, "WARNING: a downlink was already scheduled, overwritting it...\n");
-                            print_tx_status(tx_status);
-                        } else {
-                            /* Nothing to do */
-                        }
-                    }
-
                     /* send packet to concentrator */
-                    pthread_mutex_lock(&mx_concent); /* may have to wait for a fetch to finish */
-                    result = lgw_send(pkt);
-                    pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
-                    if (result == LGW_HAL_ERROR) {
-                        pthread_mutex_lock(&mx_meas_dw);
-                        meas_nb_tx_fail += 1;
-                        pthread_mutex_unlock(&mx_meas_dw);
-                        MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_send failed\n");
-                        continue;
-                    } else {
+                    if (sx1276) {
+                        txlora(sxradio, &pkt);
                         pthread_mutex_lock(&mx_meas_dw);
                         meas_nb_tx_ok += 1;
                         pthread_mutex_unlock(&mx_meas_dw);
                         MSG_DEBUG(DEBUG_PKT_FWD, "lgw_send done: count_us=%u\n", pkt.count_us);
+                    } else { 
+                        /* check if concentrator is free for sending new packet */
+                        pthread_mutex_lock(&mx_concent); /* may have to wait for a fetch to finish */
+                        result = lgw_status(TX_STATUS, &tx_status);
+                        pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
+                        if (result == LGW_HAL_ERROR) {
+                            MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_status failed\n");
+                        } else {
+                            if (tx_status == TX_EMITTING) {
+                                MSG_DEBUG(DEBUG_ERROR, "ERROR: concentrator is currently emitting\n");
+                                print_tx_status(tx_status);
+                                continue;
+                            } else if (tx_status == TX_SCHEDULED) {
+                                MSG_DEBUG(DEBUG_WARNING, "WARNING: a downlink was already scheduled, overwritting it...\n");
+                                print_tx_status(tx_status);
+                            } else {
+                                /* Nothing to do */
+                            }
+                        }
+                        pthread_mutex_lock(&mx_concent); /* may have to wait for a fetch to finish */
+                        result = lgw_send(pkt);
+                        pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
+                        if (result == LGW_HAL_ERROR) {
+                            pthread_mutex_lock(&mx_meas_dw);
+                            meas_nb_tx_fail += 1;
+                            pthread_mutex_unlock(&mx_meas_dw);
+                            MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_send failed\n");
+                            continue;
+                        } else {
+                            pthread_mutex_lock(&mx_meas_dw);
+                            meas_nb_tx_ok += 1;
+                            pthread_mutex_unlock(&mx_meas_dw);
+                            MSG_DEBUG(DEBUG_PKT_FWD, "lgw_send done: count_us=%u\n", pkt.count_us);
+                        }
                     }
+                    
                 } else {
                     MSG_DEBUG(DEBUG_ERROR, "ERROR: jit_dequeue failed with %d\n", jit_result);
                 }

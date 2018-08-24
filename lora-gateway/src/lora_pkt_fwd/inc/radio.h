@@ -23,51 +23,10 @@
 #include <errno.h>
 #include <time.h>
 
-#include <sys/time.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/resource.h>
-#include <sys/stat.h>
-
 #include <linux/spi/spidev.h>
+#include <sys/ioctl.h>
 
-#include <pthread.h>
-
-#define ASSERT(cond) if(!(cond)) {printf("%s:%d\n", __FILE__, __LINE__); exit(1);}
-
-/* values available for the 'tx_mode' parameter */
-#define IMMEDIATE       0
-#define TIMESTAMPED     1
-#define ON_GPS          2
-
-#define DEBUG_PKT_FWD   1
-#define DEBUG_JIT       0
-#define DEBUG_JIT_ERROR 1
-#define DEBUG_TIMERSYNC 0
-#define DEBUG_BEACON    0
-#define DEBUG_LOG       1
-#define DEBUG_INFO      1
-#define DEBUG_WARNING   1
-#define DEBUG_ERROR     1
-#define DEBUG_GPS       0
-#define DEBUG_SPI       1
-
-#define MSG(args...)	        printf(args) /* message that is destined to the user */
-#define MSG_DEBUG(FLAG, fmt, ...)                                                               \
-    do {                                                                                       \
-        if (FLAG)                                                                                 \
-            fprintf(stdout, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
-    } while (0)
-
-#define MSG_LOG(LEVEL, args...)                                                               \
-    do {                                                                                      \
-        if (LEVEL)                                                                             \
-            printf(args);                                                                      \
-    } while (0)
-
-
-#define LOCKFILE "/var/run/lg02_lock.pid"
-#define LOCKMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)
+#include "loragw_hal.h"
 
 // ####################################################################
 // Registers Mapping
@@ -194,14 +153,6 @@
 #define DR_LORA_SF12    0x40
 #define DR_LORA_MULTI   0x7E
 
-/* values available for the 'coderate' parameters (LoRa only) */
-/* NOTE: arbitrary values */
-#define CR_UNDEFINED    0
-#define CR_LORA_4_5     5
-#define CR_LORA_4_6     6
-#define CR_LORA_4_7     7
-#define CR_LORA_4_8     8
-
 // ##################################################################
 // rxmode 
 // ##################################################################
@@ -229,44 +180,6 @@ typedef struct {
     uint8_t invertio;
     char desc[8];
 }radiodev; 
-
-extern radiodev *rxdev;
-extern radiodev *txdev;
-
-/**
- * @struct lgw_pkt_tx_s
- * @brief Structure containing the configuration of a packet to send and a pointer to the payload
- * */  
-struct pkt_tx_s {
-    uint32_t    freq_hz;        /*!> center frequency of TX */
-    uint8_t     tx_mode;        /*!> select on what event/time the TX is triggered */
-    uint32_t    count_us;       /*!> timestamp or delay in microseconds for TX trigger */
-    uint8_t     bandwidth;      /*!> modulation bandwidth (LoRa only) */
-    uint32_t    datarate;       /*!> TX datarate (baudrate for FSK, SF for LoRa) */
-    uint8_t     coderate;       /*!> error-correcting code of the packet (LoRa only) */
-    bool        invert_pol;     /*!> invert signal polarity, for orthogonal downlinks (LoRa only) */
-    uint16_t    preamble;       /*!> set the preamble length, 0 for default */
-    bool        no_crc;         /*!> if true, do not send a CRC in the packet */
-    bool        no_header;      /*!> if true, enable implicit header mode (LoRa), fixed length (FSK) */
-    uint16_t    size;           /*!> payload size in bytes */
-    uint8_t     payload[256];   /*!> buffer containing the payload */
-};
-
-/**
- @struct pkt_rx_s
- @brief Structure containing the metadata of a packet that was received and a pointer to the payload
-*/
-
-struct pkt_rx_s {
-    uint8_t     empty;        /*!> empty label */
-    float       snr;          /*!> average packet SNR, in dB (LoRa only) */
-    float       rssi;         /*!> average packet RSSI in dB */
-    uint16_t    crc;          /*!> CRC that was received in the payload */
-    uint16_t    size;         /*!> payload size in bytes */ 
-    uint8_t     payload[256]; /*!> buffer containing the payload */
-};
-
-#define QUEUESIZE 8         /*!> size of queue */
 
 /**
  @struct 
@@ -308,8 +221,7 @@ struct mqtt_config {
 #define READ_ACCESS     0x00
 #define WRITE_ACCESS    0x80
 #define SPI_SPEED       8000000
-#define SPI_DEV_RX    "/dev/spidev1.0"
-#define SPI_DEV_TX    "/dev/spidev2.0"
+#define SPI_DEV_RADIO    "/dev/spidev2.0"
 
 /*
  * Read the state of the port. The port can be input
@@ -324,7 +236,7 @@ void diditalWrite(int, int);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* SPI initialization and configuration */
-int lgw_spi_open(char *); 
+int spi_open(char *); 
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 // Lora configure : Freq, SF, BW
@@ -356,39 +268,11 @@ void rxlora(int, uint8_t);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-bool received(uint8_t, struct pkt_rx_s *); 
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-void txlora(radiodev *, struct pkt_tx_s *); 
+void txlora(radiodev *, struct lgw_pkt_tx_s *);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void single_tx(radiodev *, uint8_t *, int); 
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int32_t bw_getval(int); 
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int32_t bw_toval(int); 
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int32_t sf_getval(int);
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int32_t sf_toval(int);
-    
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int lockfile(int);
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int already_running(void);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

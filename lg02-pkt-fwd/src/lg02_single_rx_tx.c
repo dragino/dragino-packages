@@ -39,10 +39,6 @@ static bool getversion = false;
 volatile bool exit_sig = false; /* 1 -> application terminates cleanly (shut down hardware, close open files, etc) */
 volatile bool quit_sig = false; /* 1 -> application terminates without shutting down the hardware */
 
-/* radio devices */
-
-radiodev *loradev;
-
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
 
 static void sig_handler(int sigio) {
@@ -178,6 +174,7 @@ int main(int argc, char *argv[])
 	
 	/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     /* radio device SPI_DEV init */
+    radiodev *loradev;
     loradev = (radiodev *) malloc(sizeof(radiodev));
 
     if (device == 49){

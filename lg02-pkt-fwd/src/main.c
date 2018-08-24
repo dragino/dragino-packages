@@ -27,6 +27,7 @@
 #include <netinet/in.h> /* INET constants and stuff */
 #include <arpa/inet.h>  /* IP address conversion stuff */
 #include <netdb.h>		/* gai_strerror */
+#include <mosquitto.h>		/* gai_strerror */
 
 #include <uci.h>
 
@@ -175,18 +176,35 @@ static uint32_t autoquit_threshold = 0; /* enable auto-quit after a number of no
 /* Just In Time TX scheduling */
 static struct jit_queue_s jit_queue;
 
+/* mqtt publish */
+static bool mqttconnect = true ;
+
+static struct mqtt_config mconf = {
+	.id = "client_id",
+	.keepalive = 300,
+	.host = "server",
+	.port = "port",
+	.qos = 1,
+	.topic = "topic_format", /* pub */
+	.username = "username",
+	.password = "password",
+        .clean_session = true,
+};
+
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
 
 static void sig_handler(int sigio);
 
-#define UCI_CONFIG_FILE "/etc/config/gateway"
+static char uci_config_file[32] = {'\0'};
 static struct uci_context * ctx = NULL; 
 static bool get_config(const char *section, char *option, int len);
 
 static double difftimespec(struct timespec end, struct timespec beginning);
 
 static void wait_ms(unsigned long a); 
+
+static int my_publish(struct mqtt_config *);
 
 /* radio devices */
 
@@ -218,7 +236,7 @@ static bool get_config(const char *section, char *option, int len) {
     bool ret = false;
 
     ctx = uci_alloc_context(); 
-    if (UCI_OK != uci_load(ctx, UCI_CONFIG_FILE, &pkg))  
+    if (UCI_OK != uci_load(ctx, uci_config_file, &pkg))  
         goto cleanup;   /* load uci conifg failed*/
 
     uci_foreach_element(&pkg->sections, e)
@@ -364,6 +382,52 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
 }
 
 /* -------------------------------------------------------------------------- */
+/* --- MQTT FUNCTION -------------------------------------------------------- */
+static void my_connect_callback(struct mosquitto *mosq, void *obj, int result)
+{
+    if (result) 
+        fprintf(stderr, "%s\n", mosquitto_connack_string(result));
+}
+
+static void my_disconnect_callback(struct mosquitto *mosq, void *obj, int result)
+{
+    mqttconnect = false;
+}
+
+static void my_publish_callback(struct mosquitto *mosq, void *obj, int mid)
+{
+    mosquitto_disconnect((struct mosquitto *)obj);
+}
+
+static int my_publish(struct mqtt_config *conf)
+{
+	struct mosquitto *mosq;
+
+	mosquitto_lib_init();
+
+	mosq = mosquitto_new(conf->id, true, NULL);
+	mosquitto_connect_callback_set(mosq, my_connect_callback);
+	mosquitto_disconnect_callback_set(mosq, my_disconnect_callback);
+	mosquitto_publish_callback_set(mosq, my_publish_callback);
+
+        mosquitto_username_pw_set(mosq, conf->username, conf->password);
+
+	mosquitto_connect(mosq, conf->host, atoi(conf->port), conf->keepalive);
+
+	mosquitto_loop_start(mosq);
+
+        mosquitto_publish(mosq, NULL, conf->topic, conf->msglen, conf->message, conf->qos, false);
+
+	mosquitto_loop_stop(mosq, false);
+
+	mosquitto_destroy(mosq);
+
+	mosquitto_lib_cleanup();
+
+	return 0;
+}
+
+/* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
 int main(int argc, char *argv[])
@@ -396,7 +460,9 @@ int main(int argc, char *argv[])
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-	/* load configuration */
+    /* load configuration */
+    strcpy(uci_config_file, "/etc/config/gateway");
+
     if (!get_config("general", provider, 16)){
         strcpy(provider, "ttn");  
         MSG_LOG(DEBUG_INFO, "get option provider=%s\n", provider);
@@ -514,6 +580,43 @@ int main(int argc, char *argv[])
     sscanf(gatewayid, "%llx", &ull);
     lgwm = ull;
 
+    if (!strcmp(server_type, "mqtt")) {
+        char mqtt_server_type[32] = "server_type";
+
+        strcpy(uci_config_file, "/etc/config/mqtt");
+
+        if (!get_config("general", mqtt_server_type, sizeof(mqtt_server_type))){
+            strcpy(mqtt_server_type, "thingspeak");  
+        }
+
+        if (!get_config("general", mconf.username, sizeof(mconf.username))){
+            strcpy(mconf.username, "username");  
+        }
+
+        if (!get_config("general", mconf.password, sizeof(mconf.password))){
+            strcpy(mconf.password, "password");  
+        }
+
+        if (!get_config("general", mconf.id, sizeof(mconf.id))){
+            strcpy(mconf.id, "client_id");  
+        }
+
+        if (!get_config(mqtt_server_type, mconf.host, sizeof(mconf.host))){
+            strcpy(mconf.host, "mqtt.thingspeak.com");  
+        }
+
+        if (!get_config(mqtt_server_type, mconf.port, sizeof(mconf.port))){
+            strcpy(mconf.port, "1883");  
+        }
+
+        if (!get_config(mqtt_server_type, mconf.topic, sizeof(mconf.topic))){
+            strcpy(mconf.topic, "topic_format");  
+        }
+
+        printf("MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s\n", mconf.host, mconf.port, \
+                                        mconf.username, mconf.password, mconf.topic);
+    }
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     /* init the queue of receive packets */
@@ -555,7 +658,7 @@ int main(int argc, char *argv[])
     txdev->dio[2] = 0;
     txdev->spiport = lgw_spi_open(SPI_DEV_TX);
     if (txdev->spiport < 0) {
-        syslog(LOG_ERR, "open spi_dev_tx error!\n");
+        MSG_LOG(DEBUG_ERROR, "open spi_dev_tx error!\n");
         goto clean;
     }
     txdev->freq = atol(tx_freq);
@@ -741,14 +844,10 @@ int main(int argc, char *argv[])
                         single_tx(txdev, pktrx[pt].payload, pktrx[pt].size); 
                         pktrx_clean(&pktrx[pt]); 
                     } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp")) {  // mqtt mode or tcpudp mode for loraRAW
-                        char fpath[64] = {'\0'};
-                        FILE *fp = NULL;
-                        sprintf(fpath, "/var/iot/channels/%02x%02x%02x%02x", pktrx[pt].payload[0], pktrx[pt].payload[1], pktrx[pt].payload[2], pktrx[pt].payload[3]);
-                        if ((fp = fopen(fpath, "w+")) != NULL) {
-                            fwrite(pktrx[pt].payload, 1, strlen(pktrx[pt].payload), fp);
-                            fflush(fp);
-                            fclose(fp);
-                        }
+                        strcpy(mconf.message, pktrx[pt].payload);
+                        mconf.msglen = pktrx[pt].size;
+                        my_publish(&mconf);
+
                         pktrx_clean(&pktrx[pt]);
                     }
 

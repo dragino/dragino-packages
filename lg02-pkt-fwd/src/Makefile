@@ -1,12 +1,15 @@
 # lg02_pkt_fwd
 
-all: lg02_pkt_fwd lg02_single_rx_tx
+all: lg02_pkt_fwd lg02_single_rx_tx spirw
 
 lg02_pkt_fwd: base64.o parson.o radio.o jitqueue.o main.o
-	$(CC) main.o base64.o parson.o radio.o jitqueue.o $(LIBS) -luci -lrt -ldl -lpthread -o lg02_pkt_fwd
+	$(CC) main.o base64.o parson.o radio.o jitqueue.o $(LIBS) -luci -lmosquitto -lrt -ldl -lpthread -o lg02_pkt_fwd
 
 lg02_single_rx_tx: radio.o
 	$(CC) $(CFLAGS) radio.o $(LIBS) -lrt -ldl lg02_single_rx_tx.c -o lg02_single_rx_tx
+
+spirw: radio.o
+	$(CC) $(CFLAGS) radio.o $(LIBS) -lrt -ldl simple_spi_rw.c -o spirw
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
@@ -24,4 +27,4 @@ radio.o: radio.c
 	$(CC) $(CFLAGS) -c radio.c
 
 clean:
-	rm *.o lg02_pkt_fwd lg02_single_rx_tx	
+	rm *.o lg02_pkt_fwd lg02_single_rx_tx spirw

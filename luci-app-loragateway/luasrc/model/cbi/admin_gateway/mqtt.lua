@@ -47,7 +47,7 @@ sp.default = "1883"
 sp:depends("server_type","general")
 --sp.rmempty  = false
 
-local user = s:option(Value, "user_name", translate("User Name [-u]"))
+local user = s:option(Value, "username", translate("User Name [-u]"))
 user.placeholder = "MQTT User Name"
 
 local password = s:option(Value, "password", translate("Password [-P]"))

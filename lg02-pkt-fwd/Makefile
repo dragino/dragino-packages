@@ -15,7 +15,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=Utilities
 	TITLE:=$(PKG_NAME)
 	MAINTAINER:=Dragino <support@dragino.com>
-	DEPENDS:=+libuci +libpthread +librt
+	DEPENDS:=+libuci +libmosquitto-ssl +libpthread +librt
 endef
 
 define Package/$(PKG_NAME)/description
@@ -35,6 +35,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
 	$(CP) $(PKG_BUILD_DIR)/lg02_single_rx_tx $(1)/usr/bin
+	$(CP) $(PKG_BUILD_DIR)/spirw $(1)/usr/bin
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

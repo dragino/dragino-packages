@@ -11,12 +11,14 @@
 
 #include "radio.h"
 
+extern int32_t lgw_sf_getval(int x);
+extern int32_t lgw_bw_getval(int x);
+
 static const uint8_t rxlorairqmask[] = {
     [RXMODE_SINGLE] = IRQ_LORA_RXDONE_MASK|IRQ_LORA_CRCERR_MASK,
     [RXMODE_SCAN]   = IRQ_LORA_RXDONE_MASK|IRQ_LORA_CRCERR_MASK,
     [RXMODE_RSSI]   = 0x00,
 };
-
 
 /*
  * Reserve a GPIO for this program's use.
@@ -246,22 +248,8 @@ int digitalRead(int gpio) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-static void selectreceiver(int pin)
-{
-    digitalWrite(pin, LOW);
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-static void unselectreceiver(int pin)
-{
-    digitalWrite(pin, HIGH);
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
 /* Simple write */
-static int lgw_spi_w(uint8_t spidev, uint8_t address, uint8_t data) {
+static int spi_w(uint8_t spidev, uint8_t address, uint8_t data) {
     uint8_t out_buf[3];
     uint8_t command_size;
     struct spi_ioc_transfer k;
@@ -299,7 +287,7 @@ static int lgw_spi_w(uint8_t spidev, uint8_t address, uint8_t data) {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* Simple read */
-static int lgw_spi_r(uint8_t spidev, uint8_t address, uint8_t *data) {
+static int spi_r(uint8_t spidev, uint8_t address, uint8_t *data) {
     uint8_t out_buf[3];
     uint8_t command_size;
     uint8_t in_buf[10];
@@ -341,7 +329,7 @@ static uint8_t readReg(uint8_t spidev, uint8_t addr)
 {
     uint8_t data = 0x00;
 
-    lgw_spi_r(spidev, addr, &data);
+    spi_r(spidev, addr, &data);
 
     return data;
 }
@@ -350,7 +338,7 @@ static uint8_t readReg(uint8_t spidev, uint8_t addr)
 
 static void writeReg(uint8_t spidev, uint8_t addr, uint8_t value)
 {
-    lgw_spi_w(spidev, addr, value);
+    spi_w(spidev, addr, value);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -397,7 +385,6 @@ void setsf(uint8_t spidev, int sf)
     }
 
     writeReg(spidev, REG_MODEM_CONFIG2, (readReg(spidev, REG_MODEM_CONFIG2) & 0x0f) | ((sf << 4) & 0xf0));
-    MSG_LOG(DEBUG_SPI, "SF=0x%2x\n", readReg(spidev, REG_MODEM_CONFIG2));
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -429,22 +416,19 @@ void setsbw(uint8_t spidev, long sbw)
     }
 
     writeReg(spidev, REG_MODEM_CONFIG, (readReg(spidev, REG_MODEM_CONFIG) & 0x0f) | (bw << 4));
-    MSG_LOG(DEBUG_SPI, "BW=0x%2x\n", readReg(spidev, REG_MODEM_CONFIG));
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void setcr(uint8_t spidev, int denominator)
 {
-    if (denominator < 5) {
-        denominator = 5;
-    } else if (denominator > 8) {
-        denominator = 8;
+    if (denominator < 1) {
+        denominator = 1;
+    } else if (denominator > 4) {
+        denominator = 4;
     }
 
-    int cr = denominator - 4;
-
-    writeReg(spidev, REG_MODEM_CONFIG, (readReg(spidev, REG_MODEM_CONFIG) & 0xf1) | (cr << 1));
+    writeReg(spidev, REG_MODEM_CONFIG, (readReg(spidev, REG_MODEM_CONFIG) & 0xf1) | (denominator << 1));
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -476,7 +460,7 @@ void crccheck(uint8_t spidev, uint8_t nocrc)
 
 
 /* SPI initialization and configuration */
-int lgw_spi_open(char *spi_path) {
+int spi_open(char *spi_path) {
     int a = 0, b = 0;
     int i, spidev = 0;
 
@@ -527,11 +511,9 @@ int lgw_spi_open(char *spi_path) {
         return -1;
     }
 
-    //fprintf(stderr, "Note(%s): SPI port opened and configured ok\n", spi_path);
+    fprintf(stderr, "Note(%s): SPI port opened and configured ok\n", spi_path);
     return spidev;
 }
-
-
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 // Lora configure : Freq, SF, BW
@@ -596,7 +578,6 @@ void rxlora(int spidev, uint8_t rxmode)
 {
 
     opmodeLora(spidev);
-    ASSERT((readReg(spidev, REG_OPMODE) & OPMODE_LORA) != 0);
 
     // enter standby mode (required for FIFO loading))
     opmode(spidev, OPMODE_STANDBY);
@@ -635,68 +616,13 @@ void rxlora(int spidev, uint8_t rxmode)
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
-
-    int i, rssicorr;
-
-    int irqflags = readReg(spidev, REG_IRQ_FLAGS);
-
-    // clean all IRQ
-    writeReg(spidev, REG_IRQ_FLAGS, 0xFF);
-
-    //printf("Start receive, flags=%d\n", irqflags);
-
-    if ((irqflags & IRQ_LORA_RXDONE_MASK) && (irqflags & IRQ_LORA_CRCERR_MASK) == 0) {
-
-        uint8_t currentAddr = readReg(spidev, REG_FIFO_RX_CURRENT_ADDR);
-        uint8_t receivedCount = readReg(spidev, REG_RX_NB_BYTES);
-
-        pkt_rx->size = receivedCount;
-
-        writeReg(spidev, REG_FIFO_ADDR_PTR, currentAddr);
-
-        printf("\nReceive(HEX):");
-        for(i = 0; i < receivedCount; i++) {
-            pkt_rx->payload[i] = (char)readReg(spidev, REG_FIFO);
-            printf("%02x", pkt_rx->payload[i]);
-        }
-        printf("\n");
-
-        uint8_t value = readReg(spidev, REG_PKT_SNR_VALUE);
-
-        if( value & 0x80 ) // The SNR sign bit is 1
-        {
-            // Invert and divide by 4
-            value = ( ( ~value + 1 ) & 0xFF ) >> 2;
-            pkt_rx->snr = -value;
-        } else {
-            // Divide by 4
-            pkt_rx->snr = ( value & 0xFF ) >> 2;
-        }
-        
-        rssicorr = 157;
-
-        pkt_rx->rssi = readReg(spidev, REG_PKTRSSI) - rssicorr;
-
-        pkt_rx->empty = 0;  /* make sure save the received messaeg */
-
-        return true;
-    } /* else if (readReg(spidev, REG_OPMODE) != (OPMODE_LORA | OPMODE_RX_SINGLE)) {  //single mode
-        writeReg(spidev, REG_FIFO_ADDR_PTR, 0x00);
-        rxlora(spidev, RXMODE_SINGLE);
-    }*/
-    return false;
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-void txlora(radiodev *radiodev, struct pkt_tx_s *pkt) {
+void txlora(radiodev *radiodev, struct lgw_pkt_tx_s *pkt) {
 
     opmode(radiodev->spiport, OPMODE_SLEEP);
 
     setfreq(radiodev->spiport, pkt->freq_hz);
-    setsf(radiodev->spiport, sf_getval(pkt->datarate));
-    setsbw(radiodev->spiport, bw_getval(pkt->bandwidth));
+    setsf(radiodev->spiport, lgw_sf_getval(pkt->datarate));
+    setsbw(radiodev->spiport, lgw_bw_getval(pkt->bandwidth));
     setcr(radiodev->spiport, pkt->coderate);
     setprlen(radiodev->spiport, pkt->preamble);
     setsyncword(radiodev->spiport, LORA_MAC_PREAMBLE);
@@ -721,7 +647,7 @@ void txlora(radiodev *radiodev, struct pkt_tx_s *pkt) {
     // select LoRa modem (from sleep mode)
     opmodeLora(radiodev->spiport);
 
-    ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
+    //ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
     // enter standby mode (required for FIFO loading))
     opmode(radiodev->spiport, OPMODE_STANDBY);
@@ -751,7 +677,7 @@ void txlora(radiodev *radiodev, struct pkt_tx_s *pkt) {
     // wait for TX done
     while(digitalRead(radiodev->dio[0]) == 0);
 
-    MSG("\nTransmit at SF%iBW%ld on %.6lf.\n", sf_getval(pkt->datarate), bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000);
+    printf("\nTransmit at SF%iBW%d on %.6lf.\n", lgw_sf_getval(pkt->datarate), lgw_bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000);
 
     // mask all IRQs
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
@@ -770,7 +696,7 @@ void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
     // select LoRa modem (from sleep mode)
     opmodeLora(radiodev->spiport);
 
-    ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
+    //ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
     // enter standby mode (required for FIFO loading))
     opmode(radiodev->spiport, OPMODE_STANDBY);
@@ -802,7 +728,7 @@ void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
     // wait for TX done
     while(digitalRead(radiodev->dio[0]) == 0);
 
-    MSG("\nTransmit at SF%iBW%ld on %.6lf.\n", radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000);
+    printf("\nTransmit at SF%iBW%d on %.6lf.\n", radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000);
 
     // mask all IRQs
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
@@ -814,99 +740,4 @@ void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
     opmode(radiodev->spiport, OPMODE_SLEEP);
 }
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lockfile(int fd)
-{
-    struct flock fl;
-
-    fl.l_type = F_WRLCK;
-    fl.l_start = 0;
-    fl.l_whence = SEEK_SET;
-    fl.l_len = 0;
-    return(fcntl(fd, F_SETLK, &fl));
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int already_running(void)
-{
-    int     fd;
-    char    buf[16];
-
-    fd = open(LOCKFILE, O_RDWR|O_CREAT, LOCKMODE);
-    if (fd < 0) {
-        fprintf(stderr, "can't open %s: %s", LOCKFILE, strerror(errno));
-        exit(1);
-    }
-    if (lockfile(fd) < 0) {
-        if (errno == EACCES || errno == EAGAIN) {
-            close(fd);
-            return(1);
-        }
-        fprintf(stderr, "can't lock %s: %s", LOCKFILE, strerror(errno));
-        exit(1);
-    }
-    ftruncate(fd, 0);
-    sprintf(buf, "%ld", (long)getpid());
-    write(fd, buf, strlen(buf)+1);
-    return(0);
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int32_t bw_getval(int x) {
-    switch (x) {
-        case BW_500KHZ: return 500000;
-        case BW_250KHZ: return 250000;
-        case BW_125KHZ: return 125000;
-        case BW_62K5HZ: return 62500;
-        case BW_31K2HZ: return 31200;
-        case BW_15K6HZ: return 15600;
-        case BW_7K8HZ : return 7800;
-        default: return -1;
-    }
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int32_t sf_getval(int x) {
-    switch (x) {
-        case DR_LORA_SF7: return 7;
-        case DR_LORA_SF8: return 8;
-        case DR_LORA_SF9: return 9;
-        case DR_LORA_SF10: return 10;
-        case DR_LORA_SF11: return 11;
-        case DR_LORA_SF12: return 12;
-        default: return -1;
-    }
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int32_t sf_toval(int x) {
-    switch (x) {
-        case 7: return DR_LORA_SF7; 
-        case 8: return DR_LORA_SF8; 
-        case 9: return DR_LORA_SF9;
-        case 10: return DR_LORA_SF10;
-        case 11: return DR_LORA_SF11;
-        case 12: return DR_LORA_SF12;
-        default: return -1;
-    }
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-int32_t bw_toval(int x) {
-    switch (x) {
-        case 500000: return BW_500KHZ;
-        case 250000: return BW_250KHZ;
-        case 125000: return BW_125KHZ;
-        case 62500: return BW_62K5HZ;
-        case 31200: return BW_31K2HZ;
-        case 15600: return BW_15K6HZ;
-        case 7800: return BW_7K8HZ;
-        default: return -1;
-    }
-}

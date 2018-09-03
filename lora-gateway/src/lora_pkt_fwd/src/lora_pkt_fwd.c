@@ -47,6 +47,8 @@ Maintainer: Michael Coracin
 
 #include <pthread.h>
 
+#include <uci.h>
+
 #include "trace.h"
 #include "jitqueue.h"
 #include "timersync.h"
@@ -243,6 +245,12 @@ static bool sx1276 = false;
 
 static void sig_handler(int sigio);
 
+static char uci_config_file[32] = "/etc/config/gateway";
+
+static struct uci_context * ctx = NULL; 
+
+static bool get_config(const char *section, char *option, int len);
+
 static int parse_SX1301_configuration(const char * conf_file);
 
 static int parse_gateway_configuration(const char * conf_file);
@@ -273,6 +281,36 @@ static void sig_handler(int sigio) {
         exit_sig = true;
     }
     return;
+}
+
+static bool get_config(const char *section, char *option, int len) {
+    struct uci_package * pkg = NULL;
+    struct uci_element *e;
+    const char *value;
+    bool ret = false;
+
+    ctx = uci_alloc_context(); 
+    if (UCI_OK != uci_load(ctx, uci_config_file, &pkg))  
+        goto cleanup;   /* load uci conifg failed*/
+
+    uci_foreach_element(&pkg->sections, e)
+    {
+        struct uci_section *st = uci_to_section(e);
+
+        if(!strcmp(section, st->e.name))  /* compare section name */ {
+            if (NULL != (value = uci_lookup_option_string(ctx, st, option))) {
+	         memset(option, 0, len);
+                 strncpy(option, value, len); 
+                 ret = true;
+                 break;
+            }
+        }
+    }
+    uci_unload(ctx, pkg); /* free pkg which is UCI package */
+cleanup:
+    uci_free_context(ctx);
+    ctx = NULL;
+    return ret;
 }
 
 static int parse_SX1301_configuration(const char * conf_file) {
@@ -1199,21 +1237,28 @@ int main(void)
 
     /* init transifer radio device */
     /* spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21 */
-    sxradio = (radiodev *) malloc(sizeof(radiodev));
-    sxradio->nss = 21;
-    sxradio->rst = 12;
-    sxradio->dio[0] = 7;
-    sxradio->dio[1] = 6;
-    sxradio->dio[2] = 8;
-    strcpy(sxradio->desc, "SPI_DEV_RADIO");
-    sxradio->spiport = spi_open(SPI_DEV_RADIO);
-    if (sxradio->spiport < 0) {
-        MSG_DEBUG(DEBUG_ERROR, "open spi_dev_sx1276 error!\n");
-        free(sxradio);
-    }
+    char sx1276_tx[8] = {'\0'};
 
-    if(get_radio_version(sxradio))
-        sx1276 = true;
+    get_config("gerneral", sx1276_tx, sizeof(sx1276_tx));
+
+    if (atoi(sx1276_tx) > 0) {
+
+        sxradio = (radiodev *) malloc(sizeof(radiodev));
+        sxradio->nss = 21;
+        sxradio->rst = 12;
+        sxradio->dio[0] = 7;
+        sxradio->dio[1] = 6;
+        sxradio->dio[2] = 8;
+        strcpy(sxradio->desc, "SPI_DEV_RADIO");
+        sxradio->spiport = spi_open(SPI_DEV_RADIO);
+        if (sxradio->spiport < 0) {
+            MSG_DEBUG(DEBUG_ERROR, "open spi_dev_sx1276 error!\n");
+            free(sxradio);
+        }
+
+        if(get_radio_version(sxradio))
+            sx1276 = true;
+    }
 
     /* starting the concentrator */
     i = lgw_start();

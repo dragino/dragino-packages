@@ -47,6 +47,10 @@ start_service() {
 }
 
 reload_service() {
+    if [[ "$board" = "LG08" ]]; then
+        /usr/bin/reset_lgw.sh restart 2>&1 > /dev/null
+        /usr/bin/generate-config.sh  2>&1 > /dev/null
+    fi
     stop
     start
 }

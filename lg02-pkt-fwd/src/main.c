@@ -189,6 +189,7 @@ static struct mqtt_config mconf = {
 	.port = "port",
 	.qos = 1,
 	.topic = "topic_format", /* pub */
+	.data_format = "data_format", /* pub */
 	.username = "username",
 	.password = "password",
         .clean_session = true,
@@ -631,8 +632,12 @@ int main(int argc, char *argv[])
             strcpy(mconf.topic, "topic_format");  
         }
 
-        MSG_LOG(DEBUG_INFO, "MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s\n", mconf.host, mconf.port, \
-                                        mconf.username, mconf.password, mconf.topic);
+        if (!get_config(mqtt_server_type, mconf.data_format, sizeof(mconf.data_format))){
+            strcpy(mconf.topic, "topic_data_format");  
+        }
+
+        MSG_LOG(DEBUG_UCI, "MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s, data_format=%s\n", mconf.host, mconf.port, \
+                                        mconf.username, mconf.password, mconf.topic, mconf.data_format);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

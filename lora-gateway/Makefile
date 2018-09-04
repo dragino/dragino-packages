@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lora_gateway
-PKG_VERSION:=1.0.0
+PKG_VERSION:=1.1.0
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -24,7 +24,7 @@ define Package/lora-gateway
 $(call Package/lora-gateway/Default)
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=+libftdi
+  DEPENDS:=+libuci +libftdi
 endef
 
 define Package/lora-gateway/description

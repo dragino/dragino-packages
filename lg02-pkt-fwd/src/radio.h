@@ -284,6 +284,7 @@ struct mqtt_config {
 	char message[256]; /* pub */
 	long msglen; /* pub */
 	char topic[128]; /* pub */
+	char data_format[128]; /* pub data format */
 	char username[32];
 	char password[32];
 	char cafile[32];

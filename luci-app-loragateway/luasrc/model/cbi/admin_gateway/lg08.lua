@@ -25,6 +25,7 @@ s.addremove = false
 s:tab("general",  translate("General Settings"))
 s:tab("radios",  translate("Radio Settings"))
 s:tab("channels", translate("Channels Settings"))
+s:tab("info", translate("Info Display"))
 
 ----
 ---- General Settings
@@ -104,11 +105,6 @@ o.default = 0
 o.disable = 0
 o.enable = 1
 
-o = s:taboption("general", TextValue, "ChanIF", translate("DESC"))                                
-o.rows = 26                                                                                       
-function o.cfgvalue()                                                                             
-    return nixio.fs.readfile("/etc/lora/desc") or ""                                          
-end
 
 ----
 ---- Radio Settings
@@ -358,5 +354,15 @@ o.placeholder = "select bandwidth"
 o:value("125000", "125k")
 o:value("250000", "250k")
 o:depends("lorachan_enable", "1")
+
+--
+-- info
+--
+
+o = s:taboption("info", TextValue, "ChanIF", translate("info"))                                
+o.rows = 26                                                                                       
+function o.cfgvalue()                                                                             
+    return nixio.fs.readfile("/etc/lora/desc") or ""                                          
+end
 
 return m

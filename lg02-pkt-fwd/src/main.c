@@ -180,6 +180,7 @@ static uint32_t autoquit_threshold = 0; /* enable auto-quit after a number of no
 static struct jit_queue_s jit_queue;
 
 /* mqtt publish */
+/*
 static bool mqttconnect = true ;
 
 static struct mqtt_config mconf = {
@@ -188,12 +189,13 @@ static struct mqtt_config mconf = {
 	.host = "server",
 	.port = "port",
 	.qos = 1,
-	.topic = "topic_format", /* pub */
-	.data_format = "data_format", /* pub */
+	.topic = "topic_format", 
+	.data_format = "data_format", 
 	.username = "username",
 	.password = "password",
         .clean_session = true,
 };
+*/
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
@@ -208,7 +210,7 @@ static double difftimespec(struct timespec end, struct timespec beginning);
 
 static void wait_ms(unsigned long a); 
 
-static int my_publish(struct mqtt_config *);
+//static int my_publish(struct mqtt_config *);
 
 /* radio devices */
 
@@ -386,10 +388,11 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
 
 /* -------------------------------------------------------------------------- */
 /* --- MQTT FUNCTION -------------------------------------------------------- */
+/*
 static void my_connect_callback(struct mosquitto *mosq, void *obj, int result)
 {
     if (result) 
-        fprintf(stderr, "%s\n", mosquitto_connack_string(result));
+        fprintf(stderr, "ERROR: %s\n", mosquitto_connack_string(result));
 }
 
 static void my_disconnect_callback(struct mosquitto *mosq, void *obj, int result)
@@ -429,6 +432,7 @@ static int my_publish(struct mqtt_config *conf)
 
 	return 0;
 }
+*/
 
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
@@ -458,7 +462,7 @@ int main(int argc, char *argv[])
     //
     // Make sure only one copy of the daemon is running.
     if (already_running()) {
-        MSG_LOG(DEBUG_ERROR, "%s: already running!\n", argv[0]);
+        MSG_LOG(DEBUG_ERROR, "ERROR: %s: already running!\n", argv[0]);
         exit(1);
     }
 
@@ -468,7 +472,7 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", provider, 16)){
         strcpy(provider, "ttn");  
-        MSG_LOG(DEBUG_UCI, "get option provider=%s\n", provider);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option provider=%s\n", provider);
     }
 
     snprintf(server, sizeof(server), "%s_server", provider); 
@@ -485,7 +489,7 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", port, 8)){
         strcpy(port, "1700");
-        MSG_LOG(DEBUG_UCI, "get option port=%s\n", port);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option port=%s\n", port);
     }
 
     strcpy(serv_port_up, port);
@@ -493,102 +497,102 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", email, 32)){
         strcpy(email, "dragino@dragino.com");
-        MSG_LOG(DEBUG_UCI, "get option email=%s\n", email);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option email=%s\n", email);
     }
 
     if (!get_config("general", gatewayid, 64)){
         strcpy(gatewayid, "a84041ffff16c21c");      /*set default:router.eu.thethings.network*/
-        MSG_LOG(DEBUG_UCI, "get option gatewayid=%s\n", gatewayid);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option gatewayid=%s\n", gatewayid);
     } 
 
     if (!get_config("general", LAT, 16)){
         strcpy(LAT, "0");
-        MSG_LOG(DEBUG_UCI, "get option lat=%s\n", LAT);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option lat=%s\n", LAT);
     }
 
     if (!get_config("general", LON, 16)){
         strcpy(LON, "0");
-        MSG_LOG(DEBUG_UCI, "get option lon=%s\n", LON);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option lon=%s\n", LON);
     }
 
     if (!get_config("general", logdebug, 4)){
-        MSG_LOG(DEBUG_UCI, "get option logdebug=%s\n", logdebug);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option logdebug=%s\n", logdebug);
     }
 
     /* server_type : 1.lorawan  2.relay  3.mqtt  4.tcpudp */
     if (!get_config("general", server_type, 16)){
         strcpy(server_type, "lorawan");
-        MSG_LOG(DEBUG_UCI, "get option server_type=%s\n", server_type);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option server_type=%s\n", server_type);
     }
 
     /* mode0.A for RX, B for TX mode1.B for RX, A for TX mode2. both for RX, no TX */
     if (!get_config("general", radio_mode, 8)){
         strcpy(radio_mode, "0");
-        MSG_LOG(DEBUG_UCI, "get option radio_mode=%s\n", radio_mode);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option radio_mode=%s\n", radio_mode);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if (!get_config("radio1", rx_freq, 16)){
         strcpy(rx_freq, "902320000"); /* default frequency*/
-        MSG_LOG(DEBUG_UCI, "get option rxfreq=%s\n", rx_freq);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxfreq=%s\n", rx_freq);
     }
 
     if (!get_config("radio1", rxsf, 8)){
         strcpy(rxsf, "7");
-        MSG_LOG(DEBUG_UCI, "get option rxsf=%s\n", rxsf);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxsf=%s\n", rxsf);
     }
 
     if (!get_config("radio1", rxcr, 8)){
         strcpy(rxcr, "5");
-        MSG_LOG(DEBUG_UCI, "get option coderate=%s\n", rxcr);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option coderate=%s\n", rxcr);
     }
     
     if (!get_config("radio1", rxbw, 8)){
         strcpy(rxbw, "125000");
-        MSG_LOG(DEBUG_UCI, "get option rxbw=%s\n", rxbw);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxbw=%s\n", rxbw);
     }
 
     if (!get_config("radio1", rxprlen, 8)){
         strcpy(rxprlen, "8");
-        MSG_LOG(DEBUG_UCI, "get option rxprlen=%s\n", rxprlen);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxprlen=%s\n", rxprlen);
     }
 
     if (!get_config("radio1", syncwd1, 8)){
         strcpy(syncwd1, "52");  //Value 0x34 is reserved for LoRaWAN networks
-        MSG_LOG(DEBUG_UCI, "get option syncword=0x%02x\n", syncwd1);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option syncword=0x%02x\n", syncwd1);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if (!get_config("radio2", tx_freq, 16)){
         strcpy(tx_freq, "923300000"); /* default frequency*/
-        MSG_LOG(DEBUG_UCI, "get option txfreq=%s\n", tx_freq);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option txfreq=%s\n", tx_freq);
     }
 
     if (!get_config("radio2", txsf, 8)){
         strcpy(txsf, "9");
-        MSG_LOG(DEBUG_UCI, "get option txsf=%s\n", txsf);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option txsf=%s\n", txsf);
     }
 
     if (!get_config("radio2", txcr, 8)){
         strcpy(txcr, "5");
-        MSG_LOG(DEBUG_UCI, "get option coderate=%s\n", txcr);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option coderate=%s\n", txcr);
     }
 
     if (!get_config("radio2", txbw, 8)){
         strcpy(txbw, "125000");
-        MSG_LOG(DEBUG_UCI, "get option rxbw=%s\n", txbw);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxbw=%s\n", txbw);
     }
 
     if (!get_config("radio2", txprlen, 8)){
         strcpy(txprlen, "8");
-        MSG_LOG(DEBUG_UCI, "get option txprlen=%s\n", txprlen);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option txprlen=%s\n", txprlen);
     }
 
     if (!get_config("radio2", syncwd2, 8)){
         strcpy(syncwd2, "52");  //Value 0x34 is reserved for LoRaWAN networks
-        MSG_LOG(DEBUG_UCI, "get option syncword2=0x%02x\n", syncwd2);
+        MSG_LOG(DEBUG_UCI, "UCIINFO: get option syncword2=0x%02x\n", syncwd2);
     }
 
     debuglevel = atoi(logdebug);
@@ -599,6 +603,7 @@ int main(int argc, char *argv[])
     sscanf(gatewayid, "%llx", &ull);
     lgwm = ull;
 
+    /*
     if (!strcmp(server_type, "mqtt")) {
         char mqtt_server_type[32] = "server_type";
 
@@ -636,9 +641,10 @@ int main(int argc, char *argv[])
             strcpy(mconf.topic, "topic_data_format");  
         }
 
-        MSG_LOG(DEBUG_UCI, "MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s, data_format=%s\n", mconf.host, mconf.port, \
+        MSG_LOG(DEBUG_UCI, "UCIINFO: MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s, data_format=%s\n", mconf.host, mconf.port, \
                                         mconf.username, mconf.password, mconf.topic, mconf.data_format);
     }
+    */
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -682,7 +688,7 @@ int main(int argc, char *argv[])
     txdev->dio[2] = 0;
     txdev->spiport = lgw_spi_open(SPI_DEV_TX);
     if (txdev->spiport < 0) {
-        MSG_LOG(DEBUG_ERROR, "open spi_dev_tx error!\n");
+        MSG_LOG(DEBUG_ERROR, "ERROR: open spi_dev_tx error!\n");
         goto clean;
     }
     txdev->freq = atol(tx_freq);
@@ -734,7 +740,7 @@ int main(int argc, char *argv[])
     /* look for server address w/ upstream port */
     //MSG("Looking for server with upstream port......\n");
     if (!strcmp(server_type, "lorawan")) {
-        MSG("Start lora packet forward daemon, server = %s, port = %s\n", server, port);
+        MSG_LOG(DEBUG_INFO, "INFO: Start lora packet forward daemon, server = %s, port = %s\n", server, port);
         /* prepare hints to open network sockets */
         memset(&hints, 0, sizeof hints);
         hints.ai_family = AF_INET; /* should handle IP v4 or v6 automatically */
@@ -877,10 +883,18 @@ int main(int argc, char *argv[])
                         single_tx(txdev, pktrx[pt].payload, pktrx[pt].size); 
                         pktrx_clean(&pktrx[pt]); 
                     } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp")) {  // mqtt mode or tcpudp mode for loraRAW
-                        strcpy(mconf.message, pktrx[pt].payload);
-                        mconf.msglen = pktrx[pt].size;
-                        my_publish(&mconf);
+                        char chan_path[32] = {'\0'};
+                        FILE *fp = NULL;
 
+                        sprintf(chan_path, "/var/iot/channels/%c%c%c%c", pktrx[pt].payload[0], pktrx[pt].payload[1], pktrx[pt].payload[2], pktrx[pt].payload[3]);
+                        fp = fopen(chan_path, "w+");
+                        if (fp < 0) 
+                            MSG_LOG(DEBUG_ERROR, "ERROR: canot open file path: %s\n", chan_path); 
+                        else {
+                            fwrite(pktrx[pt].payload, sizeof(char), pktrx[pt].size, fp);  
+                            fflush(fp);
+                            fclose(fp);
+                        }
                         pktrx_clean(&pktrx[pt]);
                     }
 
@@ -1168,7 +1182,7 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = '\0'; /* add string terminator, for safety */
                 
-        MSG("\nINFO (JSON): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        MSG("\nRXTX (JSON): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
             
         /* send datagram to server */
         send(sock_up, (void *)buff_up, buff_index, 0);
@@ -1337,7 +1351,7 @@ void thread_down(void) {
 	    /* the datagram is a PULL_RESP */
 	    buff_down[msg_len] = 0; /* add string terminator, just to be safe */
 	    //printf("INFO: [down] PULL_RESP received :)\n"); /* very verbose */
-	    MSG("\nINFO (json): [down] %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+	    MSG("\nRXTX (json): [down] %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 	    
 	    /* initialize TX struct and try to parse JSON */
 	    memset(&txpkt, 0, sizeof(txpkt));
@@ -1535,7 +1549,7 @@ void thread_jit(void) {
                     pthread_mutex_lock(&mx_meas_dw);
                     meas_nb_tx_ok += 1;
                     pthread_mutex_unlock(&mx_meas_dw);
-                    MSG_LOG(DEBUG_PKT_FWD, "Donwlink done: count_us=%u\n", pkt.count_us);
+                    MSG_LOG(DEBUG_PKT_FWD, "INFO: Donwlink done: count_us=%u\n", pkt.count_us);
                 } else {
                     MSG_LOG(DEBUG_ERROR, "ERROR: jit_dequeue failed with %d\n", jit_result);
                 }

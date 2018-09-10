@@ -7,23 +7,13 @@
         mode = tonumber(mode[#mode] ~= "iptables" and mode[#mode]) or 1
 
         if (mode == 1) then
-          file = io.open("/var/log/gw_debug.log", "rb")
-          if file then
-            os.execute("cat /var/log/gw_debug.log > /tmp/reportdata")
-            file:close()
-          end
+          os.execute("cat /etc/lora/desc > /tmp/reportdata")
         elseif (mode == 2) then
-          file = io.open("/var/log/gw_report.log", "rb")
-          if file then
-            os.execute("cat /var/log/gw_report.log > /tmp/reportdata")
-            file:close()
-          end
-        else
-          file = io.open("/var/log/pktfwd.log", "rb")
-          if file then
-            os.execute("cat /var/log/pktfwd.log > /tmp/reportdata")
-            file:close()
-          end
+          os.execute("logread -e REPORT | awk -F ':' '{$5}' > /tmp/reportdata")
+        elseif (mode == 3) then
+          os.execute("logread -e RXTX | awk -F ':' '{$5}' > /tmp/reportdata")
+        elseif (mode == 4) then
+          os.execute("logread -e ERROR | awk -F ':' '{$5}' > /tmp/reportdata")
         end
 
         file = io.open("/tmp/reportdata", "rb")
@@ -31,7 +21,7 @@
           sdata = file:read("*a")
           file:close()
         else
-          sdata = "is the pkt_lora_fwd runing?"
+          sdata = "is the service runing?"
         end
 -%>
 
@@ -44,13 +34,14 @@
 	}
 </style>
 
-<h2 name="content"><%:Lora Status%></h2>
+<h2 name="content"><%:Logread%></h2>
 <br />
 
 <ul class="cbi-tabmenu">
-        <li class="cbi-tab<%= mode ~= 1 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/1")%>"><%:Debug%></a></li>
+        <li class="cbi-tab<%= mode ~= 1 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/1")%>"><%:FreqINFO%></a></li>
         <li class="cbi-tab<%= mode ~= 2 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/2")%>"><%:Report%></a></li>
         <li class="cbi-tab<%= mode ~= 3 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/3")%>"><%:RxTxJson%></a></li>
+        <li class="cbi-tab<%= mode ~= 4 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/1")%>"><%:ErrorMSG%></a></li>
 </ul>
 
 <form method="post" action="<%=url("admin/gateway/lgwlog_action")%>"">              
@@ -58,7 +49,7 @@
 </form>
 
 <div id="content_syslog">
-  <textarea readonly="readonly" wrap="off" rows="<%=sdata:cmatch("\n")+2%>" id="syslog"><%=sdata:pcdata()%></textarea>
+  <textarea readonly="readonly" wrap="off" rows="<%=sdata:cmatch("\r\n")+2%>" id="syslog"><%=sdata:pcdata()%></textarea>
 </div>
 
 <%+footer%>

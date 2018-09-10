@@ -25,7 +25,6 @@ s.addremove = false
 s:tab("general",  translate("General Settings"))
 s:tab("radios",  translate("Radio Settings"))
 s:tab("channels", translate("Channels Settings"))
-s:tab("info", translate("Info Display"))
 
 ----
 ---- General Settings
@@ -99,7 +98,7 @@ o.default = 0
 o.disable = 0
 o.enable = 1
 
-o = s:taboption("general", Flag, "sx1276_tx", translate("use sx1276 for tx"))
+o = s:taboption("general", Flag, "sx1276", translate("use sx1276 for tx"))
 o.optional = true
 o.default = 0
 o.disable = 0
@@ -358,11 +357,5 @@ o:depends("lorachan_enable", "1")
 --
 -- info
 --
-
-o = s:taboption("info", TextValue, "ChanIF", translate("info"))                                
-o.rows = 26                                                                                       
-function o.cfgvalue()                                                                             
-    return nixio.fs.readfile("/etc/lora/desc") or ""                                          
-end
 
 return m

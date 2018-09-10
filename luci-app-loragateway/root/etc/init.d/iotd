@@ -21,15 +21,23 @@ init_board() {
     board=`cat /var/iot/board`
 
     uci set system.vendor.web_model="$board"
+    uci set gateway.general.model="$board"
     uci commit
 
     if [[ "$board" = "LG02" ]]; then
         process="lg02_pkt_fwd"
-    elif [[ "$board" = "LG08" ]]; then
+    elif [[ "$board" = "LG08P" ]]; then
         process="lora_pkt_fwd"
         rmmod spi-gpio-custom
         insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21
         /usr/bin/reset_lgw.sh start
+        /usr/bin/generate-config.sh
+    elif [[ "$board" = "LG08" ]]; then
+        process="lora_pkt_fwd"
+        rmmod spi-gpio-custom
+        insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19 
+        /usr/bin/reset_lgw.sh start
+        /usr/bin/generate-config.sh
     else
         exit 1
     fi
@@ -47,10 +55,6 @@ start_service() {
 }
 
 reload_service() {
-    if [[ "$board" = "LG08" ]]; then
-        /usr/bin/reset_lgw.sh restart 2>&1 > /dev/null
-        /usr/bin/generate-config.sh  2>&1 > /dev/null
-    fi
     stop
     start
 }

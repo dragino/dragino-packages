@@ -45,7 +45,6 @@
 #define DEBUG_JIT_ERROR 1
 #define DEBUG_TIMERSYNC 0
 #define DEBUG_BEACON    0
-#define DEBUG_LOG       1
 #define DEBUG_INFO      1
 #define DEBUG_WARNING   1
 #define DEBUG_ERROR     1
@@ -60,10 +59,10 @@
             fprintf(stdout, "%s:%d:%s(): " fmt, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
     } while (0)
 
-#define MSG_LOG(LEVEL, args...)                                                               \
+#define MSG_LOG(LEVEL, fmt, ...)                                                               \
     do {                                                                                      \
         if (LEVEL)                                                                             \
-            printf(args);                                                                      \
+            fprintf(stdout, fmt);                                                    \
     } while (0)
 
 
@@ -274,6 +273,7 @@ struct pkt_rx_s {
  @struct 
  @brief 
 */
+/*
 struct mqtt_config {
 	char id[64];
 	int keepalive;
@@ -281,10 +281,10 @@ struct mqtt_config {
 	char port[32];
 	int qos;
 	bool retain;
-	char message[256]; /* pub */
-	long msglen; /* pub */
-	char topic[128]; /* pub */
-	char data_format[128]; /* pub data format */
+	char message[256]; 
+	long msglen; 
+	char topic[128]; 
+	char data_format[128]; 
 	char username[32];
 	char password[32];
 	char cafile[32];
@@ -297,6 +297,7 @@ struct mqtt_config {
 	char psk_identity[32];
 	bool clean_session;
 };
+*/
 
 /*******************************************************************************
  * GPIO/SPI configure

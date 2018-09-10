@@ -239,6 +239,7 @@ static uint32_t tx_freq_max[LGW_RF_CHAIN_NB]; /* highest frequency supported by 
 /* TX RADIO sx1276 */
 radiodev *sxradio;
 static bool sx1276 = false;
+static char server_type[16] = "server_type";
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
@@ -1237,11 +1238,18 @@ int main(void)
 
     /* init transifer radio device */
     /* spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21 */
-    char sx1276_tx[8] = {'\0'};
+    char sx1276_tx[8] = "sx1276";
+    char model[8] = "model";
 
     get_config("gerneral", sx1276_tx, sizeof(sx1276_tx));
+    get_config("gerneral", model, sizeof(model));
 
-    if (atoi(sx1276_tx) > 0) {
+    /* mqtt or lorawan */
+    get_config("gerneral", server_type, sizeof(server_type));
+
+    /* only LG08P with sx1276 */
+
+    if (!strcmp(model, "LG08P") && atoi(sx1276_tx) > 0) {
 
         sxradio = (radiodev *) malloc(sizeof(radiodev));
         sxradio->nss = 21;
@@ -1411,28 +1419,28 @@ int main(void)
         }
 
         /* display a report */
-        printf("\n################## Report at: %s ##################\n", stat_timestamp);
-        printf("### [UPSTREAM] ###\n");
-        printf("# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
-        printf("# CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
-        printf("# RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
-        printf("# PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
-        printf("# PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
-        printf("### [DOWNSTREAM] ###\n");
-        printf("# PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
-        printf("# PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
-        printf("# RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
-        printf("# TX errors: %u\n", cp_nb_tx_fail);
+        printf("\nREPORT: ################## Report at: %s ##################\n", stat_timestamp);
+        printf("REPORT: ### [UPSTREAM] ###\n");
+        printf("REPORT: # RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
+        printf("REPORT: # CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
+        printf("REPORT: # RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
+        printf("REPORT: # PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
+        printf("REPORT: # PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
+        printf("REPORT: ### [DOWNSTREAM] ###\n");
+        printf("REPORT: # PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
+        printf("REPORT: # PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
+        printf("REPORT: # RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
+        printf("REPORT: # TX errors: %u\n", cp_nb_tx_fail);
         if (cp_nb_tx_requested != 0 ) {
-            printf("# TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_packet);
-            printf("# TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_beacon);
-            printf("# TX rejected (too late): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_late);
-            printf("# TX rejected (too early): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_early);
+            printf("REPORT: # TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_packet);
+            printf("REPORT: # TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_beacon);
+            printf("REPORT: # TX rejected (too late): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_late);
+            printf("REPORT: # TX rejected (too early): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_early);
         }
-        printf("# BEACON queued: %u\n", cp_nb_beacon_queued);
-        printf("# BEACON sent so far: %u\n", cp_nb_beacon_sent);
-        printf("# BEACON rejected: %u\n", cp_nb_beacon_rejected);
-        printf("### [JIT] ###\n");
+        printf("REPORT: # BEACON queued: %u\n", cp_nb_beacon_queued);
+        printf("REPORT: # BEACON sent so far: %u\n", cp_nb_beacon_sent);
+        printf("REPORT: # BEACON rejected: %u\n", cp_nb_beacon_rejected);
+        printf("REPORT: ### [JIT] ###\n");
         
         /* get timestamp captured on PPM pulse  */
         pthread_mutex_lock(&mx_concent);
@@ -1915,7 +1923,7 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = 0; /* add string terminator, for safety */
 
-        fprintf(stdout, "%s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        fprintf(stdout, "RXTX: %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
         /* send datagram to server */
         send(sock_up, (void *)buff_up, buff_index, 0);
         clock_gettime(CLOCK_MONOTONIC, &send_time);
@@ -2296,7 +2304,7 @@ void thread_down(void) {
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
             MSG_DEBUG(DEBUG_INFO, "INFO: [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
-            fprintf(stdout, "%s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+            fprintf(stdout, "RXTX: %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 
             /* initialize TX struct and try to parse JSON */
             memset(&txpkt, 0, sizeof txpkt);

@@ -38,10 +38,10 @@ gen_gw_cfg() {
 }
 
 echo_chan_if() {
-    cfg=`cat /etc/lora/global_conf.json`
     echo "SX1301 Channels frequency" > /etc/lora/desc
     echo "---------------------------------------" >> /etc/lora/desc
-    json_load "$cfg"
+
+    json_load_file "/etc/lora/global_conf.json"
     json_select SX1301_conf
     for i in `seq 0 7`
     do
@@ -57,7 +57,7 @@ echo_chan_if() {
     json_get_var desc desc
     json_select ..
     echo "chan_Lora_std" >> /etc/lora/desc
-    echo "$desc" > /etc/lora/desc
+    echo "$desc" >> /etc/lora/desc
     echo "---------------------------------------" >> /etc/lora/desc
 
     json_cleanup

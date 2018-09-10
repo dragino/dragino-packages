@@ -10,7 +10,7 @@ int main () {
     loradev->dio[0] = 7;
     loradev->dio[1] = 6;
     loradev->dio[2] = 0;	
-    strcpy(loradev->desc, "RFDEV");	
+    strcpy(loradev->desc, "LG02 detect");	
     loradev->spiport = lgw_spi_open(SPI_DEV_RX);
 
     if ((fp = fopen("/var/iot/board", "w")) < 0) {
@@ -22,8 +22,17 @@ int main () {
 
     if (get_radio_version(loradev))  
         fprintf(fp, "LG02\n");
-    else
-        fprintf(fp, "LG08\n");
+    else {
+        close(loradev->spiport);
+        loradev->nss = 21;
+        loradev->rst = 12;
+        strcpy(loradev->desc, "LG08P detect");	
+        loradev->spiport = lgw_spi_open(SPI_DEV_TX);
+        if (get_radio_version(loradev))  
+            fprintf(fp, "LG08P\n");
+        else
+            fprintf(fp, "LG08\n");
+    }
 
     fflush(fp);
     fclose(fp);

@@ -38,6 +38,12 @@ function index()
     end
     entry({"admin", "gateway", "mqtt"}, cbi("admin_gateway/mqtt"), _("MQTT"), 3)
     --entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("TCP_Client"), 4)
+    entry({"admin", "gateway", "lgwlog"}, template("admin_status/lgwlog"), _("Logread"), 20).leaf = true
+    entry({"admin", "gateway", "lgwlog_action"}, post("lgwlog_action")).leaf = true
 	
 end
+function lgwlog_action()
+    luci.http.redirect(luci.dispatcher.build_url("admin/gateway/lgwlog"))
+end
+
 

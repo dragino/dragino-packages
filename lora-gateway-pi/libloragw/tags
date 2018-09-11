@@ -1,0 +1,1222 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AGC_CMD_ABORT	src/loragw_hal.c	70;"	d	file:
+AGC_CMD_WAIT	src/loragw_hal.c	69;"	d	file:
+AR	Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
+ARCH	Makefile	/^ARCH ?=$/;"	m
+ARRAY_SIZE	src/loragw_fpga.c	35;"	d	file:
+ARRAY_SIZE	src/loragw_gps.c	40;"	d	file:
+ARRAY_SIZE	src/loragw_hal.c	37;"	d	file:
+ARRAY_SIZE	src/loragw_lbt.c	33;"	d	file:
+ARRAY_SIZE	src/loragw_radio.c	38;"	d	file:
+ARRAY_SIZE	src/loragw_reg.c	34;"	d	file:
+ARRAY_SIZE	src/loragw_spi.native.c	40;"	d	file:
+ARRAY_SIZE	tst/test_loragw_cal.c	43;"	d	file:
+ARRAY_SIZE	tst/test_loragw_hal.c	41;"	d	file:
+ARRAY_SIZE	tst/test_loragw_spi.c	29;"	d	file:
+BURST_TEST_LENGTH	tst/test_loragw_reg.c	28;"	d	file:
+BURST_TEST_SIZE	tst/test_loragw_spi.c	34;"	d	file:
+BW_125KHZ	inc/loragw_hal.h	90;"	d
+BW_15K6HZ	inc/loragw_hal.h	93;"	d
+BW_250KHZ	inc/loragw_hal.h	89;"	d
+BW_31K2HZ	inc/loragw_hal.h	92;"	d
+BW_500KHZ	inc/loragw_hal.h	88;"	d
+BW_62K5HZ	inc/loragw_hal.h	91;"	d
+BW_7K8HZ	inc/loragw_hal.h	94;"	d
+BW_UNDEFINED	inc/loragw_hal.h	87;"	d
+CC	Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
+CFLAGS	Makefile	/^CFLAGS := -O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
+CHECK_NULL	src/loragw_fpga.c	39;"	d	file:
+CHECK_NULL	src/loragw_fpga.c	43;"	d	file:
+CHECK_NULL	src/loragw_gps.c	44;"	d	file:
+CHECK_NULL	src/loragw_gps.c	48;"	d	file:
+CHECK_NULL	src/loragw_hal.c	42;"	d	file:
+CHECK_NULL	src/loragw_hal.c	47;"	d	file:
+CHECK_NULL	src/loragw_lbt.c	37;"	d	file:
+CHECK_NULL	src/loragw_lbt.c	41;"	d	file:
+CHECK_NULL	src/loragw_radio.c	42;"	d	file:
+CHECK_NULL	src/loragw_radio.c	46;"	d	file:
+CHECK_NULL	src/loragw_reg.c	38;"	d	file:
+CHECK_NULL	src/loragw_reg.c	42;"	d	file:
+CHECK_NULL	src/loragw_spi.native.c	44;"	d	file:
+CHECK_NULL	src/loragw_spi.native.c	48;"	d	file:
+CROSS_COMPILE	Makefile	/^CROSS_COMPILE ?=$/;"	m
+CR_LORA_4_5	inc/loragw_hal.h	113;"	d
+CR_LORA_4_6	inc/loragw_hal.h	114;"	d
+CR_LORA_4_7	inc/loragw_hal.h	115;"	d
+CR_LORA_4_8	inc/loragw_hal.h	116;"	d
+CR_UNDEFINED	inc/loragw_hal.h	112;"	d
+DEBUG_ARRAY	src/loragw_gps.c	43;"	d	file:
+DEBUG_ARRAY	src/loragw_gps.c	47;"	d	file:
+DEBUG_ARRAY	src/loragw_hal.c	41;"	d	file:
+DEBUG_ARRAY	src/loragw_hal.c	46;"	d	file:
+DEBUG_AUX	inc/config.h	4;"	d
+DEBUG_GPIO	inc/config.h	9;"	d
+DEBUG_GPS	inc/config.h	8;"	d
+DEBUG_HAL	inc/config.h	7;"	d
+DEBUG_LBT	inc/config.h	10;"	d
+DEBUG_MSG	src/loragw_aux.c	34;"	d	file:
+DEBUG_MSG	src/loragw_aux.c	37;"	d	file:
+DEBUG_MSG	src/loragw_fpga.c	37;"	d	file:
+DEBUG_MSG	src/loragw_fpga.c	41;"	d	file:
+DEBUG_MSG	src/loragw_gps.c	42;"	d	file:
+DEBUG_MSG	src/loragw_gps.c	46;"	d	file:
+DEBUG_MSG	src/loragw_hal.c	39;"	d	file:
+DEBUG_MSG	src/loragw_hal.c	44;"	d	file:
+DEBUG_MSG	src/loragw_lbt.c	35;"	d	file:
+DEBUG_MSG	src/loragw_lbt.c	39;"	d	file:
+DEBUG_MSG	src/loragw_radio.c	40;"	d	file:
+DEBUG_MSG	src/loragw_radio.c	44;"	d	file:
+DEBUG_MSG	src/loragw_reg.c	36;"	d	file:
+DEBUG_MSG	src/loragw_reg.c	40;"	d	file:
+DEBUG_MSG	src/loragw_spi.native.c	42;"	d	file:
+DEBUG_MSG	src/loragw_spi.native.c	46;"	d	file:
+DEBUG_PRINTF	src/loragw_aux.c	35;"	d	file:
+DEBUG_PRINTF	src/loragw_aux.c	38;"	d	file:
+DEBUG_PRINTF	src/loragw_fpga.c	38;"	d	file:
+DEBUG_PRINTF	src/loragw_fpga.c	42;"	d	file:
+DEBUG_PRINTF	src/loragw_hal.c	40;"	d	file:
+DEBUG_PRINTF	src/loragw_hal.c	45;"	d	file:
+DEBUG_PRINTF	src/loragw_lbt.c	36;"	d	file:
+DEBUG_PRINTF	src/loragw_lbt.c	40;"	d	file:
+DEBUG_PRINTF	src/loragw_radio.c	41;"	d	file:
+DEBUG_PRINTF	src/loragw_radio.c	45;"	d	file:
+DEBUG_PRINTF	src/loragw_reg.c	37;"	d	file:
+DEBUG_PRINTF	src/loragw_reg.c	41;"	d	file:
+DEBUG_PRINTF	src/loragw_spi.native.c	43;"	d	file:
+DEBUG_PRINTF	src/loragw_spi.native.c	47;"	d	file:
+DEBUG_REG	inc/config.h	6;"	d
+DEBUG_SPI	inc/config.h	5;"	d
+DEFAULT_BAUDRATE	src/loragw_gps.c	58;"	d	file:
+DEFAULT_NOTCH_FREQ	tst/test_loragw_hal.c	47;"	d	file:
+DEFAULT_RSSI_OFFSET	tst/test_loragw_cal.c	49;"	d	file:
+DEFAULT_RSSI_OFFSET	tst/test_loragw_hal.c	46;"	d	file:
+DEFAULT_TX_NOTCH_FREQ	tst/test_loragw_cal.c	48;"	d	file:
+DR_FSK_MAX	inc/loragw_hal.h	108;"	d
+DR_FSK_MIN	inc/loragw_hal.h	107;"	d
+DR_LORA_MULTI	inc/loragw_hal.h	105;"	d
+DR_LORA_SF10	inc/loragw_hal.h	102;"	d
+DR_LORA_SF11	inc/loragw_hal.h	103;"	d
+DR_LORA_SF12	inc/loragw_hal.h	104;"	d
+DR_LORA_SF7	inc/loragw_hal.h	99;"	d
+DR_LORA_SF8	inc/loragw_hal.h	100;"	d
+DR_LORA_SF9	inc/loragw_hal.h	101;"	d
+DR_UNDEFINED	inc/loragw_hal.h	98;"	d
+FPGA_VERSION	src/loragw_reg.c	/^const uint8_t FPGA_VERSION[] = { 31, 33 }; \/* several versions could be supported *\/$/;"	v
+FREQ_SIG_NORM	tst/test_loragw_cal.c	56;"	d	file:
+FW_VERSION_ADDR	src/loragw_hal.c	61;"	d	file:
+FW_VERSION_ADDR	tst/test_loragw_cal.c	53;"	d	file:
+FW_VERSION_AGC	src/loragw_hal.c	63;"	d	file:
+FW_VERSION_ARB	src/loragw_hal.c	64;"	d	file:
+FW_VERSION_CAL	src/loragw_hal.c	62;"	d	file:
+FW_VERSION_CAL	tst/test_loragw_cal.c	54;"	d	file:
+IF_FSK_STD	inc/loragw_hal.h	58;"	d
+IF_HZ_TO_REG	src/loragw_hal.c	50;"	d	file:
+IF_LORA_MULTI	inc/loragw_hal.h	57;"	d
+IF_LORA_STD	inc/loragw_hal.h	56;"	d
+IF_UNDEFINED	inc/loragw_hal.h	55;"	d
+IGNORED	inc/loragw_gps.h	/^    IGNORED,         \/*!> frame was not parsed by the system *\/$/;"	e	enum:gps_msg
+IMMEDIATE	inc/loragw_hal.h	126;"	d
+INCLUDES	Makefile	/^INCLUDES = $(wildcard inc\/*.h)$/;"	m
+INCOMPLETE	inc/loragw_gps.h	/^    INCOMPLETE,      \/*!> frame parsed was missing bytes *\/$/;"	e	enum:gps_msg
+INVALID	inc/loragw_gps.h	/^    INVALID,         \/*!> system try to parse frame but failed *\/$/;"	e	enum:gps_msg
+IS_FSK_BW	inc/loragw_hal.h	36;"	d
+IS_FSK_DR	inc/loragw_hal.h	37;"	d
+IS_LORA_BW	inc/loragw_hal.h	31;"	d
+IS_LORA_CR	inc/loragw_hal.h	34;"	d
+IS_LORA_MULTI_DR	inc/loragw_hal.h	33;"	d
+IS_LORA_STD_DR	inc/loragw_hal.h	32;"	d
+IS_TX_MODE	inc/loragw_hal.h	39;"	d
+LBT_CHANNEL_FREQ_NB	inc/loragw_hal.h	156;"	d
+LBT_TIMESTAMP_MASK	src/loragw_lbt.c	44;"	d	file:
+LGW_ADDR_CAPTURE_COUNT	inc/loragw_reg.h	351;"	d
+LGW_ADJUST_MODEM_START_OFFSET_RDX4	inc/loragw_reg.h	191;"	d
+LGW_ADJUST_MODEM_START_OFFSET_SF12_RDX4	inc/loragw_reg.h	192;"	d
+LGW_BB_RSSI	inc/loragw_reg.h	345;"	d
+LGW_BIST0_FINISHED	inc/loragw_reg.h	88;"	d
+LGW_BIST1_FINISHED	inc/loragw_reg.h	89;"	d
+LGW_BURST_CHUNK	inc/loragw_spi.h	36;"	d
+LGW_CAPTURE_FORCE_TRIGGER	inc/loragw_reg.h	334;"	d
+LGW_CAPTURE_PERIOD	inc/loragw_reg.h	336;"	d
+LGW_CAPTURE_RAM_ADDR	inc/loragw_reg.h	70;"	d
+LGW_CAPTURE_RAM_BIST_STATUS	inc/loragw_reg.h	92;"	d
+LGW_CAPTURE_RAM_DATA	inc/loragw_reg.h	71;"	d
+LGW_CAPTURE_SOURCE	inc/loragw_reg.h	332;"	d
+LGW_CAPTURE_START	inc/loragw_reg.h	333;"	d
+LGW_CAPTURE_WRAP	inc/loragw_reg.h	335;"	d
+LGW_CHANN_AGC_GAIN	inc/loragw_reg.h	166;"	d
+LGW_CHANN_OVERRIDE_AGC_GAIN	inc/loragw_reg.h	165;"	d
+LGW_CHANN_RSSI	inc/loragw_reg.h	344;"	d
+LGW_CHANN_SELECT_RSSI	inc/loragw_reg.h	231;"	d
+LGW_CHAN_FIR_RAM0_BIST_STATUS	inc/loragw_reg.h	93;"	d
+LGW_CHAN_FIR_RAM1_BIST_STATUS	inc/loragw_reg.h	94;"	d
+LGW_CHAN_GAIN_OFFSET	inc/loragw_reg.h	219;"	d
+LGW_CHIP_ID	inc/loragw_reg.h	145;"	d
+LGW_CHIRP_INVERT_RX	inc/loragw_reg.h	197;"	d
+LGW_CLEAR_BIST0	inc/loragw_reg.h	86;"	d
+LGW_CLEAR_BIST1	inc/loragw_reg.h	87;"	d
+LGW_CLK32M_EN	inc/loragw_reg.h	82;"	d
+LGW_CLKHS_EN	inc/loragw_reg.h	83;"	d
+LGW_CONCENTRATOR_MODEM_ENABLE	inc/loragw_reg.h	79;"	d
+LGW_CORR0_DETECT_EN	inc/loragw_reg.h	167;"	d
+LGW_CORR0_RAM_BIST_STATUS	inc/loragw_reg.h	95;"	d
+LGW_CORR1_DETECT_EN	inc/loragw_reg.h	168;"	d
+LGW_CORR1_RAM_BIST_STATUS	inc/loragw_reg.h	96;"	d
+LGW_CORR2_DETECT_EN	inc/loragw_reg.h	169;"	d
+LGW_CORR2_RAM_BIST_STATUS	inc/loragw_reg.h	97;"	d
+LGW_CORR3_DETECT_EN	inc/loragw_reg.h	170;"	d
+LGW_CORR3_RAM_BIST_STATUS	inc/loragw_reg.h	98;"	d
+LGW_CORR4_DETECT_EN	inc/loragw_reg.h	171;"	d
+LGW_CORR4_RAM_BIST_STATUS	inc/loragw_reg.h	99;"	d
+LGW_CORR5_DETECT_EN	inc/loragw_reg.h	172;"	d
+LGW_CORR5_RAM_BIST_STATUS	inc/loragw_reg.h	100;"	d
+LGW_CORR6_DETECT_EN	inc/loragw_reg.h	173;"	d
+LGW_CORR6_RAM_BIST_STATUS	inc/loragw_reg.h	101;"	d
+LGW_CORR7_DETECT_EN	inc/loragw_reg.h	174;"	d
+LGW_CORR7_RAM_BIST_STATUS	inc/loragw_reg.h	102;"	d
+LGW_CORR_MAC_GAIN	inc/loragw_reg.h	190;"	d
+LGW_CORR_NUM_SAME_PEAK	inc/loragw_reg.h	189;"	d
+LGW_CORR_SAME_PEAKS_OPTION_SF10	inc/loragw_reg.h	179;"	d
+LGW_CORR_SAME_PEAKS_OPTION_SF11	inc/loragw_reg.h	180;"	d
+LGW_CORR_SAME_PEAKS_OPTION_SF12	inc/loragw_reg.h	181;"	d
+LGW_CORR_SAME_PEAKS_OPTION_SF6	inc/loragw_reg.h	175;"	d
+LGW_CORR_SAME_PEAKS_OPTION_SF7	inc/loragw_reg.h	176;"	d
+LGW_CORR_SAME_PEAKS_OPTION_SF8	inc/loragw_reg.h	177;"	d
+LGW_CORR_SAME_PEAKS_OPTION_SF9	inc/loragw_reg.h	178;"	d
+LGW_CORR_SIG_NOISE_RATIO_SF10	inc/loragw_reg.h	186;"	d
+LGW_CORR_SIG_NOISE_RATIO_SF11	inc/loragw_reg.h	187;"	d
+LGW_CORR_SIG_NOISE_RATIO_SF12	inc/loragw_reg.h	188;"	d
+LGW_CORR_SIG_NOISE_RATIO_SF6	inc/loragw_reg.h	182;"	d
+LGW_CORR_SIG_NOISE_RATIO_SF7	inc/loragw_reg.h	183;"	d
+LGW_CORR_SIG_NOISE_RATIO_SF8	inc/loragw_reg.h	184;"	d
+LGW_CORR_SIG_NOISE_RATIO_SF9	inc/loragw_reg.h	185;"	d
+LGW_DATABUFF_SIZE	inc/loragw_hal.h	64;"	d
+LGW_DATA_MNGT_CPT_FRAME_ALLOCATED	inc/loragw_reg.h	385;"	d
+LGW_DATA_MNGT_CPT_FRAME_FINISHED	inc/loragw_reg.h	386;"	d
+LGW_DATA_MNGT_CPT_FRAME_READEN	inc/loragw_reg.h	387;"	d
+LGW_DATA_MNGT_RAM_BIST0_STATUS	inc/loragw_reg.h	136;"	d
+LGW_DATA_MNGT_RAM_BIST1_STATUS	inc/loragw_reg.h	137;"	d
+LGW_DATA_MNGT_STATUS	inc/loragw_reg.h	384;"	d
+LGW_DBG_AGC_MCU_RAM_ADDR	inc/loragw_reg.h	365;"	d
+LGW_DBG_AGC_MCU_RAM_DATA	inc/loragw_reg.h	349;"	d
+LGW_DBG_ARB_MCU_RAM_ADDR	inc/loragw_reg.h	364;"	d
+LGW_DBG_ARB_MCU_RAM_DATA	inc/loragw_reg.h	348;"	d
+LGW_DBG_CHANN0_GAIN	inc/loragw_reg.h	353;"	d
+LGW_DBG_CHANN1_GAIN	inc/loragw_reg.h	354;"	d
+LGW_DBG_CHANN2_GAIN	inc/loragw_reg.h	355;"	d
+LGW_DBG_CHANN3_GAIN	inc/loragw_reg.h	356;"	d
+LGW_DBG_CHANN4_GAIN	inc/loragw_reg.h	357;"	d
+LGW_DBG_CHANN5_GAIN	inc/loragw_reg.h	358;"	d
+LGW_DBG_CHANN6_GAIN	inc/loragw_reg.h	359;"	d
+LGW_DBG_CHANN7_GAIN	inc/loragw_reg.h	360;"	d
+LGW_DBG_CORR_SELECT_CHANNEL	inc/loragw_reg.h	194;"	d
+LGW_DBG_CORR_SELECT_SF	inc/loragw_reg.h	193;"	d
+LGW_DBG_DEC_FILT_GAIN	inc/loragw_reg.h	361;"	d
+LGW_DBG_DETECT_CPT	inc/loragw_reg.h	195;"	d
+LGW_DBG_MCU_DATA	inc/loragw_reg.h	347;"	d
+LGW_DBG_SYMB_CPT	inc/loragw_reg.h	196;"	d
+LGW_DC_NOTCH_EN	inc/loragw_reg.h	198;"	d
+LGW_DEC_GAIN_OFFSET	inc/loragw_reg.h	218;"	d
+LGW_DEC_RSSI	inc/loragw_reg.h	346;"	d
+LGW_DEFAULT_NOTCH_FREQ	inc/loragw_fpga.h	36;"	d
+LGW_EMERGENCY_FORCE_HOST_CTRL	inc/loragw_reg.h	146;"	d
+LGW_FILTER_GAIN	inc/loragw_reg.h	153;"	d
+LGW_FORCE_DEC_FILTER_GAIN	inc/loragw_reg.h	222;"	d
+LGW_FORCE_HOST_FE_CTRL	inc/loragw_reg.h	221;"	d
+LGW_FORCE_HOST_RADIO_CTRL	inc/loragw_reg.h	220;"	d
+LGW_FPGA_CTRL_ACCESS_HISTO_MEM	inc/loragw_fpga.h	55;"	d
+LGW_FPGA_CTRL_CLEAR_HISTO_MEM	inc/loragw_fpga.h	56;"	d
+LGW_FPGA_CTRL_FEATURE_START	inc/loragw_fpga.h	49;"	d
+LGW_FPGA_CTRL_INPUT_SYNC_I	inc/loragw_fpga.h	51;"	d
+LGW_FPGA_CTRL_INPUT_SYNC_Q	inc/loragw_fpga.h	52;"	d
+LGW_FPGA_CTRL_INVERT_IQ	inc/loragw_fpga.h	54;"	d
+LGW_FPGA_CTRL_OUTPUT_SYNC	inc/loragw_fpga.h	53;"	d
+LGW_FPGA_CTRL_RADIO_RESET	inc/loragw_fpga.h	50;"	d
+LGW_FPGA_FEATURE	inc/loragw_fpga.h	45;"	d
+LGW_FPGA_HISTO_NB_READ	inc/loragw_fpga.h	59;"	d
+LGW_FPGA_HISTO_RAM_ADDR	inc/loragw_fpga.h	57;"	d
+LGW_FPGA_HISTO_RAM_DATA	inc/loragw_fpga.h	58;"	d
+LGW_FPGA_HISTO_SCAN_FREQ	inc/loragw_fpga.h	80;"	d
+LGW_FPGA_LBT_CH0_FREQ_OFFSET	inc/loragw_fpga.h	62;"	d
+LGW_FPGA_LBT_CH1_FREQ_OFFSET	inc/loragw_fpga.h	63;"	d
+LGW_FPGA_LBT_CH2_FREQ_OFFSET	inc/loragw_fpga.h	64;"	d
+LGW_FPGA_LBT_CH3_FREQ_OFFSET	inc/loragw_fpga.h	65;"	d
+LGW_FPGA_LBT_CH4_FREQ_OFFSET	inc/loragw_fpga.h	66;"	d
+LGW_FPGA_LBT_CH5_FREQ_OFFSET	inc/loragw_fpga.h	67;"	d
+LGW_FPGA_LBT_CH6_FREQ_OFFSET	inc/loragw_fpga.h	68;"	d
+LGW_FPGA_LBT_CH7_FREQ_OFFSET	inc/loragw_fpga.h	69;"	d
+LGW_FPGA_LBT_INITIAL_FREQ	inc/loragw_fpga.h	46;"	d
+LGW_FPGA_LBT_SCAN_TIME_CH0	inc/loragw_fpga.h	71;"	d
+LGW_FPGA_LBT_SCAN_TIME_CH1	inc/loragw_fpga.h	72;"	d
+LGW_FPGA_LBT_SCAN_TIME_CH2	inc/loragw_fpga.h	73;"	d
+LGW_FPGA_LBT_SCAN_TIME_CH3	inc/loragw_fpga.h	74;"	d
+LGW_FPGA_LBT_SCAN_TIME_CH4	inc/loragw_fpga.h	75;"	d
+LGW_FPGA_LBT_SCAN_TIME_CH5	inc/loragw_fpga.h	76;"	d
+LGW_FPGA_LBT_SCAN_TIME_CH6	inc/loragw_fpga.h	77;"	d
+LGW_FPGA_LBT_SCAN_TIME_CH7	inc/loragw_fpga.h	78;"	d
+LGW_FPGA_LBT_TIMESTAMP_CH	inc/loragw_fpga.h	60;"	d
+LGW_FPGA_LBT_TIMESTAMP_SELECT_CH	inc/loragw_fpga.h	61;"	d
+LGW_FPGA_NOTCH_FREQ_OFFSET	inc/loragw_fpga.h	81;"	d
+LGW_FPGA_RSSI_TARGET	inc/loragw_fpga.h	79;"	d
+LGW_FPGA_SCAN_FREQ_OFFSET	inc/loragw_fpga.h	70;"	d
+LGW_FPGA_SOFT_RESET	inc/loragw_fpga.h	44;"	d
+LGW_FPGA_STATUS	inc/loragw_fpga.h	48;"	d
+LGW_FPGA_TOTALREGS	inc/loragw_fpga.h	82;"	d
+LGW_FPGA_VERSION	inc/loragw_fpga.h	47;"	d
+LGW_FRAME_SYNCH_GAIN	inc/loragw_reg.h	210;"	d
+LGW_FRAME_SYNCH_PEAK1_POS	inc/loragw_reg.h	207;"	d
+LGW_FRAME_SYNCH_PEAK2_POS	inc/loragw_reg.h	208;"	d
+LGW_FREQ_TO_TIME_DRIFT	inc/loragw_reg.h	203;"	d
+LGW_FREQ_TO_TIME_INVERT	inc/loragw_reg.h	202;"	d
+LGW_FSK_AUTO_AFC_ON	inc/loragw_reg.h	310;"	d
+LGW_FSK_BROADCAST	inc/loragw_reg.h	309;"	d
+LGW_FSK_BR_RATIO	inc/loragw_reg.h	299;"	d
+LGW_FSK_CH_BW_EXPO	inc/loragw_reg.h	289;"	d
+LGW_FSK_CRC_EN	inc/loragw_reg.h	294;"	d
+LGW_FSK_CRC_IBM	inc/loragw_reg.h	296;"	d
+LGW_FSK_DCFREE_ENC	inc/loragw_reg.h	295;"	d
+LGW_FSK_ERROR_OSR_TOL	inc/loragw_reg.h	297;"	d
+LGW_FSK_MODEM_ENABLE	inc/loragw_reg.h	80;"	d
+LGW_FSK_MODEM_INVERT_IQ	inc/loragw_reg.h	152;"	d
+LGW_FSK_NODE_ADRS	inc/loragw_reg.h	308;"	d
+LGW_FSK_PATTERN_TIMEOUT_CFG	inc/loragw_reg.h	311;"	d
+LGW_FSK_PKT_LENGTH	inc/loragw_reg.h	302;"	d
+LGW_FSK_PKT_MODE	inc/loragw_reg.h	292;"	d
+LGW_FSK_PSIZE	inc/loragw_reg.h	293;"	d
+LGW_FSK_RADIO_SELECT	inc/loragw_reg.h	298;"	d
+LGW_FSK_REF_PATTERN_LSB	inc/loragw_reg.h	300;"	d
+LGW_FSK_REF_PATTERN_MSB	inc/loragw_reg.h	301;"	d
+LGW_FSK_RSSI_LENGTH	inc/loragw_reg.h	290;"	d
+LGW_FSK_RX_INVERT	inc/loragw_reg.h	291;"	d
+LGW_FSK_TX_GAUSSIAN_EN	inc/loragw_reg.h	303;"	d
+LGW_FSK_TX_GAUSSIAN_SELECT_BT	inc/loragw_reg.h	304;"	d
+LGW_FSK_TX_PATTERN_EN	inc/loragw_reg.h	305;"	d
+LGW_FSK_TX_PREAMBLE_SEQ	inc/loragw_reg.h	306;"	d
+LGW_FSK_TX_PSIZE	inc/loragw_reg.h	307;"	d
+LGW_GLOBAL_EN	inc/loragw_reg.h	81;"	d
+LGW_GPIO_MODE	inc/loragw_reg.h	140;"	d
+LGW_GPIO_PIN_REG_IN	inc/loragw_reg.h	141;"	d
+LGW_GPIO_PIN_REG_OUT	inc/loragw_reg.h	142;"	d
+LGW_GPIO_SELECT_INPUT	inc/loragw_reg.h	138;"	d
+LGW_GPIO_SELECT_OUTPUT	inc/loragw_reg.h	139;"	d
+LGW_GPS_EN	inc/loragw_reg.h	379;"	d
+LGW_GPS_ERROR	inc/loragw_gps.h	90;"	d
+LGW_GPS_MIN_MSG_SIZE	inc/loragw_gps.h	92;"	d
+LGW_GPS_NMEA_SYNC_CHAR	inc/loragw_gps.h	94;"	d
+LGW_GPS_POL	inc/loragw_reg.h	380;"	d
+LGW_GPS_SUCCESS	inc/loragw_gps.h	89;"	d
+LGW_GPS_UBX_SYNC_CHAR	inc/loragw_gps.h	93;"	d
+LGW_HAL_ERROR	inc/loragw_hal.h	46;"	d
+LGW_HAL_SUCCESS	inc/loragw_hal.h	45;"	d
+LGW_IFMODEM_CONFIG	inc/loragw_hal.h	67;"	d
+LGW_IF_CHAIN_NB	inc/loragw_hal.h	62;"	d
+LGW_IF_FREQ_0	inc/loragw_reg.h	155;"	d
+LGW_IF_FREQ_1	inc/loragw_reg.h	156;"	d
+LGW_IF_FREQ_2	inc/loragw_reg.h	157;"	d
+LGW_IF_FREQ_3	inc/loragw_reg.h	158;"	d
+LGW_IF_FREQ_4	inc/loragw_reg.h	159;"	d
+LGW_IF_FREQ_5	inc/loragw_reg.h	160;"	d
+LGW_IF_FREQ_6	inc/loragw_reg.h	161;"	d
+LGW_IF_FREQ_7	inc/loragw_reg.h	162;"	d
+LGW_IF_FREQ_8	inc/loragw_reg.h	163;"	d
+LGW_IF_FREQ_9	inc/loragw_reg.h	164;"	d
+LGW_IMPLICIT_CODING_RATE	inc/loragw_reg.h	200;"	d
+LGW_IMPLICIT_CRC_EN	inc/loragw_reg.h	199;"	d
+LGW_IMPLICIT_PAYLOAD_LENGHT	inc/loragw_reg.h	201;"	d
+LGW_IQ_MISMATCH_A_AMP_COEFF	inc/loragw_reg.h	238;"	d
+LGW_IQ_MISMATCH_A_PHI_COEFF	inc/loragw_reg.h	239;"	d
+LGW_IQ_MISMATCH_B_AMP_COEFF	inc/loragw_reg.h	240;"	d
+LGW_IQ_MISMATCH_B_PHI_COEFF	inc/loragw_reg.h	242;"	d
+LGW_IQ_MISMATCH_B_SEL_I	inc/loragw_reg.h	241;"	d
+LGW_LBT_ERROR	inc/loragw_lbt.h	31;"	d
+LGW_LBT_ISSUE	inc/loragw_hal.h	47;"	d
+LGW_LBT_SUCCESS	inc/loragw_lbt.h	30;"	d
+LGW_LLR_SCALE	inc/loragw_reg.h	212;"	d
+LGW_LNA_A_CTRL_LUT	inc/loragw_reg.h	328;"	d
+LGW_LNA_A_EN	inc/loragw_reg.h	323;"	d
+LGW_LNA_B_CTRL_LUT	inc/loragw_reg.h	330;"	d
+LGW_LNA_B_EN	inc/loragw_reg.h	325;"	d
+LGW_MAX_NOTCH_FREQ	inc/loragw_fpga.h	35;"	d
+LGW_MAX_PAYLOAD_LEN	inc/loragw_reg.h	215;"	d
+LGW_MBWSSF_AGC_FREEZE_ON_DETECT	inc/loragw_reg.h	264;"	d
+LGW_MBWSSF_DETECT_MIN_SINGLE_PEAK	inc/loragw_reg.h	270;"	d
+LGW_MBWSSF_DETECT_TRIG_SAME_PEAK_NB	inc/loragw_reg.h	271;"	d
+LGW_MBWSSF_FRAME_SYNCH_GAIN	inc/loragw_reg.h	268;"	d
+LGW_MBWSSF_FRAME_SYNCH_PEAK1_POS	inc/loragw_reg.h	265;"	d
+LGW_MBWSSF_FRAME_SYNCH_PEAK2_POS	inc/loragw_reg.h	266;"	d
+LGW_MBWSSF_FREQ_TO_TIME_DRIFT	inc/loragw_reg.h	273;"	d
+LGW_MBWSSF_FREQ_TO_TIME_INVERT	inc/loragw_reg.h	272;"	d
+LGW_MBWSSF_IMPLICIT_CODING_RATE	inc/loragw_reg.h	262;"	d
+LGW_MBWSSF_IMPLICIT_CRC_EN	inc/loragw_reg.h	261;"	d
+LGW_MBWSSF_IMPLICIT_HEADER	inc/loragw_reg.h	260;"	d
+LGW_MBWSSF_IMPLICIT_PAYLOAD_LENGHT	inc/loragw_reg.h	263;"	d
+LGW_MBWSSF_LLR_SCALE	inc/loragw_reg.h	282;"	d
+LGW_MBWSSF_MAX_PAYLOAD_LEN	inc/loragw_reg.h	287;"	d
+LGW_MBWSSF_MODEM_BW	inc/loragw_reg.h	279;"	d
+LGW_MBWSSF_MODEM_ENABLE	inc/loragw_reg.h	78;"	d
+LGW_MBWSSF_MODEM_INVERT_IQ	inc/loragw_reg.h	149;"	d
+LGW_MBWSSF_ONLY_CRC_EN	inc/loragw_reg.h	286;"	d
+LGW_MBWSSF_PAYLOAD_FINE_TIMING_GAIN	inc/loragw_reg.h	275;"	d
+LGW_MBWSSF_PPM_CORRECTION	inc/loragw_reg.h	274;"	d
+LGW_MBWSSF_PPM_OFFSET	inc/loragw_reg.h	284;"	d
+LGW_MBWSSF_PREAMBLE_FINE_TIMING_GAIN	inc/loragw_reg.h	276;"	d
+LGW_MBWSSF_PREAMBLE_SYMB1_NB	inc/loragw_reg.h	267;"	d
+LGW_MBWSSF_RADIO_SELECT	inc/loragw_reg.h	280;"	d
+LGW_MBWSSF_RATE_SF	inc/loragw_reg.h	285;"	d
+LGW_MBWSSF_RX_CHIRP_INVERT	inc/loragw_reg.h	281;"	d
+LGW_MBWSSF_SNR_AVG_CST	inc/loragw_reg.h	283;"	d
+LGW_MBWSSF_SYNCH_DETECT_TH	inc/loragw_reg.h	269;"	d
+LGW_MBWSSF_TRACKING_INTEGRAL	inc/loragw_reg.h	277;"	d
+LGW_MBWSSF_ZERO_PAD	inc/loragw_reg.h	278;"	d
+LGW_MCU_AGC_DATA_RAM_BIST0_STATUS	inc/loragw_reg.h	130;"	d
+LGW_MCU_AGC_DATA_RAM_BIST1_STATUS	inc/loragw_reg.h	131;"	d
+LGW_MCU_AGC_PROG_RAM_BIST_STATUS	inc/loragw_reg.h	90;"	d
+LGW_MCU_AGC_STATUS	inc/loragw_reg.h	143;"	d
+LGW_MCU_ARB_DATA_RAM_BIST0_STATUS	inc/loragw_reg.h	132;"	d
+LGW_MCU_ARB_DATA_RAM_BIST1_STATUS	inc/loragw_reg.h	133;"	d
+LGW_MCU_ARB_PROG_RAM_BIST_STATUS	inc/loragw_reg.h	91;"	d
+LGW_MCU_ARB_STATUS	inc/loragw_reg.h	144;"	d
+LGW_MCU_CORRUPTION_DETECTED_0	inc/loragw_reg.h	227;"	d
+LGW_MCU_CORRUPTION_DETECTED_1	inc/loragw_reg.h	228;"	d
+LGW_MCU_PROM_ADDR	inc/loragw_reg.h	72;"	d
+LGW_MCU_PROM_DATA	inc/loragw_reg.h	73;"	d
+LGW_MCU_RST_0	inc/loragw_reg.h	223;"	d
+LGW_MCU_RST_1	inc/loragw_reg.h	224;"	d
+LGW_MCU_SELECT_EDGE_0	inc/loragw_reg.h	229;"	d
+LGW_MCU_SELECT_EDGE_1	inc/loragw_reg.h	230;"	d
+LGW_MCU_SELECT_MUX_0	inc/loragw_reg.h	225;"	d
+LGW_MCU_SELECT_MUX_1	inc/loragw_reg.h	226;"	d
+LGW_MIN_NOTCH_FREQ	inc/loragw_fpga.h	34;"	d
+LGW_MISC_RADIO_EN	inc/loragw_reg.h	151;"	d
+LGW_MODEM0_RAM0_BIST_STATUS	inc/loragw_reg.h	103;"	d
+LGW_MODEM0_RAM1_BIST_STATUS	inc/loragw_reg.h	111;"	d
+LGW_MODEM0_RAM2_BIST_STATUS	inc/loragw_reg.h	119;"	d
+LGW_MODEM1_RAM0_BIST_STATUS	inc/loragw_reg.h	104;"	d
+LGW_MODEM1_RAM1_BIST_STATUS	inc/loragw_reg.h	112;"	d
+LGW_MODEM1_RAM2_BIST_STATUS	inc/loragw_reg.h	120;"	d
+LGW_MODEM2_RAM0_BIST_STATUS	inc/loragw_reg.h	105;"	d
+LGW_MODEM2_RAM1_BIST_STATUS	inc/loragw_reg.h	113;"	d
+LGW_MODEM2_RAM2_BIST_STATUS	inc/loragw_reg.h	121;"	d
+LGW_MODEM3_RAM0_BIST_STATUS	inc/loragw_reg.h	106;"	d
+LGW_MODEM3_RAM1_BIST_STATUS	inc/loragw_reg.h	114;"	d
+LGW_MODEM3_RAM2_BIST_STATUS	inc/loragw_reg.h	122;"	d
+LGW_MODEM4_RAM0_BIST_STATUS	inc/loragw_reg.h	107;"	d
+LGW_MODEM4_RAM1_BIST_STATUS	inc/loragw_reg.h	115;"	d
+LGW_MODEM4_RAM2_BIST_STATUS	inc/loragw_reg.h	123;"	d
+LGW_MODEM5_RAM0_BIST_STATUS	inc/loragw_reg.h	108;"	d
+LGW_MODEM5_RAM1_BIST_STATUS	inc/loragw_reg.h	116;"	d
+LGW_MODEM5_RAM2_BIST_STATUS	inc/loragw_reg.h	124;"	d
+LGW_MODEM6_RAM0_BIST_STATUS	inc/loragw_reg.h	109;"	d
+LGW_MODEM6_RAM1_BIST_STATUS	inc/loragw_reg.h	117;"	d
+LGW_MODEM6_RAM2_BIST_STATUS	inc/loragw_reg.h	125;"	d
+LGW_MODEM7_RAM0_BIST_STATUS	inc/loragw_reg.h	110;"	d
+LGW_MODEM7_RAM1_BIST_STATUS	inc/loragw_reg.h	118;"	d
+LGW_MODEM7_RAM2_BIST_STATUS	inc/loragw_reg.h	126;"	d
+LGW_MODEM_INVERT_IQ	inc/loragw_reg.h	148;"	d
+LGW_MODEM_MBWSSF_RAM0_BIST_STATUS	inc/loragw_reg.h	127;"	d
+LGW_MODEM_MBWSSF_RAM1_BIST_STATUS	inc/loragw_reg.h	128;"	d
+LGW_MODEM_MBWSSF_RAM2_BIST_STATUS	inc/loragw_reg.h	129;"	d
+LGW_MODEM_STATUS	inc/loragw_reg.h	337;"	d
+LGW_MULTI_NB	inc/loragw_hal.h	66;"	d
+LGW_NEXT_PACKET_CNT	inc/loragw_reg.h	350;"	d
+LGW_ONLY_CRC_EN	inc/loragw_reg.h	216;"	d
+LGW_PACKET_DATA_FIFO_PTR	inc/loragw_reg.h	363;"	d
+LGW_PAGE_REG	inc/loragw_reg.h	63;"	d
+LGW_PAYLOAD_FINE_TIMING_GAIN	inc/loragw_reg.h	204;"	d
+LGW_PA_A_CTRL_LUT	inc/loragw_reg.h	329;"	d
+LGW_PA_A_EN	inc/loragw_reg.h	324;"	d
+LGW_PA_B_CTRL_LUT	inc/loragw_reg.h	331;"	d
+LGW_PA_B_EN	inc/loragw_reg.h	326;"	d
+LGW_PA_GAIN	inc/loragw_reg.h	327;"	d
+LGW_PKT_FIFO_SIZE	inc/loragw_hal.h	63;"	d
+LGW_PPM_OFFSET	inc/loragw_reg.h	214;"	d
+LGW_PREAMBLE_FINE_TIMING_GAIN	inc/loragw_reg.h	205;"	d
+LGW_PREAMBLE_SYMB1_NB	inc/loragw_reg.h	209;"	d
+LGW_RADIO_A_EN	inc/loragw_reg.h	320;"	d
+LGW_RADIO_B_EN	inc/loragw_reg.h	321;"	d
+LGW_RADIO_RST	inc/loragw_reg.h	322;"	d
+LGW_RADIO_SELECT	inc/loragw_reg.h	154;"	d
+LGW_RADIO_TYPE_NONE	inc/loragw_hal.h	/^    LGW_RADIO_TYPE_NONE,$/;"	e	enum:lgw_radio_type_e
+LGW_RADIO_TYPE_SX1255	inc/loragw_hal.h	/^    LGW_RADIO_TYPE_SX1255,$/;"	e	enum:lgw_radio_type_e
+LGW_RADIO_TYPE_SX1257	inc/loragw_hal.h	/^    LGW_RADIO_TYPE_SX1257,$/;"	e	enum:lgw_radio_type_e
+LGW_RADIO_TYPE_SX1272	inc/loragw_hal.h	/^    LGW_RADIO_TYPE_SX1272,$/;"	e	enum:lgw_radio_type_e
+LGW_RADIO_TYPE_SX1276	inc/loragw_hal.h	/^    LGW_RADIO_TYPE_SX1276$/;"	e	enum:lgw_radio_type_e
+LGW_REF_BW	inc/loragw_hal.h	65;"	d
+LGW_REG_ERROR	inc/loragw_fpga.h	32;"	d
+LGW_REG_ERROR	inc/loragw_radio.h	29;"	d
+LGW_REG_ERROR	inc/loragw_reg.h	54;"	d
+LGW_REG_SUCCESS	inc/loragw_fpga.h	31;"	d
+LGW_REG_SUCCESS	inc/loragw_radio.h	28;"	d
+LGW_REG_SUCCESS	inc/loragw_reg.h	53;"	d
+LGW_RF_CHAIN_NB	inc/loragw_hal.h	51;"	d
+LGW_RF_RX_BANDWIDTH	inc/loragw_hal.h	52;"	d
+LGW_RF_RX_BANDWIDTH_125KHZ	src/loragw_hal.c	84;"	d	file:
+LGW_RF_RX_BANDWIDTH_250KHZ	src/loragw_hal.c	85;"	d	file:
+LGW_RF_RX_BANDWIDTH_500KHZ	src/loragw_hal.c	86;"	d	file:
+LGW_RSSI_BB_DEFAULT_VALUE	inc/loragw_reg.h	232;"	d
+LGW_RSSI_BB_FILTER_ALPHA	inc/loragw_reg.h	235;"	d
+LGW_RSSI_CHANN_DEFAULT_VALUE	inc/loragw_reg.h	234;"	d
+LGW_RSSI_CHANN_FILTER_ALPHA	inc/loragw_reg.h	237;"	d
+LGW_RSSI_DEC_DEFAULT_VALUE	inc/loragw_reg.h	233;"	d
+LGW_RSSI_DEC_FILTER_ALPHA	inc/loragw_reg.h	236;"	d
+LGW_RX_DATA_BUF_ADDR	inc/loragw_reg.h	66;"	d
+LGW_RX_DATA_BUF_DATA	inc/loragw_reg.h	67;"	d
+LGW_RX_EDGE_SELECT	inc/loragw_reg.h	150;"	d
+LGW_RX_INVERT_IQ	inc/loragw_reg.h	147;"	d
+LGW_RX_PACKET_DATA_FIFO_ADDR_POINTER	inc/loragw_reg.h	75;"	d
+LGW_RX_PACKET_DATA_FIFO_NUM_STORED	inc/loragw_reg.h	74;"	d
+LGW_RX_PACKET_DATA_FIFO_PAYLOAD_SIZE	inc/loragw_reg.h	77;"	d
+LGW_RX_PACKET_DATA_FIFO_STATUS	inc/loragw_reg.h	76;"	d
+LGW_SIG_ANALYSER_AVG_LEN	inc/loragw_reg.h	372;"	d
+LGW_SIG_ANALYSER_EN	inc/loragw_reg.h	371;"	d
+LGW_SIG_ANALYSER_FREQ	inc/loragw_reg.h	376;"	d
+LGW_SIG_ANALYSER_I_OUT	inc/loragw_reg.h	377;"	d
+LGW_SIG_ANALYSER_PRECISION	inc/loragw_reg.h	373;"	d
+LGW_SIG_ANALYSER_Q_OUT	inc/loragw_reg.h	378;"	d
+LGW_SIG_ANALYSER_VALID_OUT	inc/loragw_reg.h	374;"	d
+LGW_SIG_GEN_ANALYSER_MUX_SEL	inc/loragw_reg.h	369;"	d
+LGW_SIG_GEN_EN	inc/loragw_reg.h	370;"	d
+LGW_SIG_GEN_FREQ	inc/loragw_reg.h	375;"	d
+LGW_SNR_AVG_CST	inc/loragw_reg.h	213;"	d
+LGW_SOFT_RESET	inc/loragw_reg.h	64;"	d
+LGW_SPI_DATA_FIFO_PTR	inc/loragw_reg.h	362;"	d
+LGW_SPI_ERROR	inc/loragw_spi.h	35;"	d
+LGW_SPI_MASTER_CHIP_SELECT_POLARITY	inc/loragw_reg.h	366;"	d
+LGW_SPI_MASTER_CPHA	inc/loragw_reg.h	368;"	d
+LGW_SPI_MASTER_CPOL	inc/loragw_reg.h	367;"	d
+LGW_SPI_MUX_MODE0	inc/loragw_spi.h	38;"	d
+LGW_SPI_MUX_MODE1	inc/loragw_spi.h	39;"	d
+LGW_SPI_MUX_TARGET_EEPROM	inc/loragw_spi.h	43;"	d
+LGW_SPI_MUX_TARGET_FPGA	inc/loragw_spi.h	42;"	d
+LGW_SPI_MUX_TARGET_SX127X	inc/loragw_spi.h	44;"	d
+LGW_SPI_MUX_TARGET_SX1301	inc/loragw_spi.h	41;"	d
+LGW_SPI_RADIO_A__ADDR	inc/loragw_reg.h	314;"	d
+LGW_SPI_RADIO_A__CS	inc/loragw_reg.h	315;"	d
+LGW_SPI_RADIO_A__DATA	inc/loragw_reg.h	312;"	d
+LGW_SPI_RADIO_A__DATA_READBACK	inc/loragw_reg.h	313;"	d
+LGW_SPI_RADIO_B__ADDR	inc/loragw_reg.h	318;"	d
+LGW_SPI_RADIO_B__CS	inc/loragw_reg.h	319;"	d
+LGW_SPI_RADIO_B__DATA	inc/loragw_reg.h	316;"	d
+LGW_SPI_RADIO_B__DATA_READBACK	inc/loragw_reg.h	317;"	d
+LGW_SPI_SUCCESS	inc/loragw_spi.h	34;"	d
+LGW_START_BIST0	inc/loragw_reg.h	84;"	d
+LGW_START_BIST1	inc/loragw_reg.h	85;"	d
+LGW_SW_TEST_REG1	inc/loragw_reg.h	381;"	d
+LGW_SW_TEST_REG2	inc/loragw_reg.h	382;"	d
+LGW_SW_TEST_REG3	inc/loragw_reg.h	383;"	d
+LGW_SX127X_RXBW_100K_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_100K_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_10K4_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_10K4_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_125K_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_125K_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_12K5_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_12K5_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_15K6_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_15K6_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_166K7_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_166K7_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_200K_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_200K_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_20K8_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_20K8_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_250K_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_250K_HZ$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_25K_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_25K_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_2K6_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_2K6_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_31K3_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_31K3_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_3K1_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_3K1_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_3K9_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_3K9_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_41K7_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_41K7_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_50K_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_50K_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_5K2_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_5K2_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_62K5_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_62K5_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_6K3_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_6K3_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_7K8_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_7K8_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SX127X_RXBW_83K3_HZ	inc/loragw_radio.h	/^    LGW_SX127X_RXBW_83K3_HZ,$/;"	e	enum:lgw_sx127x_rxbw_e
+LGW_SYNCH_DETECT_TH	inc/loragw_reg.h	211;"	d
+LGW_TIMESTAMP	inc/loragw_reg.h	352;"	d
+LGW_TOTALREGS	inc/loragw_reg.h	390;"	d
+LGW_TRACKING_INTEGRAL	inc/loragw_reg.h	206;"	d
+LGW_TX_CHIRP_LOW_PASS	inc/loragw_reg.h	257;"	d
+LGW_TX_DATA_BUF_ADDR	inc/loragw_reg.h	68;"	d
+LGW_TX_DATA_BUF_DATA	inc/loragw_reg.h	69;"	d
+LGW_TX_EDGE_SELECT	inc/loragw_reg.h	254;"	d
+LGW_TX_EDGE_SELECT_TOP	inc/loragw_reg.h	255;"	d
+LGW_TX_FCC_WIDEBAND	inc/loragw_reg.h	258;"	d
+LGW_TX_FRAME_SYNCH_PEAK1_POS	inc/loragw_reg.h	247;"	d
+LGW_TX_FRAME_SYNCH_PEAK2_POS	inc/loragw_reg.h	248;"	d
+LGW_TX_GAIN	inc/loragw_reg.h	256;"	d
+LGW_TX_MODE	inc/loragw_reg.h	252;"	d
+LGW_TX_OFFSET_I	inc/loragw_reg.h	250;"	d
+LGW_TX_OFFSET_Q	inc/loragw_reg.h	251;"	d
+LGW_TX_RAMP_DURATION	inc/loragw_reg.h	249;"	d
+LGW_TX_START_DELAY	inc/loragw_reg.h	246;"	d
+LGW_TX_STATUS	inc/loragw_reg.h	288;"	d
+LGW_TX_SWAP_IQ	inc/loragw_reg.h	259;"	d
+LGW_TX_TOP_RAM_BIST0_STATUS	inc/loragw_reg.h	134;"	d
+LGW_TX_TOP_RAM_BIST1_STATUS	inc/loragw_reg.h	135;"	d
+LGW_TX_TRIG_ALL	inc/loragw_reg.h	388;"	d
+LGW_TX_TRIG_DELAYED	inc/loragw_reg.h	244;"	d
+LGW_TX_TRIG_GPS	inc/loragw_reg.h	245;"	d
+LGW_TX_TRIG_IMMEDIATE	inc/loragw_reg.h	243;"	d
+LGW_TX_ZERO_PAD	inc/loragw_reg.h	253;"	d
+LGW_VALID_HEADER_COUNTER_0	inc/loragw_reg.h	338;"	d
+LGW_VALID_HEADER_COUNTER_FSK	inc/loragw_reg.h	341;"	d
+LGW_VALID_HEADER_COUNTER_MBWSSF	inc/loragw_reg.h	340;"	d
+LGW_VALID_PACKET_COUNTER_0	inc/loragw_reg.h	339;"	d
+LGW_VALID_PACKET_COUNTER_FSK	inc/loragw_reg.h	343;"	d
+LGW_VALID_PACKET_COUNTER_MBWSSF	inc/loragw_reg.h	342;"	d
+LGW_VERSION	inc/loragw_reg.h	65;"	d
+LGW_XTAL_FREQU	inc/loragw_hal.h	50;"	d
+LGW_ZERO_PAD	inc/loragw_reg.h	217;"	d
+LIBLORAGW_VERSION	Makefile	/^LIBLORAGW_VERSION := `cat ..\/VERSION`$/;"	m
+LIBLORAGW_VERSION	inc/config.h	3;"	d
+LIBS	Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
+MCU_AGC	src/loragw_hal.c	58;"	d	file:
+MCU_AGC	tst/test_loragw_cal.c	51;"	d	file:
+MCU_AGC_FW_BYTE	src/loragw_hal.c	60;"	d	file:
+MCU_AGC_FW_BYTE	tst/test_loragw_cal.c	52;"	d	file:
+MCU_ARB	src/loragw_hal.c	57;"	d	file:
+MCU_ARB_FW_BYTE	src/loragw_hal.c	59;"	d	file:
+MINUS_10PPM	src/loragw_gps.c	57;"	d	file:
+MIN_FSK_PREAMBLE	src/loragw_hal.c	74;"	d	file:
+MIN_LORA_PREAMBLE	src/loragw_hal.c	72;"	d	file:
+MOD_FSK	inc/loragw_hal.h	83;"	d
+MOD_LORA	inc/loragw_hal.h	82;"	d
+MOD_UNDEFINED	inc/loragw_hal.h	81;"	d
+NB_CAL_MAX	tst/test_loragw_cal.c	50;"	d	file:
+NMEA_GBS	inc/loragw_gps.h	/^    NMEA_GBS,        \/*!> GNSS Satellite Fault Detection *\/$/;"	e	enum:gps_msg
+NMEA_GGA	inc/loragw_gps.h	/^    NMEA_GGA,        \/*!> Global positioning system fix data (pos + alt) *\/$/;"	e	enum:gps_msg
+NMEA_GLL	inc/loragw_gps.h	/^    NMEA_GLL,        \/*!> Latitude and longitude, with time fix and status *\/$/;"	e	enum:gps_msg
+NMEA_GNS	inc/loragw_gps.h	/^    NMEA_GNS,        \/*!> GNSS fix data (pos + alt, sat number) *\/$/;"	e	enum:gps_msg
+NMEA_GSA	inc/loragw_gps.h	/^    NMEA_GSA,        \/*!> GNSS DOP and Active Satellites (sat number) *\/$/;"	e	enum:gps_msg
+NMEA_GST	inc/loragw_gps.h	/^    NMEA_GST,        \/*!> GNSS Pseudo Range Error Statistics *\/$/;"	e	enum:gps_msg
+NMEA_GSV	inc/loragw_gps.h	/^    NMEA_GSV,        \/*!> GNSS Satellites in View (sat SNR) *\/$/;"	e	enum:gps_msg
+NMEA_RMC	inc/loragw_gps.h	/^    NMEA_RMC,        \/*!> Recommended Minimum data (time + date) *\/$/;"	e	enum:gps_msg
+NMEA_TXT	inc/loragw_gps.h	/^    NMEA_TXT,        \/*!> Text Transmission *\/$/;"	e	enum:gps_msg
+NMEA_VTG	inc/loragw_gps.h	/^    NMEA_VTG,        \/*!> Course over ground and Ground speed *\/$/;"	e	enum:gps_msg
+NMEA_ZDA	inc/loragw_gps.h	/^    NMEA_ZDA,        \/*!> Time and Date *\/$/;"	e	enum:gps_msg
+OBJDIR	Makefile	/^OBJDIR = obj$/;"	m
+ON_GPS	inc/loragw_hal.h	128;"	d
+PAGE_ADDR	src/loragw_reg.c	48;"	d	file:
+PAGE_MASK	src/loragw_reg.c	49;"	d	file:
+PLL_LOCK_MAX_ATTEMPTS	src/loragw_radio.c	75;"	d	file:
+PLUS_10PPM	src/loragw_gps.c	56;"	d	file:
+RAM_SIZE	tst/test_loragw_cal.c	55;"	d	file:
+READ_ACCESS	src/loragw_spi.native.c	54;"	d	file:
+RSSI_FSK_POLY_0	src/loragw_hal.c	78;"	d	file:
+RSSI_FSK_POLY_1	src/loragw_hal.c	79;"	d	file:
+RSSI_FSK_POLY_2	src/loragw_hal.c	80;"	d	file:
+RSSI_MULTI_BIAS	src/loragw_hal.c	77;"	d	file:
+RX_METADATA_NB	src/loragw_hal.c	67;"	d	file:
+RX_OFF	inc/loragw_hal.h	148;"	d
+RX_ON	inc/loragw_hal.h	149;"	d
+RX_STATUS	inc/loragw_hal.h	135;"	d
+RX_STATUS_UNKNOWN	inc/loragw_hal.h	147;"	d
+RX_SUSPENDED	inc/loragw_hal.h	150;"	d
+RxBwExp	src/loragw_radio.c	/^    uint8_t     RxBwExp;$/;"	m	struct:lgw_sx127x_FSK_bandwidth_s	file:
+RxBwKHz	src/loragw_radio.c	/^    uint32_t    RxBwKHz;$/;"	m	struct:lgw_sx127x_FSK_bandwidth_s	file:
+RxBwMant	src/loragw_radio.c	/^    uint8_t     RxBwMant;$/;"	m	struct:lgw_sx127x_FSK_bandwidth_s	file:
+SET_PPM_ON	src/loragw_hal.c	51;"	d	file:
+SPI_DEV_PATH	src/loragw_spi.native.c	57;"	d	file:
+SPI_SPEED	src/loragw_spi.native.c	56;"	d	file:
+STAT_CRC_BAD	inc/loragw_hal.h	122;"	d
+STAT_CRC_OK	inc/loragw_hal.h	123;"	d
+STAT_NO_CRC	inc/loragw_hal.h	121;"	d
+STAT_UNDEFINED	inc/loragw_hal.h	120;"	d
+STD_FSK_PREAMBLE	src/loragw_hal.c	75;"	d	file:
+STD_LORA_PREAMBLE	src/loragw_hal.c	73;"	d	file:
+SX125x_32MHz_FRAC	inc/loragw_radio.h	31;"	d
+SX125x_ADC_TEMP	inc/loragw_sx125x.h	45;"	d
+SX125x_LNA_ZIN	inc/loragw_sx125x.h	40;"	d
+SX125x_RX_ADC_BW	inc/loragw_sx125x.h	41;"	d
+SX125x_RX_ADC_TRIM	inc/loragw_sx125x.h	42;"	d
+SX125x_RX_BB_BW	inc/loragw_sx125x.h	43;"	d
+SX125x_RX_BB_GAIN	inc/loragw_sx125x.h	39;"	d
+SX125x_RX_LNA_GAIN	inc/loragw_sx125x.h	38;"	d
+SX125x_RX_PLL_BW	inc/loragw_sx125x.h	44;"	d
+SX125x_TX_ANA_BW	inc/loragw_sx125x.h	36;"	d
+SX125x_TX_DAC_BW	inc/loragw_sx125x.h	37;"	d
+SX125x_TX_DAC_CLK_SEL	inc/loragw_sx125x.h	32;"	d
+SX125x_TX_DAC_GAIN	inc/loragw_sx125x.h	33;"	d
+SX125x_TX_MIX_GAIN	inc/loragw_sx125x.h	34;"	d
+SX125x_TX_PLL_BW	inc/loragw_sx125x.h	35;"	d
+SX125x_XOSC_DISABLE	inc/loragw_sx125x.h	47;"	d
+SX125x_XOSC_GM_STARTUP	inc/loragw_sx125x.h	46;"	d
+SX1272_REG_AFCBW	inc/loragw_sx1272_fsk.h	45;"	d
+SX1272_REG_AFCFEI	inc/loragw_sx1272_fsk.h	52;"	d
+SX1272_REG_AFCLSB	inc/loragw_sx1272_fsk.h	54;"	d
+SX1272_REG_AFCMSB	inc/loragw_sx1272_fsk.h	53;"	d
+SX1272_REG_AGCREF	inc/loragw_sx1272_fsk.h	101;"	d
+SX1272_REG_AGCTHRESH1	inc/loragw_sx1272_fsk.h	102;"	d
+SX1272_REG_AGCTHRESH2	inc/loragw_sx1272_fsk.h	103;"	d
+SX1272_REG_AGCTHRESH3	inc/loragw_sx1272_fsk.h	104;"	d
+SX1272_REG_BITRATEFRAC	inc/loragw_sx1272_fsk.h	111;"	d
+SX1272_REG_BITRATELSB	inc/loragw_sx1272_fsk.h	27;"	d
+SX1272_REG_BITRATEMSB	inc/loragw_sx1272_fsk.h	26;"	d
+SX1272_REG_BROADCASTADRS	inc/loragw_sx1272_fsk.h	80;"	d
+SX1272_REG_DIOMAPPING1	inc/loragw_sx1272_fsk.h	96;"	d
+SX1272_REG_DIOMAPPING2	inc/loragw_sx1272_fsk.h	97;"	d
+SX1272_REG_FDEVLSB	inc/loragw_sx1272_fsk.h	29;"	d
+SX1272_REG_FDEVMSB	inc/loragw_sx1272_fsk.h	28;"	d
+SX1272_REG_FEILSB	inc/loragw_sx1272_fsk.h	56;"	d
+SX1272_REG_FEIMSB	inc/loragw_sx1272_fsk.h	55;"	d
+SX1272_REG_FIFO	inc/loragw_sx1272_fsk.h	23;"	d
+SX1272_REG_FIFOTHRESH	inc/loragw_sx1272_fsk.h	81;"	d
+SX1272_REG_FORMERTEMP	inc/loragw_sx1272_fsk.h	110;"	d
+SX1272_REG_FRFLSB	inc/loragw_sx1272_fsk.h	32;"	d
+SX1272_REG_FRFMID	inc/loragw_sx1272_fsk.h	31;"	d
+SX1272_REG_FRFMSB	inc/loragw_sx1272_fsk.h	30;"	d
+SX1272_REG_IMAGECAL	inc/loragw_sx1272_fsk.h	89;"	d
+SX1272_REG_IRQFLAGS1	inc/loragw_sx1272_fsk.h	93;"	d
+SX1272_REG_IRQFLAGS2	inc/loragw_sx1272_fsk.h	94;"	d
+SX1272_REG_LNA	inc/loragw_sx1272_fsk.h	38;"	d
+SX1272_REG_LOWBAT	inc/loragw_sx1272_fsk.h	91;"	d
+SX1272_REG_LR_AGCREF	inc/loragw_sx1272_lora.h	78;"	d
+SX1272_REG_LR_AGCTHRESH1	inc/loragw_sx1272_lora.h	79;"	d
+SX1272_REG_LR_AGCTHRESH2	inc/loragw_sx1272_lora.h	80;"	d
+SX1272_REG_LR_AGCTHRESH3	inc/loragw_sx1272_lora.h	81;"	d
+SX1272_REG_LR_DETECTIONTHRESHOLD	inc/loragw_sx1272_lora.h	67;"	d
+SX1272_REG_LR_DETECTOPTIMIZE	inc/loragw_sx1272_lora.h	65;"	d
+SX1272_REG_LR_DIOMAPPING1	inc/loragw_sx1272_lora.h	73;"	d
+SX1272_REG_LR_DIOMAPPING2	inc/loragw_sx1272_lora.h	74;"	d
+SX1272_REG_LR_FEILSB	inc/loragw_sx1272_lora.h	63;"	d
+SX1272_REG_LR_FEIMID	inc/loragw_sx1272_lora.h	62;"	d
+SX1272_REG_LR_FEIMSB	inc/loragw_sx1272_lora.h	61;"	d
+SX1272_REG_LR_FIFO	inc/loragw_sx1272_lora.h	23;"	d
+SX1272_REG_LR_FIFOADDRPTR	inc/loragw_sx1272_lora.h	36;"	d
+SX1272_REG_LR_FIFORXBASEADDR	inc/loragw_sx1272_lora.h	38;"	d
+SX1272_REG_LR_FIFORXBYTEADDR	inc/loragw_sx1272_lora.h	60;"	d
+SX1272_REG_LR_FIFORXCURRENTADDR	inc/loragw_sx1272_lora.h	39;"	d
+SX1272_REG_LR_FIFOTXBASEADDR	inc/loragw_sx1272_lora.h	37;"	d
+SX1272_REG_LR_FORMERTEMP	inc/loragw_sx1272_lora.h	87;"	d
+SX1272_REG_LR_FRFLSB	inc/loragw_sx1272_lora.h	28;"	d
+SX1272_REG_LR_FRFMID	inc/loragw_sx1272_lora.h	27;"	d
+SX1272_REG_LR_FRFMSB	inc/loragw_sx1272_lora.h	26;"	d
+SX1272_REG_LR_HOPCHANNEL	inc/loragw_sx1272_lora.h	51;"	d
+SX1272_REG_LR_HOPPERIOD	inc/loragw_sx1272_lora.h	59;"	d
+SX1272_REG_LR_INVERTIQ	inc/loragw_sx1272_lora.h	66;"	d
+SX1272_REG_LR_INVERTIQ2	inc/loragw_sx1272_lora.h	69;"	d
+SX1272_REG_LR_IRQFLAGS	inc/loragw_sx1272_lora.h	41;"	d
+SX1272_REG_LR_IRQFLAGSMASK	inc/loragw_sx1272_lora.h	40;"	d
+SX1272_REG_LR_LNA	inc/loragw_sx1272_lora.h	34;"	d
+SX1272_REG_LR_MODEMCONFIG1	inc/loragw_sx1272_lora.h	52;"	d
+SX1272_REG_LR_MODEMCONFIG2	inc/loragw_sx1272_lora.h	53;"	d
+SX1272_REG_LR_MODEMSTAT	inc/loragw_sx1272_lora.h	47;"	d
+SX1272_REG_LR_OCP	inc/loragw_sx1272_lora.h	32;"	d
+SX1272_REG_LR_OPMODE	inc/loragw_sx1272_lora.h	25;"	d
+SX1272_REG_LR_PACONFIG	inc/loragw_sx1272_lora.h	30;"	d
+SX1272_REG_LR_PADAC	inc/loragw_sx1272_lora.h	84;"	d
+SX1272_REG_LR_PARAMP	inc/loragw_sx1272_lora.h	31;"	d
+SX1272_REG_LR_PAYLOADLENGTH	inc/loragw_sx1272_lora.h	57;"	d
+SX1272_REG_LR_PAYLOADMAXLENGTH	inc/loragw_sx1272_lora.h	58;"	d
+SX1272_REG_LR_PKTRSSIVALUE	inc/loragw_sx1272_lora.h	49;"	d
+SX1272_REG_LR_PKTSNRVALUE	inc/loragw_sx1272_lora.h	48;"	d
+SX1272_REG_LR_PLL	inc/loragw_sx1272_lora.h	85;"	d
+SX1272_REG_LR_PLLHOP	inc/loragw_sx1272_lora.h	82;"	d
+SX1272_REG_LR_PLLLOWPN	inc/loragw_sx1272_lora.h	86;"	d
+SX1272_REG_LR_PREAMBLELSB	inc/loragw_sx1272_lora.h	56;"	d
+SX1272_REG_LR_PREAMBLEMSB	inc/loragw_sx1272_lora.h	55;"	d
+SX1272_REG_LR_RSSIVALUE	inc/loragw_sx1272_lora.h	50;"	d
+SX1272_REG_LR_RSSIWIDEBAND	inc/loragw_sx1272_lora.h	64;"	d
+SX1272_REG_LR_RXHEADERCNTVALUELSB	inc/loragw_sx1272_lora.h	44;"	d
+SX1272_REG_LR_RXHEADERCNTVALUEMSB	inc/loragw_sx1272_lora.h	43;"	d
+SX1272_REG_LR_RXNBBYTES	inc/loragw_sx1272_lora.h	42;"	d
+SX1272_REG_LR_RXPACKETCNTVALUELSB	inc/loragw_sx1272_lora.h	46;"	d
+SX1272_REG_LR_RXPACKETCNTVALUEMSB	inc/loragw_sx1272_lora.h	45;"	d
+SX1272_REG_LR_SYMBTIMEOUTLSB	inc/loragw_sx1272_lora.h	54;"	d
+SX1272_REG_LR_SYNCWORD	inc/loragw_sx1272_lora.h	68;"	d
+SX1272_REG_LR_TCXO	inc/loragw_sx1272_lora.h	83;"	d
+SX1272_REG_LR_VERSION	inc/loragw_sx1272_lora.h	76;"	d
+SX1272_REG_NODEADRS	inc/loragw_sx1272_fsk.h	79;"	d
+SX1272_REG_OCP	inc/loragw_sx1272_fsk.h	36;"	d
+SX1272_REG_OOKAVG	inc/loragw_sx1272_fsk.h	48;"	d
+SX1272_REG_OOKFIX	inc/loragw_sx1272_fsk.h	47;"	d
+SX1272_REG_OOKPEAK	inc/loragw_sx1272_fsk.h	46;"	d
+SX1272_REG_OPMODE	inc/loragw_sx1272_fsk.h	25;"	d
+SX1272_REG_OSC	inc/loragw_sx1272_fsk.h	63;"	d
+SX1272_REG_PACKETCONFIG1	inc/loragw_sx1272_fsk.h	76;"	d
+SX1272_REG_PACKETCONFIG2	inc/loragw_sx1272_fsk.h	77;"	d
+SX1272_REG_PACONFIG	inc/loragw_sx1272_fsk.h	34;"	d
+SX1272_REG_PADAC	inc/loragw_sx1272_fsk.h	107;"	d
+SX1272_REG_PARAMP	inc/loragw_sx1272_fsk.h	35;"	d
+SX1272_REG_PAYLOADLENGTH	inc/loragw_sx1272_fsk.h	78;"	d
+SX1272_REG_PLL	inc/loragw_sx1272_fsk.h	108;"	d
+SX1272_REG_PLLHOP	inc/loragw_sx1272_fsk.h	105;"	d
+SX1272_REG_PLLLOWPN	inc/loragw_sx1272_fsk.h	109;"	d
+SX1272_REG_PREAMBLEDETECT	inc/loragw_sx1272_fsk.h	57;"	d
+SX1272_REG_PREAMBLELSB	inc/loragw_sx1272_fsk.h	66;"	d
+SX1272_REG_PREAMBLEMSB	inc/loragw_sx1272_fsk.h	65;"	d
+SX1272_REG_RES17	inc/loragw_sx1272_fsk.h	49;"	d
+SX1272_REG_RES18	inc/loragw_sx1272_fsk.h	50;"	d
+SX1272_REG_RES19	inc/loragw_sx1272_fsk.h	51;"	d
+SX1272_REG_RSSICOLLISION	inc/loragw_sx1272_fsk.h	41;"	d
+SX1272_REG_RSSICONFIG	inc/loragw_sx1272_fsk.h	40;"	d
+SX1272_REG_RSSITHRESH	inc/loragw_sx1272_fsk.h	42;"	d
+SX1272_REG_RSSIVALUE	inc/loragw_sx1272_fsk.h	43;"	d
+SX1272_REG_RXBW	inc/loragw_sx1272_fsk.h	44;"	d
+SX1272_REG_RXCONFIG	inc/loragw_sx1272_fsk.h	39;"	d
+SX1272_REG_RXDELAY	inc/loragw_sx1272_fsk.h	61;"	d
+SX1272_REG_RXTIMEOUT1	inc/loragw_sx1272_fsk.h	58;"	d
+SX1272_REG_RXTIMEOUT2	inc/loragw_sx1272_fsk.h	59;"	d
+SX1272_REG_RXTIMEOUT3	inc/loragw_sx1272_fsk.h	60;"	d
+SX1272_REG_SEQCONFIG1	inc/loragw_sx1272_fsk.h	83;"	d
+SX1272_REG_SEQCONFIG2	inc/loragw_sx1272_fsk.h	84;"	d
+SX1272_REG_SYNCCONFIG	inc/loragw_sx1272_fsk.h	67;"	d
+SX1272_REG_SYNCVALUE1	inc/loragw_sx1272_fsk.h	68;"	d
+SX1272_REG_SYNCVALUE2	inc/loragw_sx1272_fsk.h	69;"	d
+SX1272_REG_SYNCVALUE3	inc/loragw_sx1272_fsk.h	70;"	d
+SX1272_REG_SYNCVALUE4	inc/loragw_sx1272_fsk.h	71;"	d
+SX1272_REG_SYNCVALUE5	inc/loragw_sx1272_fsk.h	72;"	d
+SX1272_REG_SYNCVALUE6	inc/loragw_sx1272_fsk.h	73;"	d
+SX1272_REG_SYNCVALUE7	inc/loragw_sx1272_fsk.h	74;"	d
+SX1272_REG_SYNCVALUE8	inc/loragw_sx1272_fsk.h	75;"	d
+SX1272_REG_TCXO	inc/loragw_sx1272_fsk.h	106;"	d
+SX1272_REG_TEMP	inc/loragw_sx1272_fsk.h	90;"	d
+SX1272_REG_TIMER1COEF	inc/loragw_sx1272_fsk.h	86;"	d
+SX1272_REG_TIMER2COEF	inc/loragw_sx1272_fsk.h	87;"	d
+SX1272_REG_TIMERRESOL	inc/loragw_sx1272_fsk.h	85;"	d
+SX1272_REG_VERSION	inc/loragw_sx1272_fsk.h	99;"	d
+SX1276_REG_AFCBW	inc/loragw_sx1276_fsk.h	45;"	d
+SX1276_REG_AFCFEI	inc/loragw_sx1276_fsk.h	52;"	d
+SX1276_REG_AFCLSB	inc/loragw_sx1276_fsk.h	54;"	d
+SX1276_REG_AFCMSB	inc/loragw_sx1276_fsk.h	53;"	d
+SX1276_REG_AGCREF	inc/loragw_sx1276_fsk.h	106;"	d
+SX1276_REG_AGCTHRESH1	inc/loragw_sx1276_fsk.h	107;"	d
+SX1276_REG_AGCTHRESH2	inc/loragw_sx1276_fsk.h	108;"	d
+SX1276_REG_AGCTHRESH3	inc/loragw_sx1276_fsk.h	109;"	d
+SX1276_REG_BITRATEFRAC	inc/loragw_sx1276_fsk.h	105;"	d
+SX1276_REG_BITRATELSB	inc/loragw_sx1276_fsk.h	27;"	d
+SX1276_REG_BITRATEMSB	inc/loragw_sx1276_fsk.h	26;"	d
+SX1276_REG_BROADCASTADRS	inc/loragw_sx1276_fsk.h	80;"	d
+SX1276_REG_DIOMAPPING1	inc/loragw_sx1276_fsk.h	96;"	d
+SX1276_REG_DIOMAPPING2	inc/loragw_sx1276_fsk.h	97;"	d
+SX1276_REG_FDEVLSB	inc/loragw_sx1276_fsk.h	29;"	d
+SX1276_REG_FDEVMSB	inc/loragw_sx1276_fsk.h	28;"	d
+SX1276_REG_FEILSB	inc/loragw_sx1276_fsk.h	56;"	d
+SX1276_REG_FEIMSB	inc/loragw_sx1276_fsk.h	55;"	d
+SX1276_REG_FIFO	inc/loragw_sx1276_fsk.h	23;"	d
+SX1276_REG_FIFOTHRESH	inc/loragw_sx1276_fsk.h	81;"	d
+SX1276_REG_FORMERTEMP	inc/loragw_sx1276_fsk.h	104;"	d
+SX1276_REG_FRFLSB	inc/loragw_sx1276_fsk.h	32;"	d
+SX1276_REG_FRFMID	inc/loragw_sx1276_fsk.h	31;"	d
+SX1276_REG_FRFMSB	inc/loragw_sx1276_fsk.h	30;"	d
+SX1276_REG_IMAGECAL	inc/loragw_sx1276_fsk.h	89;"	d
+SX1276_REG_IRQFLAGS1	inc/loragw_sx1276_fsk.h	93;"	d
+SX1276_REG_IRQFLAGS2	inc/loragw_sx1276_fsk.h	94;"	d
+SX1276_REG_LNA	inc/loragw_sx1276_fsk.h	38;"	d
+SX1276_REG_LOWBAT	inc/loragw_sx1276_fsk.h	91;"	d
+SX1276_REG_LR_AGCREF	inc/loragw_sx1276_lora.h	88;"	d
+SX1276_REG_LR_AGCTHRESH1	inc/loragw_sx1276_lora.h	89;"	d
+SX1276_REG_LR_AGCTHRESH2	inc/loragw_sx1276_lora.h	90;"	d
+SX1276_REG_LR_AGCTHRESH3	inc/loragw_sx1276_lora.h	91;"	d
+SX1276_REG_LR_BITRATEFRAC	inc/loragw_sx1276_lora.h	87;"	d
+SX1276_REG_LR_DETECTIONTHRESHOLD	inc/loragw_sx1276_lora.h	71;"	d
+SX1276_REG_LR_DETECTOPTIMIZE	inc/loragw_sx1276_lora.h	68;"	d
+SX1276_REG_LR_DIOMAPPING1	inc/loragw_sx1276_lora.h	78;"	d
+SX1276_REG_LR_DIOMAPPING2	inc/loragw_sx1276_lora.h	79;"	d
+SX1276_REG_LR_FEILSB	inc/loragw_sx1276_lora.h	64;"	d
+SX1276_REG_LR_FEIMID	inc/loragw_sx1276_lora.h	63;"	d
+SX1276_REG_LR_FEIMSB	inc/loragw_sx1276_lora.h	62;"	d
+SX1276_REG_LR_FIFO	inc/loragw_sx1276_lora.h	23;"	d
+SX1276_REG_LR_FIFOADDRPTR	inc/loragw_sx1276_lora.h	36;"	d
+SX1276_REG_LR_FIFORXBASEADDR	inc/loragw_sx1276_lora.h	38;"	d
+SX1276_REG_LR_FIFORXBYTEADDR	inc/loragw_sx1276_lora.h	60;"	d
+SX1276_REG_LR_FIFORXCURRENTADDR	inc/loragw_sx1276_lora.h	39;"	d
+SX1276_REG_LR_FIFOTXBASEADDR	inc/loragw_sx1276_lora.h	37;"	d
+SX1276_REG_LR_FORMERTEMP	inc/loragw_sx1276_lora.h	86;"	d
+SX1276_REG_LR_FRFLSB	inc/loragw_sx1276_lora.h	28;"	d
+SX1276_REG_LR_FRFMID	inc/loragw_sx1276_lora.h	27;"	d
+SX1276_REG_LR_FRFMSB	inc/loragw_sx1276_lora.h	26;"	d
+SX1276_REG_LR_HOPCHANNEL	inc/loragw_sx1276_lora.h	51;"	d
+SX1276_REG_LR_HOPPERIOD	inc/loragw_sx1276_lora.h	59;"	d
+SX1276_REG_LR_INVERTIQ	inc/loragw_sx1276_lora.h	69;"	d
+SX1276_REG_LR_INVERTIQ2	inc/loragw_sx1276_lora.h	74;"	d
+SX1276_REG_LR_IRQFLAGS	inc/loragw_sx1276_lora.h	41;"	d
+SX1276_REG_LR_IRQFLAGSMASK	inc/loragw_sx1276_lora.h	40;"	d
+SX1276_REG_LR_LNA	inc/loragw_sx1276_lora.h	34;"	d
+SX1276_REG_LR_MODEMCONFIG1	inc/loragw_sx1276_lora.h	52;"	d
+SX1276_REG_LR_MODEMCONFIG2	inc/loragw_sx1276_lora.h	53;"	d
+SX1276_REG_LR_MODEMCONFIG3	inc/loragw_sx1276_lora.h	61;"	d
+SX1276_REG_LR_MODEMSTAT	inc/loragw_sx1276_lora.h	47;"	d
+SX1276_REG_LR_OCP	inc/loragw_sx1276_lora.h	32;"	d
+SX1276_REG_LR_OPMODE	inc/loragw_sx1276_lora.h	25;"	d
+SX1276_REG_LR_PACONFIG	inc/loragw_sx1276_lora.h	30;"	d
+SX1276_REG_LR_PADAC	inc/loragw_sx1276_lora.h	85;"	d
+SX1276_REG_LR_PARAMP	inc/loragw_sx1276_lora.h	31;"	d
+SX1276_REG_LR_PAYLOADLENGTH	inc/loragw_sx1276_lora.h	57;"	d
+SX1276_REG_LR_PAYLOADMAXLENGTH	inc/loragw_sx1276_lora.h	58;"	d
+SX1276_REG_LR_PKTRSSIVALUE	inc/loragw_sx1276_lora.h	49;"	d
+SX1276_REG_LR_PKTSNRVALUE	inc/loragw_sx1276_lora.h	48;"	d
+SX1276_REG_LR_PLL	inc/loragw_sx1276_lora.h	92;"	d
+SX1276_REG_LR_PLLHOP	inc/loragw_sx1276_lora.h	83;"	d
+SX1276_REG_LR_PREAMBLELSB	inc/loragw_sx1276_lora.h	56;"	d
+SX1276_REG_LR_PREAMBLEMSB	inc/loragw_sx1276_lora.h	55;"	d
+SX1276_REG_LR_RSSIVALUE	inc/loragw_sx1276_lora.h	50;"	d
+SX1276_REG_LR_RSSIWIDEBAND	inc/loragw_sx1276_lora.h	65;"	d
+SX1276_REG_LR_RXHEADERCNTVALUELSB	inc/loragw_sx1276_lora.h	44;"	d
+SX1276_REG_LR_RXHEADERCNTVALUEMSB	inc/loragw_sx1276_lora.h	43;"	d
+SX1276_REG_LR_RXNBBYTES	inc/loragw_sx1276_lora.h	42;"	d
+SX1276_REG_LR_RXPACKETCNTVALUELSB	inc/loragw_sx1276_lora.h	46;"	d
+SX1276_REG_LR_RXPACKETCNTVALUEMSB	inc/loragw_sx1276_lora.h	45;"	d
+SX1276_REG_LR_SYMBTIMEOUTLSB	inc/loragw_sx1276_lora.h	54;"	d
+SX1276_REG_LR_SYNCWORD	inc/loragw_sx1276_lora.h	72;"	d
+SX1276_REG_LR_TCXO	inc/loragw_sx1276_lora.h	84;"	d
+SX1276_REG_LR_TEST2F	inc/loragw_sx1276_lora.h	66;"	d
+SX1276_REG_LR_TEST30	inc/loragw_sx1276_lora.h	67;"	d
+SX1276_REG_LR_TEST36	inc/loragw_sx1276_lora.h	70;"	d
+SX1276_REG_LR_TEST3A	inc/loragw_sx1276_lora.h	73;"	d
+SX1276_REG_LR_VERSION	inc/loragw_sx1276_lora.h	81;"	d
+SX1276_REG_NODEADRS	inc/loragw_sx1276_fsk.h	79;"	d
+SX1276_REG_OCP	inc/loragw_sx1276_fsk.h	36;"	d
+SX1276_REG_OOKAVG	inc/loragw_sx1276_fsk.h	48;"	d
+SX1276_REG_OOKFIX	inc/loragw_sx1276_fsk.h	47;"	d
+SX1276_REG_OOKPEAK	inc/loragw_sx1276_fsk.h	46;"	d
+SX1276_REG_OPMODE	inc/loragw_sx1276_fsk.h	25;"	d
+SX1276_REG_OSC	inc/loragw_sx1276_fsk.h	63;"	d
+SX1276_REG_PACKETCONFIG1	inc/loragw_sx1276_fsk.h	76;"	d
+SX1276_REG_PACKETCONFIG2	inc/loragw_sx1276_fsk.h	77;"	d
+SX1276_REG_PACONFIG	inc/loragw_sx1276_fsk.h	34;"	d
+SX1276_REG_PADAC	inc/loragw_sx1276_fsk.h	103;"	d
+SX1276_REG_PARAMP	inc/loragw_sx1276_fsk.h	35;"	d
+SX1276_REG_PAYLOADLENGTH	inc/loragw_sx1276_fsk.h	78;"	d
+SX1276_REG_PLL	inc/loragw_sx1276_fsk.h	110;"	d
+SX1276_REG_PLLHOP	inc/loragw_sx1276_fsk.h	101;"	d
+SX1276_REG_PREAMBLEDETECT	inc/loragw_sx1276_fsk.h	57;"	d
+SX1276_REG_PREAMBLELSB	inc/loragw_sx1276_fsk.h	66;"	d
+SX1276_REG_PREAMBLEMSB	inc/loragw_sx1276_fsk.h	65;"	d
+SX1276_REG_RES17	inc/loragw_sx1276_fsk.h	49;"	d
+SX1276_REG_RES18	inc/loragw_sx1276_fsk.h	50;"	d
+SX1276_REG_RES19	inc/loragw_sx1276_fsk.h	51;"	d
+SX1276_REG_RSSICOLLISION	inc/loragw_sx1276_fsk.h	41;"	d
+SX1276_REG_RSSICONFIG	inc/loragw_sx1276_fsk.h	40;"	d
+SX1276_REG_RSSITHRESH	inc/loragw_sx1276_fsk.h	42;"	d
+SX1276_REG_RSSIVALUE	inc/loragw_sx1276_fsk.h	43;"	d
+SX1276_REG_RXBW	inc/loragw_sx1276_fsk.h	44;"	d
+SX1276_REG_RXCONFIG	inc/loragw_sx1276_fsk.h	39;"	d
+SX1276_REG_RXDELAY	inc/loragw_sx1276_fsk.h	61;"	d
+SX1276_REG_RXTIMEOUT1	inc/loragw_sx1276_fsk.h	58;"	d
+SX1276_REG_RXTIMEOUT2	inc/loragw_sx1276_fsk.h	59;"	d
+SX1276_REG_RXTIMEOUT3	inc/loragw_sx1276_fsk.h	60;"	d
+SX1276_REG_SEQCONFIG1	inc/loragw_sx1276_fsk.h	83;"	d
+SX1276_REG_SEQCONFIG2	inc/loragw_sx1276_fsk.h	84;"	d
+SX1276_REG_SYNCCONFIG	inc/loragw_sx1276_fsk.h	67;"	d
+SX1276_REG_SYNCVALUE1	inc/loragw_sx1276_fsk.h	68;"	d
+SX1276_REG_SYNCVALUE2	inc/loragw_sx1276_fsk.h	69;"	d
+SX1276_REG_SYNCVALUE3	inc/loragw_sx1276_fsk.h	70;"	d
+SX1276_REG_SYNCVALUE4	inc/loragw_sx1276_fsk.h	71;"	d
+SX1276_REG_SYNCVALUE5	inc/loragw_sx1276_fsk.h	72;"	d
+SX1276_REG_SYNCVALUE6	inc/loragw_sx1276_fsk.h	73;"	d
+SX1276_REG_SYNCVALUE7	inc/loragw_sx1276_fsk.h	74;"	d
+SX1276_REG_SYNCVALUE8	inc/loragw_sx1276_fsk.h	75;"	d
+SX1276_REG_TCXO	inc/loragw_sx1276_fsk.h	102;"	d
+SX1276_REG_TEMP	inc/loragw_sx1276_fsk.h	90;"	d
+SX1276_REG_TIMER1COEF	inc/loragw_sx1276_fsk.h	86;"	d
+SX1276_REG_TIMER2COEF	inc/loragw_sx1276_fsk.h	87;"	d
+SX1276_REG_TIMERRESOL	inc/loragw_sx1276_fsk.h	85;"	d
+SX1276_REG_VERSION	inc/loragw_sx1276_fsk.h	99;"	d
+TAKE_N_BITS_FROM	inc/loragw_aux.h	35;"	d
+TIMESTAMPED	inc/loragw_hal.h	127;"	d
+TIMING_REPEAT	tst/test_loragw_spi.c	35;"	d	file:
+TRACE	src/loragw_gps.c	50;"	d	file:
+TRACE	src/loragw_hal.c	52;"	d	file:
+TS_CPS	src/loragw_gps.c	55;"	d	file:
+TX_EMITTING	inc/loragw_hal.h	143;"	d
+TX_FREE	inc/loragw_hal.h	141;"	d
+TX_GAIN_LUT_SIZE_MAX	inc/loragw_hal.h	153;"	d
+TX_METADATA_NB	src/loragw_hal.c	66;"	d	file:
+TX_OFF	inc/loragw_hal.h	140;"	d
+TX_SCHEDULED	inc/loragw_hal.h	142;"	d
+TX_START_DELAY_DEFAULT	src/loragw_hal.c	88;"	d	file:
+TX_STATUS	inc/loragw_hal.h	134;"	d
+TX_STATUS_UNKNOWN	inc/loragw_hal.h	139;"	d
+UBX_MSG_NAVTIMEGPS_LEN	src/loragw_gps.c	60;"	d	file:
+UBX_NAV_TIMEGPS	inc/loragw_gps.h	/^    UBX_NAV_TIMEGPS, \/*!> GPS Time Solution *\/$/;"	e	enum:gps_msg
+UBX_NAV_TIMEUTC	inc/loragw_gps.h	/^    UBX_NAV_TIMEUTC  \/*!> UTC Time Solution *\/$/;"	e	enum:gps_msg
+UNKNOWN	inc/loragw_gps.h	/^    UNKNOWN,         \/*!> neutral value *\/$/;"	e	enum:gps_msg
+WRITE_ACCESS	src/loragw_spi.native.c	55;"	d	file:
+_GNU_SOURCE	inc/loragw_gps.h	25;"	d
+_GNU_SOURCE	src/loragw_gps.c	22;"	d	file:
+_LORAGW_AUX_H	inc/loragw_aux.h	18;"	d
+_LORAGW_CONFIGURATION_H	inc/config.h	2;"	d
+_LORAGW_FPGA_REG_H	inc/loragw_fpga.h	20;"	d
+_LORAGW_GPS_H	inc/loragw_gps.h	20;"	d
+_LORAGW_HAL_H	inc/loragw_hal.h	18;"	d
+_LORAGW_LBT_H	inc/loragw_lbt.h	17;"	d
+_LORAGW_RADIO_H	inc/loragw_radio.h	17;"	d
+_LORAGW_REG_H	inc/loragw_reg.h	21;"	d
+_LORAGW_SPI_H	inc/loragw_spi.h	22;"	d
+_LORAGW_SX1272_REGS_FSK_H	inc/loragw_sx1272_fsk.h	16;"	d
+_LORAGW_SX1272_REGS_LORA_H	inc/loragw_sx1272_lora.h	16;"	d
+_LORAGW_SX1276_REGS_FSK_H	inc/loragw_sx1276_fsk.h	16;"	d
+_LORAGW_SX1276_REGS_LORA_H	inc/loragw_sx1276_lora.h	16;"	d
+_XOPEN_SOURCE	src/loragw_aux.c	22;"	d	file:
+_XOPEN_SOURCE	src/loragw_aux.c	24;"	d	file:
+_XOPEN_SOURCE	tst/test_loragw_cal.c	22;"	d	file:
+_XOPEN_SOURCE	tst/test_loragw_cal.c	24;"	d	file:
+_XOPEN_SOURCE	tst/test_loragw_gps.c	22;"	d	file:
+_XOPEN_SOURCE	tst/test_loragw_gps.c	24;"	d	file:
+_XOPEN_SOURCE	tst/test_loragw_hal.c	22;"	d	file:
+_XOPEN_SOURCE	tst/test_loragw_hal.c	24;"	d	file:
+__SX125X_REGS_H__	inc/loragw_sx125x.h	16;"	d
+addr	inc/loragw_reg.h	/^    uint8_t addr;        \/*!< base address of the register (7 bit) *\/$/;"	m	struct:lgw_reg_s
+alt	inc/loragw_gps.h	/^    short   alt;    \/*!> altitude in meters (WGS 84 geoid ref.) *\/$/;"	m	struct:coord_s
+amp_a	tst/test_loragw_cal.c	/^    int8_t amp_a;$/;"	m	struct:cal_res_s	file:
+amp_b	tst/test_loragw_cal.c	/^    int8_t amp_b;$/;"	m	struct:cal_res_s	file:
+bandwidth	inc/loragw_hal.h	/^    uint8_t     bandwidth;      \/*!> RX bandwidth, 0 for default *\/$/;"	m	struct:lgw_conf_rxif_s
+bandwidth	inc/loragw_hal.h	/^    uint8_t     bandwidth;      \/*!> modulation bandwidth (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
+bandwidth	inc/loragw_hal.h	/^    uint8_t     bandwidth;      \/*!> modulation bandwidth (LoRa only) *\/$/;"	m	struct:lgw_pkt_tx_s
+cal_offset_a_i	src/loragw_hal.c	/^static int8_t cal_offset_a_i[8]; \/* TX I offset for radio A *\/$/;"	v	file:
+cal_offset_a_q	src/loragw_hal.c	/^static int8_t cal_offset_a_q[8]; \/* TX Q offset for radio A *\/$/;"	v	file:
+cal_offset_b_i	src/loragw_hal.c	/^static int8_t cal_offset_b_i[8]; \/* TX I offset for radio B *\/$/;"	v	file:
+cal_offset_b_q	src/loragw_hal.c	/^static int8_t cal_offset_b_q[8]; \/* TX Q offset for radio B *\/$/;"	v	file:
+cal_res_s	tst/test_loragw_cal.c	/^struct cal_res_s {$/;"	s	file:
+channels	inc/loragw_hal.h	/^    struct lgw_conf_lbt_chan_s  channels[LBT_CHANNEL_FREQ_NB];$/;"	m	struct:lgw_conf_lbt_s	typeref:struct:lgw_conf_lbt_s::lgw_conf_lbt_chan_s
+check_fpga_version	src/loragw_reg.c	/^bool check_fpga_version(uint8_t version) {$/;"	f
+clksrc	inc/loragw_hal.h	/^    uint8_t clksrc;         \/*!> Index of RF chain which provides clock to concentrator *\/$/;"	m	struct:lgw_conf_board_s
+coderate	inc/loragw_hal.h	/^    uint8_t     coderate;       \/*!> error-correcting code of the packet (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
+coderate	inc/loragw_hal.h	/^    uint8_t     coderate;       \/*!> error-correcting code of the packet (LoRa only) *\/$/;"	m	struct:lgw_pkt_tx_s
+coord_s	inc/loragw_gps.h	/^struct coord_s {$/;"	s
+count_us	inc/loragw_gps.h	/^    uint32_t        count_us;   \/*!> reference concentrator internal timestamp *\/$/;"	m	struct:tref
+count_us	inc/loragw_hal.h	/^    uint32_t    count_us;       \/*!> internal concentrator counter for timestamping, 1 microsecond resolution *\/$/;"	m	struct:lgw_pkt_rx_s
+count_us	inc/loragw_hal.h	/^    uint32_t    count_us;       \/*!> timestamp or delay in microseconds for TX trigger *\/$/;"	m	struct:lgw_pkt_tx_s
+crc	inc/loragw_hal.h	/^    uint16_t    crc;            \/*!> CRC that was received in the payload *\/$/;"	m	struct:lgw_pkt_rx_s
+dac_gain	inc/loragw_hal.h	/^    uint8_t dac_gain;   \/*!> 2 bits, control of the radio DAC *\/$/;"	m	struct:lgw_tx_gain_s
+datarate	inc/loragw_hal.h	/^    uint32_t    datarate;       \/*!> RX datarate of the packet (SF for LoRa) *\/$/;"	m	struct:lgw_pkt_rx_s
+datarate	inc/loragw_hal.h	/^    uint32_t    datarate;       \/*!> RX datarate, 0 for default *\/$/;"	m	struct:lgw_conf_rxif_s
+datarate	inc/loragw_hal.h	/^    uint32_t    datarate;       \/*!> TX datarate (baudrate for FSK, SF for LoRa) *\/$/;"	m	struct:lgw_pkt_tx_s
+debug	tst/test_loragw_cal.c	/^    uint8_t debug [8];$/;"	m	struct:cal_res_s	file:
+dflt	inc/loragw_reg.h	/^    int32_t dflt;        \/*!< register default value *\/$/;"	m	struct:lgw_reg_s
+dig_gain	inc/loragw_hal.h	/^    uint8_t dig_gain;   \/*!> 2 bits, control of the digital gain of SX1301 *\/$/;"	m	struct:lgw_tx_gain_s
+enable	inc/loragw_hal.h	/^    bool                        enable;             \/*!> enable or disable LBT *\/$/;"	m	struct:lgw_conf_lbt_s
+enable	inc/loragw_hal.h	/^    bool                    enable;         \/*!> enable or disable that RF chain *\/$/;"	m	struct:lgw_conf_rxrf_s
+enable	inc/loragw_hal.h	/^    bool        enable;         \/*!> enable or disable that IF chain *\/$/;"	m	struct:lgw_conf_rxif_s
+exit_sig	tst/test_loragw_gps.c	/^static int exit_sig = 0; \/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) *\/$/;"	v	file:
+exit_sig	tst/test_loragw_hal.c	/^static int exit_sig = 0; \/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) *\/$/;"	v	file:
+f_dev	inc/loragw_hal.h	/^    uint8_t     f_dev;          \/*!> frequency deviation, in kHz (FSK only) *\/$/;"	m	struct:lgw_pkt_tx_s
+fpga_regs	src/loragw_fpga.c	/^const struct lgw_reg_s fpga_regs[LGW_FPGA_TOTALREGS] = {$/;"	v	typeref:struct:lgw_reg_s
+freq_hz	inc/loragw_hal.h	/^    int32_t     freq_hz;        \/*!> center frequ of the IF chain, relative to RF chain frequency *\/$/;"	m	struct:lgw_conf_rxif_s
+freq_hz	inc/loragw_hal.h	/^    uint32_t                freq_hz;        \/*!> center frequency of the radio in Hz *\/$/;"	m	struct:lgw_conf_rxrf_s
+freq_hz	inc/loragw_hal.h	/^    uint32_t    freq_hz;        \/*!> center frequency of TX *\/$/;"	m	struct:lgw_pkt_tx_s
+freq_hz	inc/loragw_hal.h	/^    uint32_t    freq_hz;        \/*!> central frequency of the IF chain *\/$/;"	m	struct:lgw_pkt_rx_s
+freq_hz	inc/loragw_hal.h	/^    uint32_t freq_hz;$/;"	m	struct:lgw_conf_lbt_chan_s
+fsk_rx_bw	src/loragw_hal.c	/^static uint8_t fsk_rx_bw; \/* bandwidth setting of FSK modem *\/$/;"	v	file:
+fsk_rx_dr	src/loragw_hal.c	/^static uint32_t fsk_rx_dr; \/* FSK modem datarate in bauds *\/$/;"	v	file:
+fsk_sync_word	src/loragw_hal.c	/^static uint64_t fsk_sync_word= 0xC194C1; \/* default FSK sync word (ALIGNED RIGHT, MSbit first) *\/$/;"	v	file:
+fsk_sync_word_size	src/loragw_hal.c	/^static uint8_t fsk_sync_word_size = 3; \/* default number of bytes for FSK sync word *\/$/;"	v	file:
+get_img_rej	tst/test_loragw_cal.c	/^uint8_t get_img_rej(int16_t *sig_i, int16_t *sig_q, int nb_samp, double f_sig_norm) {$/;"	f
+gps	inc/loragw_gps.h	/^    struct timespec gps;        \/*!> reference GPS time (since 01.Jan.1980) *\/$/;"	m	struct:tref	typeref:struct:tref::timespec
+gps_alt	src/loragw_gps.c	/^static short gps_alt = 0; \/* altitude *\/$/;"	v	file:
+gps_day	src/loragw_gps.c	/^static short gps_day = 0; \/* day of the month (1-31) *\/$/;"	v	file:
+gps_dla	src/loragw_gps.c	/^static short gps_dla = 0; \/* degrees of latitude *\/$/;"	v	file:
+gps_dlo	src/loragw_gps.c	/^static short gps_dlo = 0; \/* degrees of longitude *\/$/;"	v	file:
+gps_fTOW	src/loragw_gps.c	/^static int32_t gps_fTOW = 0; \/* Fractional part of iTOW (+\/-500000) in nanosec *\/$/;"	v	file:
+gps_fra	src/loragw_gps.c	/^static float gps_fra = 0.0; \/* fractions of seconds (<1) *\/$/;"	v	file:
+gps_hou	src/loragw_gps.c	/^static short gps_hou = 0; \/* hours (0-23) *\/$/;"	v	file:
+gps_iTOW	src/loragw_gps.c	/^static uint32_t gps_iTOW = 0; \/* GPS time of week in milliseconds *\/$/;"	v	file:
+gps_min	src/loragw_gps.c	/^static short gps_min = 0; \/* minutes (0-59) *\/$/;"	v	file:
+gps_mla	src/loragw_gps.c	/^static double gps_mla = 0.0; \/* minutes of latitude *\/$/;"	v	file:
+gps_mlo	src/loragw_gps.c	/^static double gps_mlo = 0.0; \/* minutes of longitude *\/$/;"	v	file:
+gps_mod	src/loragw_gps.c	/^static char gps_mod = 'N'; \/* GPS mode (N no fix, A autonomous, D differential) *\/$/;"	v	file:
+gps_mon	src/loragw_gps.c	/^static short gps_mon = 0; \/* month (1-12) *\/$/;"	v	file:
+gps_msg	inc/loragw_gps.h	/^enum gps_msg {$/;"	g
+gps_ola	src/loragw_gps.c	/^static char gps_ola = 0; \/* orientation (N-S) of latitude *\/$/;"	v	file:
+gps_olo	src/loragw_gps.c	/^static char gps_olo = 0; \/* orientation (E-W) of longitude *\/$/;"	v	file:
+gps_pos_ok	src/loragw_gps.c	/^static bool gps_pos_ok = false;$/;"	v	file:
+gps_process_coords	tst/test_loragw_gps.c	/^static void gps_process_coords(void) {$/;"	f	file:
+gps_process_sync	tst/test_loragw_gps.c	/^static void gps_process_sync(void) {$/;"	f	file:
+gps_sat	src/loragw_gps.c	/^static short gps_sat = 0; \/* number of satellites used for fix *\/$/;"	v	file:
+gps_sec	src/loragw_gps.c	/^static short gps_sec = 0; \/* seconds (0-60)(60 is for leap second) *\/$/;"	v	file:
+gps_time_ok	src/loragw_gps.c	/^static bool gps_time_ok = false;$/;"	v	file:
+gps_week	src/loragw_gps.c	/^static int16_t gps_week = 0; \/* GPS week number of the navigation epoch *\/$/;"	v	file:
+gps_yea	src/loragw_gps.c	/^static short gps_yea = 0; \/* year (2 or 4 digits) *\/$/;"	v	file:
+if_chain	inc/loragw_hal.h	/^    uint8_t     if_chain;       \/*!> by which IF chain was packet received *\/$/;"	m	struct:lgw_pkt_rx_s
+if_enable	src/loragw_hal.c	/^static bool if_enable[LGW_IF_CHAIN_NB];$/;"	v	file:
+if_freq	src/loragw_hal.c	/^static int32_t if_freq[LGW_IF_CHAIN_NB]; \/* relative to radio frequency, +\/- in Hz *\/$/;"	v	file:
+if_rf_chain	src/loragw_hal.c	/^static bool if_rf_chain[LGW_IF_CHAIN_NB]; \/* for each IF, 0 -> radio A, 1 -> radio B *\/$/;"	v	file:
+ifmod_config	src/loragw_hal.c	/^const uint8_t ifmod_config[LGW_IF_CHAIN_NB] = LGW_IFMODEM_CONFIG;$/;"	v
+img_rej_a	tst/test_loragw_cal.c	/^    uint8_t img_rej_a;$/;"	m	struct:cal_res_s	file:
+img_rej_b	tst/test_loragw_cal.c	/^    uint8_t img_rej_b;$/;"	m	struct:cal_res_s	file:
+invert_pol	inc/loragw_hal.h	/^    bool        invert_pol;     \/*!> invert signal polarity, for orthogonal downlinks (LoRa only) *\/$/;"	m	struct:lgw_pkt_tx_s
+is_equal_freq	src/loragw_lbt.c	/^bool is_equal_freq(uint32_t a, uint32_t b) {$/;"	f
+lat	inc/loragw_gps.h	/^    double  lat;    \/*!> latitude [-90,90] (North +, South -) *\/$/;"	m	struct:coord_s
+lbt_channel_cfg	src/loragw_lbt.c	/^static struct lgw_conf_lbt_chan_s lbt_channel_cfg[LBT_CHANNEL_FREQ_NB];$/;"	v	typeref:struct:lgw_conf_lbt_chan_s	file:
+lbt_enable	src/loragw_lbt.c	/^static bool lbt_enable;$/;"	v	file:
+lbt_is_channel_free	src/loragw_lbt.c	/^int lbt_is_channel_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay, bool * tx_allowed) {$/;"	f
+lbt_is_enabled	src/loragw_lbt.c	/^bool lbt_is_enabled(void) {$/;"	f
+lbt_nb_active_channel	src/loragw_lbt.c	/^static uint8_t lbt_nb_active_channel;$/;"	v	file:
+lbt_rssi_offset_dB	src/loragw_lbt.c	/^static int8_t lbt_rssi_offset_dB;$/;"	v	file:
+lbt_rssi_target_dBm	src/loragw_lbt.c	/^static int8_t lbt_rssi_target_dBm;$/;"	v	file:
+lbt_setconf	src/loragw_lbt.c	/^int lbt_setconf(struct lgw_conf_lbt_s * conf) {$/;"	f
+lbt_setup	src/loragw_lbt.c	/^int lbt_setup(void) {$/;"	f
+lbt_start	src/loragw_lbt.c	/^int lbt_start(void) {$/;"	f
+lbt_start_freq	src/loragw_lbt.c	/^static uint32_t lbt_start_freq;$/;"	v	file:
+leng	inc/loragw_reg.h	/^    uint8_t leng;        \/*!< number of bits in the register *\/$/;"	m	struct:lgw_reg_s
+lgw_abort_tx	src/loragw_hal.c	/^int lgw_abort_tx(void) {$/;"	f
+lgw_board_setconf	src/loragw_hal.c	/^int lgw_board_setconf(struct lgw_conf_board_s conf) {$/;"	f
+lgw_bw_getval	src/loragw_hal.c	/^int32_t lgw_bw_getval(int x) {$/;"	f
+lgw_cnt2gps	src/loragw_gps.c	/^int lgw_cnt2gps(struct tref ref, uint32_t count_us, struct timespec *gps_time) {$/;"	f
+lgw_cnt2utc	src/loragw_gps.c	/^int lgw_cnt2utc(struct tref ref, uint32_t count_us, struct timespec *utc) {$/;"	f
+lgw_conf_board_s	inc/loragw_hal.h	/^struct lgw_conf_board_s {$/;"	s
+lgw_conf_lbt_chan_s	inc/loragw_hal.h	/^struct lgw_conf_lbt_chan_s {$/;"	s
+lgw_conf_lbt_s	inc/loragw_hal.h	/^struct lgw_conf_lbt_s {$/;"	s
+lgw_conf_rxif_s	inc/loragw_hal.h	/^struct lgw_conf_rxif_s {$/;"	s
+lgw_conf_rxrf_s	inc/loragw_hal.h	/^struct lgw_conf_rxrf_s {$/;"	s
+lgw_connect	src/loragw_reg.c	/^int lgw_connect(bool spi_only, uint32_t tx_notch_freq) {$/;"	f
+lgw_constant_adjust	src/loragw_hal.c	/^void lgw_constant_adjust(void) {$/;"	f
+lgw_disconnect	src/loragw_reg.c	/^int lgw_disconnect(void) {$/;"	f
+lgw_fpga_configure	src/loragw_fpga.c	/^int lgw_fpga_configure(uint32_t tx_notch_freq) {$/;"	f
+lgw_fpga_get_tx_notch_delay	src/loragw_fpga.c	/^float lgw_fpga_get_tx_notch_delay(void) {$/;"	f
+lgw_fpga_reg_r	src/loragw_fpga.c	/^int lgw_fpga_reg_r(uint16_t register_id, int32_t *reg_value) {$/;"	f
+lgw_fpga_reg_rb	src/loragw_fpga.c	/^int lgw_fpga_reg_rb(uint16_t register_id, uint8_t *data, uint16_t size) {$/;"	f
+lgw_fpga_reg_w	src/loragw_fpga.c	/^int lgw_fpga_reg_w(uint16_t register_id, int32_t reg_value) {$/;"	f
+lgw_fpga_reg_wb	src/loragw_fpga.c	/^int lgw_fpga_reg_wb(uint16_t register_id, uint8_t *data, uint16_t size) {$/;"	f
+lgw_get_trigcnt	src/loragw_hal.c	/^int lgw_get_trigcnt(uint32_t* trig_cnt_us) {$/;"	f
+lgw_get_tx_start_delay	src/loragw_hal.c	/^uint16_t lgw_get_tx_start_delay(bool tx_notch_enable, uint8_t bw) {$/;"	f
+lgw_gps2cnt	src/loragw_gps.c	/^int lgw_gps2cnt(struct tref ref, struct timespec gps_time, uint32_t *count_us) {$/;"	f
+lgw_gps_disable	src/loragw_gps.c	/^int lgw_gps_disable(int fd) {$/;"	f
+lgw_gps_enable	src/loragw_gps.c	/^int lgw_gps_enable(char *tty_path, char *gps_family, speed_t target_brate, int *fd_ptr) {$/;"	f
+lgw_gps_get	src/loragw_gps.c	/^int lgw_gps_get(struct timespec *utc, struct timespec *gps_time, struct coord_s *loc, struct coord_s *err) {$/;"	f
+lgw_gps_sync	src/loragw_gps.c	/^int lgw_gps_sync(struct tref *ref, uint32_t count_us, struct timespec utc, struct timespec gps_time) {$/;"	f
+lgw_is_started	src/loragw_hal.c	/^static bool lgw_is_started;$/;"	v	file:
+lgw_lbt_setconf	src/loragw_hal.c	/^int lgw_lbt_setconf(struct lgw_conf_lbt_s conf) {$/;"	f
+lgw_parse_nmea	src/loragw_gps.c	/^enum gps_msg lgw_parse_nmea(const char *serial_buff, int buff_size) {$/;"	f
+lgw_parse_ubx	src/loragw_gps.c	/^enum gps_msg lgw_parse_ubx(const char *serial_buff, size_t buff_size, size_t *msg_size) {$/;"	f
+lgw_pkt_rx_s	inc/loragw_hal.h	/^struct lgw_pkt_rx_s {$/;"	s
+lgw_pkt_tx_s	inc/loragw_hal.h	/^struct lgw_pkt_tx_s {$/;"	s
+lgw_radio_type_e	inc/loragw_hal.h	/^enum lgw_radio_type_e {$/;"	g
+lgw_radio_type_version_s	src/loragw_radio.c	/^struct lgw_radio_type_version_s {$/;"	s	file:
+lgw_receive	src/loragw_hal.c	/^int lgw_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {$/;"	f
+lgw_reg_check	src/loragw_reg.c	/^int lgw_reg_check(FILE *f) {$/;"	f
+lgw_reg_r	src/loragw_reg.c	/^int lgw_reg_r(uint16_t register_id, int32_t *reg_value) {$/;"	f
+lgw_reg_rb	src/loragw_reg.c	/^int lgw_reg_rb(uint16_t register_id, uint8_t *data, uint16_t size) {$/;"	f
+lgw_reg_s	inc/loragw_reg.h	/^struct lgw_reg_s {$/;"	s
+lgw_reg_w	src/loragw_reg.c	/^int lgw_reg_w(uint16_t register_id, int32_t reg_value) {$/;"	f
+lgw_reg_wb	src/loragw_reg.c	/^int lgw_reg_wb(uint16_t register_id, uint8_t *data, uint16_t size) {$/;"	f
+lgw_regpage	src/loragw_reg.c	/^static int lgw_regpage = -1; \/*! keep the value of the register page selected *\/$/;"	v	file:
+lgw_rxif_setconf	src/loragw_hal.c	/^int lgw_rxif_setconf(uint8_t if_chain, struct lgw_conf_rxif_s conf) {$/;"	f
+lgw_rxrf_setconf	src/loragw_hal.c	/^int lgw_rxrf_setconf(uint8_t rf_chain, struct lgw_conf_rxrf_s conf) {$/;"	f
+lgw_send	src/loragw_hal.c	/^int lgw_send(struct lgw_pkt_tx_s pkt_data) {$/;"	f
+lgw_setup_sx125x	src/loragw_radio.c	/^int lgw_setup_sx125x(uint8_t rf_chain, uint8_t rf_clkout, bool rf_enable, uint8_t rf_radio_type, uint32_t freq_hz) {$/;"	f
+lgw_setup_sx127x	src/loragw_radio.c	/^int lgw_setup_sx127x(uint32_t frequency, uint8_t modulation, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
+lgw_sf_getval	src/loragw_hal.c	/^int32_t lgw_sf_getval(int x) {$/;"	f
+lgw_soft_reset	src/loragw_reg.c	/^int lgw_soft_reset(void) {$/;"	f
+lgw_spi_close	src/loragw_spi.native.c	/^int lgw_spi_close(void *spi_target) {$/;"	f
+lgw_spi_mux_mode	src/loragw_reg.c	/^uint8_t lgw_spi_mux_mode = 0; \/*! current SPI mux mode used *\/$/;"	v
+lgw_spi_open	src/loragw_spi.native.c	/^int lgw_spi_open(void **spi_target_ptr) {$/;"	f
+lgw_spi_r	src/loragw_spi.native.c	/^int lgw_spi_r(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t *data) {$/;"	f
+lgw_spi_rb	src/loragw_spi.native.c	/^int lgw_spi_rb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t *data, uint16_t size) {$/;"	f
+lgw_spi_target	src/loragw_reg.c	/^void *lgw_spi_target = NULL; \/*! generic pointer to the SPI device *\/$/;"	v
+lgw_spi_w	src/loragw_spi.native.c	/^int lgw_spi_w(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t data) {$/;"	f
+lgw_spi_wb	src/loragw_spi.native.c	/^int lgw_spi_wb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t *data, uint16_t size) {$/;"	f
+lgw_start	src/loragw_hal.c	/^int lgw_start(void) {$/;"	f
+lgw_status	src/loragw_hal.c	/^int lgw_status(uint8_t select, uint8_t *code) {$/;"	f
+lgw_stop	src/loragw_hal.c	/^int lgw_stop(void) {$/;"	f
+lgw_sx127x_FSK_bandwidth_s	src/loragw_radio.c	/^struct lgw_sx127x_FSK_bandwidth_s {$/;"	s	file:
+lgw_sx127x_reg_r	src/loragw_radio.c	/^int lgw_sx127x_reg_r(uint8_t address, uint8_t *reg_value) {$/;"	f
+lgw_sx127x_reg_w	src/loragw_radio.c	/^int lgw_sx127x_reg_w(uint8_t address, uint8_t reg_value) {$/;"	f
+lgw_sx127x_rxbw_e	inc/loragw_radio.h	/^enum lgw_sx127x_rxbw_e {$/;"	g
+lgw_time_on_air	src/loragw_hal.c	/^uint32_t lgw_time_on_air(struct lgw_pkt_tx_s *packet) {$/;"	f
+lgw_tx_gain_lut_s	inc/loragw_hal.h	/^struct lgw_tx_gain_lut_s {$/;"	s
+lgw_tx_gain_s	inc/loragw_hal.h	/^struct lgw_tx_gain_s {$/;"	s
+lgw_txgain_setconf	src/loragw_hal.c	/^int lgw_txgain_setconf(struct lgw_tx_gain_lut_s *conf) {$/;"	f
+lgw_utc2cnt	src/loragw_gps.c	/^int lgw_utc2cnt(struct tref ref, struct timespec utc, uint32_t *count_us) {$/;"	f
+lgw_version_info	src/loragw_hal.c	/^const char* lgw_version_info() {$/;"	f
+lgw_version_string	src/loragw_hal.c	/^const char lgw_version_string[] = "Version: " LIBLORAGW_VERSION ";";$/;"	v
+load_firmware	src/loragw_hal.c	/^int load_firmware(uint8_t target, uint8_t *firmware, uint16_t size) {$/;"	f
+lon	inc/loragw_gps.h	/^    double  lon;    \/*!> longitude [-180,180] (East +, West -)*\/$/;"	m	struct:coord_s
+lora_multi_sfmask	src/loragw_hal.c	/^static uint8_t lora_multi_sfmask[LGW_MULTI_NB]; \/* enables SF for LoRa 'multi' modems *\/$/;"	v	file:
+lora_rx_bw	src/loragw_hal.c	/^static uint8_t lora_rx_bw; \/* bandwidth setting for LoRa standalone modem *\/$/;"	v	file:
+lora_rx_ppm_offset	src/loragw_hal.c	/^static bool lora_rx_ppm_offset;$/;"	v	file:
+lora_rx_sf	src/loragw_hal.c	/^static uint8_t lora_rx_sf; \/* spreading factor setting for LoRa standalone modem *\/$/;"	v	file:
+lorawan_public	inc/loragw_hal.h	/^    bool    lorawan_public; \/*!> Enable ONLY for *public* networks using the LoRa MAC protocol *\/$/;"	m	struct:lgw_conf_board_s
+lorawan_public	src/loragw_hal.c	/^static bool lorawan_public = false;$/;"	v	file:
+loregs	src/loragw_reg.c	/^const struct lgw_reg_s loregs[LGW_TOTALREGS] = {$/;"	v	typeref:struct:lgw_reg_s
+lut	inc/loragw_hal.h	/^    struct lgw_tx_gain_s    lut[TX_GAIN_LUT_SIZE_MAX];  \/*!> Array of Tx gain struct *\/$/;"	m	struct:lgw_tx_gain_lut_s	typeref:struct:lgw_tx_gain_lut_s::lgw_tx_gain_s
+main	tst/test_loragw_cal.c	/^int main(int argc, char **argv)$/;"	f
+main	tst/test_loragw_gps.c	/^int main()$/;"	f
+main	tst/test_loragw_hal.c	/^int main(int argc, char **argv)$/;"	f
+main	tst/test_loragw_reg.c	/^int main()$/;"	f
+main	tst/test_loragw_spi.c	/^int main()$/;"	f
+match_label	src/loragw_gps.c	/^static bool match_label(const char *s, char *label, int size, char wildcard) {$/;"	f	file:
+mix_gain	inc/loragw_hal.h	/^    uint8_t mix_gain;   \/*!> 4 bits, control of the radio mixer *\/$/;"	m	struct:lgw_tx_gain_s
+modulation	inc/loragw_hal.h	/^    uint8_t     modulation;     \/*!> modulation to use for the packet *\/$/;"	m	struct:lgw_pkt_tx_s
+modulation	inc/loragw_hal.h	/^    uint8_t     modulation;     \/*!> modulation used by the packet *\/$/;"	m	struct:lgw_pkt_rx_s
+nb_channel	inc/loragw_hal.h	/^    uint8_t                     nb_channel;         \/*!> number of LBT channels *\/$/;"	m	struct:lgw_conf_lbt_s
+nibble_to_hexchar	src/loragw_gps.c	/^static char nibble_to_hexchar(uint8_t a) {$/;"	f	file:
+nmea_checksum	src/loragw_gps.c	/^static int nmea_checksum(const char *nmea_string, int buff_size, char *checksum) {$/;"	f	file:
+no_crc	inc/loragw_hal.h	/^    bool        no_crc;         \/*!> if true, do not send a CRC in the packet *\/$/;"	m	struct:lgw_pkt_tx_s
+no_header	inc/loragw_hal.h	/^    bool        no_header;      \/*!> if true, enable implicit header mode (LoRa), fixed length (FSK) *\/$/;"	m	struct:lgw_pkt_tx_s
+offs	inc/loragw_reg.h	/^    uint8_t offs;        \/*!< position of the register LSB (between 0 to 7) *\/$/;"	m	struct:lgw_reg_s
+offset_i_a	tst/test_loragw_cal.c	/^    int8_t offset_i_a [8];$/;"	m	struct:cal_res_s	file:
+offset_i_b	tst/test_loragw_cal.c	/^    int8_t offset_i_b [8];$/;"	m	struct:cal_res_s	file:
+offset_q_a	tst/test_loragw_cal.c	/^    int8_t offset_q_a [8];$/;"	m	struct:cal_res_s	file:
+offset_q_b	tst/test_loragw_cal.c	/^    int8_t offset_q_b [8];$/;"	m	struct:cal_res_s	file:
+offset_rej_a	tst/test_loragw_cal.c	/^    uint8_t offset_rej_a [8];$/;"	m	struct:cal_res_s	file:
+offset_rej_b	tst/test_loragw_cal.c	/^    uint8_t offset_rej_b [8];$/;"	m	struct:cal_res_s	file:
+pa_gain	inc/loragw_hal.h	/^    uint8_t pa_gain;    \/*!> 2 bits, control of the external PA (SX1301 I\/O) *\/$/;"	m	struct:lgw_tx_gain_s
+page	inc/loragw_reg.h	/^    int8_t  page;        \/*!< page containing the register (-1 for all pages) *\/$/;"	m	struct:lgw_reg_s
+page_switch	src/loragw_reg.c	/^int page_switch(uint8_t target) {$/;"	f
+payload	inc/loragw_hal.h	/^    uint8_t     payload[256];   \/*!> buffer containing the payload *\/$/;"	m	struct:lgw_pkt_rx_s
+payload	inc/loragw_hal.h	/^    uint8_t     payload[256];   \/*!> buffer containing the payload *\/$/;"	m	struct:lgw_pkt_tx_s
+phi_a	tst/test_loragw_cal.c	/^    int8_t phi_a;$/;"	m	struct:cal_res_s	file:
+phi_b	tst/test_loragw_cal.c	/^    int8_t phi_b;$/;"	m	struct:cal_res_s	file:
+ppm_ref	tst/test_loragw_gps.c	/^struct tref ppm_ref;$/;"	v	typeref:struct:tref
+preamble	inc/loragw_hal.h	/^    uint16_t    preamble;       \/*!> set the preamble length, 0 for default *\/$/;"	m	struct:lgw_pkt_tx_s
+quit_sig	tst/test_loragw_gps.c	/^static int quit_sig = 0; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v	file:
+quit_sig	tst/test_loragw_hal.c	/^static int quit_sig = 0; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v	file:
+rdon	inc/loragw_reg.h	/^    bool    rdon;        \/*!< 1 indicates a read-only register *\/$/;"	m	struct:lgw_reg_s
+read_capture	tst/test_loragw_cal.c	/^int read_capture(int16_t *sig_i, int16_t *sig_q, int nb_samp) {$/;"	f
+reg_r_align32	src/loragw_reg.c	/^int reg_r_align32(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, struct lgw_reg_s r, int32_t *reg_value) {$/;"	f
+reg_version	src/loragw_radio.c	/^    uint8_t reg_version;$/;"	m	struct:lgw_radio_type_version_s	file:
+reg_w_align32	src/loragw_reg.c	/^int reg_w_align32(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, struct lgw_reg_s r, int32_t reg_value) {$/;"	f
+reset_sx127x	src/loragw_radio.c	/^int reset_sx127x(enum lgw_radio_type_e radio_type) {$/;"	f
+rf_chain	inc/loragw_hal.h	/^    uint8_t     rf_chain;       \/*!> through which RF chain the packet was received *\/$/;"	m	struct:lgw_pkt_rx_s
+rf_chain	inc/loragw_hal.h	/^    uint8_t     rf_chain;       \/*!> through which RF chain will the packet be sent *\/$/;"	m	struct:lgw_pkt_tx_s
+rf_chain	inc/loragw_hal.h	/^    uint8_t     rf_chain;       \/*!> to which RF chain is that IF chain associated *\/$/;"	m	struct:lgw_conf_rxif_s
+rf_clkout	src/loragw_hal.c	/^static uint8_t rf_clkout = 0;$/;"	v	file:
+rf_enable	src/loragw_hal.c	/^static bool rf_enable[LGW_RF_CHAIN_NB];$/;"	v	file:
+rf_power	inc/loragw_hal.h	/^    int8_t      rf_power;       \/*!> TX power, in dBm *\/$/;"	m	struct:lgw_pkt_tx_s
+rf_power	inc/loragw_hal.h	/^    int8_t  rf_power;   \/*!> measured TX power at the board connector, in dBm *\/$/;"	m	struct:lgw_tx_gain_s
+rf_radio_type	src/loragw_hal.c	/^static enum lgw_radio_type_e rf_radio_type[LGW_RF_CHAIN_NB];$/;"	v	typeref:enum:lgw_radio_type_e	file:
+rf_rssi_offset	src/loragw_hal.c	/^static float rf_rssi_offset[LGW_RF_CHAIN_NB];$/;"	v	file:
+rf_rx_freq	src/loragw_hal.c	/^static uint32_t rf_rx_freq[LGW_RF_CHAIN_NB]; \/* absolute, in Hz *\/$/;"	v	file:
+rf_tx_enable	src/loragw_hal.c	/^static bool rf_tx_enable[LGW_RF_CHAIN_NB];$/;"	v	file:
+rf_tx_notch_freq	src/loragw_hal.c	/^static uint32_t rf_tx_notch_freq[LGW_RF_CHAIN_NB];$/;"	v	file:
+rssi	inc/loragw_hal.h	/^    float       rssi;           \/*!> average packet RSSI in dB *\/$/;"	m	struct:lgw_pkt_rx_s
+rssi_offset	inc/loragw_hal.h	/^    float                   rssi_offset;    \/*!> Board-specific RSSI correction factor *\/$/;"	m	struct:lgw_conf_rxrf_s
+rssi_offset	inc/loragw_hal.h	/^    int8_t                      rssi_offset;        \/*!> RSSI offset to be applied to SX127x RSSI values *\/$/;"	m	struct:lgw_conf_lbt_s
+rssi_target	inc/loragw_hal.h	/^    int8_t                      rssi_target;        \/*!> RSSI threshold to detect if channel is busy or not (dBm) *\/$/;"	m	struct:lgw_conf_lbt_s
+scan_time_us	inc/loragw_hal.h	/^    uint16_t scan_time_us;$/;"	m	struct:lgw_conf_lbt_chan_s
+setup_sx1272_FSK	src/loragw_radio.c	/^int setup_sx1272_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
+setup_sx1276_FSK	src/loragw_radio.c	/^int setup_sx1276_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
+sig_handler	tst/test_loragw_gps.c	/^static void sig_handler(int sigio) {$/;"	f	file:
+sig_handler	tst/test_loragw_hal.c	/^static void sig_handler(int sigio) {$/;"	f	file:
+sign	inc/loragw_reg.h	/^    bool    sign;        \/*!< 1 indicates the register is signed (2 complem.) *\/$/;"	m	struct:lgw_reg_s
+size	inc/loragw_hal.h	/^    uint16_t    size;           \/*!> payload size in bytes *\/$/;"	m	struct:lgw_pkt_rx_s
+size	inc/loragw_hal.h	/^    uint16_t    size;           \/*!> payload size in bytes *\/$/;"	m	struct:lgw_pkt_tx_s
+size	inc/loragw_hal.h	/^    uint8_t                 size;                       \/*!> Number of LUT indexes *\/$/;"	m	struct:lgw_tx_gain_lut_s
+snr	inc/loragw_hal.h	/^    float       snr;            \/*!> average packet SNR, in dB (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
+snr_max	inc/loragw_hal.h	/^    float       snr_max;        \/*!> maximum packet SNR, in dB (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
+snr_min	inc/loragw_hal.h	/^    float       snr_min;        \/*!> minimum packet SNR, in dB (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
+status	inc/loragw_hal.h	/^    uint8_t     status;         \/*!> status of the received packet *\/$/;"	m	struct:lgw_pkt_rx_s
+str_chop	src/loragw_gps.c	/^int str_chop(char *s, int buff_size, char separator, int *idx_ary, int max_idx) {$/;"	f
+sx125x_cal	tst/test_loragw_cal.c	/^uint8_t sx125x_cal(uint8_t cal_cmd, struct cal_res_s *cal_res) {$/;"	f
+sx125x_read	src/loragw_radio.c	/^uint8_t sx125x_read(uint8_t channel, uint8_t addr) {$/;"	f
+sx125x_write	src/loragw_radio.c	/^void sx125x_write(uint8_t channel, uint8_t addr, uint8_t data) {$/;"	f
+sx127x_FskBandwidths	src/loragw_radio.c	/^const struct lgw_sx127x_FSK_bandwidth_s sx127x_FskBandwidths[] =$/;"	v	typeref:struct:lgw_sx127x_FSK_bandwidth_s
+sync_word	inc/loragw_hal.h	/^    uint64_t    sync_word;      \/*!> FSK sync word (ALIGN RIGHT, eg. 0xC194C1) *\/$/;"	m	struct:lgw_conf_rxif_s
+sync_word_size	inc/loragw_hal.h	/^    uint8_t     sync_word_size; \/*!> size of FSK sync word (number of bytes, 0 for default) *\/$/;"	m	struct:lgw_conf_rxif_s
+systime	inc/loragw_gps.h	/^    time_t          systime;    \/*!> system time when solution was calculated *\/$/;"	m	struct:tref
+tref	inc/loragw_gps.h	/^struct tref {$/;"	s
+ttyopt_restore	src/loragw_gps.c	/^static struct termios ttyopt_restore;$/;"	v	typeref:struct:termios	file:
+tx_enable	inc/loragw_hal.h	/^    bool                    tx_enable;      \/*!> enable or disable TX on that RF chain *\/$/;"	m	struct:lgw_conf_rxrf_s
+tx_mode	inc/loragw_hal.h	/^    uint8_t     tx_mode;        \/*!> select on what event\/time the TX is triggered *\/$/;"	m	struct:lgw_pkt_tx_s
+tx_notch_freq	inc/loragw_hal.h	/^    uint32_t                tx_notch_freq;  \/*!> TX notch filter frequency [126KHz..250KHz] *\/$/;"	m	struct:lgw_conf_rxrf_s
+tx_notch_offset	src/loragw_fpga.c	/^static uint8_t tx_notch_offset;$/;"	v	file:
+tx_notch_support	src/loragw_fpga.c	/^static bool tx_notch_support = false;$/;"	v	file:
+txgain_lut	src/loragw_hal.c	/^static struct lgw_tx_gain_lut_s txgain_lut = {$/;"	v	typeref:struct:lgw_tx_gain_lut_s	file:
+type	inc/loragw_hal.h	/^    enum lgw_radio_type_e   type;           \/*!> Radio type for that RF chain (SX1255, SX1257....) *\/$/;"	m	struct:lgw_conf_rxrf_s	typeref:enum:lgw_conf_rxrf_s::lgw_radio_type_e
+type	src/loragw_radio.c	/^    enum lgw_radio_type_e type;$/;"	m	struct:lgw_radio_type_version_s	typeref:enum:lgw_radio_type_version_s::lgw_radio_type_e	file:
+usage	tst/test_loragw_cal.c	/^void usage(void) {$/;"	f
+usage	tst/test_loragw_hal.c	/^void usage(void) {$/;"	f
+utc	inc/loragw_gps.h	/^    struct timespec utc;        \/*!> reference UTC time (from GPS\/NMEA) *\/$/;"	m	struct:tref	typeref:struct:tref::timespec
+validate_nmea_checksum	src/loragw_gps.c	/^static bool validate_nmea_checksum(const char *serial_buff, int buff_size) {$/;"	f	file:
+wait_ms	src/loragw_aux.c	/^void wait_ms(unsigned long a) {$/;"	f
+xtal_err	inc/loragw_gps.h	/^    double          xtal_err;   \/*!> raw clock error (eg. <1 'slow' XTAL) *\/$/;"	m	struct:tref

@@ -35,7 +35,7 @@ Maintainer: Sylvain Miermont
 #if DEBUG_REG == 1
     #define DEBUG_MSG(str)              fprintf(stderr, str)
     #define DEBUG_PRINTF(fmt, args...)  fprintf(stderr,"%s:%d: "fmt, __FUNCTION__, __LINE__, args)
-    #define CHECK_NULL(a)               if(a==NULL){fprintf(stderr,"%s:%d: ERROR: NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_REG_ERROR;}
+    #define CHECK_NULL(a)               if(a==NULL){fprintf(stderr,"%s:%d: ERROR~ NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_REG_ERROR;}
 #else
     #define DEBUG_MSG(str)
     #define DEBUG_PRINTF(fmt, args...)
@@ -448,7 +448,7 @@ int reg_w_align32(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target
         spi_stat += lgw_spi_wb(spi_target, spi_mux_mode, spi_mux_target, r.addr, buf, size_byte); /* write the register in one burst */
     } else {
         /* register spanning multiple memory bytes but with an offset */
-        DEBUG_MSG("ERROR: REGISTER SIZE AND OFFSET ARE NOT SUPPORTED\n");
+        DEBUG_MSG("ERROR~ REGISTER SIZE AND OFFSET ARE NOT SUPPORTED\n");
         return LGW_REG_ERROR;
     }
 
@@ -490,7 +490,7 @@ int reg_r_align32(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target
         }
     } else {
         /* register spanning multiple memory bytes but with an offset */
-        DEBUG_MSG("ERROR: REGISTER SIZE AND OFFSET ARE NOT SUPPORTED\n");
+        DEBUG_MSG("ERROR~ REGISTER SIZE AND OFFSET ARE NOT SUPPORTED\n");
         return LGW_REG_ERROR;
     }
 
@@ -552,7 +552,7 @@ int lgw_connect(bool spi_only, uint32_t tx_notch_freq) {
             return LGW_REG_ERROR;
         }
         if (u != loregs[LGW_VERSION].dflt) {
-            DEBUG_PRINTF("ERROR: NOT EXPECTED CHIP VERSION (v%u)\n", u);
+            DEBUG_PRINTF("ERROR~ NOT EXPECTED CHIP VERSION (v%u)\n", u);
             return LGW_REG_ERROR;
         }
 
@@ -591,7 +591,7 @@ int lgw_disconnect(void) {
 int lgw_soft_reset(void) {
     /* check if SPI is initialised */
     if ((lgw_spi_target == NULL) || (lgw_regpage < 0)) {
-        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        DEBUG_MSG("ERROR~ CONCENTRATOR UNCONNECTED\n");
         return LGW_REG_ERROR;
     }
     lgw_spi_w(lgw_spi_target, lgw_spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0, 0x80); /* 1 -> SOFT_RESET bit */
@@ -612,8 +612,8 @@ int lgw_reg_check(FILE *f) {
 
     /* check if SPI is initialised */
     if ((lgw_spi_target == NULL) || (lgw_regpage < 0)) {
-        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
-        fprintf(f, "ERROR: CONCENTRATOR UNCONNECTED\n");
+        DEBUG_MSG("ERROR~ CONCENTRATOR UNCONNECTED\n");
+        fprintf(f, "ERROR~ CONCENTRATOR UNCONNECTED\n");
         return LGW_REG_ERROR;
     }
 
@@ -641,13 +641,13 @@ int lgw_reg_w(uint16_t register_id, int32_t reg_value) {
 
     /* check input parameters */
     if (register_id >= LGW_TOTALREGS) {
-        DEBUG_MSG("ERROR: REGISTER NUMBER OUT OF DEFINED RANGE\n");
+        DEBUG_MSG("ERROR~ REGISTER NUMBER OUT OF DEFINED RANGE\n");
         return LGW_REG_ERROR;
     }
 
     /* check if SPI is initialised */
     if ((lgw_spi_target == NULL) || (lgw_regpage < 0)) {
-        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        DEBUG_MSG("ERROR~ CONCENTRATOR UNCONNECTED\n");
         return LGW_REG_ERROR;
     }
 
@@ -667,7 +667,7 @@ int lgw_reg_w(uint16_t register_id, int32_t reg_value) {
 
     /* reject write to read-only registers */
     if (r.rdon == 1){
-        DEBUG_MSG("ERROR: TRYING TO WRITE A READ-ONLY REGISTER\n");
+        DEBUG_MSG("ERROR~ TRYING TO WRITE A READ-ONLY REGISTER\n");
         return LGW_REG_ERROR;
     }
 
@@ -679,7 +679,7 @@ int lgw_reg_w(uint16_t register_id, int32_t reg_value) {
     spi_stat += reg_w_align32(lgw_spi_target, lgw_spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, r, reg_value);
 
     if (spi_stat != LGW_SPI_SUCCESS) {
-        DEBUG_MSG("ERROR: SPI ERROR DURING REGISTER WRITE\n");
+        DEBUG_MSG("ERROR~ SPI ERROR DURING REGISTER WRITE\n");
         return LGW_REG_ERROR;
     } else {
         return LGW_REG_SUCCESS;
@@ -696,13 +696,13 @@ int lgw_reg_r(uint16_t register_id, int32_t *reg_value) {
     /* check input parameters */
     CHECK_NULL(reg_value);
     if (register_id >= LGW_TOTALREGS) {
-        DEBUG_MSG("ERROR: REGISTER NUMBER OUT OF DEFINED RANGE\n");
+        DEBUG_MSG("ERROR~ REGISTER NUMBER OUT OF DEFINED RANGE\n");
         return LGW_REG_ERROR;
     }
 
     /* check if SPI is initialised */
     if ((lgw_spi_target == NULL) || (lgw_regpage < 0)) {
-        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        DEBUG_MSG("ERROR~ CONCENTRATOR UNCONNECTED\n");
         return LGW_REG_ERROR;
     }
 
@@ -717,7 +717,7 @@ int lgw_reg_r(uint16_t register_id, int32_t *reg_value) {
     spi_stat += reg_r_align32(lgw_spi_target, lgw_spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, r, reg_value);
 
     if (spi_stat != LGW_SPI_SUCCESS) {
-        DEBUG_MSG("ERROR: SPI ERROR DURING REGISTER WRITE\n");
+        DEBUG_MSG("ERROR~ SPI ERROR DURING REGISTER WRITE\n");
         return LGW_REG_ERROR;
     } else {
         return LGW_REG_SUCCESS;
@@ -734,17 +734,17 @@ int lgw_reg_wb(uint16_t register_id, uint8_t *data, uint16_t size) {
     /* check input parameters */
     CHECK_NULL(data);
     if (size == 0) {
-        DEBUG_MSG("ERROR: BURST OF NULL LENGTH\n");
+        DEBUG_MSG("ERROR~ BURST OF NULL LENGTH\n");
         return LGW_REG_ERROR;
     }
     if (register_id >= LGW_TOTALREGS) {
-        DEBUG_MSG("ERROR: REGISTER NUMBER OUT OF DEFINED RANGE\n");
+        DEBUG_MSG("ERROR~ REGISTER NUMBER OUT OF DEFINED RANGE\n");
         return LGW_REG_ERROR;
     }
 
     /* check if SPI is initialised */
     if ((lgw_spi_target == NULL) || (lgw_regpage < 0)) {
-        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        DEBUG_MSG("ERROR~ CONCENTRATOR UNCONNECTED\n");
         return LGW_REG_ERROR;
     }
 
@@ -753,7 +753,7 @@ int lgw_reg_wb(uint16_t register_id, uint8_t *data, uint16_t size) {
 
     /* reject write to read-only registers */
     if (r.rdon == 1){
-        DEBUG_MSG("ERROR: TRYING TO BURST WRITE A READ-ONLY REGISTER\n");
+        DEBUG_MSG("ERROR~ TRYING TO BURST WRITE A READ-ONLY REGISTER\n");
         return LGW_REG_ERROR;
     }
 
@@ -766,7 +766,7 @@ int lgw_reg_wb(uint16_t register_id, uint8_t *data, uint16_t size) {
     spi_stat += lgw_spi_wb(lgw_spi_target, lgw_spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, r.addr, data, size);
 
     if (spi_stat != LGW_SPI_SUCCESS) {
-        DEBUG_MSG("ERROR: SPI ERROR DURING REGISTER BURST WRITE\n");
+        DEBUG_MSG("ERROR~ SPI ERROR DURING REGISTER BURST WRITE\n");
         return LGW_REG_ERROR;
     } else {
         return LGW_REG_SUCCESS;
@@ -783,17 +783,17 @@ int lgw_reg_rb(uint16_t register_id, uint8_t *data, uint16_t size) {
     /* check input parameters */
     CHECK_NULL(data);
     if (size == 0) {
-        DEBUG_MSG("ERROR: BURST OF NULL LENGTH\n");
+        DEBUG_MSG("ERROR~ BURST OF NULL LENGTH\n");
         return LGW_REG_ERROR;
     }
     if (register_id >= LGW_TOTALREGS) {
-        DEBUG_MSG("ERROR: REGISTER NUMBER OUT OF DEFINED RANGE\n");
+        DEBUG_MSG("ERROR~ REGISTER NUMBER OUT OF DEFINED RANGE\n");
         return LGW_REG_ERROR;
     }
 
     /* check if SPI is initialised */
     if ((lgw_spi_target == NULL) || (lgw_regpage < 0)) {
-        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        DEBUG_MSG("ERROR~ CONCENTRATOR UNCONNECTED\n");
         return LGW_REG_ERROR;
     }
 
@@ -809,7 +809,7 @@ int lgw_reg_rb(uint16_t register_id, uint8_t *data, uint16_t size) {
     spi_stat += lgw_spi_rb(lgw_spi_target, lgw_spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, r.addr, data, size);
 
     if (spi_stat != LGW_SPI_SUCCESS) {
-        DEBUG_MSG("ERROR: SPI ERROR DURING REGISTER BURST READ\n");
+        DEBUG_MSG("ERROR~ SPI ERROR DURING REGISTER BURST READ\n");
         return LGW_REG_ERROR;
     } else {
         return LGW_REG_SUCCESS;

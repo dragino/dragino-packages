@@ -334,7 +334,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     /* try to parse JSON */
     root_val = json_parse_file_with_comments(conf_file);
     if (root_val == NULL) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: %s is not a valid JSON file\n", conf_file);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ %s is not a valid JSON file\n", conf_file);
         exit(EXIT_FAILURE);
     }
 
@@ -366,7 +366,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     MSG_DEBUG(DEBUG_INFO, "INFO: lorawan_public %d, clksrc %d\n", boardconf.lorawan_public, boardconf.clksrc);
     /* all parameters parsed, submitting configuration to the HAL */
     if (lgw_board_setconf(boardconf) != LGW_HAL_SUCCESS) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: Failed to configure board\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ Failed to configure board\n");
         return -1;
     }
 
@@ -408,7 +408,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
                 /* Sanity check */
                 if (i >= LBT_CHANNEL_FREQ_NB)
                 {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR: LBT channel %d not supported, skip it\n", i );
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ LBT channel %d not supported, skip it\n", i );
                     break;
                 }
                 /* Get LBT channel configuration object from array */
@@ -435,7 +435,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
 
             /* all parameters parsed, submitting configuration to the HAL */
             if (lgw_lbt_setconf(lbtconf) != LGW_HAL_SUCCESS) {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR: Failed to configure LBT\n");
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ Failed to configure LBT\n");
                 return -1;
             }
         } else {
@@ -510,7 +510,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     if (txlut.size > 0) {
         MSG_DEBUG(DEBUG_INFO, "INFO: Configuring TX LUT with %u indexes\n", txlut.size);
         if (lgw_txgain_setconf(&txlut) != LGW_HAL_SUCCESS) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: Failed to configure concentrator TX Gain LUT\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ Failed to configure concentrator TX Gain LUT\n");
             return -1;
         }
     } else {
@@ -574,7 +574,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         }
         /* all parameters parsed, submitting configuration to the HAL */
         if (lgw_rxrf_setconf(i, rfconf) != LGW_HAL_SUCCESS) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for radio %i\n", i);
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ invalid configuration for radio %i\n", i);
             return -1;
         }
     }
@@ -608,7 +608,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         }
         /* all parameters parsed, submitting configuration to the HAL */
         if (lgw_rxif_setconf(i, ifconf) != LGW_HAL_SUCCESS) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for Lora multi-SF channel %i\n", i);
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ invalid configuration for Lora multi-SF channel %i\n", i);
             return -1;
         }
     }
@@ -650,7 +650,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             MSG_DEBUG(DEBUG_INFO, "INFO: Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf);
         }
         if (lgw_rxif_setconf(8, ifconf) != LGW_HAL_SUCCESS) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for Lora standard channel\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ invalid configuration for Lora standard channel\n");
             return -1;
         }
     }
@@ -693,7 +693,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             MSG_DEBUG(DEBUG_INFO, "INFO: FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
         }
         if (lgw_rxif_setconf(9, ifconf) != LGW_HAL_SUCCESS) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for FSK channel\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ invalid configuration for FSK channel\n");
             return -1;
         }
     }
@@ -713,7 +713,7 @@ static int parse_gateway_configuration(const char * conf_file) {
     /* try to parse JSON */
     root_val = json_parse_file_with_comments(conf_file);
     if (root_val == NULL) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: %s is not a valid JSON file\n", conf_file);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ %s is not a valid JSON file\n", conf_file);
         exit(EXIT_FAILURE);
     }
 
@@ -831,7 +831,7 @@ static int parse_gateway_configuration(const char * conf_file) {
     if (val != NULL) {
         beacon_period = (uint32_t)json_value_get_number(val);
         if ((beacon_period > 0) && (beacon_period < 6)) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: invalid configuration for Beacon period, must be >= 6s\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ invalid configuration for Beacon period, must be >= 6s\n");
             return -1;
         } else {
             MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing period is configured to %u seconds\n", beacon_period);
@@ -1139,7 +1139,7 @@ int main(void)
             exit(EXIT_FAILURE);
         }
     } else {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] failed to find any configuration file named %s, %s OR %s\n", global_cfg_path, local_cfg_path, debug_cfg_path);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] failed to find any configuration file named %s, %s OR %s\n", global_cfg_path, local_cfg_path, debug_cfg_path);
         exit(EXIT_FAILURE);
     }
 
@@ -1175,7 +1175,7 @@ int main(void)
     /* look for server address w/ upstream port */
     i = getaddrinfo(serv_addr, serv_port_up, &hints, &result);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", serv_addr, serv_port_up, gai_strerror(i));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", serv_addr, serv_port_up, gai_strerror(i));
         exit(EXIT_FAILURE);
     }
 
@@ -1186,7 +1186,7 @@ int main(void)
         else break; /* success, get out of loop */
     }
     if (q == NULL) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", serv_addr, serv_port_up);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n", serv_addr, serv_port_up);
         i = 1;
         for (q=result; q!=NULL; q=q->ai_next) {
             getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
@@ -1199,7 +1199,7 @@ int main(void)
     /* connect so we can send/receive packet with the server only */
     i = connect(sock_up, q->ai_addr, q->ai_addrlen);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] connect returned %s\n", strerror(errno));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] connect returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     freeaddrinfo(result);
@@ -1207,7 +1207,7 @@ int main(void)
     /* look for server address w/ downstream port */
     i = getaddrinfo(serv_addr, serv_port_down, &hints, &result);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [down] getaddrinfo on address %s (port %s) returned %s\n", serv_addr, serv_port_up, gai_strerror(i));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [down] getaddrinfo on address %s (port %s) returned %s\n", serv_addr, serv_port_up, gai_strerror(i));
         exit(EXIT_FAILURE);
     }
 
@@ -1218,7 +1218,7 @@ int main(void)
         else break; /* success, get out of loop */
     }
     if (q == NULL) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [down] failed to open socket to any of server %s addresses (port %s)\n", serv_addr, serv_port_up);
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [down] failed to open socket to any of server %s addresses (port %s)\n", serv_addr, serv_port_up);
         i = 1;
         for (q=result; q!=NULL; q=q->ai_next) {
             getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
@@ -1231,7 +1231,7 @@ int main(void)
     /* connect so we can send/receive packet with the server only */
     i = connect(sock_down, q->ai_addr, q->ai_addrlen);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [down] connect returned %s\n", strerror(errno));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [down] connect returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     freeaddrinfo(result);
@@ -1273,29 +1273,29 @@ int main(void)
     if (i == LGW_HAL_SUCCESS) {
         MSG_DEBUG(DEBUG_INFO, "INFO: [main] concentrator started, packet can now be received\n");
     } else {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] failed to start the concentrator\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] failed to start the concentrator\n");
         exit(EXIT_FAILURE);
     }
 
     /* spawn threads to manage upstream and downstream */
     i = pthread_create( &thrid_up, NULL, (void * (*)(void *))thread_up, NULL);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create upstream thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create upstream thread\n");
         exit(EXIT_FAILURE);
     }
     i = pthread_create( &thrid_down, NULL, (void * (*)(void *))thread_down, NULL);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create downstream thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create downstream thread\n");
         exit(EXIT_FAILURE);
     }
     i = pthread_create( &thrid_jit, NULL, (void * (*)(void *))thread_jit, NULL);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create JIT thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create JIT thread\n");
         exit(EXIT_FAILURE);
     }
     i = pthread_create( &thrid_timersync, NULL, (void * (*)(void *))thread_timersync, NULL);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create Timer Sync thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create Timer Sync thread\n");
         exit(EXIT_FAILURE);
     }
 
@@ -1303,12 +1303,12 @@ int main(void)
     if (gps_enabled == true) {
         i = pthread_create( &thrid_gps, NULL, (void * (*)(void *))thread_gps, NULL);
         if (i != 0) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create GPS thread\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create GPS thread\n");
             exit(EXIT_FAILURE);
         }
         i = pthread_create( &thrid_valid, NULL, (void * (*)(void *))thread_valid, NULL);
         if (i != 0) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create validation thread\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create validation thread\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -1419,28 +1419,28 @@ int main(void)
         }
 
         /* display a report */
-        printf("\nREPORT: ################## Report at: %s ##################\n", stat_timestamp);
-        printf("REPORT: ### [UPSTREAM] ###\n");
-        printf("REPORT: # RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
-        printf("REPORT: # CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
-        printf("REPORT: # RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
-        printf("REPORT: # PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
-        printf("REPORT: # PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
-        printf("REPORT: ### [DOWNSTREAM] ###\n");
-        printf("REPORT: # PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
-        printf("REPORT: # PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
-        printf("REPORT: # RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
-        printf("REPORT: # TX errors: %u\n", cp_nb_tx_fail);
+        printf("\nREPORT~ ################## Report at: %s ##################\n", stat_timestamp);
+        printf("REPORT~ ### [UPSTREAM] ###\n");
+        printf("REPORT~ # RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
+        printf("REPORT~ # CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
+        printf("REPORT~ # RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
+        printf("REPORT~ # PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
+        printf("REPORT~ # PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
+        printf("REPORT~ ### [DOWNSTREAM] ###\n");
+        printf("REPORT~ # PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
+        printf("REPORT~ # PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
+        printf("REPORT~ # RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
+        printf("REPORT~ # TX errors: %u\n", cp_nb_tx_fail);
         if (cp_nb_tx_requested != 0 ) {
-            printf("REPORT: # TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_packet);
-            printf("REPORT: # TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_beacon);
-            printf("REPORT: # TX rejected (too late): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_late);
-            printf("REPORT: # TX rejected (too early): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_early);
+            printf("REPORT~ # TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_packet);
+            printf("REPORT~ # TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_beacon);
+            printf("REPORT~ # TX rejected (too late): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_late);
+            printf("REPORT~ # TX rejected (too early): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_early);
         }
-        printf("REPORT: # BEACON queued: %u\n", cp_nb_beacon_queued);
-        printf("REPORT: # BEACON sent so far: %u\n", cp_nb_beacon_sent);
-        printf("REPORT: # BEACON rejected: %u\n", cp_nb_beacon_rejected);
-        printf("REPORT: ### [JIT] ###\n");
+        printf("REPORT~ # BEACON queued: %u\n", cp_nb_beacon_queued);
+        printf("REPORT~ # BEACON sent so far: %u\n", cp_nb_beacon_sent);
+        printf("REPORT~ # BEACON rejected: %u\n", cp_nb_beacon_rejected);
+        printf("REPORT~ ### [JIT] ###\n");
         
         /* get timestamp captured on PPM pulse  */
         pthread_mutex_lock(&mx_concent);
@@ -1563,7 +1563,7 @@ void thread_up(void) {
     /* set upstream socket RX timeout */
     i = setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof push_timeout_half);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] setsockopt returned %s\n", strerror(errno));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] setsockopt returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -1580,7 +1580,7 @@ void thread_up(void) {
         nb_pkt = lgw_receive(NB_PKT_MAX, rxpkt);
         pthread_mutex_unlock(&mx_concent);
         if (nb_pkt == LGW_HAL_ERROR) {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] failed packet fetch, exiting\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] failed packet fetch, exiting\n");
             exit(EXIT_FAILURE);
         }
 
@@ -1681,7 +1681,7 @@ void thread_up(void) {
             if (j > 0) {
                 buff_index += j;
             } else {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
                 exit(EXIT_FAILURE);
             }
 
@@ -1696,7 +1696,7 @@ void thread_up(void) {
                     if (j > 0) {
                         buff_index += j;
                     } else {
-                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -1709,7 +1709,7 @@ void thread_up(void) {
                     if (j > 0) {
                         buff_index += j;
                     } else {
-                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -1720,7 +1720,7 @@ void thread_up(void) {
             if (j > 0) {
                 buff_index += j;
             } else {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
                 exit(EXIT_FAILURE);
             }
 
@@ -1739,7 +1739,7 @@ void thread_up(void) {
                     buff_index += 9;
                     break;
                 default:
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] received packet with unknown status\n");
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] received packet with unknown status\n");
                     memcpy((void *)(buff_up + buff_index), (void *)",\"stat\":?", 9);
                     buff_index += 9;
                     exit(EXIT_FAILURE);
@@ -1777,7 +1777,7 @@ void thread_up(void) {
                         buff_index += 13;
                         break;
                     default:
-                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] lora packet with unknown datarate\n");
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] lora packet with unknown datarate\n");
                         memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF?", 12);
                         buff_index += 12;
                         exit(EXIT_FAILURE);
@@ -1796,7 +1796,7 @@ void thread_up(void) {
                         buff_index += 6;
                         break;
                     default:
-                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] lora packet with unknown bandwidth\n");
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] lora packet with unknown bandwidth\n");
                         memcpy((void *)(buff_up + buff_index), (void *)"BW?\"", 4);
                         buff_index += 4;
                         exit(EXIT_FAILURE);
@@ -1825,7 +1825,7 @@ void thread_up(void) {
                         buff_index += 13;
                         break;
                     default:
-                        MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] lora packet with unknown coderate\n");
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] lora packet with unknown coderate\n");
                         memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"?\"", 11);
                         buff_index += 11;
                         exit(EXIT_FAILURE);
@@ -1836,7 +1836,7 @@ void thread_up(void) {
                 if (j > 0) {
                     buff_index += j;
                 } else {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
                     exit(EXIT_FAILURE);
                 }
             } else if (p->modulation == MOD_FSK) {
@@ -1848,11 +1848,11 @@ void thread_up(void) {
                 if (j > 0) {
                     buff_index += j;
                 } else {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
                     exit(EXIT_FAILURE);
                 }
             } else {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] received packet with unknown modulation\n");
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] received packet with unknown modulation\n");
                 exit(EXIT_FAILURE);
             }
 
@@ -1861,7 +1861,7 @@ void thread_up(void) {
             if (j > 0) {
                 buff_index += j;
             } else {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 4));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
                 exit(EXIT_FAILURE);
             }
 
@@ -1872,7 +1872,7 @@ void thread_up(void) {
             if (j>=0) {
                 buff_index += j;
             } else {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] bin_to_b64 failed line %u\n", (__LINE__ - 5));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] bin_to_b64 failed line %u\n", (__LINE__ - 5));
                 exit(EXIT_FAILURE);
             }
             buff_up[buff_index] = '"';
@@ -1913,7 +1913,7 @@ void thread_up(void) {
             if (j > 0) {
                 buff_index += j;
             } else {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR: [up] snprintf failed line %u\n", (__LINE__ - 5));
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 5));
                 exit(EXIT_FAILURE);
             }
         }
@@ -1923,7 +1923,7 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = 0; /* add string terminator, for safety */
 
-        fprintf(stdout, "RXTX: %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        fprintf(stdout, "RXTX~ %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
         /* send datagram to server */
         send(sock_up, (void *)buff_up, buff_index, 0);
         clock_gettime(CLOCK_MONOTONIC, &send_time);
@@ -2024,7 +2024,7 @@ void thread_down(void) {
     /* set downstream socket RX timeout */
     i = setsockopt(sock_down, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof pull_timeout);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR: [down] setsockopt returned %s\n", strerror(errno));
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [down] setsockopt returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -2052,7 +2052,7 @@ void thread_down(void) {
             break;
         default:
             /* should not happen */
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: unsupported bandwidth for beacon\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ unsupported bandwidth for beacon\n");
             exit(EXIT_FAILURE);
     }
     switch (beacon_datarate) {
@@ -2078,7 +2078,7 @@ void thread_down(void) {
             break;
         default:
             /* should not happen */
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: unsupported datarate for beacon\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ unsupported datarate for beacon\n");
             exit(EXIT_FAILURE);
     }
     beacon_pkt.size = beacon_RFU1_size + 4 + 2 + 7 + beacon_RFU2_size + 2;
@@ -2304,7 +2304,7 @@ void thread_down(void) {
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
             MSG_DEBUG(DEBUG_INFO, "INFO: [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
-            fprintf(stdout, "RXTX: %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+            fprintf(stdout, "RXTX~ %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 
             /* initialize TX struct and try to parse JSON */
             memset(&txpkt, 0, sizeof txpkt);
@@ -2589,7 +2589,7 @@ void thread_down(void) {
             jit_result = JIT_ERROR_OK;
             if ((txpkt.freq_hz < tx_freq_min[txpkt.rf_chain]) || (txpkt.freq_hz > tx_freq_max[txpkt.rf_chain])) {
                 jit_result = JIT_ERROR_TX_FREQ;
-                MSG_DEBUG(DEBUG_ERROR, "ERROR: Packet REJECTED, unsupported frequency - %u (min:%u,max:%u)\n", txpkt.freq_hz, tx_freq_min[txpkt.rf_chain], tx_freq_max[txpkt.rf_chain]);
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ Packet REJECTED, unsupported frequency - %u (min:%u,max:%u)\n", txpkt.freq_hz, tx_freq_min[txpkt.rf_chain], tx_freq_max[txpkt.rf_chain]);
             }
             if (jit_result == JIT_ERROR_OK) {
                 for (i=0; i<txlut.size; i++) {
@@ -2601,7 +2601,7 @@ void thread_down(void) {
                 if (i == txlut.size) {
                     /* this RF power is not supported */
                     jit_result = JIT_ERROR_TX_POWER;
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR: Packet REJECTED, unsupported RF power for TX - %d\n", txpkt.rf_power);
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ Packet REJECTED, unsupported RF power for TX - %d\n", txpkt.rf_power);
                 }
             }
 
@@ -2611,7 +2611,7 @@ void thread_down(void) {
                 get_concentrator_time(&current_concentrator_time, current_unix_time);
                 jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
                 if (jit_result != JIT_ERROR_OK) {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR: Packet REJECTED (jit error=%d)\n", jit_result);
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ Packet REJECTED (jit error=%d)\n", jit_result);
                 }
                 pthread_mutex_lock(&mx_meas_dw);
                 meas_nb_tx_requested += 1;
@@ -2701,7 +2701,7 @@ void thread_jit(void) {
                             MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_status failed\n");
                         } else {
                             if (tx_status == TX_EMITTING) {
-                                MSG_DEBUG(DEBUG_ERROR, "ERROR: concentrator is currently emitting\n");
+                                MSG_DEBUG(DEBUG_ERROR, "ERROR~ concentrator is currently emitting\n");
                                 print_tx_status(tx_status);
                                 continue;
                             } else if (tx_status == TX_SCHEDULED) {
@@ -2729,13 +2729,13 @@ void thread_jit(void) {
                     }
                     
                 } else {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR: jit_dequeue failed with %d\n", jit_result);
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ jit_dequeue failed with %d\n", jit_result);
                 }
             }
         } else if (jit_result == JIT_ERROR_EMPTY) {
             /* Do nothing, it can happen */
         } else {
-            MSG_DEBUG(DEBUG_ERROR, "ERROR: jit_peek failed with %d\n", jit_result);
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ jit_peek failed with %d\n", jit_result);
         }
     }
 }

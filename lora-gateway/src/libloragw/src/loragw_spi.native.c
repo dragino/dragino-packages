@@ -41,7 +41,7 @@ Maintainer: Sylvain Miermont
 #if DEBUG_SPI == 1
     #define DEBUG_MSG(str)                fprintf(stderr, str)
     #define DEBUG_PRINTF(fmt, args...)    fprintf(stderr,"%s:%d: "fmt, __FUNCTION__, __LINE__, args)
-    #define CHECK_NULL(a)                if(a==NULL){fprintf(stderr,"%s:%d: ERROR: NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_SPI_ERROR;}
+    #define CHECK_NULL(a)                if(a==NULL){fprintf(stderr,"%s:%d: ERROR~ NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_SPI_ERROR;}
 #else
     #define DEBUG_MSG(str)
     #define DEBUG_PRINTF(fmt, args...)
@@ -73,7 +73,7 @@ int lgw_spi_open(void **spi_target_ptr) {
     /* allocate memory for the device descriptor */
     spi_device = malloc(sizeof(int));
     if (spi_device == NULL) {
-        DEBUG_MSG("ERROR: MALLOC FAIL\n");
+        DEBUG_MSG("ERROR~ MALLOC FAIL\n");
         return LGW_SPI_ERROR;
     }
 
@@ -81,7 +81,7 @@ int lgw_spi_open(void **spi_target_ptr) {
     DEBUG_PRINTF("INFO: staring open SPI device %s\n", SPI_DEV_PATH);
     dev = open(SPI_DEV_PATH, O_RDWR);
     if (dev < 0) {
-        DEBUG_PRINTF("ERROR: failed to open SPI device %s\n", SPI_DEV_PATH);
+        DEBUG_PRINTF("ERROR~ failed to open SPI device %s\n", SPI_DEV_PATH);
         return LGW_SPI_ERROR;
     }
 
@@ -90,7 +90,7 @@ int lgw_spi_open(void **spi_target_ptr) {
     a = ioctl(dev, SPI_IOC_WR_MODE, &i);
     b = ioctl(dev, SPI_IOC_RD_MODE, &i);
     if ((a < 0) || (b < 0)) {
-        DEBUG_MSG("ERROR: SPI PORT FAIL TO SET IN MODE 0\n");
+        DEBUG_MSG("ERROR~ SPI PORT FAIL TO SET IN MODE 0\n");
         close(dev);
         free(spi_device);
         return LGW_SPI_ERROR;
@@ -101,7 +101,7 @@ int lgw_spi_open(void **spi_target_ptr) {
     a = ioctl(dev, SPI_IOC_WR_MAX_SPEED_HZ, &i);
     b = ioctl(dev, SPI_IOC_RD_MAX_SPEED_HZ, &i);
     if ((a < 0) || (b < 0)) {
-        DEBUG_MSG("ERROR: SPI PORT FAIL TO SET MAX SPEED\n");
+        DEBUG_MSG("ERROR~ SPI PORT FAIL TO SET MAX SPEED\n");
         close(dev);
         free(spi_device);
         return LGW_SPI_ERROR;
@@ -112,7 +112,7 @@ int lgw_spi_open(void **spi_target_ptr) {
     a = ioctl(dev, SPI_IOC_WR_LSB_FIRST, &i);
     b = ioctl(dev, SPI_IOC_RD_LSB_FIRST, &i);
     if ((a < 0) || (b < 0)) {
-        DEBUG_MSG("ERROR: SPI PORT FAIL TO SET MSB FIRST\n");
+        DEBUG_MSG("ERROR~ SPI PORT FAIL TO SET MSB FIRST\n");
         close(dev);
         free(spi_device);
         return LGW_SPI_ERROR;
@@ -123,7 +123,7 @@ int lgw_spi_open(void **spi_target_ptr) {
     a = ioctl(dev, SPI_IOC_WR_BITS_PER_WORD, &i);
     b = ioctl(dev, SPI_IOC_RD_BITS_PER_WORD, &i);
     if ((a < 0) || (b < 0)) {
-        DEBUG_MSG("ERROR: SPI PORT FAIL TO SET 8 BITS-PER-WORD\n");
+        DEBUG_MSG("ERROR~ SPI PORT FAIL TO SET 8 BITS-PER-WORD\n");
         close(dev);
         return LGW_SPI_ERROR;
     }
@@ -151,7 +151,7 @@ int lgw_spi_close(void *spi_target) {
 
     /* determine return code */
     if (a < 0) {
-        DEBUG_MSG("ERROR: SPI PORT FAILED TO CLOSE\n");
+        DEBUG_MSG("ERROR~ SPI PORT FAILED TO CLOSE\n");
         return LGW_SPI_ERROR;
     } else {
         DEBUG_MSG("Note: SPI port closed\n");
@@ -200,7 +200,7 @@ int lgw_spi_w(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, ui
 
     /* determine return code */
     if (a != (int)k.len) {
-        DEBUG_MSG("ERROR: SPI WRITE FAILURE\n");
+        DEBUG_MSG("ERROR~ SPI WRITE FAILURE\n");
         return LGW_SPI_ERROR;
     } else {
         DEBUG_MSG("Note: SPI write success\n");
@@ -250,7 +250,7 @@ int lgw_spi_r(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, ui
 
     /* determine return code */
     if (a != (int)k.len) {
-        DEBUG_MSG("ERROR: SPI READ FAILURE\n");
+        DEBUG_MSG("ERROR~ SPI READ FAILURE\n");
         return LGW_SPI_ERROR;
     } else {
         DEBUG_MSG("Note: SPI read success\n");
@@ -278,7 +278,7 @@ int lgw_spi_wb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, u
     }
     CHECK_NULL(data);
     if (size == 0) {
-        DEBUG_MSG("ERROR: BURST OF NULL LENGTH\n");
+        DEBUG_MSG("ERROR~ BURST OF NULL LENGTH\n");
         return LGW_SPI_ERROR;
     }
 
@@ -313,7 +313,7 @@ int lgw_spi_wb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, u
 
     /* determine return code */
     if (byte_transfered != size) {
-        DEBUG_MSG("ERROR: SPI BURST WRITE FAILURE\n");
+        DEBUG_MSG("ERROR~ SPI BURST WRITE FAILURE\n");
         return LGW_SPI_ERROR;
     } else {
         DEBUG_MSG("Note: SPI burst write success\n");
@@ -340,7 +340,7 @@ int lgw_spi_rb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, u
     }
     CHECK_NULL(data);
     if (size == 0) {
-        DEBUG_MSG("ERROR: BURST OF NULL LENGTH\n");
+        DEBUG_MSG("ERROR~ BURST OF NULL LENGTH\n");
         return LGW_SPI_ERROR;
     }
 
@@ -375,7 +375,7 @@ int lgw_spi_rb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, u
 
     /* determine return code */
     if (byte_transfered != size) {
-        DEBUG_MSG("ERROR: SPI BURST READ FAILURE\n");
+        DEBUG_MSG("ERROR~ SPI BURST READ FAILURE\n");
         return LGW_SPI_ERROR;
     } else {
         DEBUG_MSG("Note: SPI burst read success\n");

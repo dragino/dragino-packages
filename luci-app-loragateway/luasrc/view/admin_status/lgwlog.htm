@@ -9,11 +9,11 @@
         if (mode == 1) then
           os.execute("cat /etc/lora/desc > /tmp/reportdata")
         elseif (mode == 2) then
-          os.execute("logread -e REPORT | awk -F ':' '{$5}' > /tmp/reportdata")
+          os.execute("logread -e REPORT | awk -F '~' '{print $2}' > /tmp/reportdata")
         elseif (mode == 3) then
-          os.execute("logread -e RXTX | awk -F ':' '{$5}' > /tmp/reportdata")
+          os.execute("logread -e RXTX | awk -F '~' '{print $2}' > /tmp/reportdata")
         elseif (mode == 4) then
-          os.execute("logread -e ERROR | awk -F ':' '{$5}' > /tmp/reportdata")
+          os.execute("logread -e ERROR | awk -F '~' '{print $2}' > /tmp/reportdata")
         end
 
         file = io.open("/tmp/reportdata", "rb")
@@ -41,7 +41,7 @@
         <li class="cbi-tab<%= mode ~= 1 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/1")%>"><%:FreqINFO%></a></li>
         <li class="cbi-tab<%= mode ~= 2 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/2")%>"><%:Report%></a></li>
         <li class="cbi-tab<%= mode ~= 3 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/3")%>"><%:RxTxJson%></a></li>
-        <li class="cbi-tab<%= mode ~= 4 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/1")%>"><%:ErrorMSG%></a></li>
+        <li class="cbi-tab<%= mode ~= 4 and "-disabled" %>"><a href="<%=url("admin/gateway/lgwlog/4")%>"><%:ErrorMSG%></a></li>
 </ul>
 
 <form method="post" action="<%=url("admin/gateway/lgwlog_action")%>"">              

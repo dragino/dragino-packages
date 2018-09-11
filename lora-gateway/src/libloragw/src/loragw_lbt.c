@@ -34,7 +34,7 @@ Maintainer: Michael Coracin
 #if DEBUG_LBT == 1
     #define DEBUG_MSG(str)              fprintf(stderr, str)
     #define DEBUG_PRINTF(fmt, args...)  fprintf(stderr,"%s:%d: "fmt, __FUNCTION__, __LINE__, args)
-    #define CHECK_NULL(a)               if(a==NULL){fprintf(stderr,"%s:%d: ERROR: NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_REG_ERROR;}
+    #define CHECK_NULL(a)               if(a==NULL){fprintf(stderr,"%s:%d: ERROR~ NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_REG_ERROR;}
 #else
     #define DEBUG_MSG(str)
     #define DEBUG_PRINTF(fmt, args...)
@@ -82,7 +82,7 @@ int lbt_setconf(struct lgw_conf_lbt_s * conf) {
         return LGW_LBT_ERROR;
     }
     if ((conf->nb_channel < 1) || (conf->nb_channel > LBT_CHANNEL_FREQ_NB)) {
-        DEBUG_PRINTF("ERROR: Number of defined LBT channels is out of range (%u)\n", conf->nb_channel);
+        DEBUG_PRINTF("ERROR~ Number of defined LBT channels is out of range (%u)\n", conf->nb_channel);
         return LGW_LBT_ERROR;
     }
 
@@ -113,18 +113,18 @@ int lbt_setup(void) {
     /* Check if LBT feature is supported by FPGA */
     x = lgw_fpga_reg_r(LGW_FPGA_FEATURE, &val);
     if (x != LGW_REG_SUCCESS) {
-        DEBUG_MSG("ERROR: Failed to read FPGA Features register\n");
+        DEBUG_MSG("ERROR~ Failed to read FPGA Features register\n");
         return LGW_LBT_ERROR;
     }
     if (TAKE_N_BITS_FROM((uint8_t)val, 2, 1) != 1) {
-        DEBUG_MSG("ERROR: No support for LBT in FPGA\n");
+        DEBUG_MSG("ERROR~ No support for LBT in FPGA\n");
         return LGW_LBT_ERROR;
     }
 
     /* Get FPGA lowest frequency for LBT channels */
     x = lgw_fpga_reg_r(LGW_FPGA_LBT_INITIAL_FREQ, &val);
     if (x != LGW_REG_SUCCESS) {
-        DEBUG_MSG("ERROR: Failed to read LBT initial frequency from FPGA\n");
+        DEBUG_MSG("ERROR~ Failed to read LBT initial frequency from FPGA\n");
         return LGW_LBT_ERROR;
     }
     switch(val) {
@@ -135,14 +135,14 @@ int lbt_setup(void) {
             lbt_start_freq = 863000000;
             break;
         default:
-            DEBUG_PRINTF("ERROR: LBT start frequency %d is not supported\n", val);
+            DEBUG_PRINTF("ERROR~ LBT start frequency %d is not supported\n", val);
             return LGW_LBT_ERROR;
     }
 
     /* Configure SX127x for FSK */
     x = lgw_setup_sx127x(lbt_start_freq, MOD_FSK, LGW_SX127X_RXBW_100K_HZ, lbt_rssi_offset_dB); /* 200KHz LBT channels */
     if (x != LGW_REG_SUCCESS) {
-        DEBUG_MSG("ERROR: Failed to configure SX127x for LBT\n");
+        DEBUG_MSG("ERROR~ Failed to configure SX127x for LBT\n");
         return LGW_LBT_ERROR;
     }
 
@@ -150,7 +150,7 @@ int lbt_setup(void) {
     val = -2*lbt_rssi_target_dBm; /* Convert RSSI target in dBm to FPGA register format */
     x = lgw_fpga_reg_w(LGW_FPGA_RSSI_TARGET, val);
     if (x != LGW_REG_SUCCESS) {
-        DEBUG_MSG("ERROR: Failed to configure FPGA for LBT\n");
+        DEBUG_MSG("ERROR~ Failed to configure FPGA for LBT\n");
         return LGW_LBT_ERROR;
     }
     /* Set default values for non-active LBT channels */
@@ -162,24 +162,24 @@ int lbt_setup(void) {
     for (i=0; i<LBT_CHANNEL_FREQ_NB; i++) {
         /* Check input parameters */
         if (lbt_channel_cfg[i].freq_hz < lbt_start_freq) {
-            DEBUG_PRINTF("ERROR: LBT channel frequency is out of range (%u)\n", lbt_channel_cfg[i].freq_hz);
+            DEBUG_PRINTF("ERROR~ LBT channel frequency is out of range (%u)\n", lbt_channel_cfg[i].freq_hz);
             return LGW_LBT_ERROR;
         }
         if ((lbt_channel_cfg[i].scan_time_us != 128) && (lbt_channel_cfg[i].scan_time_us != 5000)) {
-            DEBUG_PRINTF("ERROR: LBT channel scan time is not supported (%u)\n", lbt_channel_cfg[i].scan_time_us);
+            DEBUG_PRINTF("ERROR~ LBT channel scan time is not supported (%u)\n", lbt_channel_cfg[i].scan_time_us);
             return LGW_LBT_ERROR;
         }
         /* Configure */
         freq_offset = (lbt_channel_cfg[i].freq_hz - lbt_start_freq) / 100E3; /* 100kHz unit */
         x = lgw_fpga_reg_w(LGW_FPGA_LBT_CH0_FREQ_OFFSET+i, (int32_t)freq_offset);
         if (x != LGW_REG_SUCCESS) {
-            DEBUG_PRINTF("ERROR: Failed to configure FPGA for LBT channel %d (freq offset)\n", i);
+            DEBUG_PRINTF("ERROR~ Failed to configure FPGA for LBT channel %d (freq offset)\n", i);
             return LGW_LBT_ERROR;
         }
         if (lbt_channel_cfg[i].scan_time_us == 5000) { /* configured to 128 by default */
             x = lgw_fpga_reg_w(LGW_FPGA_LBT_SCAN_TIME_CH0+i, 1);
             if (x != LGW_REG_SUCCESS) {
-                DEBUG_PRINTF("ERROR: Failed to configure FPGA for LBT channel %d (freq offset)\n", i);
+                DEBUG_PRINTF("ERROR~ Failed to configure FPGA for LBT channel %d (freq offset)\n", i);
                 return LGW_LBT_ERROR;
             }
         }
@@ -206,7 +206,7 @@ int lbt_start(void) {
 
     x = lgw_fpga_reg_w(LGW_FPGA_CTRL_FEATURE_START, 1);
     if (x != LGW_REG_SUCCESS) {
-        DEBUG_MSG("ERROR: Failed to start LBT FSM\n");
+        DEBUG_MSG("ERROR~ Failed to start LBT FSM\n");
         return LGW_LBT_ERROR;
     }
 
@@ -258,7 +258,7 @@ int lbt_is_channel_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay,
                 tx_start_time = (sx1301_time + (uint32_t)tx_start_delay + 1000000) & LBT_TIMESTAMP_MASK;
                 break;
             case IMMEDIATE:
-                DEBUG_MSG("ERROR: tx_mode IMMEDIATE is not supported when LBT is enabled\n");
+                DEBUG_MSG("ERROR~ tx_mode IMMEDIATE is not supported when LBT is enabled\n");
                 /* FALLTHROUGH  */
             default:
                 return LGW_LBT_ERROR;
@@ -348,7 +348,7 @@ int lbt_is_channel_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay,
         if ((delta_time < (tx_max_time - 2048)) && (lbt_time != 0)) {
             *tx_allowed = true;
         } else {
-            DEBUG_MSG("ERROR: TX request rejected (LBT)\n");
+            DEBUG_MSG("ERROR~ TX request rejected (LBT)\n");
             *tx_allowed = false;
         }
     } else {

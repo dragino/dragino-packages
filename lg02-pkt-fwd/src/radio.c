@@ -31,7 +31,7 @@ static bool gpio_reserve(int gpio) {
     fd = open("/sys/class/gpio/export", O_WRONLY);
     if (fd < 0) {
         /* The file could not be opened */
-        fprintf(stderr, "ERROR: gpio_reserve: could not open /sys/class/gpio/export\r\n");
+        fprintf(stderr, "ERROR~ gpio_reserve: could not open /sys/class/gpio/export\r\n");
         return false;
     }
 
@@ -41,13 +41,13 @@ static bool gpio_reserve(int gpio) {
     /* Try to reserve GPIO */
     if (write(fd, buf, strlen(buf)) < 0) {
         close(fd);
-        fprintf(stderr, "ERROR: gpio_reserve: could not write '%s' to /sys/class/gpio/export\r\n", buf);
+        fprintf(stderr, "ERROR~ gpio_reserve: could not write '%s' to /sys/class/gpio/export\r\n", buf);
         return false;
     }
 
     /* Close the GPIO controller class */
     if (close(fd) < 0) {
-        fprintf(stderr, "ERROR: gpio_reserve: could not close /sys/class/gpio/export\r\n");
+        fprintf(stderr, "ERROR~ gpio_reserve: could not close /sys/class/gpio/export\r\n");
         return false;
     }
 
@@ -68,7 +68,7 @@ static bool gpio_release(int gpio) {
     fd = open("/sys/class/gpio/unexport", O_WRONLY);
     if (fd < 0) {
         /* The file could not be opened */
-       fprintf(stderr, "gpio_release: could not open /sys/class/gpio/unexport\r\n");
+       fprintf(stderr, "ERROR~ gpio_release: could not open /sys/class/gpio/unexport\r\n");
        return false;
     }
 
@@ -77,13 +77,13 @@ static bool gpio_release(int gpio) {
 
     /* Try to release GPIO */
     if (write(fd, buf, strlen(buf)) < 0) {
-        fprintf(stderr, "ERROR: gpio_release: could not write /sys/class/gpio/unexport\r\n");
+        fprintf(stderr, "ERROR~ gpio_release: could not write /sys/class/gpio/unexport\r\n");
         return false;
     }
 
     /* Close the GPIO controller class */
     if (close(fd) < 0) {
-        fprintf(stderr, "ERROR: gpio_release: could not close /sys/class/gpio/unexport\r\n");
+        fprintf(stderr, "ERROR~ gpio_release: could not close /sys/class/gpio/unexport\r\n");
         return false;
     }
 
@@ -184,14 +184,14 @@ static int gpio_get_state(int gpio) {
     fd = open(buf, O_RDONLY);
     if (fd < 0) {
         /* The file could not be opened */
-        fprintf(stderr, "ERROR: gpio_get_state: could not open /sys/class/gpio/gpio%d/value\r\n", gpio);
+        fprintf(stderr, "ERROR~ gpio_get_state: could not open /sys/class/gpio/gpio%d/value\r\n", gpio);
         return LOW;
     }
 
     /* Read the port state */
     if (read(fd, &port_state, 1) < 0) {
         close(fd);
-        fprintf(stderr, "ERROR: gpio_get_state: could not read /sys/class/gpio/gpio%d/value\r\n", gpio);
+        fprintf(stderr, "ERROR~ gpio_get_state: could not read /sys/class/gpio/gpio%d/value\r\n", gpio);
         return LOW;
     }
 
@@ -200,7 +200,7 @@ static int gpio_get_state(int gpio) {
 
     /* Close the GPIO port */
     if (close(fd) < 0) {
-        fprintf(stderr, "ERROR: gpio_get_state: could not close /sys/class/gpio/gpio%d/value\r\n", gpio);
+        fprintf(stderr, "ERROR~ gpio_get_state: could not close /sys/class/gpio/gpio%d/value\r\n", gpio);
         return LOW;
     }
 
@@ -269,7 +269,7 @@ static int lgw_spi_w(uint8_t spidev, uint8_t address, uint8_t data) {
 
     /* check input variables */
     if ((address & 0x80) != 0) {
-        fprintf(stderr, "ERROR: WARNING: SPI address > 127\n");
+        fprintf(stderr, "ERROR~ WARNING: SPI address > 127\n");
     }
 
     /* prepare frame to be sent */
@@ -288,7 +288,7 @@ static int lgw_spi_w(uint8_t spidev, uint8_t address, uint8_t data) {
 
     /* determine return code */
     if (a != (int)k.len) {
-        fprintf(stderr, "ERROR: ERROR: SPI WRITE FAILURE\n");
+        fprintf(stderr, "ERROR~ ERROR~ SPI WRITE FAILURE\n");
         return -1;
     } else {
         //printf("Note: SPI write success\n");
@@ -308,7 +308,7 @@ static int lgw_spi_r(uint8_t spidev, uint8_t address, uint8_t *data) {
 
     /* check input variables */
     if ((address & 0x80) != 0) {
-        fprintf(stderr, "ERROR: WARNING: SPI address > 127\n");
+        fprintf(stderr, "ERROR~ WARNING: SPI address > 127\n");
     }
 
     /* prepare frame to be sent */
@@ -326,7 +326,7 @@ static int lgw_spi_r(uint8_t spidev, uint8_t address, uint8_t *data) {
 
     /* determine return code */
     if (a != (int)k.len) {
-        fprintf(stderr, "ERROR: ERROR: SPI READ FAILURE\n");
+        fprintf(stderr, "ERROR~ SPI READ FAILURE\n");
         return -1;
     } else {
         //printf("Note: SPI read success\n");
@@ -482,7 +482,7 @@ int lgw_spi_open(char *spi_path) {
     /* open SPI device */
     spidev = open(spi_path, O_RDWR);
     if (spidev < 0) {
-        fprintf(stderr, "ERROR: failed to open SPI device %s\n", spi_path);
+        fprintf(stderr, "ERROR~ failed to open SPI device %s\n", spi_path);
         return -1;
     }
 
@@ -491,7 +491,7 @@ int lgw_spi_open(char *spi_path) {
     a = ioctl(spidev, SPI_IOC_WR_MODE, &i);
     b = ioctl(spidev, SPI_IOC_RD_MODE, &i);
     if ((a < 0) || (b < 0)) {
-        fprintf(stderr, "ERROR(%s): SPI PORT FAIL TO SET IN MODE 0\n", spi_path);
+        fprintf(stderr, "ERROR~(%s): SPI PORT FAIL TO SET IN MODE 0\n", spi_path);
         close(spidev);
         return -1;
     }
@@ -501,7 +501,7 @@ int lgw_spi_open(char *spi_path) {
     a = ioctl(spidev, SPI_IOC_WR_MAX_SPEED_HZ, &i);
     b = ioctl(spidev, SPI_IOC_RD_MAX_SPEED_HZ, &i);
     if ((a < 0) || (b < 0)) {
-        fprintf(stderr, "ERROR(%s): SPI PORT FAIL TO SET MAX SPEED\n", spi_path);
+        fprintf(stderr, "ERROR~(%s): SPI PORT FAIL TO SET MAX SPEED\n", spi_path);
         close(spidev);
         return -1;
     }
@@ -511,7 +511,7 @@ int lgw_spi_open(char *spi_path) {
     a = ioctl(spidev, SPI_IOC_WR_LSB_FIRST, &i);
     b = ioctl(spidev, SPI_IOC_RD_LSB_FIRST, &i);
     if ((a < 0) || (b < 0)) {
-        fprintf(stderr, "ERROR(%s): SPI PORT FAIL TO SET MSB FIRST\n", spi_path);
+        fprintf(stderr, "ERROR~(%s): SPI PORT FAIL TO SET MSB FIRST\n", spi_path);
         close(spidev);
         return -1;
     }
@@ -521,7 +521,7 @@ int lgw_spi_open(char *spi_path) {
     a = ioctl(spidev, SPI_IOC_WR_BITS_PER_WORD, &i);
     b = ioctl(spidev, SPI_IOC_RD_BITS_PER_WORD, &i);
     if ((a < 0) || (b < 0)) {
-        fprintf(stderr, "ERROR(%s): SPI PORT FAIL TO SET 8 BITS-PER-WORD\n", spi_path);
+        fprintf(stderr, "ERROR~(%s): SPI PORT FAIL TO SET 8 BITS-PER-WORD\n", spi_path);
         close(spidev);
         return -1;
     }
@@ -547,10 +547,10 @@ bool get_radio_version(radiodev *radiodev)
     uint8_t version = readReg(radiodev->spiport, REG_VERSION);
 
     if (version == 0x12) {
-        fprintf(stderr, "ERROR: %s: SX1276 detected, starting.\n", radiodev->desc);
+        fprintf(stderr, "ERROR~ %s: SX1276 detected, starting.\n", radiodev->desc);
         return true;
     } else {
-        fprintf(stderr, "ERROR: %s: Unrecognized transceiver.\n", radiodev->desc);
+        fprintf(stderr, "ERROR~ %s: Unrecognized transceiver.\n", radiodev->desc);
         return false;
     }
 
@@ -562,7 +562,7 @@ void setup_channel(radiodev *radiodev)
     opmodeLora(radiodev->spiport);
     ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
     // setup lora
-    MSG_LOG(DEBUG_INFO, "CHANEL: Setup %s Channel: freq = %d, sf = %d, spi = %d\n", radiodev->desc, radiodev->freq, radiodev->sf, radiodev->spiport);
+    MSG_LOG(DEBUG_INFO, "INFO~ Setup %s Channel: freq = %d, sf = %d, spi = %d\n", radiodev->desc, radiodev->freq, radiodev->sf, radiodev->spiport);
     setfreq(radiodev->spiport, radiodev->freq);
     setsf(radiodev->spiport, radiodev->sf);
     setsbw(radiodev->spiport, radiodev->bw);
@@ -655,7 +655,7 @@ bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
 
         writeReg(spidev, REG_FIFO_ADDR_PTR, currentAddr);
 
-        printf("\nReceive(HEX):");
+        printf("\nRXTX~ Receive(HEX):");
         for(i = 0; i < receivedCount; i++) {
             pkt_rx->payload[i] = (char)readReg(spidev, REG_FIFO);
             printf("%02x", pkt_rx->payload[i]);
@@ -750,7 +750,7 @@ void txlora(radiodev *radiodev, struct pkt_tx_s *pkt) {
     // wait for TX done
     while(digitalRead(radiodev->dio[0]) == 0);
 
-    MSG("\nTransmit at SF%iBW%ld on %.6lf.\n", sf_getval(pkt->datarate), bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000);
+    MSG("\nINFO~ Transmit at SF%iBW%ld on %.6lf.\n", sf_getval(pkt->datarate), bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000);
 
     // mask all IRQs
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
@@ -798,7 +798,7 @@ void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
     // wait for TX done
     while(digitalRead(radiodev->dio[0]) == 0);
 
-    MSG("\nTransmit at SF%iBW%ld on %.6lf.\n", radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000);
+    MSG("\nINFO~Transmit at SF%iBW%ld on %.6lf.\n", radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000);
 
     // mask all IRQs
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
@@ -832,7 +832,7 @@ int already_running(void)
 
     fd = open(LOCKFILE, O_RDWR|O_CREAT, LOCKMODE);
     if (fd < 0) {
-        fprintf(stderr, "can't open %s: %s", LOCKFILE, strerror(errno));
+        fprintf(stderr, "ERROR~can't open %s: %s", LOCKFILE, strerror(errno));
         exit(1);
     }
     if (lockfile(fd) < 0) {
@@ -840,7 +840,7 @@ int already_running(void)
             close(fd);
             return(1);
         }
-        fprintf(stderr, "can't lock %s: %s", LOCKFILE, strerror(errno));
+        fprintf(stderr, "ERROR~can't lock %s: %s", LOCKFILE, strerror(errno));
         exit(1);
     }
     ftruncate(fd, 0);

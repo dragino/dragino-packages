@@ -392,7 +392,7 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
 static void my_connect_callback(struct mosquitto *mosq, void *obj, int result)
 {
     if (result) 
-        fprintf(stderr, "ERROR: %s\n", mosquitto_connack_string(result));
+        fprintf(stderr, "ERROR %s\n", mosquitto_connack_string(result));
 }
 
 static void my_disconnect_callback(struct mosquitto *mosq, void *obj, int result)
@@ -462,7 +462,7 @@ int main(int argc, char *argv[])
     //
     // Make sure only one copy of the daemon is running.
     if (already_running()) {
-        MSG_LOG(DEBUG_ERROR, "ERROR: %s: already running!\n", argv[0]);
+        MSG_LOG(DEBUG_ERROR, "ERROR~ %s: already running!\n", argv[0]);
         exit(1);
     }
 
@@ -472,7 +472,7 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", provider, 16)){
         strcpy(provider, "ttn");  
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option provider=%s\n", provider);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option provider=%s\n", provider);
     }
 
     snprintf(server, sizeof(server), "%s_server", provider); 
@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", port, 8)){
         strcpy(port, "1700");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option port=%s\n", port);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
     }
 
     strcpy(serv_port_up, port);
@@ -497,102 +497,102 @@ int main(int argc, char *argv[])
 
     if (!get_config("general", email, 32)){
         strcpy(email, "dragino@dragino.com");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option email=%s\n", email);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option email=%s\n", email);
     }
 
     if (!get_config("general", gatewayid, 64)){
         strcpy(gatewayid, "a84041ffff16c21c");      /*set default:router.eu.thethings.network*/
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option gatewayid=%s\n", gatewayid);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option gatewayid=%s\n", gatewayid);
     } 
 
     if (!get_config("general", LAT, 16)){
         strcpy(LAT, "0");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option lat=%s\n", LAT);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option lat=%s\n", LAT);
     }
 
     if (!get_config("general", LON, 16)){
         strcpy(LON, "0");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option lon=%s\n", LON);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option lon=%s\n", LON);
     }
 
     if (!get_config("general", logdebug, 4)){
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option logdebug=%s\n", logdebug);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option logdebug=%s\n", logdebug);
     }
 
     /* server_type : 1.lorawan  2.relay  3.mqtt  4.tcpudp */
     if (!get_config("general", server_type, 16)){
         strcpy(server_type, "lorawan");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option server_type=%s\n", server_type);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option server_type=%s\n", server_type);
     }
 
     /* mode0.A for RX, B for TX mode1.B for RX, A for TX mode2. both for RX, no TX */
     if (!get_config("general", radio_mode, 8)){
         strcpy(radio_mode, "0");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option radio_mode=%s\n", radio_mode);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option radio_mode=%s\n", radio_mode);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if (!get_config("radio1", rx_freq, 16)){
         strcpy(rx_freq, "902320000"); /* default frequency*/
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxfreq=%s\n", rx_freq);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxfreq=%s\n", rx_freq);
     }
 
     if (!get_config("radio1", rxsf, 8)){
         strcpy(rxsf, "7");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxsf=%s\n", rxsf);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxsf=%s\n", rxsf);
     }
 
     if (!get_config("radio1", rxcr, 8)){
         strcpy(rxcr, "5");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option coderate=%s\n", rxcr);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option coderate=%s\n", rxcr);
     }
     
     if (!get_config("radio1", rxbw, 8)){
         strcpy(rxbw, "125000");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxbw=%s\n", rxbw);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxbw=%s\n", rxbw);
     }
 
     if (!get_config("radio1", rxprlen, 8)){
         strcpy(rxprlen, "8");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxprlen=%s\n", rxprlen);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxprlen=%s\n", rxprlen);
     }
 
     if (!get_config("radio1", syncwd1, 8)){
         strcpy(syncwd1, "52");  //Value 0x34 is reserved for LoRaWAN networks
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option syncword=0x%02x\n", syncwd1);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword=0x%02x\n", syncwd1);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if (!get_config("radio2", tx_freq, 16)){
         strcpy(tx_freq, "923300000"); /* default frequency*/
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option txfreq=%s\n", tx_freq);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option txfreq=%s\n", tx_freq);
     }
 
     if (!get_config("radio2", txsf, 8)){
         strcpy(txsf, "9");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option txsf=%s\n", txsf);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option txsf=%s\n", txsf);
     }
 
     if (!get_config("radio2", txcr, 8)){
         strcpy(txcr, "5");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option coderate=%s\n", txcr);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option coderate=%s\n", txcr);
     }
 
     if (!get_config("radio2", txbw, 8)){
         strcpy(txbw, "125000");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option rxbw=%s\n", txbw);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxbw=%s\n", txbw);
     }
 
     if (!get_config("radio2", txprlen, 8)){
         strcpy(txprlen, "8");
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option txprlen=%s\n", txprlen);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option txprlen=%s\n", txprlen);
     }
 
     if (!get_config("radio2", syncwd2, 8)){
         strcpy(syncwd2, "52");  //Value 0x34 is reserved for LoRaWAN networks
-        MSG_LOG(DEBUG_UCI, "UCIINFO: get option syncword2=0x%02x\n", syncwd2);
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword2=0x%02x\n", syncwd2);
     }
 
     debuglevel = atoi(logdebug);
@@ -641,7 +641,7 @@ int main(int argc, char *argv[])
             strcpy(mconf.topic, "topic_data_format");  
         }
 
-        MSG_LOG(DEBUG_UCI, "UCIINFO: MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s, data_format=%s\n", mconf.host, mconf.port, \
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s, data_format=%s\n", mconf.host, mconf.port, \
                                         mconf.username, mconf.password, mconf.topic, mconf.data_format);
     }
     */
@@ -667,7 +667,7 @@ int main(int argc, char *argv[])
     rxdev->dio[2] = 0;
     rxdev->spiport = lgw_spi_open(SPI_DEV_RX);
     if (rxdev->spiport < 0) { 
-        MSG_LOG(DEBUG_ERROR, "open spi_dev_tx error!\n");
+        MSG_LOG(DEBUG_ERROR, "ERROR~ open spi_dev_tx error!\n");
         goto clean;
     }
     rxdev->freq = atol(rx_freq);
@@ -688,7 +688,7 @@ int main(int argc, char *argv[])
     txdev->dio[2] = 0;
     txdev->spiport = lgw_spi_open(SPI_DEV_TX);
     if (txdev->spiport < 0) {
-        MSG_LOG(DEBUG_ERROR, "ERROR: open spi_dev_tx error!\n");
+        MSG_LOG(DEBUG_ERROR, "ERROR~ open spi_dev_tx error!\n");
         goto clean;
     }
     txdev->freq = atol(tx_freq);
@@ -740,14 +740,14 @@ int main(int argc, char *argv[])
     /* look for server address w/ upstream port */
     //MSG("Looking for server with upstream port......\n");
     if (!strcmp(server_type, "lorawan")) {
-        MSG_LOG(DEBUG_INFO, "INFO: Start lora packet forward daemon, server = %s, port = %s\n", server, port);
+        MSG_LOG(DEBUG_INFO, "INFO~ Start lora packet forward daemon, server = %s, port = %s\n", server, port);
         /* prepare hints to open network sockets */
         memset(&hints, 0, sizeof hints);
         hints.ai_family = AF_INET; /* should handle IP v4 or v6 automatically */
         hints.ai_socktype = SOCK_DGRAM;
         i = getaddrinfo(server, serv_port_up, &hints, &result);
         if (i != 0) {
-                MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
+                MSG("ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
                 exit(EXIT_FAILURE);
         }
         
@@ -759,11 +759,11 @@ int main(int argc, char *argv[])
                 else break; /* success, get out of loop */
         }
         if (q == NULL) {
-                MSG("ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
+                MSG("ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
                 i = 1;
                 for (q=result; q!=NULL; q=q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG("INFO: [up] result %i host:%s service:%s\n", i, host_name, port_name);
+                        MSG("INFO~ [up] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
                 }
                 exit(EXIT_FAILURE);
@@ -772,7 +772,7 @@ int main(int argc, char *argv[])
         /* connect so we can send/receive packet with the server only */
         i = connect(sock_up, q->ai_addr, q->ai_addrlen);
         if (i != 0) {
-                MSG("ERROR: [up] connect returned %s\n", strerror(errno));
+                MSG("ERROR~ [up] connect returned %s\n", strerror(errno));
                 exit(EXIT_FAILURE);
         }
         freeaddrinfo(result);
@@ -781,7 +781,7 @@ int main(int argc, char *argv[])
         //MSG("loor for server with status port......\n");
         i = getaddrinfo(server, port, &hints, &result);
         if (i != 0) {
-                MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
+                MSG("ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
                 exit(EXIT_FAILURE);
         }
         /* try to open socket for status traffic */
@@ -791,11 +791,11 @@ int main(int argc, char *argv[])
                 else break; /* success, get out of loop */
         }
         if (q == NULL) {
-                MSG("ERROR: [stat] failed to open socket to any of server %s addresses (port %s)\n", server, port);
+                MSG("ERROR~ [stat] failed to open socket to any of server %s addresses (port %s)\n", server, port);
                 i = 1;
                 for (q=result; q!=NULL; q=q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG("INFO: [stat] result %i host:%s service:%s\n", i, host_name, port_name);
+                        MSG("INFO~ [stat] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
                 }
                 exit(EXIT_FAILURE);
@@ -804,7 +804,7 @@ int main(int argc, char *argv[])
         /* connect so we can send/receive packet with the server only */
         i = connect(sock_stat, q->ai_addr, q->ai_addrlen);
         if (i != 0) {
-                MSG("ERROR: [stat] connect returned %s\n", strerror(errno));
+                MSG("ERROR~ [stat] connect returned %s\n", strerror(errno));
                 exit(EXIT_FAILURE);
         }
         freeaddrinfo(result);
@@ -813,7 +813,7 @@ int main(int argc, char *argv[])
         //MSG("loor for server with downstream port......\n");
         i = getaddrinfo(server, serv_port_down, &hints, &result);
         if (i != 0) {
-                MSG("ERROR: [down] getaddrinfo on address %s (port %s) returned %s\n", server, serv_port_up, gai_strerror(i));
+                MSG("ERROR~ [down] getaddrinfo on address %s (port %s) returned %s\n", server, serv_port_up, gai_strerror(i));
                 exit(EXIT_FAILURE);
         }
         
@@ -824,11 +824,11 @@ int main(int argc, char *argv[])
                 else break; /* success, get out of loop */
         }
         if (q == NULL) {
-                MSG("ERROR: [down] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
+                MSG("ERROR~ [down] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
                 i = 1;
                 for (q=result; q!=NULL; q=q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG("INFO: [down] result %i host:%s service:%s\n", i, host_name, port_name);
+                        MSG("INFO~ [down] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
                 }
                 exit(EXIT_FAILURE);
@@ -837,7 +837,7 @@ int main(int argc, char *argv[])
         /* connect so we can send/receive packet with the server only */
         i = connect(sock_down, q->ai_addr, q->ai_addrlen);
         if (i != 0) {
-                MSG("ERROR: [down] connect returned %s\n", strerror(errno));
+                MSG("ERROR~ [down] connect returned %s\n", strerror(errno));
                 exit(EXIT_FAILURE);
         }
         freeaddrinfo(result);
@@ -845,7 +845,7 @@ int main(int argc, char *argv[])
         /* spawn threads to report status*/
         i = pthread_create( &thrid_stat, NULL, (void * (*)(void *))thread_stat, NULL);
         if (i != 0) {
-                MSG("ERROR: [main] impossible to create upstream thread\n");
+                MSG("ERROR~ [main] impossible to create upstream thread\n");
                 exit(EXIT_FAILURE);
         }
 
@@ -853,20 +853,20 @@ int main(int argc, char *argv[])
         MSG("spawn threads to manage upsteam and downstream...\n");
         i = pthread_create( &thrid_up, NULL, (void * (*)(void *))thread_up, NULL);
         if (i != 0) {
-                MSG("ERROR: [main] impossible to create upstream thread\n");
+                MSG("ERROR~ [main] impossible to create upstream thread\n");
                 exit(EXIT_FAILURE);
         }
 
         i = pthread_create( &thrid_down, NULL, (void * (*)(void *))thread_down, NULL);
         if (i != 0) {
-                MSG("ERROR: [main] impossible to create downstream thread\n");
+                MSG("ERROR~ [main] impossible to create downstream thread\n");
                 exit(EXIT_FAILURE);
 
         }
 
         i = pthread_create( &thrid_jit, NULL, (void * (*)(void *))thread_jit, NULL);
         if (i != 0) {
-            MSG_LOG(DEBUG_ERROR, "ERROR: [main] impossible to create JIT thread\n");
+            MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create JIT thread\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -889,7 +889,7 @@ int main(int argc, char *argv[])
                         sprintf(chan_path, "/var/iot/channels/%c%c%c%c", pktrx[pt].payload[0], pktrx[pt].payload[1], pktrx[pt].payload[2], pktrx[pt].payload[3]);
                         fp = fopen(chan_path, "w+");
                         if (fp < 0) 
-                            MSG_LOG(DEBUG_ERROR, "ERROR: canot open file path: %s\n", chan_path); 
+                            MSG_LOG(DEBUG_ERROR, "ERROR~ canot open file path: %s\n", chan_path); 
                         else {
                             fwrite(pktrx[pt].payload, sizeof(char), pktrx[pt].size, fp);  
                             fflush(fp);
@@ -924,7 +924,7 @@ clean:
     free(rxdev);
     free(txdev);
 	
-    MSG("INFO: Exiting Lora service program\n");
+    MSG("INFO~ Exiting Lora service program\n");
     exit(EXIT_SUCCESS);
 }
 
@@ -1042,21 +1042,21 @@ void thread_stat(void) {
         }
         
         /* display a report */
-        /*
-        printf("\n##### %s #####\n", stat_timestamp);
-        printf("### [UPSTREAM] ###\n");
-        printf("# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
-        printf("# CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
-        printf("# RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
-        printf("# PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
-        printf("# PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
-        printf("### [DOWNSTREAM] ###\n");
-        printf("# PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
-        printf("# PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
-        printf("# RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
-        printf("# TX errors: %u\n", cp_nb_tx_fail);
-        printf("##### END #####\n");
-        */
+        
+        MSG_LOG(DEBUG_INFO, "\nREPORT~ ##### %s #####\n", stat_timestamp);
+        MSG_LOG(DEBUG_INFO, "REPORT~ ### [UPSTREAM] ###\n");
+        MSG_LOG(DEBUG_INFO, "REPORT~ # RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
+        MSG_LOG(DEBUG_INFO, "REPORT~ # CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
+        MSG_LOG(DEBUG_INFO, "REPORT~ # RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
+        MSG_LOG(DEBUG_INFO, "REPORT~ # PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
+        MSG_LOG(DEBUG_INFO, "REPORT~ # PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
+        MSG_LOG(DEBUG_INFO, "REPORT~ ### [DOWNSTREAM] ###\n");
+        MSG_LOG(DEBUG_INFO, "REPORT~ # PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
+        MSG_LOG(DEBUG_INFO, "REPORT~ # PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
+        MSG_LOG(DEBUG_INFO, "REPORT~ # RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
+        MSG_LOG(DEBUG_INFO, "REPORT~ # TX errors: %u\n", cp_nb_tx_fail);
+        MSG_LOG(DEBUG_INFO, "REPORT~ ##### END #####\n");
+        
 
         /* start composing datagram with the header */
         uint8_t token_h = (uint8_t)rand(); /* random token */
@@ -1074,7 +1074,7 @@ void thread_stat(void) {
         stat_index += j;
         status_report[stat_index] = 0; /* add string terminator, for safety */
 
-        MSG("\nINFO (json): [stat update] %s\n", (char *)(status_report + 12)); /* DEBUG: display JSON stat */
+        MSG_LOG(DEBUG_INFO, "\nINFO~ (json): [stat update] %s\n", (char *)(status_report + 12)); /* DEBUG: display JSON stat */
 
         //send the update
         send(sock_stat, (void *)status_report, stat_index, 0);
@@ -1114,7 +1114,7 @@ void thread_up(void) {
     /* set upstream socket RX timeout */
     i = setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof push_timeout_half);
     if (i != 0) {
-	    MSG("ERROR: [up] setsockopt returned %s\n", strerror(errno));
+	    MSG_LOG(DEBUG_ERROR, "ERROR~ [up] setsockopt returned %s\n", strerror(errno));
 	    exit(EXIT_FAILURE);
     }
     
@@ -1126,7 +1126,7 @@ void thread_up(void) {
     
     while (!exit_sig && !quit_sig) {
 
-        //MSG("INFO: [up] loop...\n");
+        //MSG("INFO~ [up] loop...\n");
                 /* fetch packets */
 
         if (pktrx[prev].empty) {
@@ -1182,7 +1182,7 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = '\0'; /* add string terminator, for safety */
                 
-        MSG("\nRXTX (JSON): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (RXPK): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
             
         /* send datagram to server */
         send(sock_up, (void *)buff_up, buff_index, 0);
@@ -1208,7 +1208,7 @@ void thread_up(void) {
                     //MSG("WARNING: [up] ignored out-of sync ACK packet\n");
                     continue;
                 } else {
-                    MSG("INFO: [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                    MSG("INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
                     meas_up_ack_rcv += 1;
                     break;
                 }
@@ -1223,9 +1223,9 @@ void thread_up(void) {
             prev = 0;
 
         wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
-        //MSG("INFO: [up]return loop\n");
+        //MSG("INFO~ [up]return loop\n");
     }
-    MSG("\nINFO: End of upstream thread\n");
+    MSG("\nINFO~ End of upstream thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1271,7 +1271,7 @@ void thread_down(void) {
     /* set downstream socket RX timeout */
     i = setsockopt(sock_down, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof pull_timeout);
     if (i != 0) {
-	    MSG("ERROR: [down] setsockopt returned %s\n", strerror(errno));
+	    MSG("ERROR~ [down] setsockopt returned %s\n", strerror(errno));
 	    exit(EXIT_FAILURE);
     }
     
@@ -1289,7 +1289,7 @@ void thread_down(void) {
 	/* auto-quit if the threshold is crossed */
 	if ((autoquit_threshold > 0) && (autoquit_cnt >= autoquit_threshold)) {
 		exit_sig = true;
-		MSG("INFO: [down] the last %u PULL_DATA were not ACKed, exiting application\n", autoquit_threshold);
+		MSG("INFO~ [down] the last %u PULL_DATA were not ACKed, exiting application\n", autoquit_threshold);
 		break;
 	}
 	
@@ -1302,7 +1302,7 @@ void thread_down(void) {
 	/* send PULL request and record time */
 	send(sock_down, (void *)buff_req, sizeof buff_req, 0);
 	clock_gettime(CLOCK_MONOTONIC, &send_time);
-        //MSG("INFO: [down] send pull_data, %ld\n", send_time.tv_nsec);
+        //MSG("INFOERROR [down] send pull_data, %ld\n", send_time.tv_nsec);
 	pthread_mutex_lock(&mx_meas_dw);
 	meas_dw_pull_sent += 1;
 	pthread_mutex_unlock(&mx_meas_dw);
@@ -1333,25 +1333,25 @@ void thread_down(void) {
 	    if (buff_down[3] == PKT_PULL_ACK) {
 		    if ((buff_down[1] == token_h) && (buff_down[2] == token_l)) {
 			    if (req_ack) {
-				    MSG("INFO: [down] duplicate ACK received :)\n");
+				    MSG("INFO~ [down] duplicate ACK received :)\n");
 			    } else { /* if that packet was not already acknowledged */
 				    req_ack = true;
 				    autoquit_cnt = 0;
 				    pthread_mutex_lock(&mx_meas_dw);
 				    meas_dw_ack_rcv += 1;
 				    pthread_mutex_unlock(&mx_meas_dw);
-				    //MSG("INFO: [down] PULL_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+				    //MSG("INFO~ [down] PULL_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
 			    }
 		    } else { /* out-of-sync token */
-			    MSG("INFO: [down] received out-of-sync ACK\n");
+			    MSG("INFO~ [down] received out-of-sync ACK\n");
 		    }
 		    continue;
 	    }
 	    
 	    /* the datagram is a PULL_RESP */
 	    buff_down[msg_len] = 0; /* add string terminator, just to be safe */
-	    //printf("INFO: [down] PULL_RESP received :)\n"); /* very verbose */
-	    MSG("\nRXTX (json): [down] %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+	    //printf("INFO~ [down] PULL_RESP received :)\n"); /* very verbose */
+	    MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (TXPK): [down] %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 	    
 	    /* initialize TX struct and try to parse JSON */
 	    memset(&txpkt, 0, sizeof(txpkt));
@@ -1387,7 +1387,7 @@ void thread_down(void) {
             /* parse target frequency (mandatory) */
             val = json_object_get_value(txpk_obj,"freq");
             if (val == NULL) {
-                MSG_LOG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.freq\" object in JSON, TX aborted\n");
+                MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.freq\" object in JSON, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -1396,13 +1396,13 @@ void thread_down(void) {
             /* Parse Lora spreading-factor and modulation bandwidth (mandatory) */
             str = json_object_get_string(txpk_obj, "datr");
             if (str == NULL) {
-                MSG_LOG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.datr\" object in JSON, TX aborted\n");
+                MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.datr\" object in JSON, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
             i = sscanf(str, "SF%2hdBW%3hd", &x0, &x1);
             if (i != 2) {
-                MSG_LOG(DEBUG_WARNING, "WARNING: [down] format error in \"txpk.datr\", TX aborted\n");
+                MSG_LOG(DEBUG_WARNING, "WARNING~ [down] format error in \"txpk.datr\", TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -1414,7 +1414,7 @@ void thread_down(void) {
                 case 11: txpkt.datarate = DR_LORA_SF11; break;
                 case 12: txpkt.datarate = DR_LORA_SF12; break;
                 default:
-                    MSG_LOG(DEBUG_WARNING, "WARNING: [down] format error in \"txpk.datr\", invalid SF, TX aborted\n");
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] format error in \"txpk.datr\", invalid SF, TX aborted\n");
                     json_value_free(root_val);
                     continue;
             }
@@ -1423,7 +1423,7 @@ void thread_down(void) {
                 case 250: txpkt.bandwidth = BW_250KHZ; break;
                 case 500: txpkt.bandwidth = BW_500KHZ; break;
                 default:
-                    MSG_LOG(DEBUG_WARNING, "WARNING: [down] format error in \"txpk.datr\", invalid BW, TX aborted\n");
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] format error in \"txpk.datr\", invalid BW, TX aborted\n");
                     json_value_free(root_val);
                     continue;
             }
@@ -1431,7 +1431,7 @@ void thread_down(void) {
             /* Parse ECC coding rate (optional field) */
             str = json_object_get_string(txpk_obj, "codr");
             if (str == NULL) {
-                MSG_LOG(DEBUG_WARNING, "WARNING: [down] no mandatory \"txpk.codr\" object in json, TX aborted\n");
+                MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.codr\" object in json, TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -1442,7 +1442,7 @@ void thread_down(void) {
             else if (strcmp(str, "4/8") == 0) txpkt.coderate = CR_LORA_4_8;
             else if (strcmp(str, "1/2") == 0) txpkt.coderate = CR_LORA_4_8;
             else {
-                MSG_LOG(DEBUG_WARNING, "WARNING: [down] format error in \"txpk.codr\", TX aborted\n");
+                MSG_LOG(DEBUG_WARNING, "WARNING~ [down] format error in \"txpk.codr\", TX aborted\n");
                 json_value_free(root_val);
                 continue;
             }
@@ -1469,7 +1469,7 @@ void thread_down(void) {
 	    /* Parse payload length (mandatory) */
 	    val = json_object_get_value(txpk_obj,"size");
 	    if (val == NULL) {
-		    MSG("WARNING: [down] no mandatory \"txpk.size\" object in JSON, TX aborted\n");
+		    MSG("WARNING~ [down] no mandatory \"txpk.size\" object in JSON, TX aborted\n");
 		    json_value_free(root_val);
 		    continue;
 	    }
@@ -1477,17 +1477,17 @@ void thread_down(void) {
 	    
 	    /* Parse payload data (mandatory) */
 	    str = json_object_get_string(txpk_obj, "data"); if (str == NULL) {
-		    MSG("WARNING: [down] no mandatory \"txpk.data\" object in JSON, TX aborted\n");
+		    MSG("WARNING~ [down] no mandatory \"txpk.data\" object in JSON, TX aborted\n");
 		    json_value_free(root_val);
 		    continue;
 	    }
 
 	    i = b64_to_bin(str, strlen(str), txpkt.payload, sizeof(txpkt.payload));
 	    if (i != txpkt.size) {
-		MSG("WARNING: [down] mismatch between .size and .data size once converter to binary\n");
+		MSG("WARNING~ [down] mismatch between .size and .data size once converter to binary\n");
 	    }
 
-            //MSG_LOG(DEBUG_INFO, "INFO: [down]receive txpk payload %d byte)\n", txpkt.size);
+            //MSG_LOG(DEBUG_INFO, "INFO~ [down]receive txpk payload %d byte)\n", txpkt.size);
 
 	    /* free the JSON parse tree from memory */
 	    json_value_free(root_val);
@@ -1513,7 +1513,7 @@ void thread_down(void) {
             gettimeofday(&current_unix_time, NULL);
             jit_result = jit_enqueue(&jit_queue, &current_unix_time, &txpkt, downlink_type);
             if (jit_result != JIT_ERROR_OK) {
-                MSG_LOG(DEBUG_ERROR, "ERROR: Packet REJECTED (jit error=%d)\n", jit_result);
+                MSG_LOG(DEBUG_ERROR, "ERROR~ Packet REJECTED (jit error=%d)\n", jit_result);
             }
             pthread_mutex_lock(&mx_meas_dw);
             meas_nb_tx_requested += 1;
@@ -1523,7 +1523,7 @@ void thread_down(void) {
             send_tx_ack(buff_down[1], buff_down[2], jit_result);
 	}
     }
-    MSG_LOG(DEBUG_INFO, "\nINFO: End of downstream thread\n");
+    MSG_LOG(DEBUG_INFO, "\nINFO~ End of downstream thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1549,15 +1549,15 @@ void thread_jit(void) {
                     pthread_mutex_lock(&mx_meas_dw);
                     meas_nb_tx_ok += 1;
                     pthread_mutex_unlock(&mx_meas_dw);
-                    MSG_LOG(DEBUG_PKT_FWD, "INFO: Donwlink done: count_us=%u\n", pkt.count_us);
+                    MSG_LOG(DEBUG_PKT_FWD, "INFO~ Donwlink done: count_us=%u\n", pkt.count_us);
                 } else {
-                    MSG_LOG(DEBUG_ERROR, "ERROR: jit_dequeue failed with %d\n", jit_result);
+                    MSG_LOG(DEBUG_ERROR, "ERROR~ jit_dequeue failed with %d\n", jit_result);
                 }
             }
         } else if (jit_result == JIT_ERROR_EMPTY) {
             /* Do nothing, it can happen */
         } else {
-            MSG_LOG(DEBUG_ERROR, "ERROR: jit_peek failed with %d\n", jit_result);
+            MSG_LOG(DEBUG_ERROR, "ERROR~ jit_peek failed with %d\n", jit_result);
         }
     }
 }

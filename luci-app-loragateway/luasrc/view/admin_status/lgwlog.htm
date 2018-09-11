@@ -49,7 +49,7 @@
 </form>
 
 <div id="content_syslog">
-  <textarea readonly="readonly" wrap="off" rows="<%=sdata:cmatch("\r\n")+2%>" id="syslog"><%=sdata:pcdata()%></textarea>
+  <textarea readonly="readonly" wrap="off" rows="<%=sdata:cmatch("\n")+2%>" id="syslog"><%=sdata:pcdata()%></textarea>
 </div>
 
 <%+footer%>

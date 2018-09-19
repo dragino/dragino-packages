@@ -6,7 +6,7 @@
 		"antenna_gain": 0,
 		"antenna_gain_desc": "antenna gain, in dBi",
 		"lbt_cfg": {
-			"enable": true,
+			"enable": false,
 			"rssi_target": -80,
 			"chan_cfg":[
 				{ "freq_hz": 923200000, "scan_time_us": 128 },

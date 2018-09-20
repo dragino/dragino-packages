@@ -83,7 +83,7 @@ channels = m:section(TypedSection, "channels", translate("MQTT Channel"),transla
 channels.anonymous = true
 channels.addremove=true
 channels.template = "cbi/tblsection"
-channels.extedit  = luci.dispatcher.build_url("admin/sensor/channel/%s")
+channels.extedit  = luci.dispatcher.build_url("admin/gateway/channel/%s")
 
 channels.create = function(...)
 	local sid = TypedSection.create(...)

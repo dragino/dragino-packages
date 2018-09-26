@@ -9,9 +9,9 @@
         if (mode == 1) then
           os.execute("cat /etc/lora/desc > /tmp/reportdata")
         elseif (mode == 2) then
-          os.execute("logread -e REPORT | awk -F '~' '{print $2}' > /tmp/reportdata")
+          os.execute("logread -e REPORT | tail -n 26 | awk -F '~' '{print $2}' > /tmp/reportdata")
         elseif (mode == 3) then
-          os.execute("logread -e RXTX | awk -F '~' '{print $2}' > /tmp/reportdata")
+          os.execute("logread -e RXTX | tail -n 26 | awk -F '~' '{print $2}' > /tmp/reportdata")
         elseif (mode == 4) then
           os.execute("logread -e ERROR | awk -F '~' '{print $2}' > /tmp/reportdata")
         end

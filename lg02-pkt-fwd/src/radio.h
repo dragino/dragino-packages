@@ -40,18 +40,6 @@
 #define TIMESTAMPED     1
 #define ON_GPS          2
 
-#define DEBUG_PKT_FWD   1
-#define DEBUG_JIT       0
-#define DEBUG_JIT_ERROR 1
-#define DEBUG_TIMERSYNC 0
-#define DEBUG_BEACON    0
-#define DEBUG_INFO      1
-#define DEBUG_WARNING   0
-#define DEBUG_ERROR     1
-#define DEBUG_GPS       0
-#define DEBUG_SPI       0
-#define DEBUG_UCI       0
-
 #define MSG(args...)	        printf(args) /* message that is destined to the user */
 #define MSG_DEBUG(FLAG, fmt, ...)                                                               \
     do {                                                                                       \
@@ -62,7 +50,7 @@
 #define MSG_LOG(LEVEL, fmt, ...)                                                               \
     do {                                                                                      \
         if (LEVEL)                                                                             \
-            fprintf(stdout, fmt);                                                    \
+            fprintf(stdout, fmt, ##__VA_ARGS__);                                                    \
     } while (0)
 
 
@@ -231,9 +219,6 @@ typedef struct {
     char desc[8];
 }radiodev; 
 
-extern radiodev *rxdev;
-extern radiodev *txdev;
-
 /**
  * @struct lgw_pkt_tx_s
  * @brief Structure containing the configuration of a packet to send and a pointer to the payload
@@ -314,6 +299,19 @@ struct mqtt_config {
 #define SPI_SPEED       8000000
 #define SPI_DEV_RX    "/dev/spidev1.0"
 #define SPI_DEV_TX    "/dev/spidev2.0"
+
+/* log level */
+extern int DEBUG_PKT_FWD;
+extern int DEBUG_JIT;
+extern int DEBUG_JIT_ERROR;
+extern int DEBUG_TIMERSYNC;
+extern int DEBUG_BEACON;
+extern int DEBUG_INFO;
+extern int DEBUG_WARNING;
+extern int DEBUG_ERROR;
+extern int DEBUG_GPS;
+extern int DEBUG_SPI;
+extern int DEBUG_UCI;
 
 /*
  * Read the state of the port. The port can be input

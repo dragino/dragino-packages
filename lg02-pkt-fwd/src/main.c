@@ -115,7 +115,18 @@ static char logdebug[4] = "DEB";          /* debug info option */
 static char server_type[16] = "server_type";          /* debug info option */
 static char radio_mode[8] = "mode";          /* debug info option */
 
-static int debuglevel = 0;
+/* LOG Level */
+int DEBUG_PKT_FWD = 0;
+int DEBUG_JIT = 0;
+int DEBUG_JIT_ERROR = 0;  
+int DEBUG_TIMERSYNC = 0;  
+int DEBUG_BEACON = 0;     
+int DEBUG_INFO = 0;       
+int DEBUG_WARNING = 0;   
+int DEBUG_ERROR = 0;    
+int DEBUG_GPS = 0;     
+int DEBUG_SPI = 0;    
+int DEBUG_UCI = 0;   
 
 /* Set location */
 static float lat=0.0;
@@ -441,6 +452,8 @@ int main(int argc, char *argv[])
 {
     struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
     int i; /* loop variable and temporary variable for return value */
+
+    FILE *fp = NULL;
     
     /* threads */
     pthread_t thrid_stat;
@@ -477,7 +490,7 @@ int main(int argc, char *argv[])
 
     snprintf(server, sizeof(server), "%s_server", provider); 
 
-    if (!get_config("general", server, 64)){ /*set default:router.eu.thethings.network*/
+    if (!get_config("general", server, sizeof(server))){ /*set default:router.eu.thethings.network*/
         strcpy(server, "router.us.thethings.network");  
     }
 
@@ -595,7 +608,34 @@ int main(int argc, char *argv[])
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword2=0x%02x\n", syncwd2);
     }
 
-    debuglevel = atoi(logdebug);
+    switch (atoi(logdebug)) {
+        case 1:
+            DEBUG_INFO = 1;       
+            DEBUG_PKT_FWD = 1;
+            break;
+        case 2:
+            DEBUG_INFO = 1;       
+            DEBUG_PKT_FWD = 1;
+            DEBUG_JIT = 1;
+            DEBUG_JIT_ERROR = 1;  
+            DEBUG_WARNING = 1;
+            DEBUG_ERROR = 1;
+            break;
+        case 3:
+            DEBUG_INFO = 1;       
+            DEBUG_PKT_FWD = 1;
+            DEBUG_JIT = 1;
+            DEBUG_JIT_ERROR = 1;  
+            DEBUG_TIMERSYNC = 1;
+            DEBUG_WARNING = 1;
+            DEBUG_ERROR = 1;
+            DEBUG_GPS = 1;
+            DEBUG_BEACON = 1;
+            DEBUG_UCI = 1;
+            break;
+        default:
+            break;
+    }
 
     lat = atof(LAT);
     lon = atof(LON);
@@ -678,7 +718,7 @@ int main(int argc, char *argv[])
     rxdev->prlen = atoi(rxprlen);
     rxdev->syncword = atoi(syncwd1);
     rxdev->invertio = 0;
-    strcpy(rxdev->desc, "RXRF");
+    strcpy(rxdev->desc, "Radio1");
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     txdev->nss = 24;
@@ -699,18 +739,19 @@ int main(int argc, char *argv[])
     txdev->prlen = atoi(txprlen);
     txdev->syncword = atoi(syncwd2);
     txdev->invertio = 0;
-    strcpy(txdev->desc, "TXRF");
+    strcpy(txdev->desc, "Radio2");
 
-    radiodev *tmpdev;
-
-    if (!strcmp(radio_mode, "1")) { /* swap radioA radioB */
+    
+    /* swap radio1 and radio2 */
+    if (!strcmp(radio_mode, "1")) {
+        radiodev *tmpdev;
         tmpdev = rxdev;
         rxdev = txdev;
         txdev = tmpdev;
     }
 
-    MSG("radioA struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->spiport, rxdev->freq, rxdev->sf);
-    MSG("radioB struct: spiport=%d, freq=%ld, sf=%d\n", txdev->spiport, txdev->freq, txdev->sf);
+    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->desc, rxdev->spiport, rxdev->freq, rxdev->sf);
+    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d\n", txdev->desc, txdev->spiport, txdev->freq, txdev->sf);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -734,7 +775,16 @@ int main(int argc, char *argv[])
     net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (lgwm>>32)));
     net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  lgwm  ));
 
-    MSG("Lora Gateway service Mode=%s, gatewayID=%s\n", server_type, gatewayid);
+    MSG_LOG(DEBUG_INFO, "Lora Gateway service Mode=%s, gatewayID=%s\n", server_type, gatewayid);
+
+    fp = fopen("/etc/lora/desc", "w+");
+    if (NULL != fp) {
+        fprintf(fp, "%s struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->desc, rxdev->spiport, rxdev->freq, rxdev->sf);
+        fprintf(fp, "%s struct: spiport=%d, freq=%ld, sf=%d\n", txdev->desc, txdev->spiport, txdev->freq, txdev->sf);
+        fprintf(fp, "Lora Gateway service Mode=%s, gatewayID=%s, server=%s\n", server_type, gatewayid, server);
+        fflush(fp);
+        fclose(fp);
+    }
 
     
     /* look for server address w/ upstream port */
@@ -747,7 +797,7 @@ int main(int argc, char *argv[])
         hints.ai_socktype = SOCK_DGRAM;
         i = getaddrinfo(server, serv_port_up, &hints, &result);
         if (i != 0) {
-                MSG("ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
                 exit(EXIT_FAILURE);
         }
         
@@ -759,11 +809,11 @@ int main(int argc, char *argv[])
                 else break; /* success, get out of loop */
         }
         if (q == NULL) {
-                MSG("ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
                 i = 1;
                 for (q=result; q!=NULL; q=q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG("INFO~ [up] result %i host:%s service:%s\n", i, host_name, port_name);
+                        MSG_LOG(DEBUG_INFO, "INFO~ [up] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
                 }
                 exit(EXIT_FAILURE);
@@ -772,7 +822,7 @@ int main(int argc, char *argv[])
         /* connect so we can send/receive packet with the server only */
         i = connect(sock_up, q->ai_addr, q->ai_addrlen);
         if (i != 0) {
-                MSG("ERROR~ [up] connect returned %s\n", strerror(errno));
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [up] connect returned %s\n", strerror(errno));
                 exit(EXIT_FAILURE);
         }
         freeaddrinfo(result);
@@ -781,7 +831,7 @@ int main(int argc, char *argv[])
         //MSG("loor for server with status port......\n");
         i = getaddrinfo(server, port, &hints, &result);
         if (i != 0) {
-                MSG("ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
                 exit(EXIT_FAILURE);
         }
         /* try to open socket for status traffic */
@@ -791,11 +841,11 @@ int main(int argc, char *argv[])
                 else break; /* success, get out of loop */
         }
         if (q == NULL) {
-                MSG("ERROR~ [stat] failed to open socket to any of server %s addresses (port %s)\n", server, port);
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [stat] failed to open socket to any of server %s addresses (port %s)\n", server, port);
                 i = 1;
                 for (q=result; q!=NULL; q=q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG("INFO~ [stat] result %i host:%s service:%s\n", i, host_name, port_name);
+                        MSG_LOG(DEBUG_INFO, "INFO~ [stat] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
                 }
                 exit(EXIT_FAILURE);
@@ -804,7 +854,7 @@ int main(int argc, char *argv[])
         /* connect so we can send/receive packet with the server only */
         i = connect(sock_stat, q->ai_addr, q->ai_addrlen);
         if (i != 0) {
-                MSG("ERROR~ [stat] connect returned %s\n", strerror(errno));
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [stat] connect returned %s\n", strerror(errno));
                 exit(EXIT_FAILURE);
         }
         freeaddrinfo(result);
@@ -813,7 +863,7 @@ int main(int argc, char *argv[])
         //MSG("loor for server with downstream port......\n");
         i = getaddrinfo(server, serv_port_down, &hints, &result);
         if (i != 0) {
-                MSG("ERROR~ [down] getaddrinfo on address %s (port %s) returned %s\n", server, serv_port_up, gai_strerror(i));
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [down] getaddrinfo on address %s (port %s) returned %s\n", server, serv_port_up, gai_strerror(i));
                 exit(EXIT_FAILURE);
         }
         
@@ -824,11 +874,11 @@ int main(int argc, char *argv[])
                 else break; /* success, get out of loop */
         }
         if (q == NULL) {
-                MSG("ERROR~ [down] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [down] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
                 i = 1;
                 for (q=result; q!=NULL; q=q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG("INFO~ [down] result %i host:%s service:%s\n", i, host_name, port_name);
+                        MSG_LOG(DEBUG_INFO, "INFO~ [down] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
                 }
                 exit(EXIT_FAILURE);
@@ -837,7 +887,7 @@ int main(int argc, char *argv[])
         /* connect so we can send/receive packet with the server only */
         i = connect(sock_down, q->ai_addr, q->ai_addrlen);
         if (i != 0) {
-                MSG("ERROR~ [down] connect returned %s\n", strerror(errno));
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [down] connect returned %s\n", strerror(errno));
                 exit(EXIT_FAILURE);
         }
         freeaddrinfo(result);
@@ -845,7 +895,7 @@ int main(int argc, char *argv[])
         /* spawn threads to report status*/
         i = pthread_create( &thrid_stat, NULL, (void * (*)(void *))thread_stat, NULL);
         if (i != 0) {
-                MSG("ERROR~ [main] impossible to create upstream thread\n");
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create upstream thread\n");
                 exit(EXIT_FAILURE);
         }
 
@@ -853,13 +903,13 @@ int main(int argc, char *argv[])
         MSG("spawn threads to manage upsteam and downstream...\n");
         i = pthread_create( &thrid_up, NULL, (void * (*)(void *))thread_up, NULL);
         if (i != 0) {
-                MSG("ERROR~ [main] impossible to create upstream thread\n");
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create upstream thread\n");
                 exit(EXIT_FAILURE);
         }
 
         i = pthread_create( &thrid_down, NULL, (void * (*)(void *))thread_down, NULL);
         if (i != 0) {
-                MSG("ERROR~ [main] impossible to create downstream thread\n");
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create downstream thread\n");
                 exit(EXIT_FAILURE);
 
         }
@@ -884,17 +934,16 @@ int main(int argc, char *argv[])
                         pktrx_clean(&pktrx[pt]); 
                     } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp")) {  // mqtt mode or tcpudp mode for loraRAW
                         char chan_path[32] = {'\0'};
-                        FILE *fp = NULL;
 
                         sprintf(chan_path, "/var/iot/channels/%c%c%c%c", pktrx[pt].payload[0], pktrx[pt].payload[1], pktrx[pt].payload[2], pktrx[pt].payload[3]);
                         fp = fopen(chan_path, "w+");
-                        if (fp < 0) 
-                            MSG_LOG(DEBUG_ERROR, "ERROR~ canot open file path: %s\n", chan_path); 
-                        else {
+                        if ( NULL != fp ) {
                             fwrite(pktrx[pt].payload, sizeof(char), pktrx[pt].size, fp);  
                             fflush(fp);
                             fclose(fp);
-                        }
+                        } else 
+                            MSG_LOG(DEBUG_ERROR, "ERROR~ canot open file path: %s\n", chan_path); 
+
                         pktrx_clean(&pktrx[pt]);
                     }
 
@@ -924,7 +973,7 @@ clean:
     free(rxdev);
     free(txdev);
 	
-    MSG("INFO~ Exiting Lora service program\n");
+    MSG_LOG(DEBUG_INFO, "INFO~ Exiting Lora service program\n");
     exit(EXIT_SUCCESS);
 }
 
@@ -1208,7 +1257,7 @@ void thread_up(void) {
                     //MSG("WARNING: [up] ignored out-of sync ACK packet\n");
                     continue;
                 } else {
-                    MSG("INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                    MSG_LOG(DEBUG_INFO, "INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
                     meas_up_ack_rcv += 1;
                     break;
                 }
@@ -1225,7 +1274,7 @@ void thread_up(void) {
         wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
         //MSG("INFO~ [up]return loop\n");
     }
-    MSG("\nINFO~ End of upstream thread\n");
+    MSG_LOG(DEBUG_INFO, "\nINFO~ End of upstream thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1271,7 +1320,7 @@ void thread_down(void) {
     /* set downstream socket RX timeout */
     i = setsockopt(sock_down, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof pull_timeout);
     if (i != 0) {
-	    MSG("ERROR~ [down] setsockopt returned %s\n", strerror(errno));
+	    MSG_LOG(DEBUG_ERROR, "ERROR~ [down] setsockopt returned %s\n", strerror(errno));
 	    exit(EXIT_FAILURE);
     }
     
@@ -1289,7 +1338,7 @@ void thread_down(void) {
 	/* auto-quit if the threshold is crossed */
 	if ((autoquit_threshold > 0) && (autoquit_cnt >= autoquit_threshold)) {
 		exit_sig = true;
-		MSG("INFO~ [down] the last %u PULL_DATA were not ACKed, exiting application\n", autoquit_threshold);
+		MSG_LOG(DEBUG_INFO, "INFO~ [down] the last %u PULL_DATA were not ACKed, exiting application\n", autoquit_threshold);
 		break;
 	}
 	
@@ -1325,7 +1374,7 @@ void thread_down(void) {
 	    
 	    /* if the datagram does not respect protocol, just ignore it */
 	    if ((msg_len < 4) || (buff_down[0] != PROTOCOL_VERSION) || ((buff_down[3] != PKT_PULL_RESP) && (buff_down[3] != PKT_PULL_ACK))) {
-		    MSG("WARNING: [down] ignoring invalid packet\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] ignoring invalid packet\n");
 		    continue;
 	    }
 	    
@@ -1333,7 +1382,7 @@ void thread_down(void) {
 	    if (buff_down[3] == PKT_PULL_ACK) {
 		    if ((buff_down[1] == token_h) && (buff_down[2] == token_l)) {
 			    if (req_ack) {
-				    MSG("INFO~ [down] duplicate ACK received :)\n");
+				    MSG_LOG(DEBUG_INFO, "INFO~ [down] duplicate ACK received :)\n");
 			    } else { /* if that packet was not already acknowledged */
 				    req_ack = true;
 				    autoquit_cnt = 0;
@@ -1343,7 +1392,7 @@ void thread_down(void) {
 				    //MSG("INFO~ [down] PULL_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
 			    }
 		    } else { /* out-of-sync token */
-			    MSG("INFO~ [down] received out-of-sync ACK\n");
+			    MSG_LOG(DEBUG_INFO, "INFO~ [down] received out-of-sync ACK\n");
 		    }
 		    continue;
 	    }
@@ -1357,14 +1406,14 @@ void thread_down(void) {
 	    memset(&txpkt, 0, sizeof(txpkt));
 	    root_val = json_parse_string_with_comments((const char *)(buff_down + 4)); /* JSON offset */
 	    if (root_val == NULL) {
-		    MSG("WARNING: [down] invalid JSON, TX aborted\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] invalid JSON, TX aborted\n");
 		    continue;
 	    }
 	    
 	    /* look for JSON sub-object 'txpk' */
 	    txpk_obj = json_object_get_object(json_value_get_object(root_val), "txpk");
 	    if (txpk_obj == NULL) {
-		    MSG("WARNING: [down] no \"txpk\" object in JSON, TX aborted\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] no \"txpk\" object in JSON, TX aborted\n");
 		    json_value_free(root_val);
 		    continue;
 	    }
@@ -1469,7 +1518,7 @@ void thread_down(void) {
 	    /* Parse payload length (mandatory) */
 	    val = json_object_get_value(txpk_obj,"size");
 	    if (val == NULL) {
-		    MSG("WARNING~ [down] no mandatory \"txpk.size\" object in JSON, TX aborted\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.size\" object in JSON, TX aborted\n");
 		    json_value_free(root_val);
 		    continue;
 	    }
@@ -1477,14 +1526,14 @@ void thread_down(void) {
 	    
 	    /* Parse payload data (mandatory) */
 	    str = json_object_get_string(txpk_obj, "data"); if (str == NULL) {
-		    MSG("WARNING~ [down] no mandatory \"txpk.data\" object in JSON, TX aborted\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.data\" object in JSON, TX aborted\n");
 		    json_value_free(root_val);
 		    continue;
 	    }
 
 	    i = b64_to_bin(str, strlen(str), txpkt.payload, sizeof(txpkt.payload));
 	    if (i != txpkt.size) {
-		MSG("WARNING~ [down] mismatch between .size and .data size once converter to binary\n");
+		MSG_LOG(DEBUG_WARNING, "WARNING~ [down] mismatch between .size and .data size once converter to binary\n");
 	    }
 
             //MSG_LOG(DEBUG_INFO, "INFO~ [down]receive txpk payload %d byte)\n", txpkt.size);

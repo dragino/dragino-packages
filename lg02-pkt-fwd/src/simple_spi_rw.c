@@ -1,5 +1,7 @@
 #include "radio.h"
 
+int DEBUG_INFO = 0;       
+
 int main () {
     FILE *fp;
 

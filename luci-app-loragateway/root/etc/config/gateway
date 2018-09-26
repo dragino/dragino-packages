@@ -1,7 +1,7 @@
 config settings 'general'
 	option port '1700'
 	option server_type 'lorawan'
-	option logdebug '0'
+	option DEB '1'
 	option LAT '22.73'
 	option LON '114.23'
 	option email 'dragino-180ebe@dragino.com'

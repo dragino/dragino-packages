@@ -27,6 +27,7 @@ static char ver[8] = "0.1";
 static char sf[8] = "7";
 static char bw[8] = "125000";
 static char cr[8] = "5";
+static char wd[8] = "52";
 static char prlen[8] = "8";
 static char freq[16] = "868500000";            /* frequency of radio */
 static char radio[16] = RADIO1;
@@ -72,6 +73,7 @@ void print_help(void) {
     printf("                           [-f frequence] (default:868500000)\n");
     printf("                           [-s spreadingFactor] (default: 7)\n");
     printf("                           [-b bandwidth] default: 125k \n");
+    printf("                           [-w syncword] default: 52, 0x34\n");
     printf("                           [-p payload ]  \n");
     printf("                           [-o filepath ]  \n");
     printf("                           [-v] show version \n");
@@ -143,6 +145,14 @@ int main(int argc, char *argv[])
                     exit(1);
                 }
                 break;
+            case 'w':
+                if (optarg)
+                    strncpy(wd, optarg, sizeof(wd));
+                else {
+                    print_help();
+                    exit(1);
+                }
+                break;
             case 'p':
                 if (optarg)
                     strncpy(input, optarg, sizeof(input));
@@ -207,12 +217,13 @@ int main(int argc, char *argv[])
     loradev->sf = atoi(sf);
     loradev->bw = atol(bw);
     loradev->cr = atoi(cr);
+    loradev->syncword = atoi(wd);
     loradev->nocrc = 1;  /* crc check */
     loradev->prlen = atoi(prlen);
     loradev->invertio = 0;
     strcpy(loradev->desc, "RFDEV");	
 
-    MSG("Radio struct: spi_dev=%s, spiport=%d, freq=%ld, sf=%d, bw=%ld, cr=%d\n", radio, loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr );
+    MSG("Radio struct: spi_dev=%s, spiport=%d, freq=%ld, sf=%d, bw=%ld, cr=%d, wd=0x%2x\n", radio, loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->syncword);
 
     if(!get_radio_version(loradev))  
         goto clean;

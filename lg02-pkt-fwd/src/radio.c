@@ -568,7 +568,7 @@ void setup_channel(radiodev *dev)
     setsbw(dev->spiport, dev->bw);
     setcr(dev->spiport, dev->cr);
     setprlen(dev->spiport, dev->prlen);
-    setsyncword(dev->spiport, LORA_MAC_PREAMBLE);
+    setsyncword(dev->spiport, dev->syncword);
 
     /* use inverted I/Q signal (prevent mote-to-mote communication) */
     
@@ -620,7 +620,7 @@ void rxlora(int spidev, uint8_t rxmode)
     // enable required radio IRQs
     writeReg(spidev, REG_IRQ_FLAGS_MASK, ~rxlorairqmask[rxmode]);
 
-    setsyncword(spidev, LORA_MAC_PREAMBLE);  //LoraWan syncword
+    //setsyncword(spidev, LORA_MAC_PREAMBLE);  //LoraWan syncword
 
     // now instruct the radio to receive
     if (rxmode == RXMODE_SINGLE) { // single rx
@@ -703,7 +703,7 @@ void txlora(radiodev *dev, struct pkt_tx_s *pkt) {
     setsbw(dev->spiport, bw_getval(pkt->bandwidth));
     setcr(dev->spiport, pkt->coderate);
     setprlen(dev->spiport, pkt->preamble);
-    setsyncword(dev->spiport, LORA_MAC_PREAMBLE);
+    setsyncword(dev->spiport, dev->syncword);
 
     /* CRC check */
     crccheck(dev->spiport, pkt->no_crc);
@@ -771,7 +771,7 @@ void single_tx(radiodev *dev, uint8_t *payload, int size) {
     // enter standby mode (required for FIFO loading))
     opmode(dev->spiport, OPMODE_STANDBY);
 
-    setsyncword(dev->spiport, LORA_MAC_PREAMBLE);
+    setsyncword(dev->spiport, dev->syncword);
 
     // set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP
     writeReg(dev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);

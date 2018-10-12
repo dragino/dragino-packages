@@ -750,8 +750,8 @@ int main(int argc, char *argv[])
         txdev = tmpdev;
     }
 
-    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->desc, rxdev->spiport, rxdev->freq, rxdev->sf);
-    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d\n", txdev->desc, txdev->spiport, txdev->freq, txdev->sf);
+    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d, syncwd=0x%02x\n", rxdev->desc, rxdev->spiport, rxdev->freq, rxdev->sf, rxdev->syncword);
+    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d, syncwd=0x%02x\n", txdev->desc, txdev->spiport, txdev->freq, txdev->sf, txdev->syncword);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -924,7 +924,7 @@ int main(int argc, char *argv[])
     /* main thread for receive message, then process the message */
 
     rxlora(rxdev->spiport, RXMODE_SCAN);  /* star lora continue receive mode */
-    MSG_LOG(DEBUG_INFO, "Listening at SF%i on %.6lf Mhz. port%i\n", rxdev->sf, (double)(rxdev->freq)/1000000, rxdev->spiport);
+    MSG_LOG(DEBUG_INFO, "Listening at SF%i on %.6lf Mhz. syncword is 0x%02x on spiport%i\n", rxdev->sf, (double)(rxdev->freq)/1000000, rxdev->syncword, rxdev->spiport);
     while (!exit_sig && !quit_sig) {
         if(digitalRead(rxdev->dio[0]) == 1) {
             if (pktrx[pt].empty) {

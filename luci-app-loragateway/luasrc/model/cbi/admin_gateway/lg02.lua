@@ -110,7 +110,7 @@ local prb = s:option(Value, "RXPRLEN", translate("RadioA Preamble Length"), tran
 prb.placeholder = "6 ~ 65536"
 prb.default = "8"
 
-local syncwd = s:option(Value, "syncwd", translate("RadioA LoRa Sync Word"), translate("Value 52(0x34) for LoRaWAN"))
+local syncwd = s:option(Value, "SYNCWD", translate("RadioA LoRa Sync Word"), translate("Value 52(0x34) for LoRaWAN"))
 syncwd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
 syncwd.default = "52"
 
@@ -158,7 +158,7 @@ local prb = s:option(Value, "TXPRLEN", translate("RadioB Preamble Length"), tran
 prb.placeholder = "6 ~ 65536"
 prb.default = "8"
 
-local swd = s:option(Value, "syncwd", translate("RadioB LoRa Sync Word"), translate("Value 52(0x34) for LoRaWAN"))
+local swd = s:option(Value, "SYNCWD", translate("RadioB LoRa Sync Word"), translate("Value 52(0x34) for LoRaWAN"))
 swd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
 swd.default = "52"
 

@@ -20,6 +20,8 @@ init_board() {
 
     board=`cat /var/iot/board`
 
+    service=`uci get gateway.general.server_type`
+    
     uci set system.vendor.web_model="$board"
     uci set gateway.general.model="$board"
     uci commit
@@ -39,6 +41,10 @@ init_board() {
         /usr/bin/reset_lgw.sh start
         /usr/bin/generate-config.sh
     else
+        exit 1
+    fi
+
+    if [[ "$service" = "disabled" ]]; then
         exit 1
     fi
 }

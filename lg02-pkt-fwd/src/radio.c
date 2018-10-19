@@ -558,7 +558,8 @@ bool get_radio_version(radiodev *dev)
 
 void setup_channel(radiodev *dev)
 {
-    MSG_LOG(DEBUG_INFO, "INFO~ Setup %s Channel: freq = %ld, sf = %d, spi = %d\n", dev->desc, dev->freq, dev->sf, dev->spiport);
+    MSG_LOG(DEBUG_INFO, "INFO~ Setup %s Channel: freq = %ld, sf = %d, syncwd=0x%02x, prlen=%d, cr=%d, spi=%d\n", \
+            dev->desc, dev->freq, dev->sf, dev->syncword, dev->prlen, dev->cr, dev->spiport);
     opmode(dev->spiport, OPMODE_SLEEP);
     opmodeLora(dev->spiport);
     ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);

@@ -933,12 +933,52 @@ int main(int argc, char *argv[])
                         single_tx(txdev, pktrx[pt].payload, pktrx[pt].size); 
                         pktrx_clean(&pktrx[pt]); 
                     } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp")) {  // mqtt mode or tcpudp mode for loraRAW
+                        char tmp[256] = {'\0'};
                         char chan_path[32] = {'\0'};
+                        char *chan_id = NULL;
+                        char *chan_data = NULL;
+                        int id_found = 0, data_size = pktrx[pt].size;
 
-                        sprintf(chan_path, "/var/iot/channels/%c%c%c%c", pktrx[pt].payload[0], pktrx[pt].payload[1], pktrx[pt].payload[2], pktrx[pt].payload[3]);
+                        for (i = 0; i < pktrx[pt].size; i++) {
+                            tmp[i] = pktrx[pt].payload[i];
+                        }
+
+                       if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
+                            chan_data = &tmp[4];
+                        else
+                            chan_data = tmp;
+
+                        for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
+                            if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
+                                chan_id = &tmp[i + 1];
+                                ++id_found;
+                            }
+
+                            if (tmp[i] == '>') { 
+                                tmp[i] = '\0';
+                                chan_data = tmp + i + 1;
+                                data_size = data_size - i;
+                                ++id_found;
+                            }
+
+                            if (id_found == 2) /* found channel id */ 
+                                break;
+                                
+                        }
+
+                        if (id_found == 2) 
+                            sprintf(chan_path, "/var/iot/channels/%s", chan_id);
+                        else {
+                            static unsigned long next = 1;
+                            srand((unsigned)time(NULL)); 
+                            next = next * 1103515245 + 12345;
+                            sprintf(chan_path, "/var/iot/channels/%ld", (unsigned)(next/65536) % 32768);
+                        }
+                        
                         fp = fopen(chan_path, "w+");
                         if ( NULL != fp ) {
-                            fwrite(pktrx[pt].payload, sizeof(char), pktrx[pt].size, fp);  
+                            //fwrite(chan_data, sizeof(char), data_size, fp);  
+                            fprintf(fp, "%s\n", chan_data);
                             fflush(fp);
                             fclose(fp);
                         } else 

@@ -542,6 +542,7 @@ bool get_radio_version(radiodev *radiodev)
 void setup_channel(radiodev *radiodev)
 {
     opmode(radiodev->spiport, OPMODE_SLEEP);
+    opmodeLora(radiodev->spiport);
     // setup lora
     printf("Setup %s Channel: freq = %d, sf = %d, spi = %d\n", radiodev->desc, radiodev->freq, radiodev->sf, radiodev->spiport);
     setfreq(radiodev->spiport, radiodev->freq);
@@ -619,6 +620,8 @@ void rxlora(int spidev, uint8_t rxmode)
 void txlora(radiodev *radiodev, struct lgw_pkt_tx_s *pkt) {
 
     opmode(radiodev->spiport, OPMODE_SLEEP);
+    // select LoRa modem (from sleep mode)
+    opmodeLora(radiodev->spiport);
 
     setfreq(radiodev->spiport, pkt->freq_hz);
     setsf(radiodev->spiport, lgw_sf_getval(pkt->datarate));
@@ -644,8 +647,6 @@ void txlora(radiodev *radiodev, struct lgw_pkt_tx_s *pkt) {
     else
         writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) & ~(1<<6));
 
-    // select LoRa modem (from sleep mode)
-    opmodeLora(radiodev->spiport);
 
     //ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 

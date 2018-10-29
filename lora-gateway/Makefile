@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lora_gateway
-PKG_VERSION:=1.1.0
+PKG_VERSION:=1.1.1
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -57,6 +57,7 @@ define Package/lora-gateway/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_tx_continuous/util_tx_continuous $(1)/usr/lora
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/reset_lgw.sh $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lora_pkt_fwd/single_tx $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lora_pkt_fwd/lora_pkt_fwd $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/lora
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/*conf.json $(1)/etc/lora

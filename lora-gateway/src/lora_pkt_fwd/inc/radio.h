@@ -131,28 +131,6 @@
 #define MAXLINE 256
 
 
-/* values available for the 'bandwidth' parameters (LoRa & FSK) */
-/* NOTE: directly encode FSK RX bandwidth, do not change */
-#define BW_UNDEFINED    0
-#define BW_500KHZ       0x01
-#define BW_250KHZ       0x02
-#define BW_125KHZ       0x03
-#define BW_62K5HZ       0x04
-#define BW_31K2HZ       0x05
-#define BW_15K6HZ       0x06
-#define BW_7K8HZ        0x07
-
-/* values available for the 'datarate' parameters */
-/* NOTE: LoRa values used directly to code SF bitmask in 'multi' modem, do not change */
-#define DR_UNDEFINED    0
-#define DR_LORA_SF7     0x02
-#define DR_LORA_SF8     0x04
-#define DR_LORA_SF9     0x08
-#define DR_LORA_SF10    0x10
-#define DR_LORA_SF11    0x20
-#define DR_LORA_SF12    0x40
-#define DR_LORA_MULTI   0x7E
-
 // ##################################################################
 // rxmode 
 // ##################################################################
@@ -178,35 +156,9 @@ typedef struct {
     uint8_t nocrc;
     uint8_t prlen;
     uint8_t invertio;
+    uint8_t syncword;
     char desc[8];
 }radiodev; 
-
-/**
- @struct 
- @brief 
-*/
-struct mqtt_config {
-	char id[64];
-	int keepalive;
-	char host[64];
-	char port[32];
-	int qos;
-	bool retain;
-	char message[256]; /* pub */
-	long msglen; /* pub */
-	char topic[128]; /* pub */
-	char username[32];
-	char password[32];
-	char cafile[32];
-	char capath[32];
-	char certfile[32];
-	char keyfile[32];
-	char ciphers[32];
-	bool insecure;
-	char psk[32];
-	char psk_identity[32];
-	bool clean_session;
-};
 
 /*******************************************************************************
  * GPIO/SPI configure

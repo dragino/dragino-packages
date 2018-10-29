@@ -54,7 +54,7 @@ ARRAY_SIZE	libloragw/tst/test_loragw_cal.c	43;"	d	file:
 ARRAY_SIZE	libloragw/tst/test_loragw_hal.c	41;"	d	file:
 ARRAY_SIZE	libloragw/tst/test_loragw_spi.c	29;"	d	file:
 ARRAY_SIZE	lora_pkt_fwd/src/base64.c	29;"	d	file:
-ARRAY_SIZE	lora_pkt_fwd/src/lora_pkt_fwd.c	64;"	d	file:
+ARRAY_SIZE	lora_pkt_fwd/src/lora_pkt_fwd.c	66;"	d	file:
 ARRAY_SIZE	tmp/lora_pkt_fwd.c	63;"	d	file:
 ARRAY_SIZE	util_ack/src/util_ack.c	44;"	d	file:
 ARRAY_SIZE	util_lbt_test/src/util_lbt_test.c	44;"	d	file:
@@ -65,28 +65,20 @@ ARRAY_SIZE	util_spi_stress/src/util_spi_stress.c	40;"	d	file:
 ARRAY_SIZE	util_tx_continuous/src/util_tx_continuous.c	44;"	d	file:
 ARRAY_SIZE	util_tx_test/src/util_tx_test.c	44;"	d	file:
 BEACON_GUARD	lora_pkt_fwd/src/jitqueue.c	42;"	d	file:
-BEACON_POLL_MS	lora_pkt_fwd/src/lora_pkt_fwd.c	84;"	d	file:
+BEACON_POLL_MS	lora_pkt_fwd/src/lora_pkt_fwd.c	86;"	d	file:
 BEACON_POLL_MS	tmp/lora_pkt_fwd.c	83;"	d	file:
 BEACON_RESERVED	lora_pkt_fwd/src/jitqueue.c	44;"	d	file:
 BUFF_SIZE	util_spi_stress/src/util_spi_stress.c	48;"	d	file:
 BURST_TEST_LENGTH	libloragw/tst/test_loragw_reg.c	28;"	d	file:
 BURST_TEST_SIZE	libloragw/tst/test_loragw_spi.c	34;"	d	file:
 BW_125KHZ	libloragw/inc/loragw_hal.h	90;"	d
-BW_125KHZ	lora_pkt_fwd/inc/radio.h	139;"	d
 BW_15K6HZ	libloragw/inc/loragw_hal.h	93;"	d
-BW_15K6HZ	lora_pkt_fwd/inc/radio.h	142;"	d
 BW_250KHZ	libloragw/inc/loragw_hal.h	89;"	d
-BW_250KHZ	lora_pkt_fwd/inc/radio.h	138;"	d
 BW_31K2HZ	libloragw/inc/loragw_hal.h	92;"	d
-BW_31K2HZ	lora_pkt_fwd/inc/radio.h	141;"	d
 BW_500KHZ	libloragw/inc/loragw_hal.h	88;"	d
-BW_500KHZ	lora_pkt_fwd/inc/radio.h	137;"	d
 BW_62K5HZ	libloragw/inc/loragw_hal.h	91;"	d
-BW_62K5HZ	lora_pkt_fwd/inc/radio.h	140;"	d
 BW_7K8HZ	libloragw/inc/loragw_hal.h	94;"	d
-BW_7K8HZ	lora_pkt_fwd/inc/radio.h	143;"	d
 BW_UNDEFINED	libloragw/inc/loragw_hal.h	87;"	d
-BW_UNDEFINED	lora_pkt_fwd/inc/radio.h	136;"	d
 CC	libloragw/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
 CC	lora_pkt_fwd/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
 CC	util_ack/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
@@ -182,19 +174,19 @@ DEBUG_PRINTF	libloragw/src/loragw_spi.native.c	47;"	d	file:
 DEBUG_TIMERSYNC	lora_pkt_fwd/inc/trace.h	23;"	d
 DEBUG_WARNING	lora_pkt_fwd/inc/trace.h	27;"	d
 DEFAULT_BAUDRATE	libloragw/src/loragw_gps.c	58;"	d	file:
-DEFAULT_BEACON_BW_HZ	lora_pkt_fwd/src/lora_pkt_fwd.c	115;"	d	file:
+DEFAULT_BEACON_BW_HZ	lora_pkt_fwd/src/lora_pkt_fwd.c	117;"	d	file:
 DEFAULT_BEACON_BW_HZ	tmp/lora_pkt_fwd.c	114;"	d	file:
-DEFAULT_BEACON_DATARATE	lora_pkt_fwd/src/lora_pkt_fwd.c	114;"	d	file:
+DEFAULT_BEACON_DATARATE	lora_pkt_fwd/src/lora_pkt_fwd.c	116;"	d	file:
 DEFAULT_BEACON_DATARATE	tmp/lora_pkt_fwd.c	113;"	d	file:
-DEFAULT_BEACON_FREQ_HZ	lora_pkt_fwd/src/lora_pkt_fwd.c	111;"	d	file:
+DEFAULT_BEACON_FREQ_HZ	lora_pkt_fwd/src/lora_pkt_fwd.c	113;"	d	file:
 DEFAULT_BEACON_FREQ_HZ	tmp/lora_pkt_fwd.c	110;"	d	file:
-DEFAULT_BEACON_FREQ_NB	lora_pkt_fwd/src/lora_pkt_fwd.c	112;"	d	file:
+DEFAULT_BEACON_FREQ_NB	lora_pkt_fwd/src/lora_pkt_fwd.c	114;"	d	file:
 DEFAULT_BEACON_FREQ_NB	tmp/lora_pkt_fwd.c	111;"	d	file:
-DEFAULT_BEACON_FREQ_STEP	lora_pkt_fwd/src/lora_pkt_fwd.c	113;"	d	file:
+DEFAULT_BEACON_FREQ_STEP	lora_pkt_fwd/src/lora_pkt_fwd.c	115;"	d	file:
 DEFAULT_BEACON_FREQ_STEP	tmp/lora_pkt_fwd.c	112;"	d	file:
-DEFAULT_BEACON_INFODESC	lora_pkt_fwd/src/lora_pkt_fwd.c	117;"	d	file:
+DEFAULT_BEACON_INFODESC	lora_pkt_fwd/src/lora_pkt_fwd.c	119;"	d	file:
 DEFAULT_BEACON_INFODESC	tmp/lora_pkt_fwd.c	116;"	d	file:
-DEFAULT_BEACON_POWER	lora_pkt_fwd/src/lora_pkt_fwd.c	116;"	d	file:
+DEFAULT_BEACON_POWER	lora_pkt_fwd/src/lora_pkt_fwd.c	118;"	d	file:
 DEFAULT_BEACON_POWER	tmp/lora_pkt_fwd.c	115;"	d	file:
 DEFAULT_BR_KBPS	util_tx_continuous/src/util_tx_continuous.c	58;"	d	file:
 DEFAULT_BR_KBPS	util_tx_test/src/util_tx_test.c	53;"	d	file:
@@ -206,7 +198,7 @@ DEFAULT_DIGITAL_GAIN	util_tx_continuous/src/util_tx_continuous.c	51;"	d	file:
 DEFAULT_FDEV_KHZ	util_tx_continuous/src/util_tx_continuous.c	59;"	d	file:
 DEFAULT_FDEV_KHZ	util_tx_test/src/util_tx_test.c	54;"	d	file:
 DEFAULT_FREQ_HZ	util_tx_continuous/src/util_tx_continuous.c	50;"	d	file:
-DEFAULT_KEEPALIVE	lora_pkt_fwd/src/lora_pkt_fwd.c	78;"	d	file:
+DEFAULT_KEEPALIVE	lora_pkt_fwd/src/lora_pkt_fwd.c	80;"	d	file:
 DEFAULT_KEEPALIVE	tmp/lora_pkt_fwd.c	77;"	d	file:
 DEFAULT_LOG_NAME	util_spectral_scan/src/util_spectral_scan.c	50;"	d	file:
 DEFAULT_MIXER_GAIN	util_tx_continuous/src/util_tx_continuous.c	53;"	d	file:
@@ -216,20 +208,20 @@ DEFAULT_NOTCH_FREQ	libloragw/tst/test_loragw_hal.c	47;"	d	file:
 DEFAULT_NOTCH_FREQ	util_tx_continuous/src/util_tx_continuous.c	61;"	d	file:
 DEFAULT_NOTCH_FREQ	util_tx_test/src/util_tx_test.c	55;"	d	file:
 DEFAULT_PA_GAIN	util_tx_continuous/src/util_tx_continuous.c	54;"	d	file:
-DEFAULT_PORT_DW	lora_pkt_fwd/src/lora_pkt_fwd.c	77;"	d	file:
+DEFAULT_PORT_DW	lora_pkt_fwd/src/lora_pkt_fwd.c	79;"	d	file:
 DEFAULT_PORT_DW	tmp/lora_pkt_fwd.c	76;"	d	file:
-DEFAULT_PORT_UP	lora_pkt_fwd/src/lora_pkt_fwd.c	76;"	d	file:
+DEFAULT_PORT_UP	lora_pkt_fwd/src/lora_pkt_fwd.c	78;"	d	file:
 DEFAULT_PORT_UP	tmp/lora_pkt_fwd.c	75;"	d	file:
 DEFAULT_RSSI_OFFSET	libloragw/tst/test_loragw_cal.c	49;"	d	file:
 DEFAULT_RSSI_OFFSET	libloragw/tst/test_loragw_hal.c	46;"	d	file:
 DEFAULT_RSSI_OFFSET	util_tx_continuous/src/util_tx_continuous.c	48;"	d	file:
 DEFAULT_RSSI_OFFSET	util_tx_test/src/util_tx_test.c	51;"	d	file:
 DEFAULT_RSSI_PTS	util_spectral_scan/src/util_spectral_scan.c	48;"	d	file:
-DEFAULT_SERVER	lora_pkt_fwd/src/lora_pkt_fwd.c	75;"	d	file:
+DEFAULT_SERVER	lora_pkt_fwd/src/lora_pkt_fwd.c	77;"	d	file:
 DEFAULT_SERVER	tmp/lora_pkt_fwd.c	74;"	d	file:
 DEFAULT_SF	util_tx_continuous/src/util_tx_continuous.c	56;"	d	file:
 DEFAULT_START_FREQ	util_spectral_scan/src/util_spectral_scan.c	45;"	d	file:
-DEFAULT_STAT	lora_pkt_fwd/src/lora_pkt_fwd.c	79;"	d	file:
+DEFAULT_STAT	lora_pkt_fwd/src/lora_pkt_fwd.c	81;"	d	file:
 DEFAULT_STAT	tmp/lora_pkt_fwd.c	78;"	d	file:
 DEFAULT_STEP_FREQ	util_spectral_scan/src/util_spectral_scan.c	47;"	d	file:
 DEFAULT_STOP_FREQ	util_spectral_scan/src/util_spectral_scan.c	46;"	d	file:
@@ -243,22 +235,14 @@ DOUBLE_SERIALIZATION_FORMAT	util_pkt_logger/src/parson.c	39;"	d	file:
 DR_FSK_MAX	libloragw/inc/loragw_hal.h	108;"	d
 DR_FSK_MIN	libloragw/inc/loragw_hal.h	107;"	d
 DR_LORA_MULTI	libloragw/inc/loragw_hal.h	105;"	d
-DR_LORA_MULTI	lora_pkt_fwd/inc/radio.h	154;"	d
 DR_LORA_SF10	libloragw/inc/loragw_hal.h	102;"	d
-DR_LORA_SF10	lora_pkt_fwd/inc/radio.h	151;"	d
 DR_LORA_SF11	libloragw/inc/loragw_hal.h	103;"	d
-DR_LORA_SF11	lora_pkt_fwd/inc/radio.h	152;"	d
 DR_LORA_SF12	libloragw/inc/loragw_hal.h	104;"	d
-DR_LORA_SF12	lora_pkt_fwd/inc/radio.h	153;"	d
 DR_LORA_SF7	libloragw/inc/loragw_hal.h	99;"	d
-DR_LORA_SF7	lora_pkt_fwd/inc/radio.h	148;"	d
 DR_LORA_SF8	libloragw/inc/loragw_hal.h	100;"	d
-DR_LORA_SF8	lora_pkt_fwd/inc/radio.h	149;"	d
 DR_LORA_SF9	libloragw/inc/loragw_hal.h	101;"	d
-DR_LORA_SF9	lora_pkt_fwd/inc/radio.h	150;"	d
 DR_UNDEFINED	libloragw/inc/loragw_hal.h	98;"	d
-DR_UNDEFINED	lora_pkt_fwd/inc/radio.h	147;"	d
-FETCH_SLEEP_MS	lora_pkt_fwd/src/lora_pkt_fwd.c	83;"	d	file:
+FETCH_SLEEP_MS	lora_pkt_fwd/src/lora_pkt_fwd.c	85;"	d	file:
 FETCH_SLEEP_MS	tmp/lora_pkt_fwd.c	82;"	d	file:
 FPGA_FEATURE_LBT	util_spectral_scan/src/util_spectral_scan.c	60;"	d	file:
 FPGA_FEATURE_SPECTRAL_SCAN	util_spectral_scan/src/util_spectral_scan.c	59;"	d	file:
@@ -270,11 +254,11 @@ FW_VERSION_AGC	libloragw/src/loragw_hal.c	63;"	d	file:
 FW_VERSION_ARB	libloragw/src/loragw_hal.c	64;"	d	file:
 FW_VERSION_CAL	libloragw/src/loragw_hal.c	62;"	d	file:
 FW_VERSION_CAL	libloragw/tst/test_loragw_cal.c	54;"	d	file:
-GPIO_IN	lora_pkt_fwd/inc/radio.h	221;"	d
-GPIO_OUT	lora_pkt_fwd/inc/radio.h	220;"	d
-GPS_REF_MAX_AGE	lora_pkt_fwd/src/lora_pkt_fwd.c	82;"	d	file:
+GPIO_IN	lora_pkt_fwd/inc/radio.h	223;"	d
+GPIO_OUT	lora_pkt_fwd/inc/radio.h	222;"	d
+GPS_REF_MAX_AGE	lora_pkt_fwd/src/lora_pkt_fwd.c	84;"	d	file:
 GPS_REF_MAX_AGE	tmp/lora_pkt_fwd.c	81;"	d	file:
-HIGH	lora_pkt_fwd/inc/radio.h	218;"	d
+HIGH	lora_pkt_fwd/inc/radio.h	220;"	d
 IF_FSK_STD	libloragw/inc/loragw_hal.h	58;"	d
 IF_HZ_TO_REG	libloragw/src/loragw_hal.c	50;"	d	file:
 IF_LORA_MULTI	libloragw/inc/loragw_hal.h	57;"	d
@@ -807,7 +791,7 @@ LGW_XTAL_FREQU	libloragw/inc/loragw_hal.h	50;"	d
 LGW_ZERO_PAD	libloragw/inc/loragw_reg.h	217;"	d
 LIBLORAGW_VERSION	libloragw/Makefile	/^LIBLORAGW_VERSION := `cat ..\/VERSION`$/;"	m
 LIBS	libloragw/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
-LIBS	lora_pkt_fwd/Makefile	/^LIBS := -lloragw -lrt -lpthread -lm$/;"	m
+LIBS	lora_pkt_fwd/Makefile	/^LIBS := -lloragw -luci -lrt -lpthread -lm$/;"	m
 LIBS	util_lbt_test/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
 LIBS	util_pkt_logger/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
 LIBS	util_spectral_scan/Makefile	/^LIBS := -lloragw -lrt$/;"	m
@@ -818,7 +802,7 @@ LNA_LOW_GAIN	lora_pkt_fwd/inc/radio.h	76;"	d
 LNA_MAX_GAIN	lora_pkt_fwd/inc/radio.h	74;"	d
 LNA_OFF_GAIN	lora_pkt_fwd/inc/radio.h	75;"	d
 LORA_MAC_PREAMBLE	lora_pkt_fwd/inc/radio.h	69;"	d
-LOW	lora_pkt_fwd/inc/radio.h	217;"	d
+LOW	lora_pkt_fwd/inc/radio.h	219;"	d
 MAP_DIO0_LORA_RXDONE	lora_pkt_fwd/inc/radio.h	104;"	d
 MAP_DIO0_LORA_TXDONE	lora_pkt_fwd/inc/radio.h	105;"	d
 MAP_DIO1_LORA_NOP	lora_pkt_fwd/inc/radio.h	107;"	d
@@ -838,10 +822,10 @@ MCU_ARB	libloragw/src/loragw_hal.c	57;"	d	file:
 MCU_ARB_FW_BYTE	libloragw/src/loragw_hal.c	59;"	d	file:
 MINUS_10PPM	libloragw/src/loragw_gps.c	57;"	d	file:
 MIN_FREQ	util_spectral_scan/src/util_spectral_scan.c	56;"	d	file:
-MIN_FSK_PREAMB	lora_pkt_fwd/src/lora_pkt_fwd.c	102;"	d	file:
+MIN_FSK_PREAMB	lora_pkt_fwd/src/lora_pkt_fwd.c	104;"	d	file:
 MIN_FSK_PREAMB	tmp/lora_pkt_fwd.c	101;"	d	file:
 MIN_FSK_PREAMBLE	libloragw/src/loragw_hal.c	74;"	d	file:
-MIN_LORA_PREAMB	lora_pkt_fwd/src/lora_pkt_fwd.c	100;"	d	file:
+MIN_LORA_PREAMB	lora_pkt_fwd/src/lora_pkt_fwd.c	102;"	d	file:
 MIN_LORA_PREAMB	tmp/lora_pkt_fwd.c	99;"	d	file:
 MIN_LORA_PREAMBLE	libloragw/src/loragw_hal.c	72;"	d	file:
 MIN_STEP_FREQ	util_spectral_scan/src/util_spectral_scan.c	57;"	d	file:
@@ -858,7 +842,7 @@ MSG	util_tx_continuous/src/util_tx_continuous.c	45;"	d	file:
 MSG	util_tx_test/src/util_tx_test.c	45;"	d	file:
 MSG_DEBUG	lora_pkt_fwd/inc/trace.h	32;"	d
 NB_CAL_MAX	libloragw/tst/test_loragw_cal.c	50;"	d	file:
-NB_PKT_MAX	lora_pkt_fwd/src/lora_pkt_fwd.c	98;"	d	file:
+NB_PKT_MAX	lora_pkt_fwd/src/lora_pkt_fwd.c	100;"	d	file:
 NB_PKT_MAX	tmp/lora_pkt_fwd.c	97;"	d	file:
 NMEA_GBS	libloragw/inc/loragw_gps.h	/^    NMEA_GBS,        \/*!> GNSS Satellite Fault Detection *\/$/;"	e	enum:gps_msg
 NMEA_GGA	libloragw/inc/loragw_gps.h	/^    NMEA_GGA,        \/*!> Global positioning system fix data (pos + alt) *\/$/;"	e	enum:gps_msg
@@ -897,36 +881,36 @@ OPMODE_TX	lora_pkt_fwd/inc/radio.h	85;"	d
 PAGE_ADDR	libloragw/src/loragw_reg.c	48;"	d	file:
 PAGE_MASK	libloragw/src/loragw_reg.c	49;"	d	file:
 PAYLOAD_LENGTH	lora_pkt_fwd/inc/radio.h	66;"	d
-PKT_PULL_ACK	lora_pkt_fwd/src/lora_pkt_fwd.c	95;"	d	file:
+PKT_PULL_ACK	lora_pkt_fwd/src/lora_pkt_fwd.c	97;"	d	file:
 PKT_PULL_ACK	tmp/lora_pkt_fwd.c	94;"	d	file:
 PKT_PULL_ACK	util_ack/src/util_ack.c	58;"	d	file:
-PKT_PULL_DATA	lora_pkt_fwd/src/lora_pkt_fwd.c	93;"	d	file:
+PKT_PULL_DATA	lora_pkt_fwd/src/lora_pkt_fwd.c	95;"	d	file:
 PKT_PULL_DATA	tmp/lora_pkt_fwd.c	92;"	d	file:
 PKT_PULL_DATA	util_ack/src/util_ack.c	56;"	d	file:
-PKT_PULL_RESP	lora_pkt_fwd/src/lora_pkt_fwd.c	94;"	d	file:
+PKT_PULL_RESP	lora_pkt_fwd/src/lora_pkt_fwd.c	96;"	d	file:
 PKT_PULL_RESP	tmp/lora_pkt_fwd.c	93;"	d	file:
 PKT_PULL_RESP	util_ack/src/util_ack.c	57;"	d	file:
-PKT_PUSH_ACK	lora_pkt_fwd/src/lora_pkt_fwd.c	92;"	d	file:
+PKT_PUSH_ACK	lora_pkt_fwd/src/lora_pkt_fwd.c	94;"	d	file:
 PKT_PUSH_ACK	tmp/lora_pkt_fwd.c	91;"	d	file:
 PKT_PUSH_ACK	util_ack/src/util_ack.c	55;"	d	file:
-PKT_PUSH_DATA	lora_pkt_fwd/src/lora_pkt_fwd.c	91;"	d	file:
+PKT_PUSH_DATA	lora_pkt_fwd/src/lora_pkt_fwd.c	93;"	d	file:
 PKT_PUSH_DATA	tmp/lora_pkt_fwd.c	90;"	d	file:
 PKT_PUSH_DATA	util_ack/src/util_ack.c	54;"	d	file:
-PKT_TX_ACK	lora_pkt_fwd/src/lora_pkt_fwd.c	96;"	d	file:
+PKT_TX_ACK	lora_pkt_fwd/src/lora_pkt_fwd.c	98;"	d	file:
 PKT_TX_ACK	tmp/lora_pkt_fwd.c	95;"	d	file:
 PLL_LOCK_MAX_ATTEMPTS	libloragw/src/loragw_radio.c	75;"	d	file:
 PLUS_10PPM	libloragw/src/loragw_gps.c	56;"	d	file:
-PROTOCOL_VERSION	lora_pkt_fwd/src/lora_pkt_fwd.c	86;"	d	file:
+PROTOCOL_VERSION	lora_pkt_fwd/src/lora_pkt_fwd.c	88;"	d	file:
 PROTOCOL_VERSION	tmp/lora_pkt_fwd.c	85;"	d	file:
 PROTOCOL_VERSION	util_ack/src/util_ack.c	52;"	d	file:
-PULL_TIMEOUT_MS	lora_pkt_fwd/src/lora_pkt_fwd.c	81;"	d	file:
+PULL_TIMEOUT_MS	lora_pkt_fwd/src/lora_pkt_fwd.c	83;"	d	file:
 PULL_TIMEOUT_MS	tmp/lora_pkt_fwd.c	80;"	d	file:
-PUSH_TIMEOUT_MS	lora_pkt_fwd/src/lora_pkt_fwd.c	80;"	d	file:
+PUSH_TIMEOUT_MS	lora_pkt_fwd/src/lora_pkt_fwd.c	82;"	d	file:
 PUSH_TIMEOUT_MS	tmp/lora_pkt_fwd.c	79;"	d	file:
 RAM_SIZE	libloragw/tst/test_loragw_cal.c	55;"	d	file:
 READS_WHEN_ERROR	util_spi_stress/src/util_spi_stress.c	47;"	d	file:
 READ_ACCESS	libloragw/src/loragw_spi.native.c	54;"	d	file:
-READ_ACCESS	lora_pkt_fwd/inc/radio.h	223;"	d
+READ_ACCESS	lora_pkt_fwd/inc/radio.h	225;"	d
 REG_DETECTION_OPTIMIZE	lora_pkt_fwd/inc/radio.h	60;"	d
 REG_DETECTION_THRESHOLD	lora_pkt_fwd/inc/radio.h	61;"	d
 REG_DIO_MAPPING_1	lora_pkt_fwd/inc/radio.h	43;"	d
@@ -996,28 +980,28 @@ SKIP_CHAR	util_pkt_logger/src/parson.c	42;"	d	file:
 SKIP_WHITESPACES	lora_pkt_fwd/src/parson.c	43;"	d	file:
 SKIP_WHITESPACES	util_pkt_logger/src/parson.c	43;"	d	file:
 SPI_DEV_PATH	libloragw/src/loragw_spi.native.c	57;"	d	file:
-SPI_DEV_RADIO	lora_pkt_fwd/inc/radio.h	226;"	d
+SPI_DEV_RADIO	lora_pkt_fwd/inc/radio.h	228;"	d
 SPI_SPEED	libloragw/src/loragw_spi.native.c	56;"	d	file:
-SPI_SPEED	lora_pkt_fwd/inc/radio.h	225;"	d
+SPI_SPEED	lora_pkt_fwd/inc/radio.h	227;"	d
 STARTING_CAPACITY	lora_pkt_fwd/src/parson.c	35;"	d	file:
 STARTING_CAPACITY	util_pkt_logger/src/parson.c	35;"	d	file:
-STATUS_SIZE	lora_pkt_fwd/src/lora_pkt_fwd.c	105;"	d	file:
+STATUS_SIZE	lora_pkt_fwd/src/lora_pkt_fwd.c	107;"	d	file:
 STATUS_SIZE	tmp/lora_pkt_fwd.c	104;"	d	file:
 STAT_CRC_BAD	libloragw/inc/loragw_hal.h	122;"	d
 STAT_CRC_OK	libloragw/inc/loragw_hal.h	123;"	d
 STAT_NO_CRC	libloragw/inc/loragw_hal.h	121;"	d
 STAT_UNDEFINED	libloragw/inc/loragw_hal.h	120;"	d
-STD_FSK_PREAMB	lora_pkt_fwd/src/lora_pkt_fwd.c	103;"	d	file:
+STD_FSK_PREAMB	lora_pkt_fwd/src/lora_pkt_fwd.c	105;"	d	file:
 STD_FSK_PREAMB	tmp/lora_pkt_fwd.c	102;"	d	file:
 STD_FSK_PREAMBLE	libloragw/src/loragw_hal.c	75;"	d	file:
-STD_LORA_PREAMB	lora_pkt_fwd/src/lora_pkt_fwd.c	101;"	d	file:
+STD_LORA_PREAMB	lora_pkt_fwd/src/lora_pkt_fwd.c	103;"	d	file:
 STD_LORA_PREAMB	tmp/lora_pkt_fwd.c	100;"	d	file:
 STD_LORA_PREAMBLE	libloragw/src/loragw_hal.c	73;"	d	file:
-STR	lora_pkt_fwd/src/lora_pkt_fwd.c	66;"	d	file:
+STR	lora_pkt_fwd/src/lora_pkt_fwd.c	68;"	d	file:
 STR	tmp/lora_pkt_fwd.c	65;"	d	file:
 STR	util_ack/src/util_ack.c	46;"	d	file:
 STR	util_sink/src/util_sink.c	45;"	d	file:
-STRINGIFY	lora_pkt_fwd/src/lora_pkt_fwd.c	65;"	d	file:
+STRINGIFY	lora_pkt_fwd/src/lora_pkt_fwd.c	67;"	d	file:
 STRINGIFY	tmp/lora_pkt_fwd.c	64;"	d	file:
 STRINGIFY	util_ack/src/util_ack.c	45;"	d	file:
 STRINGIFY	util_sink/src/util_sink.c	44;"	d	file:
@@ -1319,7 +1303,7 @@ TIMING_REPEAT	libloragw/tst/test_loragw_spi.c	35;"	d	file:
 TRACE	libloragw/src/loragw_gps.c	50;"	d	file:
 TRACE	libloragw/src/loragw_hal.c	52;"	d	file:
 TS_CPS	libloragw/src/loragw_gps.c	55;"	d	file:
-TX_BUFF_SIZE	lora_pkt_fwd/src/lora_pkt_fwd.c	106;"	d	file:
+TX_BUFF_SIZE	lora_pkt_fwd/src/lora_pkt_fwd.c	108;"	d	file:
 TX_BUFF_SIZE	tmp/lora_pkt_fwd.c	105;"	d	file:
 TX_EMITTING	libloragw/inc/loragw_hal.h	143;"	d
 TX_FREE	libloragw/inc/loragw_hal.h	141;"	d
@@ -1339,19 +1323,19 @@ TX_STATUS_UNKNOWN	libloragw/inc/loragw_hal.h	139;"	d
 UBX_MSG_NAVTIMEGPS_LEN	libloragw/src/loragw_gps.c	60;"	d	file:
 UBX_NAV_TIMEGPS	libloragw/inc/loragw_gps.h	/^    UBX_NAV_TIMEGPS, \/*!> GPS Time Solution *\/$/;"	e	enum:gps_msg
 UBX_NAV_TIMEUTC	libloragw/inc/loragw_gps.h	/^    UBX_NAV_TIMEUTC  \/*!> UTC Time Solution *\/$/;"	e	enum:gps_msg
-UNIX_GPS_EPOCH_OFFSET	lora_pkt_fwd/src/lora_pkt_fwd.c	108;"	d	file:
+UNIX_GPS_EPOCH_OFFSET	lora_pkt_fwd/src/lora_pkt_fwd.c	110;"	d	file:
 UNIX_GPS_EPOCH_OFFSET	tmp/lora_pkt_fwd.c	107;"	d	file:
 UNKNOWN	libloragw/inc/loragw_gps.h	/^    UNKNOWN,         \/*!> neutral value *\/$/;"	e	enum:gps_msg
 VERS	util_spi_stress/src/util_spi_stress.c	46;"	d	file:
-VERSION_STRING	lora_pkt_fwd/src/lora_pkt_fwd.c	72;"	d	file:
+VERSION_STRING	lora_pkt_fwd/src/lora_pkt_fwd.c	74;"	d	file:
 VERSION_STRING	tmp/lora_pkt_fwd.c	71;"	d	file:
 VFLAG	lora_pkt_fwd/Makefile	/^VFLAG := -D VERSION_STRING="\\"$(RELEASE_VERSION)\\""$/;"	m
 WAIT_GPIO	reset_lgw.sh	/^WAIT_GPIO() {$/;"	f
 WRITE_ACCESS	libloragw/src/loragw_spi.native.c	55;"	d	file:
-WRITE_ACCESS	lora_pkt_fwd/inc/radio.h	224;"	d
-XERR_FILT_COEF	lora_pkt_fwd/src/lora_pkt_fwd.c	89;"	d	file:
+WRITE_ACCESS	lora_pkt_fwd/inc/radio.h	226;"	d
+XERR_FILT_COEF	lora_pkt_fwd/src/lora_pkt_fwd.c	91;"	d	file:
 XERR_FILT_COEF	tmp/lora_pkt_fwd.c	88;"	d	file:
-XERR_INIT_AVG	lora_pkt_fwd/src/lora_pkt_fwd.c	88;"	d	file:
+XERR_INIT_AVG	lora_pkt_fwd/src/lora_pkt_fwd.c	90;"	d	file:
 XERR_INIT_AVG	tmp/lora_pkt_fwd.c	87;"	d	file:
 _BASE64_H	lora_pkt_fwd/inc/base64.h	18;"	d
 _CRT_SECURE_NO_WARNINGS	lora_pkt_fwd/src/parson.c	24;"	d	file:
@@ -1445,6 +1429,7 @@ bin_to_b64_nopad	lora_pkt_fwd/src/base64.c	/^int bin_to_b64_nopad(const uint8_t 
 boolean	lora_pkt_fwd/src/parson.c	/^    int          boolean;$/;"	m	union:json_value_value	file:
 boolean	util_pkt_logger/src/parson.c	/^    int          boolean;$/;"	m	union:json_value_value	file:
 bw	lora_pkt_fwd/inc/radio.h	/^    uint32_t bw;$/;"	m	struct:__anon2
+bw	lora_pkt_fwd/src/single_tx.c	/^static char bw[8] = "125000";$/;"	v	file:
 cafile	lora_pkt_fwd/inc/radio.h	/^	char cafile[32];$/;"	m	struct:mqtt_config
 cal_offset_a_i	libloragw/src/loragw_hal.c	/^static int8_t cal_offset_a_i[8]; \/* TX I offset for radio A *\/$/;"	v	file:
 cal_offset_a_q	libloragw/src/loragw_hal.c	/^static int8_t cal_offset_a_q[8]; \/* TX Q offset for radio A *\/$/;"	v	file:
@@ -1479,10 +1464,12 @@ count_us	libloragw/inc/loragw_gps.h	/^    uint32_t        count_us;   \/*!> refe
 count_us	libloragw/inc/loragw_hal.h	/^    uint32_t    count_us;       \/*!> internal concentrator counter for timestamping, 1 microsecond resolution *\/$/;"	m	struct:lgw_pkt_rx_s
 count_us	libloragw/inc/loragw_hal.h	/^    uint32_t    count_us;       \/*!> timestamp or delay in microseconds for TX trigger *\/$/;"	m	struct:lgw_pkt_tx_s
 cr	lora_pkt_fwd/inc/radio.h	/^    uint8_t cr;$/;"	m	struct:__anon2
+cr	lora_pkt_fwd/src/single_tx.c	/^static char cr[8] = "5";$/;"	v	file:
 crc	libloragw/inc/loragw_hal.h	/^    uint16_t    crc;            \/*!> CRC that was received in the payload *\/$/;"	m	struct:lgw_pkt_rx_s
 crc16	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static uint16_t crc16(const uint8_t * data, unsigned size) {$/;"	f	file:
 crc16	tmp/lora_pkt_fwd.c	/^static uint16_t crc16(const uint8_t * data, unsigned size) {$/;"	f	file:
 crccheck	lora_pkt_fwd/src/radio.c	/^void crccheck(uint8_t spidev, uint8_t nocrc)$/;"	f
+ctx	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static struct uci_context * ctx = NULL; $/;"	v	typeref:struct:uci_context	file:
 dac_gain	libloragw/inc/loragw_hal.h	/^    uint8_t dac_gain;   \/*!> 2 bits, control of the radio DAC *\/$/;"	m	struct:lgw_tx_gain_s
 datarate	libloragw/inc/loragw_hal.h	/^    uint32_t    datarate;       \/*!> RX datarate of the packet (SF for LoRa) *\/$/;"	m	struct:lgw_pkt_rx_s
 datarate	libloragw/inc/loragw_hal.h	/^    uint32_t    datarate;       \/*!> RX datarate, 0 for default *\/$/;"	m	struct:lgw_conf_rxif_s
@@ -1513,6 +1500,7 @@ fpga_regs	libloragw/src/loragw_fpga.c	/^const struct lgw_reg_s fpga_regs[LGW_FPG
 free	lora_pkt_fwd/src/parson.c	47;"	d	file:
 free	util_pkt_logger/src/parson.c	47;"	d	file:
 freq	lora_pkt_fwd/inc/radio.h	/^    uint32_t freq;$/;"	m	struct:__anon2
+freq	lora_pkt_fwd/src/single_tx.c	/^static char freq[16] = "868500000";            \/* frequency of radio *\/$/;"	v	file:
 freq_hz	libloragw/inc/loragw_hal.h	/^    int32_t     freq_hz;        \/*!> center frequ of the IF chain, relative to RF chain frequency *\/$/;"	m	struct:lgw_conf_rxif_s
 freq_hz	libloragw/inc/loragw_hal.h	/^    uint32_t                freq_hz;        \/*!> center frequency of the radio in Hz *\/$/;"	m	struct:lgw_conf_rxrf_s
 freq_hz	libloragw/inc/loragw_hal.h	/^    uint32_t    freq_hz;        \/*!> center frequency of TX *\/$/;"	m	struct:lgw_pkt_tx_s
@@ -1529,6 +1517,7 @@ fwd_nocrc_pkt	tmp/lora_pkt_fwd.c	/^static bool fwd_nocrc_pkt = false; \/* packet
 fwd_valid_pkt	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static bool fwd_valid_pkt = true; \/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	v	file:
 fwd_valid_pkt	tmp/lora_pkt_fwd.c	/^static bool fwd_valid_pkt = true; \/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	v	file:
 get_concentrator_time	lora_pkt_fwd/src/timersync.c	/^int get_concentrator_time(struct timeval *concent_time, struct timeval unix_time) {$/;"	f
+get_config	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static bool get_config(const char *section, char *option, int len) {$/;"	f	file:
 get_img_rej	libloragw/tst/test_loragw_cal.c	/^uint8_t get_img_rej(int16_t *sig_i, int16_t *sig_q, int nb_samp, double f_sig_norm) {$/;"	f
 get_quoted_string	lora_pkt_fwd/src/parson.c	/^static char * get_quoted_string(const char **string) {$/;"	f	file:
 get_quoted_string	util_pkt_logger/src/parson.c	/^static char * get_quoted_string(const char **string) {$/;"	f	file:
@@ -1933,6 +1922,7 @@ main	libloragw/tst/test_loragw_hal.c	/^int main(int argc, char **argv)$/;"	f
 main	libloragw/tst/test_loragw_reg.c	/^int main()$/;"	f
 main	libloragw/tst/test_loragw_spi.c	/^int main()$/;"	f
 main	lora_pkt_fwd/src/lora_pkt_fwd.c	/^int main(void)$/;"	f
+main	lora_pkt_fwd/src/single_tx.c	/^int main(int argc, char *argv[])$/;"	f
 main	tmp/lora_pkt_fwd.c	/^int main(void)$/;"	f
 main	util_ack/src/util_ack.c	/^int main(int argc, char **argv)$/;"	f
 main	util_lbt_test/src/util_lbt_test.c	/^int main(int argc, char **argv)$/;"	f
@@ -2104,9 +2094,11 @@ post_delay	lora_pkt_fwd/inc/jitqueue.h	/^    uint32_t post_delay;            \/*
 ppm_ref	libloragw/tst/test_loragw_gps.c	/^struct tref ppm_ref;$/;"	v	typeref:struct:tref
 pre_delay	lora_pkt_fwd/inc/jitqueue.h	/^    uint32_t pre_delay;             \/* Amount of time before packet timestamp to be reserved *\/$/;"	m	struct:jit_node_s
 preamble	libloragw/inc/loragw_hal.h	/^    uint16_t    preamble;       \/*!> set the preamble length, 0 for default *\/$/;"	m	struct:lgw_pkt_tx_s
+print_help	lora_pkt_fwd/src/single_tx.c	/^void print_help(void) {$/;"	f
 print_tx_status	lora_pkt_fwd/src/lora_pkt_fwd.c	/^void print_tx_status(uint8_t tx_status) {$/;"	f
 print_tx_status	tmp/lora_pkt_fwd.c	/^void print_tx_status(uint8_t tx_status) {$/;"	f
 prlen	lora_pkt_fwd/inc/radio.h	/^    uint8_t prlen;$/;"	m	struct:__anon2
+prlen	lora_pkt_fwd/src/single_tx.c	/^static char prlen[8] = "8";$/;"	v	file:
 process_string	lora_pkt_fwd/src/parson.c	/^static char* process_string(const char *input, size_t len) {$/;"	f	file:
 process_string	util_pkt_logger/src/parson.c	/^static char* process_string(const char *input, size_t len) {$/;"	f	file:
 psk	lora_pkt_fwd/inc/radio.h	/^	char psk[32];$/;"	m	struct:mqtt_config
@@ -2171,6 +2163,7 @@ serv_port_down	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static char serv_port_down[8] =
 serv_port_down	tmp/lora_pkt_fwd.c	/^static char serv_port_down[8] = STR(DEFAULT_PORT_DW); \/* server port for downstream traffic *\/$/;"	v	file:
 serv_port_up	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static char serv_port_up[8] = STR(DEFAULT_PORT_UP); \/* server port for upstream traffic *\/$/;"	v	file:
 serv_port_up	tmp/lora_pkt_fwd.c	/^static char serv_port_up[8] = STR(DEFAULT_PORT_UP); \/* server port for upstream traffic *\/$/;"	v	file:
+server_type	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static char server_type[16] = "server_type";$/;"	v	file:
 setcr	lora_pkt_fwd/src/radio.c	/^void setcr(uint8_t spidev, int denominator)$/;"	f
 setfreq	lora_pkt_fwd/src/radio.c	/^void setfreq(uint8_t spidev, long frequency)$/;"	f
 setprlen	lora_pkt_fwd/src/radio.c	/^void setprlen(uint8_t spidev, long length)$/;"	f
@@ -2181,6 +2174,7 @@ setup_channel	lora_pkt_fwd/src/radio.c	/^void setup_channel(radiodev *radiodev)$
 setup_sx1272_FSK	libloragw/src/loragw_radio.c	/^int setup_sx1272_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
 setup_sx1276_FSK	libloragw/src/loragw_radio.c	/^int setup_sx1276_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
 sf	lora_pkt_fwd/inc/radio.h	/^    uint8_t sf;$/;"	m	struct:__anon2
+sf	lora_pkt_fwd/src/single_tx.c	/^static char sf[8] = "7";$/;"	v	file:
 sf_t	lora_pkt_fwd/inc/radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	g
 sig_handler	libloragw/tst/test_loragw_gps.c	/^static void sig_handler(int sigio) {$/;"	f	file:
 sig_handler	libloragw/tst/test_loragw_hal.c	/^static void sig_handler(int sigio) {$/;"	f	file:
@@ -2265,6 +2259,7 @@ type	libloragw/inc/loragw_hal.h	/^    enum lgw_radio_type_e   type;           \/
 type	libloragw/src/loragw_radio.c	/^    enum lgw_radio_type_e type;$/;"	m	struct:lgw_radio_type_version_s	typeref:enum:lgw_radio_type_version_s::lgw_radio_type_e	file:
 type	lora_pkt_fwd/src/parson.c	/^    JSON_Value_Type     type;$/;"	m	struct:json_value_t	file:
 type	util_pkt_logger/src/parson.c	/^    JSON_Value_Type     type;$/;"	m	struct:json_value_t	file:
+uci_config_file	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static char uci_config_file[32] = "\/etc\/config\/gateway";$/;"	v	file:
 usage	libloragw/tst/test_loragw_cal.c	/^void usage(void) {$/;"	f
 usage	libloragw/tst/test_loragw_hal.c	/^void usage(void) {$/;"	f
 usage	util_lbt_test/src/util_lbt_test.c	/^void usage(void) {$/;"	f
@@ -2281,6 +2276,7 @@ values	util_pkt_logger/src/parson.c	/^    JSON_Value **values;$/;"	m	struct:json
 verify_utf8_sequence	lora_pkt_fwd/src/parson.c	/^static int verify_utf8_sequence(const unsigned char *string, int *len) {$/;"	f	file:
 verify_utf8_sequence	util_pkt_logger/src/parson.c	/^static int verify_utf8_sequence(const unsigned char *string, int *len) {$/;"	f	file:
 wait_ms	libloragw/src/loragw_aux.c	/^void wait_ms(unsigned long a) {$/;"	f
+wd	lora_pkt_fwd/src/single_tx.c	/^static char wd[8] = "52";$/;"	v	file:
 writeReg	lora_pkt_fwd/src/radio.c	/^static void writeReg(uint8_t spidev, uint8_t addr, uint8_t value)$/;"	f	file:
 xtal_correct	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static double xtal_correct = 1.0;$/;"	v	file:
 xtal_correct	tmp/lora_pkt_fwd.c	/^static double xtal_correct = 1.0;$/;"	v	file:

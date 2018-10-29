@@ -42,11 +42,11 @@ LIBS := -lloragw -luci -lrt -lpthread -lm
 
 ### General build targets
 
-all: $(APP_NAME)
+all: $(APP_NAME) single_tx
 
 clean:
 	rm -f $(OBJDIR)/*.o
-	rm -f $(APP_NAME)
+	rm -f $(APP_NAME) single_tx
 
 ### Sub-modules compilation
 
@@ -57,6 +57,12 @@ $(OBJDIR)/%.o: src/%.c $(INCLUDES) | $(OBJDIR)
 	$(CC) -c $(CFLAGS) -I$(LGW_PATH)/inc $< -o $@
 
 ### Main program compilation and assembly
+
+$(OBJDIR)/single_tx.o: src/single_tx.c $(LGW_INC) $(INCLUDES) | $(OBJDIR)
+	$(CC) -c $(CFLAGS) $(VFLAG) -I$(LGW_PATH)/inc $< -o $@
+
+single_tx: $(OBJDIR)/single_tx.o $(LGW_PATH)/libloragw.a $(OBJDIR)/radio.o
+	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/radio.o -o $@ $(LIBS)
 
 $(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c $(LGW_INC) $(INCLUDES) | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $(VFLAG) -I$(LGW_PATH)/inc $< -o $@

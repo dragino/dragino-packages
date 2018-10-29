@@ -1259,13 +1259,11 @@ int main(void)
         sxradio->dio[2] = 8;
         strcpy(sxradio->desc, "SPI_DEV_RADIO");
         sxradio->spiport = spi_open(SPI_DEV_RADIO);
-        if (sxradio->spiport < 0) {
-            MSG_DEBUG(DEBUG_ERROR, "open spi_dev_sx1276 error!\n");
-            free(sxradio);
-        }
 
         if(get_radio_version(sxradio))
             sx1276 = true;
+        else
+            free(sxradio);
     }
 
     /* starting the concentrator */
@@ -1515,6 +1513,8 @@ int main(void)
     }
 
     MSG_DEBUG(DEBUG_INFO, "INFO: Exiting packet forwarder program\n");
+    if (sxradio)
+        free(sxradio);
     exit(EXIT_SUCCESS);
 }
 
@@ -2686,6 +2686,7 @@ void thread_jit(void) {
                     }
 
                     /* send packet to concentrator */
+
                     if (sx1276) {
                         txlora(sxradio, &pkt);
                         pthread_mutex_lock(&mx_meas_dw);

@@ -55,8 +55,7 @@ void print_help(void) {
 int main(int argc, char *argv[])
 {
 
-
-    int c;
+    int c, i;
 
     char message[248] = {'\0'};
 
@@ -69,9 +68,9 @@ int main(int argc, char *argv[])
     while ((c = getopt(argc, argv, "rf:s:b:c:w:ilp:m:h")) != -1) {
         switch (c) {
             case 'f':
-                if (optarg)
+                if (optarg) {
                     strncpy(freq, optarg, sizeof(freq));
-                else {
+                } else {
                     print_help();
                     exit(1);
                 }

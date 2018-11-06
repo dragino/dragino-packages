@@ -53,7 +53,7 @@
 #define REG_HOP_PERIOD              0x24
 #define REG_SYNC_WORD               0x39
 #define REG_VERSION                 0x42
-#define REG_PADAC                   0x5A // common
+#define REG_PADAC                   0x4D // common
 #define REG_PKTRSSI                 0x1A
 #define REG_RSSI                    0x1B 
 
@@ -217,6 +217,10 @@ void setup_channel(radiodev *);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void rxlora(int, uint8_t);
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+bool received(uint8_t, struct lgw_pkt_rx_s *);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

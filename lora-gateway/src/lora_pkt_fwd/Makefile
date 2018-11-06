@@ -43,6 +43,7 @@ LIBS := -lloragw -luci -lrt -lpthread -lm
 ### General build targets
 
 all: $(APP_NAME) single_tx
+#all: $(APP_NAME)
 
 clean:
 	rm -f $(OBJDIR)/*.o

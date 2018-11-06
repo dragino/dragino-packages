@@ -38,7 +38,8 @@ function index()
     end
     entry({"admin", "gateway", "mqtt"}, cbi("admin_gateway/mqtt"), _("MQTT"), 3)
     entry({"admin", "gateway", "channel"}, cbi("admin_gateway/sub/channel"), nil).leaf = true
-    --entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("TCP_Client"), 4)
+    entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("TCP_Client"), 4)
+    entry({"admin", "gateway", "tcp_channel"}, cbi("admin_gateway/sub/tcp_channel"), nil).leaf = true
     entry({"admin", "gateway", "lgwlog"}, template("admin_status/lgwlog"), _("Logread"), 20).leaf = true
     entry({"admin", "gateway", "lgwlog_action"}, post("lgwlog_action")).leaf = true
 	

@@ -8,9 +8,9 @@ sv.placeholder = "Select IoT service"
 sv.default = "disabled"
 sv:value("disabled",  "Disabled") 
 sv:value("lorawan",  "LoRaWan/RAW forwarder")        
-sv:value("relay",  "LoRaWan/RAW Relay")
-sv:value("mqtt",  "LoRaRAW to MQTT")
-sv:value("tcpudp",  "LoRaRAW to TCP/UDP ")
+sv:value("relay",  "LoRaWan/RAW packets relay")
+sv:value("mqtt",  "LoRaRAW forward to MQTT server")
+sv:value("tcpudp",  "LoRaRAW forward to TCP/UDP server")
 
 local lv = s:option(ListValue, "DEB", translate("Debug Level"))
 lv.placeholder = "Select debug level"

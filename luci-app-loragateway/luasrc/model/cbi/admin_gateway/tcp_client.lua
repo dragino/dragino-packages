@@ -48,25 +48,24 @@ uo.disabled = "0"
 uo.default  = uo.enabled
 uo.rmempty  = false
 
-s = m:section(TypedSection, "channels", translate("Channels"),translate("Channels to be monitored or controlled"))
-s.addremove = true
 
-local cc = s:option(ListValue, "class", translate("Channel Class"))
-cc.placeholder = translate("Choose Channel Class")
-cc:value("upload",translate("Send Local Data to Remote Channel"))
-cc:value("download",translate("Get Remote Data and Save to Local Channel"))
+channels = m:section(TypedSection, "channels", translate("TCP/IP Uplink Channel"))
+channels.anonymous = true
+channels.addremove= true
+channels.template = "cbi/tblsection"
+channels.extedit  = luci.dispatcher.build_url("admin/gateway/tcp_channel/%s")
 
-local ci = s:option(Value, "id", translate("Local Channel ID"))
-ci.placeholder = translate("Local physical or virtual port")
-for k,v in ipairs (uart_channels) do
-	ci:value(v,v)
+channels.create = function(...)
+	local sid = TypedSection.create(...)
+	if sid then
+		luci.http.redirect(channels.extedit % sid)
+		return
+	end
 end
 
-local ustring = s:option(Value, "upload_string", translate("Upload String"),translate("Construct and send a string use the local value"))
-ustring.placeholder = translate("Example: Temperature:[VALUE]")
-ustring:depends('class','upload')
-
-local mp = s:option(Value, "pattern", translate("Match Pattern"),translate("Fetch a value from arriving strings"))
-mp:depends('class','download')
+local local_id = channels:option(DummyValue, "Local_Channel", translate("Data of below channels will be uploaded"))
+local_id.cfgvalue = function(self, section)
+	return m.uci:get("tcp_client", section, "local_id")
+end
 
 return m

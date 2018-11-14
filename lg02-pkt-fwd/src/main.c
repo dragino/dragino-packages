@@ -87,7 +87,7 @@ static bool fwd_nocrc_pkt = false; /* packets with NO PAYLOAD CRC are NOT forwar
 
 /* network configuration variables */
 static uint64_t lgwm = 0; /* Lora gateway MAC address */
-static char provider[16] = "Provider";
+static char provider[16] = "provider";
 static char server[64] = {'\0'}; /* address of the server (host name or IPv4/IPv6) */
 static char port[8] = "port"; /* server port for upstream traffic */
 static char serv_port_down[8] = "1700"; /* server port for downstream traffic */
@@ -923,7 +923,7 @@ int main(int argc, char *argv[])
 
     /* main thread for receive message, then process the message */
 
-    rxlora(rxdev->spiport, RXMODE_SCAN);  /* star lora continue receive mode */
+    rxlora(rxdev, RXMODE_SCAN);  /* star lora continue receive mode */
     MSG_LOG(DEBUG_INFO, "Listening at SF%i on %.6lf Mhz. syncword is 0x%02x on spiport%i\n", rxdev->sf, (double)(rxdev->freq)/1000000, rxdev->syncword, rxdev->spiport);
     while (!exit_sig && !quit_sig) {
         if(digitalRead(rxdev->dio[0]) == 1) {

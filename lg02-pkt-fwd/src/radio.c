@@ -571,13 +571,6 @@ void setup_channel(radiodev *dev)
     setprlen(dev->spiport, dev->prlen);
     setsyncword(dev->spiport, dev->syncword);
 
-    /* use inverted I/Q signal (prevent mote-to-mote communication) */
-    
-    if (!dev->invertio)
-        writeReg(dev->spiport, REG_INVERTIQ, readReg(dev->spiport, REG_INVERTIQ) & ~(1<<6));
-    else
-        writeReg(dev->spiport, REG_INVERTIQ, readReg(dev->spiport, REG_INVERTIQ) | (1<<6));
-    
 
     /* CRC check */
     crccheck(dev->spiport, dev->nocrc);
@@ -585,51 +578,70 @@ void setup_channel(radiodev *dev)
     // Boost on , 150% LNA current
     writeReg(dev->spiport, REG_LNA, LNA_MAX_GAIN);
 
-    // Auto AGC
-    writeReg(dev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
+    // Auto AGC Low datarate optiomize
+    if (dev->sf < 11)
+        writeReg(dev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
+    else
+        writeReg(dev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_LOW_DATA_RATE_OPTIMIZE);
+
+    //500kHz RX optimization
+    writeReg(dev->spiport, 0x36, 0x02);
+    writeReg(dev->spiport, 0x3a, 0x64);
 
     // configure output power,RFO pin Output power is limited to +14db
-    writeReg(dev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
+    //writeReg(dev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
+    writeReg(dev->spiport, REG_PACONFIG, 0x8F);
+    writeReg(dev->spiport, REG_PADAC, readReg(dev->spiport, REG_PADAC)|0x07);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void rxlora(int spidev, uint8_t rxmode)
+void rxlora(radiodev *dev, uint8_t rxmode)
 {
 
-    ASSERT((readReg(spidev, REG_OPMODE) & OPMODE_LORA) != 0);
+    ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
-    // enter standby mode (required for FIFO loading))
-    opmode(spidev, OPMODE_STANDBY);
-
-    if(rxmode == RXMODE_RSSI) { // use fixed settings for rssi scan
-        writeReg(spidev, REG_MODEM_CONFIG, RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1);
-        writeReg(spidev, REG_MODEM_CONFIG2, RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2);
+    /* use inverted I/Q signal (prevent mote-to-mote communication) */
+    
+    if (dev->invertio) {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_ON | INVERTIQ_TX_OFF);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_ON);
+    } else {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_OFF);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_OFF);
     }
 
-    writeReg(spidev, REG_MAX_PAYLOAD_LENGTH, 0x80);
-    //writeReg(spidev, REG_PAYLOAD_LENGTH, PAYLOAD_LENGTH);
-    writeReg(spidev, REG_HOP_PERIOD, 0xFF);
-    writeReg(spidev, REG_FIFO_RX_BASE_AD, 0x00);
-    writeReg(spidev, REG_FIFO_ADDR_PTR, 0x00);
+    // enter standby mode (required for FIFO loading))
+    opmode(dev->spiport, OPMODE_STANDBY);
+
+    if(rxmode == RXMODE_RSSI) { // use fixed settings for rssi scan
+        writeReg(dev->spiport, REG_MODEM_CONFIG, RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1);
+        writeReg(dev->spiport, REG_MODEM_CONFIG2, RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2);
+    }
+
+    writeReg(dev->spiport, REG_MAX_PAYLOAD_LENGTH, 0x80);
+    //writeReg(dev->spiport, REG_PAYLOAD_LENGTH, PAYLOAD_LENGTH);
+    writeReg(dev->spiport, REG_HOP_PERIOD, 0xFF);
+    writeReg(dev->spiport, REG_FIFO_RX_BASE_AD, 0x00);
+    writeReg(dev->spiport, REG_FIFO_ADDR_PTR, 0x00);
 
     // configure DIO mapping DIO0=RxDone DIO1=RxTout DIO2=NOP
-    writeReg(spidev, REG_DIO_MAPPING_1, MAP_DIO0_LORA_RXDONE|MAP_DIO1_LORA_RXTOUT|MAP_DIO2_LORA_NOP);
+    writeReg(dev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_RXDONE|MAP_DIO1_LORA_RXTOUT|MAP_DIO2_LORA_NOP);
 
     // clear all radio IRQ flags
-    writeReg(spidev, REG_IRQ_FLAGS, 0xFF);
+    writeReg(dev->spiport, REG_IRQ_FLAGS, 0xFF);
     // enable required radio IRQs
-    writeReg(spidev, REG_IRQ_FLAGS_MASK, ~rxlorairqmask[rxmode]);
+    writeReg(dev->spiport, REG_IRQ_FLAGS_MASK, ~rxlorairqmask[rxmode]);
 
-    //setsyncword(spidev, LORA_MAC_PREAMBLE);  //LoraWan syncword
+    //setsyncword(dev->spiport, LORA_MAC_PREAMBLE);  //LoraWan syncword
 
     // now instruct the radio to receive
     if (rxmode == RXMODE_SINGLE) { // single rx
         //printf("start rx_single\n");
-        opmode(spidev, OPMODE_RX_SINGLE);
-        //writeReg(spidev, REG_OPMODE, OPMODE_RX_SINGLE);
+        opmode(dev->spiport, OPMODE_RX_SINGLE);
+        //writeReg(dev->spiport, REG_OPMODE, OPMODE_RX_SINGLE);
     } else { // continous rx (scan or rssi)
-        opmode(spidev, OPMODE_RX);
+        opmode(dev->spiport, OPMODE_RX);
     }
 
 }
@@ -712,16 +724,24 @@ void txlora(radiodev *dev, struct pkt_tx_s *pkt) {
     // Boost on , 150% LNA current
     writeReg(dev->spiport, REG_LNA, LNA_MAX_GAIN);
 
+    writeReg(dev->spiport, REG_PARAMP, 0x08);
+
     // Auto AGC
-    writeReg(dev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
+    if (dev->sf < 11)
+        writeReg(dev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
+    else
+        writeReg(dev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_LOW_DATA_RATE_OPTIMIZE);
 
     // configure output power,RFO pin Output power is limited to +14db
     writeReg(dev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
 
-    if (pkt->invert_pol)
-        writeReg(dev->spiport, REG_INVERTIQ, readReg(dev->spiport, REG_INVERTIQ) | (1<<6));
-    else
-        writeReg(dev->spiport, REG_INVERTIQ, readReg(dev->spiport, REG_INVERTIQ) & ~(1<<6));
+    if (pkt->invert_pol) {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_ON);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_ON);
+    } else {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_OFF);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_OFF);
+    }
 
     // enter standby mode (required for FIFO loading))
     opmode(dev->spiport, OPMODE_STANDBY);
@@ -769,6 +789,13 @@ void single_tx(radiodev *dev, uint8_t *payload, int size) {
 
     ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
+    if (dev->invertio) {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_ON);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_ON);
+    } else {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_OFF);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_OFF);
+    }
     // enter standby mode (required for FIFO loading))
     opmode(dev->spiport, OPMODE_STANDBY);
 

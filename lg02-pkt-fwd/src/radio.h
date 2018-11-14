@@ -82,7 +82,7 @@
 #define REG_HOP_PERIOD              0x24
 #define REG_SYNC_WORD               0x39
 #define REG_VERSION                 0x42
-#define REG_PADAC                   0x5A // common
+#define REG_PADAC                   0x4D
 #define REG_PKTRSSI                 0x1A
 #define REG_RSSI                    0x1B 
 
@@ -92,11 +92,10 @@
 #define REG_PREAMBLE_MSB            0x20
 #define REG_PREAMBLE_LSB            0x21
 
-#define PAYLOAD_LENGTH              0x40
-
 // preamble for lora networks (nibbles swapped)
 #define LORA_MAC_PREAMBLE           0x34
 
+#define PAYLOAD_LENGTH              0x40
 
 // LOW NOISE AMPLIFIER
 #define REG_LNA                     0x0C
@@ -152,6 +151,7 @@
 #define        REG_PARAMP                0x0A // common
 
 #define        REG_INVERTIQ              0x33
+#define        REG_INVERTIQ2             0x3B
 
 // CONF REG
 #define RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1 0x0A
@@ -159,6 +159,28 @@
 
 #define MAXLINE 256
 
+
+/*!                                                                                                     
+ * RegInvertIQ                                                                                
+*/                                                                                                     
+#define INVERTIQ_RX_MASK                       0xBF                                                
+#define INVERTIQ_RX_OFF                        0x00                                                
+#define INVERTIQ_RX_ON                         0x40                                                
+#define INVERTIQ_TX_MASK                       0xFE                                                
+#define INVERTIQ_TX_OFF                        0x01                                                
+#define INVERTIQ_TX_ON                         0x00                                                
+                                                                                                        
+/*!                                                                                                     
+ * RegDetectionThreshold                                                                                
+*/                                                                                                     
+#define DETECTIONTHRESH_SF7_TO_SF12            0x0A // Default
+#define DETECTIONTHRESH_SF6                    0x0C
+
+/*!
+ * RegInvertIQ2
+*/
+#define INVERTIQ2_ON                           0x19
+#define INVERTIQ2_OFF                          0x1D
 
 /* values available for the 'bandwidth' parameters (LoRa & FSK) */
 /* NOTE: directly encode FSK RX bandwidth, do not change */
@@ -354,7 +376,7 @@ void setup_channel(radiodev *);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void rxlora(int, uint8_t);
+void rxlora(radiodev *, uint8_t);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

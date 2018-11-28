@@ -123,6 +123,7 @@
 #define        REG_PARAMP                0x0A // common
 
 #define        REG_INVERTIQ              0x33
+#define        REG_INVERTIQ2             0x3B
 
 // CONF REG
 #define RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1 0x0A

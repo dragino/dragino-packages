@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
         static unsigned long next = 1;
         int i, data_size;
 
-        rxlora(loradev->spiport, RXMODE_SCAN);
+        rxlora(loradev, RXMODE_SCAN);
 
         if (strlen(filepath) > 0) 
             fp = fopen(filepath, "w+");

@@ -19,6 +19,23 @@ m = Map("gateway", translate("LoRa Gateway Settings"), translate("Configuration 
 
 s = m:section(NamedSection, "general", "lorawan", translate("LoRaWAN Server Settings"))
 
+local sv = s:option(ListValue, "server_type", translate("IoT Service"))
+sv.placeholder = "Select IoT service"
+sv.default = "disabled"
+sv:value("disabled",  "Disabled") 
+sv:value("lorawan",  "LoRaWan/RAW forwarder")        
+sv:value("relay",  "LoRaWan/RAW packets relay")
+sv:value("mqtt",  "LoRaRAW forward to MQTT server")
+sv:value("tcpudp",  "LoRaRAW forward to TCP/UDP server")
+
+local lv = s:option(ListValue, "DEB", translate("Debug Level"))
+lv.placeholder = "Select debug level"
+lv.default = "1"
+lv:value("0",  "No debug")
+lv:value("1",  "Little message output")
+lv:value("2",  "More verbose output")
+lv:value("3",  "Many verbose output")
+
 local sp = s:option(ListValue, "provider", translate("Service Provider"))
 sp.default = "ttn"
 sp:value("ttn", "The Things Network")
@@ -67,6 +84,10 @@ mode.default = "0"
 mode:value("0", "A for RX, B for TX")
 mode:value("1", "B for RX, A for TX")
 mode:value("2", "Both for RX, No TX")
+
+local tx_power = s:option(Value, "TXPOWER", translate("Radio Power (Unit:dBm)"))
+tx_power.placeholder = "range 5 ~ 20 dBm"
+tx_power.datatype = "rangelength(1,2)"
 
 s = m:section(NamedSection, "radio1", "lorawan", translate("Channel 1 Radio Settings"),translate("Radio settings for Channel 1"))
 local rx_fre = s:option(Value, "RXFREQ", translate("RadioA Frequency (Unit:Hz)"))

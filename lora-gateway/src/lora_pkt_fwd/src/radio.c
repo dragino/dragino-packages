@@ -544,7 +544,8 @@ void setup_channel(radiodev *radiodev)
     opmode(radiodev->spiport, OPMODE_SLEEP);
     opmodeLora(radiodev->spiport);
     // setup lora
-    printf("Setup %s Channel: freq = %d, sf = %d, spi = %d\n", radiodev->desc, radiodev->freq, radiodev->sf, radiodev->spiport);
+    printf("INFO~ Setup %s Channel: freq = %d, sf = %d, spi = %d, invert = %d\n", \
+            radiodev->desc, radiodev->freq, radiodev->sf, radiodev->spiport, radiodev->invertio);
     setfreq(radiodev->spiport, radiodev->freq);
     setsf(radiodev->spiport, radiodev->sf);
     setsbw(radiodev->spiport, radiodev->bw);
@@ -554,10 +555,13 @@ void setup_channel(radiodev *radiodev)
 
     /* use inverted I/Q signal (prevent mote-to-mote communication) */
     
-    if (!radiodev->invertio)
+    if (!radiodev->invertio) {
         writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) & ~(1<<6));
-    else
+        writeReg(radiodev->spiport, REG_INVERTIQ2, readReg(radiodev->spiport, REG_INVERTIQ2) & ~(1<<2));
+    } else {
         writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) | (1<<6));
+        writeReg(radiodev->spiport, REG_INVERTIQ2, readReg(radiodev->spiport, REG_INVERTIQ2) | (1<<2));
+    }
     
 
     /* CRC check */
@@ -785,7 +789,8 @@ void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
     // wait for TX done
     while(digitalRead(radiodev->dio[0]) == 0);
 
-    printf("\nTransmit at SF%iBW%d on %.6lf.\n", radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000);
+    printf("\nTransmit at SF%iBW%d on %.6lf, invert=%2x.\n",\
+            radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000, readReg(radiodev->spiport, REG_INVERTIQ));
 
     // mask all IRQs
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);

@@ -368,6 +368,14 @@ static void opmodeLora(uint8_t spidev) {
 
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+void setpower(uint8_t spidev, uint8_t pw) {
+    writeReg(spidev, REG_PADAC, 0x87);
+    if (pw < 5) pw = 5;
+    if (pw > 20) pw = 20;
+    writeReg(spidev, REG_PACONFIG, (uint16_t)(0x80 | ((pw - 5) & 0x0f)));
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void setfreq(uint8_t spidev, long frequency)
 {
@@ -589,9 +597,8 @@ void setup_channel(radiodev *dev)
     writeReg(dev->spiport, 0x3a, 0x64);
 
     // configure output power,RFO pin Output power is limited to +14db
-    //writeReg(dev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
-    writeReg(dev->spiport, REG_PACONFIG, 0x8F);
-    writeReg(dev->spiport, REG_PADAC, readReg(dev->spiport, REG_PADAC)|0x07);
+    //writeReg(dev->spiport, REG_PACONFIG, 0x8F);
+    //writeReg(dev->spiport, REG_PADAC, readReg(dev->spiport, REG_PADAC)|0x07);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -711,6 +718,7 @@ void txlora(radiodev *dev, struct pkt_tx_s *pkt) {
 
     ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
+    setpower(dev->spiport, pkt->rf_power);
     setfreq(dev->spiport, pkt->freq_hz);
     setsf(dev->spiport, sf_getval(pkt->datarate));
     setsbw(dev->spiport, bw_getval(pkt->bandwidth));
@@ -771,7 +779,7 @@ void txlora(radiodev *dev, struct pkt_tx_s *pkt) {
     // wait for TX done
     while(digitalRead(dev->dio[0]) == 0);
 
-    MSG("\nINFO~ Transmit at SF%iBW%ld on %.6lf.\n", sf_getval(pkt->datarate), bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000);
+    MSG_LOG(DEBUG_INFO, "\nINFO~ Transmit at SF%iBW%ld on %.6lf.\n", sf_getval(pkt->datarate), bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000);
 
     // mask all IRQs
     writeReg(dev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
@@ -789,6 +797,9 @@ void single_tx(radiodev *dev, uint8_t *payload, int size) {
 
     ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
+    // enter standby mode (required for FIFO loading))
+    opmode(dev->spiport, OPMODE_STANDBY);
+
     if (dev->invertio) {
         writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_ON);
         writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_ON);
@@ -796,10 +807,10 @@ void single_tx(radiodev *dev, uint8_t *payload, int size) {
         writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_OFF);
         writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_OFF);
     }
-    // enter standby mode (required for FIFO loading))
-    opmode(dev->spiport, OPMODE_STANDBY);
 
     setsyncword(dev->spiport, dev->syncword);
+
+    setpower(dev->spiport, dev->power);
 
     // set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP
     writeReg(dev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
@@ -826,7 +837,7 @@ void single_tx(radiodev *dev, uint8_t *payload, int size) {
     // wait for TX done
     while(digitalRead(dev->dio[0]) == 0);
 
-    MSG("\nINFO~Transmit at SF%iBW%ld on %.6lf.\n", dev->sf, (dev->bw)/1000, (double)(dev->freq)/1000000);
+    MSG_LOG(DEBUG_INFO, "\nINFO~Transmit at SF%iBW%ld on %.6lf.\n", dev->sf, (dev->bw)/1000, (double)(dev->freq)/1000000);
 
     // mask all IRQs
     writeReg(dev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);

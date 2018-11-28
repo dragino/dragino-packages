@@ -30,7 +30,6 @@ function index()
 
     local string =string
     entry({"admin", "gateway"}, alias("admin", "gateway", "iotserver"), _("Service"), 60).index = true
-    entry({"admin", "gateway", "iotserver"}, cbi("admin_gateway/iotserver"), _("IoT Server"), 1)
     if f_board == 'LG02' then
 	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg02"), _("LoRaWan GateWay"), 2)
     else

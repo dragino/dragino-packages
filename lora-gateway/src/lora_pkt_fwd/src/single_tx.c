@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
     loradev->invertio = invertiq;
     strcpy(loradev->desc, "RFDEV");	
 
-    printf("Radio struct: spiport=%d, freq=%d, sf=%d, bw=%d, cr=%d, wd=0x%2x\n", loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->syncword);
+    printf("Radio struct: spiport=%d, freq=%d, sf=%d, bw=%d, cr=%d, wd=0x%2x, IQ=%d\n", loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->syncword, loradev->invertio);
 
     if(!get_radio_version(loradev))  
         goto clean;

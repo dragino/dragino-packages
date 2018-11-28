@@ -58,15 +58,15 @@
 #define PKT_PULL_ACK	4
 #define PKT_TX_ACK      5
 
-#define NB_PKT_MAX		8 /* max number of packets per fetch/send cycle */
-
 #define MIN_LORA_PREAMB	6 /* minimum Lora preamble length for this application */
 #define STD_LORA_PREAMB	8
 #define MIN_FSK_PREAMB	3 /* minimum FSK preamble length for this application */
 #define STD_FSK_PREAMB	4
 
-#define TX_BUFF_SIZE	((540 * NB_PKT_MAX) + 30)
-#define STATUS_SIZE	    1024
+#define TX_BUFF_SIZE	512
+#define STATUS_SIZE	1024
+
+#define PUSH_PATH   "/var/iot/push"
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES (GLOBAL) ------------------------------------------- */
@@ -114,6 +114,8 @@ static char syncwd2[8] = "SYNCWD";            /* tx frequency of radio */
 static char logdebug[4] = "DEB";          /* debug info option */
 static char server_type[16] = "server_type";          /* debug info option */
 static char radio_mode[8] = "mode";          /* debug info option */
+
+static char tx_power[16] = "TXPOWER";            /* tx frequency of radio */
 
 /* LOG Level */
 int DEBUG_PKT_FWD = 0;
@@ -232,6 +234,7 @@ radiodev *txdev;
 void thread_stat(void);
 void thread_up(void);
 void thread_down(void);
+void thread_push(void);
 void thread_jit(void);
 
 /* -------------------------------------------------------------------------- */
@@ -459,6 +462,7 @@ int main(int argc, char *argv[])
     pthread_t thrid_stat;
     pthread_t thrid_up;
     pthread_t thrid_down;
+    pthread_t thrid_push;
     pthread_t thrid_jit;
 
     /* network socket creation */
@@ -542,6 +546,12 @@ int main(int argc, char *argv[])
     if (!get_config("general", radio_mode, 8)){
         strcpy(radio_mode, "0");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option radio_mode=%s\n", radio_mode);
+    }
+
+    /* power for transimit form 5 to 20 */
+    if (!get_config("general", tx_power, 8)){
+        strcpy(tx_power, "16");
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option tx_power=%s\n", tx_power);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -718,6 +728,7 @@ int main(int argc, char *argv[])
     rxdev->prlen = atoi(rxprlen);
     rxdev->syncword = atoi(syncwd1);
     rxdev->invertio = 0;
+    rxdev->power = atoi(tx_power);
     strcpy(rxdev->desc, "Radio1");
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -739,9 +750,9 @@ int main(int argc, char *argv[])
     txdev->prlen = atoi(txprlen);
     txdev->syncword = atoi(syncwd2);
     txdev->invertio = 0;
+    txdev->power = atoi(tx_power);
     strcpy(txdev->desc, "Radio2");
 
-    
     /* swap radio1 and radio2 */
     if (!strcmp(radio_mode, "1")) {
         radiodev *tmpdev;
@@ -786,7 +797,6 @@ int main(int argc, char *argv[])
         fclose(fp);
     }
 
-    
     /* look for server address w/ upstream port */
     //MSG("Looking for server with upstream port......\n");
     if (!strcmp(server_type, "lorawan")) {
@@ -892,6 +902,9 @@ int main(int argc, char *argv[])
         }
         freeaddrinfo(result);
 
+        /* JIT queue initialization */
+        jit_queue_init(&jit_queue); 
+
         /* spawn threads to report status*/
         i = pthread_create( &thrid_stat, NULL, (void * (*)(void *))thread_stat, NULL);
         if (i != 0) {
@@ -911,7 +924,12 @@ int main(int argc, char *argv[])
         if (i != 0) {
                 MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create downstream thread\n");
                 exit(EXIT_FAILURE);
+        }
 
+        i = pthread_create( &thrid_push, NULL, (void * (*)(void *))thread_push, NULL);
+        if (i != 0) {
+                MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create push data thread\n");
+                exit(EXIT_FAILURE);
         }
 
         i = pthread_create( &thrid_jit, NULL, (void * (*)(void *))thread_jit, NULL);
@@ -998,6 +1016,7 @@ int main(int argc, char *argv[])
         pthread_join(thrid_up, NULL);
         pthread_cancel(thrid_stat);
         pthread_cancel(thrid_down); /* don't wait for downstream thread */
+        pthread_cancel(thrid_push); /* don't wait for push thread */
         pthread_cancel(thrid_jit); /* don't wait for jit thread */
 
         /* if an exit signal was received, try to quit properly */
@@ -1271,7 +1290,7 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = '\0'; /* add string terminator, for safety */
                 
-        MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (RXPK): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (RXPKT): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
             
         /* send datagram to server */
         send(sock_up, (void *)buff_up, buff_index, 0);
@@ -1370,8 +1389,6 @@ void thread_down(void) {
     *(uint32_t *)(buff_req + 4) = net_mac_h;
     *(uint32_t *)(buff_req + 8) = net_mac_l;
 
-    /* JIT queue initialization */
-    jit_queue_init(&jit_queue); 
 
     while (!exit_sig && !quit_sig) {
 	    
@@ -1414,7 +1431,7 @@ void thread_down(void) {
 	    
 	    /* if the datagram does not respect protocol, just ignore it */
 	    if ((msg_len < 4) || (buff_down[0] != PROTOCOL_VERSION) || ((buff_down[3] != PKT_PULL_RESP) && (buff_down[3] != PKT_PULL_ACK))) {
-		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] ignoring invalid packet\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] ignoring invalid packet\n");
 		    continue;
 	    }
 	    
@@ -1440,20 +1457,20 @@ void thread_down(void) {
 	    /* the datagram is a PULL_RESP */
 	    buff_down[msg_len] = 0; /* add string terminator, just to be safe */
 	    //printf("INFO~ [down] PULL_RESP received :)\n"); /* very verbose */
-	    MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (TXPK): [down] %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+	    MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (TXPKT): [down] %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 	    
 	    /* initialize TX struct and try to parse JSON */
 	    memset(&txpkt, 0, sizeof(txpkt));
 	    root_val = json_parse_string_with_comments((const char *)(buff_down + 4)); /* JSON offset */
 	    if (root_val == NULL) {
-		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] invalid JSON, TX aborted\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] invalid JSON, TX aborted\n");
 		    continue;
 	    }
 	    
 	    /* look for JSON sub-object 'txpk' */
 	    txpk_obj = json_object_get_object(json_value_get_object(root_val), "txpk");
 	    if (txpk_obj == NULL) {
-		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] no \"txpk\" object in JSON, TX aborted\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no \"txpk\" object in JSON, TX aborted\n");
 		    json_value_free(root_val);
 		    continue;
 	    }
@@ -1481,6 +1498,12 @@ void thread_down(void) {
                 continue;
             }
             txpkt.freq_hz = (uint32_t)((double)(1.0e6) * json_value_get_number(val));
+
+            /* parse TX power (optional field) */
+            val = json_object_get_value(txpk_obj,"powe");
+            if (val != NULL) {
+                txpkt.rf_power = (int8_t)json_value_get_number(val);
+            }
 
             /* Parse Lora spreading-factor and modulation bandwidth (mandatory) */
             str = json_object_get_string(txpk_obj, "datr");
@@ -1588,7 +1611,7 @@ void thread_down(void) {
 		    txpkt.tx_mode = TIMESTAMPED;
 
             /*Maybe need send immediate*/
-            txlora(txdev, &txpkt);
+            //txlora(txdev, &txpkt);
 	    
 	    /* record measurement data */
 	    pthread_mutex_lock(&mx_meas_dw);
@@ -1616,7 +1639,235 @@ void thread_down(void) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* --- THREAD 4: CHECKING PACKETS TO BE SENT FROM JIT QUEUE AND SEND THEM --- */
+/* --- THREAD 4: SUB MESSAGE AND EMITTING PACKETS ------------------------ */
+
+void thread_push(void) {
+
+    int i; /* loop variables */
+
+    DIR *dir;
+    FILE *fp;
+    struct dirent *ptr;
+
+    struct stat statbuf;
+
+    char push_file[128]; 
+
+    /* configuration and metadata for an outbound packet */
+    struct pkt_tx_s txpkt;
+    
+    /* data buffers */
+    uint8_t buff_down[512]; /* buffer to receive downstream packets */
+    
+    /* JSON parsing variables */
+    JSON_Value *root_val = NULL;
+    JSON_Object *txpk_obj = NULL;
+    JSON_Value *val = NULL; /* needed to detect the absence of some fields */
+    const char *str; /* pointer to sub-strings in the JSON data */
+    short x0, x1;
+    
+    /* Just In Time downlink */
+    //struct timeval current_unix_time;
+
+    while (!exit_sig && !quit_sig) {
+        
+        /* lookup file */
+        if ((dir = opendir(PUSH_PATH)) == NULL) {
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ [push]open sending path error\n");
+            wait_ms(PUSH_TIMEOUT_MS); 
+            continue;
+        }
+
+	while ((ptr = readdir(dir)) != NULL) {
+            if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) /* current dir OR parrent dir */
+                continue;
+
+            snprintf(push_file, sizeof(push_file), "%s/%s", PUSH_PATH, ptr->d_name);
+
+            if (stat(push_file, &statbuf) < 0) {
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ stat %s error\n", ptr->d_name);
+                continue;
+            }
+
+            if ((statbuf.st_mode & S_IFMT) == S_IFREG) {
+
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [push] look file : %s\n", ptr->d_name);
+
+                if ((fp = fopen(push_file, "r")) == NULL) {
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ open %s error\n, ptr->d_name");
+                    continue;
+                }
+
+                memset(buff_down, 0, sizeof(buff_down));
+
+                fread(buff_down, sizeof(char), sizeof(buff_down), fp); /* the size less than buff_down return EOF */
+
+                unlink(push_file); /* delete the file */
+
+	        MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (TXPKT): [push] %s\n", (char *)buff_down); /* DEBUG: display JSON payload */
+	    
+                /* initialize TX struct and try to parse JSON */
+                memset(&txpkt, 0, sizeof(txpkt));
+                root_val = json_parse_string_with_comments((const char *)buff_down); /* JSON offset */
+                if (root_val == NULL) {
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [push] invalid JSON, TX aborted\n");
+                    fclose(fp);
+                    continue;
+                }
+	    
+                /* look for JSON sub-object 'txpk' */
+                txpk_obj = json_object_get_object(json_value_get_object(root_val), "txpk");
+                if (txpk_obj == NULL) {
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [push] no \"txpk\" object in JSON, TX aborted\n");
+                    json_value_free(root_val);
+                    fclose(fp);
+                    continue;
+                }
+	    
+                /* Parse "No CRC" flag (optional field) */
+                val = json_object_get_value(txpk_obj,"ncrc");
+                if (val != NULL) {
+                    txpkt.no_crc = (bool)json_value_get_boolean(val);
+                }
+
+                /* parse target frequency (mandatory) */
+                val = json_object_get_value(txpk_obj,"freq");
+                if (val == NULL) {
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.freq\" object in JSON, TX aborted\n");
+                    json_value_free(root_val);
+                    fclose(fp);
+                    continue;
+                }
+                txpkt.freq_hz = (uint32_t)((double)(1.0e6) * json_value_get_number(val));
+
+                /* parse TX power (optional field) */
+                val = json_object_get_value(txpk_obj,"powe");
+                if (val != NULL) {
+                    txpkt.rf_power = (int8_t)json_value_get_number(val);
+                }
+
+                /* Parse Lora spreading-factor and modulation bandwidth (mandatory) */
+                str = json_object_get_string(txpk_obj, "datr");
+                if (str == NULL) {
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.datr\" object in JSON, TX aborted\n");
+                    json_value_free(root_val);
+                    fclose(fp);
+                    continue;
+                }
+                i = sscanf(str, "SF%2hdBW%3hd", &x0, &x1);
+                if (i != 2) {
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] format error in \"txpk.datr\", TX aborted\n");
+                    json_value_free(root_val);
+                    fclose(fp);
+                    continue;
+                }
+                switch (x0) {
+                    case  7: txpkt.datarate = DR_LORA_SF7;  break;
+                    case  8: txpkt.datarate = DR_LORA_SF8;  break;
+                    case  9: txpkt.datarate = DR_LORA_SF9;  break;
+                    case 10: txpkt.datarate = DR_LORA_SF10; break;
+                    case 11: txpkt.datarate = DR_LORA_SF11; break;
+                    case 12: txpkt.datarate = DR_LORA_SF12; break;
+                    default:
+                        MSG_LOG(DEBUG_WARNING, "WARNING~ [down] format error in \"txpk.datr\", invalid SF, TX aborted\n");
+                        json_value_free(root_val);
+                        fclose(fp);
+                        continue;
+                }
+                switch (x1) {
+                    case 125: txpkt.bandwidth = BW_125KHZ; break;
+                    case 250: txpkt.bandwidth = BW_250KHZ; break;
+                    case 500: txpkt.bandwidth = BW_500KHZ; break;
+                    default:
+                        MSG_LOG(DEBUG_WARNING, "WARNING~ [down] format error in \"txpk.datr\", invalid BW, TX aborted\n");
+                        json_value_free(root_val);
+                        fclose(fp);
+                        continue;
+                }
+
+                /* Parse ECC coding rate (optional field) */
+                str = json_object_get_string(txpk_obj, "codr");
+                if (str == NULL) {
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.codr\" object in json, TX aborted\n");
+                    json_value_free(root_val);
+                    fclose(fp);
+                    continue;
+                }
+
+                if      (strcmp(str, "4/5") == 0) txpkt.coderate = CR_LORA_4_5;
+                else if (strcmp(str, "4/6") == 0) txpkt.coderate = CR_LORA_4_6;
+                else if (strcmp(str, "2/3") == 0) txpkt.coderate = CR_LORA_4_6;
+                else if (strcmp(str, "4/7") == 0) txpkt.coderate = CR_LORA_4_7;
+                else if (strcmp(str, "4/8") == 0) txpkt.coderate = CR_LORA_4_8;
+                else if (strcmp(str, "1/2") == 0) txpkt.coderate = CR_LORA_4_8;
+                else {
+                    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] format error in \"txpk.codr\", TX aborted\n");
+                    json_value_free(root_val);
+                    fclose(fp);
+                    continue;
+                }
+
+                /* Parse signal polarity switch (optional field) */
+                val = json_object_get_value(txpk_obj,"ipol");
+                if (val != NULL) {
+                    txpkt.invert_pol = (bool)json_value_get_boolean(val);
+                }
+
+                /* parse Lora preamble length (optional field, optimum min value enforced) */
+                val = json_object_get_value(txpk_obj,"prea");
+                if (val != NULL) {
+                    i = (int)json_value_get_number(val);
+                    if (i >= MIN_LORA_PREAMB) {
+                        txpkt.preamble = (uint16_t)i;
+                    } else {
+                        txpkt.preamble = (uint16_t)MIN_LORA_PREAMB;
+                    }
+                } else {
+                    txpkt.preamble = (uint16_t)STD_LORA_PREAMB;
+                }
+
+                /* Parse payload data (mandatory) */
+                str = json_object_get_string(txpk_obj, "data"); 
+                if (str == NULL) {
+                        MSG_LOG(DEBUG_WARNING, "WARNING~ [push] no mandatory \"txpk.data\" object in JSON, TX aborted\n");
+                        json_value_free(root_val);
+                        fclose(fp);
+                        continue;
+                }
+
+                strcpy(txpkt.payload, str);
+
+                txpkt.size = (uint16_t)strlen(txpkt.payload);
+
+                /* free the JSON parse tree from memory */
+                json_value_free(root_val);
+                
+                /* select TX mode */
+                txpkt.tx_mode = IMMEDIATE;
+
+                txlora(txdev, &txpkt);
+                /* insert the queue is the best method, but is too truble to construct the txpkt pakeage */
+                /* check TX parameter before trying to queue packet */                                      
+                /*
+                gettimeofday(&current_unix_time, NULL);
+                jit_result = jit_enqueue(&jit_queue, &current_unix_time, &txpkt, 0);
+                if (jit_result != JIT_ERROR_OK) 
+                    MSG_LOG(DEBUG_ERROR, "ERROR~ Packet REJECTED (jit error=%d)\n", jit_result);
+                */
+
+                fclose(fp);
+            }
+
+	}
+            closedir(dir);
+            wait_ms(PUSH_TIMEOUT_MS);
+            continue;
+    }
+    MSG_LOG(DEBUG_INFO, "\nINFO~ End of push thread\n");
+}
+
+/* -------------------------------------------------------------------------- */
+/* --- THREAD 5: CHECKING PACKETS TO BE SENT FROM JIT QUEUE AND SEND THEM --- */
 
 void thread_jit(void) {
     struct pkt_tx_s pkt;

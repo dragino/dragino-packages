@@ -29,6 +29,22 @@ s:tab("channels", translate("Channels Settings"))
 ----
 ---- General Settings
 ----
+o = s:taboption("general", ListValue, "server_type", translate("IoT Service"))
+o.placeholder = "Select IoT service"
+o.default = "disabled"
+o:value("disabled",  "Disabled") 
+o:value("lorawan",  "LoRaWan/RAW forwarder")        
+o:value("relay",  "LoRaWan/RAW packets relay")
+o:value("mqtt",  "LoRaRAW forward to MQTT server")
+o:value("tcpudp",  "LoRaRAW forward to TCP/UDP server")
+
+o = s:taboption("general", ListValue, "DEB", translate("Debug Level"))
+o.placeholder = "Select debug level"
+o.default = "1"
+o:value("0",  "No debug")
+o:value("1",  "Little message output")
+o:value("2",  "More verbose output")
+o:value("3",  "Many verbose output")
 
 o = s:taboption("general", ListValue, "provider", translate("Service Provider"))
 o.optional = true

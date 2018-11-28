@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <time.h>
+#include <dirent.h>
 
 #include <sys/time.h>
 #include <sys/ioctl.h>
@@ -238,6 +239,7 @@ typedef struct {
     uint8_t prlen;
     uint8_t syncword;
     uint8_t invertio;
+    uint8_t power;
     char desc[8];
 }radiodev; 
 
@@ -250,6 +252,7 @@ struct pkt_tx_s {
     uint8_t     tx_mode;        /*!> select on what event/time the TX is triggered */
     uint32_t    count_us;       /*!> timestamp or delay in microseconds for TX trigger */
     uint8_t     bandwidth;      /*!> modulation bandwidth (LoRa only) */
+    uint8_t     rf_power;       /*!> TX power, in dBm */
     uint32_t    datarate;       /*!> TX datarate (baudrate for FSK, SF for LoRa) */
     uint8_t     coderate;       /*!> error-correcting code of the packet (LoRa only) */
     bool        invert_pol;     /*!> invert signal polarity, for orthogonal downlinks (LoRa only) */
@@ -353,6 +356,8 @@ int lgw_spi_open(char *);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 // Lora configure : Freq, SF, BW
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+void setpower(uint8_t, uint8_t);
 
 void setfreq(uint8_t, long);
 

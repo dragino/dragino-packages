@@ -1,0 +1,52 @@
+#!/bin/sh /etc/rc.common
+
+START=50
+STOP=90
+
+boot() {
+    if [ ! -d /var/iot ]; then 
+        mkdir /var/iot
+    fi
+    if [ ! -d /var/iot/channels ]; then
+        mkdir /var/iot/channels
+    fi
+
+    rmmod gpio_keys_polled
+    modprobe gpio_keys_polled
+
+    rmmod spi-gpio-custom
+    insmod spi-gpio-custom bus0=1,14,16,26,0,8000000,15 bus1=2,18,21,19,0,8000000,24
+    sleep 1
+
+    /usr/bin/spirw 8 0
+
+    if [[ "$?" == "0" ]]; then
+        echo "LG02" > /var/iot/board
+    else if [[ "$?" == "1" ]]; then
+        /usr/bin/spirw 23 1
+        if [[ "$?" == "0" ]]; then
+            echo "LG01" > /var/iot/board
+        else
+            rmmod spi-gpio-custom
+            insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21
+            /usr/bin/spirw 12 1
+            if [[ "$?" == "1" ]]; then
+                echo "LG08" > /var/iot/board
+            else
+                echo "LG08P" > /var/iot/board
+            fi
+        fi
+    fi
+
+    board=`cat /var/iot/board`
+
+    uci set system.vendor.web_model="$board"
+    uci set gateway.general.model="$board"
+    uci commit
+
+    DEB=`uci get gateway.general.DEB`
+    if [[ "$DEB" -gt 1 ]]; then
+        DEB="1"
+    fi
+}
+

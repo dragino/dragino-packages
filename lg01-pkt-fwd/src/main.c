@@ -49,6 +49,8 @@
 #define PULL_TIMEOUT_MS		200
 #define FETCH_SLEEP_MS		10	/* nb of ms waited when a fetch return no packets */
 
+#define RXRF_TIMEOUT_S		5     /* single RX MAX timeout second */
+
 #define	PROTOCOL_VERSION	2
 
 #define PKT_PUSH_DATA	0
@@ -57,6 +59,7 @@
 #define PKT_PULL_RESP	3
 #define PKT_PULL_ACK	4
 #define PKT_TX_ACK      5
+
 
 #define MIN_LORA_PREAMB	6 /* minimum Lora preamble length for this application */
 #define STD_LORA_PREAMB	8
@@ -91,29 +94,22 @@ static char port[8] = "port"; /* server port for upstream traffic */
 static char serv_port_down[8] = "1700"; /* server port for downstream traffic */
 static char serv_port_up[8] = "1700"; /* server port for downstream traffic */
 static int keepalive_time = DEFAULT_KEEPALIVE; /* send a PULL_DATA request every X seconds, negative = disabled */
-static char platform[16] = "LG02/OLG02";  /* platform definition */
+static char platform[16] = "LG01/OLG01";  /* platform definition */
 static char description[16] = "DESC";                        /* used for free form description */
 static char email[32]  = "email";                        /* used for contact email */
 static char LAT[16] = "LAT";
 static char LON[16] = "LON";
 static char gatewayid[64] = "GWID";
-static char rxsf[8] = "RXSF";
-static char txsf[8] = "TXSF";
-static char rxbw[8] = "RXBW";
-static char txbw[8] = "TXBW";
-static char rxcr[8] = "RXCR";
-static char txcr[8] = "TXCR";
-static char rxprlen[8] = "RXPRLEN";
-static char txprlen[8] = "TXPRLEN";
-static char rx_freq[16] = "RXFREQ";            /* rx frequency of radio */
-static char tx_freq[16] = "TXFREQ";            /* tx frequency of radio */
-static char syncwd1[8] = "SYNCWD";            /* tx frequency of radio */
-static char syncwd2[8] = "SYNCWD";            /* tx frequency of radio */
+static char rfsf[8] = "RFSF";
+static char rfbw[8] = "RFBW";
+static char rfcr[8] = "RFCR";
+static char rfprlen[8] = "RFPRLEN";
+static char rf_freq[16] = "RFFREQ";            /* rx frequency of radio */
+static char syncwd[8] = "SYNCWD";            /* tx frequency of radio */
 static char logdebug[4] = "DEB";          /* debug info option */
 static char server_type[16] = "server_type";          /* debug info option */
-static char radio_mode[8] = "mode";          /* debug info option */
 
-static char tx_power[16] = "TXPOWER";            /* tx frequency of radio */
+static char rf_power[16] = "RFPOWER";            /* tx power of radio */
 
 /* LOG Level */
 int DEBUG_PKT_FWD = 0;
@@ -155,6 +151,9 @@ static int sock_down; /* socket for downstream traffic */
 static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; /* cut in half, critical for throughput */
 static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; /* non critical for throughput */
 
+static int radio_inuse = 0;  /* radio device if free */
+static pthread_mutex_t mx_radio_lock = PTHREAD_MUTEX_INITIALIZER; /* control access to the radio device */
+
 /* measurements to establish statistics */
 static pthread_mutex_t mx_meas_up = PTHREAD_MUTEX_INITIALIZER; /* control access to the upstream measurements */
 static uint32_t meas_nb_rx_rcv = 0; /* count packets received */
@@ -187,24 +186,6 @@ static uint32_t autoquit_threshold = 0; /* enable auto-quit after a number of no
 /* Just In Time TX scheduling */
 static struct jit_queue_s jit_queue;
 
-/* mqtt publish */
-/*
-static bool mqttconnect = true ;
-
-static struct mqtt_config mconf = {
-	.id = "client_id",
-	.keepalive = 300,
-	.host = "server",
-	.port = "port",
-	.qos = 1,
-	.topic = "topic_format", 
-	.data_format = "data_format", 
-	.username = "username",
-	.password = "password",
-        .clean_session = true,
-};
-*/
-
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
 
@@ -222,8 +203,7 @@ static void wait_ms(unsigned long a);
 
 /* radio devices */
 
-radiodev *rxdev;
-radiodev *txdev;
+radiodev *rfdev;
 
 /* threads */
 void thread_stat(void);
@@ -396,54 +376,6 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
 }
 
 /* -------------------------------------------------------------------------- */
-/* --- MQTT FUNCTION -------------------------------------------------------- */
-/*
-static void my_connect_callback(struct mosquitto *mosq, void *obj, int result)
-{
-    if (result) 
-        fprintf(stderr, "ERROR %s\n", mosquitto_connack_string(result));
-}
-
-static void my_disconnect_callback(struct mosquitto *mosq, void *obj, int result)
-{
-    mqttconnect = false;
-}
-
-static void my_publish_callback(struct mosquitto *mosq, void *obj, int mid)
-{
-    mosquitto_disconnect((struct mosquitto *)obj);
-}
-
-static int my_publish(struct mqtt_config *conf)
-{
-	struct mosquitto *mosq;
-
-	mosquitto_lib_init();
-
-	mosq = mosquitto_new(conf->id, true, NULL);
-	mosquitto_connect_callback_set(mosq, my_connect_callback);
-	mosquitto_disconnect_callback_set(mosq, my_disconnect_callback);
-	mosquitto_publish_callback_set(mosq, my_publish_callback);
-
-        mosquitto_username_pw_set(mosq, conf->username, conf->password);
-
-	mosquitto_connect(mosq, conf->host, atoi(conf->port), conf->keepalive);
-
-	mosquitto_loop_start(mosq);
-
-        mosquitto_publish(mosq, NULL, conf->topic, conf->msglen, conf->message, conf->qos, false);
-
-	mosquitto_loop_stop(mosq, false);
-
-	mosquitto_destroy(mosq);
-
-	mosquitto_lib_cleanup();
-
-	return 0;
-}
-*/
-
-/* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
 int main(int argc, char *argv[])
@@ -459,6 +391,9 @@ int main(int argc, char *argv[])
     pthread_t thrid_down;
     pthread_t thrid_push;
     pthread_t thrid_jit;
+
+    struct timespec start_time; /* time of start radio receive */
+    struct timespec end_time;  /* timeout of radio receive */
 
     /* network socket creation */
     struct addrinfo hints;
@@ -537,85 +472,46 @@ int main(int argc, char *argv[])
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option server_type=%s\n", server_type);
     }
 
-    /* mode0.A for RX, B for TX mode1.B for RX, A for TX mode2. both for RX, no TX */
-    if (!get_config("general", radio_mode, 8)){
-        strcpy(radio_mode, "0");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option radio_mode=%s\n", radio_mode);
-    }
-
     /* power for transimit form 5 to 20 */
-    if (!get_config("general", tx_power, 8)){
-        strcpy(tx_power, "16");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option tx_power=%s\n", tx_power);
+    if (!get_config("general", rf_power, 8)){
+        strcpy(rf_power, "16");
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rf_power=%s\n", rf_power);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-    if (!get_config("radio1", rx_freq, 16)){
-        strcpy(rx_freq, "902320000"); /* default frequency*/
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxfreq=%s\n", rx_freq);
+    if (!get_config("radio", rf_freq, 16)){
+        strcpy(rf_freq, "902320000"); /* default frequency*/
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxfreq=%s\n", rf_freq);
     }
 
-    if (!get_config("radio1", rxsf, 8)){
-        strcpy(rxsf, "7");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxsf=%s\n", rxsf);
+    if (!get_config("radio", rfsf, 8)){
+        strcpy(rfsf, "7");
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxsf=%s\n", rfsf);
     }
 
-    if (!get_config("radio1", rxcr, 8)){
-        strcpy(rxcr, "5");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option coderate=%s\n", rxcr);
+    if (!get_config("radio", rfcr, 8)){
+        strcpy(rfcr, "5");
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option coderate=%s\n", rfcr);
     }
     
-    if (!get_config("radio1", rxbw, 8)){
-        strcpy(rxbw, "125000");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxbw=%s\n", rxbw);
+    if (!get_config("radio", rfbw, 8)){
+        strcpy(rfbw, "125000");
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxbw=%s\n", rfbw);
     }
 
-    if (!get_config("radio1", rxprlen, 8)){
-        strcpy(rxprlen, "8");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxprlen=%s\n", rxprlen);
+    if (!get_config("radio", rfprlen, 8)){
+        strcpy(rfprlen, "8");
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxprlen=%s\n", rfprlen);
     }
 
-    if (!get_config("radio1", syncwd1, 8)){
-        strcpy(syncwd1, "52");  //Value 0x34 is reserved for LoRaWAN networks
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword=0x%02x\n", syncwd1);
-    }
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-    if (!get_config("radio2", tx_freq, 16)){
-        strcpy(tx_freq, "923300000"); /* default frequency*/
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option txfreq=%s\n", tx_freq);
-    }
-
-    if (!get_config("radio2", txsf, 8)){
-        strcpy(txsf, "9");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option txsf=%s\n", txsf);
-    }
-
-    if (!get_config("radio2", txcr, 8)){
-        strcpy(txcr, "5");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option coderate=%s\n", txcr);
-    }
-
-    if (!get_config("radio2", txbw, 8)){
-        strcpy(txbw, "125000");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxbw=%s\n", txbw);
-    }
-
-    if (!get_config("radio2", txprlen, 8)){
-        strcpy(txprlen, "8");
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option txprlen=%s\n", txprlen);
-    }
-
-    if (!get_config("radio2", syncwd2, 8)){
-        strcpy(syncwd2, "52");  //Value 0x34 is reserved for LoRaWAN networks
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword2=0x%02x\n", syncwd2);
+    if (!get_config("radio", syncwd, 8)){
+        strcpy(syncwd, "52");  //Value 0x34 is reserved for LoRaWAN networks
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword=0x%02x\n", syncwd);
     }
 
     switch (atoi(logdebug)) {
         case 1:
-            DEBUG_INFO = 1;       
             DEBUG_PKT_FWD = 1;
             break;
         case 2:
@@ -648,49 +544,6 @@ int main(int argc, char *argv[])
     sscanf(gatewayid, "%llx", &ull);
     lgwm = ull;
 
-    /*
-    if (!strcmp(server_type, "mqtt")) {
-        char mqtt_server_type[32] = "server_type";
-
-        strcpy(uci_config_file, "/etc/config/mqtt");
-
-        if (!get_config("general", mqtt_server_type, sizeof(mqtt_server_type))){
-            strcpy(mqtt_server_type, "thingspeak");  
-        }
-
-        if (!get_config("general", mconf.username, sizeof(mconf.username))){
-            strcpy(mconf.username, "username");  
-        }
-
-        if (!get_config("general", mconf.password, sizeof(mconf.password))){
-            strcpy(mconf.password, "password");  
-        }
-
-        if (!get_config("general", mconf.id, sizeof(mconf.id))){
-            strcpy(mconf.id, "client_id");  
-        }
-
-        if (!get_config(mqtt_server_type, mconf.host, sizeof(mconf.host))){
-            strcpy(mconf.host, "mqtt.thingspeak.com");  
-        }
-
-        if (!get_config(mqtt_server_type, mconf.port, sizeof(mconf.port))){
-            strcpy(mconf.port, "1883");  
-        }
-
-        if (!get_config(mqtt_server_type, mconf.topic, sizeof(mconf.topic))){
-            strcpy(mconf.topic, "topic_format");  
-        }
-
-        if (!get_config(mqtt_server_type, mconf.data_format, sizeof(mconf.data_format))){
-            strcpy(mconf.topic, "topic_data_format");  
-        }
-
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ MQTT: host=%s, port=%s, name=%s, password=%s, topic=%s, data_format=%s\n", mconf.host, mconf.port, \
-                                        mconf.username, mconf.password, mconf.topic, mconf.data_format);
-    }
-    */
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     /* init the queue of receive packets */
@@ -701,73 +554,33 @@ int main(int argc, char *argv[])
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     /* radio device init */
 
-    rxdev = (radiodev *) malloc(sizeof(radiodev));
+    rfdev = (radiodev *) malloc(sizeof(radiodev));
 
-    txdev = (radiodev *) malloc(sizeof(radiodev));
-    
-    rxdev->nss = 15;
-    rxdev->rst = 8;
-    rxdev->dio[0] = 7;
-    rxdev->dio[1] = 6;
-    rxdev->dio[2] = 0;
-    rxdev->spiport = lgw_spi_open(SPI_DEV_RX);
-    if (rxdev->spiport < 0) { 
+    rfdev->nss = 24;
+    rfdev->rst = 23;
+    rfdev->dio[0] = 22;
+    rfdev->dio[1] = 20;
+    rfdev->dio[2] = 0;
+    rfdev->spiport = lgw_spi_open(SPI_DEV_TX);   /* this is the spidev2.0 be to unity LG02 */
+    if (rfdev->spiport < 0) { 
         MSG_LOG(DEBUG_ERROR, "ERROR~ open spi_dev_tx error!\n");
         goto clean;
     }
-    rxdev->freq = atol(rx_freq);
-    rxdev->sf = atoi(rxsf);
-    rxdev->bw = atol(rxbw);
-    rxdev->cr = atoi(rxcr);
-    rxdev->nocrc = 0;  /* crc check */
-    rxdev->prlen = atoi(rxprlen);
-    rxdev->syncword = atoi(syncwd1);
-    rxdev->invertio = 0;
-    rxdev->power = atoi(tx_power);
-    strcpy(rxdev->desc, "Radio1");
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    txdev->nss = 24;
-    txdev->rst = 23;
-    txdev->dio[0] = 22;
-    txdev->dio[1] = 20;
-    txdev->dio[2] = 0;
-    txdev->spiport = lgw_spi_open(SPI_DEV_TX);
-    if (txdev->spiport < 0) {
-        MSG_LOG(DEBUG_ERROR, "ERROR~ open spi_dev_tx error!\n");
-        goto clean;
-    }
-    txdev->freq = atol(tx_freq);
-    txdev->sf = atoi(txsf);
-    txdev->bw = atol(txbw);
-    txdev->cr = atoi(txcr);
-    txdev->nocrc = 0;
-    txdev->prlen = atoi(txprlen);
-    txdev->syncword = atoi(syncwd2);
-    txdev->invertio = 0;
-    txdev->power = atoi(tx_power);
-    strcpy(txdev->desc, "Radio2");
-
-    /* swap radio1 and radio2 */
-    if (!strcmp(radio_mode, "1")) {
-        radiodev *tmpdev;
-        tmpdev = rxdev;
-        rxdev = txdev;
-        txdev = tmpdev;
-    }
-
-    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d, syncwd=0x%02x\n", rxdev->desc, rxdev->spiport, rxdev->freq, rxdev->sf, rxdev->syncword);
-    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d, syncwd=0x%02x\n", txdev->desc, txdev->spiport, txdev->freq, txdev->sf, txdev->syncword);
+    rfdev->freq = atol(rf_freq);
+    rfdev->sf = atoi(rfsf);
+    rfdev->bw = atol(rfbw);
+    rfdev->cr = atoi(rfcr);
+    rfdev->nocrc = 0;  /* crc check */
+    rfdev->prlen = atoi(rfprlen);
+    rfdev->syncword = atoi(syncwd);
+    rfdev->invertio = 0;
+    rfdev->power = atoi(rf_power);
+    strcpy(rfdev->desc, "RF_RADIO");
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-    if(get_radio_version(rxdev) == false) 
+    if(get_radio_version(rfdev) == false) 
         goto clean;
-
-    setup_channel(rxdev);
-
-    if (strcmp(server_type, "lorawan"))
-        setup_channel(txdev);
 
     /* configure signal handling */
     sigemptyset(&sigact.sa_mask);
@@ -783,19 +596,18 @@ int main(int argc, char *argv[])
 
     MSG_LOG(DEBUG_INFO, "Lora Gateway service Mode=%s, gatewayID=%s\n", server_type, gatewayid);
 
+    /* export the lora parameters for the luci ui */
     fp = fopen("/etc/lora/desc", "w+");
     if (NULL != fp) {
-        fprintf(fp, "%s struct: spiport=%d, freq=%ld, sf=%d\n", rxdev->desc, rxdev->spiport, rxdev->freq, rxdev->sf);
-        fprintf(fp, "%s struct: spiport=%d, freq=%ld, sf=%d\n", txdev->desc, txdev->spiport, txdev->freq, txdev->sf);
+        fprintf(fp, "%s struct: spiport=%d, freq=%ld, sf=%d\n", rfdev->desc, rfdev->spiport, rfdev->freq, rfdev->sf);
         fprintf(fp, "Lora Gateway service Mode=%s, gatewayID=%s, server=%s\n", server_type, gatewayid, server);
         fflush(fp);
         fclose(fp);
     }
 
-    /* look for server address w/ upstream port */
-    //MSG("Looking for server with upstream port......\n");
     if (!strcmp(server_type, "lorawan")) {
         MSG_LOG(DEBUG_INFO, "INFO~ Start lora packet forward daemon, server = %s, port = %s\n", server, port);
+        /* look for server address w/ upstream port */
         /* prepare hints to open network sockets */
         memset(&hints, 0, sizeof hints);
         hints.ai_family = AF_INET; /* should handle IP v4 or v6 automatically */
@@ -807,16 +619,15 @@ int main(int argc, char *argv[])
         }
         
         /* try to open socket for upstream traffic */
-        //MSG("Try to open socket for upstream......\n");
-        for (q=result; q!=NULL; q=q->ai_next) {
-                sock_up = socket(q->ai_family, q->ai_socktype,q->ai_protocol);
+        for (q = result; q != NULL; q = q->ai_next) {
+                sock_up = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
                 if (sock_up == -1) continue; /* try next field */
                 else break; /* success, get out of loop */
         }
         if (q == NULL) {
                 MSG_LOG(DEBUG_ERROR, "ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
                 i = 1;
-                for (q=result; q!=NULL; q=q->ai_next) {
+                for (q = result; q != NULL; q = q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
                         MSG_LOG(DEBUG_INFO, "INFO~ [up] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
@@ -833,14 +644,13 @@ int main(int argc, char *argv[])
         freeaddrinfo(result);
 
         /* look for server address w/ status port */
-        //MSG("loor for server with status port......\n");
         i = getaddrinfo(server, port, &hints, &result);
         if (i != 0) {
                 MSG_LOG(DEBUG_ERROR, "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
                 exit(EXIT_FAILURE);
         }
         /* try to open socket for status traffic */
-        for (q=result; q!=NULL; q=q->ai_next) {
+        for (q = result; q != NULL; q = q->ai_next) {
                 sock_stat = socket(q->ai_family, q->ai_socktype,q->ai_protocol);
                 if (sock_stat == -1) continue; /* try next field */
                 else break; /* success, get out of loop */
@@ -848,7 +658,7 @@ int main(int argc, char *argv[])
         if (q == NULL) {
                 MSG_LOG(DEBUG_ERROR, "ERROR~ [stat] failed to open socket to any of server %s addresses (port %s)\n", server, port);
                 i = 1;
-                for (q=result; q!=NULL; q=q->ai_next) {
+                for (q = result; q != NULL; q = q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
                         MSG_LOG(DEBUG_INFO, "INFO~ [stat] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
@@ -865,7 +675,6 @@ int main(int argc, char *argv[])
         freeaddrinfo(result);
 
         /* look for server address w/ downstream port */
-        //MSG("loor for server with downstream port......\n");
         i = getaddrinfo(server, serv_port_down, &hints, &result);
         if (i != 0) {
                 MSG_LOG(DEBUG_ERROR, "ERROR~ [down] getaddrinfo on address %s (port %s) returned %s\n", server, serv_port_up, gai_strerror(i));
@@ -873,7 +682,7 @@ int main(int argc, char *argv[])
         }
         
         /* try to open socket for downstream traffic */
-        for (q=result; q!=NULL; q=q->ai_next) {
+        for (q = result; q != NULL; q = q->ai_next) {
                 sock_down = socket(q->ai_family, q->ai_socktype,q->ai_protocol);
                 if (sock_down == -1) continue; /* try next field */
                 else break; /* success, get out of loop */
@@ -881,7 +690,7 @@ int main(int argc, char *argv[])
         if (q == NULL) {
                 MSG_LOG(DEBUG_ERROR, "ERROR~ [down] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
                 i = 1;
-                for (q=result; q!=NULL; q=q->ai_next) {
+                for (q = result; q != NULL; q = q->ai_next) {
                         getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
                         MSG_LOG(DEBUG_INFO, "INFO~ [down] result %i host:%s service:%s\n", i, host_name, port_name);
                         ++i;
@@ -936,74 +745,85 @@ int main(int argc, char *argv[])
 
     /* main thread for receive message, then process the message */
 
-    rxlora(rxdev, RXMODE_SCAN);  /* star lora continue receive mode */
-    MSG_LOG(DEBUG_INFO, "Listening at SF%i on %.6lf Mhz. syncword is 0x%02x on spiport%i\n", rxdev->sf, (double)(rxdev->freq)/1000000, rxdev->syncword, rxdev->spiport);
     while (!exit_sig && !quit_sig) {
-        if(digitalRead(rxdev->dio[0]) == 1) {
-            if (pktrx[pt].empty) {
-                if (received(rxdev->spiport, &pktrx[pt]) == true) {
-                    if (!strcmp(server_type, "relay")) {      // lora relay mode, trunking
-                        single_tx(txdev, pktrx[pt].payload, pktrx[pt].size); 
-                        pktrx_clean(&pktrx[pt]); 
-                    } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp")) {  // mqtt mode or tcpudp mode for loraRAW
-                        char tmp[256] = {'\0'};
-                        char chan_path[32] = {'\0'};
-                        char *chan_id = NULL;
-                        char *chan_data = NULL;
-                        int id_found = 0, data_size = pktrx[pt].size;
+        MSG_LOG(DEBUG_INFO, "INFO~ receive thread test if radio inuse: %d\n", radio_inuse); /* there is very strange, if no this line, process can't loop after jit send a message */
+        if (!radio_inuse) {  /* when radio_inuse equal zero */
+            pthread_mutex_lock(&mx_radio_lock); /* lock the radio device */
+            setup_channel(rfdev);
+            rxlora(rfdev, RXMODE_SINGLE);  /* star lora single receive mode */
+	    clock_gettime(CLOCK_MONOTONIC, &start_time);
 
-                        for (i = 0; i < pktrx[pt].size; i++) {
-                            tmp[i] = pktrx[pt].payload[i];
-                        }
+	    start_time = end_time;
 
-                       if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
-                            chan_data = &tmp[4];
-                        else
-                            chan_data = tmp;
+            while ((digitalRead(rfdev->dio[1]) != 1) && ((int)difftimespec(end_time, start_time) < RXRF_TIMEOUT_S)) {  /* receive timeout, if no readdigital or readerror? */
+            //while ((digitalRead(rfdev->dio[1]) != 1)) {  /* receive timeout, if no readdigital or readerror? */
+	        clock_gettime(CLOCK_MONOTONIC, &end_time);
+                if (digitalRead(rfdev->dio[0]) == 1) {
+                    if (pktrx[pt].empty) {
+                        if (received(rfdev->spiport, &pktrx[pt]) == true) {   /* received a valid message */
+                            if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp")) {  /* mqtt mode or tcpudp mode for loraRAW */
+                                char tmp[256] = {'\0'};
+                                char chan_path[32] = {'\0'};
+                                char *chan_id = NULL;
+                                char *chan_data = NULL;
+                                int id_found = 0, data_size = pktrx[pt].size;
 
-                        for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
-                            if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
-                                chan_id = &tmp[i + 1];
-                                ++id_found;
-                            }
+                                for (i = 0; i < pktrx[pt].size; i++) {
+                                    tmp[i] = pktrx[pt].payload[i];
+                                }
 
-                            if (tmp[i] == '>') { 
-                                tmp[i] = '\0';
-                                chan_data = tmp + i + 1;
-                                data_size = data_size - i;
-                                ++id_found;
-                            }
+                               if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
+                                    chan_data = &tmp[4];
+                                else
+                                    chan_data = tmp;
 
-                            if (id_found == 2) /* found channel id */ 
-                                break;
+                                for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
+                                    if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
+                                        chan_id = &tmp[i + 1];
+                                        ++id_found;
+                                    }
+
+                                    if (tmp[i] == '>') { 
+                                        tmp[i] = '\0';
+                                        chan_data = tmp + i + 1;
+                                        data_size = data_size - i;
+                                        ++id_found;
+                                    }
+
+                                    if (id_found == 2) /* found channel id */ 
+                                        break;
+                                        
+                                }
+
+                                if (id_found == 2) 
+                                    sprintf(chan_path, "/var/iot/channels/%s", chan_id);
+                                else {
+                                    static unsigned long next = 1;
+                                    srand((unsigned)time(NULL));      /* random filename */
+                                    next = next * 1103515245 + 12345;
+                                    sprintf(chan_path, "/var/iot/channels/%ld", (unsigned)(next/65536) % 32768);
+                                }
                                 
-                        }
+                                fp = fopen(chan_path, "w+");
+                                if ( NULL != fp ) {
+                                    fprintf(fp, "%s\n", chan_data);
+                                    fflush(fp);
+                                    fclose(fp);
+                                } else 
+                                    MSG_LOG(DEBUG_ERROR, "ERROR~ canot open file path: %s\n", chan_path); 
 
-                        if (id_found == 2) 
-                            sprintf(chan_path, "/var/iot/channels/%s", chan_id);
-                        else {
-                            static unsigned long next = 1;
-                            srand((unsigned)time(NULL)); 
-                            next = next * 1103515245 + 12345;
-                            sprintf(chan_path, "/var/iot/channels/%ld", (unsigned)(next/65536) % 32768);
-                        }
-                        
-                        fp = fopen(chan_path, "w+");
-                        if ( NULL != fp ) {
-                            //fwrite(chan_data, sizeof(char), data_size, fp);  
-                            fprintf(fp, "%s\n", chan_data);
-                            fflush(fp);
-                            fclose(fp);
-                        } else 
-                            MSG_LOG(DEBUG_ERROR, "ERROR~ canot open file path: %s\n", chan_path); 
+                                pktrx_clean(&pktrx[pt]);
+                            }
 
-                        pktrx_clean(&pktrx[pt]);
+                            if (++pt >= QUEUESIZE)  /* pktrx queue size */
+                                pt = 0;
+                        } 
                     }
 
-                    if (++pt >= QUEUESIZE)
-                        pt = 0;
-                } 
-            }
+                    break; /* break the while loop when receive a message */
+                }
+            } /* while loop test receive if timeout */
+            pthread_mutex_unlock(&mx_radio_lock);
         }
     }
 
@@ -1024,8 +844,7 @@ int main(int argc, char *argv[])
     }
 
 clean:
-    free(rxdev);
-    free(txdev);
+    free(rfdev);
 	
     MSG_LOG(DEBUG_INFO, "INFO~ Exiting Lora service program\n");
     exit(EXIT_SUCCESS);
@@ -1035,7 +854,7 @@ clean:
 /* --- THREAD 1: send status to lora server and print report ---------------------- */
 
 void thread_stat(void) {
-    /* ------------------------------------------------------------------------------------ */
+    /* ---------------------------------------------------------------------------- */
     /* statistics collection and send status to server */
 
     int j;
@@ -1229,8 +1048,7 @@ void thread_up(void) {
     
     while (!exit_sig && !quit_sig) {
 
-        //MSG("INFO~ [up] loop...\n");
-                /* fetch packets */
+        /* fetch packets , pktrx is a queue with max QUEUESIZE members */
 
         if (pktrx[prev].empty) {
             if (++prev >= QUEUESIZE)
@@ -1257,11 +1075,7 @@ void thread_up(void) {
         buff_up[2] = token_l;
         buff_index = 12; /* 12-byte header */
 
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", fetch_timestamp, tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxcr);
-
-        /*
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxcr);
-        */
+        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", fetch_timestamp, tmst, (double)(rfdev->freq)/1000000, rfdev->sf, rfcr);
 
         buff_index += j;
 
@@ -1322,7 +1136,7 @@ void thread_up(void) {
 
         pktrx_clean(&pktrx[prev]);
 
-        if (++prev >= QUEUESIZE)
+        if (++prev >= QUEUESIZE) /* increase the point of rx pkt queue */
             prev = 0;
 
         wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
@@ -1426,7 +1240,7 @@ void thread_down(void) {
 	    
 	    /* if the datagram does not respect protocol, just ignore it */
 	    if ((msg_len < 4) || (buff_down[0] != PROTOCOL_VERSION) || ((buff_down[3] != PKT_PULL_RESP) && (buff_down[3] != PKT_PULL_ACK))) {
-		    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] ignoring invalid packet\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] ignoring invalid packet\n");
 		    continue;
 	    }
 	    
@@ -1458,14 +1272,14 @@ void thread_down(void) {
 	    memset(&txpkt, 0, sizeof(txpkt));
 	    root_val = json_parse_string_with_comments((const char *)(buff_down + 4)); /* JSON offset */
 	    if (root_val == NULL) {
-		    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] invalid JSON, TX aborted\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] invalid JSON, TX aborted\n");
 		    continue;
 	    }
 	    
 	    /* look for JSON sub-object 'txpk' */
 	    txpk_obj = json_object_get_object(json_value_get_object(root_val), "txpk");
 	    if (txpk_obj == NULL) {
-		    MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no \"txpk\" object in JSON, TX aborted\n");
+		    MSG_LOG(DEBUG_WARNING, "WARNING: [down] no \"txpk\" object in JSON, TX aborted\n");
 		    json_value_free(root_val);
 		    continue;
 	    }
@@ -1661,14 +1475,11 @@ void thread_push(void) {
     const char *str; /* pointer to sub-strings in the JSON data */
     short x0, x1;
     
-    /* Just In Time downlink */
-    //struct timeval current_unix_time;
-
     while (!exit_sig && !quit_sig) {
         
         /* lookup file */
         if ((dir = opendir(PUSH_PATH)) == NULL) {
-            //MSG_DEBUG(DEBUG_ERROR, "ERROR~ [push]open sending path error\n");
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ open sending path error\n");
             wait_ms(PUSH_TIMEOUT_MS); 
             continue;
         }
@@ -1686,10 +1497,8 @@ void thread_push(void) {
 
             if ((statbuf.st_mode & S_IFMT) == S_IFREG) {
 
-                MSG_DEBUG(DEBUG_INFO, "INFO~ [push] look file : %s\n", ptr->d_name);
-
                 if ((fp = fopen(push_file, "r")) == NULL) {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ open %s error\n, ptr->d_name");
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ open %s error\n", ptr->d_name);
                     continue;
                 }
 
@@ -1705,7 +1514,7 @@ void thread_push(void) {
                 memset(&txpkt, 0, sizeof(txpkt));
                 root_val = json_parse_string_with_comments((const char *)buff_down); /* JSON offset */
                 if (root_val == NULL) {
-                    MSG_LOG(DEBUG_WARNING, "WARNING~ [push] invalid JSON, TX aborted\n");
+                    MSG_LOG(DEBUG_WARNING, "WARNING: [push] invalid JSON, TX aborted\n");
                     fclose(fp);
                     continue;
                 }
@@ -1713,20 +1522,20 @@ void thread_push(void) {
                 /* look for JSON sub-object 'txpk' */
                 txpk_obj = json_object_get_object(json_value_get_object(root_val), "txpk");
                 if (txpk_obj == NULL) {
-                    MSG_LOG(DEBUG_WARNING, "WARNING~ [push] no \"txpk\" object in JSON, TX aborted\n");
+                    MSG_LOG(DEBUG_WARNING, "WARNING: [push] no \"txpk\" object in JSON, TX aborted\n");
                     json_value_free(root_val);
                     fclose(fp);
                     continue;
                 }
 	    
                 /* Parse "No CRC" flag (optional field) */
-                val = json_object_get_value(txpk_obj,"ncrc");
+                val = json_object_get_value(txpk_obj, "ncrc");
                 if (val != NULL) {
                     txpkt.no_crc = (bool)json_value_get_boolean(val);
                 }
 
                 /* parse target frequency (mandatory) */
-                val = json_object_get_value(txpk_obj,"freq");
+                val = json_object_get_value(txpk_obj, "freq");
                 if (val == NULL) {
                     MSG_LOG(DEBUG_WARNING, "WARNING~ [down] no mandatory \"txpk.freq\" object in JSON, TX aborted\n");
                     json_value_free(root_val);
@@ -1736,7 +1545,7 @@ void thread_push(void) {
                 txpkt.freq_hz = (uint32_t)((double)(1.0e6) * json_value_get_number(val));
 
                 /* parse TX power (optional field) */
-                val = json_object_get_value(txpk_obj,"powe");
+                val = json_object_get_value(txpk_obj, "powe");
                 if (val != NULL) {
                     txpkt.rf_power = (int8_t)json_value_get_number(val);
                 }
@@ -1840,16 +1649,13 @@ void thread_push(void) {
                 /* select TX mode */
                 txpkt.tx_mode = IMMEDIATE;
 
-                txlora(txdev, &txpkt);
-                /* insert the queue is the best method, but is too truble to construct the txpkt pakeage */
-                /* check TX parameter before trying to queue packet */                                      
-                /*
-                gettimeofday(&current_unix_time, NULL);
-                jit_result = jit_enqueue(&jit_queue, &current_unix_time, &txpkt, 0);
-                if (jit_result != JIT_ERROR_OK) 
-                    MSG_LOG(DEBUG_ERROR, "ERROR~ Packet REJECTED (jit error=%d)\n", jit_result);
-                */
+                ++radio_inuse; /* tell the receive thread radio device in use */
+                pthread_mutex_lock(&mx_radio_lock); /* if other process lock wait until */
+                txlora(rfdev, &txpkt);
+                pthread_mutex_unlock(&mx_radio_lock);
+                --radio_inuse;
 
+                /* check TX parameter before trying to queue packet */                                      
                 fclose(fp);
             }
 
@@ -1880,7 +1686,11 @@ void thread_jit(void) {
             if (pkt_index > -1) {
                 jit_result = jit_dequeue(&jit_queue, pkt_index, &pkt, &pkt_type);
                 if (jit_result == JIT_ERROR_OK) {
-                    txlora(txdev, &pkt);
+                    ++radio_inuse; /* tell the receive thread radio device in use */
+                    pthread_mutex_lock(&mx_radio_lock); /* if other process lock wait until */
+                    txlora(rfdev, &pkt);
+                    pthread_mutex_unlock(&mx_radio_lock);
+                    --radio_inuse;
                     pthread_mutex_lock(&mx_meas_dw);
                     meas_nb_tx_ok += 1;
                     pthread_mutex_unlock(&mx_meas_dw);

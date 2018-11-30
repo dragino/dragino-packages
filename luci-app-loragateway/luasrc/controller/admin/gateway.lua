@@ -32,6 +32,8 @@ function index()
     entry({"admin", "gateway"}, alias("admin", "gateway", "iotserver"), _("Service"), 60).index = true
     if f_board == 'LG02' then
 	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg02"), _("LoRaWan GateWay"), 2)
+    elseif f_board == 'LG01' then
+	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg01"), _("LoRaWan GateWay"), 2)
     else
 	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg08"), _("LoRaWan GateWay"), 2)
     end

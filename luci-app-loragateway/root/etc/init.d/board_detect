@@ -3,7 +3,7 @@
 START=50
 STOP=90
 
-boot() {
+start() {
     if [ ! -d /var/iot ]; then 
         mkdir /var/iot
     fi
@@ -22,7 +22,7 @@ boot() {
 
     if [[ "$?" == "0" ]]; then
         echo "LG02" > /var/iot/board
-    else if [[ "$?" == "1" ]]; then
+    else 
         /usr/bin/spirw 23 1
         if [[ "$?" == "0" ]]; then
             echo "LG01" > /var/iot/board
@@ -42,11 +42,14 @@ boot() {
 
     uci set system.vendor.web_model="$board"
     uci set gateway.general.model="$board"
-    uci commit
 
     DEB=`uci get gateway.general.DEB`
     if [[ "$DEB" -gt 1 ]]; then
         DEB="1"
     fi
+}
+
+stop() {
+    exit 0
 }
 

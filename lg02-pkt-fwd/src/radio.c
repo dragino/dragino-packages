@@ -12,7 +12,7 @@
 #include "radio.h"
 
 static const uint8_t rxlorairqmask[] = {
-    [RXMODE_SINGLE] = IRQ_LORA_RXDONE_MASK|IRQ_LORA_CRCERR_MASK,
+    [RXMODE_SINGLE] = IRQ_LORA_RXDONE_MASK|IRQ_LORA_RXTOUT_MASK|IRQ_LORA_CRCERR_MASK,
     [RXMODE_SCAN]   = IRQ_LORA_RXDONE_MASK|IRQ_LORA_CRCERR_MASK,
     [RXMODE_RSSI]   = 0x00,
 };
@@ -566,19 +566,19 @@ bool get_radio_version(radiodev *dev)
 
 void setup_channel(radiodev *dev)
 {
-    MSG_LOG(DEBUG_INFO, "INFO~ Setup %s Channel: freq = %ld, sf = %d, syncwd=0x%02x, prlen=%d, cr=%d, spi=%d\n", \
-            dev->desc, dev->freq, dev->sf, dev->syncword, dev->prlen, dev->cr, dev->spiport);
+    MSG_LOG(DEBUG_INFO, "INFO~ Setup %s Channel: freq = %ld, sf = %d, syncwd=0x%02x, prlen=%d, cr=%d/5, spi=%d\n", \
+            dev->desc, dev->freq, dev->sf, dev->syncword, dev->prlen, dev->cr - 1, dev->spiport);
     opmode(dev->spiport, OPMODE_SLEEP);
     opmodeLora(dev->spiport);
     ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
-    // setup lora
+
+    /* setup lora */
     setfreq(dev->spiport, dev->freq);
     setsf(dev->spiport, dev->sf);
     setsbw(dev->spiport, dev->bw);
     setcr(dev->spiport, dev->cr);
     setprlen(dev->spiport, dev->prlen);
     setsyncword(dev->spiport, dev->syncword);
-
 
     /* CRC check */
     crccheck(dev->spiport, dev->nocrc);
@@ -608,6 +608,9 @@ void rxlora(radiodev *dev, uint8_t rxmode)
 
     ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
+    /* enter standby mode (required for FIFO loading)) */
+    opmode(dev->spiport, OPMODE_STANDBY);
+
     /* use inverted I/Q signal (prevent mote-to-mote communication) */
     
     if (dev->invertio) {
@@ -618,10 +621,8 @@ void rxlora(radiodev *dev, uint8_t rxmode)
         writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_OFF);
     }
 
-    // enter standby mode (required for FIFO loading))
-    opmode(dev->spiport, OPMODE_STANDBY);
 
-    if(rxmode == RXMODE_RSSI) { // use fixed settings for rssi scan
+    if (rxmode == RXMODE_RSSI) { // use fixed settings for rssi scan
         writeReg(dev->spiport, REG_MODEM_CONFIG, RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1);
         writeReg(dev->spiport, REG_MODEM_CONFIG2, RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2);
     }

@@ -49,6 +49,8 @@
 #define PULL_TIMEOUT_MS		200
 #define FETCH_SLEEP_MS		10	/* nb of ms waited when a fetch return no packets */
 
+#define KEEPALIVE_REC	        43200	/* default seconds interval for continue mode  keep-alive */
+
 #define	PROTOCOL_VERSION	2
 
 #define PKT_PUSH_DATA	0
@@ -452,6 +454,9 @@ int main(int argc, char *argv[])
     int i; /* loop variable and temporary variable for return value */
 
     FILE *fp = NULL;
+
+    static time_t  rxlora_time;  /* time of start continue receive mode */
+    static time_t now_time; /* time of now */
     
     /* threads */
     pthread_t thrid_stat;
@@ -938,8 +943,10 @@ int main(int argc, char *argv[])
 
     rxlora(rxdev, RXMODE_SCAN);  /* star lora continue receive mode */
     MSG_LOG(DEBUG_INFO, "Listening at SF%i on %.6lf Mhz. syncword is 0x%02x on spiport%i\n", rxdev->sf, (double)(rxdev->freq)/1000000, rxdev->syncword, rxdev->spiport);
+    rxlora_time = time(NULL);
     while (!exit_sig && !quit_sig) {
-        if(digitalRead(rxdev->dio[0]) == 1) {
+        now_time = time(NULL);
+        if(digitalRead(rxdev->dio[0]) == 1) {  /* read IO if RXDONE */
             if (pktrx[pt].empty) {
                 if (received(rxdev->spiport, &pktrx[pt]) == true) {
                     if (!strcmp(server_type, "relay")) {      // lora relay mode, trunking
@@ -1004,6 +1011,9 @@ int main(int argc, char *argv[])
                         pt = 0;
                 } 
             }
+        } else if ((long)now_time - (long)rxlora_time > KEEPALIVE_REC) { 
+            rxlora_time = now_time;
+            rxlora(rxdev, RXMODE_SCAN);  /* reset lora continue receive mode */
         }
     }
 

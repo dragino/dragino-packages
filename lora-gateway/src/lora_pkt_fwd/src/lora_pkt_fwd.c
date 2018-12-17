@@ -341,10 +341,10 @@ static int parse_SX1301_configuration(const char * conf_file) {
     /* point to the gateway configuration object */
     conf_obj = json_object_get_object(json_value_get_object(root_val), conf_obj_name);
     if (conf_obj == NULL) {
-        MSG_DEBUG(DEBUG_INFO, "INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
         return -1;
     } else {
-        MSG_DEBUG(DEBUG_INFO, "INFO: %s does contain a JSON object named %s, parsing SX1301 parameters\n", conf_file, conf_obj_name);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ %s does contain a JSON object named %s, parsing SX1301 parameters\n", conf_file, conf_obj_name);
     }
 
     /* set board configuration */
@@ -363,7 +363,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for clksrc seems wrong, please check\n");
         boardconf.clksrc = 0;
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: lorawan_public %d, clksrc %d\n", boardconf.lorawan_public, boardconf.clksrc);
+    MSG_DEBUG(DEBUG_INFO, "INFO~ lorawan_public %d, clksrc %d\n", boardconf.lorawan_public, boardconf.clksrc);
     /* all parameters parsed, submitting configuration to the HAL */
     if (lgw_board_setconf(boardconf) != LGW_HAL_SUCCESS) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ Failed to configure board\n");
@@ -374,7 +374,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     memset(&lbtconf, 0, sizeof lbtconf); /* initialize configuration structure */
     conf_lbt_obj = json_object_get_object(conf_obj, "lbt_cfg"); /* fetch value (if possible) */
     if (conf_lbt_obj == NULL) {
-        MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for LBT\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO~ no configuration for LBT\n");
     } else {
         val = json_object_get_value(conf_lbt_obj, "enable"); /* fetch value (if possible) */
         if (json_value_get_type(val) == JSONBoolean) {
@@ -402,7 +402,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             conf_array = json_object_get_array(conf_lbt_obj, "chan_cfg");
             if (conf_array != NULL) {
                 lbtconf.nb_channel = json_array_get_count( conf_array );
-                MSG_DEBUG(DEBUG_INFO, "INFO: %u LBT channels configured\n", lbtconf.nb_channel);
+                MSG_DEBUG(DEBUG_INFO, "INFO~ %u LBT channels configured\n", lbtconf.nb_channel);
             }
             for (i = 0; i < (int)lbtconf.nb_channel; i++) {
                 /* Sanity check */
@@ -439,7 +439,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
                 return -1;
             }
         } else {
-            MSG_DEBUG(DEBUG_INFO, "INFO: LBT is disabled\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ LBT is disabled\n");
         }
     }
 
@@ -453,7 +453,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             antenna_gain = 0;
         }
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: antenna_gain %d dBi\n", antenna_gain);
+    MSG_DEBUG(DEBUG_INFO, "INFO~ antenna_gain %d dBi\n", antenna_gain);
 
     /* set configuration for tx gains */
     memset(&txlut, 0, sizeof txlut); /* initialize configuration structure */
@@ -461,7 +461,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         snprintf(param_name, sizeof param_name, "tx_lut_%i", i); /* compose parameter path inside JSON structure */
         val = json_object_get_value(conf_obj, param_name); /* fetch value (if possible) */
         if (json_value_get_type(val) != JSONObject) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for tx gain lut %i\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ no configuration for tx gain lut %i\n", i);
             continue;
         }
         txlut.size++; /* update TX LUT size based on JSON object found in configuration file */
@@ -508,7 +508,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     }
     /* all parameters parsed, submitting configuration to the HAL */
     if (txlut.size > 0) {
-        MSG_DEBUG(DEBUG_INFO, "INFO: Configuring TX LUT with %u indexes\n", txlut.size);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Configuring TX LUT with %u indexes\n", txlut.size);
         if (lgw_txgain_setconf(&txlut) != LGW_HAL_SUCCESS) {
             MSG_DEBUG(DEBUG_ERROR, "ERROR~ Failed to configure concentrator TX Gain LUT\n");
             return -1;
@@ -523,7 +523,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         snprintf(param_name, sizeof param_name, "radio_%i", i); /* compose parameter path inside JSON structure */
         val = json_object_get_value(conf_obj, param_name); /* fetch value (if possible) */
         if (json_value_get_type(val) != JSONObject) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for radio %i\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ no configuration for radio %i\n", i);
             continue;
         }
         /* there is an object to configure that radio, let's parse it */
@@ -535,7 +535,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             rfconf.enable = false;
         }
         if (rfconf.enable == false) { /* radio disabled, nothing else to parse */
-            MSG_DEBUG(DEBUG_INFO, "INFO: radio %i disabled\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ radio %i disabled\n", i);
         } else  { /* radio enabled, will parse the other parameters */
             snprintf(param_name, sizeof param_name, "radio_%i.freq", i);
             rfconf.freq_hz = (uint32_t)json_object_dotget_number(conf_obj, param_name);
@@ -570,7 +570,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             } else {
                 rfconf.tx_enable = false;
             }
-            MSG_DEBUG(DEBUG_INFO, "INFO: radio %i enabled (type %s), center frequency %u, RSSI offset %f, tx enabled %d, tx_notch_freq %u\n", i, str, rfconf.freq_hz, rfconf.rssi_offset, rfconf.tx_enable, rfconf.tx_notch_freq);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ radio %i enabled (type %s), center frequency %u, RSSI offset %f, tx enabled %d, tx_notch_freq %u\n", i, str, rfconf.freq_hz, rfconf.rssi_offset, rfconf.tx_enable, rfconf.tx_notch_freq);
         }
         /* all parameters parsed, submitting configuration to the HAL */
         if (lgw_rxrf_setconf(i, rfconf) != LGW_HAL_SUCCESS) {
@@ -585,7 +585,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
         snprintf(param_name, sizeof param_name, "chan_multiSF_%i", i); /* compose parameter path inside JSON structure */
         val = json_object_get_value(conf_obj, param_name); /* fetch value (if possible) */
         if (json_value_get_type(val) != JSONObject) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for Lora multi-SF channel %i\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ no configuration for Lora multi-SF channel %i\n", i);
             continue;
         }
         /* there is an object to configure that Lora multi-SF channel, let's parse it */
@@ -597,14 +597,14 @@ static int parse_SX1301_configuration(const char * conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) { /* Lora multi-SF channel disabled, nothing else to parse */
-            MSG_DEBUG(DEBUG_INFO, "INFO: Lora multi-SF channel %i disabled\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ Lora multi-SF channel %i disabled\n", i);
         } else  { /* Lora multi-SF channel enabled, will parse the other parameters */
             snprintf(param_name, sizeof param_name, "chan_multiSF_%i.radio", i);
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, param_name);
             snprintf(param_name, sizeof param_name, "chan_multiSF_%i.if", i);
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, param_name);
             // TODO: handle individual SF enabling and disabling (spread_factor)
-            MSG_DEBUG(DEBUG_INFO, "INFO: Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 7 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 7 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
         }
         /* all parameters parsed, submitting configuration to the HAL */
         if (lgw_rxif_setconf(i, ifconf) != LGW_HAL_SUCCESS) {
@@ -617,7 +617,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     memset(&ifconf, 0, sizeof ifconf); /* initialize configuration structure */
     val = json_object_get_value(conf_obj, "chan_Lora_std"); /* fetch value (if possible) */
     if (json_value_get_type(val) != JSONObject) {
-        MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for Lora standard channel\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO~ no configuration for Lora standard channel\n");
     } else {
         val = json_object_dotget_value(conf_obj, "chan_Lora_std.enable");
         if (json_value_get_type(val) == JSONBoolean) {
@@ -626,7 +626,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: Lora standard channel %i disabled\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ Lora standard channel %i disabled\n", i);
         } else  {
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, "chan_Lora_std.radio");
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, "chan_Lora_std.if");
@@ -647,7 +647,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
                 case 12: ifconf.datarate = DR_LORA_SF12; break;
                 default: ifconf.datarate = DR_UNDEFINED;
             }
-            MSG_DEBUG(DEBUG_INFO, "INFO: Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf);
         }
         if (lgw_rxif_setconf(8, ifconf) != LGW_HAL_SUCCESS) {
             MSG_DEBUG(DEBUG_ERROR, "ERROR~ invalid configuration for Lora standard channel\n");
@@ -659,7 +659,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     memset(&ifconf, 0, sizeof ifconf); /* initialize configuration structure */
     val = json_object_get_value(conf_obj, "chan_FSK"); /* fetch value (if possible) */
     if (json_value_get_type(val) != JSONObject) {
-        MSG_DEBUG(DEBUG_INFO, "INFO: no configuration for FSK channel\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO~ no configuration for FSK channel\n");
     } else {
         val = json_object_dotget_value(conf_obj, "chan_FSK.enable");
         if (json_value_get_type(val) == JSONBoolean) {
@@ -668,7 +668,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: FSK channel %i disabled\n", i);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ FSK channel %i disabled\n", i);
         } else  {
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, "chan_FSK.radio");
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, "chan_FSK.if");
@@ -690,7 +690,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
             else if (bw <= 500000) ifconf.bandwidth = BW_500KHZ;
             else ifconf.bandwidth = BW_UNDEFINED;
 
-            MSG_DEBUG(DEBUG_INFO, "INFO: FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
         }
         if (lgw_rxif_setconf(9, ifconf) != LGW_HAL_SUCCESS) {
             MSG_DEBUG(DEBUG_ERROR, "ERROR~ invalid configuration for FSK channel\n");
@@ -720,10 +720,10 @@ static int parse_gateway_configuration(const char * conf_file) {
     /* point to the gateway configuration object */
     conf_obj = json_object_get_object(json_value_get_object(root_val), conf_obj_name);
     if (conf_obj == NULL) {
-        MSG_DEBUG(DEBUG_INFO, "INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
         return -1;
     } else {
-        MSG_DEBUG(DEBUG_INFO, "INFO: %s does contain a JSON object named %s, parsing gateway parameters\n", conf_file, conf_obj_name);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ %s does contain a JSON object named %s, parsing gateway parameters\n", conf_file, conf_obj_name);
     }
 
     /* gateway unique identifier (aka MAC address) (optional) */
@@ -731,47 +731,47 @@ static int parse_gateway_configuration(const char * conf_file) {
     if (str != NULL) {
         sscanf(str, "%llx", &ull);
         lgwm = ull;
-        MSG_DEBUG(DEBUG_INFO, "INFO: gateway MAC address is configured to %016llX\n", ull);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ gateway MAC address is configured to %016llX\n", ull);
     }
 
     /* server hostname or IP address (optional) */
     str = json_object_get_string(conf_obj, "server_address");
     if (str != NULL) {
         strncpy(serv_addr, str, sizeof serv_addr);
-        MSG_DEBUG(DEBUG_INFO, "INFO: server hostname or IP address is configured to \"%s\"\n", serv_addr);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ server hostname or IP address is configured to \"%s\"\n", serv_addr);
     }
 
     /* get up and down ports (optional) */
     val = json_object_get_value(conf_obj, "serv_port_up");
     if (val != NULL) {
         snprintf(serv_port_up, sizeof serv_port_up, "%u", (uint16_t)json_value_get_number(val));
-        MSG_DEBUG(DEBUG_INFO, "INFO: upstream port is configured to \"%s\"\n", serv_port_up);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ upstream port is configured to \"%s\"\n", serv_port_up);
     }
     val = json_object_get_value(conf_obj, "serv_port_down");
     if (val != NULL) {
         snprintf(serv_port_down, sizeof serv_port_down, "%u", (uint16_t)json_value_get_number(val));
-        MSG_DEBUG(DEBUG_INFO, "INFO: downstream port is configured to \"%s\"\n", serv_port_down);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ downstream port is configured to \"%s\"\n", serv_port_down);
     }
 
     /* get keep-alive interval (in seconds) for downstream (optional) */
     val = json_object_get_value(conf_obj, "keepalive_interval");
     if (val != NULL) {
         keepalive_time = (int)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: downstream keep-alive interval is configured to %u seconds\n", keepalive_time);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ downstream keep-alive interval is configured to %u seconds\n", keepalive_time);
     }
 
     /* get interval (in seconds) for statistics display (optional) */
     val = json_object_get_value(conf_obj, "stat_interval");
     if (val != NULL) {
         stat_interval = (unsigned)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: statistics display interval is configured to %u seconds\n", stat_interval);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ statistics display interval is configured to %u seconds\n", stat_interval);
     }
 
     /* get time-out value (in ms) for upstream datagrams (optional) */
     val = json_object_get_value(conf_obj, "push_timeout_ms");
     if (val != NULL) {
         push_timeout_half.tv_usec = 500 * (long int)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: upstream PUSH_DATA time-out is configured to %u ms\n", (unsigned)(push_timeout_half.tv_usec / 500));
+        MSG_DEBUG(DEBUG_INFO, "INFO~ upstream PUSH_DATA time-out is configured to %u ms\n", (unsigned)(push_timeout_half.tv_usec / 500));
     }
 
     /* packet filtering parameters */
@@ -779,40 +779,40 @@ static int parse_gateway_configuration(const char * conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         fwd_valid_pkt = (bool)json_value_get_boolean(val);
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: packets received with a valid CRC will%s be forwarded\n", (fwd_valid_pkt ? "" : " NOT"));
+    MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with a valid CRC will%s be forwarded\n", (fwd_valid_pkt ? "" : " NOT"));
     val = json_object_get_value(conf_obj, "forward_crc_error");
     if (json_value_get_type(val) == JSONBoolean) {
         fwd_error_pkt = (bool)json_value_get_boolean(val);
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: packets received with a CRC error will%s be forwarded\n", (fwd_error_pkt ? "" : " NOT"));
+    MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with a CRC error will%s be forwarded\n", (fwd_error_pkt ? "" : " NOT"));
     val = json_object_get_value(conf_obj, "forward_crc_disabled");
     if (json_value_get_type(val) == JSONBoolean) {
         fwd_nocrc_pkt = (bool)json_value_get_boolean(val);
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: packets received with no CRC will%s be forwarded\n", (fwd_nocrc_pkt ? "" : " NOT"));
+    MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with no CRC will%s be forwarded\n", (fwd_nocrc_pkt ? "" : " NOT"));
 
     /* GPS module TTY path (optional) */
     str = json_object_get_string(conf_obj, "gps_tty_path");
     if (str != NULL) {
         strncpy(gps_tty_path, str, sizeof gps_tty_path);
-        MSG_DEBUG(DEBUG_INFO, "INFO: GPS serial port path is configured to \"%s\"\n", gps_tty_path);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ GPS serial port path is configured to \"%s\"\n", gps_tty_path);
     }
 
     /* get reference coordinates */
     val = json_object_get_value(conf_obj, "ref_latitude");
     if (val != NULL) {
         reference_coord.lat = (double)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Reference latitude is configured to %f deg\n", reference_coord.lat);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Reference latitude is configured to %f deg\n", reference_coord.lat);
     }
     val = json_object_get_value(conf_obj, "ref_longitude");
     if (val != NULL) {
         reference_coord.lon = (double)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Reference longitude is configured to %f deg\n", reference_coord.lon);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Reference longitude is configured to %f deg\n", reference_coord.lon);
     }
     val = json_object_get_value(conf_obj, "ref_altitude");
     if (val != NULL) {
         reference_coord.alt = (short)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Reference altitude is configured to %i meters\n", reference_coord.alt);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Reference altitude is configured to %i meters\n", reference_coord.alt);
     }
 
     /* Gateway GPS coordinates hardcoding (aka. faking) option */
@@ -820,9 +820,9 @@ static int parse_gateway_configuration(const char * conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         gps_fake_enable = (bool)json_value_get_boolean(val);
         if (gps_fake_enable == true) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: fake GPS is enabled\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ fake GPS is enabled\n");
         } else {
-            MSG_DEBUG(DEBUG_INFO, "INFO: fake GPS is disabled\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ fake GPS is disabled\n");
         }
     }
 
@@ -834,7 +834,7 @@ static int parse_gateway_configuration(const char * conf_file) {
             MSG_DEBUG(DEBUG_ERROR, "ERROR~ invalid configuration for Beacon period, must be >= 6s\n");
             return -1;
         } else {
-            MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing period is configured to %u seconds\n", beacon_period);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ Beaconing period is configured to %u seconds\n", beacon_period);
         }
     }
 
@@ -842,56 +842,56 @@ static int parse_gateway_configuration(const char * conf_file) {
     val = json_object_get_value(conf_obj, "beacon_freq_hz");
     if (val != NULL) {
         beacon_freq_hz = (uint32_t)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing signal will be emitted at %u Hz\n", beacon_freq_hz);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Beaconing signal will be emitted at %u Hz\n", beacon_freq_hz);
     }
 
     /* Number of beacon channels (optional) */
     val = json_object_get_value(conf_obj, "beacon_freq_nb");
     if (val != NULL) {
         beacon_freq_nb = (uint8_t)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing channel number is set to %u\n", beacon_freq_nb);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Beaconing channel number is set to %u\n", beacon_freq_nb);
     }
 
     /* Frequency step between beacon channels (optional) */
     val = json_object_get_value(conf_obj, "beacon_freq_step");
     if (val != NULL) {
         beacon_freq_step = (uint32_t)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing channel frequency step is set to %uHz\n", beacon_freq_step);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Beaconing channel frequency step is set to %uHz\n", beacon_freq_step);
     }
 
     /* Beacon datarate (optional) */
     val = json_object_get_value(conf_obj, "beacon_datarate");
     if (val != NULL) {
         beacon_datarate = (uint8_t)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing datarate is set to SF%d\n", beacon_datarate);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Beaconing datarate is set to SF%d\n", beacon_datarate);
     }
 
     /* Beacon modulation bandwidth (optional) */
     val = json_object_get_value(conf_obj, "beacon_bw_hz");
     if (val != NULL) {
         beacon_bw_hz = (uint32_t)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing modulation bandwidth is set to %dHz\n", beacon_bw_hz);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Beaconing modulation bandwidth is set to %dHz\n", beacon_bw_hz);
     }
 
     /* Beacon TX power (optional) */
     val = json_object_get_value(conf_obj, "beacon_power");
     if (val != NULL) {
         beacon_power = (int8_t)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing TX power is set to %ddBm\n", beacon_power);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Beaconing TX power is set to %ddBm\n", beacon_power);
     }
 
     /* Beacon information descriptor (optional) */
     val = json_object_get_value(conf_obj, "beacon_infodesc");
     if (val != NULL) {
         beacon_infodesc = (uint8_t)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Beaconing information descriptor is set to %u\n", beacon_infodesc);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Beaconing information descriptor is set to %u\n", beacon_infodesc);
     }
 
     /* Auto-quit threshold (optional) */
     val = json_object_get_value(conf_obj, "autoquit_threshold");
     if (val != NULL) {
         autoquit_threshold = (uint32_t)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO: Auto-quit after %u non-acknowledged PULL_DATA\n", autoquit_threshold);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Auto-quit after %u non-acknowledged PULL_DATA\n", autoquit_threshold);
     }
 
     /* free JSON parsing data structure */
@@ -1093,17 +1093,17 @@ int main(void)
 
     /* display host endianness */
     #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-        MSG_DEBUG(DEBUG_INFO, "INFO: Little endian host\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Little endian host\n");
     #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-        MSG_DEBUG(DEBUG_INFO, "INFO: Big endian host\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Big endian host\n");
     #else
-        MSG_DEBUG(DEBUG_INFO, "INFO: Host endianness unknown\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO~ Host endianness unknown\n");
     #endif
 
     /* load configuration files */
     if (access(debug_cfg_path, R_OK) == 0) { /* if there is a debug conf, parse only the debug conf */
-        MSG_DEBUG(DEBUG_INFO, "INFO: found debug configuration file %s, parsing it\n", debug_cfg_path);
-        MSG_DEBUG(DEBUG_INFO, "INFO: other configuration files will be ignored\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO~ found debug configuration file %s, parsing it\n", debug_cfg_path);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ other configuration files will be ignored\n");
         x = parse_SX1301_configuration(debug_cfg_path);
         if (x != 0) {
             exit(EXIT_FAILURE);
@@ -1113,7 +1113,7 @@ int main(void)
             exit(EXIT_FAILURE);
         }
     } else if (access(global_cfg_path, R_OK) == 0) { /* if there is a global conf, parse it and then try to parse local conf  */
-        MSG_DEBUG(DEBUG_INFO, "INFO: found global configuration file %s, parsing it\n", global_cfg_path);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ found global configuration file %s, parsing it\n", global_cfg_path);
         x = parse_SX1301_configuration(global_cfg_path);
         if (x != 0) {
             exit(EXIT_FAILURE);
@@ -1123,13 +1123,13 @@ int main(void)
             exit(EXIT_FAILURE);
         }
         if (access(local_cfg_path, R_OK) == 0) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: found local configuration file %s, parsing it\n", local_cfg_path);
-            MSG_DEBUG(DEBUG_INFO, "INFO: redefined parameters will overwrite global parameters\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ found local configuration file %s, parsing it\n", local_cfg_path);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ redefined parameters will overwrite global parameters\n");
             parse_SX1301_configuration(local_cfg_path);
             parse_gateway_configuration(local_cfg_path);
         }
     } else if (access(local_cfg_path, R_OK) == 0) { /* if there is only a local conf, parse it and that's all */
-        MSG_DEBUG(DEBUG_INFO, "INFO: found local configuration file %s, parsing it\n", local_cfg_path);
+        MSG_DEBUG(DEBUG_INFO, "INFO~ found local configuration file %s, parsing it\n", local_cfg_path);
         x = parse_SX1301_configuration(local_cfg_path);
         if (x != 0) {
             exit(EXIT_FAILURE);
@@ -1151,7 +1151,7 @@ int main(void)
             gps_enabled = false;
             gps_ref_valid = false;
         } else {
-            MSG_DEBUG(DEBUG_INFO, "INFO: [main] TTY port %s open for GPS synchronization\n", gps_tty_path);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [main] TTY port %s open for GPS synchronization\n", gps_tty_path);
             gps_enabled = true;
             gps_ref_valid = false;
         }
@@ -1190,7 +1190,7 @@ int main(void)
         i = 1;
         for (q=result; q!=NULL; q=q->ai_next) {
             getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-            MSG_DEBUG(DEBUG_INFO, "INFO: [up] result %i host:%s service:%s\n", i, host_name, port_name);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [up] result %i host:%s service:%s\n", i, host_name, port_name);
             ++i;
         }
         exit(EXIT_FAILURE);
@@ -1222,7 +1222,7 @@ int main(void)
         i = 1;
         for (q=result; q!=NULL; q=q->ai_next) {
             getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-            MSG_DEBUG(DEBUG_INFO, "INFO: [down] result %i host:%s service:%s\n", i, host_name, port_name);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [down] result %i host:%s service:%s\n", i, host_name, port_name);
             ++i;
         }
         exit(EXIT_FAILURE);
@@ -1269,7 +1269,7 @@ int main(void)
     /* starting the concentrator */
     i = lgw_start();
     if (i == LGW_HAL_SUCCESS) {
-        MSG_DEBUG(DEBUG_INFO, "INFO: [main] concentrator started, packet can now be received\n");
+        MSG_DEBUG(DEBUG_INFO, "INFO~ [main] concentrator started, packet can now be received\n");
     } else {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] failed to start the concentrator\n");
         exit(EXIT_FAILURE);
@@ -1447,7 +1447,7 @@ int main(void)
         if (i != LGW_HAL_SUCCESS) {
             MSG_DEBUG(DEBUG_WARNING, "WARNING: # SX1301 time (PPS): unknown\n");
         } else {
-            MSG_DEBUG(DEBUG_INFO, "INFO: # SX1301 time (PPS): %u\n", trig_tstamp);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ # SX1301 time (PPS): %u\n", trig_tstamp);
         }
         jit_print_queue (&jit_queue, false, DEBUG_LOG);
         MSG_DEBUG(DEBUG_GPS, "### [GPS] ###\n");
@@ -1492,7 +1492,7 @@ int main(void)
 
         i = lgw_gps_disable(gps_tty_fd);
         if (i == LGW_HAL_SUCCESS) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: GPS closed successfully\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ GPS closed successfully\n");
         } else {
             MSG_DEBUG(DEBUG_WARNING, "WARNING: failed to close GPS successfully\n");
         }
@@ -1506,13 +1506,13 @@ int main(void)
         /* stop the hardware */
         i = lgw_stop();
         if (i == LGW_HAL_SUCCESS) {
-            MSG_DEBUG(DEBUG_INFO, "INFO: concentrator stopped successfully\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ concentrator stopped successfully\n");
         } else {
             MSG_DEBUG(DEBUG_WARNING, "WARNING: failed to stop concentrator successfully\n");
         }
     }
 
-    MSG_DEBUG(DEBUG_INFO, "INFO: Exiting packet forwarder program\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO~ Exiting packet forwarder program\n");
     if (sxradio)
         free(sxradio);
     exit(EXIT_SUCCESS);
@@ -1636,7 +1636,7 @@ void thread_up(void) {
             switch(p->status) {
                 case STAT_CRC_OK:
                     meas_nb_rx_ok += 1;
-                    MSG_DEBUG(DEBUG_INFO, "INFO: Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
+                    MSG_DEBUG(DEBUG_INFO, "INFO~ Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
                     if (!fwd_valid_pkt) {
                         pthread_mutex_unlock(&mx_meas_up);
                         continue; /* skip that packet */
@@ -1948,14 +1948,14 @@ void thread_up(void) {
                 //MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] ignored out-of sync ACK packet\n");
                 continue;
             } else {
-                MSG_DEBUG(DEBUG_INFO, "INFO: [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
                 meas_up_ack_rcv += 1;
                 break;
             }
         }
         pthread_mutex_unlock(&mx_meas_up);
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: End of upstream thread\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO~ End of upstream thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -2138,7 +2138,7 @@ void thread_down(void) {
         /* auto-quit if the threshold is crossed */
         if ((autoquit_threshold > 0) && (autoquit_cnt >= autoquit_threshold)) {
             exit_sig = true;
-            MSG_DEBUG(DEBUG_INFO, "INFO: [down] the last %u PULL_DATA were not ACKed, exiting application\n", autoquit_threshold);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [down] the last %u PULL_DATA were not ACKed, exiting application\n", autoquit_threshold);
             break;
         }
 
@@ -2243,7 +2243,7 @@ void thread_down(void) {
                         last_beacon_gps_time.tv_sec = next_beacon_gps_time.tv_sec; /* keep this beacon time as reference for next one to be programmed */
 
                         /* display beacon payload */
-                        MSG_DEBUG(DEBUG_INFO, "INFO: Beacon queued (count_us=%u, freq_hz=%u, size=%u):\n", beacon_pkt.count_us, beacon_pkt.freq_hz, beacon_pkt.size);
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ Beacon queued (count_us=%u, freq_hz=%u, size=%u):\n", beacon_pkt.count_us, beacon_pkt.freq_hz, beacon_pkt.size);
                         MSG( "   => " );
                         for (i = 0; i < beacon_pkt.size; ++i) {
                             MSG("%02X ", beacon_pkt.payload[i]);
@@ -2286,24 +2286,24 @@ void thread_down(void) {
             if (buff_down[3] == PKT_PULL_ACK) {
                 if ((buff_down[1] == token_h) && (buff_down[2] == token_l)) {
                     if (req_ack) {
-                        MSG_DEBUG(DEBUG_INFO, "INFO: [down] duplicate ACK received :)\n");
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ [down] duplicate ACK received :)\n");
                     } else { /* if that packet was not already acknowledged */
                         req_ack = true;
                         autoquit_cnt = 0;
                         pthread_mutex_lock(&mx_meas_dw);
                         meas_dw_ack_rcv += 1;
                         pthread_mutex_unlock(&mx_meas_dw);
-                        MSG_DEBUG(DEBUG_INFO, "INFO: [down] PULL_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
                     }
                 } else { /* out-of-sync token */
-                    MSG_DEBUG(DEBUG_INFO, "INFO: [down] received out-of-sync ACK\n");
+                    MSG_DEBUG(DEBUG_INFO, "INFO~ [down] received out-of-sync ACK\n");
                 }
                 continue;
             }
 
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
-            MSG_DEBUG(DEBUG_INFO, "INFO: [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
             fprintf(stdout, "RXTX~ %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 
             /* initialize TX struct and try to parse JSON */
@@ -2328,7 +2328,7 @@ void thread_down(void) {
                 /* TX procedure: send immediately */
                 sent_immediate = true;
                 downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_C;
-                MSG_DEBUG(DEBUG_INFO, "INFO: [down] a packet will be sent in \"immediate\" mode\n");
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [down] a packet will be sent in \"immediate\" mode\n");
             } else {
                 sent_immediate = false;
                 val = json_object_get_value(txpk_obj,"tmst");
@@ -2384,7 +2384,7 @@ void thread_down(void) {
                         json_value_free(root_val);
                         continue;
                     } else {
-                        MSG_DEBUG(DEBUG_INFO, "INFO: [down] a packet will be sent on timestamp value %u (calculated from GPS time)\n", txpkt.count_us);
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ [down] a packet will be sent on timestamp value %u (calculated from GPS time)\n", txpkt.count_us);
                     }
 
                     /* GPS timestamp is given, we consider it is a Class B downlink */
@@ -2622,25 +2622,25 @@ void thread_down(void) {
             send_tx_ack(buff_down[1], buff_down[2], jit_result);
         }
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: End of downstream thread\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO~ End of downstream thread\n");
 }
 
 void print_tx_status(uint8_t tx_status) {
     switch (tx_status) {
         case TX_OFF:
-            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned TX_OFF\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [jit] lgw_status returned TX_OFF\n");
             break;
         case TX_FREE:
-            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned TX_FREE\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [jit] lgw_status returned TX_FREE\n");
             break;
         case TX_EMITTING:
-            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned TX_EMITTING\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [jit] lgw_status returned TX_EMITTING\n");
             break;
         case TX_SCHEDULED:
-            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned TX_SCHEDULED\n");
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [jit] lgw_status returned TX_SCHEDULED\n");
             break;
         default:
-            MSG_DEBUG(DEBUG_INFO, "INFO: [jit] lgw_status returned UNKNOWN (%d)\n", tx_status);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [jit] lgw_status returned UNKNOWN (%d)\n", tx_status);
             break;
     }
 }
@@ -2682,7 +2682,7 @@ void thread_jit(void) {
                         pthread_mutex_lock(&mx_meas_dw);
                         meas_nb_beacon_sent += 1;
                         pthread_mutex_unlock(&mx_meas_dw);
-                        MSG_DEBUG(DEBUG_INFO, "INFO: Beacon dequeued (count_us=%u)\n", pkt.count_us);
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ Beacon dequeued (count_us=%u)\n", pkt.count_us);
                     }
 
                     /* send packet to concentrator */
@@ -2886,7 +2886,7 @@ void thread_gps(void) {
             wr_idx -= LGW_GPS_MIN_MSG_SIZE;
         }
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: End of GPS thread\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO~ End of GPS thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -2970,7 +2970,7 @@ void thread_valid(void) {
         }
         // printf("Time ref: %s, XTAL correct: %s (%.15lf)\n", ref_valid_local?"valid":"invalid", xtal_correct_ok?"valid":"invalid", xtal_correct); // DEBUG
     }
-    MSG_DEBUG(DEBUG_INFO, "INFO: End of validation thread\n");
+    MSG_DEBUG(DEBUG_INFO, "INFO~ End of validation thread\n");
 }
 
 /* --- EOF ------------------------------------------------------------------ */

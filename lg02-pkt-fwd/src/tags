@@ -6,71 +6,85 @@
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 ARRAY_MAX_CAPACITY	parson.c	34;"	d	file:
 ARRAY_SIZE	base64.c	29;"	d	file:
-ASSERT	radio.h	36;"	d
+ASSERT	radio.h	37;"	d
 BEACON_GUARD	jitqueue.c	22;"	d	file:
 BEACON_RESERVED	jitqueue.c	24;"	d	file:
-BW_125KHZ	radio.h	190;"	d
-BW_15K6HZ	radio.h	193;"	d
-BW_250KHZ	radio.h	189;"	d
-BW_31K2HZ	radio.h	192;"	d
-BW_500KHZ	radio.h	188;"	d
-BW_62K5HZ	radio.h	191;"	d
-BW_7K8HZ	radio.h	194;"	d
-BW_UNDEFINED	radio.h	187;"	d
+BW_125KHZ	radio.h	191;"	d
+BW_15K6HZ	radio.h	194;"	d
+BW_250KHZ	radio.h	190;"	d
+BW_31K2HZ	radio.h	193;"	d
+BW_500KHZ	radio.h	189;"	d
+BW_62K5HZ	radio.h	192;"	d
+BW_7K8HZ	radio.h	195;"	d
+BW_UNDEFINED	radio.h	188;"	d
 CRIT	base64.c	30;"	d	file:
-CR_LORA_4_5	radio.h	210;"	d
-CR_LORA_4_6	radio.h	211;"	d
-CR_LORA_4_7	radio.h	212;"	d
-CR_LORA_4_8	radio.h	213;"	d
-CR_UNDEFINED	radio.h	209;"	d
+CR_LORA_4_5	radio.h	211;"	d
+CR_LORA_4_6	radio.h	212;"	d
+CR_LORA_4_7	radio.h	213;"	d
+CR_LORA_4_8	radio.h	214;"	d
+CR_UNDEFINED	radio.h	210;"	d
 DEBUG	base64.c	33;"	d	file:
-DEBUG_BEACON	main.c	/^int DEBUG_BEACON = 0;     $/;"	v
-DEBUG_ERROR	main.c	/^int DEBUG_ERROR = 0;    $/;"	v
-DEBUG_GPS	main.c	/^int DEBUG_GPS = 0;     $/;"	v
+DEBUG_BEACON	lg01_pkt_fwd.c	/^int DEBUG_BEACON = 0;     $/;"	v
+DEBUG_BEACON	lg02_pkt_fwd.c	/^int DEBUG_BEACON = 0;     $/;"	v
+DEBUG_ERROR	lg01_pkt_fwd.c	/^int DEBUG_ERROR = 0;    $/;"	v
+DEBUG_ERROR	lg02_pkt_fwd.c	/^int DEBUG_ERROR = 0;    $/;"	v
+DEBUG_GPS	lg01_pkt_fwd.c	/^int DEBUG_GPS = 0;     $/;"	v
+DEBUG_GPS	lg02_pkt_fwd.c	/^int DEBUG_GPS = 0;     $/;"	v
+DEBUG_INFO	lg01_pkt_fwd.c	/^int DEBUG_INFO = 0;       $/;"	v
+DEBUG_INFO	lg02_pkt_fwd.c	/^int DEBUG_INFO = 0;       $/;"	v
 DEBUG_INFO	lg02_single_rx_tx.c	/^int DEBUG_INFO = 0;       $/;"	v
-DEBUG_INFO	main.c	/^int DEBUG_INFO = 0;       $/;"	v
 DEBUG_INFO	simple_spi_rw.c	/^int DEBUG_INFO = 0;$/;"	v
-DEBUG_JIT	main.c	/^int DEBUG_JIT = 0;$/;"	v
-DEBUG_JIT_ERROR	main.c	/^int DEBUG_JIT_ERROR = 0;  $/;"	v
-DEBUG_PKT_FWD	main.c	/^int DEBUG_PKT_FWD = 0;$/;"	v
-DEBUG_SPI	main.c	/^int DEBUG_SPI = 0;    $/;"	v
-DEBUG_TIMERSYNC	main.c	/^int DEBUG_TIMERSYNC = 0;  $/;"	v
-DEBUG_UCI	main.c	/^int DEBUG_UCI = 0;   $/;"	v
-DEBUG_WARNING	main.c	/^int DEBUG_WARNING = 0;   $/;"	v
-DEFAULT_KEEPALIVE	main.c	46;"	d	file:
-DEFAULT_STAT	main.c	47;"	d	file:
-DETECTIONTHRESH_SF6	radio.h	177;"	d
-DETECTIONTHRESH_SF7_TO_SF12	radio.h	176;"	d
-DR_LORA_MULTI	radio.h	205;"	d
-DR_LORA_SF10	radio.h	202;"	d
-DR_LORA_SF11	radio.h	203;"	d
-DR_LORA_SF12	radio.h	204;"	d
-DR_LORA_SF7	radio.h	199;"	d
-DR_LORA_SF8	radio.h	200;"	d
-DR_LORA_SF9	radio.h	201;"	d
-DR_UNDEFINED	radio.h	198;"	d
+DEBUG_JIT	lg01_pkt_fwd.c	/^int DEBUG_JIT = 0;$/;"	v
+DEBUG_JIT	lg02_pkt_fwd.c	/^int DEBUG_JIT = 0;$/;"	v
+DEBUG_JIT_ERROR	lg01_pkt_fwd.c	/^int DEBUG_JIT_ERROR = 0;  $/;"	v
+DEBUG_JIT_ERROR	lg02_pkt_fwd.c	/^int DEBUG_JIT_ERROR = 0;  $/;"	v
+DEBUG_PKT_FWD	lg01_pkt_fwd.c	/^int DEBUG_PKT_FWD = 0;$/;"	v
+DEBUG_PKT_FWD	lg02_pkt_fwd.c	/^int DEBUG_PKT_FWD = 0;$/;"	v
+DEBUG_SPI	lg01_pkt_fwd.c	/^int DEBUG_SPI = 0;    $/;"	v
+DEBUG_SPI	lg02_pkt_fwd.c	/^int DEBUG_SPI = 0;    $/;"	v
+DEBUG_TIMERSYNC	lg01_pkt_fwd.c	/^int DEBUG_TIMERSYNC = 0;  $/;"	v
+DEBUG_TIMERSYNC	lg02_pkt_fwd.c	/^int DEBUG_TIMERSYNC = 0;  $/;"	v
+DEBUG_UCI	lg01_pkt_fwd.c	/^int DEBUG_UCI = 0;   $/;"	v
+DEBUG_UCI	lg02_pkt_fwd.c	/^int DEBUG_UCI = 0;   $/;"	v
+DEBUG_WARNING	lg01_pkt_fwd.c	/^int DEBUG_WARNING = 0;   $/;"	v
+DEBUG_WARNING	lg02_pkt_fwd.c	/^int DEBUG_WARNING = 0;   $/;"	v
+DEFAULT_KEEPALIVE	lg01_pkt_fwd.c	46;"	d	file:
+DEFAULT_KEEPALIVE	lg02_pkt_fwd.c	46;"	d	file:
+DEFAULT_STAT	lg01_pkt_fwd.c	47;"	d	file:
+DEFAULT_STAT	lg02_pkt_fwd.c	47;"	d	file:
+DETECTIONTHRESH_SF6	radio.h	178;"	d
+DETECTIONTHRESH_SF7_TO_SF12	radio.h	177;"	d
+DR_LORA_MULTI	radio.h	206;"	d
+DR_LORA_SF10	radio.h	203;"	d
+DR_LORA_SF11	radio.h	204;"	d
+DR_LORA_SF12	radio.h	205;"	d
+DR_LORA_SF7	radio.h	200;"	d
+DR_LORA_SF8	radio.h	201;"	d
+DR_LORA_SF9	radio.h	202;"	d
+DR_UNDEFINED	radio.h	199;"	d
 ERROR	parson.c	31;"	d	file:
-FETCH_SLEEP_MS	main.c	50;"	d	file:
-GPIO_IN	radio.h	317;"	d
-GPIO_OUT	radio.h	316;"	d
-HIGH	radio.h	314;"	d
-IMMEDIATE	radio.h	39;"	d
-INVERTIQ2_OFF	radio.h	183;"	d
-INVERTIQ2_ON	radio.h	182;"	d
-INVERTIQ_RX_MASK	radio.h	166;"	d
-INVERTIQ_RX_OFF	radio.h	167;"	d
-INVERTIQ_RX_ON	radio.h	168;"	d
-INVERTIQ_TX_MASK	radio.h	169;"	d
-INVERTIQ_TX_OFF	radio.h	170;"	d
-INVERTIQ_TX_ON	radio.h	171;"	d
-IRQ_LORA_CDDETD_MASK	radio.h	128;"	d
-IRQ_LORA_CDDONE_MASK	radio.h	126;"	d
-IRQ_LORA_CRCERR_MASK	radio.h	123;"	d
-IRQ_LORA_FHSSCH_MASK	radio.h	127;"	d
-IRQ_LORA_HEADER_MASK	radio.h	124;"	d
-IRQ_LORA_RXDONE_MASK	radio.h	122;"	d
-IRQ_LORA_RXTOUT_MASK	radio.h	121;"	d
-IRQ_LORA_TXDONE_MASK	radio.h	125;"	d
+FETCH_SLEEP_MS	lg01_pkt_fwd.c	50;"	d	file:
+FETCH_SLEEP_MS	lg02_pkt_fwd.c	50;"	d	file:
+GPIO_IN	radio.h	320;"	d
+GPIO_OUT	radio.h	319;"	d
+HIGH	radio.h	317;"	d
+IMMEDIATE	radio.h	40;"	d
+INVERTIQ2_OFF	radio.h	184;"	d
+INVERTIQ2_ON	radio.h	183;"	d
+INVERTIQ_RX_MASK	radio.h	167;"	d
+INVERTIQ_RX_OFF	radio.h	168;"	d
+INVERTIQ_RX_ON	radio.h	169;"	d
+INVERTIQ_TX_MASK	radio.h	170;"	d
+INVERTIQ_TX_OFF	radio.h	171;"	d
+INVERTIQ_TX_ON	radio.h	172;"	d
+IRQ_LORA_CDDETD_MASK	radio.h	129;"	d
+IRQ_LORA_CDDONE_MASK	radio.h	127;"	d
+IRQ_LORA_CRCERR_MASK	radio.h	124;"	d
+IRQ_LORA_FHSSCH_MASK	radio.h	128;"	d
+IRQ_LORA_HEADER_MASK	radio.h	125;"	d
+IRQ_LORA_RXDONE_MASK	radio.h	123;"	d
+IRQ_LORA_RXTOUT_MASK	radio.h	122;"	d
+IRQ_LORA_TXDONE_MASK	radio.h	126;"	d
 JIT_ERROR_COLLISION_BEACON	jitqueue.h	/^    JIT_ERROR_COLLISION_BEACON, \/* A beacon is planned for this timeframe *\/$/;"	e	enum:jit_error_e
 JIT_ERROR_COLLISION_PACKET	jitqueue.h	/^    JIT_ERROR_COLLISION_PACKET, \/* A packet is already enqueued for this timeframe *\/$/;"	e	enum:jit_error_e
 JIT_ERROR_EMPTY	jitqueue.h	/^    JIT_ERROR_EMPTY,        \/* Downlink queue is empty *\/$/;"	e	enum:jit_error_e
@@ -100,100 +114,116 @@ JSON_Object	parson.h	/^typedef struct json_object_t JSON_Object;$/;"	t	typeref:s
 JSON_Value	parson.h	/^typedef struct json_value_t  JSON_Value;$/;"	t	typeref:struct:json_value_t
 JSON_Value_Type	parson.h	/^} JSON_Value_Type;$/;"	t	typeref:enum:json_value_type
 JSON_Value_Value	parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_value_value	file:
-LAT	main.c	/^static char LAT[16] = "LAT";$/;"	v	file:
-LNA_LOW_GAIN	radio.h	104;"	d
-LNA_MAX_GAIN	radio.h	102;"	d
-LNA_OFF_GAIN	radio.h	103;"	d
-LOCKFILE	radio.h	57;"	d
-LOCKMODE	radio.h	58;"	d
-LON	main.c	/^static char LON[16] = "LON";$/;"	v	file:
-LORA_MAC_PREAMBLE	radio.h	96;"	d
-LOW	radio.h	313;"	d
-MAP_DIO0_LORA_RXDONE	radio.h	132;"	d
-MAP_DIO0_LORA_TXDONE	radio.h	133;"	d
-MAP_DIO1_LORA_NOP	radio.h	135;"	d
-MAP_DIO1_LORA_RXTOUT	radio.h	134;"	d
-MAP_DIO2_LORA_NOP	radio.h	136;"	d
+LAT	lg01_pkt_fwd.c	/^static char LAT[16] = "LAT";$/;"	v	file:
+LAT	lg02_pkt_fwd.c	/^static char LAT[16] = "LAT";$/;"	v	file:
+LNA_LOW_GAIN	radio.h	105;"	d
+LNA_MAX_GAIN	radio.h	103;"	d
+LNA_OFF_GAIN	radio.h	104;"	d
+LOCKFILE	radio.h	58;"	d
+LOCKMODE	radio.h	59;"	d
+LON	lg01_pkt_fwd.c	/^static char LON[16] = "LON";$/;"	v	file:
+LON	lg02_pkt_fwd.c	/^static char LON[16] = "LON";$/;"	v	file:
+LORA_MAC_PREAMBLE	radio.h	97;"	d
+LOW	radio.h	316;"	d
+MAP_DIO0_LORA_RXDONE	radio.h	133;"	d
+MAP_DIO0_LORA_TXDONE	radio.h	134;"	d
+MAP_DIO1_LORA_NOP	radio.h	136;"	d
+MAP_DIO1_LORA_RXTOUT	radio.h	135;"	d
+MAP_DIO2_LORA_NOP	radio.h	137;"	d
 MAX	parson.c	40;"	d	file:
-MAXLINE	radio.h	160;"	d
+MAXLINE	radio.h	161;"	d
 MAX_NESTING	parson.c	36;"	d	file:
-MIN_FSK_PREAMB	main.c	65;"	d	file:
-MIN_LORA_PREAMB	main.c	63;"	d	file:
-MOD_FSK	main.c	140;"	d	file:
-MOD_LORA	main.c	139;"	d	file:
-MOD_UNDEFINED	main.c	138;"	d	file:
-MSG	radio.h	43;"	d
-MSG_DEBUG	radio.h	44;"	d
-MSG_LOG	radio.h	50;"	d
-NB_PKT_MAX	main.c	61;"	d	file:
+MIN_LORA_PREAMB	lg01_pkt_fwd.c	64;"	d	file:
+MIN_LORA_PREAMB	lg02_pkt_fwd.c	61;"	d	file:
+MOD_FSK	lg01_pkt_fwd.c	136;"	d	file:
+MOD_FSK	lg02_pkt_fwd.c	140;"	d	file:
+MOD_LORA	lg01_pkt_fwd.c	135;"	d	file:
+MOD_LORA	lg02_pkt_fwd.c	139;"	d	file:
+MOD_UNDEFINED	lg01_pkt_fwd.c	134;"	d	file:
+MOD_UNDEFINED	lg02_pkt_fwd.c	138;"	d	file:
+MSG	radio.h	44;"	d
+MSG_DEBUG	radio.h	45;"	d
+MSG_LOG	radio.h	51;"	d
 OBJECT_MAX_CAPACITY	parson.c	35;"	d	file:
-ON_GPS	radio.h	41;"	d
-OPMODE_CAD	radio.h	117;"	d
-OPMODE_FSRX	radio.h	114;"	d
-OPMODE_FSTX	radio.h	112;"	d
-OPMODE_LORA	radio.h	108;"	d
-OPMODE_MASK	radio.h	109;"	d
-OPMODE_RX	radio.h	115;"	d
-OPMODE_RX_SINGLE	radio.h	116;"	d
-OPMODE_SLEEP	radio.h	110;"	d
-OPMODE_STANDBY	radio.h	111;"	d
-OPMODE_TX	radio.h	113;"	d
+ON_GPS	radio.h	42;"	d
+OPMODE_CAD	radio.h	118;"	d
+OPMODE_FSRX	radio.h	115;"	d
+OPMODE_FSTX	radio.h	113;"	d
+OPMODE_LORA	radio.h	109;"	d
+OPMODE_MASK	radio.h	110;"	d
+OPMODE_RX	radio.h	116;"	d
+OPMODE_RX_SINGLE	radio.h	117;"	d
+OPMODE_SLEEP	radio.h	111;"	d
+OPMODE_STANDBY	radio.h	112;"	d
+OPMODE_TX	radio.h	114;"	d
 PARSON_VERSION	parson.h	35;"	d
-PAYLOAD_LENGTH	radio.h	98;"	d
-PKT_PULL_ACK	main.c	58;"	d	file:
-PKT_PULL_DATA	main.c	56;"	d	file:
-PKT_PULL_RESP	main.c	57;"	d	file:
-PKT_PUSH_ACK	main.c	55;"	d	file:
-PKT_PUSH_DATA	main.c	54;"	d	file:
-PKT_TX_ACK	main.c	59;"	d	file:
-PROTOCOL_VERSION	main.c	52;"	d	file:
-PULL_TIMEOUT_MS	main.c	49;"	d	file:
-PUSH_TIMEOUT_MS	main.c	48;"	d	file:
-QUEUESIZE	radio.h	277;"	d
+PAYLOAD_LENGTH	radio.h	99;"	d
+PKT_PULL_ACK	lg01_pkt_fwd.c	60;"	d	file:
+PKT_PULL_ACK	lg02_pkt_fwd.c	58;"	d	file:
+PKT_PULL_DATA	lg01_pkt_fwd.c	58;"	d	file:
+PKT_PULL_DATA	lg02_pkt_fwd.c	56;"	d	file:
+PKT_PULL_RESP	lg01_pkt_fwd.c	59;"	d	file:
+PKT_PULL_RESP	lg02_pkt_fwd.c	57;"	d	file:
+PKT_PUSH_ACK	lg01_pkt_fwd.c	57;"	d	file:
+PKT_PUSH_ACK	lg02_pkt_fwd.c	55;"	d	file:
+PKT_PUSH_DATA	lg01_pkt_fwd.c	56;"	d	file:
+PKT_PUSH_DATA	lg02_pkt_fwd.c	54;"	d	file:
+PKT_TX_ACK	lg01_pkt_fwd.c	61;"	d	file:
+PKT_TX_ACK	lg02_pkt_fwd.c	59;"	d	file:
+PROTOCOL_VERSION	lg01_pkt_fwd.c	54;"	d	file:
+PROTOCOL_VERSION	lg02_pkt_fwd.c	52;"	d	file:
+PULL_TIMEOUT_MS	lg01_pkt_fwd.c	49;"	d	file:
+PULL_TIMEOUT_MS	lg02_pkt_fwd.c	49;"	d	file:
+PUSH_PATH	lg01_pkt_fwd.c	70;"	d	file:
+PUSH_PATH	lg02_pkt_fwd.c	67;"	d	file:
+PUSH_TIMEOUT_MS	lg01_pkt_fwd.c	48;"	d	file:
+PUSH_TIMEOUT_MS	lg02_pkt_fwd.c	48;"	d	file:
+QUEUESIZE	radio.h	280;"	d
 RADIO1	lg02_single_rx_tx.c	21;"	d	file:
 RADIO2	lg02_single_rx_tx.c	22;"	d	file:
-READ_ACCESS	radio.h	319;"	d
-REG_DETECTION_OPTIMIZE	radio.h	89;"	d
-REG_DETECTION_THRESHOLD	radio.h	90;"	d
-REG_DIO_MAPPING_1	radio.h	72;"	d
-REG_DIO_MAPPING_2	radio.h	73;"	d
-REG_FIFO	radio.h	64;"	d
-REG_FIFO_ADDR_PTR	radio.h	66;"	d
-REG_FIFO_RX_BASE_AD	radio.h	68;"	d
-REG_FIFO_RX_CURRENT_ADDR	radio.h	70;"	d
-REG_FIFO_TX_BASE_AD	radio.h	67;"	d
-REG_FRF_LSB	radio.h	148;"	d
-REG_FRF_MID	radio.h	147;"	d
-REG_FRF_MSB	radio.h	146;"	d
-REG_HOP_PERIOD	radio.h	82;"	d
-REG_INVERTIQ	radio.h	153;"	d
-REG_INVERTIQ2	radio.h	154;"	d
-REG_IRQ_FLAGS	radio.h	71;"	d
-REG_IRQ_FLAGS_MASK	radio.h	80;"	d
-REG_LNA	radio.h	101;"	d
-REG_MAX_PAYLOAD_LENGTH	radio.h	81;"	d
-REG_MODEM_CONFIG	radio.h	74;"	d
-REG_MODEM_CONFIG2	radio.h	75;"	d
-REG_MODEM_CONFIG3	radio.h	76;"	d
-REG_OPMODE	radio.h	65;"	d
-REG_PACONFIG	radio.h	150;"	d
-REG_PADAC	radio.h	85;"	d
-REG_PARAMP	radio.h	151;"	d
-REG_PAYLOAD_LENGTH	radio.h	79;"	d
-REG_PKTRSSI	radio.h	86;"	d
-REG_PKT_SNR_VALUE	radio.h	78;"	d
-REG_PREAMBLE_LSB	radio.h	93;"	d
-REG_PREAMBLE_MSB	radio.h	92;"	d
-REG_RSSI	radio.h	87;"	d
-REG_RX_NB_BYTES	radio.h	69;"	d
-REG_SYMB_TIMEOUT_LSB	radio.h	77;"	d
-REG_SYNC_WORD	radio.h	83;"	d
-REG_VERSION	radio.h	84;"	d
-RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1	radio.h	157;"	d
-RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2	radio.h	158;"	d
+READ_ACCESS	radio.h	322;"	d
+REG_DETECTION_OPTIMIZE	radio.h	90;"	d
+REG_DETECTION_THRESHOLD	radio.h	91;"	d
+REG_DIO_MAPPING_1	radio.h	73;"	d
+REG_DIO_MAPPING_2	radio.h	74;"	d
+REG_FIFO	radio.h	65;"	d
+REG_FIFO_ADDR_PTR	radio.h	67;"	d
+REG_FIFO_RX_BASE_AD	radio.h	69;"	d
+REG_FIFO_RX_CURRENT_ADDR	radio.h	71;"	d
+REG_FIFO_TX_BASE_AD	radio.h	68;"	d
+REG_FRF_LSB	radio.h	149;"	d
+REG_FRF_MID	radio.h	148;"	d
+REG_FRF_MSB	radio.h	147;"	d
+REG_HOP_PERIOD	radio.h	83;"	d
+REG_INVERTIQ	radio.h	154;"	d
+REG_INVERTIQ2	radio.h	155;"	d
+REG_IRQ_FLAGS	radio.h	72;"	d
+REG_IRQ_FLAGS_MASK	radio.h	81;"	d
+REG_LNA	radio.h	102;"	d
+REG_MAX_PAYLOAD_LENGTH	radio.h	82;"	d
+REG_MODEM_CONFIG	radio.h	75;"	d
+REG_MODEM_CONFIG2	radio.h	76;"	d
+REG_MODEM_CONFIG3	radio.h	77;"	d
+REG_OPMODE	radio.h	66;"	d
+REG_PACONFIG	radio.h	151;"	d
+REG_PADAC	radio.h	86;"	d
+REG_PARAMP	radio.h	152;"	d
+REG_PAYLOAD_LENGTH	radio.h	80;"	d
+REG_PKTRSSI	radio.h	87;"	d
+REG_PKT_SNR_VALUE	radio.h	79;"	d
+REG_PREAMBLE_LSB	radio.h	94;"	d
+REG_PREAMBLE_MSB	radio.h	93;"	d
+REG_RSSI	radio.h	88;"	d
+REG_RX_NB_BYTES	radio.h	70;"	d
+REG_SYMB_TIMEOUT_LSB	radio.h	78;"	d
+REG_SYNC_WORD	radio.h	84;"	d
+REG_VERSION	radio.h	85;"	d
+RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1	radio.h	158;"	d
+RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2	radio.h	159;"	d
 RXMODE_RSSI	radio.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
 RXMODE_SCAN	radio.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
 RXMODE_SINGLE	radio.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
+RXRF_TIMEOUT_S	lg01_pkt_fwd.c	52;"	d	file:
 RX_MODE	lg02_single_rx_tx.c	19;"	d	file:
 SF10	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
 SF11	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
@@ -201,36 +231,43 @@ SF12	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
 SF7	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
 SF8	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
 SF9	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
-SPI_DEV_RX	radio.h	322;"	d
-SPI_DEV_TX	radio.h	323;"	d
-SPI_SPEED	radio.h	321;"	d
+SPI_DEV_RX	radio.h	325;"	d
+SPI_DEV_TX	radio.h	326;"	d
+SPI_SPEED	radio.h	324;"	d
 STARTING_CAPACITY	parson.c	33;"	d	file:
-STATUS_SIZE	main.c	69;"	d	file:
-STD_FSK_PREAMB	main.c	66;"	d	file:
-STD_LORA_PREAMB	main.c	64;"	d	file:
+STATUS_SIZE	lg01_pkt_fwd.c	68;"	d	file:
+STATUS_SIZE	lg02_pkt_fwd.c	65;"	d	file:
+STD_LORA_PREAMB	lg01_pkt_fwd.c	65;"	d	file:
+STD_LORA_PREAMB	lg02_pkt_fwd.c	62;"	d	file:
 SUCCESS	parson.c	32;"	d	file:
-SX1276_MC2_RX_PAYLOAD_CRCON	radio.h	139;"	d
-SX1276_MC3_AGCAUTO	radio.h	143;"	d
-SX1276_MC3_LOW_DATA_RATE_OPTIMIZE	radio.h	142;"	d
-TIMESTAMPED	radio.h	40;"	d
-TX_BUFF_SIZE	main.c	68;"	d	file:
+SX1276_MC2_RX_PAYLOAD_CRCON	radio.h	140;"	d
+SX1276_MC3_AGCAUTO	radio.h	144;"	d
+SX1276_MC3_LOW_DATA_RATE_OPTIMIZE	radio.h	143;"	d
+TIMESTAMPED	radio.h	41;"	d
+TX_BUFF_SIZE	lg01_pkt_fwd.c	67;"	d	file:
+TX_BUFF_SIZE	lg02_pkt_fwd.c	64;"	d	file:
 TX_JIT_DELAY	jitqueue.c	19;"	d	file:
 TX_MARGIN_DELAY	jitqueue.c	17;"	d	file:
 TX_MAX_ADVANCE_DELAY	jitqueue.c	20;"	d	file:
 TX_MODE	lg02_single_rx_tx.c	18;"	d	file:
 TX_START_DELAY	jitqueue.c	15;"	d	file:
-VERSION_STRING	main.c	43;"	d	file:
-WRITE_ACCESS	radio.h	320;"	d
+VERSION_STRING	lg01_pkt_fwd.c	43;"	d	file:
+VERSION_STRING	lg02_pkt_fwd.c	43;"	d	file:
+WRITE_ACCESS	radio.h	323;"	d
 _BASE64_H	base64.h	18;"	d
 _LORA_PKTFWD_JIT_H	jitqueue.h	2;"	d
 _RADIO_H	radio.h	13;"	d
-_XOPEN_SOURCE	main.c	18;"	d	file:
-_XOPEN_SOURCE	main.c	20;"	d	file:
+_XOPEN_SOURCE	lg01_pkt_fwd.c	18;"	d	file:
+_XOPEN_SOURCE	lg01_pkt_fwd.c	20;"	d	file:
+_XOPEN_SOURCE	lg02_pkt_fwd.c	18;"	d	file:
+_XOPEN_SOURCE	lg02_pkt_fwd.c	20;"	d	file:
 __compar_d_fn_t	jitqueue.c	/^typedef int (*__compar_d_fn_t) (const void *, const void *, void *);$/;"	t	file:
 already_running	radio.c	/^int already_running(void)$/;"	f
-alt	main.c	/^static int   alt=0;$/;"	v	file:
+alt	lg01_pkt_fwd.c	/^static int   alt=0;$/;"	v	file:
+alt	lg02_pkt_fwd.c	/^static int   alt=0;$/;"	v	file:
 array	parson.c	/^    JSON_Array  *array;$/;"	m	union:json_value_value	file:
-autoquit_threshold	main.c	/^static uint32_t autoquit_threshold = 0; \/* enable auto-quit after a number of non-acknowledged PULL_DATA (0 = disabled)*\/$/;"	v	file:
+autoquit_threshold	lg01_pkt_fwd.c	/^static uint32_t autoquit_threshold = 0; \/* enable auto-quit after a number of non-acknowledged PULL_DATA (0 = disabled)*\/$/;"	v	file:
+autoquit_threshold	lg02_pkt_fwd.c	/^static uint32_t autoquit_threshold = 0; \/* enable auto-quit after a number of non-acknowledged PULL_DATA (0 = disabled)*\/$/;"	v	file:
 b64_to_bin	base64.c	/^int b64_to_bin(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
 b64_to_bin_nopad	base64.c	/^int b64_to_bin_nopad(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
 bandwidth	radio.h	/^    uint8_t     bandwidth;      \/*!> modulation bandwidth (LoRa only) *\/$/;"	m	struct:pkt_tx_s
@@ -257,28 +294,38 @@ cr	lg02_single_rx_tx.c	/^static char cr[8] = "5";$/;"	v	file:
 cr	radio.h	/^    uint8_t cr;$/;"	m	struct:__anon2
 crc	radio.h	/^    uint16_t    crc;          \/*!> CRC that was received in the payload *\/$/;"	m	struct:pkt_rx_s
 crccheck	radio.c	/^void crccheck(uint8_t spidev, uint8_t nocrc)$/;"	f
-ctx	main.c	/^static struct uci_context * ctx = NULL; $/;"	v	typeref:struct:uci_context	file:
+ctx	lg01_pkt_fwd.c	/^static struct uci_context * ctx = NULL; $/;"	v	typeref:struct:uci_context	file:
+ctx	lg02_pkt_fwd.c	/^static struct uci_context * ctx = NULL; $/;"	v	typeref:struct:uci_context	file:
 datarate	radio.h	/^    uint32_t    datarate;       \/*!> TX datarate (baudrate for FSK, SF for LoRa) *\/$/;"	m	struct:pkt_tx_s
 desc	radio.h	/^    char desc[8];$/;"	m	struct:__anon2
-description	main.c	/^static char description[16] = "DESC";                        \/* used for free form description *\/$/;"	v	file:
+description	lg01_pkt_fwd.c	/^static char description[16] = "DESC";                        \/* used for free form description *\/$/;"	v	file:
+description	lg02_pkt_fwd.c	/^static char description[16] = "DESC";                        \/* used for free form description *\/$/;"	v	file:
 device	lg02_single_rx_tx.c	/^static int device = 49;$/;"	v	file:
-difftimespec	main.c	/^static double difftimespec(struct timespec end, struct timespec beginning) {$/;"	f	file:
+difftimespec	lg01_pkt_fwd.c	/^static double difftimespec(struct timespec end, struct timespec beginning) {$/;"	f	file:
+difftimespec	lg02_pkt_fwd.c	/^static double difftimespec(struct timespec end, struct timespec beginning) {$/;"	f	file:
 digitalRead	radio.c	/^int digitalRead(int gpio) {$/;"	f
 digitalWrite	radio.c	/^void digitalWrite(int gpio, int state)$/;"	f
 dio	radio.h	/^    uint8_t dio[3];$/;"	m	struct:__anon2
-email	main.c	/^static char email[32]  = "email";                        \/* used for contact email *\/$/;"	v	file:
+email	lg01_pkt_fwd.c	/^static char email[32]  = "email";                        \/* used for contact email *\/$/;"	v	file:
+email	lg02_pkt_fwd.c	/^static char email[32]  = "email";                        \/* used for contact email *\/$/;"	v	file:
 empty	radio.h	/^    uint8_t     empty;        \/*!> empty label *\/$/;"	m	struct:pkt_rx_s
+exit_sig	lg01_pkt_fwd.c	/^volatile bool exit_sig = false; \/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) *\/$/;"	v
+exit_sig	lg02_pkt_fwd.c	/^volatile bool exit_sig = false; \/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) *\/$/;"	v
 exit_sig	lg02_single_rx_tx.c	/^volatile bool exit_sig = false; \/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) *\/$/;"	v
-exit_sig	main.c	/^volatile bool exit_sig = false; \/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) *\/$/;"	v
 filepath	lg02_single_rx_tx.c	/^static char filepath[32] = {'\\0'};$/;"	v	file:
 freq	lg02_single_rx_tx.c	/^static char freq[16] = "868500000";            \/* frequency of radio *\/$/;"	v	file:
 freq	radio.h	/^    uint32_t freq;$/;"	m	struct:__anon2
 freq_hz	radio.h	/^    uint32_t    freq_hz;        \/*!> center frequency of TX *\/$/;"	m	struct:pkt_tx_s
-fwd_error_pkt	main.c	/^static bool fwd_error_pkt = false; \/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	v	file:
-fwd_nocrc_pkt	main.c	/^static bool fwd_nocrc_pkt = false; \/* packets with NO PAYLOAD CRC are NOT forwarded *\/$/;"	v	file:
-fwd_valid_pkt	main.c	/^static bool fwd_valid_pkt = true; \/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	v	file:
-gatewayid	main.c	/^static char gatewayid[64] = "GWID";$/;"	v	file:
-get_config	main.c	/^static bool get_config(const char *section, char *option, int len) {$/;"	f	file:
+fwd_error_pkt	lg01_pkt_fwd.c	/^static bool fwd_error_pkt = false; \/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	v	file:
+fwd_error_pkt	lg02_pkt_fwd.c	/^static bool fwd_error_pkt = false; \/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	v	file:
+fwd_nocrc_pkt	lg01_pkt_fwd.c	/^static bool fwd_nocrc_pkt = false; \/* packets with NO PAYLOAD CRC are NOT forwarded *\/$/;"	v	file:
+fwd_nocrc_pkt	lg02_pkt_fwd.c	/^static bool fwd_nocrc_pkt = false; \/* packets with NO PAYLOAD CRC are NOT forwarded *\/$/;"	v	file:
+fwd_valid_pkt	lg01_pkt_fwd.c	/^static bool fwd_valid_pkt = true; \/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	v	file:
+fwd_valid_pkt	lg02_pkt_fwd.c	/^static bool fwd_valid_pkt = true; \/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	v	file:
+gatewayid	lg01_pkt_fwd.c	/^static char gatewayid[64] = "GWID";$/;"	v	file:
+gatewayid	lg02_pkt_fwd.c	/^static char gatewayid[64] = "GWID";$/;"	v	file:
+get_config	lg01_pkt_fwd.c	/^static bool get_config(const char *section, char *option, int len) {$/;"	f	file:
+get_config	lg02_pkt_fwd.c	/^static bool get_config(const char *section, char *option, int len) {$/;"	f	file:
 get_processed_string	parson.c	/^static const char * get_processed_string(const char **string) {$/;"	f	file:
 get_radio_version	radio.c	/^bool get_radio_version(radiodev *dev)$/;"	f
 getversion	lg02_single_rx_tx.c	/^static bool getversion = false;$/;"	v	file:
@@ -300,7 +347,8 @@ jit_node_s	jitqueue.h	/^struct jit_node_s {$/;"	s
 jit_peek	jitqueue.c	/^enum jit_error_e jit_peek(struct jit_queue_s *queue, struct timeval *time, int *pkt_idx) {$/;"	f
 jit_pkt_type_e	jitqueue.h	/^enum jit_pkt_type_e {$/;"	g
 jit_print_queue	jitqueue.c	/^void jit_print_queue(struct jit_queue_s *queue, bool show_all, int debug_level) {$/;"	f
-jit_queue	main.c	/^static struct jit_queue_s jit_queue;$/;"	v	typeref:struct:jit_queue_s	file:
+jit_queue	lg01_pkt_fwd.c	/^static struct jit_queue_s jit_queue;$/;"	v	typeref:struct:jit_queue_s	file:
+jit_queue	lg02_pkt_fwd.c	/^static struct jit_queue_s jit_queue;$/;"	v	typeref:struct:jit_queue_s	file:
 jit_queue_init	jitqueue.c	/^void jit_queue_init(struct jit_queue_s *queue) {$/;"	f
 jit_queue_is_empty	jitqueue.c	/^bool jit_queue_is_empty(struct jit_queue_s *queue) {$/;"	f
 jit_queue_is_full	jitqueue.c	/^bool jit_queue_is_full(struct jit_queue_s *queue) {$/;"	f
@@ -358,47 +406,78 @@ json_value_init_string	parson.c	/^static JSON_Value * json_value_init_string(con
 json_value_t	parson.c	/^struct json_value_t {$/;"	s	file:
 json_value_type	parson.h	/^typedef enum json_value_type {$/;"	g
 json_value_value	parson.c	/^typedef union json_value_value {$/;"	u	file:
-keepalive_time	main.c	/^static int keepalive_time = DEFAULT_KEEPALIVE; \/* send a PULL_DATA request every X seconds, negative = disabled *\/$/;"	v	file:
-lat	main.c	/^static float lat=0.0;$/;"	v	file:
+keepalive_time	lg01_pkt_fwd.c	/^static int keepalive_time = DEFAULT_KEEPALIVE; \/* send a PULL_DATA request every X seconds, negative = disabled *\/$/;"	v	file:
+keepalive_time	lg02_pkt_fwd.c	/^static int keepalive_time = DEFAULT_KEEPALIVE; \/* send a PULL_DATA request every X seconds, negative = disabled *\/$/;"	v	file:
+lat	lg01_pkt_fwd.c	/^static float lat=0.0;$/;"	v	file:
+lat	lg02_pkt_fwd.c	/^static float lat=0.0;$/;"	v	file:
 lgw_spi_open	radio.c	/^int lgw_spi_open(char *spi_path) {$/;"	f
 lgw_spi_r	radio.c	/^static int lgw_spi_r(uint8_t spidev, uint8_t address, uint8_t *data) {$/;"	f	file:
 lgw_spi_w	radio.c	/^static int lgw_spi_w(uint8_t spidev, uint8_t address, uint8_t data) {$/;"	f	file:
-lgwm	main.c	/^static uint64_t lgwm = 0; \/* Lora gateway MAC address *\/$/;"	v	file:
+lgwm	lg01_pkt_fwd.c	/^static uint64_t lgwm = 0; \/* Lora gateway MAC address *\/$/;"	v	file:
+lgwm	lg02_pkt_fwd.c	/^static uint64_t lgwm = 0; \/* Lora gateway MAC address *\/$/;"	v	file:
 lockfile	radio.c	/^int lockfile(int fd)$/;"	f
-logdebug	main.c	/^static char logdebug[4] = "DEB";          \/* debug info option *\/$/;"	v	file:
-lon	main.c	/^static float lon=0.0;$/;"	v	file:
+logdebug	lg01_pkt_fwd.c	/^static char logdebug[4] = "DEB";          \/* debug info option *\/$/;"	v	file:
+logdebug	lg02_pkt_fwd.c	/^static char logdebug[4] = "DEB";          \/* debug info option *\/$/;"	v	file:
+lon	lg01_pkt_fwd.c	/^static float lon=0.0;$/;"	v	file:
+lon	lg02_pkt_fwd.c	/^static float lon=0.0;$/;"	v	file:
+main	lg01_pkt_fwd.c	/^int main(int argc, char *argv[])$/;"	f
+main	lg02_pkt_fwd.c	/^int main(int argc, char *argv[])$/;"	f
 main	lg02_single_rx_tx.c	/^int main(int argc, char *argv[])$/;"	f
-main	main.c	/^int main(int argc, char *argv[])$/;"	f
 main	simple_spi_rw.c	/^int main (int argc, char *argv[]) {$/;"	f
-meas_dw_ack_rcv	main.c	/^static uint32_t meas_dw_ack_rcv = 0; \/* number of PULL requests acknowledged for downstream traffic *\/$/;"	v	file:
-meas_dw_dgram_rcv	main.c	/^static uint32_t meas_dw_dgram_rcv = 0; \/* count PULL response packets received for downstream traffic *\/$/;"	v	file:
-meas_dw_network_byte	main.c	/^static uint32_t meas_dw_network_byte = 0; \/* sum of UDP bytes sent for upstream traffic *\/$/;"	v	file:
-meas_dw_payload_byte	main.c	/^static uint32_t meas_dw_payload_byte = 0; \/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v	file:
-meas_dw_pull_sent	main.c	/^static uint32_t meas_dw_pull_sent = 0; \/* number of PULL requests sent for downstream traffic *\/$/;"	v	file:
-meas_nb_rx_bad	main.c	/^static uint32_t meas_nb_rx_bad = 0; \/* count packets received with PAYLOAD CRC ERROR *\/$/;"	v	file:
-meas_nb_rx_nocrc	main.c	/^static uint32_t meas_nb_rx_nocrc = 0; \/* count packets received with NO PAYLOAD CRC *\/$/;"	v	file:
-meas_nb_rx_ok	main.c	/^static uint32_t meas_nb_rx_ok = 0; \/* count packets received with PAYLOAD CRC OK *\/$/;"	v	file:
-meas_nb_rx_rcv	main.c	/^static uint32_t meas_nb_rx_rcv = 0; \/* count packets received *\/$/;"	v	file:
-meas_nb_tx_fail	main.c	/^static uint32_t meas_nb_tx_fail = 0; \/* count packets were TX failed for other reasons *\/$/;"	v	file:
-meas_nb_tx_ok	main.c	/^static uint32_t meas_nb_tx_ok = 0; \/* count packets emitted successfully *\/$/;"	v	file:
-meas_nb_tx_rejected_collision_beacon	main.c	/^static uint32_t meas_nb_tx_rejected_collision_beacon = 0; \/* count packets were TX request were rejected due to collision with a beac  on already programmed *\/$/;"	v	file:
-meas_nb_tx_rejected_collision_packet	main.c	/^static uint32_t meas_nb_tx_rejected_collision_packet = 0; \/* count packets were TX request were rejected due to collision with anothe  r packet already programmed *\/$/;"	v	file:
-meas_nb_tx_rejected_too_early	main.c	/^static uint32_t meas_nb_tx_rejected_too_early = 0; \/* count packets were TX request were rejected because timestamp is too much in ad  vance *\/$/;"	v	file:
-meas_nb_tx_rejected_too_late	main.c	/^static uint32_t meas_nb_tx_rejected_too_late = 0; \/* count packets were TX request were rejected because it is too late to program it   *\/$/;"	v	file:
-meas_nb_tx_requested	main.c	/^static uint32_t meas_nb_tx_requested = 0; \/* count TX request from server (downlinks) *\/$/;"	v	file:
-meas_up_ack_rcv	main.c	/^static uint32_t meas_up_ack_rcv = 0; \/* number of datagrams acknowledged for upstream traffic *\/$/;"	v	file:
-meas_up_dgram_sent	main.c	/^static uint32_t meas_up_dgram_sent = 0; \/* number of datagrams sent for upstream traffic *\/$/;"	v	file:
-meas_up_network_byte	main.c	/^static uint32_t meas_up_network_byte = 0; \/* sum of UDP bytes sent for upstream traffic *\/$/;"	v	file:
-meas_up_payload_byte	main.c	/^static uint32_t meas_up_payload_byte = 0; \/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v	file:
-meas_up_pkt_fwd	main.c	/^static uint32_t meas_up_pkt_fwd = 0; \/* number of radio packet forwarded to the server *\/$/;"	v	file:
+meas_dw_ack_rcv	lg01_pkt_fwd.c	/^static uint32_t meas_dw_ack_rcv = 0; \/* number of PULL requests acknowledged for downstream traffic *\/$/;"	v	file:
+meas_dw_ack_rcv	lg02_pkt_fwd.c	/^static uint32_t meas_dw_ack_rcv = 0; \/* number of PULL requests acknowledged for downstream traffic *\/$/;"	v	file:
+meas_dw_dgram_rcv	lg01_pkt_fwd.c	/^static uint32_t meas_dw_dgram_rcv = 0; \/* count PULL response packets received for downstream traffic *\/$/;"	v	file:
+meas_dw_dgram_rcv	lg02_pkt_fwd.c	/^static uint32_t meas_dw_dgram_rcv = 0; \/* count PULL response packets received for downstream traffic *\/$/;"	v	file:
+meas_dw_network_byte	lg01_pkt_fwd.c	/^static uint32_t meas_dw_network_byte = 0; \/* sum of UDP bytes sent for upstream traffic *\/$/;"	v	file:
+meas_dw_network_byte	lg02_pkt_fwd.c	/^static uint32_t meas_dw_network_byte = 0; \/* sum of UDP bytes sent for upstream traffic *\/$/;"	v	file:
+meas_dw_payload_byte	lg01_pkt_fwd.c	/^static uint32_t meas_dw_payload_byte = 0; \/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v	file:
+meas_dw_payload_byte	lg02_pkt_fwd.c	/^static uint32_t meas_dw_payload_byte = 0; \/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v	file:
+meas_dw_pull_sent	lg01_pkt_fwd.c	/^static uint32_t meas_dw_pull_sent = 0; \/* number of PULL requests sent for downstream traffic *\/$/;"	v	file:
+meas_dw_pull_sent	lg02_pkt_fwd.c	/^static uint32_t meas_dw_pull_sent = 0; \/* number of PULL requests sent for downstream traffic *\/$/;"	v	file:
+meas_nb_rx_bad	lg01_pkt_fwd.c	/^static uint32_t meas_nb_rx_bad = 0; \/* count packets received with PAYLOAD CRC ERROR *\/$/;"	v	file:
+meas_nb_rx_bad	lg02_pkt_fwd.c	/^static uint32_t meas_nb_rx_bad = 0; \/* count packets received with PAYLOAD CRC ERROR *\/$/;"	v	file:
+meas_nb_rx_nocrc	lg01_pkt_fwd.c	/^static uint32_t meas_nb_rx_nocrc = 0; \/* count packets received with NO PAYLOAD CRC *\/$/;"	v	file:
+meas_nb_rx_nocrc	lg02_pkt_fwd.c	/^static uint32_t meas_nb_rx_nocrc = 0; \/* count packets received with NO PAYLOAD CRC *\/$/;"	v	file:
+meas_nb_rx_ok	lg01_pkt_fwd.c	/^static uint32_t meas_nb_rx_ok = 0; \/* count packets received with PAYLOAD CRC OK *\/$/;"	v	file:
+meas_nb_rx_ok	lg02_pkt_fwd.c	/^static uint32_t meas_nb_rx_ok = 0; \/* count packets received with PAYLOAD CRC OK *\/$/;"	v	file:
+meas_nb_rx_rcv	lg01_pkt_fwd.c	/^static uint32_t meas_nb_rx_rcv = 0; \/* count packets received *\/$/;"	v	file:
+meas_nb_rx_rcv	lg02_pkt_fwd.c	/^static uint32_t meas_nb_rx_rcv = 0; \/* count packets received *\/$/;"	v	file:
+meas_nb_tx_fail	lg01_pkt_fwd.c	/^static uint32_t meas_nb_tx_fail = 0; \/* count packets were TX failed for other reasons *\/$/;"	v	file:
+meas_nb_tx_fail	lg02_pkt_fwd.c	/^static uint32_t meas_nb_tx_fail = 0; \/* count packets were TX failed for other reasons *\/$/;"	v	file:
+meas_nb_tx_ok	lg01_pkt_fwd.c	/^static uint32_t meas_nb_tx_ok = 0; \/* count packets emitted successfully *\/$/;"	v	file:
+meas_nb_tx_ok	lg02_pkt_fwd.c	/^static uint32_t meas_nb_tx_ok = 0; \/* count packets emitted successfully *\/$/;"	v	file:
+meas_nb_tx_rejected_collision_beacon	lg01_pkt_fwd.c	/^static uint32_t meas_nb_tx_rejected_collision_beacon = 0; \/* count packets were TX request were rejected due to collision with a beac  on already programmed *\/$/;"	v	file:
+meas_nb_tx_rejected_collision_beacon	lg02_pkt_fwd.c	/^static uint32_t meas_nb_tx_rejected_collision_beacon = 0; \/* count packets were TX request were rejected due to collision with a beac  on already programmed *\/$/;"	v	file:
+meas_nb_tx_rejected_collision_packet	lg01_pkt_fwd.c	/^static uint32_t meas_nb_tx_rejected_collision_packet = 0; \/* count packets were TX request were rejected due to collision with anothe  r packet already programmed *\/$/;"	v	file:
+meas_nb_tx_rejected_collision_packet	lg02_pkt_fwd.c	/^static uint32_t meas_nb_tx_rejected_collision_packet = 0; \/* count packets were TX request were rejected due to collision with anothe  r packet already programmed *\/$/;"	v	file:
+meas_nb_tx_rejected_too_early	lg01_pkt_fwd.c	/^static uint32_t meas_nb_tx_rejected_too_early = 0; \/* count packets were TX request were rejected because timestamp is too much in ad  vance *\/$/;"	v	file:
+meas_nb_tx_rejected_too_early	lg02_pkt_fwd.c	/^static uint32_t meas_nb_tx_rejected_too_early = 0; \/* count packets were TX request were rejected because timestamp is too much in ad  vance *\/$/;"	v	file:
+meas_nb_tx_rejected_too_late	lg01_pkt_fwd.c	/^static uint32_t meas_nb_tx_rejected_too_late = 0; \/* count packets were TX request were rejected because it is too late to program it   *\/$/;"	v	file:
+meas_nb_tx_rejected_too_late	lg02_pkt_fwd.c	/^static uint32_t meas_nb_tx_rejected_too_late = 0; \/* count packets were TX request were rejected because it is too late to program it   *\/$/;"	v	file:
+meas_nb_tx_requested	lg01_pkt_fwd.c	/^static uint32_t meas_nb_tx_requested = 0; \/* count TX request from server (downlinks) *\/$/;"	v	file:
+meas_nb_tx_requested	lg02_pkt_fwd.c	/^static uint32_t meas_nb_tx_requested = 0; \/* count TX request from server (downlinks) *\/$/;"	v	file:
+meas_up_ack_rcv	lg01_pkt_fwd.c	/^static uint32_t meas_up_ack_rcv = 0; \/* number of datagrams acknowledged for upstream traffic *\/$/;"	v	file:
+meas_up_ack_rcv	lg02_pkt_fwd.c	/^static uint32_t meas_up_ack_rcv = 0; \/* number of datagrams acknowledged for upstream traffic *\/$/;"	v	file:
+meas_up_dgram_sent	lg01_pkt_fwd.c	/^static uint32_t meas_up_dgram_sent = 0; \/* number of datagrams sent for upstream traffic *\/$/;"	v	file:
+meas_up_dgram_sent	lg02_pkt_fwd.c	/^static uint32_t meas_up_dgram_sent = 0; \/* number of datagrams sent for upstream traffic *\/$/;"	v	file:
+meas_up_network_byte	lg01_pkt_fwd.c	/^static uint32_t meas_up_network_byte = 0; \/* sum of UDP bytes sent for upstream traffic *\/$/;"	v	file:
+meas_up_network_byte	lg02_pkt_fwd.c	/^static uint32_t meas_up_network_byte = 0; \/* sum of UDP bytes sent for upstream traffic *\/$/;"	v	file:
+meas_up_payload_byte	lg01_pkt_fwd.c	/^static uint32_t meas_up_payload_byte = 0; \/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v	file:
+meas_up_payload_byte	lg02_pkt_fwd.c	/^static uint32_t meas_up_payload_byte = 0; \/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v	file:
+meas_up_pkt_fwd	lg01_pkt_fwd.c	/^static uint32_t meas_up_pkt_fwd = 0; \/* number of radio packet forwarded to the server *\/$/;"	v	file:
+meas_up_pkt_fwd	lg02_pkt_fwd.c	/^static uint32_t meas_up_pkt_fwd = 0; \/* number of radio packet forwarded to the server *\/$/;"	v	file:
 mode	lg02_single_rx_tx.c	/^static int mode = TX_MODE;$/;"	v	file:
-mx_concent	main.c	/^static pthread_mutex_t mx_concent = PTHREAD_MUTEX_INITIALIZER; \/* control access to the concentrator *\/$/;"	v	file:
 mx_jit_queue	jitqueue.c	/^static pthread_mutex_t mx_jit_queue = PTHREAD_MUTEX_INITIALIZER; \/* control access to JIT queue *\/$/;"	v	file:
-mx_meas_dw	main.c	/^static pthread_mutex_t mx_meas_dw = PTHREAD_MUTEX_INITIALIZER; \/* control access to the downstream measurements *\/$/;"	v	file:
-mx_meas_up	main.c	/^static pthread_mutex_t mx_meas_up = PTHREAD_MUTEX_INITIALIZER; \/* control access to the upstream measurements *\/$/;"	v	file:
+mx_meas_dw	lg01_pkt_fwd.c	/^static pthread_mutex_t mx_meas_dw = PTHREAD_MUTEX_INITIALIZER; \/* control access to the downstream measurements *\/$/;"	v	file:
+mx_meas_dw	lg02_pkt_fwd.c	/^static pthread_mutex_t mx_meas_dw = PTHREAD_MUTEX_INITIALIZER; \/* control access to the downstream measurements *\/$/;"	v	file:
+mx_meas_up	lg01_pkt_fwd.c	/^static pthread_mutex_t mx_meas_up = PTHREAD_MUTEX_INITIALIZER; \/* control access to the upstream measurements *\/$/;"	v	file:
+mx_meas_up	lg02_pkt_fwd.c	/^static pthread_mutex_t mx_meas_up = PTHREAD_MUTEX_INITIALIZER; \/* control access to the upstream measurements *\/$/;"	v	file:
+mx_radio_lock	lg01_pkt_fwd.c	/^static pthread_mutex_t mx_radio_lock = PTHREAD_MUTEX_INITIALIZER; \/* control access to the radio device *\/$/;"	v	file:
 names	parson.c	/^    const char **names;$/;"	m	struct:json_object_t	file:
-net_mac_h	main.c	/^static uint32_t net_mac_h; \/* Most Significant Nibble, network order *\/$/;"	v	file:
-net_mac_l	main.c	/^static uint32_t net_mac_l; \/* Least Significant Nibble, network order *\/$/;"	v	file:
+net_mac_h	lg01_pkt_fwd.c	/^static uint32_t net_mac_h; \/* Most Significant Nibble, network order *\/$/;"	v	file:
+net_mac_h	lg02_pkt_fwd.c	/^static uint32_t net_mac_h; \/* Most Significant Nibble, network order *\/$/;"	v	file:
+net_mac_l	lg01_pkt_fwd.c	/^static uint32_t net_mac_l; \/* Least Significant Nibble, network order *\/$/;"	v	file:
+net_mac_l	lg02_pkt_fwd.c	/^static uint32_t net_mac_l; \/* Least Significant Nibble, network order *\/$/;"	v	file:
 no_crc	radio.h	/^    bool        no_crc;         \/*!> if true, do not send a CRC in the packet *\/$/;"	m	struct:pkt_tx_s
 no_header	radio.h	/^    bool        no_header;      \/*!> if true, enable implicit header mode (LoRa), fixed length (FSK) *\/$/;"	m	struct:pkt_tx_s
 nocrc	radio.h	/^    uint8_t nocrc;$/;"	m	struct:__anon2
@@ -426,53 +505,80 @@ parson_strndup	parson.c	/^static char * parson_strndup(const char *string, size_
 payload	radio.h	/^    uint8_t     payload[256];   \/*!> buffer containing the payload *\/$/;"	m	struct:pkt_tx_s
 payload	radio.h	/^    uint8_t     payload[256]; \/*!> buffer containing the payload *\/$/;"	m	struct:pkt_rx_s
 pkt	jitqueue.h	/^    struct pkt_tx_s pkt;        \/* TX packet *\/$/;"	m	struct:jit_node_s	typeref:struct:jit_node_s::pkt_tx_s
-pkt_alloc	main.c	/^static struct pkt_rx_s *pkt_alloc(void) {$/;"	f	file:
+pkt_alloc	lg01_pkt_fwd.c	/^static struct pkt_rx_s *pkt_alloc(void) {$/;"	f	file:
+pkt_alloc	lg02_pkt_fwd.c	/^static struct pkt_rx_s *pkt_alloc(void) {$/;"	f	file:
 pkt_rx_s	radio.h	/^struct pkt_rx_s {$/;"	s
 pkt_tx_s	radio.h	/^struct pkt_tx_s {$/;"	s
 pkt_type	jitqueue.h	/^    enum jit_pkt_type_e pkt_type;   \/* Packet type: Downlink, Beacon... *\/$/;"	m	struct:jit_node_s	typeref:enum:jit_node_s::jit_pkt_type_e
-pktrx	main.c	/^static struct pkt_rx_s pktrx[QUEUESIZE]; \/* allocat queuesize struct of pkt_rx_s *\/$/;"	v	typeref:struct:pkt_rx_s	file:
-pktrx_clean	main.c	/^static void pktrx_clean(struct pkt_rx_s *rx) {$/;"	f	file:
-platform	main.c	/^static char platform[16] = "LG02\/OLG02";  \/* platform definition *\/$/;"	v	file:
-port	main.c	/^static char port[8] = "port"; \/* server port for upstream traffic *\/$/;"	v	file:
+pktrx	lg01_pkt_fwd.c	/^static struct pkt_rx_s pktrx[QUEUESIZE]; \/* allocat queuesize struct of pkt_rx_s *\/$/;"	v	typeref:struct:pkt_rx_s	file:
+pktrx	lg02_pkt_fwd.c	/^static struct pkt_rx_s pktrx[QUEUESIZE]; \/* allocat queuesize struct of pkt_rx_s *\/$/;"	v	typeref:struct:pkt_rx_s	file:
+pktrx_clean	lg01_pkt_fwd.c	/^static void pktrx_clean(struct pkt_rx_s *rx) {$/;"	f	file:
+pktrx_clean	lg02_pkt_fwd.c	/^static void pktrx_clean(struct pkt_rx_s *rx) {$/;"	f	file:
+platform	lg01_pkt_fwd.c	/^static char platform[16] = "LG01\/OLG01";  \/* platform definition *\/$/;"	v	file:
+platform	lg02_pkt_fwd.c	/^static char platform[16] = "LG02\/OLG02";  \/* platform definition *\/$/;"	v	file:
+port	lg01_pkt_fwd.c	/^static char port[8] = "port"; \/* server port for upstream traffic *\/$/;"	v	file:
+port	lg02_pkt_fwd.c	/^static char port[8] = "port"; \/* server port for upstream traffic *\/$/;"	v	file:
 post_delay	jitqueue.h	/^    uint32_t post_delay;            \/* Amount of time after packet timestamp to be reserved (time on air) *\/$/;"	m	struct:jit_node_s
+power	radio.h	/^    uint8_t power;$/;"	m	struct:__anon2
 pre_delay	jitqueue.h	/^    uint32_t pre_delay;             \/* Amount of time before packet timestamp to be reserved *\/$/;"	m	struct:jit_node_s
 preamble	radio.h	/^    uint16_t    preamble;       \/*!> set the preamble length, 0 for default *\/$/;"	m	struct:pkt_tx_s
-prev	main.c	/^static int pt = 0, prev = 0;  \/* pt is point of receive packet postion,  prev is point of process packet thread*\/$/;"	v	file:
+prev	lg01_pkt_fwd.c	/^static int pt = 0, prev = 0;  \/* pt is point of receive packet postion,  prev is point of process packet thread*\/$/;"	v	file:
+prev	lg02_pkt_fwd.c	/^static int pt = 0, prev = 0;  \/* pt is point of receive packet postion,  prev is point of process packet thread*\/$/;"	v	file:
 print_help	lg02_single_rx_tx.c	/^void print_help(void) {$/;"	f
 prlen	lg02_single_rx_tx.c	/^static char prlen[8] = "8";$/;"	v	file:
 prlen	radio.h	/^    uint8_t prlen;$/;"	m	struct:__anon2
-provider	main.c	/^static char provider[16] = "provider";$/;"	v	file:
-pt	main.c	/^static int pt = 0, prev = 0;  \/* pt is point of receive packet postion,  prev is point of process packet thread*\/$/;"	v	file:
-pull_timeout	main.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
-push_timeout_half	main.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+provider	lg01_pkt_fwd.c	/^static char provider[16] = "provider";$/;"	v	file:
+provider	lg02_pkt_fwd.c	/^static char provider[16] = "provider";$/;"	v	file:
+pt	lg01_pkt_fwd.c	/^static int pt = 0, prev = 0;  \/* pt is point of receive packet postion,  prev is point of process packet thread*\/$/;"	v	file:
+pt	lg02_pkt_fwd.c	/^static int pt = 0, prev = 0;  \/* pt is point of receive packet postion,  prev is point of process packet thread*\/$/;"	v	file:
+pull_timeout	lg01_pkt_fwd.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+pull_timeout	lg02_pkt_fwd.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+push_timeout_half	lg01_pkt_fwd.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+push_timeout_half	lg02_pkt_fwd.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
 qsort_r	jitqueue.c	/^static void qsort_r(void  *base,$/;"	f	file:
+quit_sig	lg01_pkt_fwd.c	/^volatile bool quit_sig = false; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v
+quit_sig	lg02_pkt_fwd.c	/^volatile bool quit_sig = false; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v
 quit_sig	lg02_single_rx_tx.c	/^volatile bool quit_sig = false; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v
-quit_sig	main.c	/^volatile bool quit_sig = false; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v
 radio	lg02_single_rx_tx.c	/^static char radio[16] = RADIO1;$/;"	v	file:
-radio_mode	main.c	/^static char radio_mode[8] = "mode";          \/* debug info option *\/$/;"	v	file:
+radio_inuse	lg01_pkt_fwd.c	/^static int radio_inuse = 0;  \/* radio device if free *\/$/;"	v	file:
+radio_mode	lg02_pkt_fwd.c	/^static char radio_mode[8] = "mode";          \/* debug info option *\/$/;"	v	file:
 radiodev	radio.h	/^}radiodev; $/;"	t	typeref:struct:__anon2
 readReg	radio.c	/^static uint8_t readReg(uint8_t spidev, uint8_t addr)$/;"	f	file:
 read_file	parson.c	/^static char * read_file(const char * filename) {$/;"	f	file:
 received	radio.c	/^bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {$/;"	f
 remove_comments	parson.c	/^static void remove_comments(char *string, const char *start_token, const char *end_token) {$/;"	f	file:
+rf_freq	lg01_pkt_fwd.c	/^static char rf_freq[16] = "RFFREQ";            \/* rx frequency of radio *\/$/;"	v	file:
+rf_power	lg01_pkt_fwd.c	/^static char rf_power[16] = "RFPOWER";            \/* tx power of radio *\/$/;"	v	file:
+rf_power	radio.h	/^    uint8_t     rf_power;       \/*!> TX power, in dBm *\/$/;"	m	struct:pkt_tx_s
+rfbw	lg01_pkt_fwd.c	/^static char rfbw[8] = "RFBW";$/;"	v	file:
+rfcr	lg01_pkt_fwd.c	/^static char rfcr[8] = "RFCR";$/;"	v	file:
+rfdev	lg01_pkt_fwd.c	/^radiodev *rfdev;$/;"	v
+rfprlen	lg01_pkt_fwd.c	/^static char rfprlen[8] = "RFPRLEN";$/;"	v	file:
+rfsf	lg01_pkt_fwd.c	/^static char rfsf[8] = "RFSF";$/;"	v	file:
 rssi	radio.h	/^    float       rssi;         \/*!> average packet RSSI in dB *\/$/;"	m	struct:pkt_rx_s
 rst	radio.h	/^    uint8_t rst;$/;"	m	struct:__anon2
-rx_freq	main.c	/^static char rx_freq[16] = "RXFREQ";            \/* rx frequency of radio *\/$/;"	v	file:
-rxbw	main.c	/^static char rxbw[8] = "RXBW";$/;"	v	file:
-rxcr	main.c	/^static char rxcr[8] = "RXCR";$/;"	v	file:
-rxdev	main.c	/^radiodev *rxdev;$/;"	v
+rx_freq	lg02_pkt_fwd.c	/^static char rx_freq[16] = "RXFREQ";            \/* rx frequency of radio *\/$/;"	v	file:
+rxbw	lg02_pkt_fwd.c	/^static char rxbw[8] = "RXBW";$/;"	v	file:
+rxcr	lg02_pkt_fwd.c	/^static char rxcr[8] = "RXCR";$/;"	v	file:
+rxdev	lg02_pkt_fwd.c	/^radiodev *rxdev;$/;"	v
 rxlora	radio.c	/^void rxlora(radiodev *dev, uint8_t rxmode)$/;"	f
 rxlorairqmask	radio.c	/^static const uint8_t rxlorairqmask[] = {$/;"	v	file:
-rxprlen	main.c	/^static char rxprlen[8] = "RXPRLEN";$/;"	v	file:
-rxsf	main.c	/^static char rxsf[8] = "RXSF";$/;"	v	file:
+rxprlen	lg02_pkt_fwd.c	/^static char rxprlen[8] = "RXPRLEN";$/;"	v	file:
+rxsf	lg02_pkt_fwd.c	/^static char rxsf[8] = "RXSF";$/;"	v	file:
 selectreceiver	radio.c	/^static void selectreceiver(int pin)$/;"	f	file:
-send_tx_ack	main.c	/^static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error) {$/;"	f	file:
-serv_port_down	main.c	/^static char serv_port_down[8] = "1700"; \/* server port for downstream traffic *\/$/;"	v	file:
-serv_port_up	main.c	/^static char serv_port_up[8] = "1700"; \/* server port for downstream traffic *\/$/;"	v	file:
-server	main.c	/^static char server[64] = {'\\0'}; \/* address of the server (host name or IPv4\/IPv6) *\/$/;"	v	file:
-server_type	main.c	/^static char server_type[16] = "server_type";          \/* debug info option *\/$/;"	v	file:
+send_tx_ack	lg01_pkt_fwd.c	/^static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error) {$/;"	f	file:
+send_tx_ack	lg02_pkt_fwd.c	/^static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error) {$/;"	f	file:
+serv_port_down	lg01_pkt_fwd.c	/^static char serv_port_down[8] = "1700"; \/* server port for downstream traffic *\/$/;"	v	file:
+serv_port_down	lg02_pkt_fwd.c	/^static char serv_port_down[8] = "1700"; \/* server port for downstream traffic *\/$/;"	v	file:
+serv_port_up	lg01_pkt_fwd.c	/^static char serv_port_up[8] = "1700"; \/* server port for downstream traffic *\/$/;"	v	file:
+serv_port_up	lg02_pkt_fwd.c	/^static char serv_port_up[8] = "1700"; \/* server port for downstream traffic *\/$/;"	v	file:
+server	lg01_pkt_fwd.c	/^static char server[64] = {'\\0'}; \/* address of the server (host name or IPv4\/IPv6) *\/$/;"	v	file:
+server	lg02_pkt_fwd.c	/^static char server[64] = {'\\0'}; \/* address of the server (host name or IPv4\/IPv6) *\/$/;"	v	file:
+server_type	lg01_pkt_fwd.c	/^static char server_type[16] = "server_type";          \/* debug info option *\/$/;"	v	file:
+server_type	lg02_pkt_fwd.c	/^static char server_type[16] = "server_type";          \/* debug info option *\/$/;"	v	file:
 setcr	radio.c	/^void setcr(uint8_t spidev, int denominator)$/;"	f
 setfreq	radio.c	/^void setfreq(uint8_t spidev, long frequency)$/;"	f
+setpower	radio.c	/^void setpower(uint8_t spidev, uint8_t pw) {$/;"	f
 setprlen	radio.c	/^void setprlen(uint8_t spidev, long length)$/;"	f
 setsbw	radio.c	/^void setsbw(uint8_t spidev, long sbw)$/;"	f
 setsf	radio.c	/^void setsf(uint8_t spidev, int sf)$/;"	f
@@ -483,8 +589,9 @@ sf	radio.h	/^    uint8_t sf;$/;"	m	struct:__anon2
 sf_getval	radio.c	/^int32_t sf_getval(int x) {$/;"	f
 sf_t	radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	g
 sf_toval	radio.c	/^int32_t sf_toval(int x) {$/;"	f
+sig_handler	lg01_pkt_fwd.c	/^static void sig_handler(int sigio) {$/;"	f	file:
+sig_handler	lg02_pkt_fwd.c	/^static void sig_handler(int sigio) {$/;"	f	file:
 sig_handler	lg02_single_rx_tx.c	/^static void sig_handler(int sigio) {$/;"	f	file:
-sig_handler	main.c	/^static void sig_handler(int sigio) {$/;"	f	file:
 single_tx	radio.c	/^void single_tx(radiodev *dev, uint8_t *payload, int size) {$/;"	f
 size	radio.h	/^    uint16_t    size;           \/*!> payload size in bytes *\/$/;"	m	struct:pkt_tx_s
 size	radio.h	/^    uint16_t    size;         \/*!> payload size in bytes *\/ $/;"	m	struct:pkt_rx_s
@@ -493,36 +600,50 @@ skip_char	parson.c	38;"	d	file:
 skip_quotes	parson.c	/^static void skip_quotes(const char **string) {$/;"	f	file:
 skip_whitespaces	parson.c	39;"	d	file:
 snr	radio.h	/^    float       snr;          \/*!> average packet SNR, in dB (LoRa only) *\/$/;"	m	struct:pkt_rx_s
-sock_down	main.c	/^static int sock_down; \/* socket for downstream traffic *\/$/;"	v	file:
-sock_stat	main.c	/^static int sock_stat; \/* socket for upstream traffic *\/$/;"	v	file:
-sock_up	main.c	/^static int sock_up; \/* socket for upstream traffic *\/$/;"	v	file:
+sock_down	lg01_pkt_fwd.c	/^static int sock_down; \/* socket for downstream traffic *\/$/;"	v	file:
+sock_down	lg02_pkt_fwd.c	/^static int sock_down; \/* socket for downstream traffic *\/$/;"	v	file:
+sock_stat	lg01_pkt_fwd.c	/^static int sock_stat; \/* socket for upstream traffic *\/$/;"	v	file:
+sock_stat	lg02_pkt_fwd.c	/^static int sock_stat; \/* socket for upstream traffic *\/$/;"	v	file:
+sock_up	lg01_pkt_fwd.c	/^static int sock_up; \/* socket for upstream traffic *\/$/;"	v	file:
+sock_up	lg02_pkt_fwd.c	/^static int sock_up; \/* socket for upstream traffic *\/$/;"	v	file:
 spiport	radio.h	/^    uint8_t  spiport;$/;"	m	struct:__anon2
-stat_interval	main.c	/^static unsigned stat_interval = DEFAULT_STAT; \/* time interval (in sec) at which statistics are collected and displayed *\/$/;"	v	file:
+stat_interval	lg01_pkt_fwd.c	/^static unsigned stat_interval = DEFAULT_STAT; \/* time interval (in sec) at which statistics are collected and displayed *\/$/;"	v	file:
+stat_interval	lg02_pkt_fwd.c	/^static unsigned stat_interval = DEFAULT_STAT; \/* time interval (in sec) at which statistics are collected and displayed *\/$/;"	v	file:
 string	parson.c	/^    const char  *string;$/;"	m	union:json_value_value	file:
-syncwd1	main.c	/^static char syncwd1[8] = "SYNCWD";            \/* tx frequency of radio *\/$/;"	v	file:
-syncwd2	main.c	/^static char syncwd2[8] = "SYNCWD";            \/* tx frequency of radio *\/$/;"	v	file:
+syncwd	lg01_pkt_fwd.c	/^static char syncwd[8] = "SYNCWD";            \/* tx frequency of radio *\/$/;"	v	file:
+syncwd1	lg02_pkt_fwd.c	/^static char syncwd1[8] = "SYNCWD";            \/* tx frequency of radio *\/$/;"	v	file:
+syncwd2	lg02_pkt_fwd.c	/^static char syncwd2[8] = "SYNCWD";            \/* tx frequency of radio *\/$/;"	v	file:
 syncword	radio.h	/^    uint8_t syncword;$/;"	m	struct:__anon2
-thread_down	main.c	/^void thread_down(void) {$/;"	f
-thread_jit	main.c	/^void thread_jit(void) {$/;"	f
-thread_stat	main.c	/^void thread_stat(void) {$/;"	f
-thread_up	main.c	/^void thread_up(void) {$/;"	f
+thread_down	lg01_pkt_fwd.c	/^void thread_down(void) {$/;"	f
+thread_down	lg02_pkt_fwd.c	/^void thread_down(void) {$/;"	f
+thread_jit	lg01_pkt_fwd.c	/^void thread_jit(void) {$/;"	f
+thread_jit	lg02_pkt_fwd.c	/^void thread_jit(void) {$/;"	f
+thread_push	lg01_pkt_fwd.c	/^void thread_push(void) {$/;"	f
+thread_push	lg02_pkt_fwd.c	/^void thread_push(void) {$/;"	f
+thread_stat	lg01_pkt_fwd.c	/^void thread_stat(void) {$/;"	f
+thread_stat	lg02_pkt_fwd.c	/^void thread_stat(void) {$/;"	f
+thread_up	lg01_pkt_fwd.c	/^void thread_up(void) {$/;"	f
+thread_up	lg02_pkt_fwd.c	/^void thread_up(void) {$/;"	f
 time_on_air	jitqueue.c	/^uint32_t time_on_air(struct pkt_tx_s *packet) {$/;"	f
 try_realloc	parson.c	/^static int try_realloc(void **ptr, size_t new_size) {$/;"	f	file:
-tx_freq	main.c	/^static char tx_freq[16] = "TXFREQ";            \/* tx frequency of radio *\/$/;"	v	file:
+tx_freq	lg02_pkt_fwd.c	/^static char tx_freq[16] = "TXFREQ";            \/* tx frequency of radio *\/$/;"	v	file:
 tx_mode	radio.h	/^    uint8_t     tx_mode;        \/*!> select on what event\/time the TX is triggered *\/$/;"	m	struct:pkt_tx_s
-txbw	main.c	/^static char txbw[8] = "TXBW";$/;"	v	file:
-txcr	main.c	/^static char txcr[8] = "TXCR";$/;"	v	file:
-txdev	main.c	/^radiodev *txdev;$/;"	v
+tx_power	lg02_pkt_fwd.c	/^static char tx_power[16] = "TXPOWER";            \/* tx frequency of radio *\/$/;"	v	file:
+txbw	lg02_pkt_fwd.c	/^static char txbw[8] = "TXBW";$/;"	v	file:
+txcr	lg02_pkt_fwd.c	/^static char txcr[8] = "TXCR";$/;"	v	file:
+txdev	lg02_pkt_fwd.c	/^radiodev *txdev;$/;"	v
 txlora	radio.c	/^void txlora(radiodev *dev, struct pkt_tx_s *pkt) {$/;"	f
-txprlen	main.c	/^static char txprlen[8] = "TXPRLEN";$/;"	v	file:
-txsf	main.c	/^static char txsf[8] = "TXSF";$/;"	v	file:
+txprlen	lg02_pkt_fwd.c	/^static char txprlen[8] = "TXPRLEN";$/;"	v	file:
+txsf	lg02_pkt_fwd.c	/^static char txsf[8] = "TXSF";$/;"	v	file:
 type	parson.c	/^    JSON_Value_Type     type;$/;"	m	struct:json_value_t	file:
-uci_config_file	main.c	/^static char uci_config_file[32] = {'\\0'};$/;"	v	file:
+uci_config_file	lg01_pkt_fwd.c	/^static char uci_config_file[32] = {'\\0'};$/;"	v	file:
+uci_config_file	lg02_pkt_fwd.c	/^static char uci_config_file[32] = {'\\0'};$/;"	v	file:
 unselectreceiver	radio.c	/^static void unselectreceiver(int pin)$/;"	f	file:
 value	parson.c	/^    JSON_Value_Value    value;$/;"	m	struct:json_value_t	file:
 values	parson.c	/^    JSON_Value **values;$/;"	m	struct:json_object_t	file:
 ver	lg02_single_rx_tx.c	/^static char ver[8] = "0.1";$/;"	v	file:
+wait_ms	lg01_pkt_fwd.c	/^static void wait_ms(unsigned long a) {$/;"	f	file:
+wait_ms	lg02_pkt_fwd.c	/^static void wait_ms(unsigned long a) {$/;"	f	file:
 wait_ms	lg02_single_rx_tx.c	/^static void wait_ms(unsigned long a) {$/;"	f	file:
-wait_ms	main.c	/^static void wait_ms(unsigned long a) {$/;"	f	file:
 wd	lg02_single_rx_tx.c	/^static char wd[8] = "52";$/;"	v	file:
 writeReg	radio.c	/^static void writeReg(uint8_t spidev, uint8_t addr, uint8_t value)$/;"	f	file:

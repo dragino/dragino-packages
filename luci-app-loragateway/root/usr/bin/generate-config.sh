@@ -79,7 +79,7 @@ else
     rm -rf /etc/lora/local_conf.json
     json_init
     json_add_object SX1301_conf
-    json_add_boolean lorawan_public true
+    json_add_boolean lorawan_public 1
     json_add_int clksrc 1
     json_add_int antenna_gain 0
 
@@ -103,9 +103,9 @@ else
         if [ "$cmp" = "1" ]; then
             eval radio${i}_freq=`uci get gateway.general.radio${i}_freq`
             eval radio${i}_tx=`uci get gateway.general.radio${i}_tx`
-            json_add_string "type" "SX1255"
+            json_add_string "type" "SX1257"
             eval json_add_int freq \$radio${i}_freq
-            json_add_int rssi_offset -176.0
+            json_add_double rssi_offset -166.0
             eval json_add_boolean tx_enable \$radio${i}_tx
             eval cmp="\$radio${i}_tx"
             if [ "$cmp" = "1" ]; then
@@ -202,6 +202,20 @@ else
     json_close_object
 
     json_add_object tx_lut_1
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "11" 
+    json_add_int "rf_power"  "16" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_2
+    json_add_int "pa_gain"  "3" 
+    json_add_int "mix_gain"  "9" 
+    json_add_int "rf_power"  "20" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_3
     json_add_int "pa_gain"  "3" 
     json_add_int "mix_gain"  "14" 
     json_add_int "rf_power"  "27" 

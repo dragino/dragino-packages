@@ -1,7 +1,6 @@
 #!/bin/sh
 . /usr/share/libubox/jshn.sh
 
-master_cfg=`uci get gateway.general.master`
 def_cfg=`uci get gateway.general.gwcfg`
 gwid=`uci get gateway.general.GWID`
 provider=`uci get gateway.general.provider`
@@ -64,17 +63,11 @@ echo_chan_if() {
 
 }
 
-if [ "$master_cfg" != "1" ]
-then
+if [ -f /etc/lora/cfg/"$def_cfg"-global_conf.json ] 
+then 
     gen_gw_cfg
-
-    if [ -f /etc/lora/cfg/"$def_cfg"-global_conf.json ] 
-    then 
-        cp -rf /etc/lora/cfg/"$def_cfg"-global_conf.json /etc/lora/global_conf.json
-    fi
-
+    cp -rf /etc/lora/cfg/"$def_cfg"-global_conf.json /etc/lora/global_conf.json
     echo_chan_if
-
 else
     rm -rf /etc/lora/local_conf.json
     json_init
@@ -128,6 +121,8 @@ else
 ##},
 #############################################
 
+    echo "SX1301 Channels frequency" > /etc/lora/desc
+
     for i in `seq 0 7`
     do
         eval chan${i}_enable=`uci get gateway.general.chan${i}_enable`
@@ -137,8 +132,15 @@ else
         if [ "$cmp" = "1" ]; then
             eval chan${i}=`uci get gateway.general.chan${i}`
             eval chan${i}_radio=`uci get gateway.general.chan${i}_radio`
+            eval radio_index=\$chan${i}_radio                
+            eval radio_freq=\$radio${radio_index}_freq
             eval json_add_int "radio" \$chan${i}_radio
             eval json_add_int "if" \$chan${i}
+            eval chan_if=\$chan${i}
+            chan_freq=`expr $radio_freq + $chan_if`
+            echo "---------------------------------------" >> /etc/lora/desc
+            echo "chan_multiSF_$i" >> /etc/lora/desc
+            echo "LORA MAC, 125kHz, all SF, $chan_freq Hz" >> /etc/lora/desc
         fi
         json_close_object
     done
@@ -173,6 +175,11 @@ else
         json_add_int "if" $lorachan
         json_add_int "bandwidth" $lorachan_bf
         json_add_int "spread_factor" $lorachan_sf
+        eval radio_freq=\$radio${lorachan_radio}_freq
+        chan_freq=`expr $radio_freq - $lorachan`
+        echo "---------------------------------------" >> /etc/lora/desc
+        echo "chan_Lora_std" >> /etc/lora/desc
+        echo "LORA MAC, $lorachan_bf, $lorachan_sf, $chan_freq Mhz" >> /etc/lora/desc
     fi
     json_close_object
 
@@ -236,6 +243,7 @@ else
     json_close_object
 
     json_dump  > /etc/lora/global_conf.json
+
 
 fi 
 

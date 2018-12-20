@@ -96,30 +96,25 @@ o.default = "30"
 o.placeholder = "seconds"
 o.datatype    = "integer"
 
-o = s:taboption("general", ListValue, "gwcfg", translate("SX1301 Configure"))
+o = s:taboption("general", ListValue, "gwcfg", translate("Frequency Plan"))
 o.optional = true
-o.placeholder = "SX1301 Configure"
-o:value("EU", "Europe 863_870MHz")
-o:value("CN", "China 470-510MHz")
-o:value("US", "United_States 902_928MHz")
-o:value("AU", "Australia 915_928MHz")
-o:value("IN", "India 865-867MHz")
-o:value("KR", "Korea 920-923MHz")
-o:value("AS1", "Asia 920-923MHz")
-o:value("AS2", "Asia 923-925MHz")
-
-o = s:taboption("general", Flag, "master", translate("customer radios configure"))
-o.optional = true
-o.default = 0
-o.disable = 0
-o.enable = 1
+o.placeholder = "Frequency Plan"
+o:value("EU", "Europe 868Mhz(863~870)")
+o:value("CN", "China 470~510MHz")
+o:value("US", "United States 915Mhz(902~928)")
+o:value("AU", "Australia 915Mhz(915~928)")
+o:value("IN", "India 865~867MHz")
+o:value("KR", "Korea 920~923MHz")
+o:value("AS1", "Asia 920~923MHz")
+o:value("AS2", "Asia 923~925MHz")
+o:value("RU", "Russia 864~870MHz")
+o:value("CUS", "Customized Bands")
 
 o = s:taboption("general", Flag, "sx1276", translate("use sx1276 for tx"))
 o.optional = true
 o.default = 0
 o.disable = 0
 o.enable = 1
-
 
 ----
 ---- Radio Settings
@@ -207,8 +202,7 @@ o:depends("chan0_enable", "1")
 o = s:taboption("channels", Value, "chan0", translate("multiSF channel 0 IF"))
 o.optional = true
 o.default = -400000
-o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
+o.placeholder = "bandwidth: -462500~462500"
 o:depends("chan0_enable", "1")
 
 o = s:taboption("channels", Flag, "chan1_enable", translate("multiSF channel 1 enable"))
@@ -226,8 +220,7 @@ o:depends("chan1_enable", "1")
 o = s:taboption("channels", Value, "chan1", translate("multiSF channel 1 IF"))
 o.optional = true
 o.default = -200000
-o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
+o.placeholder = "bandwidth: -462500~462500"
 o:depends("chan1_enable", "1")
 
 o = s:taboption("channels", Flag, "chan2_enable", translate("multiSF channel 2 enable"))
@@ -245,8 +238,7 @@ o:depends("chan2_enable", "1")
 o = s:taboption("channels", Value, "chan2", translate("multiSF channel 2 IF"))
 o.optional = true
 o.default = 0
-o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
+o.placeholder = "bandwidth: -462500~462500"
 o:depends("chan2_enable", "1")
 
 o = s:taboption("channels", Flag, "chan3_enable", translate("multiSF channel 3 enable"))
@@ -263,8 +255,7 @@ o:depends("chan3_enable", "1")
 
 o = s:taboption("channels", Value, "chan3", translate("multiSF channel 3 IF"))
 o.optional = true
-o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
+o.placeholder = "bandwidth: -462500~462500"
 o:depends("chan3_enable", "1")
 
 o = s:taboption("channels", Flag, "chan4_enable", translate("multiSF channel 4 enable"))
@@ -281,8 +272,7 @@ o:depends("chan4_enable", "1")
 
 o = s:taboption("channels", Value, "chan4", translate("multiSF channel 4 IF"))
 o.optional = true
-o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
+o.placeholder = "bandwidth: -462500~462500"
 o:depends("chan4_enable", "1")
 
 o = s:taboption("channels", Flag, "chan5_enable", translate("multiSF channel 5 enable"))
@@ -299,8 +289,7 @@ o:depends("chan5_enable", "1")
 
 o = s:taboption("channels", Value, "chan5", translate("multiSF channel 5 IF"))
 o.optional = true
-o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
+o.placeholder = "bandwidth: -462500~462500"
 o:depends("chan5_enable", "1")
 
 o = s:taboption("channels", Flag, "chan6_enable", translate("multiSF channel 6 enable"))
@@ -317,8 +306,7 @@ o:depends("chan6_enable", "1")
 
 o = s:taboption("channels", Value, "chan6", translate("multiSF channel 6 IF"))
 o.optional = true
-o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
+o.placeholder = "bandwidth: -462500~462500"
 o:depends("chan6_enable", "1")
 
 o = s:taboption("channels", Flag, "chan7_enable", translate("multiSF channel 7 enable"))
@@ -335,8 +323,7 @@ o:depends("chan7_enable", "1")
 
 o = s:taboption("channels", Value, "chan7", translate("multiSF channel 7 IF"))
 o.optional = true
-o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
+o.placeholder = "bandwidth: -462500~462500"
 o:depends("chan7_enable", "1")
 
 o = s:taboption("channels", Flag, "lorachan_enable", translate("lorastd channel enable"))
@@ -354,7 +341,6 @@ o:depends("lorachan_enable", "1")
 o = s:taboption("channels", Value, "lorachan", translate("LoRa channel IF"))
 o.optional = true
 o.placeholder = "IF, etc:400000, -400000"
-o.datatype = "integer"
 o:depends("lorachan_enable", "1")
 
 o = s:taboption("channels", Value, "lorachan_sf", translate("LoRa channel SF"))
@@ -368,6 +354,7 @@ o.optional = true
 o.placeholder = "select bandwidth"
 o:value("125000", "125k")
 o:value("250000", "250k")
+o:value("500000", "500k")
 o:depends("lorachan_enable", "1")
 
 --

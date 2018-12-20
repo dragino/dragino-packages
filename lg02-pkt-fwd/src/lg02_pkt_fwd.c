@@ -457,6 +457,10 @@ int main(int argc, char *argv[])
 
     static time_t  rxlora_time;  /* time of start continue receive mode */
     static time_t now_time; /* time of now */
+
+    /* for relay mode, prevent circle link */
+    static char this_mic[8] = {'\0'};
+    static char last_mic[8] = {'\0'};
     
     /* threads */
     pthread_t thrid_stat;
@@ -949,9 +953,22 @@ int main(int argc, char *argv[])
         if(digitalRead(rxdev->dio[0]) == 1) {  /* read IO if RXDONE */
             if (pktrx[pt].empty) {
                 if (received(rxdev->spiport, &pktrx[pt]) == true) {
-                    if (!strcmp(server_type, "relay")) {      // lora relay mode, trunking
-                        single_tx(txdev, pktrx[pt].payload, pktrx[pt].size); 
+                    if (!strcmp(server_type, "relay")) {      /* lora relay mode, trunking */
+                        for (i = 0; i < 4; i++) {  /* payload MIC */
+                            this_mic[i] = pktrx[pt].payload[pktrx[pt].size - i - 1];
+                        }
+                        this_mic[4] = '\0';
+
+                        if (!strlen(last_mic)) {
+                            strcpy(last_mic, this_mic);
+                        }
+
+                        if (strcmp(last_mic, this_mic)) {  /* MIC not equal */
+                            single_tx(txdev, pktrx[pt].payload, pktrx[pt].size); 
+                            strcpy(last_mic, this_mic);
+                        }
                         pktrx_clean(&pktrx[pt]); 
+
                     } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp")) {  // mqtt mode or tcpudp mode for loraRAW
                         char tmp[256] = {'\0'};
                         char chan_path[32] = {'\0'};

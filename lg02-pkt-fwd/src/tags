@@ -114,6 +114,7 @@ JSON_Object	parson.h	/^typedef struct json_object_t JSON_Object;$/;"	t	typeref:s
 JSON_Value	parson.h	/^typedef struct json_value_t  JSON_Value;$/;"	t	typeref:struct:json_value_t
 JSON_Value_Type	parson.h	/^} JSON_Value_Type;$/;"	t	typeref:enum:json_value_type
 JSON_Value_Value	parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_value_value	file:
+KEEPALIVE_REC	lg02_pkt_fwd.c	52;"	d	file:
 LAT	lg01_pkt_fwd.c	/^static char LAT[16] = "LAT";$/;"	v	file:
 LAT	lg02_pkt_fwd.c	/^static char LAT[16] = "LAT";$/;"	v	file:
 LNA_LOW_GAIN	radio.h	105;"	d
@@ -134,13 +135,13 @@ MAX	parson.c	40;"	d	file:
 MAXLINE	radio.h	161;"	d
 MAX_NESTING	parson.c	36;"	d	file:
 MIN_LORA_PREAMB	lg01_pkt_fwd.c	64;"	d	file:
-MIN_LORA_PREAMB	lg02_pkt_fwd.c	61;"	d	file:
+MIN_LORA_PREAMB	lg02_pkt_fwd.c	63;"	d	file:
 MOD_FSK	lg01_pkt_fwd.c	136;"	d	file:
-MOD_FSK	lg02_pkt_fwd.c	140;"	d	file:
+MOD_FSK	lg02_pkt_fwd.c	142;"	d	file:
 MOD_LORA	lg01_pkt_fwd.c	135;"	d	file:
-MOD_LORA	lg02_pkt_fwd.c	139;"	d	file:
+MOD_LORA	lg02_pkt_fwd.c	141;"	d	file:
 MOD_UNDEFINED	lg01_pkt_fwd.c	134;"	d	file:
-MOD_UNDEFINED	lg02_pkt_fwd.c	138;"	d	file:
+MOD_UNDEFINED	lg02_pkt_fwd.c	140;"	d	file:
 MSG	radio.h	44;"	d
 MSG_DEBUG	radio.h	45;"	d
 MSG_LOG	radio.h	51;"	d
@@ -159,23 +160,23 @@ OPMODE_TX	radio.h	114;"	d
 PARSON_VERSION	parson.h	35;"	d
 PAYLOAD_LENGTH	radio.h	99;"	d
 PKT_PULL_ACK	lg01_pkt_fwd.c	60;"	d	file:
-PKT_PULL_ACK	lg02_pkt_fwd.c	58;"	d	file:
+PKT_PULL_ACK	lg02_pkt_fwd.c	60;"	d	file:
 PKT_PULL_DATA	lg01_pkt_fwd.c	58;"	d	file:
-PKT_PULL_DATA	lg02_pkt_fwd.c	56;"	d	file:
+PKT_PULL_DATA	lg02_pkt_fwd.c	58;"	d	file:
 PKT_PULL_RESP	lg01_pkt_fwd.c	59;"	d	file:
-PKT_PULL_RESP	lg02_pkt_fwd.c	57;"	d	file:
+PKT_PULL_RESP	lg02_pkt_fwd.c	59;"	d	file:
 PKT_PUSH_ACK	lg01_pkt_fwd.c	57;"	d	file:
-PKT_PUSH_ACK	lg02_pkt_fwd.c	55;"	d	file:
+PKT_PUSH_ACK	lg02_pkt_fwd.c	57;"	d	file:
 PKT_PUSH_DATA	lg01_pkt_fwd.c	56;"	d	file:
-PKT_PUSH_DATA	lg02_pkt_fwd.c	54;"	d	file:
+PKT_PUSH_DATA	lg02_pkt_fwd.c	56;"	d	file:
 PKT_TX_ACK	lg01_pkt_fwd.c	61;"	d	file:
-PKT_TX_ACK	lg02_pkt_fwd.c	59;"	d	file:
+PKT_TX_ACK	lg02_pkt_fwd.c	61;"	d	file:
 PROTOCOL_VERSION	lg01_pkt_fwd.c	54;"	d	file:
-PROTOCOL_VERSION	lg02_pkt_fwd.c	52;"	d	file:
+PROTOCOL_VERSION	lg02_pkt_fwd.c	54;"	d	file:
 PULL_TIMEOUT_MS	lg01_pkt_fwd.c	49;"	d	file:
 PULL_TIMEOUT_MS	lg02_pkt_fwd.c	49;"	d	file:
 PUSH_PATH	lg01_pkt_fwd.c	70;"	d	file:
-PUSH_PATH	lg02_pkt_fwd.c	67;"	d	file:
+PUSH_PATH	lg02_pkt_fwd.c	69;"	d	file:
 PUSH_TIMEOUT_MS	lg01_pkt_fwd.c	48;"	d	file:
 PUSH_TIMEOUT_MS	lg02_pkt_fwd.c	48;"	d	file:
 QUEUESIZE	radio.h	280;"	d
@@ -236,16 +237,16 @@ SPI_DEV_TX	radio.h	326;"	d
 SPI_SPEED	radio.h	324;"	d
 STARTING_CAPACITY	parson.c	33;"	d	file:
 STATUS_SIZE	lg01_pkt_fwd.c	68;"	d	file:
-STATUS_SIZE	lg02_pkt_fwd.c	65;"	d	file:
+STATUS_SIZE	lg02_pkt_fwd.c	67;"	d	file:
 STD_LORA_PREAMB	lg01_pkt_fwd.c	65;"	d	file:
-STD_LORA_PREAMB	lg02_pkt_fwd.c	62;"	d	file:
+STD_LORA_PREAMB	lg02_pkt_fwd.c	64;"	d	file:
 SUCCESS	parson.c	32;"	d	file:
 SX1276_MC2_RX_PAYLOAD_CRCON	radio.h	140;"	d
 SX1276_MC3_AGCAUTO	radio.h	144;"	d
 SX1276_MC3_LOW_DATA_RATE_OPTIMIZE	radio.h	143;"	d
 TIMESTAMPED	radio.h	41;"	d
 TX_BUFF_SIZE	lg01_pkt_fwd.c	67;"	d	file:
-TX_BUFF_SIZE	lg02_pkt_fwd.c	64;"	d	file:
+TX_BUFF_SIZE	lg02_pkt_fwd.c	66;"	d	file:
 TX_JIT_DELAY	jitqueue.c	19;"	d	file:
 TX_MARGIN_DELAY	jitqueue.c	17;"	d	file:
 TX_MAX_ADVANCE_DELAY	jitqueue.c	20;"	d	file:

@@ -17,11 +17,12 @@
 
 #define TX_MODE 0
 #define RX_MODE 1
+#define RADIOHEAD 1
 
 #define RADIO1    "/dev/spidev1.0"
 #define RADIO2    "/dev/spidev2.0"
 
-static char ver[8] = "0.1";
+static char ver[8] = "0.2";
 
 /* lora configuration variables */
 static char sf[8] = "7";
@@ -29,10 +30,12 @@ static char bw[8] = "125000";
 static char cr[8] = "5";
 static char wd[8] = "52";
 static char prlen[8] = "8";
+static char power[8] = "14";
 static char freq[16] = "868500000";            /* frequency of radio */
 static char radio[16] = RADIO1;
 static char filepath[32] = {'\0'};
 static int mode = TX_MODE;
+static int payload_format = 0; 
 static int device = 49;
 static bool getversion = false;
 
@@ -71,8 +74,10 @@ void print_help(void) {
     printf("                           [-s spreadingFactor] (default: 7)\n");
     printf("                           [-b bandwidth] default: 125k \n");
     printf("                           [-w syncword] default: 52(0x34)reserver for lorawan\n");
-    printf("                           [-p message ]  message to send\n");
+    printf("                           [-m message ]  message to send\n");
+    printf("                           [-P power ] Transmit Power (min:5; max:20) \n");
     printf("                           [-o filepath ] payload output to file\n");
+	printf("                           [-R] Transmit in Radiohead format\n");
     printf("                           [-v] show version \n");
     printf("                           [-h] show this help and exit \n");
 }
@@ -99,24 +104,27 @@ int main(int argc, char *argv[])
       //  exit(1);
     //}
 
-    while ((c = getopt(argc, argv, "trd:m:f:s:b:p:o:vh")) != -1) {
+    while ((c = getopt(argc, argv, "trd:m:f:s:b:w:P:o:Rvh")) != -1) {
         switch (c) {
             case 'v':
                 getversion = true;
                 break;
             case 'd':
-		if (optarg)
-			device = optarg[0];
-		else {
-			print_help();
-			exit(1);
-		}
+				if (optarg)
+					device = optarg[0];
+				else {
+					print_help();
+					exit(1);
+				}
                 break;
             case 't':
                 mode = TX_MODE;
                 break;
             case 'r':
                 mode = RX_MODE;
+                break;
+            case 'R':
+                payload_format = RADIOHEAD;
                 break;
             case 'f':
                 if (optarg)
@@ -150,9 +158,17 @@ int main(int argc, char *argv[])
                     exit(1);
                 }
                 break;
-            case 'p':
+            case 'm':
                 if (optarg)
                     strncpy(input, optarg, sizeof(input));
+                else {
+                    print_help();
+                    exit(1);
+                }
+                break;
+            case 'P':
+                if (optarg)
+                    strncpy(power, optarg, sizeof(power));
                 else {
                     print_help();
                     exit(1);
@@ -214,13 +230,14 @@ int main(int argc, char *argv[])
     loradev->sf = atoi(sf);
     loradev->bw = atol(bw);
     loradev->cr = atoi(cr);
+    loradev->power = atoi(power);
     loradev->syncword = atoi(wd);
     loradev->nocrc = 1;  /* crc check */
     loradev->prlen = atoi(prlen);
     loradev->invertio = 0;
     strcpy(loradev->desc, "RFDEV");	
 
-    MSG("Radio struct: spi_dev=%s, spiport=%d, freq=%ld, sf=%d, bw=%ld, cr=%d, wd=0x%2x\n", radio, loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->syncword);
+    MSG("Radio struct: spi_dev=%s, spiport=%d, freq=%ld, sf=%d, bw=%ld, cr=%d, wd=0x%2x, power=%d\n", radio, loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->syncword, loradev->power);
 
     if(!get_radio_version(loradev))  
         goto clean;
@@ -236,13 +253,35 @@ int main(int argc, char *argv[])
     setup_channel(loradev);
 
     if ( mode == TX_MODE ){
-	uint8_t payload[256] = {'\0'};
+		uint8_t payload[256] = {'\0'};
+		uint8_t payload_len;
 
-	if (strlen(input) < 1)
-	    strcpy(input, "HELLO DRAGINO");	
+		if (strlen(input) < 1)
+			strcpy(input, "HELLO DRAGINO");	
 
-	snprintf(payload, sizeof(payload), "%s", input);
-	single_tx(loradev, payload, strlen((char *)payload));
+		if ( payload_format == RADIOHEAD ) {
+			input[strlen((char *)input)] = 0x00;
+			payload_len = strlen((char *)input) + 5;			
+			payload[0] = 0xff;
+			payload[1] = 0xff;
+			payload[2] = 0x00;
+			payload[3] = 0x00;
+			for (int i = 0; i < payload_len - 4; i++){
+				payload[i+4] = input[i];
+			}
+		}
+		else {
+			snprintf(payload, sizeof(payload), "%s", input);
+			payload_len = strlen((char *)payload);
+		}
+
+		printf("Trasmit Data(ASCII): %s\n", payload);
+		printf("Trasmit Data(HEX): ");
+		for(int i = 0; i < payload_len; i++) {
+            printf("%02x", payload[i]);
+        }
+		printf("\n");
+		single_tx(loradev, payload, payload_len);
     } else if ( mode == RX_MODE){
 
         struct pkt_rx_s rxpkt;
@@ -340,4 +379,3 @@ clean:
     MSG("INFO: Exiting %s\n", argv[0]);
     exit(EXIT_SUCCESS);
 }
-

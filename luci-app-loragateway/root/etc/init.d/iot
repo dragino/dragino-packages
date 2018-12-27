@@ -10,6 +10,8 @@ init_board() {
 
 	if [[ "$service" = "tcpudp" ]]; then
 		process="tcp_client.lua"
+	elif [[ "$service" = "mqtt" ]]; then
+		process="mqtt_process.sh"
 	fi
 }
 

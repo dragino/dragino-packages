@@ -480,32 +480,32 @@ int main(int argc, char *argv[])
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-    if (!get_config("radio", rf_freq, 16)){
+    if (!get_config("radio1", rf_freq, 16)){
         strcpy(rf_freq, "902320000"); /* default frequency*/
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxfreq=%s\n", rf_freq);
     }
 
-    if (!get_config("radio", rfsf, 8)){
+    if (!get_config("radio1", rfsf, 8)){
         strcpy(rfsf, "7");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxsf=%s\n", rfsf);
     }
 
-    if (!get_config("radio", rfcr, 8)){
+    if (!get_config("radio1", rfcr, 8)){
         strcpy(rfcr, "5");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option coderate=%s\n", rfcr);
     }
     
-    if (!get_config("radio", rfbw, 8)){
+    if (!get_config("radio1", rfbw, 8)){
         strcpy(rfbw, "125000");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxbw=%s\n", rfbw);
     }
 
-    if (!get_config("radio", rfprlen, 8)){
+    if (!get_config("radio1", rfprlen, 8)){
         strcpy(rfprlen, "8");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxprlen=%s\n", rfprlen);
     }
 
-    if (!get_config("radio", syncwd, 8)){
+    if (!get_config("radio1", syncwd, 8)){
         strcpy(syncwd, "52");  //Value 0x34 is reserved for LoRaWAN networks
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword=0x%02x\n", syncwd);
     }

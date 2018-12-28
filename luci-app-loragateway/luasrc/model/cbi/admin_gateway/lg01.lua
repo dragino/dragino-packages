@@ -15,7 +15,7 @@ $Id: LoRaWAN.lua 5948 2010-03-27 14:54:06Z jow $
 local uci = luci.model.uci.cursor()
 local mac="a84041efefef"
 
-m = Map("gateway", translate("LoRa Gateway Settings"), translate("Configuration to communicate with LoRa devices and LoRaWAN server"))
+m = Map("gateway", translate("Single Channel LoRa Gateway"), translate("Configuration to communicate with LoRa devices and LoRaWAN server"))
 
 s = m:section(NamedSection, "general", "lorawan", translate("LoRaWAN Server Settings"))
 
@@ -24,7 +24,6 @@ sv.placeholder = "Select IoT service"
 sv.default = "disabled"
 sv:value("disabled",  "Disabled") 
 sv:value("lorawan",  "LoRaWan/RAW forwarder")        
-sv:value("relay",  "LoRaWan/RAW packets relay")
 sv:value("mqtt",  "LoRaRAW forward to MQTT server")
 sv:value("tcpudp",  "LoRaRAW forward to TCP/UDP server")
 

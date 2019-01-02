@@ -77,7 +77,7 @@ void print_help(void) {
     printf("                           [-m message ]  message to send\n");
     printf("                           [-P power ] Transmit Power (min:5; max:20) \n");
     printf("                           [-o filepath ] payload output to file\n");
-	printf("                           [-R] Transmit in Radiohead format\n");
+    printf("                           [-R] Transmit in Radiohead format\n");
     printf("                           [-v] show version \n");
     printf("                           [-h] show this help and exit \n");
 }
@@ -110,12 +110,12 @@ int main(int argc, char *argv[])
                 getversion = true;
                 break;
             case 'd':
-				if (optarg)
-					device = optarg[0];
-				else {
-					print_help();
-					exit(1);
-				}
+	        if (optarg)
+	            device = optarg[0];
+	        else {
+	            print_help();
+		    exit(1);
+	        }
                 break;
             case 't':
                 mode = TX_MODE;

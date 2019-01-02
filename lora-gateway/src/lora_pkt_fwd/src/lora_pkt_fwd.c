@@ -1239,9 +1239,11 @@ int main(void)
     /* init transifer radio device */
     /* spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21 */
     char sx1276_tx[8] = "sx1276";
+    char sx1276_txpw[8] = "sxtxpw";
     char model[8] = "model";
 
     get_config("gerneral", sx1276_tx, sizeof(sx1276_tx));
+    get_config("gerneral", sx1276_txpw, sizeof(sx1276_txpw));
     get_config("gerneral", model, sizeof(model));
 
     /* mqtt or lorawan */
@@ -1257,6 +1259,7 @@ int main(void)
         sxradio->dio[0] = 7;
         sxradio->dio[1] = 6;
         sxradio->dio[2] = 8;
+        sxradio->rf_power = (atoi(sx1276_txpw) && atoi(sx1276_txpw) <= 20) > 0 ? atoi(sx1276_txpw) : 0; /* sx1276 power < 20 */
         strcpy(sxradio->desc, "SPI_DEV_RADIO");
         sxradio->spiport = spi_open(SPI_DEV_RADIO);
 

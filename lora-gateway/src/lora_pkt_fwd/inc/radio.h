@@ -158,6 +158,7 @@ typedef struct {
     uint8_t prlen;
     uint8_t invertio;
     uint8_t syncword;
+    uint8_t rf_power;
     char desc[8];
 }radiodev; 
 
@@ -194,6 +195,8 @@ int spi_open(char *);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 // Lora configure : Freq, SF, BW
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+void setpower(uint8_t, uint8_t);
 
 void setfreq(uint8_t, long);
 

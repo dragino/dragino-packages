@@ -354,6 +354,14 @@ static void opmodeLora(uint8_t spidev) {
     writeReg(spidev, REG_OPMODE, u);
 }
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+void setpower(uint8_t spidev, uint8_t pw) {
+    writeReg(spidev, REG_PADAC, 0x87);
+    if (pw < 5) pw = 5;
+    if (pw > 20) pw = 20;
+    writeReg(spidev, REG_PACONFIG, (uint16_t)(0x80 | ((pw - 5) & 0x0f)));
+}
+
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -682,6 +690,10 @@ void txlora(radiodev *radiodev, struct lgw_pkt_tx_s *pkt) {
     // select LoRa modem (from sleep mode)
     opmodeLora(radiodev->spiport);
 
+    if (radiodev->rf_power > 0)  /* custom rx power */
+        setpower(radiodev->spiport, radiodev->rf_power);
+    else
+        setpower(radiodev->spiport, pkt->rf_power);
     setfreq(radiodev->spiport, pkt->freq_hz);
     setsf(radiodev->spiport, lgw_sf_getval(pkt->datarate));
     setsbw(radiodev->spiport, lgw_bw_getval(pkt->bandwidth));
@@ -762,6 +774,8 @@ void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
     opmode(radiodev->spiport, OPMODE_STANDBY);
 
     setsyncword(radiodev->spiport, LORA_MAC_PREAMBLE);
+
+    setpower(radiodev->spiport, radiodev->rf_power);
 
     // set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP
     writeReg(radiodev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);

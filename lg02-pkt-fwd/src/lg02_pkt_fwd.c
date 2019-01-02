@@ -917,7 +917,6 @@ int main(int argc, char *argv[])
         }
 
         /* spawn threads to manage upstream and downstream */
-        MSG("spawn threads to manage upsteam and downstream...\n");
         i = pthread_create( &thrid_up, NULL, (void * (*)(void *))thread_up, NULL);
         if (i != 0) {
                 MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create upstream thread\n");

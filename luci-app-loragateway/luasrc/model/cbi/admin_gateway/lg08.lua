@@ -116,6 +116,12 @@ o.default = 0
 o.disable = 0
 o.enable = 1
 
+o = s:taboption("general", Value, "sxtxpw", translate("Tx power for SX1276"))
+o.default = 0
+o.placeholder = "range 5 ~ 20 dBm"
+o.datatype = "rangelength(1,2)"
+o:depends("sx1276", "1")
+
 ----
 ---- Radio Settings
 ----

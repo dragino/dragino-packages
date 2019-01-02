@@ -10,9 +10,10 @@ start() {
     if [ ! -d /var/iot/channels ]; then
         mkdir /var/iot/channels
     fi
-	if [ ! -d /var/iot/push ]; then 
-		mkdir /var/iot/push
-	fi
+
+    if [ ! -d /var/iot/push ]; then 
+        mkdir /var/iot/push
+    fi
 
     rmmod gpio_keys_polled
     modprobe gpio_keys_polled

@@ -749,7 +749,7 @@ void txlora(radiodev *radiodev, struct lgw_pkt_tx_s *pkt) {
     // wait for TX done
     while(digitalRead(radiodev->dio[0]) == 0);
 
-    printf("\nTransmit at SF%iBW%d on %.6lf.\n", lgw_sf_getval(pkt->datarate), lgw_bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000);
+    printf("\nTransmit at SF%iBW%d on %.6lf %ddBm.\n", lgw_sf_getval(pkt->datarate), lgw_bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000, radiodev->rf_power > 0 ? radiodev->rf_power : pkt->rf_power);
 
     // mask all IRQs
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
@@ -803,8 +803,8 @@ void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
     // wait for TX done
     while(digitalRead(radiodev->dio[0]) == 0);
 
-    printf("\nTransmit at SF%iBW%d on %.6lf, invert=%2x.\n",\
-            radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000, readReg(radiodev->spiport, REG_INVERTIQ));
+    printf("\nTransmit at SF%iBW%d on %.6lf, %ddBm.\n",\
+            radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000, readReg(radiodev->spiport, radiodev->rf_power));
 
     // mask all IRQs
     writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);

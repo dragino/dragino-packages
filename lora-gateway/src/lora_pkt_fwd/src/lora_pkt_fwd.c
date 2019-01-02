@@ -1242,12 +1242,14 @@ int main(void)
     char sx1276_txpw[8] = "sxtxpw";
     char model[8] = "model";
 
-    get_config("gerneral", sx1276_tx, sizeof(sx1276_tx));
-    get_config("gerneral", sx1276_txpw, sizeof(sx1276_txpw));
-    get_config("gerneral", model, sizeof(model));
+    get_config("general", sx1276_tx, sizeof(sx1276_tx));
+    get_config("general", sx1276_txpw, sizeof(sx1276_txpw));
+    get_config("general", model, sizeof(model));
+
+    MSG_DEBUG(DEBUG_LOG, "INFO~ sx1276:%d, sxtxpw:%d, model:%s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model);
 
     /* mqtt or lorawan */
-    get_config("gerneral", server_type, sizeof(server_type));
+    get_config("general", server_type, sizeof(server_type));
 
     /* only LG08P with sx1276 */
 

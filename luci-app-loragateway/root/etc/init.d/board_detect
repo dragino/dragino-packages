@@ -47,6 +47,9 @@ start() {
     uci set system.vendor.web_model="$board"
     uci set gateway.general.model="$board"
 
+    uci commit system
+    uci commit gateway
+
     DEB=`uci get gateway.general.DEB`
     if [[ "$DEB" -gt 1 ]]; then
         DEB="1"

@@ -1259,7 +1259,7 @@ int main(void)
         sxradio->dio[0] = 7;
         sxradio->dio[1] = 6;
         sxradio->dio[2] = 8;
-        sxradio->rf_power = (atoi(sx1276_txpw) && atoi(sx1276_txpw) <= 20) > 0 ? atoi(sx1276_txpw) : 0; /* sx1276 power < 20 */
+        sxradio->rf_power = (atoi(sx1276_txpw) > 0 && atoi(sx1276_txpw) <= 20) ? atoi(sx1276_txpw) : 0; /* sx1276 power < 20 */
         strcpy(sxradio->desc, "SPI_DEV_RADIO");
         sxradio->spiport = spi_open(SPI_DEV_RADIO);
 

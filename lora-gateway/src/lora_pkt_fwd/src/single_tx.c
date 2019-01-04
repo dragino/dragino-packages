@@ -24,6 +24,7 @@ static char bw[8] = "125000";
 static char cr[8] = "1";
 static char wd[8] = "52";
 static char prlen[8] = "8";
+static char pw[8] = "16";
 static char freq[16] = "868500000";            /* frequency of radio */
 
 static int invertiq = 0;
@@ -55,7 +56,7 @@ void print_help(void) {
 int main(int argc, char *argv[])
 {
 
-    int c, i;
+    int c;
 
     char message[248] = {'\0'};
 
@@ -108,6 +109,14 @@ int main(int argc, char *argv[])
             case 'l':
                 loop = 1;
                 break;
+            case 'p':
+                if (optarg)
+                    strncpy(pw, optarg, sizeof(pw));
+                else {
+                    print_help();
+                    exit(1);
+                }
+                break;
             case 'w':
                 if (optarg)
                     strncpy(wd, optarg, sizeof(wd));
@@ -149,13 +158,14 @@ int main(int argc, char *argv[])
     loradev->sf = atoi(sf);
     loradev->bw = atol(bw);
     loradev->cr = atoi(cr);
+    loradev->rf_power = atoi(pw);
     loradev->syncword = atoi(wd);
     loradev->nocrc = 1;  /* crc check */
     loradev->prlen = atoi(prlen);
     loradev->invertio = invertiq;
     strcpy(loradev->desc, "RFDEV");	
 
-    printf("Radio struct: spiport=%d, freq=%d, sf=%d, bw=%d, cr=%d, wd=0x%2x, IQ=%d\n", loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->syncword, loradev->invertio);
+    printf("Radio struct: spiport=%d, freq=%d, sf=%d, bw=%d, cr=%d, wd=0x%2x, pw=%d, IQ=%d\n", loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->syncword, loradev->rf_power, loradev->invertio);
 
     if(!get_radio_version(loradev))  
         goto clean;
@@ -174,7 +184,7 @@ int main(int argc, char *argv[])
                 /* configure signal handling */
             int sn = 0;
             while ( 1 ) {
-                snprintf(payload, sizeof(payload), "%d: HELLO DRAGINO ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ", sn);	
+                snprintf(payload, sizeof(payload), "%d: HELLO DRAGINO ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ", sn);	
                 single_tx(loradev, (uint8_t *)payload, strlen(payload));
                 ++sn;
                 sleep(1);

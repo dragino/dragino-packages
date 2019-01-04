@@ -155,6 +155,7 @@ static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; /* non criti
 /* hardware access control and correction */
 pthread_mutex_t mx_concent = PTHREAD_MUTEX_INITIALIZER; /* control access to the concentrator */
 static pthread_mutex_t mx_xcorr = PTHREAD_MUTEX_INITIALIZER; /* control access to the XTAL correction */
+pthread_mutex_t mx_sx1276 = PTHREAD_MUTEX_INITIALIZER; /* control access to the sx1276 */
 static bool xtal_correct_ok = false; /* set true when XTAL correction is stable enough */
 static double xtal_correct = 1.0;
 
@@ -2665,8 +2666,6 @@ void thread_jit(void) {
     uint8_t tx_status;
 
     while (!exit_sig && !quit_sig) {
-        wait_ms(10);
-
         /* transfer data and metadata to the concentrator, and schedule TX */
         gettimeofday(&current_unix_time, NULL);
         get_concentrator_time(&current_concentrator_time, current_unix_time);
@@ -2691,13 +2690,16 @@ void thread_jit(void) {
                     }
 
                     /* send packet to concentrator */
-
                     if (sx1276) {
-                        txlora(sxradio, &pkt);
+                        //pthread_mutex_lock(&mx_sx1276);
+
+                        txlora(sxradio, &pkt); /* make sure the endnode receive */
+
+                        txlora(sxradio, &pkt); /*one txlora waste 8~20ms */
+
                         pthread_mutex_lock(&mx_meas_dw);
                         meas_nb_tx_ok += 1;
                         pthread_mutex_unlock(&mx_meas_dw);
-                        MSG_DEBUG(DEBUG_PKT_FWD, "lgw_send done: count_us=%u\n", pkt.count_us);
                     } else { 
                         /* check if concentrator is free for sending new packet */
                         pthread_mutex_lock(&mx_concent); /* may have to wait for a fetch to finish */
@@ -2730,7 +2732,7 @@ void thread_jit(void) {
                             pthread_mutex_lock(&mx_meas_dw);
                             meas_nb_tx_ok += 1;
                             pthread_mutex_unlock(&mx_meas_dw);
-                            MSG_DEBUG(DEBUG_PKT_FWD, "lgw_send done: count_us=%u\n", pkt.count_us);
+                            //MSG_DEBUG(DEBUG_PKT_FWD, "lgw_send done: count_us=%u\n", pkt.count_us);
                         }
                     }
                     
@@ -2739,8 +2741,10 @@ void thread_jit(void) {
                 }
             }
         } else if (jit_result == JIT_ERROR_EMPTY) {
+            wait_ms(10);
             /* Do nothing, it can happen */
         } else {
+            wait_ms(10);
             MSG_DEBUG(DEBUG_ERROR, "ERROR~ jit_peek failed with %d\n", jit_result);
         }
     }

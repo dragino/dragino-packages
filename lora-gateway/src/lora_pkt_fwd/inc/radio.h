@@ -129,6 +129,19 @@
 #define RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG1 0x0A
 #define RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2 0x70
 
+/*!                                                                                                     
+ * RegInvertIQ                                                                                
+ */                      
+#define INVERTIQ_RX_MASK                       0xBF
+#define INVERTIQ_RX_OFF                        0x00                                                
+#define INVERTIQ_RX_ON                         0x40                                                
+#define INVERTIQ_TX_MASK                       0xFE                                                
+#define INVERTIQ_TX_OFF                        0x01
+#define INVERTIQ_TX_ON                         0x00
+
+#define INVERTIQ2_ON                           0x19
+#define INVERTIQ2_OFF                          0x1D
+
 #define MAXLINE 256
 
 
@@ -158,7 +171,7 @@ typedef struct {
     uint8_t prlen;
     uint8_t invertio;
     uint8_t syncword;
-    uint8_t rf_power;
+    int8_t rf_power;
     char desc[8];
 }radiodev; 
 

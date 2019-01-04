@@ -500,10 +500,12 @@ void jit_print_queue(struct jit_queue_s *queue, bool show_all, int debug_level) 
         MSG_DEBUG(debug_level, "INFO: [jit] queue contains %d beacons:\n", queue->num_beacon);
         loop_end = (show_all == true) ? JIT_QUEUE_MAX : queue->num_pkt;
         for (i=0; i<loop_end; i++) {
-            MSG_DEBUG(debug_level, " - node[%d]: count_us=%u - type=%d\n",
+            MSG_DEBUG(debug_level, "node[%d]: count_us=%u,type=%d, pre_delay=%u, post_delay=%u\n",
                         i,
                         queue->nodes[i].pkt.count_us,
-                        queue->nodes[i].pkt_type);
+                        queue->nodes[i].pkt_type,
+                        queue->nodes[i].pre_delay,
+                        queue->nodes[i].post_delay);
         }
 
         pthread_mutex_unlock(&mx_jit_queue);

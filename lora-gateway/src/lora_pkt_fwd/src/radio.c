@@ -357,6 +357,7 @@ static void opmodeLora(uint8_t spidev) {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void setpower(uint8_t spidev, uint8_t pw) {
     writeReg(spidev, REG_PADAC, 0x87);
+    fprintf(stderr, "INFO: set tx power to %i(dBm)\n", pw);
     if (pw < 5) pw = 5;
     if (pw > 20) pw = 20;
     writeReg(spidev, REG_PACONFIG, (uint16_t)(0x80 | ((pw - 5) & 0x0f)));
@@ -527,64 +528,56 @@ int spi_open(char *spi_path) {
 // Lora configure : Freq, SF, BW
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-bool get_radio_version(radiodev *radiodev)
+bool get_radio_version(radiodev *dev)
 {
-    digitalWrite(radiodev->rst, LOW);
+    digitalWrite(dev->rst, LOW);
     sleep(1);
-    digitalWrite(radiodev->rst, HIGH);
+    digitalWrite(dev->rst, HIGH);
     sleep(1);
 
-    opmode(radiodev->spiport, OPMODE_SLEEP);
-    uint8_t version = readReg(radiodev->spiport, REG_VERSION);
+    opmode(dev->spiport, OPMODE_SLEEP);
+    uint8_t version = readReg(dev->spiport, REG_VERSION);
 
     if (version == 0x12) {
-        fprintf(stderr, "%s: SX1276 detected, starting.\n", radiodev->desc);
+        fprintf(stderr, "%s: SX1276 detected, starting.\n", dev->desc);
         return true;
     } else {
-        fprintf(stderr, "%s: Unrecognized transceiver.\n", radiodev->desc);
+        fprintf(stderr, "%s: Unrecognized transceiver.\n", dev->desc);
         return false;
     }
 
 }
 
-void setup_channel(radiodev *radiodev)
+void setup_channel(radiodev *dev)
 {
-    opmode(radiodev->spiport, OPMODE_SLEEP);
-    opmodeLora(radiodev->spiport);
+    opmode(dev->spiport, OPMODE_SLEEP);
+    opmodeLora(dev->spiport);
     // setup lora
     printf("INFO~ Setup %s Channel: freq = %d, sf = %d, spi = %d, invert = %d\n", \
-            radiodev->desc, radiodev->freq, radiodev->sf, radiodev->spiport, radiodev->invertio);
-    setfreq(radiodev->spiport, radiodev->freq);
-    setsf(radiodev->spiport, radiodev->sf);
-    setsbw(radiodev->spiport, radiodev->bw);
-    setcr(radiodev->spiport, radiodev->cr);
-    setprlen(radiodev->spiport, radiodev->prlen);
-    setsyncword(radiodev->spiport, LORA_MAC_PREAMBLE);
+            dev->desc, dev->freq, dev->sf, dev->spiport, dev->invertio);
+    setfreq(dev->spiport, dev->freq);
+    setsf(dev->spiport, dev->sf);
+    setsbw(dev->spiport, dev->bw);
+    setcr(dev->spiport, dev->cr);
+    setprlen(dev->spiport, dev->prlen);
+    setsyncword(dev->spiport, LORA_MAC_PREAMBLE);
 
     /* use inverted I/Q signal (prevent mote-to-mote communication) */
     
-    if (!radiodev->invertio) {
-        writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) & ~(1<<6));
-        writeReg(radiodev->spiport, REG_INVERTIQ2, readReg(radiodev->spiport, REG_INVERTIQ2) & ~(1<<2));
-    } else {
-        writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) | (1<<6));
-        writeReg(radiodev->spiport, REG_INVERTIQ2, readReg(radiodev->spiport, REG_INVERTIQ2) | (1<<2));
-    }
-    
 
     /* CRC check */
-    crccheck(radiodev->spiport, radiodev->nocrc);
+    crccheck(dev->spiport, dev->nocrc);
 
     // Boost on , 150% LNA current
-    writeReg(radiodev->spiport, REG_LNA, LNA_MAX_GAIN);
+    writeReg(dev->spiport, REG_LNA, LNA_MAX_GAIN);
 
     // Auto AGC
-    writeReg(radiodev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
+    writeReg(dev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
 
     // configure output power,RFO pin Output power is limited to +14db
-    //writeReg(radiodev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
-    writeReg(radiodev->spiport, REG_PACONFIG, (uint8_t)(0x80|15));
-    writeReg(radiodev->spiport, REG_PADAC, readReg(radiodev->spiport, REG_PADAC)|0x07);
+    //writeReg(dev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
+    //writeReg(dev->spiport, REG_PACONFIG, (uint8_t)(0x80|15));
+    //writeReg(dev->spiport, REG_PADAC, readReg(dev->spiport, REG_PADAC)|0x07);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -684,136 +677,149 @@ bool received(uint8_t spidev, struct lgw_pkt_rx_s *pkt_rx) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void txlora(radiodev *radiodev, struct lgw_pkt_tx_s *pkt) {
+void txlora(radiodev *dev, struct lgw_pkt_tx_s *pkt) {
 
-    opmode(radiodev->spiport, OPMODE_SLEEP);
+    opmode(dev->spiport, OPMODE_SLEEP);
     // select LoRa modem (from sleep mode)
-    opmodeLora(radiodev->spiport);
+    opmodeLora(dev->spiport);
 
-    if (radiodev->rf_power > 0)  /* custom rx power */
-        setpower(radiodev->spiport, radiodev->rf_power);
+    if (dev->rf_power > 0)  /* custom rx power */
+        setpower(dev->spiport, dev->rf_power);
     else
-        setpower(radiodev->spiport, pkt->rf_power);
-    setfreq(radiodev->spiport, pkt->freq_hz);
-    setsf(radiodev->spiport, lgw_sf_getval(pkt->datarate));
-    setsbw(radiodev->spiport, lgw_bw_getval(pkt->bandwidth));
-    setcr(radiodev->spiport, pkt->coderate);
-    setprlen(radiodev->spiport, pkt->preamble);
-    setsyncword(radiodev->spiport, LORA_MAC_PREAMBLE);
+        setpower(dev->spiport, pkt->rf_power);
+
+    setfreq(dev->spiport, pkt->freq_hz);
+    setsf(dev->spiport, lgw_sf_getval(pkt->datarate));
+    setsbw(dev->spiport, lgw_bw_getval(pkt->bandwidth));
+    setcr(dev->spiport, pkt->coderate);
+    setprlen(dev->spiport, pkt->preamble);
+    setsyncword(dev->spiport, LORA_MAC_PREAMBLE);
 
     /* CRC check */
-    crccheck(radiodev->spiport, pkt->no_crc);
+    crccheck(dev->spiport, pkt->no_crc);
 
     // Boost on , 150% LNA current
-    writeReg(radiodev->spiport, REG_LNA, LNA_MAX_GAIN);
+    writeReg(dev->spiport, REG_LNA, LNA_MAX_GAIN);
 
     // Auto AGC
-    writeReg(radiodev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
+    writeReg(dev->spiport, REG_MODEM_CONFIG3, SX1276_MC3_AGCAUTO);
 
     // configure output power,RFO pin Output power is limited to +14db
-    writeReg(radiodev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
+    writeReg(dev->spiport, REG_PACONFIG, (uint8_t)(0x80|(15&0xf)));
 
-    if (pkt->invert_pol)
-        writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) | (1<<6));
-    else
-        writeReg(radiodev->spiport, REG_INVERTIQ, readReg(radiodev->spiport, REG_INVERTIQ) & ~(1<<6));
+    if (pkt->invert_pol) {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_ON);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_ON);
+    } else {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_OFF);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_OFF);
+    }
 
-
-    //ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
+    //ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
     // enter standby mode (required for FIFO loading))
-    opmode(radiodev->spiport, OPMODE_STANDBY);
+    opmode(dev->spiport, OPMODE_STANDBY);
 
     // set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP
-    writeReg(radiodev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
+    writeReg(dev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
     // clear all radio IRQ flags
-    writeReg(radiodev->spiport, REG_IRQ_FLAGS, 0xFF);
+    writeReg(dev->spiport, REG_IRQ_FLAGS, 0xFF);
     // mask all IRQs but TxDone
-    writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, ~IRQ_LORA_TXDONE_MASK);
+    writeReg(dev->spiport, REG_IRQ_FLAGS_MASK, ~IRQ_LORA_TXDONE_MASK);
 
     // initialize the payload size and address pointers
-    writeReg(radiodev->spiport, REG_FIFO_TX_BASE_AD, 0x00); writeReg(radiodev->spiport, REG_FIFO_ADDR_PTR, 0x00);
+    writeReg(dev->spiport, REG_FIFO_TX_BASE_AD, 0x00); writeReg(dev->spiport, REG_FIFO_ADDR_PTR, 0x00);
 
     // write buffer to the radio FIFO
     int i;
 
     for (i = 0; i < pkt->size; i++) { 
-        writeReg(radiodev->spiport, REG_FIFO, pkt->payload[i]);
+        writeReg(dev->spiport, REG_FIFO, pkt->payload[i]);
     }
 
-    writeReg(radiodev->spiport, REG_PAYLOAD_LENGTH, pkt->size);
+    writeReg(dev->spiport, REG_PAYLOAD_LENGTH, pkt->size);
 
     // now we actually start the transmission
-    opmode(radiodev->spiport, OPMODE_TX);
+    opmode(dev->spiport, OPMODE_TX);
 
     // wait for TX done
-    while(digitalRead(radiodev->dio[0]) == 0);
+    while(digitalRead(dev->dio[0]) == 0);
 
-    printf("\nTransmit at SF%iBW%d on %.6lf %ddBm.\n", lgw_sf_getval(pkt->datarate), lgw_bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000, radiodev->rf_power > 0 ? radiodev->rf_power : pkt->rf_power);
+    printf("\nTransmit at SF%iBW%d on %.6lf %ddBm.\n", lgw_sf_getval(pkt->datarate), lgw_bw_getval(pkt->bandwidth)/1000, (double)(pkt->freq_hz)/1000000, dev->rf_power > 0 ? dev->rf_power : pkt->rf_power);
 
     // mask all IRQs
-    writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
+    writeReg(dev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
 
     // clear all radio IRQ flags
-    writeReg(radiodev->spiport, REG_IRQ_FLAGS, 0xFF);
+    writeReg(dev->spiport, REG_IRQ_FLAGS, 0xFF);
 
     // go from stanby to sleep
-    opmode(radiodev->spiport, OPMODE_SLEEP);
+    opmode(dev->spiport, OPMODE_SLEEP);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-void single_tx(radiodev *radiodev, uint8_t *payload, int size) {
+void single_tx(radiodev *dev, uint8_t *payload, int size) {
 
     // select LoRa modem (from sleep mode)
-    opmodeLora(radiodev->spiport);
+    opmodeLora(dev->spiport);
 
-    //ASSERT((readReg(radiodev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
+    //ASSERT((readReg(dev->spiport, REG_OPMODE) & OPMODE_LORA) != 0);
 
     // enter standby mode (required for FIFO loading))
-    opmode(radiodev->spiport, OPMODE_STANDBY);
+    opmode(dev->spiport, OPMODE_STANDBY);
 
-    setsyncword(radiodev->spiport, LORA_MAC_PREAMBLE);
+    setsyncword(dev->spiport, LORA_MAC_PREAMBLE);
 
-    setpower(radiodev->spiport, radiodev->rf_power);
+    setpower(dev->spiport, dev->rf_power);
+
+    if (dev->invertio) {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_ON);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_ON);
+    } else {
+        writeReg(dev->spiport, REG_INVERTIQ, (readReg(dev->spiport, REG_INVERTIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_OFF | INVERTIQ_TX_OFF);
+        writeReg(dev->spiport, REG_INVERTIQ2, INVERTIQ2_OFF);
+    }
 
     // set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP
-    writeReg(radiodev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
+    writeReg(dev->spiport, REG_DIO_MAPPING_1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
     // clear all radio IRQ flags
-    writeReg(radiodev->spiport, REG_IRQ_FLAGS, 0xFF);
+    writeReg(dev->spiport, REG_IRQ_FLAGS, 0xFF);
     // mask all IRQs but TxDone
-    writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, ~IRQ_LORA_TXDONE_MASK);
+    writeReg(dev->spiport, REG_IRQ_FLAGS_MASK, ~IRQ_LORA_TXDONE_MASK);
 
     // initialize the payload size and address pointers
-    writeReg(radiodev->spiport, REG_FIFO_TX_BASE_AD, 0x00); 
-    writeReg(radiodev->spiport, REG_FIFO_ADDR_PTR, 0x00);
+    writeReg(dev->spiport, REG_FIFO_TX_BASE_AD, 0x00); 
+    writeReg(dev->spiport, REG_FIFO_ADDR_PTR, 0x00);
 
     // write buffer to the radio FIFO
     int i;
 
     for (i = 0; i < size; i++) { 
-        writeReg(radiodev->spiport, REG_FIFO, payload[i]);
+        writeReg(dev->spiport, REG_FIFO, payload[i]);
     }
 
-    writeReg(radiodev->spiport, REG_PAYLOAD_LENGTH, size);
+    writeReg(dev->spiport, REG_PAYLOAD_LENGTH, size);
 
     // now we actually start the transmission
-    opmode(radiodev->spiport, OPMODE_TX);
+    opmode(dev->spiport, OPMODE_TX);
 
     // wait for TX done
-    while(digitalRead(radiodev->dio[0]) == 0);
+    while(digitalRead(dev->dio[0]) == 0);
 
-    printf("\nTransmit at SF%iBW%d on %.6lf, %ddBm.\n",\
-            radiodev->sf, (radiodev->bw)/1000, (double)(radiodev->freq)/1000000, readReg(radiodev->spiport, radiodev->rf_power));
+    printf("\nTransmit at SF%iBW%d on %.6lf, %i(dBm).\n",
+            dev->sf, (dev->bw)/1000,
+            (double)(dev->freq)/1000000, 
+            dev->rf_power);
 
     // mask all IRQs
-    writeReg(radiodev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
+    writeReg(dev->spiport, REG_IRQ_FLAGS_MASK, 0xFF);
 
     // clear all radio IRQ flags
-    writeReg(radiodev->spiport, REG_IRQ_FLAGS, 0xFF);
+    writeReg(dev->spiport, REG_IRQ_FLAGS, 0xFF);
 
     // go from stanby to sleep
-    opmode(radiodev->spiport, OPMODE_SLEEP);
+    opmode(dev->spiport, OPMODE_SLEEP);
 }
 
 

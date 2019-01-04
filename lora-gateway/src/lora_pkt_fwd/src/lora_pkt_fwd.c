@@ -155,7 +155,7 @@ static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; /* non criti
 /* hardware access control and correction */
 pthread_mutex_t mx_concent = PTHREAD_MUTEX_INITIALIZER; /* control access to the concentrator */
 static pthread_mutex_t mx_xcorr = PTHREAD_MUTEX_INITIALIZER; /* control access to the XTAL correction */
-pthread_mutex_t mx_sx1276 = PTHREAD_MUTEX_INITIALIZER; /* control access to the sx1276 */
+//pthread_mutex_t mx_sx1276 = PTHREAD_MUTEX_INITIALIZER; /* control access to the sx1276 */
 static bool xtal_correct_ok = false; /* set true when XTAL correction is stable enough */
 static double xtal_correct = 1.0;
 
@@ -2661,6 +2661,8 @@ void thread_jit(void) {
     int pkt_index = -1;
     struct timeval current_unix_time;
     struct timeval current_concentrator_time;
+    uint32_t time_us;
+    uint16_t diff_us;
     enum jit_error_e jit_result;
     enum jit_pkt_type_e pkt_type;
     uint8_t tx_status;
@@ -2693,9 +2695,33 @@ void thread_jit(void) {
                     if (sx1276) {
                         //pthread_mutex_lock(&mx_sx1276);
 
-                        txlora(sxradio, &pkt); /* make sure the endnode receive */
+                        gettimeofday(&current_unix_time, NULL);
+                        get_concentrator_time(&current_concentrator_time, current_unix_time);
+                        time_us = current_concentrator_time.tv_sec * 1000000UL + current_concentrator_time.tv_usec;
 
-                        txlora(sxradio, &pkt); /*one txlora waste 8~20ms */
+                        diff_us = (long)(pkt.count_us - time_us) / 1000;
+
+                        MSG_DEBUG(DEBUG_JIT, "JITINFO~ pending TX count_us=%u, now_us=%u, diff=%u, waitms=%d\n",
+                                        pkt.count_us,
+                                        time_us,
+                                        pkt.count_us - time_us,
+                                        diff_us - 10);
+                        
+
+                        if ((diff_us - 8/*adjusti guess number*/) >= 1)
+                            wait_ms(diff_us);
+
+                        /*
+                        gettimeofday(&current_unix_time, NULL);
+                        get_concentrator_time(&current_concentrator_time, current_unix_time);
+                        time_us = current_concentrator_time.tv_sec * 1000000UL + current_concentrator_time.tv_usec;
+
+                        printf("JITINFO~ start TX  now_us=%u, diff=%u\n",
+                                    time_us,
+                                    time_us - pkt.count_us);
+                        */
+
+                        txlora(sxradio, &pkt); 
 
                         pthread_mutex_lock(&mx_meas_dw);
                         meas_nb_tx_ok += 1;

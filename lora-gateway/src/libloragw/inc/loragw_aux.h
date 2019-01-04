@@ -43,6 +43,8 @@ Maintainer: Sylvain Miermont
 */
 void wait_ms(unsigned long t);
 
+void wait_us(unsigned long t);
+
 #endif
 
 /* --- EOF ------------------------------------------------------------------ */

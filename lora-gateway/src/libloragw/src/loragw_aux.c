@@ -63,7 +63,7 @@ void wait_us(unsigned long a) {
     struct timespec rem;
 
     dly.tv_sec = a / 1000000;
-    dly.tv_nsec = (long)a * 1000000;
+    dly.tv_nsec = ((long)a % 1000000) * 1000;
 
     DEBUG_PRINTF("NOTE dly: %ld sec %ld ns\n", dly.tv_sec, dly.tv_nsec);
 

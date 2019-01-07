@@ -53,19 +53,6 @@ static void sig_handler(int sigio) {
     }
 }
 
-static void wait_ms(unsigned long a) {
-    struct timespec dly;
-    struct timespec rem;
-
-    dly.tv_sec = a / 1000;
-    dly.tv_nsec = ((long)a % 1000) * 1000000;
-
-    if((dly.tv_sec > 0) || ((dly.tv_sec == 0) && (dly.tv_nsec > 100000))) {
-        clock_nanosleep(CLOCK_MONOTONIC, 0, &dly, &rem);
-    }
-    return;
-}
-
 void print_help(void) {
     printf("Usage: lg02_single_rx_tx   [-d radio_dev] select radio 1 or 2 (default:1) \n");
     printf("                           [-t] set as tx\n");

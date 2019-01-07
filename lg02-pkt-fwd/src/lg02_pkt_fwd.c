@@ -218,8 +218,6 @@ static bool get_config(const char *section, char *option, int len);
 
 static double difftimespec(struct timespec end, struct timespec beginning);
 
-static void wait_ms(unsigned long a); 
-
 //static int my_publish(struct mqtt_config *);
 
 /* radio devices */
@@ -285,21 +283,6 @@ static double difftimespec(struct timespec end, struct timespec beginning) {
     return x;
 }
 
-static void wait_ms(unsigned long a) {
-    struct timespec dly;
-    struct timespec rem;
-
-    dly.tv_sec = a / 1000;
-    dly.tv_nsec = ((long)a % 1000) * 1000000;
-
-    //MSG("NOTE dly: %ld sec %ld ns\n", dly.tv_sec, dly.tv_nsec);
-
-    if((dly.tv_sec > 0) || ((dly.tv_sec == 0) && (dly.tv_nsec > 100000))) {
-        clock_nanosleep(CLOCK_MONOTONIC, 0, &dly, &rem);
-        //MSG("NOTE remain: %ld sec %ld ns\n", rem.tv_sec, rem.tv_nsec);
-    }
-    return;
-}
 
 static struct pkt_rx_s *pkt_alloc(void) {
     return (struct pkt_rx_s *) malloc(sizeof(struct pkt_rx_s));
@@ -1688,7 +1671,7 @@ void thread_push(void) {
     short x0, x1;
     
     /* Just In Time downlink */
-    //struct timeval current_unix_time;
+    struct timeval current_unix_time;
 
     while (!exit_sig && !quit_sig) {
         
@@ -1866,14 +1849,15 @@ void thread_push(void) {
                 /* select TX mode */
                 txpkt.tx_mode = IMMEDIATE;
 
+                gettimeofday(&current_unix_time, NULL);
+                txpkt.count_us = current_unix_time.tv_sec + current_unix_time.tv_usec + 1495/*START_DELAY*/;
+
                 txlora(txdev, &txpkt);
                 /* insert the queue is the best method, but is too truble to construct the txpkt pakeage */
                 /* check TX parameter before trying to queue packet */                                      
                 /*
                 gettimeofday(&current_unix_time, NULL);
                 jit_result = jit_enqueue(&jit_queue, &current_unix_time, &txpkt, 0);
-                if (jit_result != JIT_ERROR_OK) 
-                    MSG_LOG(DEBUG_ERROR, "ERROR~ Packet REJECTED (jit error=%d)\n", jit_result);
                 */
 
                 fclose(fp);
@@ -1894,11 +1878,12 @@ void thread_jit(void) {
     struct pkt_tx_s pkt;
     int pkt_index = -1;
     struct timeval current_unix_time;
+    //uint32_t time_us;
+    //uint16_t diff_us;
     enum jit_error_e jit_result;
     enum jit_pkt_type_e pkt_type;
 
     while (!exit_sig && !quit_sig) {
-        wait_ms(10);
         /* transfer data and metadata to the concentrator, and schedule TX */
         gettimeofday(&current_unix_time, NULL);
         jit_result = jit_peek(&jit_queue, &current_unix_time, &pkt_index);
@@ -1910,15 +1895,16 @@ void thread_jit(void) {
                     pthread_mutex_lock(&mx_meas_dw);
                     meas_nb_tx_ok += 1;
                     pthread_mutex_unlock(&mx_meas_dw);
-                    MSG_LOG(DEBUG_PKT_FWD, "INFO~ Donwlink done: count_us=%u\n", pkt.count_us);
+                    MSG_LOG(DEBUG_JIT, "INFO~ Donwlink done: count_us=%u\n", pkt.count_us);
                 } else {
                     MSG_LOG(DEBUG_ERROR, "ERROR~ jit_dequeue failed with %d\n", jit_result);
                 }
             }
         } else if (jit_result == JIT_ERROR_EMPTY) {
-            /* Do nothing, it can happen */
+            wait_ms(10);
         } else {
             MSG_LOG(DEBUG_ERROR, "ERROR~ jit_peek failed with %d\n", jit_result);
+            wait_ms(10);
         }
     }
 }

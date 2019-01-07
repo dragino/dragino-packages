@@ -2699,27 +2699,30 @@ void thread_jit(void) {
                         get_concentrator_time(&current_concentrator_time, current_unix_time);
                         time_us = current_concentrator_time.tv_sec * 1000000UL + current_concentrator_time.tv_usec;
 
-                        diff_us = (long)(pkt.count_us - time_us) / 1000;
+                        diff_us = pkt.count_us - time_us - 1495/*START_DELAY*/;
 
                         MSG_DEBUG(DEBUG_JIT, "JITINFO~ pending TX count_us=%u, now_us=%u, diff=%u, waitms=%d\n",
                                         pkt.count_us,
                                         time_us,
                                         pkt.count_us - time_us,
-                                        diff_us - 10);
+                                        diff_us);
                         
 
-                        if ((diff_us - 8/*adjusti guess number*/) >= 1)
-                            wait_ms(diff_us);
+                        if (pkt.tx_mode != IMMEDIATE && diff_us > 0 && diff_us < 30000/*JIT_START_DELAY*/)
+                            wait_us(diff_us);
 
                         /*
                         gettimeofday(&current_unix_time, NULL);
                         get_concentrator_time(&current_concentrator_time, current_unix_time);
                         time_us = current_concentrator_time.tv_sec * 1000000UL + current_concentrator_time.tv_usec;
 
-                        printf("JITINFO~ start TX  now_us=%u, diff=%u\n",
+                        printf("JITINFO~ start TX  now_us=%u, count_us=%u, diff_us=%u, diff=%u\n",
                                     time_us,
+                                    pkt.count_us,
+                                    diff_us,
                                     time_us - pkt.count_us);
                         */
+                        
 
                         txlora(sxradio, &pkt); 
 

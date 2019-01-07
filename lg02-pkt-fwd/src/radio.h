@@ -338,6 +338,11 @@ extern int DEBUG_GPS;
 extern int DEBUG_SPI;
 extern int DEBUG_UCI;
 
+
+void wait_ms(unsigned long a); 
+
+void wait_us(unsigned long a); 
+
 /*
  * Read the state of the port. The port can be input
  * or output.

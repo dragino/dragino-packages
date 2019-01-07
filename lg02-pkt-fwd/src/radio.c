@@ -208,6 +208,38 @@ static int gpio_get_state(int gpio) {
     return state;
 }
 
+void wait_ms(unsigned long a) {
+    struct timespec dly;
+    struct timespec rem;
+
+    dly.tv_sec = a / 1000;
+    dly.tv_nsec = ((long)a % 1000) * 1000000;
+
+    //MSG("NOTE dly: %ld sec %ld ns\n", dly.tv_sec, dly.tv_nsec);
+
+    if((dly.tv_sec > 0) || ((dly.tv_sec == 0) && (dly.tv_nsec > 100000))) {
+        clock_nanosleep(CLOCK_MONOTONIC, 0, &dly, &rem);
+        //MSG("NOTE remain: %ld sec %ld ns\n", rem.tv_sec, rem.tv_nsec);
+    }
+    return;
+}
+
+void wait_us(unsigned long a) {
+    struct timespec dly;
+    struct timespec rem;
+
+    dly.tv_sec = a / 1000000;
+    dly.tv_nsec = ((long)a % 1000000) * 1000;
+
+    //MSG("NOTE dly: %ld sec %ld ns\n", dly.tv_sec, dly.tv_nsec);
+
+    if((dly.tv_sec > 0) || ((dly.tv_sec == 0) && (dly.tv_nsec > 100000))) {
+        clock_nanosleep(CLOCK_MONOTONIC, 0, &dly, &rem);
+        //MSG("NOTE remain: %ld sec %ld ns\n", rem.tv_sec, rem.tv_nsec);
+    }
+    return;
+}
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void digitalWrite(int gpio, int state)
@@ -713,6 +745,11 @@ bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
 
 void txlora(radiodev *dev, struct pkt_tx_s *pkt) {
 
+    int i;
+
+    struct timeval current_unix_time;
+    uint32_t time_us;
+
     opmode(dev->spiport, OPMODE_SLEEP);
     // select LoRa modem (from sleep mode)
     opmodeLora(dev->spiport);
@@ -765,14 +802,19 @@ void txlora(radiodev *dev, struct pkt_tx_s *pkt) {
     // initialize the payload size and address pointers
     writeReg(dev->spiport, REG_FIFO_TX_BASE_AD, 0x00); writeReg(dev->spiport, REG_FIFO_ADDR_PTR, 0x00);
 
-    // write buffer to the radio FIFO
-    int i;
-
     for (i = 0; i < pkt->size; i++) { 
         writeReg(dev->spiport, REG_FIFO, pkt->payload[i]);
     }
 
     writeReg(dev->spiport, REG_PAYLOAD_LENGTH, pkt->size);
+
+    gettimeofday(&current_unix_time, NULL);
+    time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
+
+    time_us = pkt->count_us - 1495/*TX_START_DELAY*/ - time_us;
+
+    if (pkt->tx_mode != IMMEDIATE && time_us > 0 && time_us < 30000/*TX_JIT DELAY*/)
+        wait_us(time_us);
 
     // now we actually start the transmission
     opmode(dev->spiport, OPMODE_TX);

@@ -197,8 +197,6 @@ static bool get_config(const char *section, char *option, int len);
 
 static double difftimespec(struct timespec end, struct timespec beginning);
 
-static void wait_ms(unsigned long a); 
-
 //static int my_publish(struct mqtt_config *);
 
 /* radio devices */
@@ -261,22 +259,6 @@ static double difftimespec(struct timespec end, struct timespec beginning) {
     x += (double)(end.tv_sec - beginning.tv_sec);
     
     return x;
-}
-
-static void wait_ms(unsigned long a) {
-    struct timespec dly;
-    struct timespec rem;
-
-    dly.tv_sec = a / 1000;
-    dly.tv_nsec = ((long)a % 1000) * 1000000;
-
-    //MSG("NOTE dly: %ld sec %ld ns\n", dly.tv_sec, dly.tv_nsec);
-
-    if((dly.tv_sec > 0) || ((dly.tv_sec == 0) && (dly.tv_nsec > 100000))) {
-        clock_nanosleep(CLOCK_MONOTONIC, 0, &dly, &rem);
-        //MSG("NOTE remain: %ld sec %ld ns\n", rem.tv_sec, rem.tv_nsec);
-    }
-    return;
 }
 
 static struct pkt_rx_s *pkt_alloc(void) {
@@ -1473,6 +1455,8 @@ void thread_push(void) {
     JSON_Value *val = NULL; /* needed to detect the absence of some fields */
     const char *str; /* pointer to sub-strings in the JSON data */
     short x0, x1;
+
+    struct timeval current_unix_time;
     
     while (!exit_sig && !quit_sig) {
         
@@ -1647,6 +1631,9 @@ void thread_push(void) {
                 
                 /* select TX mode */
                 txpkt.tx_mode = IMMEDIATE;
+
+                gettimeofday(&current_unix_time, NULL);
+                txpkt.count_us = current_unix_time.tv_sec + current_unix_time.tv_usec + 1495/*START_DELAY*/;
 
                 ++radio_inuse; /* tell the receive thread radio device in use */
                 pthread_mutex_lock(&mx_radio_lock); /* if other process lock wait until */

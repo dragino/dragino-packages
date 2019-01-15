@@ -7,8 +7,13 @@ start() {
     if [ ! -d /var/iot ]; then 
         mkdir /var/iot
     fi
+
     if [ ! -d /var/iot/channels ]; then
         mkdir /var/iot/channels
+    fi
+
+    if [ ! -d /var/iot/receive ]; then
+        mkdir /var/iot/receive
     fi
 
     if [ ! -d /var/iot/push ]; then 

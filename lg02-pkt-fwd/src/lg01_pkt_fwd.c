@@ -782,7 +782,7 @@ int main(int argc, char *argv[])
                                     static unsigned long next = 1;
                                     srand((unsigned)time(NULL));      /* random filename */
                                     next = next * 1103515245 + 12345;
-                                    sprintf(chan_path, "/var/iot/channels/%ld", (unsigned)(next/65536) % 32768);
+                                    sprintf(chan_path, "/var/iot/receive/%ld", (unsigned)(next/65536) % 32768);
                                 }
                                 
                                 fp = fopen(chan_path, "w+");

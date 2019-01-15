@@ -1444,16 +1444,16 @@ int main(void)
         printf("REPORT~ # BEACON queued: %u\n", cp_nb_beacon_queued);
         printf("REPORT~ # BEACON sent so far: %u\n", cp_nb_beacon_sent);
         printf("REPORT~ # BEACON rejected: %u\n", cp_nb_beacon_rejected);
-        printf("REPORT~ ### [JIT] ###\n");
+        printf("REPORT~ ### [PPS] ###\n");
         
         /* get timestamp captured on PPM pulse  */
         pthread_mutex_lock(&mx_concent);
         i = lgw_get_trigcnt(&trig_tstamp);
         pthread_mutex_unlock(&mx_concent);
         if (i != LGW_HAL_SUCCESS) {
-            MSG_DEBUG(DEBUG_WARNING, "WARNING: # SX1301 time (PPS): unknown\n");
+            printf("REPORT~ # SX1301 time (PPS): unknown\n");
         } else {
-            MSG_DEBUG(DEBUG_INFO, "INFO~ # SX1301 time (PPS): %u\n", trig_tstamp);
+            printf("REPORT~ # SX1301 time (PPS): %u\n", trig_tstamp);
         }
         jit_print_queue (&jit_queue, false, DEBUG_LOG);
         MSG_DEBUG(DEBUG_GPS, "### [GPS] ###\n");

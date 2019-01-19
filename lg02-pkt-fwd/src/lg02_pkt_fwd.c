@@ -951,7 +951,7 @@ int main(int argc, char *argv[])
                         }
                         pktrx_clean(&pktrx[pt]); 
 
-                    } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp")) {  // mqtt mode or tcpudp mode for loraRAW
+                    } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp") || !strcmp(server_type, "customized")) {  // mqtt mode or tcpudp mode for loraRAW
                         char tmp[256] = {'\0'};
                         char chan_path[32] = {'\0'};
                         char *chan_id = NULL;

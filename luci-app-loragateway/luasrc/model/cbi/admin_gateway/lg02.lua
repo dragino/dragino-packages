@@ -27,6 +27,7 @@ sv:value("lorawan",  "LoRaWan/RAW forwarder")
 sv:value("relay",  "LoRaWan/RAW packets relay")
 sv:value("mqtt",  "LoRaRAW forward to MQTT server")
 sv:value("tcpudp",  "LoRaRAW forward to TCP/UDP server")
+sv:value("customized",  "Process LoRa Data via customized script    ")
 
 local lv = s:option(ListValue, "DEB", translate("Debug Level"))
 lv.placeholder = "Select debug level"

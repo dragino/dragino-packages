@@ -283,6 +283,57 @@ static double difftimespec(struct timespec end, struct timespec beginning) {
     return x;
 }
 
+static int init_socket(const char *servaddr, const char *servport) {
+    int i, sockfd;
+    /* network socket creation */
+    struct addrinfo hints;
+    struct addrinfo *result; /* store result of getaddrinfo */
+    struct addrinfo *q; /* pointer to move into *result data */
+
+    char host_name[64];
+    char port_name[64];
+
+    /* prepare hints to open network sockets */
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_INET; /* WA: Forcing IPv4 as AF_UNSPEC makes connection on localhost to fail */
+    hints.ai_socktype = SOCK_DGRAM;
+
+    /* look for server address w/ upstream port */
+    i = getaddrinfo(servaddr, servport, &hints, &result);
+    if (i != 0) {
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, servport, gai_strerror(i));
+        return -1;
+    }
+
+    /* try to open socket for upstream traffic */
+    for (q=result; q!=NULL; q=q->ai_next) {
+        sockfd = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
+        if (sockfd == -1) continue; /* try next field */
+        else break; /* success, get out of loop */
+    }
+    if (q == NULL) {
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n", servaddr, servport);
+        i = 1;
+        for (q=result; q!=NULL; q=q->ai_next) {
+            getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [up] result %i host:%s service:%s\n", i, host_name, port_name);
+            ++i;
+        }
+
+        return -1;
+    }
+
+    /* connect so we can send/receive packet with the server only */
+    i = connect(sockfd, q->ai_addr, q->ai_addrlen);
+    if (i != 0) {
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] connect returned %s\n", strerror(errno));
+        return -1;
+    }
+
+    freeaddrinfo(result);
+
+    return sockfd;
+}
 
 static struct pkt_rx_s *pkt_alloc(void) {
     return (struct pkt_rx_s *) malloc(sizeof(struct pkt_rx_s));
@@ -451,13 +502,6 @@ int main(int argc, char *argv[])
     pthread_t thrid_down;
     pthread_t thrid_push;
     pthread_t thrid_jit;
-
-    /* network socket creation */
-    struct addrinfo hints;
-    struct addrinfo *result; /* store result of getaddrinfo */
-    struct addrinfo *q; /* pointer to move into *result data */
-    char host_name[64];
-    char port_name[64];
     
     unsigned long long ull = 0;
 
@@ -788,106 +832,15 @@ int main(int argc, char *argv[])
     //MSG("Looking for server with upstream port......\n");
     if (!strcmp(server_type, "lorawan")) {
         MSG_LOG(DEBUG_INFO, "INFO~ Start lora packet forward daemon, server = %s, port = %s\n", server, port);
-        /* prepare hints to open network sockets */
-        memset(&hints, 0, sizeof hints);
-        hints.ai_family = AF_INET; /* should handle IP v4 or v6 automatically */
-        hints.ai_socktype = SOCK_DGRAM;
-        i = getaddrinfo(server, serv_port_up, &hints, &result);
-        if (i != 0) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
-                exit(EXIT_FAILURE);
-        }
-        
-        /* try to open socket for upstream traffic */
-        //MSG("Try to open socket for upstream......\n");
-        for (q=result; q!=NULL; q=q->ai_next) {
-                sock_up = socket(q->ai_family, q->ai_socktype,q->ai_protocol);
-                if (sock_up == -1) continue; /* try next field */
-                else break; /* success, get out of loop */
-        }
-        if (q == NULL) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
-                i = 1;
-                for (q=result; q!=NULL; q=q->ai_next) {
-                        getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG_LOG(DEBUG_INFO, "INFO~ [up] result %i host:%s service:%s\n", i, host_name, port_name);
-                        ++i;
-                }
-                exit(EXIT_FAILURE);
-        }
-        
-        /* connect so we can send/receive packet with the server only */
-        i = connect(sock_up, q->ai_addr, q->ai_addrlen);
-        if (i != 0) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [up] connect returned %s\n", strerror(errno));
-                exit(EXIT_FAILURE);
-        }
-        freeaddrinfo(result);
 
-        /* look for server address w/ status port */
-        //MSG("loor for server with status port......\n");
-        i = getaddrinfo(server, port, &hints, &result);
-        if (i != 0) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", server, serv_port_up, gai_strerror(i));
-                exit(EXIT_FAILURE);
-        }
-        /* try to open socket for status traffic */
-        for (q=result; q!=NULL; q=q->ai_next) {
-                sock_stat = socket(q->ai_family, q->ai_socktype,q->ai_protocol);
-                if (sock_stat == -1) continue; /* try next field */
-                else break; /* success, get out of loop */
-        }
-        if (q == NULL) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [stat] failed to open socket to any of server %s addresses (port %s)\n", server, port);
-                i = 1;
-                for (q=result; q!=NULL; q=q->ai_next) {
-                        getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG_LOG(DEBUG_INFO, "INFO~ [stat] result %i host:%s service:%s\n", i, host_name, port_name);
-                        ++i;
-                }
-                exit(EXIT_FAILURE);
-        }
-        
-        /* connect so we can send/receive packet with the server only */
-        i = connect(sock_stat, q->ai_addr, q->ai_addrlen);
-        if (i != 0) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [stat] connect returned %s\n", strerror(errno));
-                exit(EXIT_FAILURE);
-        }
-        freeaddrinfo(result);
+        if ((sock_up = init_socket(server, serv_port_up)) == -1)
+            exit(EXIT_FAILURE);
 
-        /* look for server address w/ downstream port */
-        //MSG("loor for server with downstream port......\n");
-        i = getaddrinfo(server, serv_port_down, &hints, &result);
-        if (i != 0) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [down] getaddrinfo on address %s (port %s) returned %s\n", server, serv_port_up, gai_strerror(i));
-                exit(EXIT_FAILURE);
-        }
-        
-        /* try to open socket for downstream traffic */
-        for (q=result; q!=NULL; q=q->ai_next) {
-                sock_down = socket(q->ai_family, q->ai_socktype,q->ai_protocol);
-                if (sock_down == -1) continue; /* try next field */
-                else break; /* success, get out of loop */
-        }
-        if (q == NULL) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [down] failed to open socket to any of server %s addresses (port %s)\n", server, serv_port_up);
-                i = 1;
-                for (q=result; q!=NULL; q=q->ai_next) {
-                        getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-                        MSG_LOG(DEBUG_INFO, "INFO~ [down] result %i host:%s service:%s\n", i, host_name, port_name);
-                        ++i;
-                }
-                exit(EXIT_FAILURE);
-        }
-        
-        /* connect so we can send/receive packet with the server only */
-        i = connect(sock_down, q->ai_addr, q->ai_addrlen);
-        if (i != 0) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [down] connect returned %s\n", strerror(errno));
-                exit(EXIT_FAILURE);
-        }
-        freeaddrinfo(result);
+        if ((sock_stat = init_socket(server, serv_port_up)) == -1)
+            exit(EXIT_FAILURE);
+
+        if ((sock_down = init_socket(server, serv_port_down)) == -1)
+            exit(EXIT_FAILURE);
 
         /* JIT queue initialization */
         jit_queue_init(&jit_queue); 
@@ -1308,11 +1261,23 @@ void thread_up(void) {
                 j = recv(sock_up, (void *)buff_ack, sizeof buff_ack, 0);
                 clock_gettime(CLOCK_MONOTONIC, &recv_time);
                 if (j == -1) {
-                    if (errno == EAGAIN) { /* timeout */
-                            continue;
-                    } else { /* server connection error */
-                            break;
+                    if (errno != EAGAIN) { /* timeout */
+
+                        shutdown(sock_up, SHUT_RDWR);
+                        shutdown(sock_stat, SHUT_RDWR);
+                        shutdown(sock_down, SHUT_RDWR);
+
+                        if ((sock_up = init_socket(server, serv_port_up)) == -1)
+                            exit(EXIT_FAILURE);
+
+                        if ((sock_stat = init_socket(server, serv_port_up)) == -1)
+                            exit(EXIT_FAILURE);
+
+                        if ((sock_down = init_socket(server, serv_port_down)) == -1)
+            exit(EXIT_FAILURE);
+
                     }
+                    continue;
                 } else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
                     //MSG("WARNING: [up] ignored invalid non-ACL packet\n");
                     continue;
@@ -1430,6 +1395,21 @@ void thread_down(void) {
 	    /* if no network message was received, got back to listening sock_down socket */
 	    if (msg_len == -1) {
 		    //MSG("WARNING: [down] recv returned %s\n", strerror(errno)); /* too verbose */
+                    if (errno != EAGAIN) { /* timeout */
+                        shutdown(sock_up, SHUT_RDWR);
+                        shutdown(sock_stat, SHUT_RDWR);
+                        shutdown(sock_down, SHUT_RDWR);
+
+                        if ((sock_up = init_socket(server, serv_port_up)) == -1)
+                            exit(EXIT_FAILURE);
+
+                        if ((sock_stat = init_socket(server, serv_port_up)) == -1)
+                            exit(EXIT_FAILURE);
+
+                        if ((sock_down = init_socket(server, serv_port_down)) == -1)
+            exit(EXIT_FAILURE);
+                    }
+
 		    continue;
 	    }
 	    

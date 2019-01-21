@@ -63,6 +63,8 @@ define Package/lora-gateway/install
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/*conf.json $(1)/etc/lora
 	$(INSTALL_DIR) $(1)/etc/lora/cfg
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/cfg/*.json* $(1)/etc/lora/cfg
+	$(INSTALL_DIR) $(1)/etc/lora/customized_scripts
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lora_pkt_fwd/customized_scripts/* $(1)/etc/lora/customized_scripts
 endef
 
 $(eval $(call BuildPackage,lora-gateway))

@@ -50,12 +50,7 @@ static pthread_mutex_t mx_jit_queue = PTHREAD_MUTEX_INITIALIZER; /* control acce
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
 typedef int (*__compar_d_fn_t) (const void *, const void *, void *);
-static void qsort_r(void  *base,
-           size_t nel,
-           size_t width,
-           __compar_d_fn_t comp,
-		   void *arg)
-{
+static void qsort_r(void  *base, size_t nel, size_t width, __compar_d_fn_t comp, void *arg) {
 	size_t wgap, i, j, k;
 	char tmp;
 

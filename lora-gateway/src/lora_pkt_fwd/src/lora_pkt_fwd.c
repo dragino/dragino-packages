@@ -1015,7 +1015,7 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
     return send(sock_down, (void *)buff_ack, buff_index, 0);
 }
 
-static int init_socket(const char *servaddr, const char *servport) {
+static int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len) {
     int i, sockfd;
     /* network socket creation */
     struct addrinfo hints;
@@ -1063,6 +1063,13 @@ static int init_socket(const char *servaddr, const char *servport) {
     }
 
     freeaddrinfo(result);
+
+    if ((setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, rectimeout, len)) != 0) {
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] setsockopt returned %s\n", strerror(errno));
+        return -1;
+    }
+
+    MSG_DEBUG(DEBUG_INFO, "INFO~ sockfd=%d\n", sockfd);
 
     return sockfd;
 }
@@ -1212,10 +1219,12 @@ int main(void)
     net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  lgwm  ));
 
     /* init socket for communicate */
-    if ((sock_up = init_socket(serv_addr, serv_port_up)) == -1)
+    if ((sock_up = init_socket(serv_addr, serv_port_up,\
+                    (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
         exit(EXIT_FAILURE);
 
-    if ((sock_down = init_socket(serv_addr, serv_port_down)) == -1)
+    if ((sock_down = init_socket(serv_addr, serv_port_down,\
+                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
         exit(EXIT_FAILURE);
 
     /* init transifer radio device */
@@ -1548,11 +1557,13 @@ void thread_up(void) {
     uint16_t mote_fcnt = 0;
 
     /* set upstream socket RX timeout */
+    /*
     i = setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof push_timeout_half);
     if (i != 0) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] setsockopt returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
+    */
 
     /* pre-fill the data buffer with fixed fields */
     buff_up[0] = PROTOCOL_VERSION;
@@ -1927,11 +1938,14 @@ void thread_up(void) {
                 /* server connection error */
                     shutdown(sock_up, SHUT_RDWR);
                     shutdown(sock_down, SHUT_RDWR);
-                    if ((sock_up = init_socket(serv_addr, serv_port_up)) == -1)
+                    if ((sock_up = init_socket(serv_addr, serv_port_up,\
+                                    (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
                         exit(EXIT_FAILURE);
 
-                    if ((sock_down = init_socket(serv_addr, serv_port_down)) == -1)
+                    if ((sock_down = init_socket(serv_addr, serv_port_down,\
+                                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
                         exit(EXIT_FAILURE);
+
                 }
 
                 continue;
@@ -2017,11 +2031,13 @@ void thread_down(void) {
     enum jit_pkt_type_e downlink_type;
 
     /* set downstream socket RX timeout */
+    /*
     i = setsockopt(sock_down, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof pull_timeout);
     if (i != 0) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [down] setsockopt returned %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
+    */
 
     /* pre-fill the pull request buffer with fixed fields */
     buff_req[0] = PROTOCOL_VERSION;
@@ -2271,11 +2287,14 @@ void thread_down(void) {
                     /* server connection error */
                     shutdown(sock_up, SHUT_RDWR);
                     shutdown(sock_down, SHUT_RDWR);
-                    if ((sock_up = init_socket(serv_addr, serv_port_up)) == -1)
+                    if ((sock_up = init_socket(serv_addr, serv_port_up,\
+                                    (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
                         exit(EXIT_FAILURE);
 
-                    if ((sock_down = init_socket(serv_addr, serv_port_down)) == -1)
+                    if ((sock_down = init_socket(serv_addr, serv_port_down,\
+                                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
                         exit(EXIT_FAILURE);
+
                 }
 
                 continue;

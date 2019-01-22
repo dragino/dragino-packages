@@ -143,7 +143,6 @@ static uint32_t net_mac_h; /* Most Significant Nibble, network order */
 static uint32_t net_mac_l; /* Least Significant Nibble, network order */
 
 /* network sockets */
-static int sock_stat; /* socket for upstream traffic */
 static int sock_up; /* socket for upstream traffic */
 static int sock_down; /* socket for downstream traffic */
 
@@ -261,7 +260,7 @@ static double difftimespec(struct timespec end, struct timespec beginning) {
     return x;
 }
 
-static int init_socket(const char *servaddr, const char *servport) {
+static int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len) {
     int i, sockfd;
     /* network socket creation */
     struct addrinfo hints;
@@ -309,6 +308,13 @@ static int init_socket(const char *servaddr, const char *servport) {
     }
 
     freeaddrinfo(result);
+
+    if ((setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, rectimeout, len)) != 0) {
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] setsockopt returned %s\n", strerror(errno));
+        return -1;
+    }
+
+    MSG_DEBUG(DEBUG_INFO, "INFO~ sockfd=%d\n", sockfd);
 
     return sockfd;
 }
@@ -636,13 +642,12 @@ int main(int argc, char *argv[])
         MSG_LOG(DEBUG_INFO, "INFO~ Start lora packet forward daemon, server = %s, port = %s\n", server, port);
 
         /* look for server address w/ upstream port */
-        if ((sock_up = init_socket(server, serv_port_up)) == -1)
+        if ((sock_up = init_socket(server, serv_port_up,\
+                        (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
             exit(EXIT_FAILURE);
 
-        if ((sock_stat = init_socket(server, serv_port_up)) == -1)
-            exit(EXIT_FAILURE);
-
-        if ((sock_down = init_socket(server, serv_port_down)) == -1)
+        if ((sock_down = init_socket(server, serv_port_down,\
+                        (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
             exit(EXIT_FAILURE);
 
         /* JIT queue initialization */
@@ -775,7 +780,6 @@ int main(int argc, char *argv[])
         /* if an exit signal was received, try to quit properly */
         if (exit_sig) {
             /* shut down network sockets */
-            shutdown(sock_stat, SHUT_RDWR);
             shutdown(sock_up, SHUT_RDWR);
             shutdown(sock_down, SHUT_RDWR);
         }
@@ -937,7 +941,7 @@ void thread_stat(void) {
         MSG_LOG(DEBUG_INFO, "\nINFO~ (json): [stat update] %s\n", (char *)(status_report + 12)); /* DEBUG: display JSON stat */
 
         //send the update
-        send(sock_stat, (void *)status_report, stat_index, 0);
+        send(sock_up, (void *)status_report, stat_index, 0);
 
         /* wait for next reporting interval */
         wait_ms(1000 * stat_interval);
@@ -1051,21 +1055,10 @@ void thread_up(void) {
                 j = recv(sock_up, (void *)buff_ack, sizeof buff_ack, 0);
                 clock_gettime(CLOCK_MONOTONIC, &recv_time);
                 if (j == -1) {
-                    if (errno != EAGAIN) { /* timeout */
-                        shutdown(sock_up, SHUT_RDWR);
-                        shutdown(sock_stat, SHUT_RDWR);
-                        shutdown(sock_down, SHUT_RDWR);
-
-                        if ((sock_up = init_socket(server, serv_port_up)) == -1)
-                            exit(EXIT_FAILURE);
-
-                        if ((sock_stat = init_socket(server, serv_port_up)) == -1)
-                            exit(EXIT_FAILURE);
-
-                        if ((sock_down = init_socket(server, serv_port_down)) == -1)
-            exit(EXIT_FAILURE);
-                    }
+                    if (errno == EAGAIN) { /* timeout */
                     continue;
+                    }
+                    break;
                 } else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
                     //MSG("WARNING: [up] ignored invalid non-ACL packet\n");
                     continue;
@@ -1185,16 +1178,13 @@ void thread_down(void) {
 		//MSG("WARNING: [down] recv returned %s\n", strerror(errno)); /* too verbose */
                 if (errno != EAGAIN) { /* timeout */
                     shutdown(sock_up, SHUT_RDWR);
-                    shutdown(sock_stat, SHUT_RDWR);
                     shutdown(sock_down, SHUT_RDWR);
-
-                    if ((sock_up = init_socket(server, serv_port_up)) == -1)
+                    if ((sock_up = init_socket(server, serv_port_up,\
+                                    (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
                         exit(EXIT_FAILURE);
 
-                    if ((sock_stat = init_socket(server, serv_port_up)) == -1)
-                        exit(EXIT_FAILURE);
-
-                    if ((sock_down = init_socket(server, serv_port_down)) == -1)
+                    if ((sock_down = init_socket(server, serv_port_down,\
+                                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
                         exit(EXIT_FAILURE);
                 }
 	        continue;

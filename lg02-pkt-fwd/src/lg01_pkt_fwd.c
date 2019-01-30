@@ -673,17 +673,17 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
         }
 
-        i = pthread_create( &thrid_push, NULL, (void * (*)(void *))thread_push, NULL);
-        if (i != 0) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create push data thread\n");
-                exit(EXIT_FAILURE);
-        }
-
         i = pthread_create( &thrid_jit, NULL, (void * (*)(void *))thread_jit, NULL);
         if (i != 0) {
             MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create JIT thread\n");
             exit(EXIT_FAILURE);
         }
+    }
+
+    i = pthread_create( &thrid_push, NULL, (void * (*)(void *))thread_push, NULL);
+    if (i != 0) {
+            MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create push data thread\n");
+            exit(EXIT_FAILURE);
     }
 
     /* main thread for receive message, then process the message */
@@ -774,7 +774,6 @@ int main(int argc, char *argv[])
         pthread_join(thrid_up, NULL);
         pthread_cancel(thrid_stat);
         pthread_cancel(thrid_down); /* don't wait for downstream thread */
-        pthread_cancel(thrid_push); /* don't wait for push thread */
         pthread_cancel(thrid_jit); /* don't wait for jit thread */
 
         /* if an exit signal was received, try to quit properly */
@@ -784,6 +783,8 @@ int main(int argc, char *argv[])
             shutdown(sock_down, SHUT_RDWR);
         }
     }
+
+    pthread_cancel(thrid_push); /* don't wait for push thread */
 
 clean:
     free(rfdev);

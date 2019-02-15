@@ -1237,13 +1237,24 @@ void thread_down(void) {
 		    continue;
 	    }
 	    
-
-            /* TX procedure: send on timestamp value */
-            val = json_object_get_value(txpk_obj,"tmst");
-            if (val != NULL) {
+            i = json_object_get_boolean(txpk_obj,"imme"); /* can be 1 if true, 0 if false, or -1 if not a JSON boolean */
+            if (i == 1) {
+                /* TX procedure: send immediately */
+                sent_immediate = true;
+                downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_C;
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [down] a packet will be sent in \"immediate\" mode\n");
+            } else {
                 sent_immediate = false;
-                txpkt.count_us = (uint32_t)json_value_get_number(val);
-                downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_A;
+                val = json_object_get_value(txpk_obj,"tmst");
+                if (val != NULL) {
+                    /* TX procedure: send on timestamp value */
+                    txpkt.count_us = (uint32_t)json_value_get_number(val);
+
+                    /* Concentrator timestamp is given, we consider it is a Class A downlink */
+                    downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_A;
+                } else {
+                    downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_C;
+                }
             }
 
             /* Parse "No CRC" flag (optional field) */

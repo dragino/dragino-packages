@@ -61,6 +61,7 @@ void print_help(void) {
     printf("                           [-s spreadingFactor] (default: 7)\n");
     printf("                           [-b bandwidth] default: 125k \n");
     printf("                           [-w syncword] default: 52(0x34)reserver for lorawan\n");
+    printf("                           [-p PreambleLength] default: 8, range 6~65535\n");
     printf("                           [-m message ]  message to send\n");
     printf("                           [-P power ] Transmit Power (min:5; max:20) \n");
     printf("                           [-o filepath ] payload output to file\n");
@@ -91,7 +92,7 @@ int main(int argc, char *argv[])
       //  exit(1);
     //}
 
-    while ((c = getopt(argc, argv, "trd:m:f:s:b:w:P:o:Rvh")) != -1) {
+    while ((c = getopt(argc, argv, "trd:m:p:f:s:b:w:P:o:Rvh")) != -1) {
         switch (c) {
             case 'v':
                 getversion = true;
@@ -145,6 +146,13 @@ int main(int argc, char *argv[])
                     exit(1);
                 }
                 break;
+            case 'p':
+                if (optarg)
+                    strncpy(prlen, optarg, sizeof(prlen));
+                else {
+                    print_help();
+                    exit(1);
+                }
             case 'm':
                 if (optarg)
                     strncpy(input, optarg, sizeof(input));
@@ -279,7 +287,7 @@ int main(int argc, char *argv[])
         char *chan_id = NULL;
         char *chan_data = NULL;
         static int id_found = 0;
-        static unsigned long next = 1;
+        static unsigned long next = 1, count_ok = 0, count_err = 0;
         int i, data_size;
 
         rxlora(loradev, RXMODE_SCAN);
@@ -288,70 +296,74 @@ int main(int argc, char *argv[])
             fp = fopen(filepath, "w+");
 
         MSG("\nListening at SF%i on %.6lf Mhz. port%i\n", loradev->sf, (double)(loradev->freq)/1000000, loradev->spiport);
+        fprintf(stdout, "REC_OK: %d,    CRCERR: %d\n", count_ok, count_err);
         while (!exit_sig && !quit_sig) {
             if(digitalRead(loradev->dio[0]) == 1) {
                 memset(rxpkt.payload, 0, sizeof(rxpkt.payload));
-                received(loradev->spiport, &rxpkt);
+                if (received(loradev->spiport, &rxpkt)) {
 
-                data_size = rxpkt.size;
+                    data_size = rxpkt.size;
 
-                memset(tmp, 0, sizeof(tmp));
+                    memset(tmp, 0, sizeof(tmp));
 
-                for (i = 0; i < rxpkt.size; i++) {
-                    tmp[i] = rxpkt.payload[i];
-                }
-
-                if (fp) {  
-                    fprintf(fp, "%s\n", rxpkt.payload);
-                    fflush(fp);
-                }
-
-                if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
-                     chan_data = &tmp[4];
-                else
-                     chan_data = tmp;
-
-                chan_id = chan_data;   /* init chan_id point to payload */
-
-                /* the format of payload maybe : <chanid>chandata like as <1234>hello  */
-                for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
-                    if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
-                        chan_id = &tmp[i + 1];
-                        ++id_found;
+                    for (i = 0; i < rxpkt.size; i++) {
+                        tmp[i] = rxpkt.payload[i];
                     }
 
-                    if (tmp[i] == '>') { 
-                        tmp[i] = '\0';
-                        chan_data = tmp + i + 1;
-                        data_size = data_size - i;
-                        ++id_found;
+                    if (fp) {  
+                        fprintf(fp, "%s\n", rxpkt.payload);
+                        fflush(fp);
                     }
 
-                    if (id_found == 2) /* found channel id */ 
-                        break;
-                        
-                }
+                    if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
+                         chan_data = &tmp[4];
+                    else
+                         chan_data = tmp;
 
-                if (id_found == 2) 
-                    sprintf(chan_path, "/var/iot/channels/%s", chan_id);
-                else {
-                    srand((unsigned)time(NULL)); 
-                    next = next * 1103515245 + 12345;
-                    sprintf(chan_path, "/var/iot/channels/%ld", (unsigned)(next/65536) % 32768);
-                }
+                    chan_id = chan_data;   /* init chan_id point to payload */
 
-                id_found = 0;  /* reset id_found */
-                
-                chan_fp  = fopen(chan_path, "w+");
-                if ( NULL !=  chan_fp ) {
-                    //fwrite(chan_data, sizeof(char), data_size, fp);  
-                    fprintf(chan_fp, "%s\n", chan_data);
-                    fflush(chan_fp);
-                    fclose(chan_fp);
-                } else 
-                    fprintf(stderr, "ERROR~ canot open file path: %s\n", chan_path); 
+                    /* the format of payload maybe : <chanid>chandata like as <1234>hello  */
+                    for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
+                        if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
+                            chan_id = &tmp[i + 1];
+                            ++id_found;
+                        }
 
-                fprintf(stderr, "echo received: %s\n", chan_data);
+                        if (tmp[i] == '>') { 
+                            tmp[i] = '\0';
+                            chan_data = tmp + i + 1;
+                            data_size = data_size - i;
+                            ++id_found;
+                        }
+
+                        if (id_found == 2) /* found channel id */ 
+                            break;
+                            
+                    }
+
+                    if (id_found == 2) 
+                        sprintf(chan_path, "/var/iot/channels/%s", chan_id);
+                    else {
+                        srand((unsigned)time(NULL)); 
+                        next = next * 1103515245 + 12345;
+                        sprintf(chan_path, "/var/iot/channels/%ld", (unsigned)(next/65536) % 32768);
+                    }
+
+                    id_found = 0;  /* reset id_found */
+                    
+                    chan_fp  = fopen(chan_path, "w+");
+                    if ( NULL !=  chan_fp ) {
+                        //fwrite(chan_data, sizeof(char), data_size, fp);  
+                        fprintf(chan_fp, "%s\n", chan_data);
+                        fflush(chan_fp);
+                        fclose(chan_fp);
+                    } else 
+                        fprintf(stderr, "ERROR~ canot open file path: %s\n", chan_path); 
+
+                    //fprintf(stdout, "Received: %s\n", chan_data);
+                    fprintf(stdout, "count_OK: %d, count_CRCERR: %d\n", ++count_ok, count_err);
+                } else                                             
+                    fprintf(stdout, "REC_OK: %d, CRCERR: %d\n", count_ok, ++count_err);
             }
         }
 

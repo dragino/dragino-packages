@@ -61,6 +61,7 @@ void print_help(void) {
     printf("                           [-s spreadingFactor] (default: 7)\n");
     printf("                           [-b bandwidth] default: 125k \n");
     printf("                           [-w syncword] default: 52(0x34)reserver for lorawan\n");
+    printf("                           [-c coderate] default: 5(4/5), range 5~8(4/8)\n");
     printf("                           [-p PreambleLength] default: 8, range 6~65535\n");
     printf("                           [-m message ]  message to send\n");
     printf("                           [-P power ] Transmit Power (min:5; max:20) \n");
@@ -92,7 +93,7 @@ int main(int argc, char *argv[])
       //  exit(1);
     //}
 
-    while ((c = getopt(argc, argv, "trd:m:p:f:s:b:w:P:o:Rvh")) != -1) {
+    while ((c = getopt(argc, argv, "trd:m:p:c:f:s:b:w:P:o:Rvh")) != -1) {
         switch (c) {
             case 'v':
                 getversion = true;
@@ -149,6 +150,13 @@ int main(int argc, char *argv[])
             case 'p':
                 if (optarg)
                     strncpy(prlen, optarg, sizeof(prlen));
+                else {
+                    print_help();
+                    exit(1);
+                }
+            case 'c':
+                if (optarg)
+                    strncpy(cr, optarg, sizeof(cr));
                 else {
                     print_help();
                     exit(1);
@@ -232,7 +240,7 @@ int main(int argc, char *argv[])
     loradev->invertio = 0;
     strcpy(loradev->desc, "RFDEV");	
 
-    MSG("Radio struct: spi_dev=%s, spiport=%d, freq=%ld, sf=%d, bw=%ld, cr=%d, wd=0x%2x, power=%d\n", radio, loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->syncword, loradev->power);
+    MSG("Radio struct: spi_dev=%s, spiport=%d, freq=%ld, sf=%d, bw=%ld, cr=%d, pr=%d, wd=0x%2x, power=%d\n", radio, loradev->spiport, loradev->freq, loradev->sf, loradev->bw, loradev->cr, loradev->prlen, loradev->syncword, loradev->power);
 
     if(!get_radio_version(loradev))  
         goto clean;

@@ -9,11 +9,12 @@
 #include <string.h>
 #include "db.h"
 
-uint8_t* result;
-char sql[128];
-
 //char array to hex array
 static void str_to_hex(uint8_t* dest, char* src, int len);
+
+static void lookup_gweui(sqlite3_stmt* stmt, void* data); 
+static void judge_joininfo(sqlite3_stmt* stmt, void* data);
+static void judge_devaddr(sqlite3_stmt* stmt, void* data);
 
 bool db_init(const char* dbpath, struct context* cntx) {
 	sqlite3_stmt* stmts[] = { cntx->selectgweui,
@@ -50,235 +51,131 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 			if (rowcallback != NULL)
 				rowcallback(stmt, data);
 		} else {
-			printf("sqlite error; %s", sqlite3_errstr(ret));
+			printf("sqlite error: %s", sqlite3_errstr(ret));
 			return false;
 		}
 	}
 }
 
-bool db_lookup_str(sqlite3_stmt* smtm, char* value, char* output) {
-
-	sqlite3_bind_text(smtm, 1, value, -1, SQLITE_STATIC);
-        db_step(smtm, query_db, output);
-        sqlite3_reset(smtm);
-        if (!strcmp(value, output))
-                return true;
+bool db_lookup_gweui(sqlite3_stmt* stmt, struct metadata* meta) {
+	sqlite3_bind_text(stmt, 1, meta->gweui_hex, -1, SQLITE_STATIC);
+        db_step(stmt, lookup_str, meta);
+        sqlite3_reset(stmt);
+        if (!strcmp(meta->gweui, meta->outstr))  
+                return true; /* gweui exist */
         else
                 return false;
 }
 
-bool db_lookup_int(sqlite3_stmt* stmt, int value, int* output) {
-
-	sqlite3_bind_text(smtm, 1, value, -1, SQLITE_STATIC);
-        db_step(smtm, query_db, output);
-        sqlite3_reset(smtm);
-        if (value == *output)
-                return true;
+bool db_judge_joinrepeat(sqlite3_stmt* stmt, struct metadata* meta) {
+	sqlite3_bind_text(stmt, 1, meta->deveui_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_blob(stmt, 2, meta->devnonce, sizeof(meta->devnonce), SQLITE_STATIC);
+        db_step(stmt, lookup_str, meta);
+        sqlite3_reset(stmt);
+        if (!strcmp(meta->appeui_hex, meta->outstr))  
+                return true; /* devnonce exist */
         else
                 return false;
-}
-                
-void query_db(sqlite3_stmt* stmt, void* data) {
-        switch (sqlite3_column_type(stmt, 0)) {
-                case 1:
-                        (int)*data = 0;
-                        (int)*data = sqlite3_column_int(stmt, 0);
-                        break;
-                default:
-                        bzero((char 8)data, MAXSTRSIZE);
-                        strncpy((char *)data, sqlite3_column_text(stmt, 0), MAXCHARSIZE);
-                        return;
-        }
-}
-                        
-bool update_db_by_sqlstr(sqlite3* db, const char* sqlstr) {
+e
 
-        if (sqlite3_exec(db, sqlstr, NULL, NULL, NULL) != SQLITE_OK) 
-            return FAILED;
-        else
-            return SUCCESS;
+bool db_lookup_appkey(sqlite3_stmt* stmt, struct metadata* meta) {
+	sqlite3_bind_text(stmt, 1, meta->appeui_hex, -1, SQLITE_STATIC);
+        db_step(stmt, lookup_appkey, meta);
+        sqlite3_reset(stmt);
 }
 
-/*try to query one field from one table by devaddr filed
- *there is only one record in query results
- */
-
-int query_db_by_addr(sqlite3* db, const char* column_name, const char* table_name, unsigned int devaddr, uint8_t* data, int size) {
-
-	int ret = 0;
-
-        char tempchar[64] = {'\0'};
-
-        sqlite3_stmt *ppstmt; 
-
-	bzero(sql, sizeof(sql));
-	snprintf(sql, sizeof(sql), "SELECT HEX(%s) AS %s FROM %s WHERE devaddr=%u", column_name, column_name, table_name, devaddr);
-
-        if (sqlite3_prepare_v2(db, sql, strlen(sql), &ppstmt, NULL) != SQLITE_OK)
-                return FAILED;
-
-        if (sqlite3_step(ppstmt) == SQLITE_ROW) {
-                strncpy(tempchar, (uint8_t *)sqlite3_column_text(ppstmt, 0), sizeof(tempchar));
-                ret = 1;
-        }
-
-        sqlite3_finalize(ppstmt);
-
-	if(strlen(tempchar) != size * 2){
-		return FAILED;
-	}
-
-	str_to_hex(data, tempchar, size);
-
+bool db_update_devinfo(sqlite3_stmt* stmt, struct metadata* meta) {
+        bool ret;
+	sqlite3_bind_blob(stmt, 1, meta->devnonce, sizeof(meta->devnonce), SQLITE_STATIC);
+	sqlite3_bind_blob(stmt, 2, meta->devaddr, sizeof(meta->devaddr), SQLITE_STATIC);
+	sqlite3_bind_blob(stmt, 3, meta->appskey, sizeof(meta->appskey), SQLITE_STATIC);
+	sqlite3_bind_blob(stmt, 4, meta->nwkskey, sizeof(meta->nwkskey), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 5, meta->deveui_hex, -1, SQLITE_STATIC);
+        ret = db_step(stmt, NULL, NULL);
+        sqlite3_reset(stmt);
         return ret;
 }
 
-int query_db_by_addr_str(sqlite3* db, const char* column_name, const char* table_name, unsigned int devaddr, char* data) {
-
-	int ret = 0;
-
-        sqlite3_stmt *ppstmt; 
-
-	bzero(sql, sizeof(sql));
-	snprintf(sql, sizeof(sql), "SELECT HEX(%s) AS %s FROM %s WHERE devaddr=%u", column_name, column_name, table_name, devaddr);
-        if (sqlite3_prepare_v2(db, sql, strlen(sql), &ppstmt, NULL) != SQLITE_OK)
-                return FAILED;
-
-        if (sqlite3_step(ppstmt) == SQLITE_ROW) {
-                strcpy(data, (uint8_t *)sqlite3_column_text(ppstmt, 0));
-                ret = 1;
-        }
-        sqlite3_finalize(ppstmt);
+bool db_insert_upmsg(sqlite3_stmt* stmt, struct metadata* meta, int fcntup, void *payload, psize) {
+        bool ret;
+	sqlite3_bind_int(stmt, 1, meta->tmst);
+	sqlite3_bind_int(stmt, 2, meta->datarate);
+	sqlite3_bind_double(stmt, 3, meta->freq);
+	sqlite3_bind_double(stmt, 4, meta->rssi);
+	sqlite3_bind_double(stmt, 5, meta->snr);
+	sqlite3_bind_int(stmt, 6, fcntup);
+	sqlite3_bind_text(stmt, 7, meta->gweui_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 8, meta->appeui_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 9, meta->deveui_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_blob(stmt, 10, payload, psize, SQLITE_STATIC);
+        ret = db_step(stmt, NULL, NULL);
+        sqlite3_reset(stmt);
         return ret;
 }
 
-int query_db_by_addr_uint(sqlite3* db, const char* column_name, const char* table_name, unsigned int devaddr, unsigned int* data) {
-
-	int ret = 0;
-
-        sqlite3_stmt *ppstmt; 
-
-	bzero(sql, sizeof(sql));
-	snprintf(sql, sizeof(sql), "SELECT %s FROM %s WHERE devaddr=%u", column_name, table_name, devaddr);
-        if (sqlite3_prepare_v2(db, sql, strlen(sql), &ppstmt, NULL) != SQLITE_OK)
-                return FAILED;
-
-        if (sqlite3_step(ppstmt) == SQLITE_ROW) {
-                *data = sqlite3_column_int(ppstmt, 0);
-                ret = 1;
-        }
-        sqlite3_finalize(ppstmt);
+bool db_judge_devaddr(sqlite3_stmt* stmt, struct metadata* meta) {
+        bool ret;
+	sqlite3_bind_blob(stmt, 1, meta->devaddr, sizeof(meta->devaddr), SQLITE_STATIC);
+        ret = db_step(stmt, judge_devaddr, meta);
+        sqlite3_reset(stmt);
         return ret;
 }
 
-/*try to query one field from one table by devaddr filed
- *there is only one record in query results
- */
-int query_db_by_deveui(sqlite3* db, const char* column_name, const char* table_name, const char* deveui, uint8_t* data, int size){
-
-	int ret = 0;
-
-        sqlite3_stmt *ppstmt; 
-
-        char tempchar[64];
-
-	bzero(sql, sizeof(sql));
-
-	snprintf(sql, sizeof(sql), "SELECT HEX(%s) AS %s FROM %s WHERE deveui=x'%s'", column_name, column_name, table_name, deveui);
-	
-        if (sqlite3_prepare_v2(db, sql, strlen(sql), &ppstmt, NULL) != SQLITE_OK)
-                return FAILED;
-
-        if (sqlite3_step(ppstmt) == SQLITE_ROW) {
-                strncpy(tempchar, sqlite3_column_text(ppstmt, 0), sizeof(tempchar));
-                ret = 1;
-        }
-        sqlite3_finalize(ppstmt);
-
-	if(strlen(tempchar) != size * 2){
-		return FAILED;
-	}
-	//char array to hex array
-	str_to_hex(data, tempchar, size);
-
-	return SUCCESS;
+bool db_judge_msgrepeat(sqlite3_stmt* stmt, struct metadata* meta) {
+	sqlite3_bind_text(stmt, 1, meta->deveui_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_int(stmt, 2, meta->tmst);
+        db_step(stmt, lookupstr, meta);
+        sqlite3_reset(stmt);
+        if (!strcmp(meta->deveui_hex, meta->outstr)) 
+                return true; /* a repeatmsg */
+        return false;
 }
 
-int query_db_by_deveui_str(sqlite3* db, const char* column_name, const char* table_name, const char* deveui, char* data){
-
-	int ret = 0;
-
-        sqlite3_stmt *ppstmt; 
-
-	bzero(sql, sizeof(sql));
-	snprintf(sql, sizeof(sql), "SELECT %s FROM %s WHERE deveui=x'%s'", column_name, table_name, deveui);
-        if (sqlite3_prepare_v2(db, sql, strlen(sql), &ppstmt, NULL) != SQLITE_OK)
-                return FAILED;
-
-        if (sqlite3_step(ppstmt) == SQLITE_ROW) {
-                strcpy(data, (uint8_t *)sqlite3_column_text(ppstmt, 0));
-                ret = 1;
-        }
-        sqlite3_finalize(ppstmt);
-	return ret;
-}
-
-int query_db_by_deveui_uint(sqlite3* db, const char* column_name, const char* table_name, const char* deveui, unsigned int* data) {
-
-	int ret = 0;
-
-        sqlite3_stmt *ppstmt; 
-
-	bzero(sql, sizeof(sql));
-	snprintf(sql, sizeof(sql), "SELECT %s FROM %s WHERE deveui=x'%s'", column_name, table_name, deveui);
-
-        if (sqlite3_prepare_v2(db, sql, strlen(sql), &ppstmt, NULL) != SQLITE_OK)
-                return FAILED;
-
-        if (sqlite3_step(ppstmt) == SQLITE_ROW) {
-                *data = sqlite3_column_int(ppstmt, 0);
-                ret = 1;
-        }
-        sqlite3_finalize(ppstmt);
+bool db_lookup_nwkskey(sqlite3_stmt* stmt, struct metadata* meta) {
+        bool ret;
+	sqlite3_bind_text(stmt, 1, meta->deveui_hex, sizeof(meta->deveui_hex), SQLITE_STATIC);
+        ret = db_step(stmt, lookup_nwkskey, meta);
+        sqlite3_reset(stmt);
         return ret;
 }
 
-int update_db_by_deveui(sqlite3* db, const char* column_name, const char* table_name, const char* deveui, const char* data, int seed) {
-
-	bzero(sql, sizeof(sql));
-
-	if (seed == 0) {
-		snprintf(sql, sizeof(sql), "UPDATE %s SET %s=x'%s' WHERE deveui=x'%s'", table_name, column_name, data, deveui);
-	} else {
-		snprintf(sql, sizeof(sql), "UPDATE %s SET %s=\"%s\" WHERE deveui=x'%s'", table_name, column_name, data, deveui);
-	}
-
-        if (sqlite3_exec(db, sql, NULL, NULL, NULL) != SQLITE_OK) 
-            return FAILED;
-        else
-            return SUCCESS;
+static void lookup_str(sqlite3_stmt* stmt, void* data) {
+        struct metadata* meta = (struct metadata*) data;
+        memset(meta->outstr, 0, sizeof(meta->outstr));
+        strncpy((char *)meta->outstr, sqlite3_column_text(stmt, 0), sizeof(meta->outstr));
 }
 
-int update_db_by_deveui_uint(sqlite3* db, const char* column_name, const char* table_name, const char* deveui, unsigned int data) {
-
-	bzero(sql, sizeof(sql));
-	snprintf(sql, sizeof(sql), "UPDATE %s SET %s=%u WHERE deveui=x'%s'", table_name, column_name, data, deveui);
-        if (sqlite3_exec(db, sql, NULL, NULL, NULL) != SQLITE_OK) 
-            return FAILED;
-        else
-            return SUCCESS;
+static void lookup_appkey(sqlite3_stmt* stmt, void* data) {
+        struct metadata* meta = (struct metadata*) data;
+        memset1(meta->appkey, 0, sizeof(meta->appkey));
+        memcpy1(meta->appkey, sqlite3_column_blob(stmt, 0), sizeof(meta->appkey));
 }
 
-int update_db_by_addr_uint(sqlite3* db, const char* column_name, const char* table_name, unsigned int devaddr, unsigned int data) {
-
-	bzero(sql, sizeof(sql));
-	snprintf(sql, sizeof(sql),"UPDATE %s SET %s=%u WHERE devaddr=%u", table_name, column_name, data, devaddr);
-        if (sqlite3_exec(db, sql, NULL, NULL, NULL) != SQLITE_OK) 
-            return FAILED;
-        else
-            return SUCCESS;
+static void lookup_nwkskey(sqlite3_stmt* stmt, void* data) {
+        struct metadata* meta = (struct metadata*) data;
+        memset1(meta->nwkskey, 0, sizeof(meta->nwkskey));
+        memcpy1(meta->nwkskey, sqlite3_column_blob(stmt, 0), sizeof(meta->nwkskey));
 }
 
+static void dbgetmetainfo(sqlite3_stmt* stmt, void* data) {
+        struct metadata* meta = (struct metadata*) data;
+
+        memset1(meta->devnonce, 0, sizeof(meta->devnonce));
+        memset(meta->appeui_hex, 0, sizeof(meta->appeui_hex));
+        memset1(meta->appskey, 0, sizeof(meta->appskey));
+        memset1(meta->nwkskey, 0, sizeof(meta->nwkskey));
+
+        memcpy1(meta->devnonce, sqlite3_column_blob(stmt, 0), sizeof(meta->devnonce));
+        strncpy(meta->appeui_hex, sqlite3_column_text(stmt, 1), sizeof(meta->appeui_hex));
+        memcpy1(meta->nwkskey, sqlite3_column_blob(stmt, 2), sizeof(meta->nwkskey));
+        memcpy1(meta->appskey, sqlite3_column_blob(stmt, 3), sizeof(meta->appskey));
+}
+
+static void judge_devaddr(sqlite3_stmt* stmt, void* data) {
+        struct metadata* meta = (struct metadata*) data;
+        memset(meta->deveui_hex, 0, sizeof(meta->deveui_hex));
+        strncpy((char *)meta->deveui_hex, sqlite3_column_text(stmt, 0), sizeof(meta->deveui_hex));
+}
 
 void str_to_hex(uint8_t* dest, char* src, int len) {
 	int i = 0;
@@ -287,9 +184,9 @@ void str_to_hex(uint8_t* dest, char* src, int len) {
 	uint8_t ui1;
 	uint8_t ui2;
 
-	for (i=0; i<len; i++) {
+	for (i = 0; i < len; i++) {
 		ch1 = src[i*2];
-		ch2 = src[i*2+1];
+		ch2 = src[i*2 + 1];
 		ui1 = toupper(ch1) - 0x30;
 		if (ui1 > 9)
 			ui1 -= 7;

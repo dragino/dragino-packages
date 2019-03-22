@@ -5,18 +5,18 @@
 ATTACH DATABASE 'loraserv' As 'loraserv';
 -- --------------------------------------------------------
 --
--- Table structure for table `loradevs`
+-- Table structure for table `devs`
 --
 
 CREATE TABLE IF NOT EXISTS `devs` (
-  `deveui` INTEGER PRIMARY KEY DEFAULT NULL,
-  `appid` INTEGER,
-  `appskey` TEXT DEFAULT NULL,
-  `devaddr` TEXT DEFAULT NULL,
-  `nwkskey` TEXT DEFAULT NULL,
+  `deveui` text PRIMARY KEY DEFAULT NULL,
+  `appeui` text default 0,
+  `appskey` blob DEFAULT NULL,
+  `nwkskey` blob DEFAULT NULL,
+  `devaddr` blob DEFAULT NULL,
   `fcntdown` INTEGER DEFAULT '0',
   `fcntup` INTEGER DEFAULT '0',
-  `joinnonce` INTEGER DEFAULT '0'
+  `devnonce` blob DEFAULT '0'
 );
 
 -- --------------------------------------------------------
@@ -36,20 +36,21 @@ CREATE TABLE IF NOT EXISTS `configuration` (
 -- Table structure for table `upframes`
 --
 
-CREATE TABLE IF NOT EXISTS `upframes` (
-  `ID` integer NOT NULL,
-  `DataRate` real DEFAULT NULL,
-  `ULFreq` real DEFAULT NULL,
-  `RSSI` real DEFAULT NULL,
-  `SNR` real DEFAULT NULL,
-  `GWCnt` integer DEFAULT NULL,
-  `FCntUp` integer NOT NULL,
-  `RecvTime` datetime NOT NULL,
-  `Confirmed` integer NOT NULL,
-  `FRMPayload` blob DEFAULT NULL,
-  `FPort` integer NOT NULL
-  `GWEUI` text DEFAULT NULL,
-  `DevEUI` text DEFAULT NULL,
+CREATE TABLE IF NOT EXISTS `upmsg` (
+  `id` integer PRIMARY key AUTOINCREMENT,
+  `recvtime` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `tmst` integer NOT NULL default 0,
+  `datarate` integer DEFAULT 5,
+  `freq` real DEFAULT NULL,
+  `rssi` real DEFAULT NULL,
+  `snr` real DEFAULT NULL,
+  `fcntup` integer NOT NULL default 0,
+  `confirmed` integer NOT NULL default 0,
+  `frmpayload` blob DEFAULT NULL,
+  `fport` integer NOT NULL default 7,
+  `gweui` text DEFAULT NULL,
+  `appeui` text DEFAULT NULL,
+  `deveui` text DEFAULT NULL
 ); 
 
 
@@ -60,90 +61,72 @@ CREATE TABLE IF NOT EXISTS `upframes` (
 --
 
 CREATE TABLE IF NOT EXISTS `joindevs` (
-  `ID` INTEGER PRIMARY KEY AUTOINCREMENT,
-  `DevEUI` text NOT NULL,
-  `NwkKey` text DEFAULT NULL,
-  `AppKey` text DEFAULT NULL,
-  `RJcount1_last` integer DEFAULT '0',
-  `DevNonce_last` integer DEFAULT '0',
-  `Lifetime` integer NOT NULL,
-  `joinNonce` text DEFAULT '0'
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `deveui` text NOT NULL,
+  `nwkskey` blob DEFAULT NULL,
+  `appskey` blob DEFAULT NULL,
+  `rjcount1_last` integer DEFAULT '0',
+  `devnonce_last` integer DEFAULT '0',
+  `lifetime` integer NOT NULL,
+  `devnonce` blob DEFAULT '0'
 );
 
 
 --
--- Table structure for table `DeviceProfiles`
+-- Table structure for table `gwprofile`
 --
 
 CREATE TABLE IF NOT EXISTS `gwprofile` (
-  `ID` integer NOT NULL,
-  `SupportsClassC` integer NOT NULL,
-  `ClassCTimeout` integer NOT NULL,
-  `MACVersion` text NOT NULL,
-  `RegParamsRevision` text NOT NULL,
-  `SupportsJoin` integer NOT NULL,
-  `RX1Delay` integer NOT NULL,
-  `RX1DROffset` integer NOT NULL,
-  `RX2DataRate` integer NOT NULL,
-  `RX2Freq` real NOT NULL,
-  `MaxEIRP` integer NOT NULL,
-  `MaxDutyCycle` real NOT NULL,
-  `RFRegion` text NOT NULL,
-  `32bitFCnt` integer NOT NULL,
+  `id` integer PRIMARY KEY AUTOINCREMENT,
+  `supportsclassc` integer NOT NULL default 1,
+  `classctimeout` integer NOT NULL default 0,
+  `macversion` text NOT NULL default '1.0.3',
+  `regparamsrevision` text NOT NULL defualt '1',
+  `supportsjoin` integer NOT NULL default 1,
+  `rx1delay` integer NOT NULL default 1,
+  `rx1droffset` integer NOT NULL default 0,
+  `rx2datarate` integer NOT NULL default 5,
+  `rx2freq` real NOT NULL default 868.925,
+  `maxeirp` integer NOT NULL default 1,
+  `maxdutycycle` real NOT NULL default 1,
+  `rfregion` text NOT NULL default 'EU868',
+  `32bitfcnt` integer NOT NULL default 0
 );
 
 --
 -- Table structure for table `gateways`
 --
 
-CREATE TABLE IF NOT EXISTS `gateways` (
-  `eui` integer PRIMARY KEY NOT NULL,
-  `description` text not null,
-  `created_at` timestamp not null,
-  `updated_at` timestamp not null,
+CREATE TABLE IF NOT EXISTS `gws` (
+  `gweui` text PRIMARY KEY NOT NULL,
+  `profileid` integer not null default 1`,
+  `description` text not null default 'dragino gw',
+  `created_at` timestamp not null DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp ON UPDATE CURRENT_TIMESTAMP,
   `first_seen_at` timestamp,
   `last_seen_at` timestamp,
-  `RFRegion` text,
-  `maxTxPower_dBm` integer DEFAULT NULL,
-  `allowGpsToSetPosition` integer NOT NULL DEFAULT '1',
-  `time` timestamp NOT NULL DEFAULT NULL,
+  `maxtxpower_dbm` integer DEFAULT NULL default 26,
+  `allowgpstosetposition` integer NOT NULL DEFAULT '1',
   `latitude` real DEFAULT NULL,
   `longitude` real DEFAULT NULL,
-  `altitude` ellouble DEFAULT NULL,
-  `ntwkMaxDelayUp_ms` integer  DEFAULT NULL, --'Max expected delay in ms from GW to NS',
-  `ntwkMaxDelayDn_ms` smallint(5)  DEFAULT NULL, --'Max expected delay in ms from NS to Gw',
-  `UpRecv` int(10)  DEFAULT '0',
-  `UpRecvOK` int(10)  NOT NULL DEFAULT '0',
-  `UpFwd` int(10)  NOT NULL DEFAULT '0',
-  `UpACK` float NOT NULL DEFAULT '0',
-  `DownRecv` int(10)  NOT NULL DEFAULT '0',
-  `DownTrans` int(10)  NOT NULL DEFAULT '0',
-  `lastuppacketid` bigint(20)  DEFAULT NULL,
+  `altitude` real DEFAULT NULL,
+  `uprecv` integer  DEFAULT '0',
+  `uprecvok` integer  NOT NULL DEFAULT '0',
+  `upfwd` integer  NOT NULL DEFAULT '0',
+  `upack` integer NOT NULL DEFAULT '0',
+  `downrecv` integer  NOT NULL DEFAULT '0',
+  `downtrans` integer  NOT NULL DEFAULT '0',
+  `lastuppacketid` integer  DEFAULT NULL
 );
 
 --
--- Table structure for table `sessions`
+-- Table structure for table `apps`
 --
-
-CREATE TABLE IF NOT EXISTS `sessions` (
-  `ID` int(10)  NOT NULL,
-  `Until` datetime DEFAULT NULL COMMENT 'NULL for ABP',
-  `DevAddr` int(10)  NOT NULL,
-  `NFCntDown` int(10)  DEFAULT NULL,
-  `FCntUp` int(10)  DEFAULT NULL,
-  `FNwkSIntKey` binary(16) DEFAULT NULL,
-  `SNwkSIntKey` binary(16) DEFAULT NULL,
-  `NwkSEncKey` binary(16) DEFAULT NULL,
-  `AS_KEK_label` varchar(256) DEFAULT NULL,
-  `AS_KEK_key` varbinary(256) DEFAULT NULL,
-  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
 
 create table if not exits `apps` (
-        `app_id` integer primary key not null,
-        `des` text,
-        `appeui` text not null,
-        `appkey` text not null
+        `appeui` text PRIMARY KEY not null,
+        `description` text,
+        `appkey` blob not null
 );
         
 

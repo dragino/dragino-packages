@@ -50,20 +50,11 @@ Maintainer: skerlan
 
 #include "LoRaMacCrypto.h"
 
-#define LISTENQ 		16
-#define CONNFD_NUM_MAX          16
 #define FRAME_LEN               24 /* 17/3*4+1,corresponding to the ashanled.c */
 
-#define APP_SERV_ADDR       "localhost"
 #define GW_SERV_ADDR        "localhost"
-#define NC_SERV_ADDR        "localhost"
-#define NET_SERV_ADDR       "localhost"
 #define NET_PORT_PUSH       1700
 #define NET_PORT_PULL       1700
-#define APP_PORT_UP         8000
-#define APP_PORT_DOWN       8002
-#define NC_PORT_UP          8004
-#define NC_PORT_DOWN        8006
 
 #define PKT_PUSH_DATA	0
 #define PKT_PUSH_ACK	1
@@ -93,10 +84,7 @@ Maintainer: skerlan
 #define JSON_MAX  1024 /*1024 is big enough, not calculate the accurate size of json string*/
 
 #define APPLICATION_SERVER     1
-#define NETWORK_CONTROLLER     2
-#define BOTH                   3
-#define ERR                    4
-#define IGNORE                 5
+#define IGNORE                 0
 
 #define MAX_NB_B64             341 /*255 bytes=340 char in b64*/
 #define RANGE                  1000000 /*1s*/
@@ -125,6 +113,7 @@ struct pkt_info {
 	uint8_t pkt_payload[BUFF_SIZE - 12];/*packet payload*/
 	int  pkt_no;/*packet number*/
 	char gwaddr[16];/*gateway address*/
+	char gweui_hex[17];/*gateway address*/
 };
 
 /*meta data of the packet */
@@ -143,21 +132,25 @@ struct metadata {
 	float    lsnr;     /*SNR in dB*/
 	float    rssi;	   /*rssi in dB*/
 	uint16_t size;     /*payload size in bytes*/
+
+        char    appeui_hex[17] = {'\0'};
+        char    gweui_hex[17] = {'\0'};
+        char    deveui_hex[17] = {'\0'};
+
+        uint8_t appkey[16] = {'\0'};
+        uint8_t appskey[16] = {'\0'};
+        uint8_t nwkskey[16] = {'\0'};
+        uint8_t devnonce[2] = {'\0'};
+
+        char    outstr[24] = {'\0'};  /*temp string for swap data*/
 };
 
 /* json data return*/
 struct jsondata {
 	int to; /* which server to send to 1.app 2.nc 3.both 4.err 5.ignore */
-	char json_string_as[JSON_MAX]; /* json_string_as is sent for application server */
-	char json_string_nc[JSON_MAX]; /* send for network controller */
 	uint32_t devaddr;  /* gateway address for as downlink */
 	char deveui_hex[17];
-	bool join; /*is it a join request message*/
-};
-
-/* structure used to transfer connected sockfd */
-struct arg {  /* use for thread argument */
-	int connfd;
+        struct msg_down msg;
 };
 
 struct th_check_arg {
@@ -175,28 +168,9 @@ struct msg_down {
 	char*  gwaddr;
 };
 
-struct msg_delay {
-	uint32_t devaddr;
-	char deveui_hex[17];
-	char* frame;
-	int size;
-};
-
 struct msg_join {
 	char deveui_hex[17];
 	uint32_t tmst;
-};
-
-struct msg_trans{
-	uint32_t devaddr;
-	uint8_t rx1_dr;
-	uint8_t rx2_dr;
-	uint32_t rx2_freq;
-};
-
-struct msg_rxdelay{
-	uint32_t devaddr;
-	uint8_t delay;
 };
 
 typedef enum eLoRaMacSrvCmd
@@ -268,20 +242,10 @@ typedef enum eLoRaMacMoteCmd
     MOTE_MAC_RX_TIMING_SETUP_ANS     = 0x08,
 }LoRaMacMoteCmd_t;
 
-
-struct command_info {
-	uint32_t devaddr;
-	uint8_t cmd_num;
-	uint8_t type[15];
-	bool isworked[15];
-};
-
-/*structure used for storing the json string and appSKey*/
-struct res_handle{
-	uint8_t signal;/*indicates whether the struct stores the infomation*/
-	char appSKey[33];/*store the appSkey which will be transferred the network controller*/
-	char json_string[JSON_MAX];
-};
+/*reverse memory copy*/
+void revercpy( uint8_t *dst, const uint8_t *src, int size );
+/*transform the array of uint8_t to hexadecimal string*/
+void i8_to_hexstr(uint8_t* uint, char* str, int size);
 
 void set_timer(int sec, int msec);
 
@@ -291,51 +255,20 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd);
 
 /*compare the node element*/
 int compare_msg_down(const void* data, const void* key);
-int compare_msg_delay(const void* data, const void* key);
-int compare_msg_join(const void* data, const void*key);
-
-int compare_msg_trans(const void* data,const void* key);
-int compare_msg_rxdelay(const void* data,const void* key);
 
 /*destory the linked list node
  * free the memory allocated in the heap
  */
-void destroy_msg(void* msg);
 void destroy_msg_down(void* msg);
-void destroy_msg_delay(void* msg);
-
 
 /*shallow copy
  * for the data allocated in the heap,
  * just copy the pointer
  */
-void assign_msg(void* data, const void* msg);
 void assign_msg_down(void* data, const void* msg);
-void assign_msg_delay(void* data, const void* msg);
-void assign_msg_join(void* data, const void* msg);
-void assign_msg_trans(void* data,const void* msg);
-void assign_msg_rxdelay(void* data,const void* msg);
 
 /*deep copy*/
 void copy_msg_down(void* data, const void* msg);
-void copy_msg_delay(void* data, const void* msg);
-void copy_msg_join(void* data, const void* msg);
-
-void copy_msg_trans(void* data,const void* msg);
-void copy_msg_rxdelay(void* data,const void* msg);
-
-
-/*handle the message sent by the networkserver*/
-struct res_handle as_msg_handle(char*, int);
-
-/*packet the command to JSON*/
-int command_handle(int, uint32_t, char*, ...);
-
-/*handle the command message in upstream*/
-void nc_msg_handle(const char*, int, struct command_info*);
-
-/*recognize the type of message and parse it to json string*/
-void ns_msg_handle(struct jsondata*, struct metadata*, uint8_t*);
 
 /*packet the data that will be sent to the gateaway*/
 bool serialize_msg_to_gw(const char* data, int size, const char* deveui_hex, char* json_data, char* gwaddr, uint32_t tmst, int delay);

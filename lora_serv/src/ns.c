@@ -15,14 +15,17 @@ Maintainer: skerlan
 */
 
 #include "handle.h"
+#include "db.h"
+
+struct context cntx; /* sqlite3 database context */
 
 /* --- PRIVATE VARIABLES ------------------------------------------- */
 /*network configuration variables*/
-static char netserv_addr[64] = STR(NET_SERV_ADDR);
+static char netserv_addr[64] = STR(GW_SERV_ADDR);
 
 //static char gwserv_addr[64]=STR(GW_SERV_ADDR);
-static char netserv_port_push[8] = STR(NET_PORT_PUSH);
-static char netserv_port_pull[8] = STR(NET_PORT_PULL);
+static char netserv_port_push[8] = STR(GW_PORT_PUSH);
+static char netserv_port_pull[8] = STR(GW_PORT_PULL);
 
 /* network sockets */
 static int sockfd_push;/*socket for upstream from gateway*/
@@ -58,32 +61,27 @@ void  thread_up_handle(void*);/*thread for handling message in upstream from gat
 /* ------------------------------------------- MAIN FUNCTION ------------------------------------------- */
 int main(int argc, char** argv) {
 
-        int i;
+    int i;
 	int pkt_no = 0;
 	int msg_len;/*length of buffer received*/
 
 	uint8_t gweui[8];
-        char gweui_hex[17] = {'\0'};
-        char output[MAXSTRSIZE] = {'\0'};
+    char gweui_hex[17] = {'\0'};
 
 	uint8_t buff_push[BUFF_SIZE]; /* buffer to receive  upstream packets */
 	uint8_t buff_push_ack[4];/*buffer to confirm the upstream packets*/
 
-	pthread_t th_up_handle;/*thread for handing the json string in upstream*/
-
 	struct pkt_info pkt_info;
-
-        struct context cntx; /* sqlite3 database context */
 
 	struct sockaddr_in cliaddr;
 	socklen_t addrlen;
 
-	bzero(&cliaddr, sizeof(cliaddr));
+	memset(&cliaddr, 0, sizeof(cliaddr));
 	addrlen = sizeof(cliaddr);
 
 	/* threads*/
 	pthread_t th_down;/*thread for downstream to gateway*/
-        pthread_t th_up_handle;/*thread for handing the json string in upstream*/
+    pthread_t th_up_handle;/*thread for handing the json string in upstream*/
 
 	struct sigaction sigact;
 
@@ -96,13 +94,6 @@ int main(int argc, char** argv) {
 		MSG("INFO: Host endiannes is unknown\n");
 	#endif
 
-	/*create the linked list for GW Donlink*/
-	list_init(&gw_list);
-
-	/*try to open and bind udp socket*/
-	udp_bind(netserv_addr, netserv_port_push, &sockfd_push);
-	udp_bind(netserv_addr, netserv_port_pull, &sockfd_pull);
-        
 	/*configure the signal handling*/
 	sigemptyset(&sigact.sa_mask);
 	sigact.sa_flags = SA_NOMASK;
@@ -111,6 +102,13 @@ int main(int argc, char** argv) {
 	sigaction(SIGINT, &sigact, NULL);
 	sigaction(SIGTERM, &sigact, NULL);
 
+	/*create the linked list for GW Donlink*/
+	list_init(&gw_list);
+
+	/*try to open and bind udp socket*/
+	udp_bind(netserv_addr, netserv_port_push, &sockfd_push, 1);
+	udp_bind(netserv_addr, netserv_port_pull, &sockfd_pull, 0);
+        
 	/*create threads*/
 
 	if (pthread_create(&th_down, NULL, (void*(*)(void*))thread_down, NULL) !=0 ) {
@@ -118,11 +116,16 @@ int main(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
+    if (!db_init(DBPATH, &cntx)) {
+		MSG("ERROR: [main] can't create database context\n");
+		exit(EXIT_FAILURE);
+    }
+
 	while (!exit_sig) {        /* main thread, dispatch PUSH_DATA */
 		msg_len = recvfrom(sockfd_push, buff_push, sizeof(buff_push), 0, (struct sockaddr*)&cliaddr, &addrlen);
 		if (msg_len < 0) {
-			MSG("WARNING: [up] thread_up recv returned %s\n", strerror(errno));
-			break;
+			//MSG("WARNING: [up] thread_up recv returned %s\n", strerror(errno));
+			continue;
 		}
 
 		if (msg_len == 0) {
@@ -141,16 +144,16 @@ int main(int argc, char** argv) {
 			continue;
 		}
 
-                bzero(gweui, sizeof(gweui));
-                bzero(gweui_hex, sizeof(gweui_hex));
+        memset(gweui, 0, sizeof(gweui));
+        memset(gweui_hex, 0, sizeof(gweui_hex));
 		revercpy(gweui, buff_push + 4, 8);
 		i8_to_hexstr(gweui, gweui_hex, 8);
 
-                /* lookupgweui: select gweui from gws where gweui = ? */
-                if (!db_lookup_str(cntx->lookupgweui, gweui_hex, output)) {
-			MSG("WARNING: [up] Not a valid GatewayEUI, ignore!\n");
-                        continue;
-                }
+        /* lookupgweui: select gweui from gws where gweui = ? */
+        if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
+	        MSG("WARNING: [up] Not a valid GatewayEUI, ignore!\n");
+            continue;
+        }
 
 		if (buff_push[3] == PKT_PUSH_DATA) {
 			MSG("INFO: [up]receive a push data\n");
@@ -166,13 +169,14 @@ int main(int argc, char** argv) {
 			if (sendto(sockfd_push, buff_push_ack, sizeof(buff_push_ack), 0, (struct sockaddr*)&cliaddr, addrlen) < 0)
 				MSG("WARNING: [thread_up] send push_ack for packet_%d fail\n", pkt_no);
                         
+            memset(&pkt_info, 0, sizeof(struct pkt_info));
 			memcpy(pkt_info.pkt_payload, buff_push + 12, msg_len - 12);
 			strcpy(pkt_info.gwaddr, inet_ntoa(cliaddr.sin_addr));
 			strcpy(pkt_info.gweui_hex, gweui_hex);
 			pkt_info.pkt_no = pkt_no;
 			if (pthread_create(&th_up_handle, NULL, (void*)thread_up_handle, (void*)&pkt_info) != 0) {
-				MSG("ERROR: [thread_up] impossible to create thread for forwarding\n");
-				exit(EXIT_FAILURE);
+				MSG("WARNING: [thread_up] impossible to create thread thread_up_handle\n");
+                continue;
 			}
 		}
 
@@ -185,6 +189,9 @@ int main(int argc, char** argv) {
 
 		/*free linked list*/
 		list_destroy(&gw_list, destroy_msg_down);
+
+        /*free database struct*/
+        db_destroy(&cntx);
 	}
 	/*wait for threads to finish*/
 	pthread_join(th_down, NULL);
@@ -204,7 +211,9 @@ void signal_handle(int signo){
 void thread_up_handle(void* pkt_info) {
 	/* when this thread exits,it will automatically release all resources*/
 	pthread_detach(pthread_self());
-	struct pkt_info *pkt = (struct pkt_info*)pkt_info;
+
+    struct pkt_info pkt;     
+    memcpy(&pkt, pkt_info, sizeof(struct pkt_info)); /* copy the data from main thread, this data may be change */
 
 	/*json parsing variables*/
 	JSON_Value  *root_val = NULL;
@@ -213,38 +222,36 @@ void thread_up_handle(void* pkt_info) {
 	JSON_Value  *val = NULL;
 
 	int i, j, size;
-
 	char content[BUFF_SIZE];
 	const char* str;
 	uint8_t payload[256];/*256 is the max size defined in the specification*/
 	char rxpk_name[7];
 	char tempstr[32];
 	char tempdata[300];
-	int pkt_no = pkt->pkt_no;
 	struct metadata meta_data;
 	struct jsondata json_result;/*keep the result of analyzing message from gateway*/
 
 	/*parse JSON*/
-	bzero(content, sizeof(content));
-	root_val = json_parse_string_with_comments((const char*)(pkt->pkt_payload));
+	memset(content, 0, sizeof(content));
+	root_val = json_parse_string_with_comments((const char*)(pkt.pkt_payload));
 	if (root_val == NULL) {
-		MSG("WARNING: [up] packet_%d push_data contains invalid JSON\n", pkt_no);
+		MSG("WARNING: [up] packet_%d push_data contains invalid JSON\n", pkt.pkt_no);
 		json_value_free(root_val);
 	}
 	rxpk_arr = json_object_get_array(json_value_get_object(root_val), "rxpk");
 	if (rxpk_arr == NULL) {
-		MSG("WARNING: [up] packet_%d push_data contains no \"rxpk\" array in JSON\n", pkt_no);
+		MSG("WARNING: [up] packet_%d push_data contains no \"rxpk\" array in JSON\n", pkt.pkt_no);
 		json_value_free(root_val);
 	}
 
 	/*traverse the rxpk array*/
-	snprintf(tempstr, sizeof(tempstr), "PUSH DATA %d:\n", pkt_no);
+	snprintf(tempstr, sizeof(tempstr), "PUSH DATA %d:\n", pkt.pkt_no);
 	strcat(content, tempstr);
 	i = 0;
 	while ((rxpk_obj = json_array_get_object(rxpk_arr, i)) != NULL) {
-		bzero(&json_result, sizeof(json_result));
-		bzero(&meta_data, sizeof(meta_data));
-		strcpy(meta_data.gwaddr, pkt->gwaddr);
+		memset(&json_result, 0, sizeof(json_result));
+		memset(&meta_data, 0, sizeof(meta_data));
+		strcpy(meta_data.gwaddr, pkt.gwaddr);
 		snprintf(rxpk_name, sizeof(rxpk_name), "rxpk_%d", i);
 		strcat(content, rxpk_name);
 		val = json_object_get_value(rxpk_obj, "tmst");
@@ -334,7 +341,7 @@ void thread_up_handle(void* pkt_info) {
 		if (val != NULL) {
 			str = json_value_get_string(val);
 			if (b64_to_bin(str, strlen(str), payload, sizeof(payload)) != size){
-				MSG("WARNING: [up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n", pkt_no, i);
+				MSG("WARNING: [up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n", pkt.pkt_no, i);
 			}
 			strcat(content, " data:");
 			for (j=0; j<size; j++){
@@ -342,7 +349,7 @@ void thread_up_handle(void* pkt_info) {
 				strcat(content, tempdata);
 			}
 		} else {
-			MSG("WARNING: [up] in packet_%d rxpk_%d contains no data\n", pkt_no, i);
+			MSG("WARNING: [up] in packet_%d rxpk_%d contains no data\n", pkt.pkt_no, i);
 		}
 		MSG("%s\n", content);
 		/*analysis the MAC payload content*/
@@ -353,13 +360,13 @@ void thread_up_handle(void* pkt_info) {
                 /* insert msg_down into gw_list */
 		if (json_result.to != IGNORE) {
 			pthread_mutex_lock(&mx_gw_list);
-			list_insert_at_tail(&gw_list, json_result->msg, json_result->msgsize, assign_msg_down);
+			list_insert_at_tail(&gw_list, json_result.msg, json_result.msgsize, assign_msg_down);
 			pthread_mutex_unlock(&mx_gw_list);
 		}
                 
 		if (++i >= NB_PKT_MAX) break;
 
-		bzero(content, sizeof(content));
+		memset(content, 0, sizeof(content));
 	}
 
 	json_value_free(root_val);
@@ -379,7 +386,7 @@ void thread_down(void) {
 	struct msg_down data;
 	bool flag;
 
-	bzero(&cliaddr,sizeof(cliaddr));
+	memset(&cliaddr, 0, sizeof(cliaddr));
 	addrlen = sizeof(cliaddr);
 	data.gwaddr = malloc(16);
 	data.json_string = malloc(JSON_MAX);
@@ -387,8 +394,8 @@ void thread_down(void) {
 	while (!exit_sig) {
 		msg_len = recvfrom(sockfd_pull, buff_pull, sizeof(buff_pull), 0, (struct sockaddr*)&cliaddr, &addrlen);
 		if (msg_len < 0) {
-			MSG("WARNING: [down] thread_down recv returned %s\n", strerror(errno));
-			break;
+			//MSG("WARNING: [down] thread_down recv returned %s\n", strerror(errno));
+			continue;
 		}
 		if (msg_len == 0) {
 			if(exit_sig == true){
@@ -400,7 +407,7 @@ void thread_down(void) {
 			}
 		}
 		/* if the datagram does not respect the format of PULL DATA, just ignore it */
-		if (msg_len < 4 || buff_push[0] != VERSION || ((buff_push[3] != PKT_PUSH_DATA) && buff_push[3] != PKT_PULL_DATA)){
+		if (msg_len < 4 || buff_pull[0] != VERSION || ((buff_pull[3] != PKT_PUSH_DATA) && buff_pull[3] != PKT_PULL_DATA)){
 			MSG("WARNING: [down] pull data invalid,just ignore\n");
 			continue;
 		}

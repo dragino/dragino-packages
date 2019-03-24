@@ -17,8 +17,6 @@ Maintainer: skerlan
 #ifndef HANDLE_H_
 #define HANDLE_H_
 
-#endif /* HANDLE_H_ */
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -30,12 +28,10 @@ Maintainer: skerlan
 #include <signal.h>
 #include <sys/time.h>
 
-#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <unistd.h>
-#include <ctype.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -46,15 +42,16 @@ Maintainer: skerlan
 #include "base64.h"
 #include "parson.h"
 #include "generic_list.h"
-#include "db.h"
 
 #include "LoRaMacCrypto.h"
 
 #define FRAME_LEN               24 /* 17/3*4+1,corresponding to the ashanled.c */
 
-#define GW_SERV_ADDR        "localhost"
-#define NET_PORT_PUSH       1700
-#define NET_PORT_PULL       1700
+#define DBPATH "/tmp/loraserv"
+
+#define GW_SERV_ADDR       localhost
+#define GW_PORT_PUSH       1700
+#define GW_PORT_PULL       1701
 
 #define PKT_PUSH_DATA	0
 #define PKT_PUSH_ACK	1
@@ -62,11 +59,12 @@ Maintainer: skerlan
 #define PKT_PULL_RESP	3
 #define PKT_PULL_ACK	4
 
+#define PUSH_TIMEOUT_MS     100
+#define PULL_TIMEOUT_MS     200
+
 #define SOCKET_INTERVAL_S   10
 #define SOCKET_INTERVAL_MS  0
 #define SEND_INTERVAL_S     2
-#define AS_SEND_INTERVAL_S  1  
-#define SEND_INTERVAL_MS    0
 
 /*define version of GWMP */
 #define VERSION 2
@@ -79,8 +77,6 @@ Maintainer: skerlan
 
 #define LORAMAC_FRAME_MAXPAYLOAD   255
 
-#define CMD_FRAME_DOWN_MAX 34 
-
 #define JSON_MAX  1024 /*1024 is big enough, not calculate the accurate size of json string*/
 
 #define APPLICATION_SERVER     1
@@ -88,8 +84,6 @@ Maintainer: skerlan
 
 #define MAX_NB_B64             341 /*255 bytes=340 char in b64*/
 #define RANGE                  1000000 /*1s*/
-
-#define CMD_UP_MAX             15
 
 #define NO_DELAY               0
 #define JOIN_ACCEPT_DELAY      6000000 /*6s the second window of join*/  
@@ -99,9 +93,6 @@ Maintainer: skerlan
 #define CLASS_A                0
 #define CLASS_B                1
 #define CLASS_C                2
-
-#define FAILED     0
-#define SUCCESS    1
 
 /* structure used for sending and receiving data */
 struct pkt {
@@ -133,34 +124,17 @@ struct metadata {
 	float    rssi;	   /*rssi in dB*/
 	uint16_t size;     /*payload size in bytes*/
 
-        char    appeui_hex[17] = {'\0'};
-        char    gweui_hex[17] = {'\0'};
-        char    deveui_hex[17] = {'\0'};
+    char    appeui_hex[17];
+    char    gweui_hex[17];
+    char    deveui_hex[17];
 
-        uint8_t appkey[16] = {'\0'};
-        uint8_t appskey[16] = {'\0'};
-        uint8_t nwkskey[16] = {'\0'};
-        uint8_t devnonce[2] = {'\0'};
+    uint16_t devnonce;
 
-        char    outstr[24] = {'\0'};  /*temp string for swap data*/
-};
+    uint8_t appkey[16];
+    uint8_t appskey[16];
+    uint8_t nwkskey[16];
 
-/* json data return*/
-struct jsondata {
-	int to; /* which server to send to 1.app 2.nc 3.both 4.err 5.ignore */
-	uint32_t devaddr;  /* gateway address for as downlink */
-	char deveui_hex[17];
-        struct msg_down msg;
-};
-
-struct th_check_arg {
-	uint32_t devaddr;
-	uint32_t tmst;
-};
-
-/*data structure of linked list node*/
-struct msg {
-	char*  json_string;
+	uint32_t devaddr;     
 };
 
 struct msg_down {
@@ -168,79 +142,14 @@ struct msg_down {
 	char*  gwaddr;
 };
 
-struct msg_join {
+/* json data return*/
+struct jsondata {
+	int to; /* which server to send to 1.app 2.nc 3.both 4.err 5.ignore */
+    int msgsize;
+	uint32_t devaddr;  /* gateway address for as downlink */
 	char deveui_hex[17];
-	uint32_t tmst;
+    struct msg_down* msg;
 };
-
-typedef enum eLoRaMacSrvCmd
-{
-    /*!
-     * LinkCheckAns
-     */
-    SRV_MAC_LINK_CHECK_ANS           = 0x02,
-    /*!
-     * LinkADRReq
-     */
-    SRV_MAC_LINK_ADR_REQ             = 0x03,
-    /*!
-     * DutyCycleReq
-     */
-    SRV_MAC_DUTY_CYCLE_REQ           = 0x04,
-    /*!
-     * RXParamSetupReq
-     */
-    SRV_MAC_RX_PARAM_SETUP_REQ       = 0x05,
-    /*!
-     * DevStatusReq
-     */
-    SRV_MAC_DEV_STATUS_REQ           = 0x06,
-    /*!
-     * NewChannelReq
-     */
-    SRV_MAC_NEW_CHANNEL_REQ          = 0x07,
-    /*!
-     * RXTimingSetupReq
-     */
-    SRV_MAC_RX_TIMING_SETUP_REQ      = 0x08,
-}LoRaMacSrvCmd_t;
-
-/*!
- * LoRaMAC mote MAC commands
- * copy from LoRaMac.h
- * LoRaWAN Specification V1.0, chapter 5, table 4
- */
-typedef enum eLoRaMacMoteCmd
-{
-    /*!
-     * LinkCheckReq
-     */
-    MOTE_MAC_LINK_CHECK_REQ          = 0x02,
-    /*!
-     * LinkADRAns
-     */
-    MOTE_MAC_LINK_ADR_ANS            = 0x03,
-    /*!
-     * DutyCycleAns
-     */
-    MOTE_MAC_DUTY_CYCLE_ANS          = 0x04,
-    /*!
-     * RXParamSetupAns
-     */
-    MOTE_MAC_RX_PARAM_SETUP_ANS      = 0x05,
-    /*!
-     * DevStatusAns
-     */
-    MOTE_MAC_DEV_STATUS_ANS          = 0x06,
-    /*!
-     * NewChannelAns
-     */
-    MOTE_MAC_NEW_CHANNEL_ANS         = 0x07,
-    /*!
-     * RXTimingSetupAns
-     */
-    MOTE_MAC_RX_TIMING_SETUP_ANS     = 0x08,
-}LoRaMacMoteCmd_t;
 
 /*reverse memory copy*/
 void revercpy( uint8_t *dst, const uint8_t *src, int size );
@@ -251,7 +160,7 @@ void set_timer(int sec, int msec);
 
 void tcp_bind(const char* servaddr, const char* port, int* listenfd);
 void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit_sig);
-void udp_bind(const char* servaddr, const char* port, int* sockfd);
+void udp_bind(const char* servaddr, const char* port, int* sockfd, int type);
 
 /*compare the node element*/
 int compare_msg_down(const void* data, const void* key);
@@ -271,5 +180,6 @@ void assign_msg_down(void* data, const void* msg);
 void copy_msg_down(void* data, const void* msg);
 
 /*packet the data that will be sent to the gateaway*/
-bool serialize_msg_to_gw(const char* data, int size, const char* deveui_hex, char* json_data, char* gwaddr, uint32_t tmst, int delay);
+void serialize_msg_to_gw(const char* data, int size, char* deveui_hex, char* json_data, uint32_t tmst, int delay);
 
+#endif /* HANDLE_H_ */

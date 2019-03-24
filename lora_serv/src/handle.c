@@ -15,6 +15,7 @@ Maintainer: skerlan
 */
 
 #include "handle.h"
+#include "db.h"
 
 /*keys just for testing*/
 #define DEFAULT_appeui  { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
@@ -26,9 +27,13 @@ Maintainer: skerlan
 
 #define JOIN_ACC_SIZE                          17
 
+extern struct context cntx;
+
 /* ----------------------------------------------------------------- */
 /* ------------------ PRIVATE function ----------------------------- */
 
+static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; /* cut in half, critical for throughput */
+static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; /* non critical for throughput */
 
 /*prepare the frame payload and compute the session keys*/
 static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t* appkey, uint32_t devaddr, uint8_t *nwkskey, uint8_t *appskey);
@@ -99,7 +104,6 @@ typedef union uLoRaMacFrameCtrl {
     }Bits;
 }LoRaMacFrameCtrl_t;
 
-
 /*!
  * LoRaMAC DLSettings field definition
  * LoRaWAN Specification V1.0, chapter 5.4
@@ -125,6 +129,46 @@ typedef union uLoRaMacRxDelay{
 	}Bits;
 }LoRaMacRxDelay_t;
 
+/*!
+ * LoRaMAC frame types
+ * Copy from LoRaMAC.h
+ * LoRaWAN Specification V1.0, chapter 4.2.1, table 1
+ */
+typedef enum eLoRaMacFrameType
+{
+    /*!
+     * LoRaMAC join request frame
+     */
+    FRAME_TYPE_JOIN_REQ              = 0x00,
+    /*!
+     * LoRaMAC join accept frame
+     */
+    FRAME_TYPE_JOIN_ACCEPT           = 0x01,
+    /*!
+     * LoRaMAC unconfirmed up-link frame
+     */
+    FRAME_TYPE_DATA_UNCONFIRMED_UP   = 0x02,
+    /*!
+     * LoRaMAC unconfirmed down-link frame
+     */
+    FRAME_TYPE_DATA_UNCONFIRMED_DOWN = 0x03,
+    /*!
+     * LoRaMAC confirmed up-link frame
+     */
+    FRAME_TYPE_DATA_CONFIRMED_UP     = 0x04,
+    /*!
+     * LoRaMAC confirmed down-link frame
+     */
+    FRAME_TYPE_DATA_CONFIRMED_DOWN   = 0x05,
+    /*!
+     * LoRaMAC RFU frame
+     */
+    FRAME_TYPE_RFU                   = 0x06,
+    /*!
+     * LoRaMAC proprietary frame
+     */
+    FRAME_TYPE_PROPRIETARY           = 0x07,
+}LoRaMacFrameType_t;
 
 /* --------------------------------------------------------------------------- */
 /* ------- handle message process -------------------------------------------- */
@@ -135,25 +179,22 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 	uint8_t appeui[8];
 	uint8_t deveui[8];
 
-        int i, delay = 0;
+    int i, delay = 0;
 
 	int size = meta->size; 	/*the length of payload*/
 	LoRaMacHeader_t macHdr; /*the MAC header*/
 	/* json args for parsing data to json string*/
 
-	char* str = NULL;
-
-        char outstr[MAXSTRSIZE];
-        int outint = 0;
+    char json_data[512];
+    struct msg_down* msg_to_gw;
 
 	/*typical fields for confirmed/unconfirmed message*/
 	LoRaMacFrameCtrl_t fCtrl;
-	uint32_t devaddr=0;
 	uint32_t fopts_len;/*the size of foptions field*/
 	uint8_t adr;       /*indicate if ADR is permitted*/
 	uint16_t upCnt = 0;
 	uint8_t fport;
-        char frame_payload[FRAME_LEN];
+    char frame_payload[FRAME_LEN];
 	uint8_t fpayload[LORAMAC_FRAME_MAXPAYLOAD];/*the frame payload*/
 
 	uint32_t mic = 0;
@@ -176,14 +217,14 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
 			/*judge whether it is a repeated message*/
                         /* select devnonce from devs where deveui = ? and devnonce = ?*/
-			if (db_judge_joinrepeat(cntx->judgejoinrepeat, meta)) {
+			if (db_judge_joinrepeat(cntx.judgejoinrepeat, meta)) {
 				MSG("WARNING: [up] have same devnonce, join request repeat.\n");
 				result->to = IGNORE;
 				break;
 			} 
 
                         /* select appkey from apps where appeui = ? */
-			db_lookup_appkey(cntx->lookupappkey, meta->appeui_hex); 
+			db_lookup_appkey(cntx.lookupappkey, meta->appeui_hex); 
 
 			LoRaMacJoinComputeMic(payload, 23 - 4, meta->appkey, &cal_mic);
 			/*if mic is wrong,the join request will be ignored*/
@@ -195,17 +236,17 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 				meta->devaddr = rand();
 				as_prepare_frame(frame_payload, (uint16_t)meta->devnonce, meta->appkey, meta->devaddr, meta->nwkskey, meta->appskey);
 
-                                /* update or IGNORE devs set devaddr = ?, appskey = ?, nwkskey = ?, devnonce = ? wheredeveui = ? */
+                /* update or IGNORE devs set devaddr = ?, appskey = ?, nwkskey = ?, devnonce = ? wheredeveui = ? */
 
-                                db_update_devinfo(cntx->updatedevinfo, meta);
+                db_update_devinfo(cntx.updatedevinfo, meta);
 
 				serialize_msg_to_gw(frame_payload, 17, meta->gweui_hex, json_data, meta->tmst, JOIN_ACCEPT_DELAY); 
-				msg_to_gw.gwaddr = malloc(strlen(meta->gwaddr) + 1);
-				msg_to_gw.json_string = malloc(strlen(json_data) + 1);
-				strcpy(msg_to_gw.gwaddr, meta->gwaddr);
-				strcpy(msg_to_gw.json_string, json_data);
-                                result->msgsize = sizeof(msg_to_gw);
-                                result->msg = msg_to_gw;
+				msg_to_gw->gwaddr = malloc(strlen(meta->gwaddr) + 1);
+				msg_to_gw->json_string = malloc(strlen(json_data) + 1);
+				strcpy(msg_to_gw->gwaddr, meta->gwaddr);
+				strcpy(msg_to_gw->json_string, json_data);
+                result->msgsize = sizeof(msg_to_gw);
+                result->msg = msg_to_gw;
 				result->to = APPLICATION_SERVER;
 			}
 			break;
@@ -232,7 +273,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
                         /* select deveui from devs where devaddr = ? */
 
-			db_judge_devaddr(cntx->judgedevaddr, meta);
+			db_judge_devaddr(cntx.judgedevaddr, meta);
 
 			if (NULL == meta->deveui_hex) {
 				MSG("WARNING: [up] query the database failed\n");
@@ -243,7 +284,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
 			/*judge whether it is a repeated message*/
                         /* select id from upmsg where deveui = ? and tmst = ? */
-			if (db_judge_msgrepeat(cntx->judgeupmsgrepeat, meta)) {
+			if (db_judge_msgrepeat(cntx.judgemsgrepeat, meta)) {
 				MSG("WARNING: [up] repeated push_data\n");
 				result->to = IGNORE;
 				break;
@@ -251,7 +292,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
                         /* select nwkskey from devs where deveui = ? */
 
-			db_lookup_nwkskey(cntx->lookupnwkskey, meta); 
+			db_lookup_nwkskey(cntx.lookupnwkskey, meta); 
 
 			LoRaMacComputeMic(payload, meta->size - 4, meta->nwkskey, meta->devaddr, UP, (uint32_t)upCnt, &cal_mic);
 			if(cal_mic != mic){
@@ -263,12 +304,12 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
                         /* udpate tables insert upmsg */
                         /* insert into upmsg (tmst, datarate, freq, rssi, snr, fcntup, gweui, appeui, deveui, frmpayload) values */
                                 
-                        db_insert_upmsg(cntx->insertupmsg, meta, upCnt, payload, meta->size);
+            db_insert_upmsg(cntx.insertupmsg, meta, upCnt, payload, meta->size);
 
 			
-			LoRaMacPayloadDecrypt(payload, meta->size, meta->appskey, meta->devaddr, UP, (uint32_t)upCnt, dec_userdata);
+			LoRaMacPayloadDecrypt(payload, meta->size, meta->appskey, meta->devaddr, UP, (uint32_t)upCnt, fpayload);
 
-                        printf("Decrypted: %s\n", dec_userdata);
+            printf("Decrypted: %s\n", fpayload);
 
 			/*when the message contains both MAC command and userdata*/
                         /* do nothing */
@@ -279,7 +320,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 		}
 		/*proprietary message*/
 		case FRAME_TYPE_PROPRIETARY: {
-			memcpy(fpayload, payload + 1,mlhhhx size-1);
+			memcpy(fpayload, payload + 1, meta->size - 1);
 			result->to = IGNORE;
 			break;
 		}
@@ -287,7 +328,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
 }
 
-void serialize_msg_to_gw(const char* data, int size, const char* gweui_hex, char* json_data, uint32_t tmst, int delay) {
+void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json_data, uint32_t tmst, int delay) {
 	JSON_Value  *root_val_x = NULL;
 	JSON_Object *root_obj_x = NULL;
 	unsigned int rx2_dr;
@@ -296,7 +337,8 @@ void serialize_msg_to_gw(const char* data, int size, const char* gweui_hex, char
 	struct timespec time;/*storing local timestamp*/
 	char* json_str = NULL;
 
-        /* select rx2datarate, rx2freq from gwprofile where id in select profileid from gws where gweui = ? */
+    /* select rx2datarate, rx2freq from gwprofile where id in select profileid from gws where gweui = ? */
+    db_lookup_profile(cntx.lookupprofile, gweui_hex, &rx2_dr, &rx2_freq);
 
 	switch (rx2_dr) {
 		case 0:{
@@ -438,7 +480,7 @@ void copy_msg_down(void* data, const void* msg) {
 	strcpy(data_x->gwaddr, msg_x->gwaddr);
 }
 
-void destroy_msg_down(void* msg){
+void destroy_msg_down(void* msg) {
 	struct msg_down* message = (struct msg_down*)msg;
 	free(message->json_string);
 	free(message->gwaddr);
@@ -568,12 +610,12 @@ void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit
 }
 
 /*get the udp socket fd and bind it*/
-void udp_bind(const char* servaddr, const char* port, int* sockfd) {
+void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {
 	/*some  variables for building UDP sockets*/
+	int i;
 	struct addrinfo hints;
 	struct addrinfo *results;
 	struct addrinfo *r;
-	int i;
 	char host_name[64];
 	char service_name[64];
 	int sock;
@@ -582,7 +624,8 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd) {
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_DGRAM;
-	if (getaddrinfo(servaddr, port, &hints, &results) != 0) {
+	hints.ai_addr = NULL;
+	if (getaddrinfo(NULL, port, &hints, &results) != 0) {
 		MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, port, gai_strerror(i));
 		exit(EXIT_FAILURE);
 	}
@@ -594,7 +637,8 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd) {
 			break;
 		close(sock);/*bind error,close and try again*/
 	}
-	if ( r== NULL) {
+
+	if (r== NULL) {
 		MSG("ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", servaddr, port);
 		i = 1;
 		for (r = results; r != NULL; r = r->ai_next) {
@@ -604,6 +648,19 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd) {
 		}
 		exit(EXIT_FAILURE);
 	}
+
+    if (type) { /* push */
+        if ((setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof(push_timeout_half))) != 0) {
+            MSG("ERROR~ [up] setsockopt returned %s\n", strerror(errno));
+            sock = -1;
+        }
+    } else {
+        if ((setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof(pull_timeout))) != 0) {
+            MSG("ERROR~ [up] setsockopt returned %s\n", strerror(errno));
+            sock = -1;
+        }
+    }
+
 	*sockfd = sock;
 	freeaddrinfo(results);
 }

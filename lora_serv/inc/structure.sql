@@ -10,7 +10,7 @@ ATTACH DATABASE 'loraserv' As 'loraserv';
 
 CREATE TABLE IF NOT EXISTS `devs` (
   `deveui` text PRIMARY KEY DEFAULT NULL,
-  `appeui` text default 0,
+  `appeui` text default NULL foreign key (appeui) references apps (appeui) on delete set NULL,
   `appskey` blob DEFAULT NULL,
   `nwkskey` blob DEFAULT NULL,
   `devaddr` blob DEFAULT NULL,
@@ -99,10 +99,10 @@ CREATE TABLE IF NOT EXISTS `gwprofile` (
 
 CREATE TABLE IF NOT EXISTS `gws` (
   `gweui` text PRIMARY KEY NOT NULL,
-  `profileid` integer not null default 1`,
+  `profileid` integer not null default 1,
   `description` text not null default 'dragino gw',
   `created_at` timestamp not null DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp ON UPDATE CURRENT_TIMESTAMP,
+  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP,
   `first_seen_at` timestamp,
   `last_seen_at` timestamp,
   `maxtxpower_dbm` integer DEFAULT NULL default 26,

@@ -8,8 +8,6 @@
 
 #include <stdbool.h>
 
-#endif /* GENERIC_LIST_H_ */
-
 typedef struct Node{
 	void* data;
 	struct Node* next;
@@ -37,3 +35,5 @@ bool list_search_and_delete(plist list, void* key, void* data, int(*compare)(con
 void list_search_and_update(plist list, void* key, void* new_data, int size, int(*compare)(const void*, const void*), void(*assign)(void*, const void*));
 /*judge where the list is empty*/
 bool list_is_empty(plist list);
+
+#endif /* GENERIC_LIST_H_ */

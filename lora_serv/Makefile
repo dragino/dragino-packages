@@ -1,49 +1,39 @@
-APP_NAME:=ns
+include $(TOPDIR)/rules.mk
 
-OBJECTS:=obj/$(APP_NAME).o obj/base64.o obj/parson.o obj/aes.o obj/cmac.o obj/utilities.o obj/LoRaMacCrypto.o obj/generic_list.o obj/db.o obj/handle.o
+PKG_NAME:=lora_simple_serv
+PKG_VERSION:=1.0.0
+PKG_RELEASE:=1
 
-CFLAGS := -Iinc
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
-LIBS := -lsqlite3 -lpthread
+TARGET_LDFLAGS:= -lsqlite3 -lpthread  
 
-all: $(APP_NAME)
+include $(INCLUDE_DIR)/package.mk
 
-clean:
-	rm -f obj/*.o
-	rm -f $(APP_NAME)
+define Package/$(PKG_NAME)    
+	SECTION:=utils
+	CATEGORY:=Utilities
+	TITLE:=$(PKG_NAME)
+	MAINTAINER:=Dragino <support@dragino.com>
+	DEPENDS:=+libsqlite3 +libpthread 
+endef
 
-obj:
-	mkdir -p obj
+define Package/$(PKG_NAME)/description
+	LoRaWan simple server
+	For Dragino LG01/LG02/LG08
+endef
 
-obj/base64.o: src/base64.c inc/base64.h
-	gcc -c $(CFLAGS)  $< -o $@ 
+CONFIGURE_VARS+= \
+	CC="$(TOOLCHAIN_DIR)/bin/$(TARGET_CC)"
 
-obj/parson.o: src/parson.c inc/parson.h
-	gcc -c $(CFLAGS) $< -o $@
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src/* $(PKG_BUILD_DIR)/
+endef
 
-obj/aes.o: src/aes.c inc/aes.h
-	gcc -c $(CFLAGS) $< -o $@
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
+endef
 
-obj/cmac.o: src/cmac.c inc/cmac.h
-	gcc -c $(CFLAGS) $< -o $@
-
-obj/utilities.o: src/utilities.c inc/utilities.h
-	gcc -c $(CFLAGS) $< -o $@
-
-obj/LoRaMacCrypto.o: src/LoRaMacCrypto.c inc/LoRaMacCrypto.h inc/aes.h inc/cmac.h inc/utilities.h
-	gcc -c $(CFLAGS) $< -o $@
-
-obj/generic_list.o: src/generic_list.c inc/generic_list.h
-	gcc -c $(CFLAGS) $< -o $@
-
-obj/db.o: src/db.c inc/db.h inc/handle.h inc/utilities.h
-	gcc -c $(CFLAGS) $< -o $@ 
-
-obj/handle.o: src/handle.c inc/handle.h inc/LoRaMacCrypto.h inc/parson.h inc/db.h
-	gcc -c $(CFLAGS) $< -o $@ 
-
-obj/$(APP_NAME).o: src/ns.c inc/handle.h inc/db.h inc/base64.h inc/parson.h 
-	gcc -c $(CFLAGS) $< -o $@ 
-
-$(APP_NAME): $(OBJECTS)
-	gcc  $(OBJECTS) -o $@ $(LIBS)
+$(eval $(call BuildPackage,$(PKG_NAME)))

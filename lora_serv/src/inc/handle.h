@@ -179,6 +179,8 @@ void assign_msg_down(void* data, const void* msg);
 /*deep copy*/
 void copy_msg_down(void* data, const void* msg);
 
+void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payload);
+
 /*packet the data that will be sent to the gateaway*/
 void serialize_msg_to_gw(const char* data, int size, char* deveui_hex, char* json_data, uint32_t tmst, int delay);
 

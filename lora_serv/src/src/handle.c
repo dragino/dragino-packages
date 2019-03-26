@@ -14,6 +14,7 @@ Maintainer: skerlan
 
 */
 
+#include <unistd.h>
 #include "handle.h"
 #include "db.h"
 

@@ -6,7 +6,7 @@ PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
-TARGET_LDFLAGS:= -lc -lsqlite3 -lpthread  
+TARGET_LDFLAGS:= -lsqlite3 -lpthread  
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -21,6 +21,11 @@ endef
 define Package/$(PKG_NAME)/description
 	LoRaWan simple server
 	For Dragino LG01/LG02/LG08
+endef
+
+define Package/$(PKG_NAME)/extra_provides
+	echo 'libc.so.6';\
+	echo 'libpthread.so.0';
 endef
 
 CONFIGURE_VARS+= \

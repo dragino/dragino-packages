@@ -1,12 +1,12 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=lora_simple_serv
+PKG_NAME:=lora_serv
 PKG_VERSION:=1.0.0
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
-TARGET_LDFLAGS:= -lsqlite3 -lpthread  
+TARGET_LDFLAGS:= -lc -lsqlite3 -lpthread  
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -15,7 +15,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=Utilities
 	TITLE:=$(PKG_NAME)
 	MAINTAINER:=Dragino <support@dragino.com>
-	DEPENDS:=+libsqlite3 +libpthread 
+	DEPENDS:=+libc +libsqlite3 +libpthread 
 endef
 
 define Package/$(PKG_NAME)/description

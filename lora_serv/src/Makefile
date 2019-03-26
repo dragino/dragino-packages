@@ -1,6 +1,6 @@
-APP_NAME:=lora_simple_serv
+APP_NAME:=lora_serv
 
-OBJECTS:=obj/ns.o obj/base64.o obj/parson.o obj/aes.o obj/cmac.o obj/utilities.o obj/LoRaMacCrypto.o obj/generic_list.o obj/db.o obj/handle.o
+OBJDIR = obj
 
 CFLAGS := -Iinc
 
@@ -8,41 +8,43 @@ LIBS := -lsqlite3 -lpthread
 
 all: $(APP_NAME)
 
+OBJECTS:=$(OBJDIR)/$(APP_NAME).o obj/base64.o obj/parson.o obj/aes.o obj/cmac.o obj/utilities.o obj/LoRaMacCrypto.o obj/generic_list.o obj/db.o obj/handle.o
+
 clean:
 	rm -f obj/*.o
 	rm -f $(APP_NAME)
 
-obj:
-	mkdir -p obj
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 
-obj/base64.o: src/base64.c inc/base64.h
+$(OBJDIR)/base64.o: src/base64.c inc/base64.h | $(OBJDIR)
 	gcc -c $(CFLAGS)  $< -o $@ 
 
-obj/parson.o: src/parson.c inc/parson.h
+$(OBJDIR)/parson.o: src/parson.c inc/parson.h | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@
 
-obj/aes.o: src/aes.c inc/aes.h
+$(OBJDIR)/aes.o: src/aes.c inc/aes.h | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@
 
-obj/cmac.o: src/cmac.c inc/cmac.h
+$(OBJDIR)/cmac.o: src/cmac.c inc/cmac.h | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@
 
-obj/utilities.o: src/utilities.c inc/utilities.h
+$(OBJDIR)/utilities.o: src/utilities.c inc/utilities.h | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@
 
-obj/LoRaMacCrypto.o: src/LoRaMacCrypto.c inc/LoRaMacCrypto.h inc/aes.h inc/cmac.h inc/utilities.h
+$(OBJDIR)/LoRaMacCrypto.o: src/LoRaMacCrypto.c inc/LoRaMacCrypto.h inc/aes.h inc/cmac.h inc/utilities.h | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@
 
-obj/generic_list.o: src/generic_list.c inc/generic_list.h
+$(OBJDIR)/generic_list.o: src/generic_list.c inc/generic_list.h | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@
 
-obj/db.o: src/db.c inc/db.h inc/handle.h inc/utilities.h
+$(OBJDIR)/db.o: src/db.c inc/db.h inc/handle.h inc/utilities.h | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@ 
 
-obj/handle.o: src/handle.c inc/handle.h inc/LoRaMacCrypto.h inc/parson.h inc/db.h
+$(OBJDIR)/handle.o: src/handle.c inc/handle.h inc/LoRaMacCrypto.h inc/parson.h inc/db.h | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@ 
 
-obj/ns.o: src/ns.c inc/handle.h inc/db.h inc/base64.h inc/parson.h 
+$(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c inc/handle.h inc/db.h inc/base64.h inc/parson.h  | $(OBJDIR)
 	gcc -c $(CFLAGS) $< -o $@ 
 
 $(APP_NAME): $(OBJECTS)

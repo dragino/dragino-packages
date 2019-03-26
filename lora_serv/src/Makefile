@@ -1,6 +1,6 @@
 APP_NAME:=lora_simple_serv
 
-OBJECTS:=obj/$(APP_NAME).o obj/base64.o obj/parson.o obj/aes.o obj/cmac.o obj/utilities.o obj/LoRaMacCrypto.o obj/generic_list.o obj/db.o obj/handle.o
+OBJECTS:=obj/ns.o obj/base64.o obj/parson.o obj/aes.o obj/cmac.o obj/utilities.o obj/LoRaMacCrypto.o obj/generic_list.o obj/db.o obj/handle.o
 
 CFLAGS := -Iinc
 
@@ -42,7 +42,7 @@ obj/db.o: src/db.c inc/db.h inc/handle.h inc/utilities.h
 obj/handle.o: src/handle.c inc/handle.h inc/LoRaMacCrypto.h inc/parson.h inc/db.h
 	gcc -c $(CFLAGS) $< -o $@ 
 
-obj/$(APP_NAME).o: src/ns.c inc/handle.h inc/db.h inc/base64.h inc/parson.h 
+obj/ns.o: src/ns.c inc/handle.h inc/db.h inc/base64.h inc/parson.h 
 	gcc -c $(CFLAGS) $< -o $@ 
 
 $(APP_NAME): $(OBJECTS)

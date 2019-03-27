@@ -19,7 +19,7 @@ APPEND_INDENT	src/parson.c	881;"	d	file:
 APPEND_STRING	src/parson.c	715;"	d	file:
 APPEND_STRING	src/parson.c	880;"	d	file:
 APPLICATION_SERVER	inc/handle.h	82;"	d
-APP_NAME	Makefile	/^APP_NAME:=lora_simple_serv$/;"	m
+APP_NAME	Makefile	/^APP_NAME:=lora_serv$/;"	m
 ARRAY_MAX_CAPACITY	src/parson.c	36;"	d	file:
 ARRAY_SIZE	src/base64.c	29;"	d	file:
 Ack	src/handle.c	/^        uint8_t Ack             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
@@ -168,7 +168,8 @@ N_MAX_ROUNDS	inc/aes.h	56;"	d
 N_ROW	inc/aes.h	53;"	d
 Nibble2HexChar	src/utilities.c	/^int8_t Nibble2HexChar( uint8_t a )$/;"	f
 Node	inc/generic_list.h	/^typedef struct Node{$/;"	s
-OBJECTS	Makefile	/^OBJECTS:=obj\/$(APP_NAME).o obj\/base64.o obj\/parson.o obj\/aes.o obj\/cmac.o obj\/utilities.o obj\/LoRaMacCrypto.o obj\/generic_list.o obj\/db.o obj\/handle.o$/;"	m
+OBJDIR	Makefile	/^OBJDIR = obj$/;"	m
+OBJECTS	Makefile	/^OBJECTS:=$(OBJDIR)\/$(APP_NAME).o obj\/base64.o obj\/parson.o obj\/aes.o obj\/cmac.o obj\/utilities.o obj\/LoRaMacCrypto.o obj\/generic_list.o obj\/db.o obj\/handle.o$/;"	m
 OBJECT_MAX_CAPACITY	src/parson.c	37;"	d	file:
 PKT_PULL_ACK	inc/handle.h	60;"	d
 PKT_PULL_DATA	inc/handle.h	58;"	d
@@ -249,7 +250,7 @@ capacity	src/parson.c	/^    size_t       capacity;$/;"	m	struct:json_array_t	fil
 capacity	src/parson.c	/^    size_t       capacity;$/;"	m	struct:json_object_t	file:
 chan	inc/handle.h	/^	uint8_t  chan;     \/* IF channel*\/$/;"	m	struct:metadata
 char_to_code	src/base64.c	/^uint8_t char_to_code(char x) {$/;"	f
-cntx	src/ns.c	/^struct context cntx; \/* sqlite3 database context *\/$/;"	v	typeref:struct:context
+cntx	src/lora_serv.c	/^struct context cntx; \/* sqlite3 database context *\/$/;"	v	typeref:struct:context
 code_62	src/base64.c	/^static char code_62 = '+';	\/* RFC 1421 standard character for code 62 *\/$/;"	v	file:
 code_63	src/base64.c	/^static char code_63 = '\/';	\/* RFC 1421 standard character for code 63 *\/$/;"	v	file:
 code_pad	src/base64.c	/^static char code_pad = '=';	\/* RFC 1421 padding character if padding *\/$/;"	v	file:
@@ -327,7 +328,7 @@ deveui_hex	inc/handle.h	/^	char deveui_hex[17];$/;"	m	struct:jsondata
 deveui_hex	inc/handle.h	/^    char    deveui_hex[17];$/;"	m	struct:metadata
 devnonce	inc/handle.h	/^    uint16_t devnonce;$/;"	m	struct:metadata
 eLoRaMacFrameType	src/handle.c	/^typedef enum eLoRaMacFrameType$/;"	g	file:
-exit_sig	src/ns.c	/^static bool exit_sig = false;$/;"	v	file:
+exit_sig	src/lora_serv.c	/^static bool exit_sig = false;$/;"	v	file:
 f1	src/aes.c	77;"	d	file:
 f2	src/aes.c	78;"	d	file:
 f3	src/aes.c	84;"	d	file:
@@ -360,7 +361,7 @@ gfmul_9	src/aes.c	/^static const uint8_t gfmul_9[256] = mm_data(f9);$/;"	v	file:
 gfmul_b	src/aes.c	/^static const uint8_t gfmul_b[256] = mm_data(fb);$/;"	v	file:
 gfmul_d	src/aes.c	/^static const uint8_t gfmul_d[256] = mm_data(fd);$/;"	v	file:
 gfmul_e	src/aes.c	/^static const uint8_t gfmul_e[256] = mm_data(fe);$/;"	v	file:
-gw_list	src/ns.c	/^static linked_list gw_list;$/;"	v	file:
+gw_list	src/lora_serv.c	/^static linked_list gw_list;$/;"	v	file:
 gwaddr	inc/handle.h	/^	char     gwaddr[16];$/;"	m	struct:metadata
 gwaddr	inc/handle.h	/^	char gwaddr[16];\/*gateway address*\/$/;"	m	struct:pkt_info
 gwaddr	inc/handle.h	/^	char*  gwaddr;$/;"	m	struct:msg_down
@@ -508,7 +509,7 @@ lookupgweui	inc/db.h	/^	sqlite3_stmt* lookupgweui;$/;"	m	struct:context
 lookupnwkskey	inc/db.h	/^	sqlite3_stmt* lookupnwkskey; $/;"	m	struct:context
 lookupprofile	inc/db.h	/^	sqlite3_stmt* lookupprofile; $/;"	m	struct:context
 lsnr	inc/handle.h	/^	float    lsnr;     \/*SNR in dB*\/$/;"	m	struct:metadata
-main	src/ns.c	/^int main(int argc, char** argv) {$/;"	f
+main	src/lora_serv.c	/^int main(int argc, char** argv) {$/;"	f
 malloc	src/parson.c	46;"	d	file:
 memcpy1	src/utilities.c	/^void memcpy1( uint8_t *dst, const uint8_t *src, uint16_t size )$/;"	f
 memcpyr	src/utilities.c	/^void memcpyr( uint8_t *dst, const uint8_t *src, uint16_t size )$/;"	f
@@ -520,14 +521,14 @@ modu	inc/handle.h	/^	char     modu[5];  \/* modulation:LORA or FSK*\/$/;"	m	stru
 msg	inc/handle.h	/^    struct msg_down* msg;$/;"	m	struct:jsondata	typeref:struct:jsondata::msg_down
 msg_down	inc/handle.h	/^struct msg_down {$/;"	s
 msgsize	inc/handle.h	/^    int msgsize;$/;"	m	struct:jsondata
-mx_db	src/ns.c	/^static pthread_mutex_t mx_db = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
-mx_gw_list	src/ns.c	/^static pthread_mutex_t mx_gw_list = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
-mx_push	src/ns.c	/^static pthread_mutex_t mx_push = PTHREAD_MUTEX_INITIALIZER; \/* control access to the push_data upstream measurements *\/$/;"	v	file:
+mx_db	src/lora_serv.c	/^static pthread_mutex_t mx_db = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+mx_gw_list	src/lora_serv.c	/^static pthread_mutex_t mx_gw_list = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+mx_push	src/lora_serv.c	/^static pthread_mutex_t mx_push = PTHREAD_MUTEX_INITIALIZER; \/* control access to the push_data upstream measurements *\/$/;"	v	file:
 names	src/parson.c	/^    char       **names;$/;"	m	struct:json_object_t	file:
-nb_push_rcv	src/ns.c	/^static uint32_t nb_push_rcv = 0; \/* count push_data packets received *\/$/;"	v	file:
-netserv_addr	src/ns.c	/^static char netserv_addr[64] = STR(GW_SERV_ADDR);$/;"	v	file:
-netserv_port_pull	src/ns.c	/^static char netserv_port_pull[8] = STR(GW_PORT_PULL);$/;"	v	file:
-netserv_port_push	src/ns.c	/^static char netserv_port_push[8] = STR(GW_PORT_PUSH);$/;"	v	file:
+nb_push_rcv	src/lora_serv.c	/^static uint32_t nb_push_rcv = 0; \/* count push_data packets received *\/$/;"	v	file:
+netserv_addr	src/lora_serv.c	/^static char netserv_addr[64] = STR(GW_SERV_ADDR);$/;"	v	file:
+netserv_port_pull	src/lora_serv.c	/^static char netserv_port_pull[8] = STR(GW_PORT_PULL);$/;"	v	file:
+netserv_port_push	src/lora_serv.c	/^static char netserv_port_push[8] = STR(GW_PORT_PUSH);$/;"	v	file:
 next	inc/generic_list.h	/^	struct Node* next;$/;"	m	struct:Node	typeref:struct:Node::Node
 next	src/utilities.c	/^static uint32_t next = 1;$/;"	v	file:
 ns_msg_handle	src/handle.c	/^void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payload) {$/;"	f
@@ -580,22 +581,22 @@ sbox	src/aes.c	/^static const uint8_t sbox[256]  =  sb_data(f1);$/;"	v	file:
 serialize_msg_to_gw	src/handle.c	/^void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json_data, uint32_t tmst, int delay) {$/;"	f
 set_timer	src/handle.c	/^void set_timer(int sec,int msec) {$/;"	f
 shift_sub_rows	src/aes.c	/^static void shift_sub_rows( uint8_t st[N_BLOCK] )$/;"	f	file:
-signal_handle	src/ns.c	/^void signal_handle(int signo){$/;"	f
+signal_handle	src/lora_serv.c	/^void signal_handle(int signo){$/;"	f
 size	inc/handle.h	/^	uint16_t size;     \/*payload size in bytes*\/$/;"	m	struct:metadata
 skip_quotes	src/parson.c	/^static void skip_quotes(const char **string) {$/;"	f	file:
-sockfd_pull	src/ns.c	/^static int sockfd_pull;\/*socket for downstream to gateway*\/$/;"	v	file:
-sockfd_push	src/ns.c	/^static int sockfd_push;\/*socket for upstream from gateway*\/$/;"	v	file:
+sockfd_pull	src/lora_serv.c	/^static int sockfd_pull;\/*socket for downstream to gateway*\/$/;"	v	file:
+sockfd_push	src/lora_serv.c	/^static int sockfd_push;\/*socket for upstream from gateway*\/$/;"	v	file:
 srand1	src/utilities.c	/^void srand1( uint32_t seed )$/;"	f
 stat	inc/handle.h	/^	uint8_t  stat;     \/* packet status*\/$/;"	m	struct:metadata
 string	src/parson.c	/^    char        *string;$/;"	m	union:json_value_value	file:
 tail	inc/generic_list.h	/^	struct Node* tail;$/;"	m	struct:List	typeref:struct:List::Node
 tcp_bind	src/handle.c	/^void tcp_bind(const char* servaddr, const char* port, int* listenfd) {$/;"	f
 tcp_connect	src/handle.c	/^void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit_sig) {$/;"	f
-thread_down	src/ns.c	/^void thread_down(void) {$/;"	f
-thread_up_handle	src/ns.c	/^void thread_up_handle(void* pkt_info) {$/;"	f
+thread_down	src/lora_serv.c	/^void thread_down(void) {$/;"	f
+thread_up_handle	src/lora_serv.c	/^void thread_up_handle(void* pkt_info) {$/;"	f
 time	inc/handle.h	/^	char     time[28];$/;"	m	struct:metadata
 tmst	inc/handle.h	/^	uint32_t tmst;     \/*raw time stamp*\/$/;"	m	struct:metadata
-tmst_g	src/ns.c	/^static uint32_t tmst_g;$/;"	v	file:
+tmst_g	src/lora_serv.c	/^static uint32_t tmst_g;$/;"	v	file:
 to	inc/handle.h	/^	int to; \/* which server to send to 1.app 2.nc 3.both 4.err 5.ignore *\/$/;"	m	struct:jsondata
 type	src/parson.c	/^    JSON_Value_Type     type;$/;"	m	struct:json_value_t	file:
 uLoRaMacDLSettings	src/handle.c	/^typedef union uLoRaMacDLSettings{$/;"	u	file:

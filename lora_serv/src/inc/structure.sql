@@ -10,7 +10,7 @@ ATTACH DATABASE 'loraserv' As 'loraserv';
 
 CREATE TABLE IF NOT EXISTS `devs` (
   `deveui` text PRIMARY KEY DEFAULT NULL,
-  `appeui` text default NULL foreign key (appeui) references apps (appeui) on delete set NULL,
+  `appeui` text default NULL,
   `appskey` blob DEFAULT NULL,
   `nwkskey` blob DEFAULT NULL,
   `devaddr` blob DEFAULT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `gwprofile` (
   `supportsclassc` integer NOT NULL default 1,
   `classctimeout` integer NOT NULL default 0,
   `macversion` text NOT NULL default '1.0.3',
-  `regparamsrevision` text NOT NULL defualt '1',
+  `regparamsrevision` text NOT NULL default '1',
   `supportsjoin` integer NOT NULL default 1,
   `rx1delay` integer NOT NULL default 1,
   `rx1droffset` integer NOT NULL default 0,
@@ -123,10 +123,15 @@ CREATE TABLE IF NOT EXISTS `gws` (
 -- Table structure for table `apps`
 --
 
-create table if not exits `apps` (
-        `appeui` text PRIMARY KEY not null,
-        `description` text,
-        `appkey` blob not null
+CREATE TABLE IF NOT EXISTS `apps` (
+        `appeui` TEXT PRIMARY KEY not null,
+        `description` TEXT,
+        `appkey` BLOB NOT null
 );
         
+
+INSERT OR IGNORE INTO gws (gweui) VALUES ('a840411a92d44150');
+INSERT OR IGNORE INTO apps (appeui, appkey) VALUES ('000C29FFFF189889', '3FF71C74EE5C4F18DFF3705455910AF6');
+INSERT OR IGNORE INTO devs (deveui, appeui) VALUES ('1234590834221467', '000C29FFFF189889');
+INSERT OR IGNORE INTO gwprofile (id) VALUES (1);
 

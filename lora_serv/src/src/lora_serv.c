@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 
 	/*configure the signal handling*/
 	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = SA_NOMASK;
+	sigact.sa_flags = 0;
 	sigact.sa_handler = signal_handle;
 	sigaction(SIGQUIT, &sigact, NULL);
 	sigaction(SIGINT, &sigact, NULL);
@@ -146,8 +146,9 @@ int main(int argc, char** argv) {
 
         memset(gweui, 0, sizeof(gweui));
         memset(gweui_hex, 0, sizeof(gweui_hex));
-		revercpy(gweui, buff_push + 4, 8);
+		memcpy(gweui, buff_push + 4, 8);
 		i8_to_hexstr(gweui, gweui_hex, 8);
+                MSG("INFO: REC,GWEUI = %s\n", gweui_hex);
 
         /* lookupgweui: select gweui from gws where gweui = ? */
         if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
@@ -156,7 +157,6 @@ int main(int argc, char** argv) {
         }
 
 		if (buff_push[3] == PKT_PUSH_DATA) {
-			MSG("INFO: [up]receive a push data\n");
 			pkt_no++;
 			pthread_mutex_lock(&mx_push);
 			nb_push_rcv++;
@@ -236,16 +236,20 @@ void thread_up_handle(void* pkt_info) {
 	root_val = json_parse_string_with_comments((const char*)(pkt.pkt_payload));
 	if (root_val == NULL) {
 		MSG("WARNING: [up] packet_%d push_data contains invalid JSON\n", pkt.pkt_no);
-		json_value_free(root_val);
+                goto thread_out;
 	}
 	rxpk_arr = json_object_get_array(json_value_get_object(root_val), "rxpk");
 	if (rxpk_arr == NULL) {
+	    rxpk_arr = json_object_get_array(json_value_get_object(root_val), "stat");
+            if (rxpk_arr != NULL) 
+                MSG("Receive a packet_%d push_data of gw status\n", pkt.pkt_no);
+            else
 		MSG("WARNING: [up] packet_%d push_data contains no \"rxpk\" array in JSON\n", pkt.pkt_no);
-		json_value_free(root_val);
+            goto thread_out;
 	}
 
 	/*traverse the rxpk array*/
-	snprintf(tempstr, sizeof(tempstr), "PUSH DATA %d:\n", pkt.pkt_no);
+	snprintf(tempstr, sizeof(tempstr), "\n######PKT(%d)########\n", pkt.pkt_no);
 	strcat(content, tempstr);
 	i = 0;
 	while ((rxpk_obj = json_array_get_object(rxpk_arr, i)) != NULL) {
@@ -343,15 +347,17 @@ void thread_up_handle(void* pkt_info) {
 			if (b64_to_bin(str, strlen(str), payload, sizeof(payload)) != size){
 				MSG("WARNING: [up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n", pkt.pkt_no, i);
 			}
-			strcat(content, " data:");
+			strcat(content, " Data:(");
 			for (j=0; j<size; j++){
 				snprintf(tempdata, sizeof(tempdata), "0x%02x ", payload[j]);
 				strcat(content, tempdata);
 			}
+			strcat(content, ")");
 		} else {
 			MSG("WARNING: [up] in packet_%d rxpk_%d contains no data\n", pkt.pkt_no, i);
 		}
-		MSG("%s\n", content);
+		MSG("RXPK: %s\n", content);
+                MSG("##############################################\n");
 		/*analysis the MAC payload content*/
 		pthread_mutex_lock(&mx_db);
 		ns_msg_handle(&json_result, &meta_data, payload);/*this function will access the database*/
@@ -369,6 +375,7 @@ void thread_up_handle(void* pkt_info) {
 		memset(content, 0, sizeof(content));
 	}
 
+thread_out:
 	json_value_free(root_val);
 	pthread_exit("pthread_up_handle exit");
 }

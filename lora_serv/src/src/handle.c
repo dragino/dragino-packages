@@ -216,6 +216,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			mic |= ((uint32_t)payload[21])<<16;
 			mic |= ((uint32_t)payload[22])<<24;
 
+			MSG("INFO: [up] Receive Join reques: appeui=%s, deveui=%s\n", meta->appeui_hex, meta->deveui_hex);
 			/*judge whether it is a repeated message*/
                         /* select devnonce from devs where deveui = ? and devnonce = ?*/
 			if (db_judge_joinrepeat(cntx.judgejoinrepeat, meta)) {
@@ -230,7 +231,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			LoRaMacJoinComputeMic(payload, 23 - 4, meta->appkey, &cal_mic);
 			/*if mic is wrong,the join request will be ignored*/
 			if (mic != cal_mic) {
-				MSG("WARNING: [up] join request payload mic is wrong,just ignore it\n");
+				MSG("WARNING: [up] join request payload mic is wrong, just ignore it\n");
 				result->to = IGNORE;
 			} else {
 				srand(time(NULL));
@@ -271,6 +272,8 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			mic |= ((uint32_t)payload[size - 3])<<8;
 			mic |= ((uint32_t)payload[size - 2])<<16;
 			mic |= ((uint32_t)payload[size - 1])<<24;
+
+			MSG("INFO: [up] Receive UP_DATA: devaddr=%lu\n", meta->devaddr);
 
                         /* select deveui from devs where devaddr = ? */
 

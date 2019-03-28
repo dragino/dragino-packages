@@ -30,6 +30,7 @@ Maintainer: skerlan
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -145,16 +146,18 @@ struct msg_down {
 /* json data return*/
 struct jsondata {
 	int to; /* which server to send to 1.app 2.nc 3.both 4.err 5.ignore */
-    int msgsize;
 	uint32_t devaddr;  /* gateway address for as downlink */
 	char deveui_hex[17];
-    struct msg_down* msg;
+        struct msg_down* msg_down;
 };
 
 /*reverse memory copy*/
 void revercpy( uint8_t *dst, const uint8_t *src, int size );
+
 /*transform the array of uint8_t to hexadecimal string*/
-void i8_to_hexstr(uint8_t* uint, char* str, int size);
+void i82hexstr(uint8_t* uint, char* str, int size);
+
+void str2hex(uint8_t* dest, char* src, int len);
 
 void set_timer(int sec, int msec);
 

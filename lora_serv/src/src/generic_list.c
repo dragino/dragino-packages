@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "generic_list.h"
 
 void list_init(plist list) {
@@ -35,10 +36,10 @@ void list_insert_at_tail(plist list, void* data, int size, void(*assign)(void*, 
 	node = malloc(sizeof(list_node));
 	node->next = NULL;
 	node->data = malloc(size);
-	if(assign!=NULL){
+	if(assign != NULL) {
 		assign(node->data, data);
 	}
-	if(list->head==NULL){
+	if(list->head == NULL) {
 		list->head = node;
 		list->tail = node;
 	} else {
@@ -60,11 +61,12 @@ void list_delete_at_head(plist list, void(*destroy)(void*)) {
 	free(list->head->data);
 	free(list->head);
 	if(node == NULL){
-		list->head=NULL;
-		list->tail=NULL;
+		list->head = NULL;
+		list->tail = NULL;
 	} else {
 		list->head = node;
 	}
+        printf("delete at head\n");
 	list->length--;
 }
 
@@ -91,6 +93,7 @@ bool list_search_and_delete(plist list, void* key, void* data, int(*compare)(con
 	if (compare(node->data, key) == 0) {
 		deep_copy(data, node->data);
 		list_delete_at_head(list, destroy);
+                printf("List_delete\n");
 		list->length--;
 		return true;
 	}

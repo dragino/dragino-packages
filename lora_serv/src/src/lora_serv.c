@@ -147,8 +147,8 @@ int main(int argc, char** argv) {
         memset(gweui, 0, sizeof(gweui));
         memset(gweui_hex, 0, sizeof(gweui_hex));
 		memcpy(gweui, buff_push + 4, 8);
-		i8_to_hexstr(gweui, gweui_hex, 8);
-                MSG("INFO: REC,GWEUI = %s\n", gweui_hex);
+		i82hexstr(gweui, gweui_hex, 8);
+                //MSG("INFO: GWEUI=(%s)\n", gweui_hex);
 
         /* lookupgweui: select gweui from gws where gweui = ? */
         if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
@@ -231,6 +231,7 @@ void thread_up_handle(void* pkt_info) {
 	struct metadata meta_data;
 	struct jsondata json_result;/*keep the result of analyzing message from gateway*/
 
+        MSG("~INFO~ Handle(%d): %s\n", pkt.pkt_no, pkt.pkt_payload);
 	/*parse JSON*/
 	memset(content, 0, sizeof(content));
 	root_val = json_parse_string_with_comments((const char*)(pkt.pkt_payload));
@@ -243,12 +244,11 @@ void thread_up_handle(void* pkt_info) {
 	    rxpk_arr = json_object_get_array(json_value_get_object(root_val), "stat");
             if (rxpk_arr != NULL) 
                 MSG("Receive a packet_%d push_data of gw status\n", pkt.pkt_no);
-            else
-		MSG("WARNING: [up] packet_%d push_data contains no \"rxpk\" array in JSON\n", pkt.pkt_no);
             goto thread_out;
 	}
 
 	/*traverse the rxpk array*/
+        MSG("~INFO~ Handle(%d): start get object\n", pkt.pkt_no);
 	snprintf(tempstr, sizeof(tempstr), "\n######PKT(%d)########\n", pkt.pkt_no);
 	strcat(content, tempstr);
 	i = 0;
@@ -356,7 +356,7 @@ void thread_up_handle(void* pkt_info) {
 		} else {
 			MSG("WARNING: [up] in packet_%d rxpk_%d contains no data\n", pkt.pkt_no, i);
 		}
-		MSG("RXPK: %s\n", content);
+		MSG("%s\n", content);
                 MSG("##############################################\n");
 		/*analysis the MAC payload content*/
 		pthread_mutex_lock(&mx_db);
@@ -365,8 +365,9 @@ void thread_up_handle(void* pkt_info) {
                 
                 /* insert msg_down into gw_list */
 		if (json_result.to != IGNORE) {
+                        MSG("INFO:(main)Jstring(%s)\n", json_result.msg_down->json_string);
 			pthread_mutex_lock(&mx_gw_list);
-			list_insert_at_tail(&gw_list, json_result.msg, json_result.msgsize, assign_msg_down);
+			list_insert_at_tail(&gw_list, json_result.msg_down, sizeof(struct msg_down), assign_msg_down);
 			pthread_mutex_unlock(&mx_gw_list);
 		}
                 
@@ -376,8 +377,10 @@ void thread_up_handle(void* pkt_info) {
 	}
 
 thread_out:
+        sprintf(content, "EXIT HANDLE PKT-%d", pkt.pkt_no);
+        MSG("%s\n", content);
 	json_value_free(root_val);
-	pthread_exit("pthread_up_handle exit");
+	pthread_exit(content);
 }
 
 void thread_down(void) {
@@ -418,12 +421,15 @@ void thread_down(void) {
 			MSG("WARNING: [down] pull data invalid,just ignore\n");
 			continue;
 		}
+
+
 		if (buff_pull[3] == PKT_PULL_DATA) {
 			pkt_no++;
 			strcpy(gwaddr, inet_ntoa(cliaddr.sin_addr));
 			pthread_mutex_lock(&mx_gw_list);
-			//flag=find_node_x(gw_list_head,gwaddr,jsonstr);
+                        MSG("INFO: THREAD_DOWN process\n");
 			flag = list_search_and_delete(&gw_list, gwaddr, &data, compare_msg_down, copy_msg_down, destroy_msg_down);
+                        MSG("~INFO~ list result %s\n", data);
 			pthread_mutex_unlock(&mx_gw_list);
 			if (flag == false) {
 				memcpy(buff_pull_ack, buff_pull, 3);

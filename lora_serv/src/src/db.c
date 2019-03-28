@@ -123,6 +123,7 @@ void db_destroy(struct context* cntx) {
 
 bool db_lookup_gweui(sqlite3_stmt* stmt, char *gweui) {
 	sqlite3_bind_text(stmt, 1, gweui, -1, SQLITE_STATIC);
+        //MSG("~INFO~SQL=(%s)\n", sqlite3_expanded_sql(stmt));
 	int ret = sqlite3_step(stmt);
     sqlite3_reset(stmt);
 	if (ret == SQLITE_ROW) {
@@ -229,15 +230,16 @@ bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2fr
 
 static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {
 	int ret;
+        //MSG("~INFO~SQL=(%s)\n", sqlite3_expanded_sql(stmt));
 	while (1) {
 		ret = sqlite3_step(stmt);
-		if (ret == SQLITE_DONE)
+		if (ret == SQLITE_DONE) {
 			return true;
-		else if (ret == SQLITE_ROW) {
+                } else if (ret == SQLITE_ROW) {
 			if (rowcallback != NULL)
 				rowcallback(stmt, data);
 		} else {
-			printf("sqlite error: %s", sqlite3_errstr(ret));
+			MSG("sqlite error: %s\n", sqlite3_errstr(ret));
 			return false;
 		}
 	}
@@ -246,7 +248,8 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 static void lookup_appkey(sqlite3_stmt* stmt, void* data) {
     struct metadata* meta = (struct metadata*) data;
     memset1(meta->appkey, 0, sizeof(meta->appkey));
-    memcpy1(meta->appkey, sqlite3_column_blob(stmt, 0), sizeof(meta->appkey));
+    //memcpy1(meta->appkey, sqlite3_column_blob(stmt, 0), sizeof(meta->appkey));
+    str2hex(meta->appkey, sqlite3_column_text(stmt, 0), sizeof(meta->appkey));
 }
 
 

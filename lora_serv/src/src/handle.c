@@ -186,8 +186,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 	LoRaMacHeader_t macHdr; /*the MAC header*/
 	/* json args for parsing data to json string*/
 
-    char json_data[512];
-    struct msg_down* msg_to_gw;
+    char json_string[512];
 
 	/*typical fields for confirmed/unconfirmed message*/
 	LoRaMacFrameCtrl_t fCtrl;
@@ -205,10 +204,10 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 	macHdr.Value = payload[0];
 	switch (macHdr.Bits.MType) {
 		case FRAME_TYPE_JOIN_REQ: {     /*join request message*/
-			revercpy(appeui, payload + 1, 8);
-			revercpy(deveui, payload + 9, 8);
-			i8_to_hexstr(appeui, meta->appeui_hex, 8);
-			i8_to_hexstr(deveui, meta->deveui_hex, 8);
+			memcpy(appeui, payload + 1, 8);
+			memcpy(deveui, payload + 9, 8);
+			i82hexstr(appeui, meta->appeui_hex, 8);
+			i82hexstr(deveui, meta->deveui_hex, 8);
 			meta->devnonce |= (uint16_t)payload[17];
 			meta->devnonce |= ((uint16_t)payload[18])<<8;
 			mic |= (uint32_t)payload[19];
@@ -226,9 +225,15 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			} 
 
                         /* select appkey from apps where appeui = ? */
-			db_lookup_appkey(cntx.lookupappkey, meta->appeui_hex); 
+			db_lookup_appkey(cntx.lookupappkey, meta); 
+
+                        char appkey_hex[33];
+
+                        i82hexstr(meta->appkey, appkey_hex, 16);
 
 			LoRaMacJoinComputeMic(payload, 23 - 4, meta->appkey, &cal_mic);
+
+                        MSG("INFO: appkey={%s}, mic=%u, cal_mic=%u\n", appkey_hex, mic, cal_mic);
 			/*if mic is wrong,the join request will be ignored*/
 			if (mic != cal_mic) {
 				MSG("WARNING: [up] join request payload mic is wrong, just ignore it\n");
@@ -242,13 +247,14 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
                 db_update_devinfo(cntx.updatedevinfo, meta);
 
-				serialize_msg_to_gw(frame_payload, 17, meta->gweui_hex, json_data, meta->tmst, JOIN_ACCEPT_DELAY); 
-				msg_to_gw->gwaddr = malloc(strlen(meta->gwaddr) + 1);
-				msg_to_gw->json_string = malloc(strlen(json_data) + 1);
-				strcpy(msg_to_gw->gwaddr, meta->gwaddr);
-				strcpy(msg_to_gw->json_string, json_data);
-                result->msgsize = sizeof(msg_to_gw);
-                result->msg = msg_to_gw;
+                                MSG("~INFO~ framepayload: %s\n", frame_payload);
+
+				serialize_msg_to_gw(frame_payload, 17, meta->gweui_hex, json_string, meta->tmst, JOIN_ACCEPT_DELAY); 
+                                result->msg_down = malloc(sizeof(struct msg_down));
+                                result->msg_down->gwaddr = malloc(strlen(meta->gwaddr) + 1);
+                                result->msg_down->json_string = malloc(strlen(json_string) + 1);
+				strcpy(result->msg_down->gwaddr, meta->gwaddr);
+				strcpy(result->msg_down->json_string, json_string);
 				result->to = APPLICATION_SERVER;
 			}
 			break;
@@ -273,7 +279,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			mic |= ((uint32_t)payload[size - 2])<<16;
 			mic |= ((uint32_t)payload[size - 1])<<24;
 
-			MSG("INFO: [up] Receive UP_DATA: devaddr=%lu\n", meta->devaddr);
+			MSG("INFO: [up] Receive UP_DATA: devaddr=%u\n", meta->devaddr);
 
                         /* select deveui from devs where devaddr = ? */
 
@@ -381,14 +387,14 @@ void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json
 			strcpy(dr, "SF7BW125");
 		}
 	}
-	MSG("%s %.4f\n", dr, rx2_freq);
+	MSG("INFO: JOIN_ACCEPT(%s %.4f)\n", dr, rx2_freq);
 	clock_gettime(CLOCK_REALTIME, &time);
 	root_val_x = json_value_init_object();
 	root_obj_x = json_value_get_object(root_val_x);
 	if (delay == NO_DELAY) {
 		json_object_dotset_boolean(root_obj_x, "txpk.imme", true);
 	} else {
-		json_object_dotset_number(root_obj_x, "txpk.tmst", tmst+delay);
+		json_object_dotset_number(root_obj_x, "txpk.tmst", tmst + delay);
 	}
 	json_object_dotset_number(root_obj_x, "txpk.freq", rx2_freq);
 	json_object_dotset_number(root_obj_x, "txpk.rfch", 0);
@@ -475,6 +481,7 @@ void assign_msg_down(void* data, const void* msg) {
 	struct msg_down* msg_x = (struct msg_down*)msg;
 	data_x->gwaddr = msg_x->gwaddr;
 	data_x->json_string = msg_x->json_string;
+        MSG("~ASSIGN~ %s\n", data_x->json_string);
 }
 
 void copy_msg_down(void* data, const void* msg) {
@@ -482,24 +489,47 @@ void copy_msg_down(void* data, const void* msg) {
 	struct msg_down* msg_x = (struct msg_down*)msg;
 	strcpy(data_x->json_string, msg_x->json_string);
 	strcpy(data_x->gwaddr, msg_x->gwaddr);
+        MSG("~COPY~ %s\n", data_x->json_string);
 }
 
 void destroy_msg_down(void* msg) {
 	struct msg_down* message = (struct msg_down*)msg;
 	free(message->json_string);
 	free(message->gwaddr);
+	free(message);
+        MSG("~Destroy~\n");
 }
 
 
-void i8_to_hexstr(uint8_t* uint, char* str, int size) {
+void i82hexstr(uint8_t* uint, char* str, int size) {
 	/*in case that the str has a value,strcat() seems not safe*/
 	memset(str, 0, size * 2 + 1);
 	char tempstr[3];
 	int i;
 	for (i = 0; i < size; i++) {
-		snprintf(tempstr, sizeof(tempstr), "%02x", uint[i]);
+		snprintf(tempstr, sizeof(tempstr), "%02X", uint[i]);
 		strcat(str, tempstr);
 	}
+}
+
+void str2hex(uint8_t* dest, char* src, int len) {
+        int i;
+        char ch1;
+        char ch2;
+        uint8_t ui1;
+        uint8_t ui2;
+
+        for(i = 0; i < len; i++) {
+                ch1 = src[i*2];
+                ch2 = src[i*2 + 1];
+                ui1 = toupper(ch1) - 0x30;
+                if (ui1 > 9)
+                        ui1 -= 7;
+                ui2 = toupper(ch2) - 0x30;
+                if (ui2 > 9)
+                        ui2 -= 7;
+                dest[i] = ui1*16 + ui2;
+        }
 }
 
 /* -------------------------------------------------------------*/
@@ -668,5 +698,6 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {
 	*sockfd = sock;
 	freeaddrinfo(results);
 }
+
 
 

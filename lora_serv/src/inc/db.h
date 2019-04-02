@@ -25,12 +25,13 @@
 CREATE TABLE IF NOT EXISTS `devs` (\
   `deveui` TEXT PRIMARY KEY DEFAULT NULL,\
   `appeui` TEXT DEFAULT 0,\
-  `appskey` BLOB DEFAULT NULL,\
-  `nwkskey` BLOB DEFAULT NULL,\
-  `devaddr` BLOB DEFAULT NULL,\
+  `appskey` TEXT DEFAULT NULL,\
+  `nwkskey` TEXT DEFAULT NULL,\
+  `devaddr` INTEGER DEFAULT NULL,\
   `fcntdown` INTEGER DEFAULT 0,\
   `fcntup` INTEGER DEFAULT 0,\
-  `devnonce` BLOB DEFAULT 0\
+  `lasttmst` INTEGER NOT NULL DEFAULT 0,\
+  `devnonce` INTEGER DEFAULT 0\
 );"
 
 #define CREATEGWS "\
@@ -60,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `gws` (\
 CREATE TABLE IF NOT EXISTS `apps` (\
         `appeui` TEXT PRIMARY KEY NOT NULL,\
         `description` TEXT,\
-        `appkey` BLOB NOT NULL\
+        `appkey` TEXT NOT NULL\
 );"
 
 #define CREATEUPMSG "\
@@ -68,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `upmsg` (\
   `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
   `recvtime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\
   `tmst` INTEGER NOT NULL DEFAULT 0,\
-  `datarate` integer DEFAULT 5,\
+  `datarate` INTEGER DEFAULT 5,\
   `freq` REAL DEFAULT NULL,\
   `rssi` REAL DEFAULT NULL,\
   `snr` REAL DEFAULT NULL,\
@@ -92,14 +93,14 @@ CREATE TABLE IF NOT EXISTS `gwprofile` (\
   `rx1delay` INTEGER NOT NULL DEFAULT 1,\
   `rx1droffset` INTEGER NOT NULL DEFAULT 0,\
   `rx2datarate` INTEGER NOT NULL DEFAULT 5,\
-  `rx2freq` REAL NOT NULL DEFAULT 868.925,\
+  `rx2freq` REAL NOT NULL DEFAULT 869.525,\
   `maxeirp` integer NOT NULL DEFAULT 1,\
   `maxdutycycle` REAL NOT NULL DEFAULT 1,\
   `rfregion` TEXT NOT NULL DEFAULT 'EU868',\
   `32bitfcnt` INTEGER NOT NULL DEFAULT 0\
 );"
 
-#define INSERTGWS "INSERT OR IGNORE INTO gws (gweui) VALUES ('a840411a92d44150')"
+#define INSERTGWS "INSERT OR IGNORE INTO gws (gweui) VALUES ('A840411B7C5C4150')"
 #define INSERTAPPS "INSERT OR IGNORE INTO apps (appeui, appkey) VALUES ('000C29FFFF189889', '3FF71C74EE5C4F18DFF3705455910AF6')"
 #define INSERTDEVS "INSERT OR IGNORE INTO devs (deveui, appeui) VALUES ('1234590834221467', '000C29FFFF189889')"
 #define INSERTGWPROFILE "INSERT OR IGNORE INTO gwprofile (id) VALUES (1)"
@@ -129,9 +130,9 @@ bool db_judge_joinrepeat(sqlite3_stmt* stmt, void* data);
 bool db_lookup_appkey(sqlite3_stmt* stmt, void* data);
 bool db_update_devinfo(sqlite3_stmt* stmt, void* data);
 bool db_judge_devaddr(sqlite3_stmt* stmt, void* data);
-bool db_judge_msgrepeat(sqlite3_stmt* stmt, void* data);
+bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, int tmst);
 bool db_lookup_nwkskey(sqlite3_stmt* stmt, void* data);
 bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2freq);
-bool db_insert_upmsg(sqlite3_stmt* stmt, void* data, int fcntup, void *payload, int psize); 
+bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* payload); 
 
 #endif   /* end defined DB_SQLITE3_H_ */

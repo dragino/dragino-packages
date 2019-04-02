@@ -73,6 +73,12 @@ Maintainer: skerlan
 #define STRINGIFY(x)	#x
 #define STR(x)		STRINGIFY(x)
 #define MSG(args...)    printf(args)
+#define MSG_DEBUG(FLAG, fmt, ...)                                                               \
+         do {                                                                                       \
+                if (FLAG)                                                                                 \
+                      fprintf(stdout, fmt, ##__VA_ARGS__); \
+         } while (0)
+
 #define NB_PKT_MAX      8 /*the max size of the "rxpk" array*/
 #define BUFF_SIZE ((540 * NB_PKT_MAX) + 30)
 
@@ -95,6 +101,15 @@ Maintainer: skerlan
 #define CLASS_B                1
 #define CLASS_C                2
 
+/* log level */
+extern int DEBUG_INFO;
+extern int DEBUG_DEBUG;
+extern int DEBUG_WARNING;
+extern int DEBUG_ERROR;
+extern int DEBUG_JOIN;
+extern int DEBUG_UPDW;
+extern int DEBUG_SQL;
+
 /* structure used for sending and receiving data */
 struct pkt {
 	char json_content[JSON_MAX];
@@ -110,7 +125,8 @@ struct pkt_info {
 
 /*meta data of the packet */
 struct metadata {
-	char     gwaddr[16];
+	char    gwaddr[16];
+    char    gweui_hex[17];
 	uint32_t tmst;     /*raw time stamp*/
 	char     time[28];
 	uint8_t  chan;     /* IF channel*/
@@ -124,20 +140,28 @@ struct metadata {
 	float    lsnr;     /*SNR in dB*/
 	float    rssi;	   /*rssi in dB*/
 	uint16_t size;     /*payload size in bytes*/
+	uint16_t fcntup;     
+	uint8_t fport;     
+};
 
-    char    appeui_hex[17];
-    char    gweui_hex[17];
-    char    deveui_hex[17];
-
+/* device info for session */
+struct devinfo {
+	uint32_t devaddr;     
     uint16_t devnonce;
+
+    char    deveui_hex[17];
+    char    appeui_hex[17];
 
     uint8_t appkey[16];
     uint8_t appskey[16];
     uint8_t nwkskey[16];
 
-	uint32_t devaddr;     
+    uint8_t appkey_hex[33];
+    uint8_t appskey_hex[33];
+    uint8_t nwkskey_hex[33];
 };
 
+/* message for download PULL_RES or JOIN_ACCEPT */
 struct msg_down {
 	char*  json_string;
 	char*  gwaddr;
@@ -148,7 +172,7 @@ struct jsondata {
 	int to; /* which server to send to 1.app 2.nc 3.both 4.err 5.ignore */
 	uint32_t devaddr;  /* gateway address for as downlink */
 	char deveui_hex[17];
-        struct msg_down* msg_down;
+    struct msg_down* msg_down;
 };
 
 /*reverse memory copy*/

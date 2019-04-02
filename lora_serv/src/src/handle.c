@@ -18,10 +18,6 @@ Maintainer: skerlan
 #include "handle.h"
 #include "db.h"
 
-/*keys just for testing*/
-#define DEFAULT_appeui  { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
-#define DEFALUT_deveui	{ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
-
 /*stream direction*/
 #define UP                                     0
 #define DOWN                                   1
@@ -58,7 +54,7 @@ typedef union uLoRaMacHeader {
         /*!
          * Major version
          */
-        uint8_t Major           : 2;
+        uint8_t MType           : 3;
         /*!
          * RFU
          */
@@ -66,7 +62,7 @@ typedef union uLoRaMacHeader {
         /*!
          * Message type
          */
-        uint8_t MType           : 3;
+        uint8_t Major           : 2;
     }Bits;
 }LoRaMacHeader_t;
 
@@ -83,25 +79,25 @@ typedef union uLoRaMacFrameCtrl {
     struct sCtrlBits
     {
         /*!
-         * Frame options length
+         * ADR control in frame header
          */
-        uint8_t FOptsLen        : 4;
-        /*!
-         * Frame pending bit
-         */
-        uint8_t FPending        : 1;
-        /*!
-         * Message acknowledge bit
-         */
-        uint8_t Ack             : 1;
+        uint8_t Adr             : 1;
         /*!
          * ADR acknowledgment request bit
          */
         uint8_t AdrAckReq       : 1;
         /*!
-         * ADR control in frame header
+         * Message acknowledge bit
          */
-        uint8_t Adr             : 1;
+        uint8_t Ack             : 1;
+        /*!
+         * Frame pending bit
+         */
+        uint8_t FPending        : 1;
+        /*!
+         * Frame options length
+         */
+        uint8_t FOptsLen        : 4;
     }Bits;
 }LoRaMacFrameCtrl_t;
 
@@ -112,9 +108,9 @@ typedef union uLoRaMacFrameCtrl {
 typedef union uLoRaMacDLSettings{
 	uint8_t Value;
 	struct sDLSBits{
-		uint8_t RX2DataRate      : 4;
-		uint8_t RX1DRoffset      : 3;
 		uint8_t RFU              : 1;
+		uint8_t RX1DRoffset      : 3;
+		uint8_t RX2DataRate      : 4;
 	}Bits;
 }LoRaMacDLSettings_t;
 
@@ -125,8 +121,8 @@ typedef union uLoRaMacDLSettings{
 typedef union uLoRaMacRxDelay{
 	uint8_t Value;
 	struct sRxDBits{
-		uint8_t Del              : 4;
 		uint8_t RFU              : 4;
+		uint8_t Del              : 4;
 	}Bits;
 }LoRaMacRxDelay_t;
 
@@ -176,26 +172,30 @@ typedef enum eLoRaMacFrameType
 
 void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payload) {
 
-	/*typical fields for join request message*/
 	uint8_t appeui[8];
 	uint8_t deveui[8];
+
+    char tempstr[3] = {'\0'};
+
+    struct devinfo devinfo;
 
     int i, delay = 0;
 
 	int size = meta->size; 	/*the length of payload*/
 	LoRaMacHeader_t macHdr; /*the MAC header*/
-	/* json args for parsing data to json string*/
-
-    char json_string[512];
 
 	/*typical fields for confirmed/unconfirmed message*/
 	LoRaMacFrameCtrl_t fCtrl;
+
+	/* json args for parsing data to json string*/
+    char json_string[512];
+
 	uint32_t fopts_len;/*the size of foptions field*/
 	uint8_t adr;       /*indicate if ADR is permitted*/
-	uint16_t upCnt = 0;
-	uint8_t fport;
-    char frame_payload[FRAME_LEN];
-	uint8_t fpayload[LORAMAC_FRAME_MAXPAYLOAD];/*the frame payload*/
+
+    char frame_payload[FRAME_LEN];  /* prepare payload for join accept */
+	uint8_t fpayload[LORAMAC_FRAME_MAXPAYLOAD]; /*the frame payload of UP_DATE*/
+    uint8_t frame_payload_b64[MAX_NB_B64];
 
 	uint32_t mic = 0;
 	uint32_t cal_mic;/*the MIC value calculated by the payload*/
@@ -204,55 +204,71 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 	macHdr.Value = payload[0];
 	switch (macHdr.Bits.MType) {
 		case FRAME_TYPE_JOIN_REQ: {     /*join request message*/
-			memcpy(appeui, payload + 1, 8);
-			memcpy(deveui, payload + 9, 8);
-			i82hexstr(appeui, meta->appeui_hex, 8);
-			i82hexstr(deveui, meta->deveui_hex, 8);
-			meta->devnonce |= (uint16_t)payload[17];
-			meta->devnonce |= ((uint16_t)payload[18])<<8;
+			revercpy(appeui, payload + 1, 8);
+			revercpy(deveui, payload + 9, 8);
+			i82hexstr(appeui, devinfo.appeui_hex, 8);
+			i82hexstr(deveui, devinfo.deveui_hex, 8);
+			devinfo.devnonce |= (uint16_t)payload[17];
+			devinfo.devnonce |= ((uint16_t)payload[18])<<8;
 			mic |= (uint32_t)payload[19];
 			mic |= ((uint32_t)payload[20])<<8;
 			mic |= ((uint32_t)payload[21])<<16;
 			mic |= ((uint32_t)payload[22])<<24;
 
-			MSG("INFO: [up] Receive Join reques: appeui=%s, deveui=%s\n", meta->appeui_hex, meta->deveui_hex);
+			MSG_DEBUG(DEBUG_INFO, "\nINFO: [up] JOIN REQUE: appeui=%s, deveui=%s, devnonce=(%4X)\n", 
+                    devinfo.appeui_hex, devinfo.deveui_hex, devinfo.devnonce);
 			/*judge whether it is a repeated message*/
-                        /* select devnonce from devs where deveui = ? and devnonce = ?*/
-			if (db_judge_joinrepeat(cntx.judgejoinrepeat, meta)) {
-				MSG("WARNING: [up] have same devnonce, join request repeat.\n");
+            /* select devnonce from devs where deveui = ? and devnonce = ?*/
+            /*
+			if (db_judge_joinrepeat(cntx.judgejoinrepeat, &devinfo)) {
+				MSG("WARNING: [up] same devnonce as last.\n");
 				result->to = IGNORE;
 				break;
 			} 
+            */
 
-                        /* select appkey from apps where appeui = ? */
-			db_lookup_appkey(cntx.lookupappkey, meta); 
+            /* select appkey from apps where appeui = ? */
+			db_lookup_appkey(cntx.lookupappkey, &devinfo); 
 
-                        char appkey_hex[33];
+            i82hexstr(devinfo.appkey, devinfo.appkey_hex, 16);
 
-                        i82hexstr(meta->appkey, appkey_hex, 16);
+			LoRaMacJoinComputeMic(payload, 23 - 4, devinfo.appkey, &cal_mic);
 
-			LoRaMacJoinComputeMic(payload, 23 - 4, meta->appkey, &cal_mic);
+            MSG_DEBUG(DEBUG_INFO, "\nINFO~ appkey={%s}, mic=%u, cal_mic=%u\n", devinfo.appkey_hex, mic, cal_mic);
 
-                        MSG("INFO: appkey={%s}, mic=%u, cal_mic=%u\n", appkey_hex, mic, cal_mic);
 			/*if mic is wrong,the join request will be ignored*/
 			if (mic != cal_mic) {
-				MSG("WARNING: [up] join request payload mic is wrong, just ignore it\n");
+				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] join request payload mic is wrong!\n");
 				result->to = IGNORE;
 			} else {
 				srand(time(NULL));
-				meta->devaddr = rand();
-				as_prepare_frame(frame_payload, (uint16_t)meta->devnonce, meta->appkey, meta->devaddr, meta->nwkskey, meta->appskey);
+				devinfo.devaddr = (uint32_t)rand();
+				as_prepare_frame(frame_payload, devinfo.devnonce, devinfo.appkey, devinfo.devaddr, devinfo.nwkskey, devinfo.appskey);
+
+                bin_to_b64(frame_payload, JOIN_ACC_SIZE, frame_payload_b64, MAX_NB_B64);
+
+                memset(devinfo.appskey_hex, 0, sizeof(devinfo.appskey_hex));
+                memset(devinfo.nwkskey_hex, 0, sizeof(devinfo.nwkskey_hex));
+
+                for (i = 0; i < 16; i++) {
+                    memset(tempstr, 0, sizeof(tempstr));
+                    snprintf(tempstr, sizeof(tempstr), "%02X", devinfo.appskey[i]);
+                    strcat(devinfo.appskey_hex, tempstr);
+                    memset(tempstr, 0, sizeof(tempstr));
+                    snprintf(tempstr, sizeof(tempstr), "%02X", devinfo.nwkskey[i]);
+                    strcat(devinfo.nwkskey_hex, tempstr);
+                }
+
+                MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up]nwkskey=(%s), appskey=(%s), devaddr=(%08X)\n", 
+                        devinfo.nwkskey_hex, devinfo.appskey_hex, devinfo.devaddr);
 
                 /* update or IGNORE devs set devaddr = ?, appskey = ?, nwkskey = ?, devnonce = ? wheredeveui = ? */
+                db_update_devinfo(cntx.updatedevinfo, &devinfo);  /* update device info on database */
 
-                db_update_devinfo(cntx.updatedevinfo, meta);
-
-                                MSG("~INFO~ framepayload: %s\n", frame_payload);
-
-				serialize_msg_to_gw(frame_payload, 17, meta->gweui_hex, json_string, meta->tmst, JOIN_ACCEPT_DELAY); 
-                                result->msg_down = malloc(sizeof(struct msg_down));
-                                result->msg_down->gwaddr = malloc(strlen(meta->gwaddr) + 1);
-                                result->msg_down->json_string = malloc(strlen(json_string) + 1);
+				serialize_msg_to_gw(frame_payload_b64, 17, meta->gweui_hex, json_string, meta->tmst, JOIN_ACCEPT_DELAY); 
+                result->msg_down = malloc(sizeof(struct msg_down));
+                result->msg_down->gwaddr = malloc(strlen(meta->gwaddr) + 1);
+                result->msg_down->json_string = malloc(strlen(json_string) + 1);
 				strcpy(result->msg_down->gwaddr, meta->gwaddr);
 				strcpy(result->msg_down->json_string, json_string);
 				result->to = APPLICATION_SERVER;
@@ -263,63 +279,62 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 		case FRAME_TYPE_DATA_UNCONFIRMED_UP:/*fall through,just handle like confirmed message*/
 		/*confirmed message*/
 		case FRAME_TYPE_DATA_CONFIRMED_UP: {
-			meta->devaddr |= (uint32_t)payload[1];
-			meta->devaddr |= ((uint32_t)payload[2])<<8;
-			meta->devaddr |= ((uint32_t)payload[3])<<16;
-			meta->devaddr |= ((uint32_t)payload[4])<<24;
+			devinfo.devaddr |= (uint32_t)payload[1];
+			devinfo.devaddr |= ((uint32_t)payload[2])<<8;
+			devinfo.devaddr |= ((uint32_t)payload[3])<<16;
+			devinfo.devaddr |= ((uint32_t)payload[4])<<24;
 			fCtrl.Value = payload[5];
 			fopts_len = fCtrl.Bits.FOptsLen;
 			adr = fCtrl.Bits.Adr;
-			upCnt |= (uint16_t)payload[6];
-			upCnt |= ((uint16_t)payload[7])<<8;
-			fport = payload[8 + fopts_len];
+			meta->fcntup |= (uint16_t)payload[6];
+			meta->fcntup |= ((uint16_t)payload[7])<<8;
+			meta->fport = payload[8 + fopts_len];
 			memcpy(fpayload, payload + 9 + fopts_len, size - 13 - fopts_len);
 			mic |= (uint32_t)payload[size - 4];
 			mic |= ((uint32_t)payload[size - 3])<<8;
 			mic |= ((uint32_t)payload[size - 2])<<16;
 			mic |= ((uint32_t)payload[size - 1])<<24;
 
-			MSG("INFO: [up] Receive UP_DATA: devaddr=%u\n", meta->devaddr);
+			MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up] DATA Receive devaddr=(%08X)\n", devinfo.devaddr);
 
-                        /* select deveui from devs where devaddr = ? */
+            /* select deveui from devs where devaddr = ? */
+            memset(devinfo.deveui_hex, 0, sizeof(devinfo.deveui_hex));
 
-			db_judge_devaddr(cntx.judgedevaddr, meta);
+			db_judge_devaddr(cntx.judgedevaddr, &devinfo);
 
-			if (NULL == meta->deveui_hex) {
-				MSG("WARNING: [up] query the database failed\n");
+			if (strlen(devinfo.deveui_hex) < 8) {
+				MSG_DEBUG(DEBUG_WARNING, "WARNING~ [up] The device not register!\n");
 				/*The device has not joined in the LoRaWAN */
 				result->to = IGNORE;
 				break;
 			}
 
 			/*judge whether it is a repeated message*/
-                        /* select id from upmsg where deveui = ? and tmst = ? */
-			if (db_judge_msgrepeat(cntx.judgemsgrepeat, meta)) {
-				MSG("WARNING: [up] repeated push_data\n");
+            /* select id from upmsg where deveui = ? and tmst = ? */
+			if (db_judge_msgrepeat(cntx.judgemsgrepeat, devinfo.deveui_hex, meta->tmst)) {
+				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] repeated push_data!\n");
 				result->to = IGNORE;
 				break;
 			} 
 
-                        /* select nwkskey from devs where deveui = ? */
+            /* select nwkskey from devs where deveui = ? */
+			db_lookup_nwkskey(cntx.lookupnwkskey, &devinfo); 
 
-			db_lookup_nwkskey(cntx.lookupnwkskey, meta); 
-
-			LoRaMacComputeMic(payload, meta->size - 4, meta->nwkskey, meta->devaddr, UP, (uint32_t)upCnt, &cal_mic);
+			LoRaMacComputeMic(payload, meta->size - 4, devinfo.nwkskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, &cal_mic);
 			if(cal_mic != mic){
-				MSG("WARNING: [up] push data payload mic is wrong,just ignore it\n");
+				MSG("WARNING: [up] push data payload mic is wrong!\n");
 				result->to = IGNORE;
 				break;
-                        }
+            }
 
-                        /* udpate tables insert upmsg */
-                        /* insert into upmsg (tmst, datarate, freq, rssi, snr, fcntup, gweui, appeui, deveui, frmpayload) values */
+            /* udpate tables insert upmsg */
+            /* insert into upmsg (tmst, datarate, freq, rssi, snr, fcntup, gweui, appeui, deveui, frmpayload) values */
                                 
-            db_insert_upmsg(cntx.insertupmsg, meta, upCnt, payload, meta->size);
+            db_insert_upmsg(cntx.insertupmsg, &devinfo, meta, payload);
 
-			
-			LoRaMacPayloadDecrypt(payload, meta->size, meta->appskey, meta->devaddr, UP, (uint32_t)upCnt, fpayload);
+			LoRaMacPayloadDecrypt(payload, meta->size, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, fpayload);
 
-            printf("Decrypted: %s\n", fpayload);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [up]Decrypted: %s\n", fpayload);
 
 			/*when the message contains both MAC command and userdata*/
                         /* do nothing */
@@ -384,10 +399,10 @@ void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json
 			break;
 		}
 		default:{
-			strcpy(dr, "SF7BW125");
+			strcpy(dr, "SF12BW125");
 		}
 	}
-	MSG("INFO: JOIN_ACCEPT(%s %.4f)\n", dr, rx2_freq);
+	MSG_DEBUG(DEBUG_INFO, "INFO~ JOIN_ACCEPT(%s %.6f)\n", dr, rx2_freq);
 	clock_gettime(CLOCK_REALTIME, &time);
 	root_val_x = json_value_init_object();
 	root_obj_x = json_value_get_object(root_val_x);
@@ -405,14 +420,15 @@ void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json
 	json_object_dotset_boolean(root_obj_x, "txpk.ipol", 1);
 	json_object_dotset_number(root_obj_x, "txpk.size", size);
 	json_object_dotset_string(root_obj_x, "txpk.data", data);
-	json_str = json_serialize_to_string_pretty(root_val_x);
-	strncpy(json_data, json_str, strlen(json_str) + 1);
+	json_str = json_serialize_to_string(root_val_x);
+    strncpy(json_data, json_str, strlen(json_str) + 1);
+    MSG_DEBUG(DEBUG_INFO, "INFO~ [donw] TXPK:(%s)\n", json_str);
 	json_free_serialized_string(json_str);
 	json_value_free(root_val_x);
 }
 
 
-void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t* appkey, uint32_t devaddr, uint8_t *nwkskey, uint8_t *appskey) {
+static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t* appkey, uint32_t devaddr, uint8_t *nwkskey, uint8_t *appskey) {
 	uint8_t  payload[JOIN_ACC_SIZE];
 	uint8_t index = 0;
 	LoRaMacHeader_t hdr;
@@ -458,16 +474,31 @@ void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t* appkey
 	payload[++index] = (mic>>8) & 0xFF;
 	payload[++index] = (mic>>16) & 0xFF;
 	payload[++index] = (mic>>24) & 0xFF;
+
 	/*compute the two session key
 	 *the second argument is corresponding to the LoRaMac.c(v4.0.0)
 	 *it seems that it makes a mistake,because the byte-order is adverse
 	*/
 	LoRaMacJoinComputeSKeys(appkey, payload + 1, devnonce, nwkskey, appskey);
+
+    int i;
+    MSG("\n=================================================================\n");
+    MSG("PAYLOAD:");
+    for (i = 0; i <= index; i++) {
+        printf("%02X", payload[i]);
+    }
+
+    MSG("\nappnonce:%02X, devaddr:%08X, mic:%08X\n", appNonce[0], devaddr, mic);
+
 	/*encrypt join accept message*/
 	LoRaMacJoinEncrypt(payload + 1, (uint16_t)JOIN_ACC_SIZE - 1, appkey, frame_payload + 1);
 	frame_payload[0] = payload[0];
+    MSG("\nENPAYLOAD:");
+    for (i = 0; i < JOIN_ACC_SIZE; i++) {
+        printf("%02X", frame_payload[i]);
+    }
+    MSG("\n===============================================================\n");
 }
-
 
 /* ---------------------------------------------------------------------------- */
 /* ---------- process string message ------------------------------------------ */
@@ -481,7 +512,6 @@ void assign_msg_down(void* data, const void* msg) {
 	struct msg_down* msg_x = (struct msg_down*)msg;
 	data_x->gwaddr = msg_x->gwaddr;
 	data_x->json_string = msg_x->json_string;
-        MSG("~ASSIGN~ %s\n", data_x->json_string);
 }
 
 void copy_msg_down(void* data, const void* msg) {
@@ -489,15 +519,12 @@ void copy_msg_down(void* data, const void* msg) {
 	struct msg_down* msg_x = (struct msg_down*)msg;
 	strcpy(data_x->json_string, msg_x->json_string);
 	strcpy(data_x->gwaddr, msg_x->gwaddr);
-        MSG("~COPY~ %s\n", data_x->json_string);
 }
 
 void destroy_msg_down(void* msg) {
 	struct msg_down* message = (struct msg_down*)msg;
 	free(message->json_string);
 	free(message->gwaddr);
-	free(message);
-        MSG("~Destroy~\n");
 }
 
 
@@ -658,8 +685,7 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_addr = NULL;
-	if (getaddrinfo(NULL, port, &hints, &results) != 0) {
+	if (getaddrinfo(servaddr, port, &hints, &results) != 0) {
 		MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, port, gai_strerror(i));
 		exit(EXIT_FAILURE);
 	}
@@ -672,7 +698,7 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {
 		close(sock);/*bind error,close and try again*/
 	}
 
-	if (r== NULL) {
+	if (r == NULL) {
 		MSG("ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", servaddr, port);
 		i = 1;
 		for (r = results; r != NULL; r = r->ai_next) {

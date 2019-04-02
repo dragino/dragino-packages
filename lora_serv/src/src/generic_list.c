@@ -66,7 +66,6 @@ void list_delete_at_head(plist list, void(*destroy)(void*)) {
 	} else {
 		list->head = node;
 	}
-        printf("delete at head\n");
 	list->length--;
 }
 
@@ -93,7 +92,6 @@ bool list_search_and_delete(plist list, void* key, void* data, int(*compare)(con
 	if (compare(node->data, key) == 0) {
 		deep_copy(data, node->data);
 		list_delete_at_head(list, destroy);
-                printf("List_delete\n");
 		list->length--;
 		return true;
 	}

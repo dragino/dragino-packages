@@ -204,8 +204,13 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 	macHdr.Value = payload[0];
 	switch (macHdr.Bits.MType) {
 		case FRAME_TYPE_JOIN_REQ: {     /*join request message*/
+<<<<<<< HEAD
 			revercpy(appeui, payload + 1, 8);
 			revercpy(deveui, payload + 9, 8);
+=======
+			memcpy(appeui, payload + 1, 8);
+			memcpy(deveui, payload + 9, 8);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 			i82hexstr(appeui, devinfo.appeui_hex, 8);
 			i82hexstr(deveui, devinfo.deveui_hex, 8);
 			devinfo.devnonce |= (uint16_t)payload[17];
@@ -215,8 +220,12 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			mic |= ((uint32_t)payload[21])<<16;
 			mic |= ((uint32_t)payload[22])<<24;
 
+<<<<<<< HEAD
 			MSG_DEBUG(DEBUG_INFO, "\nINFO: [up] JOIN REQUE: appeui=%s, deveui=%s, devnonce=(%4X)\n", 
                     devinfo.appeui_hex, devinfo.deveui_hex, devinfo.devnonce);
+=======
+			MSG_DEBUG(DEBUG_INFO, "INFO: [up] Join REQUE: appeui=%s, deveui=%s\n", devinfo.appeui_hex, devinfo.deveui_hex);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 			/*judge whether it is a repeated message*/
             /* select devnonce from devs where deveui = ? and devnonce = ?*/
             /*
@@ -234,7 +243,11 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
 			LoRaMacJoinComputeMic(payload, 23 - 4, devinfo.appkey, &cal_mic);
 
+<<<<<<< HEAD
             MSG_DEBUG(DEBUG_INFO, "\nINFO~ appkey={%s}, mic=%u, cal_mic=%u\n", devinfo.appkey_hex, mic, cal_mic);
+=======
+            //MSG_DEBUG(DEBUG_INFO, "INFO~ appkey={%s}, mic=%u, cal_mic=%u\n", appkey_hex, mic, cal_mic);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 
 			/*if mic is wrong,the join request will be ignored*/
 			if (mic != cal_mic) {
@@ -242,6 +255,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 				result->to = IGNORE;
 			} else {
 				srand(time(NULL));
+<<<<<<< HEAD
 				devinfo.devaddr = (uint32_t)rand();
 				as_prepare_frame(frame_payload, devinfo.devnonce, devinfo.appkey, devinfo.devaddr, devinfo.nwkskey, devinfo.appskey);
 
@@ -261,6 +275,29 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
                 MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up]nwkskey=(%s), appskey=(%s), devaddr=(%08X)\n", 
                         devinfo.nwkskey_hex, devinfo.appskey_hex, devinfo.devaddr);
+=======
+				devinfo.devaddr = rand();
+				as_prepare_frame(frame_payload, devinfo.devnonce, devinfo.appkey, devinfo.devaddr, devinfo.nwkskey, devinfo.appskey);
+                bin_to_b64(frame_payload, JOIN_ACC_SIZE, frame_payload_b64, MAX_NB_B64);
+
+                for (i = 0; i < 16; i++) {
+                    memset(tempstr, 0, sizeof(tempstr));
+                    snprintf(tempstr, sizeof(tempstr), "%02x", devinfo.nwkskey[i]);
+                    MSG("nwkskey(%s)", tempstr);
+                    strcat(devinfo.nwkskey_hex, tempstr);
+                }
+
+                MSG("\n\n");
+
+                for (i = 0; i < 16; i++) {
+                    memset(tempstr, 0, sizeof(tempstr));
+                    snprintf(tempstr, sizeof(tempstr), "%02x", devinfo.appskey[i]);
+                    strcat(devinfo.appskey_hex, tempstr);
+                }
+
+                MSG_DEBUG(DEBUG_INFO, "INFO~ frame=(%s), nwkskey=(%s), appskey=(%s)\n", 
+                        frame_payload_b64, devinfo.nwkskey_hex, devinfo.appskey_hex);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 
                 /* update or IGNORE devs set devaddr = ?, appskey = ?, nwkskey = ?, devnonce = ? wheredeveui = ? */
                 db_update_devinfo(cntx.updatedevinfo, &devinfo);  /* update device info on database */
@@ -295,6 +332,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			mic |= ((uint32_t)payload[size - 2])<<16;
 			mic |= ((uint32_t)payload[size - 1])<<24;
 
+<<<<<<< HEAD
 			MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up] DATA Receive devaddr=(%08X)\n", devinfo.devaddr);
 
             /* select deveui from devs where devaddr = ? */
@@ -303,6 +341,15 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			db_judge_devaddr(cntx.judgedevaddr, &devinfo);
 
 			if (strlen(devinfo.deveui_hex) < 8) {
+=======
+			MSG_DEBUG(DEBUG_INFO, "INFO~ [up] Receive devaddr=(%u)\n", devinfo.devaddr);
+
+            /* select deveui from devs where devaddr = ? */
+
+			db_judge_devaddr(cntx.judgedevaddr, &devinfo);
+
+			if (NULL == devinfo.deveui_hex) {
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 				MSG_DEBUG(DEBUG_WARNING, "WARNING~ [up] The device not register!\n");
 				/*The device has not joined in the LoRaWAN */
 				result->to = IGNORE;
@@ -402,7 +449,11 @@ void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json
 			strcpy(dr, "SF12BW125");
 		}
 	}
+<<<<<<< HEAD
 	MSG_DEBUG(DEBUG_INFO, "INFO~ JOIN_ACCEPT(%s %.6f)\n", dr, rx2_freq);
+=======
+	MSG_DEBUG(DEBUG_WARNING, "INFO: JOIN_ACCEPT(%s %.4f)\n", dr, rx2_freq);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 	clock_gettime(CLOCK_REALTIME, &time);
 	root_val_x = json_value_init_object();
 	root_obj_x = json_value_get_object(root_val_x);
@@ -422,7 +473,10 @@ void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json
 	json_object_dotset_string(root_obj_x, "txpk.data", data);
 	json_str = json_serialize_to_string(root_val_x);
     strncpy(json_data, json_str, strlen(json_str) + 1);
+<<<<<<< HEAD
     MSG_DEBUG(DEBUG_INFO, "INFO~ [donw] TXPK:(%s)\n", json_str);
+=======
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 	json_free_serialized_string(json_str);
 	json_value_free(root_val_x);
 }

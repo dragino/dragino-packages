@@ -50,7 +50,7 @@ Maintainer: skerlan
 
 #define DBPATH "/tmp/loraserv"
 
-#define GW_SERV_ADDR       localhost
+#define GW_SERV_ADDR       192.168.31.254
 #define GW_PORT_PUSH       1700
 #define GW_PORT_PULL       1701
 
@@ -141,7 +141,11 @@ struct metadata {
 	float    rssi;	   /*rssi in dB*/
 	uint16_t size;     /*payload size in bytes*/
 	uint16_t fcntup;     
+<<<<<<< HEAD
 	uint8_t fport;     
+=======
+	uint8_t fport;
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 };
 
 /* device info for session */

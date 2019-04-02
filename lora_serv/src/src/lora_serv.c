@@ -149,7 +149,11 @@ int main(int argc, char** argv) {
 		/* if the datagram does not respect the format of PUSH DATA, just ignore it */
 		if (msg_len < 12 || buff_push[0] != VERSION || buff_push[3] != PKT_PUSH_DATA){
             /* too short for GW <-> MAC protocol */
+<<<<<<< HEAD
 			MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] push data invalid, ignore!\n");
+=======
+			MSG("WARNING: [up] push data invalid, ignore!\n");
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 			continue;
 		}
 
@@ -161,7 +165,11 @@ int main(int argc, char** argv) {
 
         /* lookupgweui: select gweui from gws where gweui = ? */
         if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
+<<<<<<< HEAD
 	        MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] GWEUI(%s) NOT REGISTER !\n", gweui_hex);
+=======
+	        MSG_DEBUG(DEBUG_INFO, "WARNING: [up] GWEUI(%s) NOT REGISTER !\n", gweui_hex);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
             continue;
         }
 
@@ -238,21 +246,39 @@ void thread_up_handle(void* pkt_info) {
 	struct metadata meta_data;
 	struct jsondata json_result;/*keep the result of analyzing message from gateway*/
 
+<<<<<<< HEAD
     MSG_DEBUG(DEBUG_INFO, "INFO~ [handle-up] Handle(%d): %s\n", pkt.pkt_no, pkt.pkt_payload);
+=======
+    MSG_DEBUG(DEBUG_INFO, "~INFO~ Handle(%d): %s\n", pkt.pkt_no, pkt.pkt_payload);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 
 	/*parse JSON*/
 
 	root_val = json_parse_string_with_comments((const char*)(pkt.pkt_payload));
 	if (root_val == NULL) {
+<<<<<<< HEAD
 		MSG("WARNING: [handel-up] packet_%d push_data contains invalid JSON\n", pkt.pkt_no);
+=======
+		MSG("WARNING: [up] packet_%d push_data contains invalid JSON\n", pkt.pkt_no);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
         goto thread_out;
 	}
 
 	rxpk_arr = json_object_get_array(json_value_get_object(root_val), "rxpk");
 	if (rxpk_arr == NULL) {
+<<<<<<< HEAD
 	    //rxpk_arr = json_object_get_array(json_value_get_object(root_val), "stat");
         //if (rxpk_arr != NULL) 
          //   MSG_DEBUG(DEBUG_INFO, "INFO~ [handel-up] Receive a packet_%d for gw status\n", pkt.pkt_no);
+=======
+	    json_value_free(root_val);
+	    root_val = json_parse_string_with_comments((const char*)(pkt.pkt_payload));
+	    if (root_val == NULL)
+            goto thread_out;
+	    rxpk_arr = json_object_get_array(json_value_get_object(root_val), "stat");
+        if (rxpk_arr != NULL) 
+            MSG_DEBUG(DEBUG_INFO, "Receive a packet_%d push_data of gw status\n", pkt.pkt_no);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
         goto thread_out;
 	}
 
@@ -269,7 +295,11 @@ void thread_up_handle(void* pkt_info) {
 
 		val = json_object_get_value(rxpk_obj, "tmst");
 		if (val != NULL) {
+<<<<<<< HEAD
 			meta_data.tmst = (uint32_t)json_value_get_number(val);
+=======
+			meta_data.tmst = (uint8_t)json_value_get_number(val);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 		}
 
 		val = json_object_get_value(rxpk_obj, "chan");
@@ -331,10 +361,17 @@ void thread_up_handle(void* pkt_info) {
 		if (val != NULL) {
 			str = json_value_get_string(val);
 			if (b64_to_bin(str, strlen(str), payload, sizeof(payload)) != size){
+<<<<<<< HEAD
 				MSG_DEBUG(DEBUG_WARNING, "WARNING: [handel-up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n", pkt.pkt_no, i);
 			}
 		} else {
 			MSG_DEBUG(DEBUG_WARNING, "WARNING: [handel-up] in packet_%d rxpk_%d contains no data\n", pkt.pkt_no, i);
+=======
+				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n", pkt.pkt_no, i);
+			}
+		} else {
+			MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] in packet_%d rxpk_%d contains no data\n", pkt.pkt_no, i);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 		}
 
 		/*analysis the MAC payload content*/
@@ -357,7 +394,11 @@ void thread_up_handle(void* pkt_info) {
 
 thread_out:
     //sprintf(tempstr, "EXIT HANDLE PKT%d", pkt.pkt_no);
+<<<<<<< HEAD
     MSG_DEBUG(DEBUG_INFO, "INFO~ [handel-up] EXIT HANDLE PKT%d\n", pkt.pkt_no);
+=======
+    MSG_DEBUG(DEBUG_INFO, "INFO~ EXIT HANDLE PKT%d\n", pkt.pkt_no);
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 	json_value_free(root_val);
 	pthread_exit(NULL);
 }
@@ -397,7 +438,11 @@ void thread_down(void) {
 		}
 		/* if the datagram does not respect the format of PULL DATA, just ignore it */
 		if (msg_len < 4 || buff_pull[0] != VERSION || buff_pull[3] != PKT_PULL_DATA){
+<<<<<<< HEAD
 			MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] pull data invalid,just ignore\n");
+=======
+			MSG("WARNING: [down] pull data invalid,just ignore\n");
+>>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 			continue;
 		}
 

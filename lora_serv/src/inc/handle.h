@@ -50,10 +50,6 @@ Maintainer: skerlan
 
 #define DBPATH "/tmp/loraserv"
 
-#define GW_SERV_ADDR       192.168.31.254
-#define GW_PORT_PUSH       1700
-#define GW_PORT_PULL       1701
-
 #define PKT_PUSH_DATA	0
 #define PKT_PUSH_ACK	1
 #define PKT_PULL_DATA	2
@@ -141,11 +137,7 @@ struct metadata {
 	float    rssi;	   /*rssi in dB*/
 	uint16_t size;     /*payload size in bytes*/
 	uint16_t fcntup;     
-<<<<<<< HEAD
 	uint8_t fport;     
-=======
-	uint8_t fport;
->>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 };
 
 /* device info for session */
@@ -153,8 +145,11 @@ struct devinfo {
 	uint32_t devaddr;     
     uint16_t devnonce;
 
-    char    deveui_hex[17];
-    char    appeui_hex[17];
+    char devaddr_hex[9];
+    char devnonce_hex[7];
+
+    char deveui_hex[17];
+    char appeui_hex[17];
 
     uint8_t appkey[16];
     uint8_t appskey[16];

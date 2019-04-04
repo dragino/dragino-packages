@@ -150,12 +150,14 @@ bool db_judge_joinrepeat(sqlite3_stmt* stmt, void* data) {
 
 bool db_lookup_appkey(sqlite3_stmt* stmt, void* data) {
     struct devinfo* devinfo = (struct devinfo*) data;
-	sqlite3_bind_text(stmt, 1, devinfo->appeui_hex, -1, SQLITE_STATIC);
-<<<<<<< HEAD
+    sqlite3_bind_text(stmt, 1, devinfo->appeui_hex, -1, SQLITE_STATIC);
     DEBUG_STMT(stmt);
-=======
->>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
-    bool ret = db_step(stmt, lookup_appkey, devinfo);
+    int ret = sqlite3_step(stmt);
+    if (ret == SQLITE_ROW) {
+        memset1(devinfo->appkey, 0, sizeof(devinfo->appkey));
+        str2hex(devinfo->appkey, (char *)sqlite3_column_text(stmt, 0), sizeof(devinfo->appkey));
+        ret = 0;
+    }
     sqlite3_reset(stmt);
     return ret;
 }
@@ -163,12 +165,11 @@ bool db_lookup_appkey(sqlite3_stmt* stmt, void* data) {
 bool db_update_devinfo(sqlite3_stmt* stmt, void* data) {
     bool ret;
     struct devinfo* devinfo = (struct devinfo*) data;
-	sqlite3_bind_int(stmt, 1, devinfo->devnonce);
-	sqlite3_bind_int(stmt, 2, devinfo->devaddr);
-	sqlite3_bind_text(stmt, 3, devinfo->appskey_hex, sizeof(devinfo->appskey_hex), SQLITE_STATIC);
-	sqlite3_bind_text(stmt, 4, devinfo->nwkskey_hex, sizeof(devinfo->nwkskey_hex), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 1, devinfo->devnonce_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 2, devinfo->devaddr_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 3, devinfo->appskey_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 4, devinfo->nwkskey_hex, -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 5, devinfo->deveui_hex, -1, SQLITE_STATIC);
-	sqlite3_bind_int(stmt, 6, devinfo->devaddr);
     DEBUG_STMT(stmt);
     ret = db_step(stmt, NULL, NULL);
     sqlite3_reset(stmt);
@@ -196,16 +197,19 @@ bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* pa
 }
 
 bool db_judge_devaddr(sqlite3_stmt* stmt, void* data) {
-    bool ret;
     struct devinfo* devinfo = (struct devinfo*) data;
-	sqlite3_bind_int(stmt, 1, devinfo->devaddr);
+	sqlite3_bind_text(stmt, 1, devinfo->devaddr_hex, -1, SQLITE_STATIC);
     DEBUG_STMT(stmt);
-    ret = db_step(stmt, judge_devaddr, devinfo);
+    int ret = sqlite3_step(stmt);
+    if (ret == SQLITE_ROW) {
+        strncpy((char *)devinfo->deveui_hex, sqlite3_column_text(stmt, 0), sizeof(devinfo->deveui_hex));
+        ret = 0;
+    }
     sqlite3_reset(stmt);
     return ret;
 }
 
-bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, int tmst) {
+bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, uint32_t tmst) {
 	sqlite3_bind_text(stmt, 1, deveui, -1, SQLITE_STATIC);
 	sqlite3_bind_int(stmt, 2, tmst);
     DEBUG_STMT(stmt);
@@ -218,13 +222,18 @@ bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, int tmst) {
 }
 
 bool db_lookup_nwkskey(sqlite3_stmt* stmt, void* data) {
-    bool ret;
+    int ret;
     struct devinfo* devinfo = (struct devinfo*) data;
-	sqlite3_bind_text(stmt, 1, devinfo->deveui_hex, sizeof(devinfo->deveui_hex), SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 1, devinfo->deveui_hex, -1, SQLITE_STATIC);
     DEBUG_STMT(stmt);
-    ret = db_step(stmt, lookup_nwkskey, devinfo);
+    ret = sqlite3_step(stmt);
+    if (ret == SQLITE_ROW) {
+        str2hex(devinfo->nwkskey, (char *)sqlite3_column_text(stmt, 0), sizeof(devinfo->nwkskey));
+        sqlite3_reset(stmt);
+        return true;
+    }
     sqlite3_reset(stmt);
-    return ret;
+    return false;
 }
 
 bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2freq) {
@@ -236,11 +245,7 @@ bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2fr
 	    *rx2dr = sqlite3_column_int(stmt, 0);
 	    *rx2freq = sqlite3_column_double(stmt, 1);
 	} else {
-<<<<<<< HEAD
         *rx2dr = 0; /* default datarate */
-=======
-        *rx2dr = 5; /* default datarate */
->>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
         *rx2freq = 869.525; /* default frequence for EU_868 */
     }
     sqlite3_reset(stmt);
@@ -249,7 +254,6 @@ bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2fr
 
 static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {
 	int ret;
-        //MSG("~INFO~SQL=(%s)\n", sqlite3_expanded_sql(stmt));
 	while (1) {
 		ret = sqlite3_step(stmt);
 		if (ret == SQLITE_DONE) {
@@ -258,7 +262,7 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 			if (rowcallback != NULL)
 				rowcallback(stmt, data);
 		} else {
-			MSG("sqlite error: %s\n", sqlite3_errstr(ret));
+			MSG_DEBUG(DEBUG_ERROR, "ERROR~ %s\n", sqlite3_errstr(ret));
 			return false;
 		}
 	}
@@ -267,7 +271,6 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 static void lookup_appkey(sqlite3_stmt* stmt, void* data) {
     struct devinfo* devinfo = (struct devinfo*) data;
     memset1(devinfo->appkey, 0, sizeof(devinfo->appkey));
-    //memcpy1(devinfo->appkey, sqlite3_column_blob(stmt, 0), sizeof(devinfo->appkey));
     str2hex(devinfo->appkey, (char *)sqlite3_column_text(stmt, 0), sizeof(devinfo->appkey));
 }
 
@@ -276,32 +279,18 @@ static void lookup_nwkskey(sqlite3_stmt* stmt, void* data) {
     struct devinfo* devinfo = (struct devinfo*) data;
     memset1(devinfo->nwkskey, 0, sizeof(devinfo->nwkskey));
     str2hex(devinfo->nwkskey, (char *)sqlite3_column_text(stmt, 0), sizeof(devinfo->nwkskey));
+    MSG_DEBUG(DEBUG_DEBUG, "\nNWKskey: %02X%02X\n", devinfo->nwkskey[3], devinfo->nwkskey[4]);
 }
 
 static void judge_devaddr(sqlite3_stmt* stmt, void* data) {
     struct devinfo* devinfo = (struct devinfo*) data;
-<<<<<<< HEAD
     strncpy((char *)devinfo->deveui_hex, sqlite3_column_text(stmt, 0), sizeof(devinfo->deveui_hex));
 }
 
 static void sql_debug(sqlite3_stmt* stmt) { 
     char *sql;
     sql = sqlite3_expanded_sql(stmt);
-    MSG_DEBUG(DEBUG_SQL, "\nDBLOG~ SQL=(%s)\n", sql);
+    MSG_DEBUG(DEBUG_SQL, "\nDEBUG-DB~ SQL=(%s)\n", sql);
     sqlite3_free(sql);
 }
-
-=======
-    memset(devinfo->deveui_hex, 0, sizeof(devinfo->deveui_hex));
-    strncpy((char *)devinfo->deveui_hex, sqlite3_column_text(stmt, 0), sizeof(devinfo->deveui_hex));
-}
-
-static void sql_debug(sqlite3_stmt* stmt) { 
-    char *sql;
-    sql = sqlite3_expanded_sql(stmt);
-    MSG_DEBUG(DEBUG_SQL, "~INFO~ SQL=(%s)\n", sql);
-    sqlite3_free(sql);
-}
-
->>>>>>> ecfb381ade916363034db6f48f1fa3f2c57029ab
 

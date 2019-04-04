@@ -11,45 +11,56 @@ AES_CMAC_Init	src/cmac.c	/^void AES_CMAC_Init(AES_CMAC_CTX *ctx)$/;"	f
 AES_CMAC_KEY_LENGTH	inc/cmac.h	42;"	d
 AES_CMAC_SetKey	src/cmac.c	/^void AES_CMAC_SetKey(AES_CMAC_CTX *ctx, const uint8_t key[AES_CMAC_KEY_LENGTH])$/;"	f
 AES_CMAC_Update	src/cmac.c	/^void AES_CMAC_Update(AES_CMAC_CTX *ctx, const uint8_t *data, uint32_t len)$/;"	f
-AES_DEC_PREKEYED	inc/aes.h	38;"	d
-AES_ENC_PREKEYED	inc/aes.h	35;"	d
+AES_DEC_PREKEYED	inc/aes.h	42;"	d
+AES_DEC_PREKEYED	swap/aes.h	38;"	d
+AES_ENC_PREKEYED	inc/aes.h	39;"	d
+AES_ENC_PREKEYED	swap/aes.h	35;"	d
 AES_H	inc/aes.h	32;"	d
+AES_H	swap/aes.h	32;"	d
 APPEND_INDENT	src/parson.c	1097;"	d	file:
 APPEND_INDENT	src/parson.c	872;"	d	file:
 APPEND_STRING	src/parson.c	1096;"	d	file:
 APPEND_STRING	src/parson.c	867;"	d	file:
-APPLICATION_SERVER	inc/handle.h	89;"	d
+APPLICATION_SERVER	inc/handle.h	85;"	d
 APP_NAME	Makefile	/^APP_NAME:=lora_serv$/;"	m
 ARRAY_SIZE	src/base64.c	29;"	d	file:
 Ack	src/handle.c	/^        uint8_t Ack             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+Ack	swap/handle.c	/^        uint8_t Ack             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
 Adr	src/handle.c	/^        uint8_t Adr             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+Adr	swap/handle.c	/^        uint8_t Adr             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
 AdrAckReq	src/handle.c	/^        uint8_t AdrAckReq       : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+AdrAckReq	swap/handle.c	/^        uint8_t AdrAckReq       : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
 AesCmacCtx	src/LoRaMacCrypto.c	/^static AES_CMAC_CTX AesCmacCtx[1];$/;"	v	file:
 AesContext	src/LoRaMacCrypto.c	/^static aes_context AesContext;$/;"	v	file:
-BPOLY	src/aes.c	74;"	d	file:
-BUFF_SIZE	inc/handle.h	83;"	d
+BPOLY	src/aes.c	76;"	d	file:
+BPOLY	swap/aes.c	74;"	d	file:
+BUFF_SIZE	inc/handle.h	79;"	d
 Bits	src/handle.c	/^	}Bits;$/;"	m	union:uLoRaMacDLSettings	typeref:struct:uLoRaMacDLSettings::sDLSBits	file:
 Bits	src/handle.c	/^	}Bits;$/;"	m	union:uLoRaMacRxDelay	typeref:struct:uLoRaMacRxDelay::sRxDBits	file:
 Bits	src/handle.c	/^    }Bits;$/;"	m	union:uLoRaMacFrameCtrl	typeref:struct:uLoRaMacFrameCtrl::sCtrlBits	file:
 Bits	src/handle.c	/^    }Bits;$/;"	m	union:uLoRaMacHeader	typeref:struct:uLoRaMacHeader::sHdrBits	file:
+Bits	swap/handle.c	/^	}Bits;$/;"	m	union:uLoRaMacDLSettings	typeref:struct:uLoRaMacDLSettings::sDLSBits	file:
+Bits	swap/handle.c	/^	}Bits;$/;"	m	union:uLoRaMacRxDelay	typeref:struct:uLoRaMacRxDelay::sRxDBits	file:
+Bits	swap/handle.c	/^    }Bits;$/;"	m	union:uLoRaMacFrameCtrl	typeref:struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+Bits	swap/handle.c	/^    }Bits;$/;"	m	union:uLoRaMacHeader	typeref:struct:uLoRaMacHeader::sHdrBits	file:
 CFLAGS	Makefile	/^CFLAGS := -Iinc$/;"	m
-CLASS_A	inc/handle.h	100;"	d
-CLASS_B	inc/handle.h	101;"	d
-CLASS_C	inc/handle.h	102;"	d
+CLASS_A	inc/handle.h	96;"	d
+CLASS_B	inc/handle.h	97;"	d
+CLASS_C	inc/handle.h	98;"	d
 CLEAN_DOWNLINKS	src/database.c	32;"	d	file:
 CLEAN_UPLINKS	src/database.c	29;"	d	file:
 COUNT_DOWNLINKS	src/database.c	33;"	d	file:
-CREATEAPPS	inc/db.h	59;"	d
+CREATEAPPS	inc/db.h	60;"	d
 CREATEDEVS	inc/db.h	24;"	d
-CREATEGWPROFILE	inc/db.h	84;"	d
-CREATEGWS	inc/db.h	36;"	d
-CREATEUPMSG	inc/db.h	66;"	d
+CREATEGWPROFILE	inc/db.h	85;"	d
+CREATEGWS	inc/db.h	37;"	d
+CREATEUPMSG	inc/db.h	67;"	d
 CRIT	src/base64.c	30;"	d	file:
 DBPATH	inc/handle.h	51;"	d
 DB_SQLITE3_H_	inc/db.h	10;"	d
 DEBUG	src/base64.c	33;"	d	file:
 DEBUG_BEACON	inc/trace.h	24;"	d
-DEBUG_DEBUG	src/lora_serv.c	/^int DEBUG_DEBUG = 0;$/;"	v
+DEBUG_DEBUG	src/lora_serv.c	/^int DEBUG_DEBUG = 1;$/;"	v
 DEBUG_ERROR	inc/trace.h	29;"	d
 DEBUG_ERROR	src/lora_serv.c	/^int DEBUG_ERROR = 1;$/;"	v
 DEBUG_INFO	inc/trace.h	26;"	d
@@ -60,54 +71,66 @@ DEBUG_JOIN	src/lora_serv.c	/^int DEBUG_JOIN = 0;$/;"	v
 DEBUG_LOG	inc/trace.h	25;"	d
 DEBUG_PKT_FWD	inc/trace.h	20;"	d
 DEBUG_PPM	inc/trace.h	27;"	d
+DEBUG_SQL	src/lora_serv.c	/^int DEBUG_SQL = 1;$/;"	v
+DEBUG_STMT	src/db.c	15;"	d	file:
 DEBUG_TIMERSYNC	inc/trace.h	23;"	d
 DEBUG_UPDW	src/lora_serv.c	/^int DEBUG_UPDW = 0;$/;"	v
 DEBUG_WARNING	inc/trace.h	28;"	d
 DEBUG_WARNING	src/lora_serv.c	/^int DEBUG_WARNING = 0;$/;"	v
-DEFALUT_deveui	src/handle.c	23;"	d	file:
-DEFAULT_appeui	src/handle.c	22;"	d	file:
-DOWN	src/handle.c	27;"	d	file:
+DOWN	src/handle.c	23;"	d	file:
+DOWN	swap/handle.c	23;"	d	file:
 DOWNLINKS_GET_FIRST	src/database.c	34;"	d	file:
-DPOLY	src/aes.c	75;"	d	file:
+DPOLY	src/aes.c	77;"	d	file:
+DPOLY	swap/aes.c	75;"	d	file:
 Del	src/handle.c	/^		uint8_t Del              : 4;$/;"	m	struct:uLoRaMacRxDelay::sRxDBits	file:
+Del	swap/handle.c	/^		uint8_t Del              : 4;$/;"	m	struct:uLoRaMacRxDelay::sRxDBits	file:
 FLOAT_FORMAT	src/parson.c	45;"	d	file:
 FOptsLen	src/handle.c	/^        uint8_t FOptsLen        : 4;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+FOptsLen	swap/handle.c	/^        uint8_t FOptsLen        : 4;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
 FPending	src/handle.c	/^        uint8_t FPending        : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+FPending	swap/handle.c	/^        uint8_t FPending        : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
 FRAME_LEN	inc/handle.h	49;"	d
 FRAME_TYPE_DATA_CONFIRMED_DOWN	src/handle.c	/^    FRAME_TYPE_DATA_CONFIRMED_DOWN   = 0x05,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_DATA_CONFIRMED_DOWN	swap/handle.c	/^    FRAME_TYPE_DATA_CONFIRMED_DOWN   = 0x05,$/;"	e	enum:eLoRaMacFrameType	file:
 FRAME_TYPE_DATA_CONFIRMED_UP	src/handle.c	/^    FRAME_TYPE_DATA_CONFIRMED_UP     = 0x04,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_DATA_CONFIRMED_UP	swap/handle.c	/^    FRAME_TYPE_DATA_CONFIRMED_UP     = 0x04,$/;"	e	enum:eLoRaMacFrameType	file:
 FRAME_TYPE_DATA_UNCONFIRMED_DOWN	src/handle.c	/^    FRAME_TYPE_DATA_UNCONFIRMED_DOWN = 0x03,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_DATA_UNCONFIRMED_DOWN	swap/handle.c	/^    FRAME_TYPE_DATA_UNCONFIRMED_DOWN = 0x03,$/;"	e	enum:eLoRaMacFrameType	file:
 FRAME_TYPE_DATA_UNCONFIRMED_UP	src/handle.c	/^    FRAME_TYPE_DATA_UNCONFIRMED_UP   = 0x02,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_DATA_UNCONFIRMED_UP	swap/handle.c	/^    FRAME_TYPE_DATA_UNCONFIRMED_UP   = 0x02,$/;"	e	enum:eLoRaMacFrameType	file:
 FRAME_TYPE_JOIN_ACCEPT	src/handle.c	/^    FRAME_TYPE_JOIN_ACCEPT           = 0x01,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_JOIN_ACCEPT	swap/handle.c	/^    FRAME_TYPE_JOIN_ACCEPT           = 0x01,$/;"	e	enum:eLoRaMacFrameType	file:
 FRAME_TYPE_JOIN_REQ	src/handle.c	/^    FRAME_TYPE_JOIN_REQ              = 0x00,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_JOIN_REQ	swap/handle.c	/^    FRAME_TYPE_JOIN_REQ              = 0x00,$/;"	e	enum:eLoRaMacFrameType	file:
 FRAME_TYPE_PROPRIETARY	src/handle.c	/^    FRAME_TYPE_PROPRIETARY           = 0x07,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_PROPRIETARY	swap/handle.c	/^    FRAME_TYPE_PROPRIETARY           = 0x07,$/;"	e	enum:eLoRaMacFrameType	file:
 FRAME_TYPE_RFU	src/handle.c	/^    FRAME_TYPE_RFU                   = 0x06,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_RFU	swap/handle.c	/^    FRAME_TYPE_RFU                   = 0x06,$/;"	e	enum:eLoRaMacFrameType	file:
 GENERIC_LIST_H_	inc/generic_list.h	7;"	d
 GET_FRAMECOUNTER_DOWN	src/database.c	24;"	d	file:
 GET_FRAMECOUNTER_UP	src/database.c	23;"	d	file:
 GET_KEYPARTS	src/database.c	21;"	d	file:
 GET_SESSIONDEVADDR	src/database.c	20;"	d	file:
-GW_PORT_PULL	inc/handle.h	55;"	d
-GW_PORT_PUSH	inc/handle.h	54;"	d
-GW_SERV_ADDR	inc/handle.h	53;"	d
 HANDLE_H_	inc/handle.h	18;"	d
-HAVE_UINT_32T	src/aes.c	50;"	d	file:
-IGNORE	inc/handle.h	90;"	d
+HAVE_MEMCPY	src/aes.c	39;"	d	file:
+HAVE_UINT_32T	src/aes.c	52;"	d	file:
+HAVE_UINT_32T	swap/aes.c	50;"	d	file:
+IGNORE	inc/handle.h	86;"	d
 INC_FRAMECOUNTER_DOWN	src/database.c	26;"	d	file:
 INITSTMT	inc/db.h	108;"	d
 INITSTMT	src/database.c	55;"	d	file:
 INSERTAPPS	inc/db.h	104;"	d
 INSERTDEVS	inc/db.h	105;"	d
 INSERTGWPROFILE	inc/db.h	106;"	d
-INSERTGWS	inc/db.h	102;"	d
 INSERTGWS	inc/db.h	103;"	d
 INSERTUPMSG	inc/db.h	18;"	d
 ISSQLITEERROR	src/database.c	36;"	d	file:
 IS_CONT	src/parson.c	67;"	d	file:
 IS_NUMBER_INVALID	src/parson.c	57;"	d	file:
 IS_NUMBER_INVALID	src/parson.c	59;"	d	file:
-JOIN_ACCEPT_DELAY	inc/handle.h	96;"	d
-JOIN_ACC_SIZE	src/handle.c	29;"	d	file:
+JOIN_ACCEPT_DELAY	inc/handle.h	92;"	d
+JOIN_ACC_SIZE	src/handle.c	25;"	d	file:
+JOIN_ACC_SIZE	swap/handle.c	25;"	d	file:
 JSONArray	inc/parson.h	/^    JSONArray   = 5,$/;"	e	enum:json_value_type
 JSONBoolean	inc/parson.h	/^    JSONBoolean = 6$/;"	e	enum:json_value_type
 JSONError	inc/parson.h	/^    JSONError   = -1,$/;"	e	enum:json_value_type
@@ -119,7 +142,7 @@ JSONString	inc/parson.h	/^    JSONString  = 2,$/;"	e	enum:json_value_type
 JSONSuccess	inc/parson.h	/^    JSONSuccess = 0,$/;"	e	enum:json_result_t
 JSON_Array	inc/parson.h	/^typedef struct json_array_t  JSON_Array;$/;"	t	typeref:struct:json_array_t
 JSON_Free_Function	inc/parson.h	/^typedef void   (*JSON_Free_Function)(void *);$/;"	t
-JSON_MAX	inc/handle.h	87;"	d
+JSON_MAX	inc/handle.h	83;"	d
 JSON_Malloc_Function	inc/parson.h	/^typedef void * (*JSON_Malloc_Function)(size_t);$/;"	t
 JSON_Object	inc/parson.h	/^typedef struct json_object_t JSON_Object;$/;"	t	typeref:struct:json_object_t
 JSON_Status	inc/parson.h	/^typedef int JSON_Status;$/;"	t
@@ -137,15 +160,19 @@ LOOKUPBYSTRING	src/database.c	62;"	d	file:
 LOOKUPGWEUI	inc/db.h	14;"	d
 LOOKUPNWKSKEY	inc/db.h	21;"	d
 LOOKUPPROFILE	inc/db.h	22;"	d
-LORAMAC_FRAME_MAXPAYLOAD	inc/handle.h	85;"	d
+LORAMAC_FRAME_MAXPAYLOAD	inc/handle.h	81;"	d
 LORAMAC_MIC_BLOCK_B0_SIZE	src/LoRaMacCrypto.c	32;"	d	file:
 LSHIFT	src/cmac.c	42;"	d	file:
 List	inc/generic_list.h	/^typedef struct List{$/;"	s
 LoRaMacComputeMic	src/LoRaMacCrypto.c	/^void LoRaMacComputeMic( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t address, uint8_t dir, uint32_t sequenceCounter, uint32_t *mic )$/;"	f
 LoRaMacDLSettings_t	src/handle.c	/^}LoRaMacDLSettings_t;$/;"	t	typeref:union:uLoRaMacDLSettings	file:
+LoRaMacDLSettings_t	swap/handle.c	/^}LoRaMacDLSettings_t;$/;"	t	typeref:union:uLoRaMacDLSettings	file:
 LoRaMacFrameCtrl_t	src/handle.c	/^}LoRaMacFrameCtrl_t;$/;"	t	typeref:union:uLoRaMacFrameCtrl	file:
+LoRaMacFrameCtrl_t	swap/handle.c	/^}LoRaMacFrameCtrl_t;$/;"	t	typeref:union:uLoRaMacFrameCtrl	file:
 LoRaMacFrameType_t	src/handle.c	/^}LoRaMacFrameType_t;$/;"	t	typeref:enum:eLoRaMacFrameType	file:
+LoRaMacFrameType_t	swap/handle.c	/^}LoRaMacFrameType_t;$/;"	t	typeref:enum:eLoRaMacFrameType	file:
 LoRaMacHeader_t	src/handle.c	/^}LoRaMacHeader_t;$/;"	t	typeref:union:uLoRaMacHeader	file:
+LoRaMacHeader_t	swap/handle.c	/^}LoRaMacHeader_t;$/;"	t	typeref:union:uLoRaMacHeader	file:
 LoRaMacJoinComputeMic	src/LoRaMacCrypto.c	/^void LoRaMacJoinComputeMic( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t *mic )$/;"	f
 LoRaMacJoinComputeSKeys	src/LoRaMacCrypto.c	/^void LoRaMacJoinComputeSKeys( const uint8_t *key, const uint8_t *appNonce, uint16_t devNonce, uint8_t *nwkSKey, uint8_t *appSKey )$/;"	f
 LoRaMacJoinDecrypt	src/LoRaMacCrypto.c	/^void LoRaMacJoinDecrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint8_t *decBuffer )$/;"	f
@@ -153,69 +180,89 @@ LoRaMacJoinEncrypt	src/LoRaMacCrypto.c	/^void LoRaMacJoinEncrypt( const uint8_t 
 LoRaMacPayloadDecrypt	src/LoRaMacCrypto.c	/^void LoRaMacPayloadDecrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t address, uint8_t dir, uint32_t sequenceCounter, uint8_t *decBuffer )$/;"	f
 LoRaMacPayloadEncrypt	src/LoRaMacCrypto.c	/^void LoRaMacPayloadEncrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t address, uint8_t dir, uint32_t sequenceCounter, uint8_t *encBuffer )$/;"	f
 LoRaMacRxDelay_t	src/handle.c	/^}LoRaMacRxDelay_t;$/;"	t	typeref:union:uLoRaMacRxDelay	file:
+LoRaMacRxDelay_t	swap/handle.c	/^}LoRaMacRxDelay_t;$/;"	t	typeref:union:uLoRaMacRxDelay	file:
 MAX	inc/utilities.h	35;"	d
 MAX	src/parson.c	51;"	d	file:
-MAX_NB_B64	inc/handle.h	92;"	d
+MAX_NB_B64	inc/handle.h	88;"	d
 MAX_NESTING	src/parson.c	43;"	d	file:
 MIN	inc/utilities.h	26;"	d
-MSG	inc/handle.h	75;"	d
+MSG	inc/handle.h	71;"	d
 MSG	inc/trace.h	31;"	d
-MSG_DEBUG	inc/handle.h	76;"	d
+MSG_DEBUG	inc/handle.h	72;"	d
 MSG_DEBUG	inc/trace.h	32;"	d
 MSG_INFO	inc/trace.h	38;"	d
 MType	src/handle.c	/^        uint8_t MType           : 3;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
+MType	swap/handle.c	/^        uint8_t MType           : 3;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
 M_last	inc/cmac.h	/^            uint8_t        M_last[16];$/;"	m	struct:_AES_CMAC_CTX
 M_n	inc/cmac.h	/^            uint32_t       M_n;$/;"	m	struct:_AES_CMAC_CTX
 Major	src/handle.c	/^        uint8_t Major           : 2;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
+Major	swap/handle.c	/^        uint8_t Major           : 2;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
 Mic	src/LoRaMacCrypto.c	/^static uint8_t Mic[16];$/;"	v	file:
 MicBlockB0	src/LoRaMacCrypto.c	/^static uint8_t MicBlockB0[] = { 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
-NB_PKT_MAX	inc/handle.h	82;"	d
-NO_DELAY	inc/handle.h	95;"	d
+NB_PKT_MAX	inc/handle.h	78;"	d
+NO_DELAY	inc/handle.h	91;"	d
 NUM_BUF_SIZE	src/parson.c	46;"	d	file:
-N_BLOCK	inc/aes.h	55;"	d
-N_COL	inc/aes.h	54;"	d
-N_MAX_ROUNDS	inc/aes.h	56;"	d
-N_ROW	inc/aes.h	53;"	d
+N_BLOCK	inc/aes.h	59;"	d
+N_BLOCK	swap/aes.h	55;"	d
+N_COL	inc/aes.h	58;"	d
+N_COL	swap/aes.h	54;"	d
+N_MAX_ROUNDS	inc/aes.h	60;"	d
+N_MAX_ROUNDS	swap/aes.h	56;"	d
+N_ROW	inc/aes.h	57;"	d
+N_ROW	swap/aes.h	53;"	d
 Nibble2HexChar	src/utilities.c	/^int8_t Nibble2HexChar( uint8_t a )$/;"	f
 Node	inc/generic_list.h	/^typedef struct Node{$/;"	s
 OBJDIR	Makefile	/^OBJDIR = obj$/;"	m
 OBJECTS	Makefile	/^OBJECTS:=$(OBJDIR)\/$(APP_NAME).o obj\/base64.o obj\/parson.o obj\/aes.o obj\/cmac.o obj\/utilities.o obj\/LoRaMacCrypto.o obj\/generic_list.o obj\/db.o obj\/handle.o$/;"	m
-PKT_PULL_ACK	inc/handle.h	61;"	d
-PKT_PULL_DATA	inc/handle.h	59;"	d
-PKT_PULL_RESP	inc/handle.h	60;"	d
-PKT_PUSH_ACK	inc/handle.h	58;"	d
-PKT_PUSH_DATA	inc/handle.h	57;"	d
+PKT_PULL_ACK	inc/handle.h	57;"	d
+PKT_PULL_DATA	inc/handle.h	55;"	d
+PKT_PULL_RESP	inc/handle.h	56;"	d
+PKT_PUSH_ACK	inc/handle.h	54;"	d
+PKT_PUSH_DATA	inc/handle.h	53;"	d
 POW2	inc/utilities.h	43;"	d
-PULL_TIMEOUT_MS	inc/handle.h	64;"	d
-PUSH_TIMEOUT_MS	inc/handle.h	63;"	d
+PULL_TIMEOUT_MS	inc/handle.h	60;"	d
+PUSH_TIMEOUT_MS	inc/handle.h	59;"	d
 RAND_LOCAL_MAX	src/utilities.c	27;"	d	file:
-RANGE	inc/handle.h	93;"	d
-RECV_DELAY	inc/handle.h	98;"	d
+RANGE	inc/handle.h	89;"	d
+RECV_DELAY	inc/handle.h	94;"	d
 RFU	src/handle.c	/^		uint8_t RFU              : 1;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
 RFU	src/handle.c	/^		uint8_t RFU              : 4;$/;"	m	struct:uLoRaMacRxDelay::sRxDBits	file:
 RFU	src/handle.c	/^        uint8_t RFU             : 3;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
+RFU	swap/handle.c	/^		uint8_t RFU              : 1;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
+RFU	swap/handle.c	/^		uint8_t RFU              : 4;$/;"	m	struct:uLoRaMacRxDelay::sRxDBits	file:
+RFU	swap/handle.c	/^        uint8_t RFU             : 3;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
 RX1DRoffset	src/handle.c	/^		uint8_t RX1DRoffset      : 3;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
+RX1DRoffset	swap/handle.c	/^		uint8_t RX1DRoffset      : 3;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
 RX2DataRate	src/handle.c	/^		uint8_t RX2DataRate      : 4;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
-SEND_INTERVAL_S	inc/handle.h	68;"	d
+RX2DataRate	swap/handle.c	/^		uint8_t RX2DataRate      : 4;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
+SEND_INTERVAL_S	inc/handle.h	64;"	d
 SET_FRAMECOUNTER_UP	src/database.c	25;"	d	file:
 SIZEOF_TOKEN	src/parson.c	48;"	d	file:
 SKIP_CHAR	src/parson.c	49;"	d	file:
 SKIP_WHITESPACES	src/parson.c	50;"	d	file:
-SOCKET_INTERVAL_MS	inc/handle.h	67;"	d
-SOCKET_INTERVAL_S	inc/handle.h	66;"	d
+SOCKET_INTERVAL_MS	inc/handle.h	63;"	d
+SOCKET_INTERVAL_S	inc/handle.h	62;"	d
 STARTING_CAPACITY	src/parson.c	42;"	d	file:
-STR	inc/handle.h	74;"	d
-STRINGIFY	inc/handle.h	73;"	d
-UP	src/handle.c	26;"	d	file:
+STR	inc/handle.h	70;"	d
+STRINGIFY	inc/handle.h	69;"	d
+UP	src/handle.c	22;"	d	file:
+UP	swap/handle.c	22;"	d	file:
 UPDATEDEVINFO	inc/db.h	17;"	d
-USE_TABLES	src/aes.c	55;"	d	file:
-VERSION	inc/handle.h	71;"	d
-VERSION_1	src/aes.c	62;"	d	file:
+USE_TABLES	src/aes.c	57;"	d	file:
+USE_TABLES	swap/aes.c	55;"	d	file:
+VERSION	inc/handle.h	67;"	d
+VERSION_1	src/aes.c	64;"	d	file:
+VERSION_1	swap/aes.c	62;"	d	file:
 Value	src/handle.c	/^	uint8_t Value;$/;"	m	union:uLoRaMacDLSettings	file:
 Value	src/handle.c	/^	uint8_t Value;$/;"	m	union:uLoRaMacRxDelay	file:
 Value	src/handle.c	/^    uint8_t Value;$/;"	m	union:uLoRaMacFrameCtrl	file:
 Value	src/handle.c	/^    uint8_t Value;$/;"	m	union:uLoRaMacHeader	file:
-WPOLY	src/aes.c	73;"	d	file:
+Value	swap/handle.c	/^	uint8_t Value;$/;"	m	union:uLoRaMacDLSettings	file:
+Value	swap/handle.c	/^	uint8_t Value;$/;"	m	union:uLoRaMacRxDelay	file:
+Value	swap/handle.c	/^    uint8_t Value;$/;"	m	union:uLoRaMacFrameCtrl	file:
+Value	swap/handle.c	/^    uint8_t Value;$/;"	m	union:uLoRaMacHeader	file:
+WPOLY	src/aes.c	75;"	d	file:
+WPOLY	swap/aes.c	73;"	d	file:
 X	inc/cmac.h	/^            uint8_t        X[16];$/;"	m	struct:_AES_CMAC_CTX
 XOR	src/cmac.c	49;"	d	file:
 _AES_CMAC_CTX	inc/cmac.h	/^typedef struct _AES_CMAC_CTX {$/;"	s
@@ -227,35 +274,52 @@ _LORA_PKTFWD_TRACE_H	inc/trace.h	18;"	d
 __LORAMAC_CRYPTO_H__	inc/LoRaMacCrypto.h	38;"	d
 __UTILITIES_H__	inc/utilities.h	17;"	d
 aBlock	src/LoRaMacCrypto.c	/^static uint8_t aBlock[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
-add_round_key	src/aes.c	/^static void add_round_key( uint8_t d[N_BLOCK], const uint8_t k[N_BLOCK] )$/;"	f	file:
-aes_cbc_decrypt	src/aes.c	/^return_type aes_cbc_decrypt( const uint8_t *in, uint8_t *out,$/;"	f
-aes_cbc_encrypt	src/aes.c	/^return_type aes_cbc_encrypt( const uint8_t *in, uint8_t *out,$/;"	f
+add_round_key	src/aes.c	/^static void add_round_key( uint_8t d[N_BLOCK], const uint_8t k[N_BLOCK] )$/;"	f	file:
+add_round_key	swap/aes.c	/^static void add_round_key( uint8_t d[N_BLOCK], const uint8_t k[N_BLOCK] )$/;"	f	file:
+aes_cbc_decrypt	src/aes.c	/^return_type aes_cbc_decrypt( const unsigned char *in, unsigned char *out,$/;"	f
+aes_cbc_decrypt	swap/aes.c	/^return_type aes_cbc_decrypt( const uint8_t *in, uint8_t *out,$/;"	f
+aes_cbc_encrypt	src/aes.c	/^return_type aes_cbc_encrypt( const unsigned char *in, unsigned char *out,$/;"	f
+aes_cbc_encrypt	swap/aes.c	/^return_type aes_cbc_encrypt( const uint8_t *in, uint8_t *out,$/;"	f
 aes_context	inc/aes.h	/^} aes_context;$/;"	t	typeref:struct:__anon1
-aes_decrypt	src/aes.c	/^return_type aes_decrypt( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK], const aes_context ctx[1] )$/;"	f
-aes_decrypt_128	src/aes.c	/^void aes_decrypt_128( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK],$/;"	f
-aes_decrypt_256	src/aes.c	/^void aes_decrypt_256( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK],$/;"	f
-aes_encrypt	src/aes.c	/^return_type aes_encrypt( const uint8_t in[N_BLOCK], uint8_t  out[N_BLOCK], const aes_context ctx[1] )$/;"	f
-aes_encrypt_128	src/aes.c	/^void aes_encrypt_128( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK],$/;"	f
-aes_encrypt_256	src/aes.c	/^void aes_encrypt_256( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK],$/;"	f
-aes_set_key	src/aes.c	/^return_type aes_set_key( const uint8_t key[], length_type keylen, aes_context ctx[1] )$/;"	f
+aes_context	swap/aes.h	/^} aes_context;$/;"	t	typeref:struct:__anon2
+aes_decrypt	src/aes.c	/^return_type aes_decrypt( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK], const aes_context ctx[1] )$/;"	f
+aes_decrypt	swap/aes.c	/^return_type aes_decrypt( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK], const aes_context ctx[1] )$/;"	f
+aes_decrypt_128	src/aes.c	/^void aes_decrypt_128( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
+aes_decrypt_128	swap/aes.c	/^void aes_decrypt_128( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK],$/;"	f
+aes_decrypt_256	src/aes.c	/^void aes_decrypt_256( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
+aes_decrypt_256	swap/aes.c	/^void aes_decrypt_256( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK],$/;"	f
+aes_encrypt	src/aes.c	/^return_type aes_encrypt( const unsigned char in[N_BLOCK], unsigned char  out[N_BLOCK], const aes_context ctx[1] )$/;"	f
+aes_encrypt	swap/aes.c	/^return_type aes_encrypt( const uint8_t in[N_BLOCK], uint8_t  out[N_BLOCK], const aes_context ctx[1] )$/;"	f
+aes_encrypt_128	src/aes.c	/^void aes_encrypt_128( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
+aes_encrypt_128	swap/aes.c	/^void aes_encrypt_128( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK],$/;"	f
+aes_encrypt_256	src/aes.c	/^void aes_encrypt_256( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
+aes_encrypt_256	swap/aes.c	/^void aes_encrypt_256( const uint8_t in[N_BLOCK], uint8_t out[N_BLOCK],$/;"	f
+aes_set_key	src/aes.c	/^return_type aes_set_key( const unsigned char key[], length_type keylen, aes_context ctx[1] )$/;"	f
+aes_set_key	swap/aes.c	/^return_type aes_set_key( const uint8_t key[], length_type keylen, aes_context ctx[1] )$/;"	f
 append_indent	src/parson.c	/^static int append_indent(char *buf, int level) {$/;"	f	file:
 append_string	src/parson.c	/^static int append_string(char *buf, const char *string) {$/;"	f	file:
-appeui_hex	inc/handle.h	/^    char    appeui_hex[17];$/;"	m	struct:devinfo
+appeui_hex	inc/handle.h	/^    char appeui_hex[17];$/;"	m	struct:devinfo
 appkey	inc/handle.h	/^    uint8_t appkey[16];$/;"	m	struct:devinfo
 appkey_hex	inc/handle.h	/^    uint8_t appkey_hex[33];$/;"	m	struct:devinfo
 appskey	inc/handle.h	/^    uint8_t appskey[16];$/;"	m	struct:devinfo
 appskey_hex	inc/handle.h	/^    uint8_t appskey_hex[33];$/;"	m	struct:devinfo
 array	src/parson.c	/^    JSON_Array  *array;$/;"	m	union:json_value_value	file:
 as_prepare_frame	src/handle.c	/^static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t* appkey, uint32_t devaddr, uint8_t *nwkskey, uint8_t *appskey) {$/;"	f	file:
+as_prepare_frame	swap/handle.c	/^static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t* appkey, uint32_t devaddr, uint8_t *nwkskey, uint8_t *appskey) {$/;"	f	file:
 assign_msg_down	src/handle.c	/^void assign_msg_down(void* data, const void* msg) {$/;"	f
+assign_msg_down	swap/handle.c	/^void assign_msg_down(void* data, const void* msg) {$/;"	f
 b64_to_bin	src/base64.c	/^int b64_to_bin(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
 b64_to_bin_nopad	src/base64.c	/^int b64_to_bin_nopad(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
 bin_to_b64	src/base64.c	/^int bin_to_b64(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
 bin_to_b64_nopad	src/base64.c	/^int bin_to_b64_nopad(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
-block_copy	src/aes.c	309;"	d	file:
-block_copy	src/aes.c	312;"	d	file:
-block_copy_nn	src/aes.c	308;"	d	file:
-block_copy_nn	src/aes.c	311;"	d	file:
+block_copy	src/aes.c	303;"	d	file:
+block_copy	src/aes.c	306;"	d	file:
+block_copy	swap/aes.c	309;"	d	file:
+block_copy	swap/aes.c	312;"	d	file:
+block_copy_nn	src/aes.c	302;"	d	file:
+block_copy_nn	src/aes.c	305;"	d	file:
+block_copy_nn	swap/aes.c	308;"	d	file:
+block_copy_nn	swap/aes.c	311;"	d	file:
 boolean	src/parson.c	/^    int          boolean;$/;"	m	union:json_value_value	file:
 capacity	src/parson.c	/^    size_t       capacity;$/;"	m	struct:json_array_t	file:
 capacity	src/parson.c	/^    size_t       capacity;$/;"	m	struct:json_object_t	file:
@@ -268,14 +332,20 @@ code_pad	src/base64.c	/^static char code_pad = '=';	\/* RFC 1421 padding charact
 code_to_char	src/base64.c	/^char code_to_char(uint8_t x) {$/;"	f
 codr	inc/handle.h	/^	char     codr[4];  \/*ECC coding rate*\/$/;"	m	struct:metadata
 compare_msg_down	src/handle.c	/^int compare_msg_down(const void* data, const void* key) {$/;"	f
+compare_msg_down	swap/handle.c	/^int compare_msg_down(const void* data, const void* key) {$/;"	f
 context	inc/db.h	/^struct context {$/;"	s
 copy_and_key	src/aes.c	/^static void copy_and_key( void *d, const void *s, const void *k )$/;"	f	file:
+copy_and_key	swap/aes.c	/^static void copy_and_key( void *d, const void *s, const void *k )$/;"	f	file:
 copy_block	src/aes.c	/^static void copy_block( void *d, const void *s )$/;"	f	file:
-copy_block_nn	src/aes.c	/^static void copy_block_nn( uint8_t * d, const uint8_t *s, uint8_t nn )$/;"	f	file:
+copy_block	swap/aes.c	/^static void copy_block( void *d, const void *s )$/;"	f	file:
+copy_block_nn	src/aes.c	/^static void copy_block_nn( uint_8t * d, const uint_8t *s, uint_8t nn )$/;"	f	file:
+copy_block_nn	swap/aes.c	/^static void copy_block_nn( uint8_t * d, const uint8_t *s, uint8_t nn )$/;"	f	file:
 copy_msg_down	src/handle.c	/^void copy_msg_down(void* data, const void* msg) {$/;"	f
+copy_msg_down	swap/handle.c	/^void copy_msg_down(void* data, const void* msg) {$/;"	f
 count	src/parson.c	/^    size_t       count;$/;"	m	struct:json_array_t	file:
 count	src/parson.c	/^    size_t       count;$/;"	m	struct:json_object_t	file:
-d2	src/aes.c	82;"	d	file:
+d2	src/aes.c	84;"	d	file:
+d2	swap/aes.c	82;"	d	file:
 data	inc/generic_list.h	/^	void* data;$/;"	m	struct:Node
 data_appflags_list_rowcallback	src/database.c	/^static void data_appflags_list_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
 database_app_add	src/database.c	/^void database_app_add(context_readonly* cntx, const struct app* app) {$/;"	f
@@ -322,10 +392,10 @@ db	inc/db.h	/^	sqlite3* db;$/;"	m	struct:context
 db_createtb	src/db.c	/^static bool db_createtb(struct context* cntx) {$/;"	f	file:
 db_destroy	src/db.c	/^void db_destroy(struct context* cntx) {$/;"	f
 db_init	src/db.c	/^bool db_init(const char* dbpath, struct context* cntx) {$/;"	f
-db_insert_upmsg	src/db.c	/^bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* matadata, void* payload) {$/;"	f
+db_insert_upmsg	src/db.c	/^bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* payload) {$/;"	f
 db_judge_devaddr	src/db.c	/^bool db_judge_devaddr(sqlite3_stmt* stmt, void* data) {$/;"	f
 db_judge_joinrepeat	src/db.c	/^bool db_judge_joinrepeat(sqlite3_stmt* stmt, void* data) {$/;"	f
-db_judge_msgrepeat	src/db.c	/^bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, int tmst) {$/;"	f
+db_judge_msgrepeat	src/db.c	/^bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, uint32_t tmst) {$/;"	f
 db_lookup_appkey	src/db.c	/^bool db_lookup_appkey(sqlite3_stmt* stmt, void* data) {$/;"	f
 db_lookup_gweui	src/db.c	/^bool db_lookup_gweui(sqlite3_stmt* stmt, char *gweui) {$/;"	f
 db_lookup_nwkskey	src/db.c	/^bool db_lookup_nwkskey(sqlite3_stmt* stmt, void* data) {$/;"	f
@@ -333,68 +403,111 @@ db_lookup_profile	src/db.c	/^bool db_lookup_profile(sqlite3_stmt* stmt, char *gw
 db_step	src/db.c	/^static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {$/;"	f	file:
 db_update_devinfo	src/db.c	/^bool db_update_devinfo(sqlite3_stmt* stmt, void* data) {$/;"	f
 destroy_msg_down	src/handle.c	/^void destroy_msg_down(void* msg) {$/;"	f
+destroy_msg_down	swap/handle.c	/^void destroy_msg_down(void* msg) {$/;"	f
 devaddr	inc/handle.h	/^	uint32_t devaddr;     $/;"	m	struct:devinfo
 devaddr	inc/handle.h	/^	uint32_t devaddr;  \/* gateway address for as downlink *\/$/;"	m	struct:jsondata
+devaddr_hex	inc/handle.h	/^    char devaddr_hex[9];$/;"	m	struct:devinfo
 deveui_hex	inc/handle.h	/^	char deveui_hex[17];$/;"	m	struct:jsondata
-deveui_hex	inc/handle.h	/^    char    deveui_hex[17];$/;"	m	struct:devinfo
+deveui_hex	inc/handle.h	/^    char deveui_hex[17];$/;"	m	struct:devinfo
 devinfo	inc/handle.h	/^struct devinfo {$/;"	s
 devnonce	inc/handle.h	/^    uint16_t devnonce;$/;"	m	struct:devinfo
+devnonce_hex	inc/handle.h	/^    char devnonce_hex[7];$/;"	m	struct:devinfo
 eLoRaMacFrameType	src/handle.c	/^typedef enum eLoRaMacFrameType$/;"	g	file:
+eLoRaMacFrameType	swap/handle.c	/^typedef enum eLoRaMacFrameType$/;"	g	file:
 exit_sig	src/lora_serv.c	/^static bool exit_sig = false;$/;"	v	file:
-f1	src/aes.c	77;"	d	file:
-f2	src/aes.c	78;"	d	file:
-f3	src/aes.c	84;"	d	file:
-f4	src/aes.c	79;"	d	file:
-f8	src/aes.c	80;"	d	file:
-f9	src/aes.c	85;"	d	file:
-fb	src/aes.c	86;"	d	file:
+f1	src/aes.c	79;"	d	file:
+f1	swap/aes.c	77;"	d	file:
+f2	src/aes.c	80;"	d	file:
+f2	swap/aes.c	78;"	d	file:
+f3	src/aes.c	86;"	d	file:
+f3	swap/aes.c	84;"	d	file:
+f4	src/aes.c	81;"	d	file:
+f4	swap/aes.c	79;"	d	file:
+f8	src/aes.c	82;"	d	file:
+f8	swap/aes.c	80;"	d	file:
+f9	src/aes.c	87;"	d	file:
+f9	swap/aes.c	85;"	d	file:
+fb	src/aes.c	88;"	d	file:
+fb	swap/aes.c	86;"	d	file:
 fcntup	inc/handle.h	/^	uint16_t fcntup;     $/;"	m	struct:metadata
-fd	src/aes.c	87;"	d	file:
-fe	src/aes.c	88;"	d	file:
-fport	inc/handle.h	/^	uint8_t fport;$/;"	m	struct:metadata
+fd	src/aes.c	89;"	d	file:
+fd	swap/aes.c	87;"	d	file:
+fe	src/aes.c	90;"	d	file:
+fe	swap/aes.c	88;"	d	file:
+fport	inc/handle.h	/^	uint8_t fport;     $/;"	m	struct:metadata
 free	src/parson.c	54;"	d	file:
 freq	inc/handle.h	/^	double 	 freq;     \/*frequency of IF channel*\/$/;"	m	struct:metadata
-fwd_affine	src/aes.c	/^uint8_t fwd_affine(const uint8_t x)$/;"	f
+fwd_affine	src/aes.c	/^uint_8t fwd_affine(const uint_8t x)$/;"	f
+fwd_affine	swap/aes.c	/^uint8_t fwd_affine(const uint8_t x)$/;"	f
 get_quoted_string	src/parson.c	/^static char * get_quoted_string(const char **string) {$/;"	f	file:
-gf_inv	src/aes.c	/^static uint8_t gf_inv(const uint8_t x)$/;"	f	file:
-gfm2_sb	src/aes.c	214;"	d	file:
-gfm2_sb	src/aes.c	298;"	d	file:
-gfm2_sbox	src/aes.c	/^static const uint8_t gfm2_sbox[256] = sb_data(f2);$/;"	v	file:
-gfm3_sb	src/aes.c	215;"	d	file:
-gfm3_sb	src/aes.c	299;"	d	file:
-gfm3_sbox	src/aes.c	/^static const uint8_t gfm3_sbox[256] = sb_data(f3);$/;"	v	file:
-gfm_9	src/aes.c	217;"	d	file:
-gfm_9	src/aes.c	300;"	d	file:
-gfm_b	src/aes.c	218;"	d	file:
-gfm_b	src/aes.c	301;"	d	file:
-gfm_d	src/aes.c	219;"	d	file:
-gfm_d	src/aes.c	302;"	d	file:
-gfm_e	src/aes.c	220;"	d	file:
-gfm_e	src/aes.c	303;"	d	file:
-gfmul_9	src/aes.c	/^static const uint8_t gfmul_9[256] = mm_data(f9);$/;"	v	file:
-gfmul_b	src/aes.c	/^static const uint8_t gfmul_b[256] = mm_data(fb);$/;"	v	file:
-gfmul_d	src/aes.c	/^static const uint8_t gfmul_d[256] = mm_data(fd);$/;"	v	file:
-gfmul_e	src/aes.c	/^static const uint8_t gfmul_e[256] = mm_data(fe);$/;"	v	file:
+gf_inv	src/aes.c	/^static uint_8t gf_inv(const uint_8t x)$/;"	f	file:
+gf_inv	swap/aes.c	/^static uint8_t gf_inv(const uint8_t x)$/;"	f	file:
+gfm2_sb	src/aes.c	209;"	d	file:
+gfm2_sb	src/aes.c	292;"	d	file:
+gfm2_sb	swap/aes.c	214;"	d	file:
+gfm2_sb	swap/aes.c	298;"	d	file:
+gfm2_sbox	src/aes.c	/^static const uint_8t gfm2_sbox[256] = sb_data(f2);$/;"	v	file:
+gfm2_sbox	swap/aes.c	/^static const uint8_t gfm2_sbox[256] = sb_data(f2);$/;"	v	file:
+gfm3_sb	src/aes.c	210;"	d	file:
+gfm3_sb	src/aes.c	293;"	d	file:
+gfm3_sb	swap/aes.c	215;"	d	file:
+gfm3_sb	swap/aes.c	299;"	d	file:
+gfm3_sbox	src/aes.c	/^static const uint_8t gfm3_sbox[256] = sb_data(f3);$/;"	v	file:
+gfm3_sbox	swap/aes.c	/^static const uint8_t gfm3_sbox[256] = sb_data(f3);$/;"	v	file:
+gfm_9	src/aes.c	211;"	d	file:
+gfm_9	src/aes.c	294;"	d	file:
+gfm_9	swap/aes.c	217;"	d	file:
+gfm_9	swap/aes.c	300;"	d	file:
+gfm_b	src/aes.c	212;"	d	file:
+gfm_b	src/aes.c	295;"	d	file:
+gfm_b	swap/aes.c	218;"	d	file:
+gfm_b	swap/aes.c	301;"	d	file:
+gfm_d	src/aes.c	213;"	d	file:
+gfm_d	src/aes.c	296;"	d	file:
+gfm_d	swap/aes.c	219;"	d	file:
+gfm_d	swap/aes.c	302;"	d	file:
+gfm_e	src/aes.c	214;"	d	file:
+gfm_e	src/aes.c	297;"	d	file:
+gfm_e	swap/aes.c	220;"	d	file:
+gfm_e	swap/aes.c	303;"	d	file:
+gfmul_9	src/aes.c	/^static const uint_8t gfmul_9[256] = mm_data(f9);$/;"	v	file:
+gfmul_9	swap/aes.c	/^static const uint8_t gfmul_9[256] = mm_data(f9);$/;"	v	file:
+gfmul_b	src/aes.c	/^static const uint_8t gfmul_b[256] = mm_data(fb);$/;"	v	file:
+gfmul_b	swap/aes.c	/^static const uint8_t gfmul_b[256] = mm_data(fb);$/;"	v	file:
+gfmul_d	src/aes.c	/^static const uint_8t gfmul_d[256] = mm_data(fd);$/;"	v	file:
+gfmul_d	swap/aes.c	/^static const uint8_t gfmul_d[256] = mm_data(fd);$/;"	v	file:
+gfmul_e	src/aes.c	/^static const uint_8t gfmul_e[256] = mm_data(fe);$/;"	v	file:
+gfmul_e	swap/aes.c	/^static const uint8_t gfmul_e[256] = mm_data(fe);$/;"	v	file:
 gw_list	src/lora_serv.c	/^static linked_list gw_list;$/;"	v	file:
 gwaddr	inc/handle.h	/^	char    gwaddr[16];$/;"	m	struct:metadata
 gwaddr	inc/handle.h	/^	char gwaddr[16];\/*gateway address*\/$/;"	m	struct:pkt_info
 gwaddr	inc/handle.h	/^	char*  gwaddr;$/;"	m	struct:msg_down
 gweui_hex	inc/handle.h	/^	char gweui_hex[17];\/*gateway address*\/$/;"	m	struct:pkt_info
 gweui_hex	inc/handle.h	/^    char    gweui_hex[17];$/;"	m	struct:metadata
+gwserv	src/lora_serv.c	/^char gwserv[64] = "localhost";$/;"	v
 head	inc/generic_list.h	/^	struct Node* head;$/;"	m	struct:List	typeref:struct:List::Node
 hex_char_to_int	src/parson.c	/^static int hex_char_to_int(char c) {$/;"	f	file:
-hibit	src/aes.c	/^static uint8_t hibit(const uint8_t x)$/;"	f	file:
+hibit	src/aes.c	/^static uint_8t hibit(const uint_8t x)$/;"	f	file:
+hibit	swap/aes.c	/^static uint8_t hibit(const uint8_t x)$/;"	f	file:
 i82hexstr	src/handle.c	/^void i82hexstr(uint8_t* uint, char* str, int size) {$/;"	f
+i82hexstr	swap/handle.c	/^void i82hexstr(uint8_t* uint, char* str, int size) {$/;"	f
 insertupmsg	inc/db.h	/^	sqlite3_stmt* insertupmsg; $/;"	m	struct:context
-inv_affine	src/aes.c	/^uint8_t inv_affine(const uint8_t x)$/;"	f
-inv_mix_sub_columns	src/aes.c	/^  static void inv_mix_sub_columns( uint8_t dt[N_BLOCK] )$/;"	f	file:
-inv_shift_sub_rows	src/aes.c	/^static void inv_shift_sub_rows( uint8_t st[N_BLOCK] )$/;"	f	file:
-is_box	src/aes.c	212;"	d	file:
-is_box	src/aes.c	297;"	d	file:
+inv_affine	src/aes.c	/^uint_8t inv_affine(const uint_8t x)$/;"	f
+inv_affine	swap/aes.c	/^uint8_t inv_affine(const uint8_t x)$/;"	f
+inv_mix_sub_columns	src/aes.c	/^  static void inv_mix_sub_columns( uint_8t dt[N_BLOCK] )$/;"	f	file:
+inv_mix_sub_columns	swap/aes.c	/^  static void inv_mix_sub_columns( uint8_t dt[N_BLOCK] )$/;"	f	file:
+inv_shift_sub_rows	src/aes.c	/^static void inv_shift_sub_rows( uint_8t st[N_BLOCK] )$/;"	f	file:
+inv_shift_sub_rows	swap/aes.c	/^static void inv_shift_sub_rows( uint8_t st[N_BLOCK] )$/;"	f	file:
+is_box	src/aes.c	208;"	d	file:
+is_box	src/aes.c	291;"	d	file:
+is_box	swap/aes.c	212;"	d	file:
+is_box	swap/aes.c	297;"	d	file:
 is_decimal	src/parson.c	/^static int is_decimal(const char *string, size_t length) {$/;"	f	file:
 is_valid_utf8	src/parson.c	/^static int is_valid_utf8(const char *string, size_t string_len) {$/;"	f	file:
-isb_data	src/aes.c	126;"	d	file:
-isbox	src/aes.c	/^static const uint8_t isbox[256] = isb_data(f1);$/;"	v	file:
+isb_data	src/aes.c	128;"	d	file:
+isb_data	swap/aes.c	126;"	d	file:
+isbox	src/aes.c	/^static const uint_8t isbox[256] = isb_data(f1);$/;"	v	file:
+isbox	swap/aes.c	/^static const uint8_t isbox[256] = isb_data(f1);$/;"	v	file:
 items	src/parson.c	/^    JSON_Value **items;$/;"	m	struct:json_array_t	file:
 json_array	src/parson.c	/^JSON_Array * json_array  (const JSON_Value *value) {$/;"	f
 json_array_add	src/parson.c	/^static JSON_Status json_array_add(JSON_Array *array, JSON_Value *value) {$/;"	f	file:
@@ -515,9 +628,11 @@ judge_devaddr	src/db.c	/^static void judge_devaddr(sqlite3_stmt* stmt, void* dat
 judgedevaddr	inc/db.h	/^	sqlite3_stmt* judgedevaddr; $/;"	m	struct:context
 judgejoinrepeat	inc/db.h	/^	sqlite3_stmt* judgejoinrepeat;$/;"	m	struct:context
 judgemsgrepeat	inc/db.h	/^	sqlite3_stmt* judgemsgrepeat; $/;"	m	struct:context
-ksch	inc/aes.h	/^{   uint8_t ksch[(N_MAX_ROUNDS + 1) * N_BLOCK];$/;"	m	struct:__anon1
+ksch	inc/aes.h	/^{   uint_8t ksch[(N_MAX_ROUNDS + 1) * N_BLOCK];$/;"	m	struct:__anon1
+ksch	swap/aes.h	/^{   uint8_t ksch[(N_MAX_ROUNDS + 1) * N_BLOCK];$/;"	m	struct:__anon2
 length	inc/generic_list.h	/^	long  length;$/;"	m	struct:List
-length_type	inc/aes.h	/^typedef uint8_t length_type;$/;"	t
+length_type	inc/aes.h	/^typedef uint_8t length_type;$/;"	t
+length_type	swap/aes.h	/^typedef uint8_t length_type;$/;"	t
 linked_list	inc/generic_list.h	/^}linked_list, *plist;$/;"	t	typeref:struct:List
 list_delete_at_head	src/generic_list.c	/^void list_delete_at_head(plist list, void(*destroy)(void*)) {$/;"	f
 list_destroy	src/generic_list.c	/^void list_destroy(plist list, void(*destroy)(void*)) {$/;"	f
@@ -541,8 +656,10 @@ memcpy1	src/utilities.c	/^void memcpy1( uint8_t *dst, const uint8_t *src, uint16
 memcpyr	src/utilities.c	/^void memcpyr( uint8_t *dst, const uint8_t *src, uint16_t size )$/;"	f
 memset1	src/utilities.c	/^void memset1( uint8_t *dst, uint8_t value, uint16_t size )$/;"	f
 metadata	inc/handle.h	/^struct metadata {$/;"	s
-mix_sub_columns	src/aes.c	/^  static void mix_sub_columns( uint8_t dt[N_BLOCK] )$/;"	f	file:
-mm_data	src/aes.c	160;"	d	file:
+mix_sub_columns	src/aes.c	/^  static void mix_sub_columns( uint_8t dt[N_BLOCK] )$/;"	f	file:
+mix_sub_columns	swap/aes.c	/^  static void mix_sub_columns( uint8_t dt[N_BLOCK] )$/;"	f	file:
+mm_data	src/aes.c	162;"	d	file:
+mm_data	swap/aes.c	160;"	d	file:
 modu	inc/handle.h	/^	char     modu[5];  \/* modulation:LORA or FSK*\/$/;"	m	struct:metadata
 msg_down	inc/handle.h	/^    struct msg_down* msg_down;$/;"	m	struct:jsondata	typeref:struct:jsondata::msg_down
 msg_down	inc/handle.h	/^struct msg_down {$/;"	s
@@ -551,12 +668,10 @@ mx_gw_list	src/lora_serv.c	/^static pthread_mutex_t mx_gw_list = PTHREAD_MUTEX_I
 mx_push	src/lora_serv.c	/^static pthread_mutex_t mx_push = PTHREAD_MUTEX_INITIALIZER; \/* control access to the push_data upstream measurements *\/$/;"	v	file:
 names	src/parson.c	/^    char       **names;$/;"	m	struct:json_object_t	file:
 nb_push_rcv	src/lora_serv.c	/^static uint32_t nb_push_rcv = 0; \/* count push_data packets received *\/$/;"	v	file:
-netserv_addr	src/lora_serv.c	/^static char netserv_addr[64] = STR(GW_SERV_ADDR);$/;"	v	file:
-netserv_port_pull	src/lora_serv.c	/^static char netserv_port_pull[8] = STR(GW_PORT_PULL);$/;"	v	file:
-netserv_port_push	src/lora_serv.c	/^static char netserv_port_push[8] = STR(GW_PORT_PUSH);$/;"	v	file:
 next	inc/generic_list.h	/^	struct Node* next;$/;"	m	struct:Node	typeref:struct:Node::Node
 next	src/utilities.c	/^static uint32_t next = 1;$/;"	v	file:
 ns_msg_handle	src/handle.c	/^void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payload) {$/;"	f
+ns_msg_handle	swap/handle.c	/^void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payload) {$/;"	f
 null	src/parson.c	/^    int          null;$/;"	m	union:json_value_value	file:
 num_bytes_in_utf8_sequence	src/parson.c	/^static int num_bytes_in_utf8_sequence(unsigned char c) {$/;"	f	file:
 number	src/parson.c	/^    double       number;$/;"	m	union:json_value_value	file:
@@ -586,30 +701,48 @@ pkt_payload	inc/handle.h	/^	uint8_t pkt_payload[BUFF_SIZE - 12];\/*packet payloa
 plist	inc/generic_list.h	/^}linked_list, *plist;$/;"	t	typeref:struct:List
 pnode	inc/generic_list.h	/^}list_node, *pnode;$/;"	t	typeref:struct:Node
 process_string	src/parson.c	/^static char* process_string(const char *input, size_t len) {$/;"	f	file:
+pull_port	src/lora_serv.c	/^char pull_port[16] = "1701";$/;"	v
 pull_timeout	src/handle.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+pull_timeout	swap/handle.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+push_port	src/lora_serv.c	/^char push_port[16] = "1700";$/;"	v
 push_timeout_half	src/handle.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+push_timeout_half	swap/handle.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
 rand1	src/utilities.c	/^int32_t rand1( void )$/;"	f
 randr	src/utilities.c	/^int32_t randr( int32_t min, int32_t max )$/;"	f
 read_file	src/parson.c	/^static char * read_file(const char * filename) {$/;"	f	file:
 remove_comments	src/parson.c	/^static void remove_comments(char *string, const char *start_token, const char *end_token) {$/;"	f	file:
-return_type	inc/aes.h	/^typedef uint8_t return_type;$/;"	t
+return_type	inc/aes.h	/^typedef uint_8t return_type;$/;"	t
+return_type	swap/aes.h	/^typedef uint8_t return_type;$/;"	t
 revercpy	src/handle.c	/^void revercpy( uint8_t *dst, const uint8_t *src, int size) {$/;"	f
+revercpy	swap/handle.c	/^void revercpy( uint8_t *dst, const uint8_t *src, int size) {$/;"	f
 rfch	inc/handle.h	/^	uint8_t  rfch;     \/* RF channel*\/$/;"	m	struct:metadata
 rijndael	inc/cmac.h	/^            aes_context    rijndael;$/;"	m	struct:_AES_CMAC_CTX
-rnd	inc/aes.h	/^    uint8_t rnd;$/;"	m	struct:__anon1
+rnd	inc/aes.h	/^    uint_8t rnd;$/;"	m	struct:__anon1
+rnd	swap/aes.h	/^    uint8_t rnd;$/;"	m	struct:__anon2
 rssi	inc/handle.h	/^	float    rssi;	   \/*rssi in dB*\/$/;"	m	struct:metadata
 sBlock	src/LoRaMacCrypto.c	/^static uint8_t sBlock[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
 sCtrlBits	src/handle.c	/^    struct sCtrlBits$/;"	s	union:uLoRaMacFrameCtrl	file:
+sCtrlBits	swap/handle.c	/^    struct sCtrlBits$/;"	s	union:uLoRaMacFrameCtrl	file:
 sDLSBits	src/handle.c	/^	struct sDLSBits{$/;"	s	union:uLoRaMacDLSettings	file:
+sDLSBits	swap/handle.c	/^	struct sDLSBits{$/;"	s	union:uLoRaMacDLSettings	file:
 sHdrBits	src/handle.c	/^    struct sHdrBits$/;"	s	union:uLoRaMacHeader	file:
+sHdrBits	swap/handle.c	/^    struct sHdrBits$/;"	s	union:uLoRaMacHeader	file:
 sRxDBits	src/handle.c	/^	struct sRxDBits{$/;"	s	union:uLoRaMacRxDelay	file:
-s_box	src/aes.c	210;"	d	file:
-s_box	src/aes.c	296;"	d	file:
-sb_data	src/aes.c	92;"	d	file:
-sbox	src/aes.c	/^static const uint8_t sbox[256]  =  sb_data(f1);$/;"	v	file:
+sRxDBits	swap/handle.c	/^	struct sRxDBits{$/;"	s	union:uLoRaMacRxDelay	file:
+s_box	src/aes.c	207;"	d	file:
+s_box	src/aes.c	290;"	d	file:
+s_box	swap/aes.c	210;"	d	file:
+s_box	swap/aes.c	296;"	d	file:
+sb_data	src/aes.c	94;"	d	file:
+sb_data	swap/aes.c	92;"	d	file:
+sbox	src/aes.c	/^static const uint_8t sbox[256]  =  sb_data(f1);$/;"	v	file:
+sbox	swap/aes.c	/^static const uint8_t sbox[256]  =  sb_data(f1);$/;"	v	file:
 serialize_msg_to_gw	src/handle.c	/^void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json_data, uint32_t tmst, int delay) {$/;"	f
+serialize_msg_to_gw	swap/handle.c	/^void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json_data, uint32_t tmst, int delay) {$/;"	f
 set_timer	src/handle.c	/^void set_timer(int sec,int msec) {$/;"	f
-shift_sub_rows	src/aes.c	/^static void shift_sub_rows( uint8_t st[N_BLOCK] )$/;"	f	file:
+set_timer	swap/handle.c	/^void set_timer(int sec,int msec) {$/;"	f
+shift_sub_rows	src/aes.c	/^static void shift_sub_rows( uint_8t st[N_BLOCK] )$/;"	f	file:
+shift_sub_rows	swap/aes.c	/^static void shift_sub_rows( uint8_t st[N_BLOCK] )$/;"	f	file:
 signal_handle	src/lora_serv.c	/^void signal_handle(int signo){$/;"	f
 size	inc/handle.h	/^	uint16_t size;     \/*payload size in bytes*\/$/;"	m	struct:metadata
 skip_quotes	src/parson.c	/^static JSON_Status skip_quotes(const char **string) {$/;"	f	file:
@@ -620,10 +753,13 @@ srand1	src/utilities.c	/^void srand1( uint32_t seed )$/;"	f
 sscanf	src/parson.c	40;"	d	file:
 stat	inc/handle.h	/^	uint8_t  stat;     \/* packet status*\/$/;"	m	struct:metadata
 str2hex	src/handle.c	/^void str2hex(uint8_t* dest, char* src, int len) {$/;"	f
+str2hex	swap/handle.c	/^void str2hex(uint8_t* dest, char* src, int len) {$/;"	f
 string	src/parson.c	/^    char        *string;$/;"	m	union:json_value_value	file:
 tail	inc/generic_list.h	/^	struct Node* tail;$/;"	m	struct:List	typeref:struct:List::Node
 tcp_bind	src/handle.c	/^void tcp_bind(const char* servaddr, const char* port, int* listenfd) {$/;"	f
+tcp_bind	swap/handle.c	/^void tcp_bind(const char* servaddr, const char* port, int* listenfd) {$/;"	f
 tcp_connect	src/handle.c	/^void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit_sig) {$/;"	f
+tcp_connect	swap/handle.c	/^void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit_sig) {$/;"	f
 thread_down	src/lora_serv.c	/^void thread_down(void) {$/;"	f
 thread_up_handle	src/lora_serv.c	/^void thread_up_handle(void* pkt_info) {$/;"	f
 time	inc/handle.h	/^	char     time[28];$/;"	m	struct:metadata
@@ -632,14 +768,25 @@ tmst_g	src/lora_serv.c	/^static uint32_t tmst_g;$/;"	v	file:
 to	inc/handle.h	/^	int to; \/* which server to send to 1.app 2.nc 3.both 4.err 5.ignore *\/$/;"	m	struct:jsondata
 type	src/parson.c	/^    JSON_Value_Type  type;$/;"	m	struct:json_value_t	file:
 uLoRaMacDLSettings	src/handle.c	/^typedef union uLoRaMacDLSettings{$/;"	u	file:
+uLoRaMacDLSettings	swap/handle.c	/^typedef union uLoRaMacDLSettings{$/;"	u	file:
 uLoRaMacFrameCtrl	src/handle.c	/^typedef union uLoRaMacFrameCtrl {$/;"	u	file:
+uLoRaMacFrameCtrl	swap/handle.c	/^typedef union uLoRaMacFrameCtrl {$/;"	u	file:
 uLoRaMacHeader	src/handle.c	/^typedef union uLoRaMacHeader {$/;"	u	file:
+uLoRaMacHeader	swap/handle.c	/^typedef union uLoRaMacHeader {$/;"	u	file:
 uLoRaMacRxDelay	src/handle.c	/^typedef union uLoRaMacRxDelay{$/;"	u	file:
+uLoRaMacRxDelay	swap/handle.c	/^typedef union uLoRaMacRxDelay{$/;"	u	file:
 udp_bind	src/handle.c	/^void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {$/;"	f
-update_decrypt_key_128	src/aes.c	/^static void update_decrypt_key_128( uint8_t k[N_BLOCK], uint8_t *rc )$/;"	f	file:
-update_decrypt_key_256	src/aes.c	/^static void update_decrypt_key_256( uint8_t k[2 * N_BLOCK], uint8_t *rc )$/;"	f	file:
-update_encrypt_key_128	src/aes.c	/^static void update_encrypt_key_128( uint8_t k[N_BLOCK], uint8_t *rc )$/;"	f	file:
-update_encrypt_key_256	src/aes.c	/^static void update_encrypt_key_256( uint8_t k[2 * N_BLOCK], uint8_t *rc )$/;"	f	file:
+udp_bind	swap/handle.c	/^void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {$/;"	f
+uint_32t	src/aes.c	/^  typedef unsigned uint_32t;  \/\/ Edited by Semtech - David Roe 1 Dec 13$/;"	t	file:
+uint_8t	inc/aes.h	/^typedef unsigned char uint_8t;$/;"	t
+update_decrypt_key_128	src/aes.c	/^static void update_decrypt_key_128( uint_8t k[N_BLOCK], uint_8t *rc )$/;"	f	file:
+update_decrypt_key_128	swap/aes.c	/^static void update_decrypt_key_128( uint8_t k[N_BLOCK], uint8_t *rc )$/;"	f	file:
+update_decrypt_key_256	src/aes.c	/^static void update_decrypt_key_256( uint_8t k[2 * N_BLOCK], uint_8t *rc )$/;"	f	file:
+update_decrypt_key_256	swap/aes.c	/^static void update_decrypt_key_256( uint8_t k[2 * N_BLOCK], uint8_t *rc )$/;"	f	file:
+update_encrypt_key_128	src/aes.c	/^static void update_encrypt_key_128( uint_8t k[N_BLOCK], uint_8t *rc )$/;"	f	file:
+update_encrypt_key_128	swap/aes.c	/^static void update_encrypt_key_128( uint8_t k[N_BLOCK], uint8_t *rc )$/;"	f	file:
+update_encrypt_key_256	src/aes.c	/^static void update_encrypt_key_256( uint_8t k[2 * N_BLOCK], uint_8t *rc )$/;"	f	file:
+update_encrypt_key_256	swap/aes.c	/^static void update_encrypt_key_256( uint8_t k[2 * N_BLOCK], uint8_t *rc )$/;"	f	file:
 updatedevinfo	inc/db.h	/^	sqlite3_stmt* updatedevinfo; $/;"	m	struct:context
 value	src/parson.c	/^    JSON_Value_Value value;$/;"	m	struct:json_value_t	file:
 values	src/parson.c	/^    JSON_Value **values;$/;"	m	struct:json_object_t	file:
@@ -647,3 +794,4 @@ verify_utf8_sequence	src/parson.c	/^static int verify_utf8_sequence(const unsign
 wrapping_value	src/parson.c	/^    JSON_Value  *wrapping_value;$/;"	m	struct:json_array_t	file:
 wrapping_value	src/parson.c	/^    JSON_Value  *wrapping_value;$/;"	m	struct:json_object_t	file:
 xor_block	src/aes.c	/^static void xor_block( void *d, const void *s )$/;"	f	file:
+xor_block	swap/aes.c	/^static void xor_block( void *d, const void *s )$/;"	f	file:

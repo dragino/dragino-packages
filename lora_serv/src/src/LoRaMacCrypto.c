@@ -172,16 +172,17 @@ void LoRaMacJoinDecrypt( const uint8_t *buffer, uint16_t size, const uint8_t *ke
 {
     memset1( AesContext.ksch, '\0', 240 );
     aes_set_key( key, 16, &AesContext );
-    aes_encrypt( buffer, decBuffer, &AesContext );
+    aes_decrypt( buffer, decBuffer, &AesContext );
     // Check if optional CFList is included
     if( size >= 16 )
     {
-        aes_encrypt( buffer + 16, decBuffer + 16, &AesContext );
+        aes_decrypt( buffer + 16, decBuffer + 16, &AesContext );
     }
 }
 
 void LoRaMacJoinComputeSKeys( const uint8_t *key, const uint8_t *appNonce, uint16_t devNonce, uint8_t *nwkSKey, uint8_t *appSKey )
 {
+    int i;
     uint8_t nonce[16];
     uint8_t *pDevNonce = ( uint8_t * )&devNonce;
     
@@ -190,14 +191,34 @@ void LoRaMacJoinComputeSKeys( const uint8_t *key, const uint8_t *appNonce, uint1
 
     memset1( nonce, 0, sizeof( nonce ) );
     nonce[0] = 0x01;
+    /*
+    nonce[1] = appNonce[2];
+    nonce[2] = appNonce[1];
+    nonce[3] = appNonce[0];
+    nonce[4] = appNonce[5];
+    nonce[5] = appNonce[4];
+    nonce[6] = appNonce[3];
+    */
     memcpy1( nonce + 1, appNonce, 6 );
-    memcpy1( nonce + 7, pDevNonce, 2 );
+#ifdef BIGENDIAN
+    nonce[7] = pDevNonce[1];
+    nonce[8] = pDevNonce[0];
+#else
+    nonce[7] = pDevNonce[0];
+    nonce[8] = pDevNonce[1];
+#endif
     aes_encrypt( nonce, nwkSKey, &AesContext );
 
     memset1( nonce, 0, sizeof( nonce ) );
     nonce[0] = 0x02;
     memcpy1( nonce + 1, appNonce, 6 );
-    memcpy1( nonce + 7, pDevNonce, 2 );
+#ifdef BIGENDIAN
+    nonce[7] = pDevNonce[1];
+    nonce[8] = pDevNonce[0];
+#else
+    nonce[7] = pDevNonce[0];
+    nonce[8] = pDevNonce[1];
+#endif
     aes_encrypt( nonce, appSKey, &AesContext );
 }
 void LoRaMacJoinEncrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint8_t *encBuffer ){

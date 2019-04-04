@@ -172,12 +172,12 @@ typedef enum eLoRaMacFrameType
 
 void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payload) {
 
-    uint8_t appeui[8] = {'\0'};
-    uint8_t deveui[8] = {'\0'};
+    uint8_t appeui[8];
+    uint8_t deveui[8];
 
     char tempstr[3] = {'\0'};
 
-    struct devinfo devinfo = {'\0'};
+    struct devinfo devinfo;
 
     int i, delay = 0;
 
@@ -188,23 +188,17 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
     LoRaMacFrameCtrl_t fCtrl;
 
     /* json args for parsing data to json string*/
-    char json_string[512] = {'\0'};
+    char json_string[512];
 
     uint32_t fopts_len;/*the size of foptions field*/
     uint8_t adr;       /*indicate if ADR is permitted*/
 
-    char frame_payload[FRAME_LEN] = {'\0'};  /* prepare payload for join accept */
-    uint8_t fpayload[LORAMAC_FRAME_MAXPAYLOAD] = {'\0'}; /*the frame payload of UP_DATE*/
-    uint8_t frame_payload_b64[MAX_NB_B64] = {'\0'};
+    char frame_payload[FRAME_LEN];  /* prepare payload for join accept */
+    uint8_t fpayload[LORAMAC_FRAME_MAXPAYLOAD]; /*the frame payload of UP_DATE*/
+    uint8_t frame_payload_b64[MAX_NB_B64];
 
     uint32_t mic = 0;
     uint32_t cal_mic;/*the MIC value calculated by the payload*/
-
-    MSG_DEBUG(DEBUG_DEBUG, "\nREC PAYLOAD(%ubytes):\n", size);
-    for (i = 0; i < size; i++) {
-        MSG_DEBUG(DEBUG_DEBUG, "%02X", payload[i]);
-    }
-    MSG_DEBUG(DEBUG_DEBUG, "\n================================================\n");
 
     /*analyse the type of the message*/
     macHdr.Value = payload[0];
@@ -221,9 +215,13 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 		    mic |= ((uint32_t)payload[21])<<16;
 		    mic |= ((uint32_t)payload[22])<<24;
 
+            MSG("\nREC PAYLOAD:\n");
+            for (i = 0; i < size; i++) {
+                MSG("%02X", payload[i]);
+            }
+            MSG("\n================================================\n");
 
-		    MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up] JOIN REQUE: appeui=%s, deveui=%s, devnonce=(%04X)\n", 
-                                            devinfo.appeui_hex, devinfo.deveui_hex, devinfo.devnonce);
+		    MSG_DEBUG(DEBUG_INFO, "\nINFO: [up] JOIN REQUE: appeui=%s, deveui=%s, devnonce=(%04X)\n", devinfo.appeui_hex, devinfo.deveui_hex, devinfo.devnonce);
 		    /*judge whether it is a repeated message*/
                     /* select devnonce from devs where deveui = ? and devnonce = ?*/
                     /*
@@ -241,7 +239,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
 		    LoRaMacJoinComputeMic(payload, 23 - 4, devinfo.appkey, &cal_mic);
 
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ appkey={%s}, mic=%04X, cal_mic=%04X\n", devinfo.appkey_hex, mic, cal_mic);
+            MSG_DEBUG(DEBUG_INFO, "\nINFO~ appkey={%s}, mic=%04X, cal_mic=%04X\n", devinfo.appkey_hex, mic, cal_mic);
 
 			/*if mic is wrong,the join request will be ignored*/
 			if (mic != cal_mic) {
@@ -254,24 +252,22 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
                 bin_to_b64(frame_payload, JOIN_ACC_SIZE, frame_payload_b64, MAX_NB_B64);
 
-                i82hexstr(devinfo.appskey, devinfo.appskey_hex, 16);
-                i82hexstr(devinfo.nwkskey, devinfo.nwkskey_hex, 16);
+                memset(devinfo.appskey_hex, 0, sizeof(devinfo.appskey_hex));
+                memset(devinfo.nwkskey_hex, 0, sizeof(devinfo.nwkskey_hex));
 
-                /*
                 for (i = 0; i < 16; i++) {
-                    memset(tempstr, '\0', sizeof(tempstr));
-                    sprintf(tempstr, "%02X", devinfo.appskey[i]);
+                    memset(tempstr, 0, sizeof(tempstr));
+                    snprintf(tempstr, sizeof(tempstr), "%02X", devinfo.appskey[i]);
                     strcat(devinfo.appskey_hex, tempstr);
+                    memset(tempstr, 0, sizeof(tempstr));
+                    snprintf(tempstr, sizeof(tempstr), "%02X", devinfo.nwkskey[i]);
+                    strcat(devinfo.nwkskey_hex, tempstr);
                 }
-                */
 
-                snprintf(devinfo.devaddr_hex, sizeof(devinfo.devaddr_hex), "%08X", devinfo.devaddr);
-                snprintf(devinfo.devnonce_hex, sizeof(devinfo.devnonce_hex), "%06X", devinfo.devnonce_hex);
-
-                MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up]nwkskey=(%s), appskey=(%s)\n", 
+                MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up]nwkskey=(%s), appskey=(%s)\n", 
                         devinfo.nwkskey_hex, devinfo.appskey_hex, devinfo.devaddr);
 
-                /* update or IGNORE devs set devaddr = ?, appskey = ?, nwkskey = ?, devnonce = ? where deveui = ? */
+                /* update or IGNORE devs set devaddr = ?, appskey = ?, nwkskey = ?, devnonce = ? wheredeveui = ? */
                 db_update_devinfo(cntx.updatedevinfo, &devinfo);  /* update device info on database */
 
 				serialize_msg_to_gw(frame_payload_b64, 17, meta->gweui_hex, json_string, meta->tmst, JOIN_ACCEPT_DELAY); 
@@ -304,11 +300,11 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			mic |= ((uint32_t)payload[size - 2])<<16;
 			mic |= ((uint32_t)payload[size - 1])<<24;
 
-			//MSG_DEBUG(DEBUG_DEBUG, "\nINFO~ [up] DATA Receive devaddr=(%08X)\n", devinfo.devaddr);
-
-            snprintf(devinfo.devaddr_hex, sizeof(devinfo.devaddr_hex), "%08X", devinfo.devaddr);
+			MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up] DATA Receive devaddr=(%08X)\n", devinfo.devaddr);
 
             /* select deveui from devs where devaddr = ? */
+            memset(devinfo.deveui_hex, 0, sizeof(devinfo.deveui_hex));
+
 			db_judge_devaddr(cntx.judgedevaddr, &devinfo);
 
 			if (strlen(devinfo.deveui_hex) < 8) {
@@ -329,11 +325,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
             /* select nwkskey from devs where deveui = ? */
 			db_lookup_nwkskey(cntx.lookupnwkskey, &devinfo); 
 
-            i82hexstr(devinfo.nwkskey, devinfo.nwkskey_hex, 16);
-
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up->%u]NWKSKEY:%s\n", meta->fcntup, devinfo.nwkskey_hex);
-
-			LoRaMacComputeMic(payload, size - 4, devinfo.nwkskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, &cal_mic);
+			LoRaMacComputeMic(payload, meta->size - 4, devinfo.nwkskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, &cal_mic);
 			if(cal_mic != mic){
 				MSG("WARNING: [up] push data payload mic is wrong!\n");
 				result->to = IGNORE;
@@ -347,10 +339,10 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
 			LoRaMacPayloadDecrypt(payload, meta->size, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, fpayload);
 
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up]Decrypted: %s\n", fpayload);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [up]Decrypted: %s\n", fpayload);
 
 			/*when the message contains both MAC command and userdata*/
-            /* do nothing */
+                        /* do nothing */
 
 			result->to = IGNORE;
 
@@ -359,7 +351,6 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 		/*proprietary message*/
 		case FRAME_TYPE_PROPRIETARY: {
 			memcpy(fpayload, payload + 1, meta->size - 1);
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up]Payload: %s\n", fpayload);
 			result->to = IGNORE;
 			break;
 		}
@@ -446,7 +437,7 @@ static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t*
 	uint8_t  payload[JOIN_ACC_SIZE];
 	uint8_t index = 0;
 	LoRaMacHeader_t hdr;
-	int rand_num, i;
+	int rand_num;
 	uint8_t appNonce[3];
 	uint8_t NetID[3] = {0x00, 0x00, 0x00};
 	LoRaMacDLSettings_t dls;
@@ -493,25 +484,25 @@ static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t*
 	 *the second argument is corresponding to the LoRaMac.c(v4.0.0)
 	 *it seems that it makes a mistake,because the byte-order is adverse
 	*/
-
-    MSG_DEBUG(DEBUG_DEBUG, "\n=================================================================\nPAYLOAD:");
-    for (i = 0; i <= index; i++) {
-        MSG_DEBUG(DEBUG_DEBUG, "%02X", payload[i]);
-    }
-
 	LoRaMacJoinComputeSKeys(appkey, payload + 1, devnonce, nwkskey, appskey);
 
-    MSG_DEBUG(DEBUG_DEBUG, "\nappnonce:%02X%02X%02X, devaddr:%08X, devnonce:%04X, mic:%08X\n", 
-                                                    appNonce[0], appNonce[1], appNonce[2], devaddr, devnonce, mic);
+    int i;
+    MSG("\n=================================================================\n");
+    MSG("PAYLOAD:");
+    for (i = 0; i <= index; i++) {
+        printf("%02X", payload[i]);
+    }
+
+    MSG("\nappnonce:%02X, devaddr:%08X, devnonce:%04X, mic:%08X\n", appNonce[2], devaddr, devnonce, mic);
 
 	/*encrypt join accept message*/
 	LoRaMacJoinEncrypt(payload + 1, (uint16_t)JOIN_ACC_SIZE - 1, appkey, frame_payload + 1);
 	frame_payload[0] = payload[0];
-    MSG_DEBUG(DEBUG_DEBUG, "\nENPAYLOAD:");
+    MSG("\nENPAYLOAD:");
     for (i = 0; i < JOIN_ACC_SIZE; i++) {
-        MSG_DEBUG(DEBUG_DEBUG, "%02X", frame_payload[i]);
+        printf("%02X", frame_payload[i]);
     }
-    MSG_DEBUG(DEBUG_DEBUG, "\n===============================================================\n");
+    MSG("\n===============================================================\n");
 }
 
 /* ---------------------------------------------------------------------------- */
@@ -544,9 +535,9 @@ void destroy_msg_down(void* msg) {
 
 void i82hexstr(uint8_t* uint, char* str, int size) {
 	/*in case that the str has a value,strcat() seems not safe*/
-	int i;
+	memset(str, 0, size * 2 + 1);
 	char tempstr[3];
-	memset(str, '\0', size * 2 + 1);
+	int i;
 	for (i = 0; i < size; i++) {
 		snprintf(tempstr, sizeof(tempstr), "%02X", uint[i]);
 		strcat(str, tempstr);

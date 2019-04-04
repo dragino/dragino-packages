@@ -11,27 +11,27 @@
 
 #include <sqlite3.h>
 
-#define LOOKUPGWEUI "select gweui from gws where gweui = ?"
-#define JUDGEJOINREPEAT "select appeui from devs where deveui = ? and devnonce = ?"
-#define LOOKUPAPPKEY "select appkey from apps where appeui = ?"
-#define UPDATEDEVINFO "update or ignore devs set devnonce = ?, devaddr = ?, appskey = ?, nwkskey = ? where deveui = ?"
-#define INSERTUPMSG "insert or ignore into upmsg (tmst, datarate, freq, rssi, snr, fcntup, gweui, appeui, deveui, frmpayload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-#define JUDGEDEVADDR "select deveui from devs where devaddr = ?"
-#define JUDGEMSGREPEAT "select deveui from upmsg where deveui = ? and tmst = ?"
-#define LOOKUPNWKSKEY "select nwkskey from devs where deveui = ?"
-#define LOOKUPPROFILE "select rx2datarate, rx2freq, id from gwprofile where id in (select profileid from gws where gweui = ?)"
+#define LOOKUPGWEUI "select gweui from gws where gweui = ?;"
+#define JUDGEJOINREPEAT "select appeui from devs where deveui = ? and devnonce = ?;"
+#define LOOKUPAPPKEY "select appkey from apps where appeui = ?;"
+#define UPDATEDEVINFO "update or ignore devs set devnonce = ?, devaddr = ?, appskey = ?, nwkskey = ? where deveui = ?;"
+#define INSERTUPMSG "insert or ignore into upmsg (tmst, datarate, freq, rssi, snr, fcntup, gweui, appeui, deveui, frmpayload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+#define JUDGEDEVADDR "select deveui from devs where devaddr = ?;"
+#define JUDGEMSGREPEAT "select deveui from upmsg where deveui = ? and tmst = ?;"
+#define LOOKUPNWKSKEY "select nwkskey from devs where deveui = ?;"
+#define LOOKUPPROFILE "select rx2datarate, rx2freq, id from gwprofile where id in (select profileid from gws where gweui = ?);"
 
 #define CREATEDEVS "\
 CREATE TABLE IF NOT EXISTS `devs` (\
   `deveui` TEXT PRIMARY KEY DEFAULT NULL,\
-  `appeui` TEXT DEFAULT 0,\
-  `appskey` TEXT DEFAULT NULL,\
-  `nwkskey` TEXT DEFAULT NULL,\
-  `devaddr` INTEGER DEFAULT NULL,\
+  `appeui` TEXT,\
+  `appskey` TEXT,\
+  `nwkskey` TEXT,\
+  `devaddr` TEXT,\
   `fcntdown` INTEGER DEFAULT 0,\
   `fcntup` INTEGER DEFAULT 0,\
-  `lasttmst` INTEGER NOT NULL DEFAULT 0,\
-  `devnonce` INTEGER DEFAULT 0\
+  `lasttmst` INTEGER DEFAULT 0,\
+  `devnonce` TEXT DEFAULT NULL\
 );"
 
 #define CREATEGWS "\
@@ -101,12 +101,12 @@ CREATE TABLE IF NOT EXISTS `gwprofile` (\
 );"
 
 #define INSERTGWS "INSERT OR IGNORE INTO gws (gweui) VALUES ('A840411B7C5C4150')"
-#define INSERTAPPS "INSERT OR IGNORE INTO apps (appeui, appkey) VALUES ('000C29FFFF189889', '3FF71C74EE5C4F18DFF3705455910AF6')"
-#define INSERTDEVS "INSERT OR IGNORE INTO devs (deveui, appeui) VALUES ('1234590834221467', '000C29FFFF189889')"
+#define INSERTAPPS "INSERT OR IGNORE INTO apps (appeui, appkey) VALUES ('899818FFFF290C00', '3FF71C74EE5C4F18DFF3705455910AF6')"
+#define INSERTDEVS "INSERT OR IGNORE INTO devs (deveui, appeui) VALUES ('6714223408593412', '899818FFFF290C00')"
 #define INSERTGWPROFILE "INSERT OR IGNORE INTO gwprofile (id) VALUES (1)"
 
 #define INITSTMT(SQL, STMT) if (sqlite3_prepare_v2(cntx->db, SQL, -1, &STMT, NULL) != SQLITE_OK) {\
-									printf("failed to prepare sql; %s -> %s\n", SQL, sqlite3_errmsg(cntx->db));\
+									MSG_DEBUG(DEBUG_DEBUG, "failed to prepare sql; %s -> %s\n", SQL, sqlite3_errmsg(cntx->db));\
 									goto out;\
 								}
 
@@ -130,7 +130,7 @@ bool db_judge_joinrepeat(sqlite3_stmt* stmt, void* data);
 bool db_lookup_appkey(sqlite3_stmt* stmt, void* data);
 bool db_update_devinfo(sqlite3_stmt* stmt, void* data);
 bool db_judge_devaddr(sqlite3_stmt* stmt, void* data);
-bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, int tmst);
+bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, uint32_t tmst);
 bool db_lookup_nwkskey(sqlite3_stmt* stmt, void* data);
 bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2freq);
 bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* payload); 

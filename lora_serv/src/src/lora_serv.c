@@ -19,12 +19,12 @@ Maintainer: skerlan
     
 /* log level */
 int DEBUG_INFO = 1;
-int DEBUG_DEBUG = 1;
+int DEBUG_DEBUG = 0;
 int DEBUG_WARNING = 0;
 int DEBUG_ERROR = 1;
 int DEBUG_JOIN = 0;
 int DEBUG_UPDW = 0;
-int DEBUG_SQL = 1;
+int DEBUG_SQL = 0;
 
 char gwserv[64] = "localhost";
 char push_port[16] = "1700";
@@ -97,7 +97,6 @@ int main(int argc, char** argv) {
 		MSG_DEBUG(DEBUG_INFO, "INFO~ Little endian host\n");
 	#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 		MSG_DEBUG(DEBUG_INFO, "INFO~ Big endian host\n");
-        #define BIGENDIAN
 	#else
 		MSG_DEBUG(DEBUG_INFO, "INFO~ Host endiannes is unknown\n");
 	#endif

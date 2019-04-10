@@ -257,14 +257,6 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
                 i82hexstr(devinfo.appskey, devinfo.appskey_hex, 16);
                 i82hexstr(devinfo.nwkskey, devinfo.nwkskey_hex, 16);
 
-                /*
-                for (i = 0; i < 16; i++) {
-                    memset(tempstr, '\0', sizeof(tempstr));
-                    sprintf(tempstr, "%02X", devinfo.appskey[i]);
-                    strcat(devinfo.appskey_hex, tempstr);
-                }
-                */
-
                 snprintf(devinfo.devaddr_hex, sizeof(devinfo.devaddr_hex), "%08X", devinfo.devaddr);
                 snprintf(devinfo.devnonce_hex, sizeof(devinfo.devnonce_hex), "%06X", devinfo.devnonce_hex);
 
@@ -298,7 +290,8 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			meta->fcntup |= (uint16_t)payload[6];
 			meta->fcntup |= ((uint16_t)payload[7])<<8;
 			meta->fport = payload[8 + fopts_len];
-			memcpy(fpayload, payload + 9 + fopts_len, size - 13 - fopts_len);
+            uint16_t fsize = size - 13 - fopts_len;
+			memcpy(fpayload, payload + 9 + fopts_len, fsize);
 			mic |= (uint32_t)payload[size - 4];
 			mic |= ((uint32_t)payload[size - 3])<<8;
 			mic |= ((uint32_t)payload[size - 2])<<16;
@@ -330,12 +323,14 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			db_lookup_nwkskey(cntx.lookupnwkskey, &devinfo); 
 
             i82hexstr(devinfo.nwkskey, devinfo.nwkskey_hex, 16);
+            i82hexstr(devinfo.appskey, devinfo.appskey_hex, 16);
 
             MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up->%u]NWKSKEY:%s\n", meta->fcntup, devinfo.nwkskey_hex);
+            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up->%u]APPSKEY:%s\n", meta->fcntup, devinfo.appskey_hex);
 
 			LoRaMacComputeMic(payload, size - 4, devinfo.nwkskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, &cal_mic);
 			if(cal_mic != mic){
-				MSG("WARNING: [up] push data payload mic is wrong!\n");
+				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] push data payload mic is wrong!\n");
 				result->to = IGNORE;
 				break;
             }
@@ -343,11 +338,16 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
             /* udpate tables insert upmsg */
             /* insert into upmsg (tmst, datarate, freq, rssi, snr, fcntup, gweui, appeui, deveui, frmpayload) values */
                                 
-            db_insert_upmsg(cntx.insertupmsg, &devinfo, meta, payload);
 
-			LoRaMacPayloadDecrypt(payload, meta->size, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, fpayload);
+			LoRaMacPayloadDecrypt(fpayload, fsize, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, frame_payload);
 
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up]Decrypted: %s\n", fpayload);
+            db_insert_upmsg(cntx.insertupmsg, &devinfo, meta, frame_payload);
+
+            MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up%u]Decrypted(%u):", meta->fcntup, fsize);
+            for (i = 0; i < fsize; i++) {
+                MSG_DEBUG(DEBUG_INFO, "%02X", frame_payload[i]);
+            }
+            MSG_DEBUG(DEBUG_INFO, "\n+++++++++++++++++++++++++++++++++++++++++++\n");
 
 			/*when the message contains both MAC command and userdata*/
             /* do nothing */

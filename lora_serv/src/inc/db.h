@@ -2,7 +2,7 @@
  * for sqlite3 databases 
  * db.h 
  *
- *  Created on: Feb 17, 2011
+ *  Created on: FEB 17, 2019
  *      Author: skerlan
  */
 
@@ -12,19 +12,19 @@
 #include <sqlite3.h>
 
 #define LOOKUPGWEUI "select gweui from gws where gweui = ?;"
-#define JUDGEJOINREPEAT "select appeui from devs where deveui = ? and devnonce = ?;"
+#define JUDGEJOINREPEAT "select appid from devs where deveui = ? and devnonce = ?;"
 #define LOOKUPAPPKEY "select appkey from apps where appeui = ?;"
 #define UPDATEDEVINFO "update or ignore devs set devnonce = ?, devaddr = ?, appskey = ?, nwkskey = ? where deveui = ?;"
-#define INSERTUPMSG "insert or ignore into upmsg (tmst, datarate, freq, rssi, snr, fcntup, gweui, appeui, deveui, frmpayload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+#define INSERTUPMSG "insert or ignore into upmsg (tmst, datarate, freq, rssi, snr, fcntup, gweui, appeui, deveui, devaddr, payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
 #define JUDGEDEVADDR "select deveui from devs where devaddr = ?;"
 #define JUDGEMSGREPEAT "select deveui from upmsg where deveui = ? and tmst = ?;"
-#define LOOKUPNWKSKEY "select nwkskey from devs where deveui = ?;"
+#define LOOKUPNWKSKEY "select nwkskey, appskey from devs where deveui = ?;"
 #define LOOKUPPROFILE "select rx2datarate, rx2freq, id from gwprofile where id in (select profileid from gws where gweui = ?);"
 
 #define CREATEDEVS "\
 CREATE TABLE IF NOT EXISTS `devs` (\
   `deveui` TEXT PRIMARY KEY DEFAULT NULL,\
-  `appeui` TEXT,\
+  `appid` TEXT,\
   `appskey` TEXT,\
   `nwkskey` TEXT,\
   `devaddr` TEXT,\
@@ -38,13 +38,11 @@ CREATE TABLE IF NOT EXISTS `devs` (\
 CREATE TABLE IF NOT EXISTS `gws` (\
   `gweui` TEXT PRIMARY KEY NOT NULL,\
   `profileid` INTEGER NOT NULL DEFAULT 1,\
-  `description` TEXT NOT null DEFAULT 'dragino gw',\
+  `description` TEXT NOT null DEFAULT 'draginogw',\
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
   `first_seen_at` TIMESTAMP,\
   `last_seen_at` TIMESTAMP,\
   `maxtxpower_dbm` INTEGER DEFAULT NULL DEFAULT 26,\
-  `allowgpstosetposition` INTEGER NOT NULL DEFAULT 1,\
   `latitude` REAL DEFAULT NULL,\
   `longitude` REAL DEFAULT NULL,\
   `altitude` REAL DEFAULT NULL,\
@@ -60,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `gws` (\
 #define CREATEAPPS "\
 CREATE TABLE IF NOT EXISTS `apps` (\
         `appeui` TEXT PRIMARY KEY NOT NULL,\
-        `description` TEXT,\
+        `name` TEXT UNIQUE,\
         `appkey` TEXT NOT NULL\
 );"
 
@@ -75,16 +73,18 @@ CREATE TABLE IF NOT EXISTS `upmsg` (\
   `snr` REAL DEFAULT NULL,\
   `fcntup` INTEGER NOT NULL default 0,\
   `confirmed` INTEGER NOT NULL default 0,\
-  `frmpayload` BLOB DEFAULT NULL,\
+  `payload` TEXT DEFAULT NULL,\
   `fport` INTEGER NOT NULL default 7,\
   `gweui` TEXT DEFAULT NULL,\
   `appeui` TEXT DEFAULT NULL,\
-  `deveui` TEXT DEFAULT NULL\
+  `deveui` TEXT DEFAULT NULL,\
+  `devaddr` TEXT DEFAULT NULL\
 );"
 
 #define CREATEGWPROFILE "\
 CREATE TABLE IF NOT EXISTS `gwprofile` (\
   `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
+  `name` TEXT UNIQUE,\
   `supportsclassc` INTEGER NOT NULL DEFAULT 1,\
   `classctimeout` INTEGER NOT NULL DEFAULT 0,\
   `macversion` TEXT NOT NULL DEFAULT '1.0.3',\
@@ -100,10 +100,18 @@ CREATE TABLE IF NOT EXISTS `gwprofile` (\
   `32bitfcnt` INTEGER NOT NULL DEFAULT 0\
 );"
 
+#define CREATECFG "\
+CREATE TABLE IF NOT EXISTS `config` (\
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
+  `name` TEXT UNIQUE,\
+  `value` TEXT\
+);"
+
 #define INSERTGWS "INSERT OR IGNORE INTO gws (gweui) VALUES ('A840411B7C5C4150')"
-#define INSERTAPPS "INSERT OR IGNORE INTO apps (appeui, appkey) VALUES ('899818FFFF290C00', '3FF71C74EE5C4F18DFF3705455910AF6')"
-#define INSERTDEVS "INSERT OR IGNORE INTO devs (deveui, appeui) VALUES ('6714223408593412', '899818FFFF290C00')"
-#define INSERTGWPROFILE "INSERT OR IGNORE INTO gwprofile (id) VALUES (1)"
+#define INSERTAPPS "INSERT OR IGNORE INTO apps (name, appeui, appkey) VALUES ('dragino', '899818FFFF290C00', '3FF71C74EE5C4F18DFF3705455910AF6')"
+#define INSERTDEVS "INSERT OR IGNORE INTO devs (deveui, appid) VALUES ('6714223408593412', '899818FFFF290C00')"
+#define INSERTGWPROFILE "INSERT OR IGNORE INTO gwprofile (id, name) VALUES (1, 'EU868')"
+#define INSERTCFG "INSERT OR IGNORE INTO config (name, value) VALUES ('server', 'localhost'), ('upport', '1700'), ('dwport', '1701')"
 
 #define INITSTMT(SQL, STMT) if (sqlite3_prepare_v2(cntx->db, SQL, -1, &STMT, NULL) != SQLITE_OK) {\
 									MSG_DEBUG(DEBUG_DEBUG, "failed to prepare sql; %s -> %s\n", SQL, sqlite3_errmsg(cntx->db));\

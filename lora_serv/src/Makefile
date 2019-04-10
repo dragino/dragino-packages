@@ -6,13 +6,15 @@ CFLAGS := -Iinc
 
 LIBS := -lsqlite3 -lpthread
 
-all: $(APP_NAME)
+LIBNOP := -lsqlite3 
 
-OBJECTS:=$(OBJDIR)/$(APP_NAME).o obj/base64.o obj/parson.o obj/aes.o obj/cmac.o obj/utilities.o obj/LoRaMacCrypto.o obj/generic_list.o obj/db.o obj/handle.o
+all: $(APP_NAME) lw_utili
+
+OBJECTS:=$(OBJDIR)/$(APP_NAME).o $(OBJDIR)/base64.o $(OBJDIR)/parson.o $(OBJDIR)/aes.o $(OBJDIR)/cmac.o $(OBJDIR)/utilities.o $(OBJDIR)/LoRaMacCrypto.o $(OBJDIR)/generic_list.o $(OBJDIR)/db.o $(OBJDIR)/handle.o
 
 clean:
 	rm -f obj/*.o
-	rm -f $(APP_NAME)
+	rm -f $(APP_NAME) lw_utili
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
@@ -44,8 +46,14 @@ $(OBJDIR)/db.o: src/db.c inc/db.h inc/handle.h inc/utilities.h | $(OBJDIR)
 $(OBJDIR)/handle.o: src/handle.c inc/handle.h inc/LoRaMacCrypto.h inc/parson.h inc/db.h | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $< -o $@ 
 
+$(OBJDIR)/lw_utili.o: src/lw_utili.c inc/lw_utili.h | $(OBJDIR) 
+	$(CC) -c $(CFLAGS) $< -o $@ 
+
 $(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c inc/handle.h inc/db.h inc/base64.h inc/parson.h  | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $< -o $@ 
+
+lw_utili: $(OBJDIR)/lw_utili.o
+	$(CC) $(OBJDIR)/lw_utili.o -o $@ $(LIBNOP)
 
 $(APP_NAME): $(OBJECTS)
 	$(CC)  $(OBJECTS) -o $@ $(LIBS)

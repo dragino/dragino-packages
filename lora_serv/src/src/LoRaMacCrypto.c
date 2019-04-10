@@ -126,6 +126,20 @@ void LoRaMacPayloadEncrypt( const uint8_t *buffer, uint16_t size, const uint8_t 
     aBlock[12] = ( sequenceCounter >> 16 ) & 0xFF;
     aBlock[13] = ( sequenceCounter >> 24 ) & 0xFF;
 
+    /* FOR DEBUG 
+    printf("\naBlock:");
+    for (i = 0; i < 16; i++) {
+        printf("%02X", aBlock[i]);
+    }
+    printf("\n+++++++++++++++++++++++++++++++++++++++\n");
+
+    printf("\nSKEY:");
+    for (i = 0; i < 16; i++) {
+        printf("%02X", key[i]);
+    }
+    printf("\n+++++++++++++++++++++++++++++++++++++++\n");
+    */
+
     while( size >= 16 )
     {
         aBlock[15] = ( ( ctr ) & 0xFF );
@@ -143,6 +157,13 @@ void LoRaMacPayloadEncrypt( const uint8_t *buffer, uint16_t size, const uint8_t 
     {
         aBlock[15] = ( ( ctr ) & 0xFF );
         aes_encrypt( aBlock, sBlock, &AesContext );
+        /*
+        printf("\nsBlock:");
+        for (i = 0; i < 16; i++) {
+            printf("%02X", sBlock[i]);
+        }
+        printf("\n+++++++++++++++++++++++++++++++++++++++\n");
+        */
         for( i = 0; i < size; i++ )
         {
             encBuffer[bufferIndex + i] = buffer[bufferIndex + i] ^ sBlock[i];
@@ -176,8 +197,7 @@ void LoRaMacJoinDecrypt( const uint8_t *buffer, uint16_t size, const uint8_t *ke
     // Check if optional CFList is included
     if( size >= 16 )
     {
-        aes_decrypt( buffer + 16, decBuffer + 16, &AesContext );
-    }
+        aes_decrypt( buffer + 16, decBuffer + 16, &AesContext ); }
 }
 
 void LoRaMacJoinComputeSKeys( const uint8_t *key, const uint8_t *appNonce, uint16_t devNonce, uint8_t *nwkSKey, uint8_t *appSKey )

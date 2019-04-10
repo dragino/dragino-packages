@@ -1,10 +1,18 @@
 /*
- * for sqlite3 databases 
- * db.c
- *
- *  Created on: Feb 17, 2019
- *      Author: skerlan
- */
+  ____  ____      _    ____ ___ _   _  ___  
+  |  _ \|  _ \    / \  / ___|_ _| \ | |/ _ \ 
+  | | | | |_) |  / _ \| |  _ | ||  \| | | | |
+  | |_| |  _ <  / ___ \ |_| || || |\  | |_| |
+  |____/|_| \_\/_/   \_\____|___|_| \_|\___/ 
+
+Description:
+    Network server, sqlite3 db.c
+
+License: Revised BSD License, see LICENSE.TXT file include in the project
+
+Maintainer: skerlan
+
+*/
 
 #include <string.h>
 #include <stdbool.h>
@@ -189,7 +197,9 @@ bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* pa
 	sqlite3_bind_text(stmt, 7, meta->gweui_hex, -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 8, devinfo->appeui_hex, -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 9, devinfo->deveui_hex, -1, SQLITE_STATIC);
-	sqlite3_bind_blob(stmt, 10, payload, meta->size, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 9, devinfo->deveui_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 10, devinfo->devaddr_hex, -1, SQLITE_STATIC);
+	sqlite3_bind_text(stmt, 11, payload, -1, SQLITE_STATIC);
     DEBUG_STMT(stmt);
     ret = db_step(stmt, NULL, NULL);
     sqlite3_reset(stmt);
@@ -229,6 +239,7 @@ bool db_lookup_nwkskey(sqlite3_stmt* stmt, void* data) {
     ret = sqlite3_step(stmt);
     if (ret == SQLITE_ROW) {
         str2hex(devinfo->nwkskey, (char *)sqlite3_column_text(stmt, 0), sizeof(devinfo->nwkskey));
+        str2hex(devinfo->appskey, (char *)sqlite3_column_text(stmt, 1), sizeof(devinfo->appskey));
         sqlite3_reset(stmt);
         return true;
     }

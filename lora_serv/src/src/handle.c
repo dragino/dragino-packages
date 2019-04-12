@@ -32,6 +32,8 @@ extern struct context cntx;
 static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; /* cut in half, critical for throughput */
 static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; /* non critical for throughput */
 
+static uint32_t next = 1; 
+
 /*prepare the frame payload and compute the session keys*/
 static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t* appkey, uint32_t devaddr, uint8_t *nwkskey, uint8_t *appskey);
 
@@ -51,18 +53,16 @@ typedef union uLoRaMacHeader {
      */
     struct sHdrBits
     {
-        /*!
-         * Major version
-         */
+        /*!| Major version | RFU | MType | */
+#ifdef BIGENDIAN
         uint8_t MType           : 3;
-        /*!
-         * RFU
-         */
         uint8_t RFU             : 3;
-        /*!
-         * Message type
-         */
         uint8_t Major           : 2;
+#else
+        uint8_t Major           : 2;
+        uint8_t RFU             : 3;
+        uint8_t MType           : 3;
+#endif
     }Bits;
 }LoRaMacHeader_t;
 
@@ -78,26 +78,21 @@ typedef union uLoRaMacFrameCtrl {
     uint8_t Value;
     struct sCtrlBits
     {
-        /*!
-         * ADR control in frame header
-         */
+        /*! | ADR | ADRACKReq | ACK | RFU | FOptsLen | */
+#ifdef BIGENDIAN
         uint8_t Adr             : 1;
-        /*!
-         * ADR acknowledgment request bit
-         */
         uint8_t AdrAckReq       : 1;
-        /*!
-         * Message acknowledge bit
-         */
         uint8_t Ack             : 1;
-        /*!
-         * Frame pending bit
-         */
         uint8_t FPending        : 1;
-        /*!
-         * Frame options length
-         */
         uint8_t FOptsLen        : 4;
+#else
+        /*! | ADR | ADRACKReq | ACK | RFU | FOptsLen | */
+        uint8_t FOptsLen        : 4;
+        uint8_t FPending        : 1;
+        uint8_t Ack             : 1;
+        uint8_t AdrAckReq       : 1;
+        uint8_t Adr             : 1;
+#endif
     }Bits;
 }LoRaMacFrameCtrl_t;
 
@@ -108,9 +103,15 @@ typedef union uLoRaMacFrameCtrl {
 typedef union uLoRaMacDLSettings{
 	uint8_t Value;
 	struct sDLSBits{
+#ifdef BIGENDIAN
 		uint8_t RFU              : 1;
 		uint8_t RX1DRoffset      : 3;
 		uint8_t RX2DataRate      : 4;
+#else
+		uint8_t RX2DataRate      : 4;
+		uint8_t RX1DRoffset      : 3;
+		uint8_t RFU              : 1;
+#endif
 	}Bits;
 }LoRaMacDLSettings_t;
 
@@ -121,8 +122,13 @@ typedef union uLoRaMacDLSettings{
 typedef union uLoRaMacRxDelay{
 	uint8_t Value;
 	struct sRxDBits{
+#ifdef BIGENDIAN
 		uint8_t RFU              : 4;
 		uint8_t Del              : 4;
+#else
+		uint8_t Del              : 4;
+		uint8_t RFU              : 4;
+#endif
 	}Bits;
 }LoRaMacRxDelay_t;
 
@@ -200,11 +206,13 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
     uint32_t mic = 0;
     uint32_t cal_mic;/*the MIC value calculated by the payload*/
 
-    MSG_DEBUG(DEBUG_DEBUG, "\nREC PAYLOAD(%ubytes):\n", size);
+    MSG_DEBUG(DEBUG_DEBUG, "\n-----------------------------------------------------------------\n");
+
+    MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ REC PAYLOAD(%ubytes):\n ", size);
     for (i = 0; i < size; i++) {
         MSG_DEBUG(DEBUG_DEBUG, "%02X", payload[i]);
     }
-    MSG_DEBUG(DEBUG_DEBUG, "\n================================================\n");
+    MSG_DEBUG(DEBUG_DEBUG, "\n-----------------------------------------------------------------\n");
 
     /*analyse the type of the message*/
     macHdr.Value = payload[0];
@@ -221,21 +229,24 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 		    mic |= ((uint32_t)payload[21])<<16;
 		    mic |= ((uint32_t)payload[22])<<24;
 
-
 		    MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up] JOIN REQUE: appeui=%s, deveui=%s, devnonce=(%04X)\n", 
                                             devinfo.appeui_hex, devinfo.deveui_hex, devinfo.devnonce);
 		    /*judge whether it is a repeated message*/
-                    /* select devnonce from devs where deveui = ? and devnonce = ?*/
-                    /*
+            /* select devnonce from devs where deveui = ? and devnonce = ?*/
+            /*
 		    if (db_judge_joinrepeat(cntx.judgejoinrepeat, &devinfo)) {
 			    MSG("WARNING: [up] same devnonce as last.\n");
 			    result->to = IGNORE;
 			    break;
 		    } 
-        */
+            */
 
-        /* select appkey from apps where appeui = ? */
-		    db_lookup_appkey(cntx.lookupappkey, &devinfo); 
+            /* select appkey from apps where appeui = ? */
+		    if (db_lookup_appkey(cntx.lookupappkey, &devinfo) != true) {
+				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] Device not bind to app!\n");
+				result->to = IGNORE;
+                break;
+            }
 
             i82hexstr(devinfo.appkey, devinfo.appkey_hex, 16);
 
@@ -248,7 +259,8 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] join request payload mic is wrong!\n");
 				result->to = IGNORE;
 			} else {
-				srand(time(NULL));
+                next = (next * 12345678) % 9999999UL + (uint32_t)time(NULL);
+				srand(next);
 				devinfo.devaddr = (uint32_t)rand();
 				as_prepare_frame(frame_payload, devinfo.devnonce, devinfo.appkey, devinfo.devaddr, devinfo.nwkskey, devinfo.appskey);
 
@@ -343,11 +355,12 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
             db_insert_upmsg(cntx.insertupmsg, &devinfo, meta, frame_payload);
 
+            MSG_DEBUG(DEBUG_INFO, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
             MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up%u]Decrypted(%u):", meta->fcntup, fsize);
             for (i = 0; i < fsize; i++) {
                 MSG_DEBUG(DEBUG_INFO, "%02X", frame_payload[i]);
             }
-            MSG_DEBUG(DEBUG_INFO, "\n+++++++++++++++++++++++++++++++++++++++++++\n");
+            MSG_DEBUG(DEBUG_INFO, "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
 			/*when the message contains both MAC command and userdata*/
             /* do nothing */

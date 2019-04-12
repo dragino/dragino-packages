@@ -46,9 +46,13 @@ Maintainer: skerlan
 
 #include "LoRaMacCrypto.h"
 
-#define FRAME_LEN               24 /* 17/3*4+1,corresponding to the ashanled.c */
+#define FRAME_LEN 24 /* 17/3*4+1,corresponding to the ashanled.c */
 
-#define DBPATH "/tmp/loraserv"
+#define DBPATH "/etc/loraserv"
+
+#ifdef LG08_LG02
+#define MSGDBPATH "/tmp/msgdb"
+#endif
 
 #define PKT_PUSH_DATA	0
 #define PKT_PUSH_ACK	1
@@ -124,20 +128,34 @@ struct metadata {
 	char    gwaddr[16];
     char    gweui_hex[17];
 	uint32_t tmst;     /*raw time stamp*/
-	char     time[28];
-	uint8_t  chan;     /* IF channel*/
-	uint8_t  rfch;     /* RF channel*/
-	double 	 freq;     /*frequency of IF channel*/
+	char     time[28]; /*UTC time of pkt RX, us precision, ISO 8601 'compact' format*/
+	uint8_t  chan;     /*Concentrator "IF" channel used for RX (unsigned integer)*/
+	uint8_t  rfch;     /*Concentrator "RF chain" used for RX (unsigned integer)*/
+	double 	 freq;     /*RX central frequency in MHz (unsigned float, Hz precision)*/
 	uint8_t  stat;     /* packet status*/
 	char     modu[5];  /* modulation:LORA or FSK*/
 	char     datrl[10];/* data rate for LORA*/
 	uint32_t datrf;    /*data rate for FSK*/
-	char     codr[4];  /*ECC coding rate*/
-	float    lsnr;     /*SNR in dB*/
-	float    rssi;	   /*rssi in dB*/
-	uint16_t size;     /*payload size in bytes*/
+	char     codr[4];  /*LoRa ECC coding rate identifier*/
+	float    lsnr;     /*Lora SNR ratio in dB (signed float, 0.1 dB precision)*/
+	float    rssi;	   /*RSSI in dBm (signed integer, 1 dB precision)*/
+	uint16_t size;     /*RF packet payload size in bytes (unsigned integer)*/
 	uint16_t fcntup;     
 	uint8_t fport;     
+};
+
+struct gwinfo {
+    char* gweui;
+    char time[32];    /*UTC 'system' time of the gateway, ISO 8601 'expanded' format*/
+    float lati;       /*GPS latitude of the gateway in degree (float, N is +)*/
+    float longt;      /*GPS latitude of the gateway in degree (float, E is +)*/
+    float alti;       /*GPS altitude of the gateway in meter RX (integer)*/
+    uint32_t rxnb;    /*Number of radio packets received (unsigned integer)*/
+    uint32_t rxok;    /*Number of radio packets received with a valid PHY CRC*/
+    uint32_t rxfw;    /*Number of radio packets forwarded (unsigned integer)*/
+    uint32_t ackr;    /*Percentage of upstream datagrams that were acknowledged*/
+    uint32_t dwnb;    /*Number of downlink datagrams received (unsigned integer)*/
+    uint32_t txnb;    /*Number of packets emitted (unsigned integer)*/
 };
 
 /* device info for session */

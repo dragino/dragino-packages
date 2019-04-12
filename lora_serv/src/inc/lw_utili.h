@@ -15,13 +15,13 @@
 #include <stdio.h>
 
 #define DBPATH "/etc/loraserv"
-#define MSGDB  "/tmp/loramsg"
+#define MSGDBPATH  "/tmp/msgdb"
 
 #define INITSTMT(SQL, STMT) if (sqlite3_prepare_v2(cntx.db, SQL, -1, &STMT, NULL) != SQLITE_OK) { \
                                 MSG("failed to prepare sql; %s -> %s\n", SQL, sqlite3_errmsg(cntx.db));\
                                 goto out; } 
 #ifdef LG08_LG02
-#define INITMSG(SQL, STMT)  if (sqlite3_prepare_v2(cntx.msgdb, SQL, -1, &STMT, NULL) != SQLITE_OK) { \
+#define INITMSGSTMT(SQL, STMT)  if (sqlite3_prepare_v2(cntx.msgdb, SQL, -1, &STMT, NULL) != SQLITE_OK) { \
                                 MSG("failed to prepare sql; %s -> %s\n", SQL, sqlite3_errmsg(cntx.msgdb));\
                                 goto out; } 
 #endif

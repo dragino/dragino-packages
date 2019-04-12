@@ -37,20 +37,27 @@ static bool db_createtb(struct context* cntx) {
     sqlite3_stmt* createapps = NULL;
     sqlite3_stmt* createupmsg = NULL;
     sqlite3_stmt* creategwprofile = NULL;
+    sqlite3_stmt* createcfg = NULL;
 
     sqlite3_stmt* insertgws = NULL;
     sqlite3_stmt* insertapps = NULL;
     sqlite3_stmt* insertdevs = NULL;
     sqlite3_stmt* insertgwprofile = NULL;
+    sqlite3_stmt* insertcfg = NULL;
 
     INITSTMT(CREATEDEVS, createdevs);
     INITSTMT(CREATEGWS, creategws);
     INITSTMT(CREATEAPPS, createapps);
+#ifdef LG08_LG02
+    INITMSGSTMT(CREATEUPMSG, createupmsg);
+#else
     INITSTMT(CREATEUPMSG, createupmsg);
+#endif
     INITSTMT(CREATEGWPROFILE, creategwprofile);
+    INITSTMT(CREATECFG, createcfg);
 
 
-    sqlite3_stmt* createstmts[] = { createdevs, creategws, createapps, createupmsg, creategwprofile };
+    sqlite3_stmt* createstmts[] = { createdevs, creategws, createapps, createupmsg, creategwprofile, createcfg };
 
 	for (i = 0; i < sizeof(createstmts)/sizeof(createstmts[0]); i++) {
         if (!db_step(createstmts[i], NULL, NULL)) {
@@ -65,8 +72,9 @@ static bool db_createtb(struct context* cntx) {
     INITSTMT(INSERTAPPS, insertapps);
     INITSTMT(INSERTDEVS, insertdevs);
     INITSTMT(INSERTGWPROFILE, insertgwprofile);
+    INITSTMT(INSERTCFG, insertcfg);
 
-    sqlite3_stmt* insertstmts[] = { insertgws, insertapps, insertdevs, insertgwprofile };
+    sqlite3_stmt* insertstmts[] = { insertgws, insertapps, insertdevs, insertgwprofile, insertcfg };
 
 	for (i = 0; i < sizeof(insertstmts)/sizeof(insertstmts[0]); i++) {
         if (!db_step(insertstmts[i], NULL, NULL)) {
@@ -86,7 +94,8 @@ bool db_init(const char* dbpath, struct context* cntx) {
     int i, ret;
 	sqlite3_stmt* stmts[] = { cntx->lookupgweui, cntx->judgejoinrepeat, cntx->lookupappkey,
                               cntx->updatedevinfo, cntx->insertupmsg, cntx->judgedevaddr,
-                              cntx->judgejoinrepeat, cntx->lookupnwkskey, cntx->lookupprofile };
+                              cntx->judgejoinrepeat, cntx->lookupnwkskey, cntx->lookupprofile,
+                              cntx->updategwinfo };
 
 	ret = sqlite3_open(dbpath, &cntx->db);
 	if (ret) {
@@ -94,6 +103,14 @@ bool db_init(const char* dbpath, struct context* cntx) {
 	    sqlite3_close(cntx->db);
 		return false;
 	}
+#ifdef LG08_LG02
+	ret = sqlite3_open(MSGDBPATH, &cntx->msgdb);
+	if (ret) {
+        printf("ERROR: Can't open database: %s\n", sqlite3_errmsg(cntx->msgdb));
+	    sqlite3_close(cntx->msgdb);
+		return false;
+	}
+#endif
 
     if (!db_createtb(cntx))
         goto out;
@@ -102,20 +119,30 @@ bool db_init(const char* dbpath, struct context* cntx) {
     INITSTMT(JUDGEJOINREPEAT, cntx->judgejoinrepeat);
     INITSTMT(LOOKUPAPPKEY, cntx->lookupappkey);
     INITSTMT(UPDATEDEVINFO, cntx->updatedevinfo);
+#ifdef LG08_LG02
+    INITMSGSTMT(INSERTUPMSG, cntx->insertupmsg);
+    INITMSGSTMT(JUDGEMSGREPEAT, cntx->judgemsgrepeat);
+#else
     INITSTMT(INSERTUPMSG, cntx->insertupmsg);
-    INITSTMT(JUDGEDEVADDR, cntx->judgedevaddr);
     INITSTMT(JUDGEMSGREPEAT, cntx->judgemsgrepeat);
+#endif
+    INITSTMT(JUDGEDEVADDR, cntx->judgedevaddr);
     INITSTMT(LOOKUPNWKSKEY, cntx->lookupnwkskey);
     INITSTMT(LOOKUPPROFILE, cntx->lookupprofile);
+    INITSTMT(UPDATEGWINFO, cntx->updategwinfo);
 
 	return true;
 
 out:    
+    MSG("GOTO out!\n");
 	for (i = 0; i < sizeof(stmts)/sizeof(stmts[0]); i++) {
 		sqlite3_finalize(stmts[i]);
 	}
 
 	sqlite3_close(cntx->db);
+#ifdef LG08_LG02
+	sqlite3_close(cntx->msgdb);
+#endif
     return false;
 
 }
@@ -130,11 +157,13 @@ void db_destroy(struct context* cntx) {
 		sqlite3_finalize(cntx->judgemsgrepeat);
 		sqlite3_finalize(cntx->lookupnwkskey);
 		sqlite3_finalize(cntx->lookupprofile);
+		sqlite3_finalize(cntx->updategwinfo);
 		sqlite3_close(cntx->db);
 }
 
 bool db_lookup_gweui(sqlite3_stmt* stmt, char *gweui) {
 	sqlite3_bind_text(stmt, 1, gweui, -1, SQLITE_STATIC);
+    DEBUG_STMT(stmt);
 	int ret = sqlite3_step(stmt);
     sqlite3_reset(stmt);
 	if (ret == SQLITE_ROW) {
@@ -164,10 +193,11 @@ bool db_lookup_appkey(sqlite3_stmt* stmt, void* data) {
     if (ret == SQLITE_ROW) {
         memset1(devinfo->appkey, 0, sizeof(devinfo->appkey));
         str2hex(devinfo->appkey, (char *)sqlite3_column_text(stmt, 0), sizeof(devinfo->appkey));
-        ret = 0;
+        sqlite3_reset(stmt);
+        return true;
     }
     sqlite3_reset(stmt);
-    return ret;
+    return false;
 }
 
 bool db_update_devinfo(sqlite3_stmt* stmt, void* data) {
@@ -178,7 +208,6 @@ bool db_update_devinfo(sqlite3_stmt* stmt, void* data) {
 	sqlite3_bind_text(stmt, 3, devinfo->appskey_hex, -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 4, devinfo->nwkskey_hex, -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 5, devinfo->deveui_hex, -1, SQLITE_STATIC);
-    DEBUG_STMT(stmt);
     ret = db_step(stmt, NULL, NULL);
     sqlite3_reset(stmt);
     return ret;
@@ -200,7 +229,6 @@ bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* pa
 	sqlite3_bind_text(stmt, 9, devinfo->deveui_hex, -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 10, devinfo->devaddr_hex, -1, SQLITE_STATIC);
 	sqlite3_bind_text(stmt, 11, payload, -1, SQLITE_STATIC);
-    DEBUG_STMT(stmt);
     ret = db_step(stmt, NULL, NULL);
     sqlite3_reset(stmt);
     return ret;
@@ -263,8 +291,27 @@ bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2fr
     return ret;
 }
 
+bool db_update_gwinfo(sqlite3_stmt* stmt, void* data) { 
+    struct gwinfo* gwinfo = (struct gwinfo*) data;
+	sqlite3_bind_text(stmt, 1, gwinfo->time, -1, SQLITE_STATIC);
+    sqlite3_bind_double(stmt, 2, gwinfo->lati);
+    sqlite3_bind_double(stmt, 3, gwinfo->longt);
+    sqlite3_bind_double(stmt, 4, gwinfo->alti);
+    sqlite3_bind_int(stmt, 5, gwinfo->rxnb);
+    sqlite3_bind_int(stmt, 6, gwinfo->rxok);
+    sqlite3_bind_int(stmt, 7, gwinfo->rxfw);
+    sqlite3_bind_int(stmt, 8, gwinfo->ackr);
+    sqlite3_bind_int(stmt, 9, gwinfo->dwnb);
+    sqlite3_bind_int(stmt, 10, gwinfo->txnb);
+	sqlite3_bind_text(stmt, 11, gwinfo->gweui, -1, SQLITE_STATIC);
+    int ret = db_step(stmt, NULL, NULL);
+    sqlite3_reset(stmt);
+    return ret;
+}
+
 static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {
 	int ret;
+    DEBUG_STMT(stmt);
 	while (1) {
 		ret = sqlite3_step(stmt);
 		if (ret == SQLITE_DONE) {
@@ -284,7 +331,6 @@ static void lookup_appkey(sqlite3_stmt* stmt, void* data) {
     memset1(devinfo->appkey, 0, sizeof(devinfo->appkey));
     str2hex(devinfo->appkey, (char *)sqlite3_column_text(stmt, 0), sizeof(devinfo->appkey));
 }
-
 
 static void lookup_nwkskey(sqlite3_stmt* stmt, void* data) {
     struct devinfo* devinfo = (struct devinfo*) data;

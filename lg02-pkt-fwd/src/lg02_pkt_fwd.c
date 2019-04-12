@@ -948,9 +948,9 @@ int main(int argc, char *argv[])
                             sprintf(chan_path, "/var/iot/channels/%s", chan_id);
                         else {
                             static unsigned long next = 1;
-                            srand((unsigned)time(NULL)); 
                             next = next * 1103515245 + 12345;
-                            sprintf(chan_path, "/var/iot/receive/%ld", (unsigned)(next/65536) % 32768);
+                            srand((unsigned)time(NULL) + next); 
+                            sprintf(chan_path, "/var/iot/receive/%ld", (unsigned)rand() % 327689);
                         }
                         
                         fp = fopen(chan_path, "w+");

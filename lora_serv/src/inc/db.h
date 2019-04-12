@@ -20,6 +20,7 @@
 #define JUDGEMSGREPEAT "select deveui from upmsg where deveui = ? and tmst = ?;"
 #define LOOKUPNWKSKEY "select nwkskey, appskey from devs where deveui = ?;"
 #define LOOKUPPROFILE "select rx2datarate, rx2freq, id from gwprofile where id in (select profileid from gws where gweui = ?);"
+#define UPDATEGWINFO "update or ignore gws set last_seen_at = ?, lati = ?, longt = ?, alti = ?, rxnb = ?, rxok = ?, rxfw = ?, ackr = ?, dwnb = ?, txnb = ? where gweui = ?;"
 
 #define CREATEDEVS "\
 CREATE TABLE IF NOT EXISTS `devs` (\
@@ -38,21 +39,20 @@ CREATE TABLE IF NOT EXISTS `devs` (\
 CREATE TABLE IF NOT EXISTS `gws` (\
   `gweui` TEXT PRIMARY KEY NOT NULL,\
   `profileid` INTEGER NOT NULL DEFAULT 1,\
-  `description` TEXT NOT null DEFAULT 'draginogw',\
+  `desc` TEXT NOT null DEFAULT 'draginogw',\
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,\
-  `first_seen_at` TIMESTAMP,\
-  `last_seen_at` TIMESTAMP,\
-  `maxtxpower_dbm` INTEGER DEFAULT NULL DEFAULT 26,\
-  `latitude` REAL DEFAULT NULL,\
-  `longitude` REAL DEFAULT NULL,\
-  `altitude` REAL DEFAULT NULL,\
-  `uprecv` INTEGER  DEFAULT 0,\
-  `uprecvok` INTEGER  NOT NULL DEFAULT 0,\
-  `upfwd` INTEGER  NOT NULL DEFAULT 0,\
-  `upack` INTEGER NOT NULL DEFAULT 0,\
-  `downrecv` INTEGER  NOT NULL DEFAULT 0,\
-  `downtrans` INTEGER  NOT NULL DEFAULT 0,\
-  `lastuppacketid` INTEGER  DEFAULT NULL\
+  `last_seen_at` TEXT,\
+  `maxpwdbm` INTEGER DEFAULT NULL DEFAULT 26,\
+  `lati` REAL DEFAULT NULL,\
+  `longt` REAL DEFAULT NULL,\
+  `alti` REAL DEFAULT NULL,\
+  `rxnb` INTEGER  DEFAULT 0,\
+  `rxok` INTEGER  NOT NULL DEFAULT 0,\
+  `rxfw` INTEGER  NOT NULL DEFAULT 0,\
+  `ackr` INTEGER NOT NULL DEFAULT 0,\
+  `dwnb` INTEGER  NOT NULL DEFAULT 0,\
+  `txnb` INTEGER  NOT NULL DEFAULT 0,\
+  `lastrxid` INTEGER  DEFAULT NULL\
 );"
 
 #define CREATEAPPS "\
@@ -103,23 +103,41 @@ CREATE TABLE IF NOT EXISTS `gwprofile` (\
 #define CREATECFG "\
 CREATE TABLE IF NOT EXISTS `config` (\
   `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
-  `name` TEXT UNIQUE,\
+  `cfgid` INTEGER NOT NULL DEFAULT 0,\
+  `section` TEXT NOT NULL DEFAULT 'default',\
+  `option` TEXT,\
   `value` TEXT\
+);"
+
+#define CREATECFGTABLE "\
+CREATE TABLE IF NOT EXISTS `cfgtable` (\
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
+  `config` TEXT UNIQUE\
 );"
 
 #define INSERTGWS "INSERT OR IGNORE INTO gws (gweui) VALUES ('A840411B7C5C4150')"
 #define INSERTAPPS "INSERT OR IGNORE INTO apps (name, appeui, appkey) VALUES ('dragino', '899818FFFF290C00', '3FF71C74EE5C4F18DFF3705455910AF6')"
 #define INSERTDEVS "INSERT OR IGNORE INTO devs (deveui, appid) VALUES ('6714223408593412', '899818FFFF290C00')"
 #define INSERTGWPROFILE "INSERT OR IGNORE INTO gwprofile (id, name) VALUES (1, 'EU868')"
-#define INSERTCFG "INSERT OR IGNORE INTO config (name, value) VALUES ('server', 'localhost'), ('upport', '1700'), ('dwport', '1701')"
+#define INSERTCFG "INSERT OR IGNORE INTO config (option, value) VALUES ('server', 'localhost'), ('upport', '1700'), ('dwport', '1701')"
 
-#define INITSTMT(SQL, STMT) if (sqlite3_prepare_v2(cntx->db, SQL, -1, &STMT, NULL) != SQLITE_OK) {\
-									MSG_DEBUG(DEBUG_DEBUG, "failed to prepare sql; %s -> %s\n", SQL, sqlite3_errmsg(cntx->db));\
+#define INITSTMT(SQL, STMT) if (sqlite3_prepare_v2(cntx->db, SQL, -1, &STMT, NULL) != SQLITE_OK) {  \
+									MSG_DEBUG(DEBUG_DEBUG, "failed to prepare sql; %s -> %s\n", SQL,  sqlite3_errmsg(cntx->db));\
 									goto out;\
 								}
 
+#ifdef LG08_LG02
+#define INITMSGSTMT(SQL, STMT) if (sqlite3_prepare_v2(cntx->msgdb, SQL, -1, &STMT, NULL) != SQLITE_OK) {  \
+									MSG_DEBUG(DEBUG_DEBUG, "failed to prepare sql; %s -> %s\n", SQL, sqlite3_errmsg(cntx->msgdb));\
+									goto out;\
+								}
+#endif
+
 struct context {
 	sqlite3* db;
+#ifdef LG08_LG02
+    sqlite3* msgdb;
+#endif
 	sqlite3_stmt* lookupgweui;
 	sqlite3_stmt* judgejoinrepeat;
 	sqlite3_stmt* lookupappkey;
@@ -129,6 +147,7 @@ struct context {
 	sqlite3_stmt* judgemsgrepeat; 
 	sqlite3_stmt* lookupnwkskey; 
 	sqlite3_stmt* lookupprofile; 
+	sqlite3_stmt* updategwinfo; 
 };
 
 bool db_init(const char* dbpath, struct context* cntx);
@@ -142,5 +161,6 @@ bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, uint32_t tmst);
 bool db_lookup_nwkskey(sqlite3_stmt* stmt, void* data);
 bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2freq);
 bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* payload); 
+bool db_update_gwinfo(sqlite3_stmt* stmt, void* data);
 
 #endif   /* end defined DB_SQLITE3_H_ */

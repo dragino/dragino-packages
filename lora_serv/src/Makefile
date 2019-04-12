@@ -2,7 +2,7 @@ APP_NAME:=lora_serv
 
 OBJDIR = obj
 
-CFLAGS := -Iinc
+CFLAGS := -Iinc -DBIGENDIAN -DLG08_LG02
 
 LIBS := -lsqlite3 -lpthread
 

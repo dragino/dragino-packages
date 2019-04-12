@@ -26,11 +26,7 @@ int DEBUG_JOIN = 0;
 int DEBUG_UPDW = 0;
 int DEBUG_SQL = 0;
 
-char gwserv[64] = "localhost";
-char push_port[16] = "1700";
-char pull_port[16] = "1701";
-
-struct context cntx; /* sqlite3 database context */
+struct context cntx = {'\0'}; /* sqlite3 database context */
 
 /* --- PRIVATE VARIABLES ------------------------------------------- */
 
@@ -38,6 +34,9 @@ struct context cntx; /* sqlite3 database context */
 static int sockfd_push;/*socket for upstream from gateway*/
 static int sockfd_pull;/*socket for downstream to gateway*/
 
+static char gwserv[64] = "localhost";
+static char push_port[16] = "1700";
+static char pull_port[16] = "1701";
 
 /*linked list used for storing json sting for application server and network controller*/
 static linked_list gw_list;
@@ -116,6 +115,11 @@ int main(int argc, char** argv) {
 	udp_bind(gwserv, push_port, &sockfd_push, 1);
 	udp_bind(gwserv, pull_port, &sockfd_pull, 0);
         
+    if (!db_init(DBPATH, &cntx)) {
+		MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] can't create database context\n");
+		exit(EXIT_FAILURE);
+    }
+
 	/*create threads*/
 
 	if (pthread_create(&th_down, NULL, (void*(*)(void*))thread_down, NULL) !=0 ) {
@@ -123,10 +127,6 @@ int main(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
-    if (!db_init(DBPATH, &cntx)) {
-		MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] can't create database context\n");
-		exit(EXIT_FAILURE);
-    }
 
 	while (!exit_sig) {        /* main thread, dispatch PUSH_DATA */
 		msg_len = recvfrom(sockfd_push, buff_push, sizeof(buff_push), 0, (struct sockaddr*)&cliaddr, &addrlen);
@@ -247,10 +247,55 @@ void thread_up_handle(void* pkt_info) {
 	}
 
 	rxpk_arr = json_object_get_array(json_value_get_object(root_val), "rxpk");
-	if (rxpk_arr == NULL) {
-	    rxpk_arr = json_object_get_array(json_value_get_object(root_val), "stat");
-        if (rxpk_arr != NULL) 
-            MSG_DEBUG(DEBUG_INFO, "Receive a packet_%d push_data of gw status\n", pkt.pkt_no);
+	if (rxpk_arr == NULL) {  /* process gateway status */
+	    rxpk_obj = json_object_get_object(json_value_get_object(root_val), "stat");
+        if (rxpk_obj != NULL) { 
+            struct gwinfo gwinfo = {'\0'};
+            gwinfo.gweui = pkt.gweui_hex;
+            val = json_object_get_value(rxpk_obj, "time");
+            if (val != NULL) {
+                strcpy(gwinfo.time, json_value_get_string(val)); 
+            }
+            val = json_object_get_value(rxpk_obj, "lati");
+            if (val != NULL) {
+                gwinfo.lati = (double)json_value_get_number(val);
+            }
+            val = json_object_get_value(rxpk_obj, "longt");
+            if (val != NULL) {
+                gwinfo.longt = (double)json_value_get_number(val);
+            }
+            val = json_object_get_value(rxpk_obj, "alti");
+            if (val != NULL) {
+                gwinfo.alti = (double)json_value_get_number(val);
+            }
+            val = json_object_get_value(rxpk_obj, "rxnb");
+            if (val != NULL) {
+                gwinfo.rxnb = (uint32_t)json_value_get_number(val);
+            }
+            val = json_object_get_value(rxpk_obj, "rxok");
+            if (val != NULL) {
+                gwinfo.rxok = (uint32_t)json_value_get_number(val);
+            }
+            val = json_object_get_value(rxpk_obj, "rxfw");
+            if (val != NULL) {
+                gwinfo.rxfw = (uint32_t)json_value_get_number(val);
+            }
+            val = json_object_get_value(rxpk_obj, "ackr");
+            if (val != NULL) {
+                gwinfo.ackr = (uint32_t)json_value_get_number(val);
+            }
+            val = json_object_get_value(rxpk_obj, "dwnb");
+            if (val != NULL) {
+                gwinfo.dwnb = (uint32_t)json_value_get_number(val);
+            }
+            val = json_object_get_value(rxpk_obj, "txnb");
+            if (val != NULL) {
+                gwinfo.txnb = (uint32_t)json_value_get_number(val);
+            }
+            if (db_update_gwinfo(cntx.updategwinfo, &gwinfo)) {
+                MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ [up] GWEUI(%s) update status!\n", gwinfo.gweui);
+            }
+        }
         goto thread_out;
 	}
 
@@ -263,7 +308,6 @@ void thread_up_handle(void* pkt_info) {
 		memset(&meta_data, 0, sizeof(meta_data));
 		strcpy(meta_data.gwaddr, pkt.gwaddr);
 		strcpy(meta_data.gweui_hex, pkt.gweui_hex);
-
 
 		val = json_object_get_value(rxpk_obj, "tmst");
 		if (val != NULL) {
@@ -355,7 +399,7 @@ void thread_up_handle(void* pkt_info) {
 
 thread_out:
     //sprintf(tempstr, "EXIT HANDLE PKT%d", pkt.pkt_no);
-    MSG_DEBUG(DEBUG_INFO, "INFO~ [handel-up] EXIT HANDLE PKT%d\n", pkt.pkt_no);
+    //MSG_DEBUG(DEBUG_INFO, "INFO~ [handel-up] EXIT HANDLE PKT%d\n", pkt.pkt_no);
 	json_value_free(root_val);
 	pthread_exit(NULL);
 }
@@ -363,6 +407,8 @@ thread_out:
 void thread_down(void) {
 	int pkt_no = 0;
 	int msg_len;/*length of buffer received*/
+	uint8_t gweui[8];
+    char gweui_hex[17] = {'\0'};
 	uint8_t buff_pull[12]; /* buffer of PULL_DATA*/
 	uint8_t buff_pull_ack[4];/*buffer to confirm the PULL_DATA*/
 	uint8_t buff_pull_resp[JSON_MAX + 4];/*buffer of PULL_RESP*/
@@ -389,15 +435,26 @@ void thread_down(void) {
 				/*thread_down socket is shut down*/
 				break;
 			} else {
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] the data size is 0 ,just ignore\n");
+				MSG_DEBUG(DEBUG_WARNING, "WARNING~ [pull] the data size is 0 ,just ignore\n");
 				continue;
 			}
 		}
 		/* if the datagram does not respect the format of PULL DATA, just ignore it */
 		if (msg_len < 4 || buff_pull[0] != VERSION || buff_pull[3] != PKT_PULL_DATA){
-			MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] pull data invalid,just ignore\n");
+			MSG_DEBUG(DEBUG_WARNING, "WARNING~ [pull] pull data invalid,just ignore\n");
 			continue;
 		}
+
+        memset(gweui, 0, sizeof(gweui));
+        memset(gweui_hex, 0, sizeof(gweui_hex));
+
+		memcpy(gweui, buff_pull + 4, 8);
+		i82hexstr(gweui, gweui_hex, 8);
+
+        if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
+	        MSG_DEBUG(DEBUG_WARNING, "WARNING~ [pull] GWEUI(%s) NOT REGISTER !\n", gweui_hex);
+            continue;
+        }
 
 		if (buff_pull[3] == PKT_PULL_DATA) {
 			pkt_no++;

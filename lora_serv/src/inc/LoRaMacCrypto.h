@@ -37,8 +37,6 @@
 #ifndef __LORAMAC_CRYPTO_H__
 #define __LORAMAC_CRYPTO_H__
 
-#define BIGENDIAN
-
 /*!
  * Computes the LoRaMAC frame MIC field
  *

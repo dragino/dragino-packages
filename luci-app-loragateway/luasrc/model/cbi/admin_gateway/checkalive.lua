@@ -1,4 +1,4 @@
- m = Map("gateway", translate("Network checkalive"), translate("Configuration to check network if alive"))
+ m = Map("netalive", translate("Network checkalive"), translate("Configuration to check network if alive"))
  s = m:section(NamedSection, "netalive", "Network", translate("Network checking alive"))
 
  local checkalive = s:option(Flag, "checkalive", translate("Enabled checking"))

@@ -67,7 +67,7 @@ sp.default = "1700"
 
 local dport = s:option(Value, "dwport", translate("Server dwonstream Port"))
 dport.datatype = "port"
-dport.default = "1701"
+dport.default = "1700"
 
 local gid = s:option(Value, "GWID", translate("Gateway ID"))
 gid.placeholder = "Gateway ID from Server"

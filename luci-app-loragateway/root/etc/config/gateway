@@ -30,3 +30,5 @@ config settings 'general'
 config settings 'radio1'
 
 config settings 'radio2'
+
+config settings 'netalive'

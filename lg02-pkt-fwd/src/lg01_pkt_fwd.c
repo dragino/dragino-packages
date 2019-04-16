@@ -91,8 +91,9 @@ static uint64_t lgwm = 0; /* Lora gateway MAC address */
 static char provider[16] = "provider";
 static char server[64] = {'\0'}; /* address of the server (host name or IPv4/IPv6) */
 static char port[8] = "port"; /* server port for upstream traffic */
+static char dwport[8] = "dwport"; /* server port for upstream traffic */
 static char serv_port_down[8] = "1700"; /* server port for downstream traffic */
-static char serv_port_up[8] = "1700"; /* server port for downstream traffic */
+static char serv_port_up[8] = "1700"; /* server port for upstream traffic */
 static int keepalive_time = DEFAULT_KEEPALIVE; /* send a PULL_DATA request every X seconds, negative = disabled */
 static char platform[16] = "LG01/OLG01";  /* platform definition */
 static char description[16] = "DESC";                        /* used for free form description */
@@ -472,8 +473,13 @@ int main(int argc, char *argv[])
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
     }
 
+    if (!get_config("general", dwport, 8)){
+        strcpy(dwport, "1700");
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
+    }
+
     strcpy(serv_port_up, port);
-    strcpy(serv_port_down, port);
+    strcpy(serv_port_down, dwport);
 
     if (!get_config("general", email, 32)){
         strcpy(email, "dragino@dragino.com");

@@ -42,6 +42,7 @@ function index()
     entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("TCP_Client"), 4)
     entry({"admin", "gateway", "tcp_channel"}, cbi("admin_gateway/sub/tcp_channel"), nil).leaf = true
     entry({"admin", "gateway", "customized_script"}, cbi("admin_gateway/customized_script"), _("Customized Script"), 5)
+    entry({"admin", "gateway", "checkalive"}, cbi("admin_gateway/checkalive"), _("Network checkalive"), 6)
     entry({"admin", "gateway", "lgwlog"}, template("admin_status/lgwlog"), _("Logread"), 20).leaf = true
     entry({"admin", "gateway", "lgwlog_action"}, post("lgwlog_action")).leaf = true
 	

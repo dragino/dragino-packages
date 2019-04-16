@@ -61,9 +61,13 @@ ttn_addr:value("as923.thethings.meshed.com.au", "meshed-router")
 ttn_addr:value("ttn.opennetworkinfrastructure.org", "switch-router")
 ttn_addr:value("router.cn.thethings.network", "router.cn.thethings.network")
 
-local sp = s:option(Value, "port", translate("Server Port"))
+local sp = s:option(Value, "port", translate("Server upstream Port"))
 sp.datatype = "port"
 sp.default = "1700"
+
+local dport = s:option(Value, "dwport", translate("Server dwonstream Port"))
+dport.datatype = "port"
+dport.default = "1701"
 
 local gid = s:option(Value, "GWID", translate("Gateway ID"))
 gid.placeholder = "Gateway ID from Server"

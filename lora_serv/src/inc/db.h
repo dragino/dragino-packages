@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `upmsg` (\
   `confirmed` INTEGER NOT NULL default 0,\
   `payload` TEXT DEFAULT NULL,\
   `fport` INTEGER NOT NULL default 7,\
+  `push` INTEGER NOT NULL DEFAULT 0,\
   `gweui` TEXT DEFAULT NULL,\
   `appeui` TEXT DEFAULT NULL,\
   `deveui` TEXT DEFAULT NULL,\

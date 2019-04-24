@@ -43,6 +43,10 @@ extern int optind, opterr, optopt;
 #define OPT_APPEUI                        (18)
 #define OPT_UPGW                          (19)
 #define OPT_DELETE                        (20)
+#define OPT_APPKEY                        (21)
+#define OPT_APPSKEY                       (22)
+#define OPT_NWKSKEY                       (23)
+#define OPT_ADDABP                        (24)
 
 #define CMD_ADDGW                           1
 #define CMD_LISTGW                          2
@@ -55,7 +59,9 @@ extern int optind, opterr, optopt;
 #define CMD_LISTMSG                         9
 #define CMD_UPGW                            10
 #define CMD_DELETE                          11
+#define CMD_ADDABP                          12
 
+#define NAMELEN            8 
 #define KEYLEN             16
 #define APPKEYLEN          32
 #define KEYHEXS            128 
@@ -82,6 +88,7 @@ static void listdev(sqlite3_stmt *stmt, void* data);
 static void listmsg(sqlite3_stmt *stmt, void* data);
 
 static char *genkey(char *key, uint8_t len);
+static char *genname(char *name, uint8_t len);
 static char *invert(char *dst, const char *src, uint8_t len);
 static char *tohex(char *dst, const char *src, uint8_t len);
 
@@ -102,12 +109,16 @@ struct option app_long_options[] = {
     {"rx2dr",       required_argument,      0,      OPT_RX2DR},
     {"rx2freq",     required_argument,      0,      OPT_RX2FREQ},
     {"adddev",            no_argument,      0,      OPT_ADDDEV},
+    {"addabp",            no_argument,      0,      OPT_ADDABP},
     {"listdev",           no_argument,      0,      OPT_LISTDEV},
     {"listmsg",           no_argument,      0,      OPT_LISTMSG},
     {"devaddr",     required_argument,      0,      OPT_DEVADDR},
     {"deveui",      required_argument,      0,      OPT_DEVEUI},
     {"gweui",       required_argument,      0,      OPT_GWEUI},
     {"appeui",      required_argument,      0,      OPT_APPEUI},
+    {"appkey",      required_argument,      0,      OPT_APPKEY},
+    {"appskey",     required_argument,      0,      OPT_APPSKEY},
+    {"nwkskey",     required_argument,      0,      OPT_NWKSKEY},
     {"delete",            no_argument,      0,      OPT_DELETE},
     {0,             0,                      0,      0},
 };
@@ -196,6 +207,7 @@ static void show_help() {
     MSG("e.g. add a application: lw_utili --addapp --appname dragino\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--adddev              add a device return DEVEUI APPEUI and APPKEY\n");
+    MSG("--addabp              add a device for ABP\n");
     MSG("--listdev             list all devices info, or the device index by deveui\n");
     MSG("\n");
     MSG("e.g. add a device:    lw_utili --adddev --appname dragino\n");
@@ -205,6 +217,10 @@ static void show_help() {
     MSG("--deveui   <hex>      devaddr\n"     );
     MSG("--appeui   <hex>      appaddr\n"     );
     MSG("--gweui    <hex>      gwaddr\n"     );
+    MSG("\n--------------------------------------------------------------------------------\n");
+    MSG("--appkey   <hex>      appkey\n"     );
+    MSG("--appskey  <hex>      appskey\n"     );
+    MSG("--nwkskey  <hex>      nwkskey\n"     );
     MSG("\n");
     MSG("e.g. listmsg by devaddr: lw_utili --listmsg --devaddr aabbccdd\n");
     MSG("\n--------------------------------------------------------------------------------\n");
@@ -247,7 +263,17 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
             break;
         case OPT_UPGW:
             MSG(">>>>>>>>>>>>>>>>>>>>>>UPGW CMD>>>>>>>>>>>>>>>>>>>>>>\n");
-            cntx->cmd = CMD_UPGW;
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->gweui, optarg, sizeof(cntx->gweui));
+                    cntx->cmd = CMD_UPGW;
+                }        
+            } else {
+                MSG("UPGW: gweui option missing!\n");
+                return -1;
+            }
             break;
         case OPT_ADDPF:
             MSG(">>>>>>>>>>>>>>>>>>>>>>ADDPF CMD>>>>>>>>>>>>>>>>>>>>>>\n");
@@ -268,6 +294,10 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
         case OPT_ADDDEV:
             MSG(">>>>>>>>>>>>>>>>>>>>>>ADDDEV CMD>>>>>>>>>>>>>>>>>>>>>>\n");
             cntx->cmd = CMD_ADDDEV;
+            break; 
+        case OPT_ADDABP:
+            MSG(">>>>>>>>>>>>>>>>>>>>>>ADDABP CMD>>>>>>>>>>>>>>>>>>>>>>\n");
+            cntx->cmd = CMD_ADDABP;
             break; 
         case OPT_LISTDEV:
             MSG(">>>>>>>>>>>>>>>>>>>>>>LISTDEV CMD>>>>>>>>>>>>>>>>>>>>>\n");
@@ -385,7 +415,43 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->appeui, optarg, sizeof(cntx->appeui));
                 }        
             } else {
-                MSG("WARNING~ Input the APPEUI!\n");
+                MSG("WARNING~ need input APPEUI!\n");
+                return -1;
+            }       
+            break;
+        case OPT_APPKEY:
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->appkey, optarg, sizeof(cntx->appkey));
+                }        
+            } else {
+                MSG("WARNING~ Need input APPKEY!\n");
+                return -1;
+            }       
+            break;
+        case OPT_APPSKEY:
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->appskey, optarg, sizeof(cntx->appskey));
+                }        
+            } else {
+                MSG("WARNING~ Input the APPSKEY!\n");
+                return -1;
+            }       
+            break;
+        case OPT_NWKSKEY:
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->nwkskey, optarg, sizeof(cntx->nwkskey));
+                }        
+            } else {
+                MSG("WARNING~ Input the NWKSKEY!\n");
                 return -1;
             }       
             break;
@@ -416,6 +482,11 @@ void main(int argc, char *argv[]) {
     char colum[16] = {'\0'};
     char table[16] = {'\0'};
 
+    char tmpchar[32] = {'\0'};
+
+    int ret;
+
+
     db_init(DBPATH, &cntx);
 
     if (app_getopt(&cntx, argc, argv))
@@ -432,7 +503,7 @@ void main(int argc, char *argv[]) {
                 snprintf(sql, sizeof(sql), "select id from gwprofile where id = %d", cntx.pfid);
                 INITSTMT(sql, cntx.stmt);
                 DEBUG_STMT(cntx.stmt);
-                int ret = sqlite3_step(cntx.stmt);
+                ret = sqlite3_step(cntx.stmt);
                 if (ret != SQLITE_ROW) {
                     MSG("\nid:%d not a valid profileid, use --listpf to get a valid profileid\n", cntx.pfid);
                     goto out;
@@ -471,10 +542,11 @@ void main(int argc, char *argv[]) {
             break;
 
         case CMD_UPGW:
+            printf("gweui=%s, pfid=%d\n", cntx.gweui, cntx.pfid);
             if ((strlen(cntx.gweui) > 0) && cntx.pfid > 0) { 
                 snprintf(sql, sizeof(sql), "SELECT name FROM gwprofile where id = %d", cntx.pfid);
                 INITSTMT(sql, cntx.stmt);
-                int ret = sqlite3_step(cntx.stmt);
+                ret = sqlite3_step(cntx.stmt);
                 if (ret != SQLITE_ROW) {
                     MSG("WARNING~ not a valid profile id , check by lw_utili --listpf\n");
                     goto out;
@@ -538,7 +610,7 @@ void main(int argc, char *argv[]) {
             snprintf(sql, sizeof(sql), "select appeui, appkey from apps where name = '%s'", cntx.appname);
             INITSTMT(sql, cntx.stmt);
             DEBUG_STMT(cntx.stmt);
-            int ret = sqlite3_step(cntx.stmt);
+            ret = sqlite3_step(cntx.stmt);
             if (ret != SQLITE_ROW) {
                 MSG("\nappname:%s not a valid appname, use --listapp to get a valid appname\n", cntx.appname);
                 goto out;
@@ -572,6 +644,39 @@ void main(int argc, char *argv[]) {
                 }
             } 
                 
+            break;
+        case CMD_ADDABP:
+            if ((strlen(cntx.deveui) < 1) || (strlen(cntx.devaddr) < 1) ||
+                                            (strlen(cntx.appeui) < 1) ||
+                                            (strlen(cntx.appkey) < 1) ||
+                                            (strlen(cntx.appskey) < 1) ||
+                                            (strlen(cntx.nwkskey) < 1)) {
+                MSG("ADDABP need options: deveui, devaddr, appeui, appkey, appskey, nwkskey\n");
+                MSG("e.g. lw_utili --addabp --deveui <hex> --devaddr <hex> --appeui <hex> --appkey <hex> --appskey <hex> --nwkskey <hex>\n");
+                goto out;
+            }
+            snprintf(sql, sizeof(sql), "select appkey from apps where appeui = '%s'", cntx.appeui);
+            INITSTMT(sql, cntx.stmt);
+            DEBUG_STMT(cntx.stmt);
+            sqlite3_step(cntx.stmt);
+            if (ret == SQLITE_ROW) {
+                strcpy(cntx.appname, sqlite3_column_text(cntx.stmt, 0));
+            } else {
+                sqlite3_finalize(cntx.stmt);
+                snprintf(sql, sizeof(sql), "insert into apps (appeui, appkey, name) values ('%s', '%s', '%s')", 
+                        cntx.appeui, cntx.appkey, genname(tmpchar, NAMELEN));
+                INITSTMT(sql, cntx.stmt);
+                db_step(cntx.stmt, NULL, NULL);  /* add new apps */
+            }
+            sqlite3_finalize(cntx.stmt);
+            snprintf(sql, sizeof(sql), "insert into devs (deveui, devaddr, appid, appskey, nwkskey)\
+                    values ('%s', '%s', '%s', '%s', '%s')", cntx.deveui, cntx.devaddr, cntx.appeui, cntx.appskey, cntx.nwkskey);
+            INITSTMT(sql, cntx.stmt);
+            if (db_step(cntx.stmt, NULL, NULL)) {  /* add new devs for abp*/
+                MSG("AddABP device FAILED\n");
+                goto out;
+            }
+
             break;
 
         case CMD_LISTDEV:
@@ -757,6 +862,22 @@ static char *genkey(char *key, uint8_t len) {
     }
     
     return key;
+}
+
+static char *genname(char *name, uint8_t len) {
+    int i;
+    static unsigned long next = 1;
+    char alpha[64] = "abcdefghijklmnopqrstuvwxyz0ABCDEFGHIJKLMNOPQRSTUVWXYZ-123456789";
+                      
+    for (i = 0; i < len; i++) {
+        next = next * 11 + (unsigned int long)rand();
+        srand((unsigned int)(time(NULL) + next));
+        name[i] = alpha[rand() % 64];
+    }
+
+    name[i] = '\0';
+    
+    return name;
 }
 
 static char *invert(char *dst, const char *src, uint8_t len) {

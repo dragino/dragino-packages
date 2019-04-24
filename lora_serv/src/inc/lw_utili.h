@@ -46,6 +46,9 @@ struct lw_t {
     char deveui[17];
     char appeui[17];
     char devaddr[9];
+    char appkey[33];
+    char appskey[33];
+    char nwkskey[33];
     uint8_t cmd;
     uint8_t rx2dr;
     uint8_t pfid;

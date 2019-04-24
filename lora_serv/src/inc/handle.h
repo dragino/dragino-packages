@@ -52,6 +52,7 @@ Maintainer: skerlan
 
 #ifdef LG08_LG02
 #define MSGDBPATH "/tmp/msgdb"
+#define PUSHPATH "/var/iot/channels"
 #endif
 
 #define PKT_PUSH_DATA	0

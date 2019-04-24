@@ -361,6 +361,19 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
                 MSG_DEBUG(DEBUG_INFO, "%02X", frame_payload[i]);
             }
             MSG_DEBUG(DEBUG_INFO, "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+#ifdef LG08_LG02
+            FILE *fp;
+            char pushpath[128];
+            snprintf(pushpath, sizeof(pushpath), "%s/%s", PUSHPATH, devinfo.devaddr_hex);
+            fp = fopen(PUSHPATH, "w+"); 
+            if (NULL == fp) 
+                MSG_DEBUG(DEBUG_INFO, "Fail to open puath: %s\n", pushpath);
+            else {
+                fprintf(fp, "%s", frame_payload);
+                fflush(fp);
+                fclose(fp);
+            }
+#endif
 
 			/*when the message contains both MAC command and userdata*/
             /* do nothing */

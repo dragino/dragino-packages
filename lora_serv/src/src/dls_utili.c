@@ -109,7 +109,7 @@ struct option app_long_options[] = {
     {"rx2dr",       required_argument,      0,      OPT_RX2DR},
     {"rx2freq",     required_argument,      0,      OPT_RX2FREQ},
     {"adddev",            no_argument,      0,      OPT_ADDDEV},
-    {"addabp",            no_argument,      0,      OPT_ADDABP},
+    {"mandev",            no_argument,      0,      OPT_ADDABP},
     {"listdev",           no_argument,      0,      OPT_LISTDEV},
     {"listmsg",           no_argument,      0,      OPT_LISTMSG},
     {"devaddr",     required_argument,      0,      OPT_DEVADDR},
@@ -207,7 +207,7 @@ static void show_help() {
     MSG("e.g. add a application: dls_utili --addapp --appname dragino\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--adddev              add a device return DEVEUI APPEUI and APPKEY\n");
-    MSG("--addabp              add a device for ABP\n");
+    MSG("--mandev              add a device by manual\n");
     MSG("--listdev             list all devices info, or the device index by deveui\n");
     MSG("\n");
     MSG("e.g. add a device:    dls_utili --adddev --appname dragino\n");
@@ -297,7 +297,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
             cntx->cmd = CMD_ADDDEV;
             break; 
         case OPT_ADDABP:
-            MSG(">>>>>>>>>>>>>>>>>>>>>>ADDABP CMD>>>>>>>>>>>>>>>>>>>>>>\n");
+            MSG(">>>>>>>>>>>>>>>>>>>>>>MANDEV CMD>>>>>>>>>>>>>>>>>>>>>>\n");
             cntx->cmd = CMD_ADDABP;
             break; 
         case OPT_LISTDEV:
@@ -530,7 +530,7 @@ void main(int argc, char *argv[]) {
             break;
 
         case CMD_ADDPF:
-            if ((strlen(cntx.pfname) < 1) || cntx.rx2dr < -1 || cntx.rx2dr > 6) {
+            if ((strlen(cntx.pfname) < 1) || cntx.rx2dr < -1 || cntx.rx2dr > 12) {
                 MSG("WARNING! Wrong option: pfname=%s, rx2dr=%u, rx2freq=%f\n", cntx.pfname, cntx.rx2dr, cntx.rx2freq);
                 goto out;
             }
@@ -543,14 +543,16 @@ void main(int argc, char *argv[]) {
             break;
 
         case CMD_UPGW:
-            printf("gweui=%s, pfid=%d\n", cntx.gweui, cntx.pfid);
+            printf("gweui=%s, pfname=%d\n", cntx.gweui, cntx.pfname);
             if ((strlen(cntx.gweui) > 0) && cntx.pfid > 0) { 
-                snprintf(sql, sizeof(sql), "SELECT name FROM gwprofile where id = %d", cntx.pfid);
+                snprintf(sql, sizeof(sql), "SELECT id FROM gwprofile where name = %d", cntx.pfname);
                 INITSTMT(sql, cntx.stmt);
                 ret = sqlite3_step(cntx.stmt);
                 if (ret != SQLITE_ROW) {
-                    MSG("WARNING~ not a valid profile id , check by dls_utili --listpf\n");
+                    MSG("WARNING~ not a valid profile name , check by dls_utili --listpf\n");
                     goto out;
+                } else if (ret == SQLITE_ROW) {
+                    cntx.pfid = sqlite3_column_int(cntx.stmt, 1);
                 }
                 sqlite3_finalize(cntx.stmt);
                 snprintf(sql, sizeof(sql), "UPDATE OR IGNORE gws SET profileid = %d WHERE gweui = '%s'", cntx.pfid, cntx.gweui);
@@ -652,8 +654,8 @@ void main(int argc, char *argv[]) {
                                             (strlen(cntx.appkey) < 1) ||
                                             (strlen(cntx.appskey) < 1) ||
                                             (strlen(cntx.nwkskey) < 1)) {
-                MSG("ADDABP need options: deveui, devaddr, appeui, appkey, appskey, nwkskey\n");
-                MSG("e.g. dls_utili --addabp --deveui <hex> --devaddr <hex> --appeui <hex> --appkey <hex> --appskey <hex> --nwkskey <hex>\n");
+                MSG("mandev need options: deveui, devaddr, appeui, appkey, appskey, nwkskey\n");
+                MSG("e.g. dls_utili --mandev --deveui <hex> --devaddr <hex> --appeui <hex> --appkey <hex> --appskey <hex> --nwkskey <hex>\n");
                 goto out;
             }
             snprintf(sql, sizeof(sql), "select appkey from apps where appeui = '%s'", cntx.appeui);
@@ -674,7 +676,7 @@ void main(int argc, char *argv[]) {
                     values ('%s', '%s', '%s', '%s', '%s')", cntx.deveui, cntx.devaddr, cntx.appeui, cntx.appskey, cntx.nwkskey);
             INITSTMT(sql, cntx.stmt);
             if (db_step(cntx.stmt, NULL, NULL)) {  /* add new devs for abp*/
-                MSG("AddABP device FAILED\n");
+                MSG("Add device FAILED\n");
                 goto out;
             }
 

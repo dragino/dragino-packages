@@ -1,4 +1,4 @@
-APP_NAME:=lora_serv
+APP_NAME:=dragino_lorawan_server
 
 OBJDIR = obj
 

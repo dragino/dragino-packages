@@ -439,7 +439,7 @@ void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json
 			break;
 		}
 		default:{
-			strcpy(dr, "SF12BW125");
+			strcpy(dr, "SF12BW500");
 		}
 	}
 	MSG_DEBUG(DEBUG_INFO, "[DLS INFO] JOIN_ACCEPT(%s %.6f)\n", dr, rx2_freq);

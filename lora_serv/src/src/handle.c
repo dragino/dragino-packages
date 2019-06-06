@@ -208,7 +208,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
     MSG_DEBUG(DEBUG_DEBUG, "\n-----------------------------------------------------------------\n");
 
-    MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ REC PAYLOAD(%ubytes):\n ", size);
+    MSG_DEBUG(DEBUG_DEBUG, "[DLS DEBUG] REC PAYLOAD(%ubytes):\n ", size);
     for (i = 0; i < size; i++) {
         MSG_DEBUG(DEBUG_DEBUG, "%02X", payload[i]);
     }
@@ -229,13 +229,13 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 		    mic |= ((uint32_t)payload[21])<<16;
 		    mic |= ((uint32_t)payload[22])<<24;
 
-		    MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up] JOIN REQUE: appeui=%s, deveui=%s, devnonce=(%04X)\n", 
+		    MSG_DEBUG(DEBUG_DEBUG, "\n[DLS DEBUG] [up] JOIN REQUEST: appeui=%s, deveui=%s, devnonce=(%04X)\n", 
                                             devinfo.appeui_hex, devinfo.deveui_hex, devinfo.devnonce);
 		    /*judge whether it is a repeated message*/
             /* select devnonce from devs where deveui = ? and devnonce = ?*/
             /*
 		    if (db_judge_joinrepeat(cntx.judgejoinrepeat, &devinfo)) {
-			    MSG("WARNING: [up] same devnonce as last.\n");
+			    MSG("[DLS WARNING] [up] same devnonce as last.\n");
 			    result->to = IGNORE;
 			    break;
 		    } 
@@ -243,7 +243,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
             /* select appkey from apps where appeui = ? */
 		    if (db_lookup_appkey(cntx.lookupappkey, &devinfo) != true) {
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] Device not bind to app!\n");
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] appkey mismatch, Device not bind to app!\n");
 				result->to = IGNORE;
                 break;
             }
@@ -252,11 +252,11 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 
 		    LoRaMacJoinComputeMic(payload, 23 - 4, devinfo.appkey, &cal_mic);
 
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ appkey={%s}, mic=%04X, cal_mic=%04X\n", devinfo.appkey_hex, mic, cal_mic);
+            MSG_DEBUG(DEBUG_DEBUG, "\n[DLS DEBUG] appkey={%s}, mic=%04X, cal_mic=%04X\n", devinfo.appkey_hex, mic, cal_mic);
 
 			/*if mic is wrong,the join request will be ignored*/
 			if (mic != cal_mic) {
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] join request payload mic is wrong!\n");
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] join request payload mic is wrong!\n");
 				result->to = IGNORE;
 			} else {
                 next = (next * 12345678) % 9999999UL + (uint32_t)time(NULL);
@@ -272,7 +272,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
                 snprintf(devinfo.devaddr_hex, sizeof(devinfo.devaddr_hex), "%08X", devinfo.devaddr);
                 snprintf(devinfo.devnonce_hex, sizeof(devinfo.devnonce_hex), "%06X", devinfo.devnonce_hex);
 
-                MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up]nwkskey=(%s), appskey=(%s)\n", 
+                MSG_DEBUG(DEBUG_DEBUG, "\n[DLS DEBUG] [up]nwkskey=(%s), appskey=(%s)\n", 
                         devinfo.nwkskey_hex, devinfo.appskey_hex, devinfo.devaddr);
 
                 /* update or IGNORE devs set devaddr = ?, appskey = ?, nwkskey = ?, devnonce = ? where deveui = ? */
@@ -309,7 +309,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			mic |= ((uint32_t)payload[size - 2])<<16;
 			mic |= ((uint32_t)payload[size - 1])<<24;
 
-			//MSG_DEBUG(DEBUG_DEBUG, "\nINFO~ [up] DATA Receive devaddr=(%08X)\n", devinfo.devaddr);
+			//MSG_DEBUG(DEBUG_DEBUG, "\n[DLS INFO] [up] DATA Receive devaddr=(%08X)\n", devinfo.devaddr);
 
             snprintf(devinfo.devaddr_hex, sizeof(devinfo.devaddr_hex), "%08X", devinfo.devaddr);
 
@@ -317,7 +317,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			db_judge_devaddr(cntx.judgedevaddr, &devinfo);
 
 			if (strlen(devinfo.deveui_hex) < 8) {
-				MSG_DEBUG(DEBUG_WARNING, "WARNING~ [up] The device not register!\n");
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] The device not register!\n");
 				/*The device has not joined in the LoRaWAN */
 				result->to = IGNORE;
 				break;
@@ -326,7 +326,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 			/*judge whether it is a repeated message*/
             /* select id from upmsg where deveui = ? and tmst = ? */
 			if (db_judge_msgrepeat(cntx.judgemsgrepeat, devinfo.deveui_hex, meta->tmst)) {
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] repeated push_data!\n");
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] repeated push_data!\n");
 				result->to = IGNORE;
 				break;
 			} 
@@ -337,12 +337,12 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
             i82hexstr(devinfo.nwkskey, devinfo.nwkskey_hex, 16);
             i82hexstr(devinfo.appskey, devinfo.appskey_hex, 16);
 
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up->%u]NWKSKEY:%s\n", meta->fcntup, devinfo.nwkskey_hex);
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up->%u]APPSKEY:%s\n", meta->fcntup, devinfo.appskey_hex);
+            MSG_DEBUG(DEBUG_DEBUG, "\n[DLS DEBUG] [up->%u]NWKSKEY:%s\n", meta->fcntup, devinfo.nwkskey_hex);
+            MSG_DEBUG(DEBUG_DEBUG, "\n[DLS DEBUG] [up->%u]APPSKEY:%s\n", meta->fcntup, devinfo.appskey_hex);
 
 			LoRaMacComputeMic(payload, size - 4, devinfo.nwkskey, devinfo.devaddr, UP, (uint32_t)meta->fcntup, &cal_mic);
 			if(cal_mic != mic){
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] push data payload mic is wrong!\n");
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] push data payload mic is wrong!\n");
 				result->to = IGNORE;
 				break;
             }
@@ -356,7 +356,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
             db_insert_upmsg(cntx.insertupmsg, &devinfo, meta, frame_payload);
 
             MSG_DEBUG(DEBUG_INFO, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-            MSG_DEBUG(DEBUG_INFO, "\nINFO~ [up%u]Decrypted(%u):", meta->fcntup, fsize);
+            MSG_DEBUG(DEBUG_INFO, "\n[DLS INFO] [up%u]Decrypted(%u):", meta->fcntup, fsize);
             for (i = 0; i < fsize; i++) {
                 MSG_DEBUG(DEBUG_INFO, "%02X", frame_payload[i]);
             }
@@ -367,7 +367,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
             snprintf(pushpath, sizeof(pushpath), "%s/%s", PUSHPATH, devinfo.devaddr_hex);
             fp = fopen(PUSHPATH, "w+"); 
             if (NULL == fp) 
-                MSG_DEBUG(DEBUG_INFO, "Fail to open puath: %s\n", pushpath);
+                MSG_DEBUG(DEBUG_INFO, "[DLS INFO] Fail to open push path: %s\n", pushpath);
             else {
                 fprintf(fp, "%s", frame_payload);
                 fflush(fp);
@@ -385,7 +385,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
 		/*proprietary message*/
 		case FRAME_TYPE_PROPRIETARY: {
 			memcpy(fpayload, payload + 1, meta->size - 1);
-            MSG_DEBUG(DEBUG_DEBUG, "\nDEBUG~ [up]Payload: %s\n", fpayload);
+            MSG_DEBUG(DEBUG_DEBUG, "\n[DLS DEBUG] [up]Payload: %s\n", fpayload);
 			result->to = IGNORE;
 			break;
 		}
@@ -442,7 +442,7 @@ void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json
 			strcpy(dr, "SF12BW125");
 		}
 	}
-	MSG_DEBUG(DEBUG_INFO, "INFO~ JOIN_ACCEPT(%s %.6f)\n", dr, rx2_freq);
+	MSG_DEBUG(DEBUG_INFO, "[DLS INFO] JOIN_ACCEPT(%s %.6f)\n", dr, rx2_freq);
 	clock_gettime(CLOCK_REALTIME, &time);
 	root_val_x = json_value_init_object();
 	root_obj_x = json_value_get_object(root_val_x);
@@ -462,7 +462,7 @@ void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json
 	json_object_dotset_string(root_obj_x, "txpk.data", data);
 	json_str = json_serialize_to_string(root_val_x);
     strncpy(json_data, json_str, strlen(json_str) + 1);
-    MSG_DEBUG(DEBUG_INFO, "INFO~ [donw] TXPK:(%s)\n", json_str);
+    MSG_DEBUG(DEBUG_INFO, "[DLS INFO] [down] TXPK:(%s)\n", json_str);
 	json_free_serialized_string(json_str);
 	json_value_free(root_val_x);
 }
@@ -520,7 +520,7 @@ static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t*
 	 *it seems that it makes a mistake,because the byte-order is adverse
 	*/
 
-    MSG_DEBUG(DEBUG_DEBUG, "\n=================================================================\nPAYLOAD:");
+    MSG_DEBUG(DEBUG_DEBUG, "\n[DLS INFO]=================================================\n[DLS INFO] PAYLOAD:");
     for (i = 0; i <= index; i++) {
         MSG_DEBUG(DEBUG_DEBUG, "%02X", payload[i]);
     }
@@ -533,11 +533,11 @@ static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t*
 	/*encrypt join accept message*/
 	LoRaMacJoinEncrypt(payload + 1, (uint16_t)JOIN_ACC_SIZE - 1, appkey, frame_payload + 1);
 	frame_payload[0] = payload[0];
-    MSG_DEBUG(DEBUG_DEBUG, "\nENPAYLOAD:");
+    MSG_DEBUG(DEBUG_DEBUG, "\n[DLS INFO] ENCRYPT PAYLOAD:");
     for (i = 0; i < JOIN_ACC_SIZE; i++) {
         MSG_DEBUG(DEBUG_DEBUG, "%02X", frame_payload[i]);
     }
-    MSG_DEBUG(DEBUG_DEBUG, "\n===============================================================\n");
+    MSG_DEBUG(DEBUG_DEBUG, "\n[DLS INFO]========================================================\n");
 }
 
 /* ---------------------------------------------------------------------------- */
@@ -633,7 +633,7 @@ void tcp_bind(const char* servaddr, const char* port, int* listenfd) {
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_family = AF_INET;
 	if (getaddrinfo(servaddr, port, &hints, &results) != 0) {
-		MSG("ERROR: [down] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, port, gai_strerror(i));
+		MSG("[DLS ERROR] [down] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, port, gai_strerror(i));
 		exit(EXIT_FAILURE);
 	}
 	r = results;
@@ -647,11 +647,11 @@ void tcp_bind(const char* servaddr, const char* port, int* listenfd) {
 	} while ((r = r->ai_next) != NULL);
 
 	if (r == NULL) {
-		MSG("ERROR: [down] failed to open listening socket to any of server %s addresses (port %s)\n", servaddr, port);
+		MSG("[DLS ERROR] [down] failed to open listening socket to any of server %s address (port %s)\n", servaddr, port);
 		i = 1;
 		for (r = results; r != NULL; r = r->ai_next) {
 			getnameinfo(r->ai_addr, r->ai_addrlen, host_name, sizeof(host_name), service_name, sizeof(service_name), NI_NUMERICHOST);
-			MSG("INFO: [down] result %i host:%s service:%s\n", i, host_name, service_name);
+			MSG("[DLS INFO] [down] result %i host:%s service:%s\n", i, host_name, service_name);
 			i++;
 		}
 		exit(EXIT_FAILURE);
@@ -678,7 +678,7 @@ void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit
 		hints.ai_family = AF_INET;
 		hints.ai_socktype = SOCK_STREAM;
 		if (getaddrinfo(servaddr, port, &hints, &results) != 0) {
-			MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, port, gai_strerror(i));
+			MSG("[DLS ERROR] [up] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, port, gai_strerror(i));
 			exit(EXIT_FAILURE);
 		}
 		for (r = results; r != NULL; r = r->ai_next) {
@@ -691,17 +691,17 @@ void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit
 			close(sock);/*connect error,close and try again*/
 		}
 		if (r == NULL) {
-			MSG("ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", servaddr, port);
+			MSG("[DLS ERROR] [up] failed to open socket to any of server %s address (port %s)\n", servaddr, port);
 			i = 1;
 			for (r = results; r != NULL; r = r->ai_next){
 				getnameinfo(r->ai_addr, r->ai_addrlen, host_name, sizeof(host_name), service_name, sizeof(service_name), NI_NUMERICHOST);
-				MSG("INFO: [up] result %i host:%s service:%s\n", i, host_name, service_name);
+				MSG("[DLS INFO] [up] result %i host:%s service:%s\n", i, host_name, service_name);
 				i++;
 			}
 		} else {
 			/*the connection to the server is established, break*/
 			*sockfd = sock;
-			MSG("INFO: connect to the server %s addresses (port %s) successfully\n", servaddr, port);
+			MSG("[DLS INFO] connect to the server %s addresses (port %s) successfully\n", servaddr, port);
 			freeaddrinfo(results);
 			break;
 		}
@@ -726,7 +726,7 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_DGRAM;
 	if (getaddrinfo(servaddr, port, &hints, &results) != 0) {
-		MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, port, gai_strerror(i));
+		MSG("[DLS ERROR] [up] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, port, gai_strerror(i));
 		exit(EXIT_FAILURE);
 	}
 	for (r = results; r != NULL; r = r->ai_next) {
@@ -739,11 +739,11 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {
 	}
 
 	if (r == NULL) {
-		MSG("ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", servaddr, port);
+		MSG("[DLS ERROR] [up] failed to open socket to any of server %s address (port %s)\n", servaddr, port);
 		i = 1;
 		for (r = results; r != NULL; r = r->ai_next) {
 			getnameinfo(r->ai_addr, r->ai_addrlen, host_name, sizeof(host_name), service_name, sizeof(service_name), NI_NUMERICHOST);
-			MSG("INFO: [up] result %i host:%s service:%s\n", i, host_name, service_name);
+			MSG("[DLS INFO] [up] result %i host:%s service:%s\n", i, host_name, service_name);
 			i++;
 		}
 		exit(EXIT_FAILURE);
@@ -751,12 +751,12 @@ void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {
 
     if (type) { /* push */
         if ((setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof(push_timeout_half))) != 0) {
-            MSG("ERROR~ [up] setsockopt returned %s\n", strerror(errno));
+            MSG("[DLS ERROR] [up] setsockopt returned %s\n", strerror(errno));
             sock = -1;
         }
     } else {
         if ((setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof(pull_timeout))) != 0) {
-            MSG("ERROR~ [up] setsockopt returned %s\n", strerror(errno));
+            MSG("[DLS ERROR] [up] setsockopt returned %s\n", strerror(errno));
             sock = -1;
         }
     }

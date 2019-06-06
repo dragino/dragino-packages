@@ -6,7 +6,7 @@
   |____/|_| \_\/_/   \_\____|___|_| \_|\___/ 
 
 Description:
-    lw_uliti control the sqlite3 database for lorawan configure
+    dls_uliti control the sqlite3 database for lorawan configure
 
 License: Revised BSD License, see LICENSE.TXT file include in the project
 
@@ -18,7 +18,7 @@ Maintainer: skerlan
 #include <stdlib.h>
 #include <time.h>
 #include <getopt.h>
-#include "lw_utili.h"
+#include "dls_utili.h"
 
 extern char *optarg;  
 extern int optind, opterr, optopt; 
@@ -127,14 +127,14 @@ bool db_init(const char* dbpath, struct lw_t* cntx) {
     int ret;
 	ret = sqlite3_open(dbpath, &cntx->db);
 	if (ret) {
-        MSG("ERROR: Can't open database: %s\n", sqlite3_errmsg(cntx->db));
+        MSG("[DLS ERROR] Can't open database: %s\n", sqlite3_errmsg(cntx->db));
 	    sqlite3_close(cntx->db);
 		return false;
 	}
 #ifdef LG08_LG02
 	ret = sqlite3_open(MSGDBPATH, &cntx->msgdb);
 	if (ret) {
-        MSG("ERROR: Can't open database: %s\n", sqlite3_errmsg(cntx->msgdb));
+        MSG("[DLS ERROR] Can't open database: %s\n", sqlite3_errmsg(cntx->msgdb));
 	    sqlite3_close(cntx->msgdb);
 		return false;
 	}
@@ -160,7 +160,7 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 			if (rowcallback != NULL)
 				rowcallback(stmt, data);
 		} else {
-			MSG_DEBUG(DEBUG_ERROR, "ERROR~ %s\n", sqlite3_errstr(ret));
+			MSG_DEBUG(DEBUG_ERROR, "[DLS ERROR] %s\n", sqlite3_errstr(ret));
 			return false;
 		}
 	}
@@ -169,13 +169,13 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 static void sql_debug(sqlite3_stmt* stmt) { 
     char *sql;
     sql = sqlite3_expanded_sql(stmt);
-    MSG_DEBUG(DEBUG_SQL, "\nDEBUG~ SQL=(%s)\n", sql);
+    MSG_DEBUG(DEBUG_SQL, "\n[DLS INFO] SQL=(%s)\n", sql);
     sqlite3_free(sql);
 }
 
 static void show_help() {
     MSG("\n--------------------------------------------------------------------------------\n");
-    MSG("Usage: lw_utili [OPTIONS]\n");
+    MSG("Usage: dls_utili [OPTIONS]\n");
     MSG("\n");
     MSG("-v, --version         show this app version\n");
     MSG("-h, --help            show this help\n");
@@ -186,31 +186,31 @@ static void show_help() {
     MSG("--pfname   <string>   profile name use for add or list profile\n");
     MSG("--pfid     <int>      profile id use for add gateway\n");
     MSG("\n");
-    MSG("e.g. add a gateway:   lw_utili --addgw A840411B7C5C4150 --pfname dragino\n");
+    MSG("e.g. add a gateway:   dls_utili --addgw A840411B7C5C4150 --pfname dragino\n");
     MSG("                      PFNAME index which profile gateway in use\n");
-    MSG("     list gateways:   lw_utili --listgw, this command will print all gateways status and info\n");
+    MSG("     list gateways:   dls_utili --listgw, this command will print all gateways status and info\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--addpf               add profile for gateway\n");
     MSG("--listpf   <string>   list all profiles info, or the profile by profile name\n");
     MSG("--rx2dr    <int>      datarate: 0(SF12BW125)/1(SF11BW125)/2(SF10BW125)/3(SF9BW125)/4(SF8BW125)/5(SF7BW125)\n");
-    MSG("--rx2freq  <float>    rx2freque use for join accept downlink\n");
+    MSG("--rx2freq  <float>    rx2 frequency used for join accept downlink\n");
     MSG("\n");
-    MSG("e.g. add a profile:   lw_utili --addpf --pfname dragino --rx2dr 5 --rx2freq 868.925\n");
+    MSG("e.g. add a profile:   dls_utili --addpf --pfname dragino --rx2dr 5 --rx2freq 868.925\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--delete              delete by appeui/deveui/gweui/pfid\n");
-    MSG("e.g.  lw_utili --delete --appeui appeui\n");
+    MSG("e.g.  dls_utili --delete --appeui appeui\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--addapp   <string>   add a applicate for device register\n");
     MSG("--listapp  <string>   list all applicates info, or the app index by app name\n");
     MSG("--appname  <string>   application name use for add or list application\n");
     MSG("\n");
-    MSG("e.g. add a application: lw_utili --addapp --appname dragino\n");
+    MSG("e.g. add a application: dls_utili --addapp --appname dragino\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--adddev              add a device return DEVEUI APPEUI and APPKEY\n");
     MSG("--addabp              add a device for ABP\n");
     MSG("--listdev             list all devices info, or the device index by deveui\n");
     MSG("\n");
-    MSG("e.g. add a device:    lw_utili --adddev --appname dragino\n");
+    MSG("e.g. add a device:    dls_utili --adddev --appname dragino\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--listmsg             list all message by devaddr|deveui|gweui|appeui\n");
     MSG("--devaddr  <hex>      devaddr\n"     );
@@ -222,7 +222,7 @@ static void show_help() {
     MSG("--appskey  <hex>      appskey\n"     );
     MSG("--nwkskey  <hex>      nwkskey\n"     );
     MSG("\n");
-    MSG("e.g. listmsg by devaddr: lw_utili --listmsg --devaddr aabbccdd\n");
+    MSG("e.g. listmsg by devaddr: dls_utili --listmsg --devaddr aabbccdd\n");
     MSG("\n--------------------------------------------------------------------------------\n");
 }
 
@@ -238,7 +238,8 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
         }
         switch (ret) {
         case 'v':
-            MSG("%s Version: 1.0.0\n", argv[0]);
+		    MSG("Dragino LoRaWAN Server\n");
+            MSG("%s Version: 1.0.2\n", argv[0]);
             return 0;
         case 'h':
             show_help();
@@ -379,7 +380,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->devaddr, optarg, sizeof(cntx->devaddr));
                 }        
             } else {
-                MSG("WARNING~ need input devaddr\n");
+                MSG("WARNING~ input devaddr\n");
                 return -1;
             }       
             break;
@@ -391,7 +392,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->gweui, optarg, sizeof(cntx->gweui));
                 }        
             } else {
-                MSG("WARNING~ Input the GWEUI!\n");
+                MSG("WARNING~ input GWEUI!\n");
                 return -1;
             }       
             break;
@@ -403,7 +404,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->deveui, optarg, sizeof(cntx->deveui));
                 }        
             } else {
-                MSG("WARNING~ Input the DEVEUI!\n");
+                MSG("WARNING~ input DEVEUI!\n");
                 return -1;
             }       
             break;
@@ -427,7 +428,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->appkey, optarg, sizeof(cntx->appkey));
                 }        
             } else {
-                MSG("WARNING~ Need input APPKEY!\n");
+                MSG("WARNING~ need input APPKEY!\n");
                 return -1;
             }       
             break;
@@ -439,7 +440,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->appskey, optarg, sizeof(cntx->appskey));
                 }        
             } else {
-                MSG("WARNING~ Input the APPSKEY!\n");
+                MSG("WARNING~ input the APPSKEY!\n");
                 return -1;
             }       
             break;
@@ -548,7 +549,7 @@ void main(int argc, char *argv[]) {
                 INITSTMT(sql, cntx.stmt);
                 ret = sqlite3_step(cntx.stmt);
                 if (ret != SQLITE_ROW) {
-                    MSG("WARNING~ not a valid profile id , check by lw_utili --listpf\n");
+                    MSG("WARNING~ not a valid profile id , check by dls_utili --listpf\n");
                     goto out;
                 }
                 sqlite3_finalize(cntx.stmt);
@@ -652,7 +653,7 @@ void main(int argc, char *argv[]) {
                                             (strlen(cntx.appskey) < 1) ||
                                             (strlen(cntx.nwkskey) < 1)) {
                 MSG("ADDABP need options: deveui, devaddr, appeui, appkey, appskey, nwkskey\n");
-                MSG("e.g. lw_utili --addabp --deveui <hex> --devaddr <hex> --appeui <hex> --appkey <hex> --appskey <hex> --nwkskey <hex>\n");
+                MSG("e.g. dls_utili --addabp --deveui <hex> --devaddr <hex> --appeui <hex> --appkey <hex> --appskey <hex> --nwkskey <hex>\n");
                 goto out;
             }
             snprintf(sql, sizeof(sql), "select appkey from apps where appeui = '%s'", cntx.appeui);

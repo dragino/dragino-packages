@@ -511,6 +511,19 @@ void main(int argc, char *argv[]) {
                 } 
                 snprintf(sql, sizeof(sql), "INSERT OR IGNORE INTO gws (gweui, profileid) VALUES ('%s', %d)", cntx.gweui, cntx.pfid);
                 sqlite3_finalize(cntx.stmt);
+            } else if (strlen(cntx.pfname) > 0) {
+                snprintf(sql, sizeof(sql), "select id from gwprofile where name = %d", cntx.pfname);
+                INITSTMT(sql, cntx.stmt);
+                DEBUG_STMT(cntx.stmt);
+                ret = sqlite3_step(cntx.stmt);
+                if (ret != SQLITE_ROW) {
+                    MSG("\nid:%d not a valid profilename, use --listpf to get a valid profilename\n", cntx.pfname);
+                    goto out;
+                } else if (ret == SQLITE_ROW) {
+                    cntx.pfid = sqlite3_column_int(cntx.stmt, 1);
+                }
+                snprintf(sql, sizeof(sql), "INSERT OR IGNORE INTO gws (gweui, profileid) VALUES ('%s', %d)", cntx.gweui, cntx.pfid);
+                sqlite3_finalize(cntx.stmt);
             } else
                 snprintf(sql, sizeof(sql), "INSERT OR IGNORE INTO gws (gweui) VALUES ('%s')", cntx.gweui);
 

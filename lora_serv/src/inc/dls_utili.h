@@ -49,6 +49,7 @@ struct lw_t {
     char appkey[33];
     char appskey[33];
     char nwkskey[33];
+    char csvpath[48];
     uint8_t cmd;
     uint8_t rx2dr;
     uint8_t pfid;

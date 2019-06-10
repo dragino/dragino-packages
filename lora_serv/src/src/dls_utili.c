@@ -203,7 +203,7 @@ static void show_help() {
     MSG("\n");
     MSG("e.g. add a profile:   dls_utili --addpf --pfname dragino --rx2dr 5 --rx2freq 868.925\n");
     MSG("\n--------------------------------------------------------------------------------\n");
-    MSG("--delete              delete by appeui/deveui/gweui/pfid\n");
+    MSG("--delete              delete by appeui/deveui/gweui/pfname/pfid\n");
     MSG("e.g.  dls_utili --delete --appeui appeui\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--addapp   <string>   add a applicate for device register\n");
@@ -830,6 +830,10 @@ void main(int argc, char *argv[]) {
                 strcpy(msgcon, cntx.gweui);
                 strcpy(colum, "gweui");
                 strcpy(table, "gws");
+            } else if (strlen(cntx.pfname) > 0) {
+                strcpy(msgcon, cntx.pfname);
+                strcpy(colum, "name");
+                strcpy(table, "gwprofile");
             } else {
                 MSG("WARNING~ NO delete condition! Need deveui or gweui or appeui!\n");
                 goto out;

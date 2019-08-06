@@ -30,19 +30,23 @@ function index()
 
     local string =string
     entry({"admin", "gateway"}, alias("admin", "gateway", "iotserver"), _("Service"), 60).index = true
-    if f_board == 'LG02' then
-	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg02"), _("LoRaWan GateWay"), 2)
-    elseif f_board == 'LG01' then
-	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg01"), _("LoRaWan GateWay"), 2)
+    if f_board == 'LG02' or f_board == 'LG01' then
+		entry({"admin", "gateway", "mqtt"}, cbi("admin_gateway/mqtt"), _("MQTT"), 3)
+		entry({"admin", "gateway", "http"}, cbi("admin_gateway/http"), _("HTTP / HTTPS"), 6)
+		entry({"admin", "gateway", "channel"}, cbi("admin_gateway/sub/channel"), nil).leaf = true
+		entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("TCP_Client"), 4)
+		entry({"admin", "gateway", "tcp_channel"}, cbi("admin_gateway/sub/tcp_channel"), nil).leaf = true
+		entry({"admin", "gateway", "customized_script"}, cbi("admin_gateway/customized_script"), _("Customized Script"), 5)
+		if f_board == 'LG02' then
+			entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg02"), _("LoRaWan GateWay"), 2)
+		else
+			entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg01"), _("LoRaWan GateWay"), 2)
+		end
     else
-	entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg08"), _("LoRaWan GateWay"), 2)
+		entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg08"), _("LoRaWan GateWay"), 2)
     end
-    entry({"admin", "gateway", "mqtt"}, cbi("admin_gateway/mqtt"), _("MQTT"), 3)
-    entry({"admin", "gateway", "channel"}, cbi("admin_gateway/sub/channel"), nil).leaf = true
-    entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("TCP_Client"), 4)
-    entry({"admin", "gateway", "tcp_channel"}, cbi("admin_gateway/sub/tcp_channel"), nil).leaf = true
-    entry({"admin", "gateway", "customized_script"}, cbi("admin_gateway/customized_script"), _("Customized Script"), 5)
-    entry({"admin", "gateway", "checkalive"}, cbi("admin_gateway/checkalive"), _("Network checkalive"), 6)
+
+
     entry({"admin", "gateway", "lgwlog"}, template("admin_status/lgwlog"), _("Logread"), 20).leaf = true
     entry({"admin", "gateway", "lgwlog_action"}, post("lgwlog_action")).leaf = true
 	

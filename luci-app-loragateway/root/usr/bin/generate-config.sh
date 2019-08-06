@@ -2,6 +2,7 @@
 . /usr/share/libubox/jshn.sh
 
 def_cfg=`uci get gateway.general.gwcfg`
+subband=`uci get gateway.general.subband`
 gwid=`uci get gateway.general.GWID`
 provider=`uci get gateway.general.provider`
 server=`uci get gateway.general.${provider}_server`
@@ -62,6 +63,10 @@ echo_chan_if() {
     json_cleanup
 
 }
+
+if [ "$def_cfg" = "AU" ] || [ "$def_cfg" = "US" ] ;then
+	def_cfg="$def_cfg-$subband"
+fi
 
 if [ -f /etc/lora/cfg/"$def_cfg"-global_conf.json ] 
 then 

@@ -132,7 +132,7 @@ local syncwd = s:option(Value, "SYNCWD", translate("LoRa Sync Word"), translate(
 syncwd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
 syncwd.default = "52"
 
-local encry = s:option(Value, "encryption", translate("Encryption Key"))
-encry.placeholder = "Encryption Key"
+--local encry = s:option(Value, "encryption", translate("Encryption Key"))
+--encry.placeholder = "Encryption Key"
 
 return m

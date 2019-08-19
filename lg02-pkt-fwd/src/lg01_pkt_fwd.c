@@ -1024,7 +1024,7 @@ void thread_up(void) {
         buff_up[2] = token_l;
         buff_index = 12; /* 12-byte header */
 
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", fetch_timestamp, tmst, (double)(rfdev->freq)/1000000, rfdev->sf, rfcr);
+        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":%.1f", fetch_timestamp, tmst, (double)(rfdev->freq)/1000000, rfdev->sf, rfcr, pktrx[prev].snr);
 
         buff_index += j;
 

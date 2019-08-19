@@ -241,6 +241,7 @@ static uint32_t tx_freq_max[LGW_RF_CHAIN_NB]; /* highest frequency supported by 
 radiodev *sxradio;
 static bool sx1276 = false;
 static char server_type[16] = "server_type";
+static FILE *fp = NULL;
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
@@ -1237,10 +1238,10 @@ int main(void)
     get_config("general", sx1276_txpw, sizeof(sx1276_txpw));
     get_config("general", model, sizeof(model));
 
-    MSG_DEBUG(DEBUG_LOG, "INFO~ sx1276:%d, sxtxpw:%d, model:%s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model);
-
     /* mqtt or lorawan */
     get_config("general", server_type, sizeof(server_type));
+
+    MSG_DEBUG(DEBUG_LOG, "INFO~ sx1276:%d, sxtxpw:%d, model:%s, server_type:%s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model, server_type);
 
     /* only LG08P with sx1276 */
 
@@ -1880,6 +1881,54 @@ void thread_up(void) {
             buff_up[buff_index] = '}';
             ++buff_index;
             ++pkt_in_dgram;
+            if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp") || !strcmp(server_type, "customized")) {  // mqtt mode or tcpudp mode for loraRAW 
+                char tmp[256] = {'\0'};
+                char chan_path[32] = {'\0'};
+                char *chan_id = NULL;
+                char *chan_data = NULL;
+                int id_found = 0, data_size = p->size;
+
+                for (i = 0; i < p->size; i++) {
+                    tmp[i] = p->payload[i];
+                }
+
+                if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
+                    chan_data = &tmp[4];
+                else
+                    chan_data = tmp;
+
+                for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
+                    if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
+                        chan_id = &tmp[i + 1];
+                        ++id_found;
+                    }
+
+                    if (tmp[i] == '>') { 
+                        tmp[i] = '\0';
+                        chan_data = tmp + i + 1;
+                        data_size = data_size - i;
+                        ++id_found;
+                    }
+
+                    if (id_found == 2) /* found channel id */ 
+                        break;
+                }
+
+                if (id_found == 2) 
+                    sprintf(chan_path, "/var/iot/channels/%s", chan_id);
+                else {
+                    sprintf(chan_path, "/var/iot/receive/%u%u", token_l, token_h);
+                }
+                
+                fp = fopen(chan_path, "w+");
+                if ( NULL != fp ) {
+                    //fwrite(chan_data, sizeof(char), data_size, fp);  
+                    fprintf(fp, "%s\n", chan_data);
+                    fflush(fp);
+                    fclose(fp);
+                } else 
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ cannot open file path: %s\n", chan_path); 
+            }
         }
 
         /* restart fetch sequence without sending empty JSON if all packets have been filtered out */

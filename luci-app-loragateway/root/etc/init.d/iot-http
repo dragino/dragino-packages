@@ -1,0 +1,31 @@
+#!/bin/sh /etc/rc.common
+
+START=59
+USE_PROCD=1
+
+init_board() {
+	if [ `uci get http_iot.general.down_enable` == "1" ] || [ `uci get http_iot.general.up_enable` == "1" ];then	
+		process="http_process.sh"
+		logger "[IoT:] Start http_process"
+	fi
+}
+
+start_service() {
+    init_board
+    procd_open_instance
+    procd_set_param command /usr/bin/"$process"
+    procd_set_param stdout 1
+    procd_set_param respawn
+    procd_set_param pidfile /var/run/"$process".pid
+    procd_close_instance
+}
+
+reload_service() {
+    stop
+    start
+}
+
+service_triggers()
+{
+    procd_add_reload_trigger "network" "wireless" "gateway" "mqtt" "tcp_client" "customized_script" "http_iot"
+}

@@ -96,20 +96,37 @@ o.default = "30"
 o.placeholder = "seconds"
 o.datatype    = "integer"
 
-o = s:taboption("general", ListValue, "gwcfg", translate("Frequency Plan"))
+o = s:taboption("general", ListValue, "gwcfg", translate("Frequency Plan"), translate("See logread --> FreqINFO for detail"))
 o.optional = true
 o.placeholder = "Frequency Plan"
-o:value("EU", "Europe 868Mhz(863~870)")
-o:value("CN", "China 470~510MHz")
-o:value("US", "United States 915Mhz(902~928)")
-o:value("AU", "Australia 915Mhz(915~928)")
-o:value("IN", "India 865~867MHz")
-o:value("KR", "Korea 920~923MHz")
-o:value("AS1", "Asia 920~923MHz")
-o:value("AS2", "Asia 923~925MHz")
-o:value("RU", "Russia 864~870MHz")
+o:value("EU", "Europe 868Mhz(863~870)-- EU868")
+o:value("CN", "China 470~510MHz -- CN470")
+o:value("US", "United States 915Mhz(902~928) -- US915")
+o:value("AU", "Australia 915Mhz(915~928) -- AU915")
+o:value("IN", "India 865~867MHz -- IN865")
+o:value("KR", "Korea 920~923MHz -- KR920")
+o:value("AS1", "Asia 920~923MHz -- AS923-1")
+o:value("AS2", "Asia 923~925MHz -- AS923-2")
+--o:value("RU", "Russia 864~870MHz")
 o:value("CUS", "Customized Bands")
 
+o = s:taboption("general", ListValue, "subband", translate("Frequency Sub Band"))
+o.optional = true
+o.placeholder = "Frequency Sub Band"
+o:value("1", "1: US915(902.3~903.7) / AU915(915.2~916.6)")
+o:value("2", "2: US915(903.9~905.3) / AU915(916.8~918.2)")
+o:value("3", "3: US915(905.5~906.9) / AU915(918.4~919.8)")
+o:value("4", "4: US915(907.1~908.5) / AU915(920.0~921.4)")
+o:value("5", "5: US915(908.7~910.1) / AU915(921.6~923.0)")
+o:value("6", "6: US915(910.3~911.7) / AU915(923.2~924.6)")
+o:value("7", "7: US915(911.9~913.3) / AU915(924.8~926.2)")
+o:value("8", "8: US915(913.5~914.9) / AU915(926.4~927.8)")
+o:depends("gwcfg", "US")
+o:depends("gwcfg", "AU")
+o.default = "2"
+
+
+--[[
 o = s:taboption("general", Flag, "sx1276", translate("use sx1276 for tx"))
 o.optional = true
 o.default = 0
@@ -121,7 +138,7 @@ o.default = 0
 o.placeholder = "range 5 ~ 20 dBm"
 o.datatype = "rangelength(1,2)"
 o:depends("sx1276", "1")
-
+--]]
 ----
 ---- Radio Settings
 ----

@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=lora_serv
-PKG_VERSION:=1.0.1
+PKG_NAME:=dragino_lorawan_server
+PKG_VERSION:=1.0.2
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -20,7 +20,7 @@ endef
 
 define Package/$(PKG_NAME)/description
 	LoRaWan simple server
-	For Dragino LG01/LG02/LG08
+	For Dragino LG01N/OLG01N/LG02/OLG02/LG308/LPS8
 endef
 
 define Package/$(PKG_NAME)/extra_provides
@@ -39,7 +39,7 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
-	$(CP) $(PKG_BUILD_DIR)/lw_utili $(1)/usr/bin
+	$(CP) $(PKG_BUILD_DIR)/dls_utili $(1)/usr/bin
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

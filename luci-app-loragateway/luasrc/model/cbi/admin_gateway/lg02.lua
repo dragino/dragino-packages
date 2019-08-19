@@ -62,13 +62,9 @@ ttn_addr:value("as923.thethings.meshed.com.au", "meshed-router")
 ttn_addr:value("ttn.opennetworkinfrastructure.org", "switch-router")
 ttn_addr:value("router.cn.thethings.network", "router.cn.thethings.network")
 
-local sp = s:option(Value, "port", translate("Server upstream Port"))
+local sp = s:option(Value, "port", translate("Server Port"))
 sp.datatype = "port"
 sp.default = "1700"
-
-local dport = s:option(Value, "dwport", translate("Server dwonstream Port"))
-dport.datatype = "port"
-dport.default = "1700"
 
 local gid = s:option(Value, "GWID", translate("Gateway ID"))
 gid.placeholder = "Gateway ID from Server"
@@ -179,6 +175,7 @@ sbw:value("41700", "41.7 kHz")
 sbw:value("62500", "62.5 kHz")
 sbw:value("125000", "125 kHz")
 sbw:value("250000", "250 kHz")
+sbw:value("500000", "500 kHz")
 
 local prb = s:option(Value, "TXPRLEN", translate("RadioB Preamble Length"), translate("Length range: 6 ~ 65536"))
 prb.placeholder = "6 ~ 65536"

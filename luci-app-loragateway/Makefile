@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-loragateway
-PKG_VERSION:=1.0
+PKG_VERSION:=1.1
 PKG_RELEASE:=1
 
 
@@ -32,6 +32,8 @@ define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	mkdir -p $(PKG_BUILD_DIR)/usr
 	mkdir -p $(PKG_BUILD_DIR)/etc
+	mkdir -p $(PKG_BUILD_DIR)/etc/iot
+	mkdir -p $(PKG_BUILD_DIR)/etc/iot/cert
 	mkdir -p $(PKG_BUILD_DIR)/usr/lib/lua/luci
 	mkdir -p $(PKG_BUILD_DIR)/etc/config
 	$(CP) ./root/usr/* $(PKG_BUILD_DIR)/usr

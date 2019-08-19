@@ -1,13 +1,13 @@
 /*
- * for lw_utili control sqlite3 databases 
- * lw_utili.h 
+ * for dls_utili control sqlite3 databases 
+ * dls_utili.h 
  *
  *  Created on: FEB 17, 2019
  *      Author: skerlan
  */
 
-#ifndef DB_LW_UTILI_H
-#define DB_LW_UTILI_H
+#ifndef DB_DLS_UTILI_H
+#define DB_DLS_UTILI_H
 
 #include <sqlite3.h>
 #include <stdbool.h>
@@ -46,6 +46,10 @@ struct lw_t {
     char deveui[17];
     char appeui[17];
     char devaddr[9];
+    char appkey[33];
+    char appskey[33];
+    char nwkskey[33];
+    char csvpath[48];
     uint8_t cmd;
     uint8_t rx2dr;
     uint8_t pfid;

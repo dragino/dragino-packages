@@ -38,7 +38,7 @@ static char gwserv[64] = "localhost";
 static char push_port[16] = "1700";
 static char pull_port[16] = "1701";
 
-/*linked list used for storing json sting for application server and network controller*/
+/*linked list used for storing json string for application server and network controller*/
 static linked_list gw_list;
 
 /*mutex lock for controlling access to the linked list*/
@@ -93,11 +93,11 @@ int main(int argc, char** argv) {
 
 	/* display host endianness infomation*/
 	#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-		MSG_DEBUG(DEBUG_INFO, "INFO~ Little endian host\n");
+		MSG_DEBUG(DEBUG_INFO, "[DLS INFO] Little endian host\n");
 	#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-		MSG_DEBUG(DEBUG_INFO, "INFO~ Big endian host\n");
+		MSG_DEBUG(DEBUG_INFO, "[DLS INFO] Big endian host\n");
 	#else
-		MSG_DEBUG(DEBUG_INFO, "INFO~ Host endiannes is unknown\n");
+		MSG_DEBUG(DEBUG_INFO, "[DLS INFO] Host endiannes is unknown\n");
 	#endif
 
 	/*configure the signal handling*/
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 	sigaction(SIGINT, &sigact, NULL);
 	sigaction(SIGTERM, &sigact, NULL);
 
-	/*create the linked list for GW Donlink*/
+	/*create the linked list for GW Downlink*/
 	list_init(&gw_list);
 
 	/*try to open and bind udp socket*/
@@ -116,14 +116,14 @@ int main(int argc, char** argv) {
 	udp_bind(gwserv, pull_port, &sockfd_pull, 0);
         
     if (!db_init(DBPATH, &cntx)) {
-		MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] can't create database context\n");
+		MSG_DEBUG(DEBUG_ERROR, "[DLS ERROR] [main] can't create database context\n");
 		exit(EXIT_FAILURE);
     }
 
 	/*create threads*/
 
 	if (pthread_create(&th_down, NULL, (void*(*)(void*))thread_down, NULL) !=0 ) {
-		MSG_DEBUG(DEBUG_ERROR, "ERROR: [main] impossible to create thread for downstream communicating from gateway\n");
+		MSG_DEBUG(DEBUG_ERROR, "[DLS ERROR] [main] impossible to create thread for downstream communicating from gateway\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 	while (!exit_sig) {        /* main thread, dispatch PUSH_DATA */
 		msg_len = recvfrom(sockfd_push, buff_push, sizeof(buff_push), 0, (struct sockaddr*)&cliaddr, &addrlen);
 		if (msg_len < 0) {
-			//MSG("WARNING: [up] thread_up recv returned %s\n", strerror(errno));
+			//MSG("[DLS WARNING] [up] thread_up recv returned %s\n", strerror(errno));
 			continue;
 		}
 
@@ -140,14 +140,14 @@ int main(int argc, char** argv) {
 				/*thread_up socket is shut down*/
 				break;
 			} else {
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] the data size is 0 ,just ignore\n");
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] data size is 0 ,ignore!\n");
 				continue;
 			}
 		}
 		/* if the datagram does not respect the format of PUSH DATA, just ignore it */
 		if (msg_len < 12 || buff_push[0] != VERSION || buff_push[3] != PKT_PUSH_DATA){
             /* too short for GW <-> MAC protocol */
-			MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] push data invalid, ignore!\n");
+			MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] push data format invalid, ignore!\n");
 			continue;
 		}
 
@@ -157,9 +157,9 @@ int main(int argc, char** argv) {
 		memcpy(gweui, buff_push + 4, 8);
 		i82hexstr(gweui, gweui_hex, 8);
 
-        /* lookupgweui: select gweui from gws where gweui = ? */
+        /* lookup gweui: select gweui from gws where gweui = ? */
         if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
-	        MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] GWEUI(%s) NOT REGISTER !\n", gweui_hex);
+	        MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] GWEUI(%s) NOT REGISTER!\n", gweui_hex);
             continue;
         }
 
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
 			buff_push_ack[3] = PKT_PUSH_ACK;
 
 			if (sendto(sockfd_push, buff_push_ack, sizeof(buff_push_ack), 0, (struct sockaddr*)&cliaddr, addrlen) < 0)
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [thread_up] send push_ack for packet_%d fail\n", pkt_no);
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] send push_ack for packet_%d fail\n", pkt_no);
                         
             memset(&pkt_info, 0, sizeof(struct pkt_info));
 			memcpy(pkt_info.pkt_payload, buff_push + 12, msg_len - 12);
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
 			strcpy(pkt_info.gweui_hex, gweui_hex);
 			pkt_info.pkt_no = pkt_no;
 			if (pthread_create(&th_up_handle, NULL, (void*)thread_up_handle, (void*)&pkt_info) != 0) {
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [thread_up] impossible to create thread thread_up_handle\n");
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [up] impossible to create thread thread_up_handle\n");
                 continue;
 			}
 		}
@@ -202,14 +202,14 @@ int main(int argc, char** argv) {
 	}
 	/*wait for threads to finish*/
 	pthread_join(th_down, NULL);
-	MSG_DEBUG(DEBUG_INFO, "INFO~ the main program on network server exit successfully\n");
+	MSG_DEBUG(DEBUG_INFO, "[DLS INFO] the main program on network server exit successfully\n");
 	exit(EXIT_SUCCESS);
 }
 
 void signal_handle(int signo){
 	if(signo == SIGINT || signo == SIGTERM || signo == SIGQUIT) {
 		exit_sig = true;
-		MSG("######################waiting for exiting#######################\n");
+		MSG("##################### Waiting For Exiting ######################\n");
 	}
 	return;
 }
@@ -236,13 +236,13 @@ void thread_up_handle(void* pkt_info) {
 	struct metadata meta_data;
 	struct jsondata json_result;/*keep the result of analyzing message from gateway*/
 
-    MSG_DEBUG(DEBUG_INFO, "INFO~ [handle-up] Handle(%d): %s\n", pkt.pkt_no, pkt.pkt_payload);
+    MSG_DEBUG(DEBUG_INFO, "[DLS INFO] [handle-up] Handle(%d): %s\n", pkt.pkt_no, pkt.pkt_payload);
 
 	/*parse JSON*/
 
 	root_val = json_parse_string_with_comments((const char*)(pkt.pkt_payload));
 	if (root_val == NULL) {
-		MSG("WARNING: [handel-up] packet_%d push_data contains invalid JSON\n", pkt.pkt_no);
+		MSG("[DLS WARNING] [handel-up] packet_%d push_data contains invalid JSON\n", pkt.pkt_no);
         goto thread_out;
 	}
 
@@ -293,7 +293,7 @@ void thread_up_handle(void* pkt_info) {
                 gwinfo.txnb = (uint32_t)json_value_get_number(val);
             }
             if (db_update_gwinfo(cntx.updategwinfo, &gwinfo)) {
-                MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ [up] GWEUI(%s) update status!\n", gwinfo.gweui);
+                MSG_DEBUG(DEBUG_DEBUG, "[DLS DEBUG] [up] GWEUI(%s) update status!\n", gwinfo.gweui);
             }
         }
         goto thread_out;
@@ -373,10 +373,10 @@ void thread_up_handle(void* pkt_info) {
 		if (val != NULL) {
 			str = json_value_get_string(val);
 			if (b64_to_bin(str, strlen(str), payload, sizeof(payload)) != size){
-				MSG_DEBUG(DEBUG_WARNING, "WARNING: [handel-up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n", pkt.pkt_no, i);
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [handel-up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n", pkt.pkt_no, i);
 			}
 		} else {
-			MSG_DEBUG(DEBUG_WARNING, "WARNING: [handel-up] in packet_%d rxpk_%d contains no data\n", pkt.pkt_no, i);
+			MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [handel-up] in packet_%d rxpk_%d contains no data\n", pkt.pkt_no, i);
 		}
 
 		/*analysis the MAC payload content*/
@@ -399,7 +399,7 @@ void thread_up_handle(void* pkt_info) {
 
 thread_out:
     //sprintf(tempstr, "EXIT HANDLE PKT%d", pkt.pkt_no);
-    //MSG_DEBUG(DEBUG_INFO, "INFO~ [handel-up] EXIT HANDLE PKT%d\n", pkt.pkt_no);
+    //MSG_DEBUG(DEBUG_INFO, "[DLS INFO] [handel-up] EXIT HANDLE PKT%d\n", pkt.pkt_no);
 	json_value_free(root_val);
 	pthread_exit(NULL);
 }
@@ -427,7 +427,7 @@ void thread_down(void) {
 	while (!exit_sig) {
 		msg_len = recvfrom(sockfd_pull, buff_pull, sizeof(buff_pull), 0, (struct sockaddr*)&cliaddr, &addrlen);
 		if (msg_len < 0) {
-			//MSG("WARNING: [down] thread_down recv returned %s\n", strerror(errno));
+			//MSG("[DLS WARNING] [down] thread_down recv returned %s\n", strerror(errno));
 			continue;
 		}
 		if (msg_len == 0) {
@@ -435,13 +435,13 @@ void thread_down(void) {
 				/*thread_down socket is shut down*/
 				break;
 			} else {
-				MSG_DEBUG(DEBUG_WARNING, "WARNING~ [pull] the data size is 0 ,just ignore\n");
+				MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [pull] the data size is 0 ,just ignore\n");
 				continue;
 			}
 		}
 		/* if the datagram does not respect the format of PULL DATA, just ignore it */
 		if (msg_len < 4 || buff_pull[0] != VERSION || buff_pull[3] != PKT_PULL_DATA){
-			MSG_DEBUG(DEBUG_WARNING, "WARNING~ [pull] pull data invalid,just ignore\n");
+			MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [pull] pull data invalid,just ignore\n");
 			continue;
 		}
 
@@ -452,7 +452,7 @@ void thread_down(void) {
 		i82hexstr(gweui, gweui_hex, 8);
 
         if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
-	        MSG_DEBUG(DEBUG_WARNING, "WARNING~ [pull] GWEUI(%s) NOT REGISTER !\n", gweui_hex);
+	        MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [pull] GWEUI(%s) NOT REGISTER !\n", gweui_hex);
             continue;
         }
 
@@ -466,20 +466,20 @@ void thread_down(void) {
 				memcpy(buff_pull_ack, buff_pull, 3);
 				buff_pull_ack[3] = PKT_PULL_ACK;
 				if (sendto(sockfd_pull, buff_pull_ack, sizeof(buff_pull_ack), 0, (struct sockaddr*)&cliaddr, addrlen) < 0)
-					MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] send pull_ack for packet_%d fail\n", pkt_no);
+					MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [down] send pull_ack for packet_%d fail\n", pkt_no);
 			} else {
 				strcpy(jsonstr, data.json_string);
 				memcpy(buff_pull_resp, buff_pull, 3);
 				buff_pull_resp[3] = PKT_PULL_RESP;
 				memcpy(buff_pull_resp + 4, jsonstr, strlen(jsonstr) + 1);
 				if (sendto(sockfd_pull, buff_pull_resp, sizeof(buff_pull_resp), 0, (struct sockaddr*)&cliaddr, addrlen) < 0)
-					MSG_DEBUG(DEBUG_WARNING, "WARNING: [dwon] send pull_resp for packet_%d fail\n", pkt_no);
-				MSG("INFO: [down] send pull_resp successfully\n");
+					MSG_DEBUG(DEBUG_WARNING, "[DLS WARNING] [down] send pull_resp for packet_%d fail\n", pkt_no);
+				MSG("[DLS INFO]: [down] send pull_resp successfully\n");
 			}
 		}
 	}
 	free(data.gwaddr);
 	free(data.json_string);
-	MSG("INFO: thread_down exit successfully\n");
+	MSG("[DLS INFO] thread_down exit successfully\n");
 }
 

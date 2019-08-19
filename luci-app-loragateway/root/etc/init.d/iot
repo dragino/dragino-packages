@@ -14,6 +14,7 @@ init_board() {
 		process="mqtt_process.sh"
 	elif [[ "$service" = "customized" ]]; then
 		process=`uci get customized_script.general.script_name`
+		chmod +x /etc/lora/customized_scripts/$process
 		ln /etc/lora/customized_scripts/$process /usr/bin/$process
 	fi
 }

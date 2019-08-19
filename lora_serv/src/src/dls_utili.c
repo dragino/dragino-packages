@@ -6,7 +6,7 @@
   |____/|_| \_\/_/   \_\____|___|_| \_|\___/ 
 
 Description:
-    lw_uliti control the sqlite3 database for lorawan configure
+    dls_uliti control the sqlite3 database for lorawan configure
 
 License: Revised BSD License, see LICENSE.TXT file include in the project
 
@@ -18,7 +18,7 @@ Maintainer: skerlan
 #include <stdlib.h>
 #include <time.h>
 #include <getopt.h>
-#include "lw_utili.h"
+#include "dls_utili.h"
 
 extern char *optarg;  
 extern int optind, opterr, optopt; 
@@ -43,6 +43,11 @@ extern int optind, opterr, optopt;
 #define OPT_APPEUI                        (18)
 #define OPT_UPGW                          (19)
 #define OPT_DELETE                        (20)
+#define OPT_APPKEY                        (21)
+#define OPT_APPSKEY                       (22)
+#define OPT_NWKSKEY                       (23)
+#define OPT_MANDEV                        (24)
+#define OPT_IMPORTCSV                     (25)
 
 #define CMD_ADDGW                           1
 #define CMD_LISTGW                          2
@@ -55,9 +60,13 @@ extern int optind, opterr, optopt;
 #define CMD_LISTMSG                         9
 #define CMD_UPGW                            10
 #define CMD_DELETE                          11
+#define CMD_MANDEV                          12
+#define CMD_IMPORTCSV                       13
 
+#define NAMELEN            8 
 #define KEYLEN             16
 #define APPKEYLEN          32
+#define KEYSIZE            40 
 #define KEYHEXS            128 
 
 #define DEBUG_SQL           0
@@ -73,6 +82,8 @@ static void sql_debug(sqlite3_stmt* stmt);
 
 static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data);
 
+static void freekey(struct lw_t *lws);
+
 static int app_getopt(struct lw_t *cntx, int argc, char **argv);
 
 static void listgw(sqlite3_stmt *stmt, void* data); 
@@ -82,6 +93,7 @@ static void listdev(sqlite3_stmt *stmt, void* data);
 static void listmsg(sqlite3_stmt *stmt, void* data);
 
 static char *genkey(char *key, uint8_t len);
+static char *genname(char *name, uint8_t len);
 static char *invert(char *dst, const char *src, uint8_t len);
 static char *tohex(char *dst, const char *src, uint8_t len);
 
@@ -102,13 +114,18 @@ struct option app_long_options[] = {
     {"rx2dr",       required_argument,      0,      OPT_RX2DR},
     {"rx2freq",     required_argument,      0,      OPT_RX2FREQ},
     {"adddev",            no_argument,      0,      OPT_ADDDEV},
+    {"mandev",            no_argument,      0,      OPT_MANDEV},
     {"listdev",           no_argument,      0,      OPT_LISTDEV},
     {"listmsg",           no_argument,      0,      OPT_LISTMSG},
     {"devaddr",     required_argument,      0,      OPT_DEVADDR},
     {"deveui",      required_argument,      0,      OPT_DEVEUI},
     {"gweui",       required_argument,      0,      OPT_GWEUI},
     {"appeui",      required_argument,      0,      OPT_APPEUI},
+    {"appkey",      required_argument,      0,      OPT_APPKEY},
+    {"appskey",     required_argument,      0,      OPT_APPSKEY},
+    {"nwkskey",     required_argument,      0,      OPT_NWKSKEY},
     {"delete",            no_argument,      0,      OPT_DELETE},
+    {"importcsv",   required_argument,      0,      OPT_IMPORTCSV},
     {0,             0,                      0,      0},
 };
 
@@ -116,14 +133,14 @@ bool db_init(const char* dbpath, struct lw_t* cntx) {
     int ret;
 	ret = sqlite3_open(dbpath, &cntx->db);
 	if (ret) {
-        MSG("ERROR: Can't open database: %s\n", sqlite3_errmsg(cntx->db));
+        MSG("[DLS ERROR] Can't open database: %s\n", sqlite3_errmsg(cntx->db));
 	    sqlite3_close(cntx->db);
 		return false;
 	}
 #ifdef LG08_LG02
 	ret = sqlite3_open(MSGDBPATH, &cntx->msgdb);
 	if (ret) {
-        MSG("ERROR: Can't open database: %s\n", sqlite3_errmsg(cntx->msgdb));
+        MSG("[DLS ERROR] Can't open database: %s\n", sqlite3_errmsg(cntx->msgdb));
 	    sqlite3_close(cntx->msgdb);
 		return false;
 	}
@@ -149,7 +166,7 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 			if (rowcallback != NULL)
 				rowcallback(stmt, data);
 		} else {
-			MSG_DEBUG(DEBUG_ERROR, "ERROR~ %s\n", sqlite3_errstr(ret));
+			MSG_DEBUG(DEBUG_ERROR, "[DLS ERROR] %s\n", sqlite3_errstr(ret));
 			return false;
 		}
 	}
@@ -158,13 +175,13 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 static void sql_debug(sqlite3_stmt* stmt) { 
     char *sql;
     sql = sqlite3_expanded_sql(stmt);
-    MSG_DEBUG(DEBUG_SQL, "\nDEBUG~ SQL=(%s)\n", sql);
+    MSG_DEBUG(DEBUG_SQL, "\n[DLS INFO] SQL=(%s)\n", sql);
     sqlite3_free(sql);
 }
 
 static void show_help() {
     MSG("\n--------------------------------------------------------------------------------\n");
-    MSG("Usage: lw_utili [OPTIONS]\n");
+    MSG("Usage: dls_utili [OPTIONS]\n");
     MSG("\n");
     MSG("-v, --version         show this app version\n");
     MSG("-h, --help            show this help\n");
@@ -175,38 +192,46 @@ static void show_help() {
     MSG("--pfname   <string>   profile name use for add or list profile\n");
     MSG("--pfid     <int>      profile id use for add gateway\n");
     MSG("\n");
-    MSG("e.g. add a gateway:   lw_utili --addgw A840411B7C5C4150 --pfname dragino\n");
+    MSG("e.g. add a gateway:   dls_utili --addgw A840411B7C5C4150 --pfname dragino\n");
     MSG("                      PFNAME index which profile gateway in use\n");
-    MSG("     list gateways:   lw_utili --listgw, this command will print all gateways status and info\n");
+    MSG("     list gateways:   dls_utili --listgw, this command will print all gateways status and info\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--addpf               add profile for gateway\n");
     MSG("--listpf   <string>   list all profiles info, or the profile by profile name\n");
     MSG("--rx2dr    <int>      datarate: 0(SF12BW125)/1(SF11BW125)/2(SF10BW125)/3(SF9BW125)/4(SF8BW125)/5(SF7BW125)\n");
-    MSG("--rx2freq  <float>    rx2freque use for join accept downlink\n");
+    MSG("--rx2freq  <float>    rx2 frequency used for join accept downlink\n");
     MSG("\n");
-    MSG("e.g. add a profile:   lw_utili --addpf --pfname dragino --rx2dr 5 --rx2freq 868.925\n");
+    MSG("e.g. add a profile:   dls_utili --addpf --pfname dragino --rx2dr 5 --rx2freq 868.925\n");
     MSG("\n--------------------------------------------------------------------------------\n");
-    MSG("--delete              delete by appeui/deveui/gweui/pfid\n");
-    MSG("e.g.  lw_utili --delete --appeui appeui\n");
+    MSG("--delete              delete by appeui/deveui/gweui/pfname/pfid\n");
+    MSG("e.g.  dls_utili --delete --appeui appeui\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--addapp   <string>   add a applicate for device register\n");
     MSG("--listapp  <string>   list all applicates info, or the app index by app name\n");
     MSG("--appname  <string>   application name use for add or list application\n");
     MSG("\n");
-    MSG("e.g. add a application: lw_utili --addapp --appname dragino\n");
+    MSG("e.g. add a application: dls_utili --addapp --appname dragino\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--adddev              add a device return DEVEUI APPEUI and APPKEY\n");
+    MSG("--mandev              add a device by manual\n");
     MSG("--listdev             list all devices info, or the device index by deveui\n");
     MSG("\n");
-    MSG("e.g. add a device:    lw_utili --adddev --appname dragino\n");
+    MSG("e.g. add a device:    dls_utili --adddev --appname dragino\n");
     MSG("\n--------------------------------------------------------------------------------\n");
     MSG("--listmsg             list all message by devaddr|deveui|gweui|appeui\n");
     MSG("--devaddr  <hex>      devaddr\n"     );
     MSG("--deveui   <hex>      devaddr\n"     );
     MSG("--appeui   <hex>      appaddr\n"     );
     MSG("--gweui    <hex>      gwaddr\n"     );
+    MSG("\n--------------------------------------------------------------------------------\n");
+    MSG("--appkey   <hex>      appkey\n"     );
+    MSG("--appskey  <hex>      appskey\n"     );
+    MSG("--nwkskey  <hex>      nwkskey\n"     );
     MSG("\n");
-    MSG("e.g. listmsg by devaddr: lw_utili --listmsg --devaddr aabbccdd\n");
+    MSG("e.g. listmsg by devaddr: dls_utili --listmsg --devaddr aabbccdd\n");
+    MSG("\n--------------------------------------------------------------------------------\n");
+    MSG("--importcsv  <string> (CSVPATH)    import deveui/devaddr/appeui/appkey/appskey/nwkskey by CSV format\n");
+    MSG("e.g. importcsv by path: dls_utili --importcsv filepath\n");
     MSG("\n--------------------------------------------------------------------------------\n");
 }
 
@@ -222,7 +247,8 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
         }
         switch (ret) {
         case 'v':
-            MSG("%s Version: 1.0.0\n", argv[0]);
+		    MSG("Dragino LoRaWAN Server\n");
+            MSG("%s Version: 1.0.2\n", argv[0]);
             return 0;
         case 'h':
             show_help();
@@ -247,7 +273,17 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
             break;
         case OPT_UPGW:
             MSG(">>>>>>>>>>>>>>>>>>>>>>UPGW CMD>>>>>>>>>>>>>>>>>>>>>>\n");
-            cntx->cmd = CMD_UPGW;
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->gweui, optarg, sizeof(cntx->gweui));
+                    cntx->cmd = CMD_UPGW;
+                }        
+            } else {
+                MSG("UPGW: gweui option missing!\n");
+                return -1;
+            }
             break;
         case OPT_ADDPF:
             MSG(">>>>>>>>>>>>>>>>>>>>>>ADDPF CMD>>>>>>>>>>>>>>>>>>>>>>\n");
@@ -268,6 +304,10 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
         case OPT_ADDDEV:
             MSG(">>>>>>>>>>>>>>>>>>>>>>ADDDEV CMD>>>>>>>>>>>>>>>>>>>>>>\n");
             cntx->cmd = CMD_ADDDEV;
+            break; 
+        case OPT_MANDEV:
+            MSG(">>>>>>>>>>>>>>>>>>>>>>MANDEV CMD>>>>>>>>>>>>>>>>>>>>>>\n");
+            cntx->cmd = CMD_MANDEV;
             break; 
         case OPT_LISTDEV:
             MSG(">>>>>>>>>>>>>>>>>>>>>>LISTDEV CMD>>>>>>>>>>>>>>>>>>>>>\n");
@@ -349,7 +389,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->devaddr, optarg, sizeof(cntx->devaddr));
                 }        
             } else {
-                MSG("WARNING~ need input devaddr\n");
+                MSG("WARNING~ input devaddr\n");
                 return -1;
             }       
             break;
@@ -361,7 +401,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->gweui, optarg, sizeof(cntx->gweui));
                 }        
             } else {
-                MSG("WARNING~ Input the GWEUI!\n");
+                MSG("WARNING~ input GWEUI!\n");
                 return -1;
             }       
             break;
@@ -373,7 +413,7 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->deveui, optarg, sizeof(cntx->deveui));
                 }        
             } else {
-                MSG("WARNING~ Input the DEVEUI!\n");
+                MSG("WARNING~ input DEVEUI!\n");
                 return -1;
             }       
             break;
@@ -385,7 +425,57 @@ static int app_getopt(struct lw_t *cntx, int argc, char **argv) {
                     strncpy(cntx->appeui, optarg, sizeof(cntx->appeui));
                 }        
             } else {
-                MSG("WARNING~ Input the APPEUI!\n");
+                MSG("WARNING~ need input APPEUI!\n");
+                return -1;
+            }       
+            break;
+        case OPT_APPKEY:
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->appkey, optarg, sizeof(cntx->appkey));
+                }        
+            } else {
+                MSG("WARNING~ need input APPKEY!\n");
+                return -1;
+            }       
+            break;
+        case OPT_APPSKEY:
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->appskey, optarg, sizeof(cntx->appskey));
+                }        
+            } else {
+                MSG("WARNING~ input the APPSKEY!\n");
+                return -1;
+            }       
+            break;
+        case OPT_NWKSKEY:
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->nwkskey, optarg, sizeof(cntx->nwkskey));
+                }        
+            } else {
+                MSG("WARNING~ Input the NWKSKEY!\n");
+                return -1;
+            }       
+            break;
+        case OPT_IMPORTCSV:
+            MSG(">>>>>>>>>>>>>>>>>>>>>>IMPORT CSVFILE>>>>>>>>>>>>>>>>>>>>>\n");
+            cntx->cmd = CMD_IMPORTCSV;
+            if(optarg != NULL) { 
+                if (optarg[0] == '-') {
+                    optind--;
+                } else {  
+                    strncpy(cntx->csvpath, optarg, sizeof(cntx->csvpath));
+                }        
+            } else {
+                MSG("WARNING~ Need the csv format file path!\n");
                 return -1;
             }       
             break;
@@ -416,6 +506,14 @@ void main(int argc, char *argv[]) {
     char colum[16] = {'\0'};
     char table[16] = {'\0'};
 
+    char tmpchar[6 * KEYSIZE] = {'\0'};
+
+    int ret, i;
+
+    FILE *fp;
+
+    char pi[8][KEYSIZE], *pt;
+
     db_init(DBPATH, &cntx);
 
     if (app_getopt(&cntx, argc, argv))
@@ -432,11 +530,24 @@ void main(int argc, char *argv[]) {
                 snprintf(sql, sizeof(sql), "select id from gwprofile where id = %d", cntx.pfid);
                 INITSTMT(sql, cntx.stmt);
                 DEBUG_STMT(cntx.stmt);
-                int ret = sqlite3_step(cntx.stmt);
+                ret = sqlite3_step(cntx.stmt);
                 if (ret != SQLITE_ROW) {
                     MSG("\nid:%d not a valid profileid, use --listpf to get a valid profileid\n", cntx.pfid);
                     goto out;
                 } 
+                snprintf(sql, sizeof(sql), "INSERT OR IGNORE INTO gws (gweui, profileid) VALUES ('%s', %d)", cntx.gweui, cntx.pfid);
+                sqlite3_finalize(cntx.stmt);
+            } else if (strlen(cntx.pfname) > 0) {
+                snprintf(sql, sizeof(sql), "select id from gwprofile where name = %d", cntx.pfname);
+                INITSTMT(sql, cntx.stmt);
+                DEBUG_STMT(cntx.stmt);
+                ret = sqlite3_step(cntx.stmt);
+                if (ret != SQLITE_ROW) {
+                    MSG("\nid:%d not a valid profilename, use --listpf to get a valid profilename\n", cntx.pfname);
+                    goto out;
+                } else if (ret == SQLITE_ROW) {
+                    cntx.pfid = sqlite3_column_int(cntx.stmt, 0);
+                }
                 snprintf(sql, sizeof(sql), "INSERT OR IGNORE INTO gws (gweui, profileid) VALUES ('%s', %d)", cntx.gweui, cntx.pfid);
                 sqlite3_finalize(cntx.stmt);
             } else
@@ -453,12 +564,12 @@ void main(int argc, char *argv[]) {
             INITSTMT(sql, cntx.stmt);
             DEBUG_STMT(cntx.stmt);
             MSG("\n|      GWEUI      | rx2dr |   rx2freq   |    Last-seen    |\n");
-            if (db_step(cntx.stmt, listgw, NULL))
+            if (!db_step(cntx.stmt, listgw, NULL))
                 goto out;
             break;
 
         case CMD_ADDPF:
-            if ((strlen(cntx.pfname) < 1) || cntx.rx2dr < -1 || cntx.rx2dr > 6) {
+            if ((strlen(cntx.pfname) < 1) || cntx.rx2dr < -1 || cntx.rx2dr > 12) {
                 MSG("WARNING! Wrong option: pfname=%s, rx2dr=%u, rx2freq=%f\n", cntx.pfname, cntx.rx2dr, cntx.rx2freq);
                 goto out;
             }
@@ -466,18 +577,20 @@ void main(int argc, char *argv[]) {
                     cntx.pfname, cntx.rx2dr, cntx.rx2freq);
             INITSTMT(sql, cntx.stmt);
             DEBUG_STMT(cntx.stmt);
-            db_step(cntx.stmt, NULL, NULL);
-            MSG("Add profile complete! name:%s, rx2dr:%u, r2xfreq:%f\n", cntx.pfname, cntx.rx2dr, cntx.rx2freq);
+            if (db_step(cntx.stmt, NULL, NULL))
+                MSG("Add profile complete! name:%s, rx2dr:%u, r2xfreq:%f\n", cntx.pfname, cntx.rx2dr, cntx.rx2freq);
             break;
 
         case CMD_UPGW:
-            if ((strlen(cntx.gweui) > 0) && cntx.pfid > 0) { 
-                snprintf(sql, sizeof(sql), "SELECT name FROM gwprofile where id = %d", cntx.pfid);
+            if ((strlen(cntx.gweui) > 0) && strlen(cntx.pfname) > 0) { 
+                snprintf(sql, sizeof(sql), "SELECT id FROM gwprofile where name = '%s'", cntx.pfname);
                 INITSTMT(sql, cntx.stmt);
-                int ret = sqlite3_step(cntx.stmt);
+                ret = sqlite3_step(cntx.stmt);
                 if (ret != SQLITE_ROW) {
-                    MSG("WARNING~ not a valid profile id , check by lw_utili --listpf\n");
+                    MSG("WARNING~ not a valid profile name , check by dls_utili --listpf\n");
                     goto out;
+                } else if (ret == SQLITE_ROW) {
+                    cntx.pfid = sqlite3_column_int(cntx.stmt, 0);
                 }
                 sqlite3_finalize(cntx.stmt);
                 snprintf(sql, sizeof(sql), "UPDATE OR IGNORE gws SET profileid = %d WHERE gweui = '%s'", cntx.pfid, cntx.gweui);
@@ -494,7 +607,7 @@ void main(int argc, char *argv[]) {
             INITSTMT(sql, cntx.stmt);
             DEBUG_STMT(cntx.stmt);
             MSG("\n|  name  |  rx1delay  |  r2xdr  |  rx2freq  |\n");
-            if (db_step(cntx.stmt, listpf, NULL))
+            if (!db_step(cntx.stmt, listpf, NULL))
                 goto out;
             break;
 
@@ -526,7 +639,7 @@ void main(int argc, char *argv[]) {
             snprintf(sql, sizeof(sql), "SELECT name, appeui, appkey FROM apps");
             INITSTMT(sql, cntx.stmt);
             DEBUG_STMT(cntx.stmt);
-            if (db_step(cntx.stmt, listapp, NULL))
+            if (!db_step(cntx.stmt, listapp, NULL))
                 goto out;
             break;
 
@@ -538,7 +651,7 @@ void main(int argc, char *argv[]) {
             snprintf(sql, sizeof(sql), "select appeui, appkey from apps where name = '%s'", cntx.appname);
             INITSTMT(sql, cntx.stmt);
             DEBUG_STMT(cntx.stmt);
-            int ret = sqlite3_step(cntx.stmt);
+            ret = sqlite3_step(cntx.stmt);
             if (ret != SQLITE_ROW) {
                 MSG("\nappname:%s not a valid appname, use --listapp to get a valid appname\n", cntx.appname);
                 goto out;
@@ -573,12 +686,104 @@ void main(int argc, char *argv[]) {
             } 
                 
             break;
+        case CMD_IMPORTCSV:
+            fp = fopen(cntx.csvpath, "r");
+            if (NULL == fp) {
+                MSG("IMPORT: open csvpath error!\n");
+                goto out;
+            }
+            while (fgets(tmpchar, sizeof(tmpchar), fp) != NULL) {
+                if (NULL != tmpchar) {     /* not NULL LINE */
+                    pt = strtok(tmpchar, ",");
+                    i = 0;
+                    while ((NULL != pt) && (i < 8)) {
+                        strncpy(pi[i], pt, KEYSIZE);
+                        while (pi[i][0] == 0x20) { /* retrip space */
+                            strcpy(pi[i], &pi[i][1]);
+                        }
+
+                        i++;
+
+                        pt = strtok(NULL, ",");
+                    }
+
+                    strcpy(cntx.deveui, pi[0]);
+                    strcpy(cntx.devaddr, pi[1]);
+                    strcpy(cntx.appeui, pi[2]);
+                    strcpy(cntx.appkey, pi[3]);
+                    strcpy(cntx.appskey, pi[4]);
+                    strcpy(cntx.nwkskey, pi[5]);
+
+                    snprintf(sql, sizeof(sql), "select appkey from apps where appeui = '%s'", cntx.appeui);
+                    INITSTMT(sql, cntx.stmt);
+                    DEBUG_STMT(cntx.stmt);
+                    sqlite3_step(cntx.stmt);
+                    if (ret == SQLITE_ROW) {
+                        strcpy(cntx.appkey, sqlite3_column_text(cntx.stmt, 0));
+                    } else {
+                        sqlite3_finalize(cntx.stmt);
+                        snprintf(sql, sizeof(sql), "INSERT OR IGNORE INTO apps (appeui, appkey, name) VALUES ('%s', '%s', '%s')", 
+                                cntx.appeui, cntx.appkey, genname(tmpchar, NAMELEN));
+                        INITSTMT(sql, cntx.stmt);
+                        if (db_step(cntx.stmt, NULL, NULL))  /* add new apps */
+                            MSG("Add a app=%s \n", cntx.appeui);
+                    }
+                    sqlite3_finalize(cntx.stmt);
+                    snprintf(sql, sizeof(sql), "INSERT OR IGNORE INTO devs (deveui, devaddr, appid, appskey, nwkskey) VALUES ('%s', '%s', '%s', '%s', '%s')", \
+                    cntx.deveui, cntx.devaddr, cntx.appeui, cntx.appskey, cntx.nwkskey);
+                    INITSTMT(sql, cntx.stmt);
+                    if (!db_step(cntx.stmt, NULL, NULL)) {  /* add new devs */
+                        MSG("Import deveui=%s FAILED\n", cntx.deveui);
+                    } else
+                        MSG("Import deveui=%s SUCCES\n", cntx.deveui);
+                    sqlite3_finalize(cntx.stmt);
+                }
+            }
+
+            break;
+
+        case CMD_MANDEV:
+            if ((strlen(cntx.deveui) < 1) || (strlen(cntx.devaddr) < 1) ||
+                                            (strlen(cntx.appeui) < 1) ||
+                                            (strlen(cntx.appkey) < 1) ||
+                                            (strlen(cntx.appskey) < 1) ||
+                                            (strlen(cntx.nwkskey) < 1)) {
+                MSG("mandev need options: deveui, devaddr, appeui, appkey, appskey, nwkskey\n");
+                MSG("e.g. dls_utili --mandev --deveui <hex> --devaddr <hex> --appeui <hex> --appkey <hex> --appskey <hex> --nwkskey <hex>\n");
+                goto out;
+            }
+            snprintf(sql, sizeof(sql), "select appkey from apps where appeui = '%s'", cntx.appeui);
+            INITSTMT(sql, cntx.stmt);
+            DEBUG_STMT(cntx.stmt);
+            sqlite3_step(cntx.stmt);
+            if (ret == SQLITE_ROW) {
+                strcpy(cntx.appname, sqlite3_column_text(cntx.stmt, 0));
+            } else {
+                sqlite3_finalize(cntx.stmt);
+                snprintf(sql, sizeof(sql), "insert into apps (appeui, appkey, name) values ('%s', '%s', '%s')", 
+                        cntx.appeui, cntx.appkey, genname(tmpchar, NAMELEN));
+                INITSTMT(sql, cntx.stmt);
+                if(db_step(cntx.stmt, NULL, NULL));  /* add new apps */
+                    MSG("Add a app=%s \n", cntx.appeui);
+            }
+            sqlite3_finalize(cntx.stmt);
+            snprintf(sql, sizeof(sql), "insert into devs (deveui, devaddr, appid, appskey, nwkskey)\
+                    values ('%s', '%s', '%s', '%s', '%s')", cntx.deveui, cntx.devaddr, cntx.appeui, cntx.appskey, cntx.nwkskey);
+            INITSTMT(sql, cntx.stmt);
+            if (!db_step(cntx.stmt, NULL, NULL)) {  /* add new devs for abp*/
+                MSG("Add device FAILED\n");
+                goto out;
+            }
+
+            MSG("Add deviceEUI=%s Sucess!\n", cntx.deveui);
+
+            break;
 
         case CMD_LISTDEV:
             snprintf(sql, sizeof(sql), "SELECT deveui, appid, appkey, devaddr FROM devs INNER JOIN apps on devs.appid = apps.appeui");
             INITSTMT(sql, cntx.stmt);
             DEBUG_STMT(cntx.stmt);
-            if (db_step(cntx.stmt, listdev, NULL))
+            if (!db_step(cntx.stmt, listdev, NULL))
                 goto out;
             break;
 
@@ -625,6 +830,10 @@ void main(int argc, char *argv[]) {
                 strcpy(msgcon, cntx.gweui);
                 strcpy(colum, "gweui");
                 strcpy(table, "gws");
+            } else if (strlen(cntx.pfname) > 0) {
+                strcpy(msgcon, cntx.pfname);
+                strcpy(colum, "name");
+                strcpy(table, "gwprofile");
             } else {
                 MSG("WARNING~ NO delete condition! Need deveui or gweui or appeui!\n");
                 goto out;
@@ -759,6 +968,22 @@ static char *genkey(char *key, uint8_t len) {
     return key;
 }
 
+static char *genname(char *name, uint8_t len) {
+    int i;
+    static unsigned long next = 1;
+    char alpha[64] = "abcdefghijklmnopqrstuvwxyz0ABCDEFGHIJKLMNOPQRSTUVWXYZ-123456789";
+                      
+    for (i = 0; i < len; i++) {
+        next = next * 11 + (unsigned int long)rand();
+        srand((unsigned int)(time(NULL) + next));
+        name[i] = alpha[rand() % 64];
+    }
+
+    name[i] = '\0';
+    
+    return name;
+}
+
 static char *invert(char *dst, const char *src, uint8_t len) {
     int i;
     for (i = 0; i < len; i++) {
@@ -786,4 +1011,14 @@ static char *tohex(char *dst, const char *src, uint8_t len) {
     sprintf(tmp, "0x%c%c }", src[len - 2], src[len - 1]);
     strcat(dst, tmp);
     return dst;
+}
+
+static void freekey(struct lw_t *lws) {
+    memset(lws->deveui, '\0', sizeof(lws->deveui));
+    memset(lws->devaddr, '\0', sizeof(lws->devaddr));
+    memset(lws->appeui, '\0', sizeof(lws->appeui));
+    memset(lws->appkey, '\0', sizeof(lws->appkey));
+    memset(lws->appskey, '\0', sizeof(lws->appskey));
+    memset(lws->nwkskey, '\0', sizeof(lws->nwkskey));
+    memset(lws->appname, '\0', sizeof(lws->appname));
 }

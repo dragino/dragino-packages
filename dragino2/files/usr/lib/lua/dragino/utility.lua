@@ -23,7 +23,7 @@ local type,assert,print,pairs,string,io,os,table,tonumber = type,assert,print,pa
 
 local uci = require("luci.model.uci")
 local util = require("luci.util")
-local luci_fs = require("luci.fs")
+local luci_fs = require("nixio.fs")
 
 setfenv(1,M)
 
@@ -105,6 +105,7 @@ end
 --Get Firmware Version
 --@return f_version firmware version
 --@return b_time build time
+--@return h_version hardware version
 function getVersion()
 	for line in io.lines('/etc/banner') do 
 		if string.match(line,'Version:[%s]+(.+)') then 
@@ -114,7 +115,22 @@ function getVersion()
 			b_time = string.match(line,'Build[%s]+(.+)')  
 		end
 	end
-	return f_version,b_time
+	h_version = util.trim(luci_fs.readfile("/var/iot/board"))
+	if h_version == "LG01" then 
+		h_version = "LG01N / OLG01N"
+	elseif h_version == "LG02" then
+		h_version = "LG02 / OLG02"
+	elseif h_version == "LG08" or h_version == "LG08P" then
+		local SN=util.exec('hexdump -v -e \'11/1 "%_p"\' -s $((0x908)) -n 11 /dev/mtd6') 
+		if string.match(SN,'lps8') then
+			h_version = "LPS8"
+		else 
+			h_version = "LG308"
+		end
+	else 
+		h_version = "Dragino HE"
+	end 
+	return f_version,b_time,h_version
 end
 
 --log data to device
@@ -131,6 +147,10 @@ end
 function getUSBInfo()
 	local USB_INFO=util.exec('cat /sys/kernel/debug/usb/devices | grep -A 1 "P:  Vendor"')
 	local start = string.find(USB_INFO,"Vendor=05c6")
+	if start == nil 
+        then 
+            start = string.find(USB_INFO,"Vendor=2c7c")
+    end
 	if start == nil then return nil end
 	u_man=string.match(USB_INFO,"Manufacturer=([%w%s%.%_]+[%w])",start)
 	u_vid=string.match(USB_INFO,"Vendor=([%w]+)",start)
@@ -168,14 +188,13 @@ end
 --@return channel value table {channel1=value1,channel2=value2....} from sensor directory
 function get_channels_valuetable()
 	local valuetable = {}
-	local files = luci_fs.dir(SENSOR_DIR)
-	for k,v in pairs(files) do 
-		if luci_fs.isfile(SENSOR_DIR..v) then 
-			local value = util.trim(util.exec("tail -n 1 " .. SENSOR_DIR..v))
+	for file in luci_fs.dir(SENSOR_DIR) do 
+		--if luci_fs.isfile(file) then 
+			local value = util.trim(util.exec("tail -n 1 " .. SENSOR_DIR..file))
 			if value ~= nil and value ~= "" then
-				valuetable[v]=value
+				valuetable[file]=value
 			end
-		end
+		--end
 	end
   return valuetable
 end

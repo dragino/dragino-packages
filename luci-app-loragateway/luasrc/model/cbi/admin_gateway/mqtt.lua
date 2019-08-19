@@ -26,6 +26,7 @@ st:value("general",  "General Server")
 st:value("lewei50",  "Lewei50")
 st:value("thingspeak",  "ThingSpeak MQTT")
 st:value("mydevices",  "myDevices")
+st:value("azureiothub",  "Azure IoTHub")
 --function st.write(self,section,value)
 --	server_t = value
 --	m.uci:set("mqtt","general","server_type",value)
@@ -39,6 +40,7 @@ local sv = s:option(Value, "server", translate("Broker Address [-h]"))
 sv.datatype = "host"
 sv.placeholder = "Domain or IP"
 sv:depends("server_type","general")
+sv:depends("server_type","azureiothub")
 --sv.rmempty  = false
 
 local sp = s:option(Value, "port", translate("Broker Port [-p]"))
@@ -55,6 +57,12 @@ password.placeholder = "MQTT password"
 
 local cid = s:option(Value, "client_id", translate("Client ID [-i]"))
 cid.placeholder = "MQTT Client ID"
+
+local qos = s:option(ListValue, "QoS", translate("Quality of service level [-q]"))
+qos.default = "0"
+qos:value("0",  "QoS 0")
+qos:value("1",  "QoS 1")
+qos:value("2",  "QoS 2")
 
 --local api_key = s:option(Value, "api_key", translate("API Key"))
 --api_key.placeholder = "MQTT API Key"

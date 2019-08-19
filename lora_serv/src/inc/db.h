@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS `upmsg` (\
   `confirmed` INTEGER NOT NULL default 0,\
   `payload` TEXT DEFAULT NULL,\
   `fport` INTEGER NOT NULL default 7,\
+  `push` INTEGER NOT NULL DEFAULT 0,\
   `gweui` TEXT DEFAULT NULL,\
   `appeui` TEXT DEFAULT NULL,\
   `deveui` TEXT DEFAULT NULL,\
@@ -118,7 +119,8 @@ CREATE TABLE IF NOT EXISTS `cfgtable` (\
 #define INSERTGWS "INSERT OR IGNORE INTO gws (gweui) VALUES ('A840411B7C5C4150')"
 #define INSERTAPPS "INSERT OR IGNORE INTO apps (name, appeui, appkey) VALUES ('dragino', '899818FFFF290C00', '3FF71C74EE5C4F18DFF3705455910AF6')"
 #define INSERTDEVS "INSERT OR IGNORE INTO devs (deveui, appid) VALUES ('6714223408593412', '899818FFFF290C00')"
-#define INSERTGWPROFILE "INSERT OR IGNORE INTO gwprofile (id, name) VALUES (1, 'EU868')"
+#define INSERTGWPROFILE "INSERT OR IGNORE INTO gwprofile (id, name, rx2datarate, rx2freq) VALUES (1, 'EU868', 0, 869.525), \
+    (2, 'US915', 8, 923.3), (3, 'EU433', 0, 434.665), (4, 'AU923', 8, 923.3), (5, 'AS923', 2, 923.2), (6, 'KR923', 0, 921.90);"
 #define INSERTCFG "INSERT OR IGNORE INTO config (option, value) VALUES ('server', 'localhost'), ('upport', '1700'), ('dwport', '1701')"
 
 #define INITSTMT(SQL, STMT) if (sqlite3_prepare_v2(cntx->db, SQL, -1, &STMT, NULL) != SQLITE_OK) {  \

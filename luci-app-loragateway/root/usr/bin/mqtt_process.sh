@@ -8,51 +8,37 @@ DEBUG=`echo $DEBUG| awk '{print int($0)}'`
 
 UPDATE_INTERVAL=5
 
-
 old=`date +%s`
 
 server_type=`uci get mqtt.general.server_type`
+QoS=`uci get mqtt.general.QoS`
 
-# Check if the MQTT Server is pre_config
-if [ `uci get mqtt.$server_type` == "general" ];then
-	pre_config_server=0
-else
-	pre_config_server=1
-fi
 
-#Set MQTT Server Address [-h]
-if [ $pre_config_server -eq 0 ];then
-	server=`uci get mqtt.general.server`
-else 
+
+# Check if the MQTT Server is a fix server
+if [ `uci get mqtt.$server_type.fix_server` == "1" ] ;then
 	server=`uci get mqtt.$server_type.server`
-fi
-
-#Set MQTT Server Port [-p]
-if [ $pre_config_server -eq 0 ];then
-	port=`uci get mqtt.general.port`
-else 
-	port=`uci get mqtt.$server_type.port`
+else
+	server=`uci get mqtt.general.server`
 fi
 
 #Set MQTT Parameter [-u][-P][-i]
 user=`uci get mqtt.general.username`
-pass=`uci get mqtt.general.password`
-clientID=`uci get mqtt.general.client_id`
+clientID=`uci get mqtt.general.client_id` 
+pass=`uci -q get mqtt.general.password`
+port=`uci get mqtt.$server_type.port`
+cafile=`uci -q get mqtt.$server_type.ca_file`
+pub_format=`uci get mqtt.$server_type.topic_format`
+data_format=`uci get mqtt.$server_type.data_format`
 
-
-#Set MQTT Publish topic format
-if [ $pre_config_server -eq 0 ];then
-	pub_format=`uci get mqtt.general.topic_format`
-else 
-	pub_format=`uci get mqtt.$server_type.topic_format`
+# If cafile is not required then set the fields to null
+if [[ -z "$cafile" ]];then
+	C=" "
+	cafile=""
+else
+	C="--cafile "
 fi
 
-#Set MQTT Publish data format
-if [ $pre_config_server -eq 0 ];then
-	data_format=`uci get mqtt.general.data_format`
-else 
-	data_format=`uci get mqtt.$server_type.data_format`
-fi
 
 [ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Server:Port" $server:$port
 [ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Topic Format: " $pub_format
@@ -88,16 +74,39 @@ do
 					#Replace clientID if we find macro CLIENTID
 					topic=`echo ${topic/CLIENTID/$clientID}`				
 					
-					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "[-t] $topic"	
 
 					#General MQTT Update Data
 					data=`cat /var/iot/channels/$channel`
-					mqtt_data=`echo ${data_format/DATA/$data}`
-					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "[-m] $mqtt_data"
+					mqtt_data=`echo ${data_format/DATA/$remote_id $data}`
 					
-					### Send MQTT Command
-					mosquitto_pub -h $server -p $port -u $user -P $pass  -i $clientID -t $topic -m $mqtt_data
-					
+					# Send MQTT Command
+
+# -----------------------------------------
+# Debug output just for testing - delete this section when not required
+					if [ $DEBUG -ge 1 ]; then
+						logger "[IoT.MQTT]:  "
+						logger "[IoT.MQTT]:-----"
+						logger "[IoT.MQTT]:Parameters"
+						logger "[IoT.MQTT]:server[-h]: "$server
+						logger "[IoT.MQTT]:port[-p]: "$port
+						logger "[IoT.MQTT]:user[-u]: "$user
+						logger "[IoT.MQTT]:pass[-P]: "$P$pass
+						logger "[IoT.MQTT]:QoS[-q]: "$QoS
+						logger "[IoT.MQTT]:clientID[-u]: "$clientID
+						logger "[IoT.MQTT]:topic[-t]: "$topic
+						logger "[IoT.MQTT]:mqtt_data[-m]: "$mqtt_data
+						logger "[IoT.MQTT]:cafile[--cafile]: "$C$cafile
+						logger "[IoT.MQTT]:------"
+					fi 
+# ------------------------------------------
+
+					if [ ! -z "$pass" ]; then  # Check for null password string 
+						mosquitto_pub -d -h $server -p $port -u $user -P "$pass" -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile
+					else
+						mosquitto_pub -d -h $server -p $port -u $user -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile
+					fi
+
+
 					### Delete the Channel info
 					rm /var/iot/channels/$channel
 				else

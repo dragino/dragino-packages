@@ -10,10 +10,10 @@ UPDATE_INTERVAL=5
 
 old=`date +%s`
 
+CERTPATH="/etc/iot/cert/"
+
 server_type=`uci get mqtt.general.server_type`
 QoS=`uci get mqtt.general.QoS`
-
-
 
 # Check if the MQTT Server is a fix server
 if [ `uci get mqtt.$server_type.fix_server` == "1" ] ;then
@@ -22,14 +22,18 @@ else
 	server=`uci get mqtt.general.server`
 fi
 
-#Set MQTT Parameter [-u][-P][-i]
-user=`uci get mqtt.general.username`
-clientID=`uci get mqtt.general.client_id` 
+#Get shared MQTT Parameters
+user=`uci -q get mqtt.general.username`
 pass=`uci -q get mqtt.general.password`
+clientID=`uci -q get mqtt.general.client_id` 
+cert=$CERTPATH"certfile"
+key=$CERTPATH"keyfile"
+# Get server specific MQTT parameters
 port=`uci get mqtt.$server_type.port`
-cafile=`uci -q get mqtt.$server_type.ca_file`
 pub_format=`uci get mqtt.$server_type.topic_format`
 data_format=`uci get mqtt.$server_type.data_format`
+cafile=`uci -q get mqtt.$server_type.cafile`
+
 
 # If cafile is not required then set the fields to null
 if [[ -z "$cafile" ]];then
@@ -39,11 +43,9 @@ else
 	C="--cafile "
 fi
 
-
 [ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Server:Port" $server:$port
 [ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Topic Format: " $pub_format
 [ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Data Format: " $data_format
-
 
 #Run Forever
 while [ 1 ]
@@ -58,31 +60,31 @@ do
 			for channel in $CID; do
 				HAS_CID=`uci show mqtt | grep 'local_id=' | grep $channel | awk -F '[][]' '{print $2}'`
 				if [ -n "$HAS_CID" ];then
-				#if [ "`uci get mqtt.$channel.local_id`" == "$channel" ]; then
 					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
-					#Replace Channel ID if we find macro CHANNEL
+
+					# Get values
 					remote_id=`uci get mqtt.@channels[$HAS_CID].remote_id`
-					topic=`echo ${pub_format/CHANNEL/$remote_id}`
-				
-					#Replace Channel ID if we find macro WRITE_API
-					channel_API=`uci get mqtt.@channels[$HAS_CID].write_api_key`
-					topic=`echo ${topic/WRITE_API/$channel_API}`
-					
-					#Replace username if we find macro USERNAME
-					topic=`echo ${topic/USERNAME/$user}`
-					
-					#Replace clientID if we find macro CLIENTID
-					topic=`echo ${topic/CLIENTID/$clientID}`				
-					
-
-					#General MQTT Update Data
+					channel_API=`uci -q get mqtt.@channels[$HAS_CID].write_api_key`
 					data=`cat /var/iot/channels/$channel`
-					mqtt_data=`echo ${data_format/DATA/$remote_id $data}`
-					
-					# Send MQTT Command
 
-# -----------------------------------------
-# Debug output just for testing - delete this section when not required
+					# Generate Topic and Data strings
+					# Initialise strings
+					topic=$pub_format
+					mqtt_data=$data_format
+					# Replace topic macros
+					topic=`echo ${topic/CHANNEL/$remote_id}`  
+					topic=`echo ${topic/CLIENTID/$clientID}`				
+					topic=`echo ${topic/WRITE_API/$channel_API}`
+					topic=`echo ${topic/USERNAME/$user}`
+					# Replace data macros
+					mqtt_data=`echo ${mqtt_data/CHANNEL/$remote_id}`
+					mqtt_data=`echo ${mqtt_data/DATA/$data}`  
+
+					# Initialise debug flag
+					D=" "
+
+					# -----------------------------------------
+					# Debug output 
 					if [ $DEBUG -ge 1 ]; then
 						logger "[IoT.MQTT]:  "
 						logger "[IoT.MQTT]:-----"
@@ -92,25 +94,55 @@ do
 						logger "[IoT.MQTT]:user[-u]: "$user
 						logger "[IoT.MQTT]:pass[-P]: "$P$pass
 						logger "[IoT.MQTT]:QoS[-q]: "$QoS
+						logger "[IoT.MQTT]:cafile[--cafile]: "$cafile
+						logger "[IoT.MQTT]:cert[--cert]: "$cert
+						logger "[IoT.MQTT]:key[--key]: "$key
 						logger "[IoT.MQTT]:clientID[-u]: "$clientID
+						logger "[IoT.MQTT]:remote_id: "$remote_id
 						logger "[IoT.MQTT]:topic[-t]: "$topic
 						logger "[IoT.MQTT]:mqtt_data[-m]: "$mqtt_data
-						logger "[IoT.MQTT]:cafile[--cafile]: "$C$cafile
 						logger "[IoT.MQTT]:------"
 					fi 
-# ------------------------------------------
 
-					if [ ! -z "$pass" ]; then  # Check for null password string 
-						mosquitto_pub -d -h $server -p $port -u $user -P "$pass" -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile
+					# ------------------------------------------
+					# Debug console output for manual testing
+
+					if [ $DEBUG -ge 10 ]; then
+						# Set debug flag
+						D="-d"
+						# Echo parameters to console
+						echo " "
+						echo "-----"
+						echo "Parameters"
+						echo "server: "$server
+						echo "port: "$port
+						echo "user: "$user
+						echo "pass: "$P$pass
+						echo "QoS: "$QoS
+						echo "cert: "$cert
+						echo "key: "$key
+						echo "cafile: "$cafile
+						echo "clientID: "$clientID
+						echo "remoteID: "$remote_id
+						echo "topic: "$topic
+						echo "mqtt_data: "$mqtt_data
+						echo "------"
+					fi
+					# ------------------------------------------
+
+					# Send MQTT Command
+					if [ ! -z "$pass" ]; then  # Check for password 
+						mosquitto_pub $D -h $server -p $port -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile -u $user -P "$pass" 
+					elif [ ! -z "$cert" ]; then # Check for cert
+						mosquitto_pub $D -h $server -p $port -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile --cert $cert --key $key
 					else
-						mosquitto_pub -d -h $server -p $port -u $user -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile
+						mosquitto_pub $D -h $server -p $port -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile -u $user 
 					fi
 
-
-					### Delete the Channel info
+					# Delete the Channel info
 					rm /var/iot/channels/$channel
 				else
-					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Do Not Find Match Entry for $channel" 
+					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Did Not Find Match Entry for $channel" 
 					rm /var/iot/channels/$channel
 				fi
 			done

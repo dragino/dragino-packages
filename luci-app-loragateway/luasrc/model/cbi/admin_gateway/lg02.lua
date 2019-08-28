@@ -83,12 +83,13 @@ local mode = s:option(ListValue, "mode", translate("RadioMode"))
 mode.placeholder = "Radio Mode"
 mode.default = "0"
 mode:value("0", "A for RX, B for TX")
-mode:value("1", "B for RX, A for TX")
-mode:value("2", "Both for RX, No TX")
+--mode:value("1", "B for RX, A for TX")
+--mode:value("2", "Both for RX, No TX")
 
 local tx_power = s:option(Value, "TXPOWER", translate("Radio Power (Unit:dBm)"))
 tx_power.placeholder = "range 5 ~ 20 dBm"
 tx_power.datatype = "rangelength(1,2)"
+tx_power.default = "20"
 
 s = m:section(NamedSection, "radio1", "lorawan", translate("Channel 1 Radio Settings"),translate("Radio settings for Channel 1"))
 local rx_fre = s:option(Value, "RXFREQ", translate("RadioA Frequency (Unit:Hz)"))
@@ -136,8 +137,8 @@ local syncwd = s:option(Value, "SYNCWD", translate("RadioA LoRa Sync Word"), tra
 syncwd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
 syncwd.default = "52"
 
-local encry = s:option(Value, "encryption", translate("Encryption Key"))
-encry.placeholder = "Encryption Key"
+--local encry = s:option(Value, "encryption", translate("Encryption Key"))
+--encry.placeholder = "Encryption Key"
 
 s = m:section(NamedSection, "radio2", "lorawan", translate("Channel 2 Radio Settings"),translate("Radio settings for Channel 2"))
 local tx_fre = s:option(Value, "TXFREQ", translate("RadioB Frequency (Unit:Hz)"))
@@ -185,7 +186,7 @@ local swd = s:option(Value, "SYNCWD", translate("RadioB LoRa Sync Word"), transl
 swd.placeholder = "Value 52(0x34) is reserved for LoRaWAN networks"
 swd.default = "52"
 
-local encry = s:option(Value, "encryption", translate("Encryption Key"))
-encry.placeholder = "Encryption Key"
+--local encry = s:option(Value, "encryption", translate("Encryption Key"))
+--encry.placeholder = "Encryption Key"
 
 return m

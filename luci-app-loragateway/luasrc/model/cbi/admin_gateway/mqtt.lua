@@ -27,20 +27,14 @@ st:value("lewei50",  "Lewei50")
 st:value("thingspeak",  "ThingSpeak MQTT")
 st:value("mydevices",  "myDevices")
 st:value("azureiothub",  "Azure IoTHub")
---function st.write(self,section,value)
---	server_t = value
---	m.uci:set("mqtt","general","server_type",value)
---	m.uci:set("mqtt","general","server","mqtt.thingspeak.com")
---	if (value == "thingspeak") then
---		m.uci:set("mqtt","general","server","mqtt.thingspeak.com")
---	end
---end
+st:value("awsiot",  "AWS IoT")
 
 local sv = s:option(Value, "server", translate("Broker Address [-h]"))
 sv.datatype = "host"
 sv.placeholder = "Domain or IP"
 sv:depends("server_type","general")
 sv:depends("server_type","azureiothub")
+sv:depends("server_type","awsiot")
 --sv.rmempty  = false
 
 local sp = s:option(Value, "port", translate("Broker Port [-p]"))
@@ -51,9 +45,21 @@ sp:depends("server_type","general")
 
 local user = s:option(Value, "username", translate("User Name [-u]"))
 user.placeholder = "MQTT User Name"
+user:depends("server_type","general")
+user:depends("server_type","thingspeak")
+user:depends("server_type","mydevices")
+user:depends("server_type","lewei50")
+user:depends("server_type","azureiothub")
+--user.rmempty  = false
 
 local password = s:option(Value, "password", translate("Password [-P]"))
 password.placeholder = "MQTT password"
+password:depends("server_type","general")
+password:depends("server_type","thingspeak")
+password:depends("server_type","mydevices")
+password:depends("server_type","lewei50")
+password:depends("server_type","azureiothub")
+--user.rmempty  = false
 
 local cid = s:option(Value, "client_id", translate("Client ID [-i]"))
 cid.placeholder = "MQTT Client ID"
@@ -64,10 +70,6 @@ qos:value("0",  "QoS 0")
 qos:value("1",  "QoS 1")
 qos:value("2",  "QoS 2")
 
---local api_key = s:option(Value, "api_key", translate("API Key"))
---api_key.placeholder = "MQTT API Key"
---api_key:depends("server_type","general")
-
 local topic_format = s:option(Value, "topic_format", translate("Topic Format [-t]"))
 topic_format.placeholder = "MQTT publish topic format"
 topic_format:depends("server_type","general")
@@ -75,17 +77,6 @@ topic_format:depends("server_type","general")
 local data_format = s:option(Value, "data_format", translate("Data String Format [-m]"))
 data_format.placeholder = "MQTT publish data format"
 data_format:depends("server_type","general")
-
---local en_sub = s:option(Flag, "en_sub", translate("Enabled Subscribe"))
---en_sub.enabled  = "1"
---en_sub.disabled = "0"
---en_sub.default  = en_sub.disable
---en_sub.rmempty  = false
-
---local sub_topic = s:option(Value, "sub_topic", translate("Subscribe Topic"))
---sub_topic.placeholder = "MQTT subscribe topic"
-
---local sub_action = s:option(Value, "action", translate("Downlink Action"),translate("Action when there subscribed topic update"))
 
 channels = m:section(TypedSection, "channels", translate("MQTT Channel"),translate("Match between Local Channel and remote channel"))
 channels.anonymous = true

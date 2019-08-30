@@ -91,6 +91,7 @@ int main(int argc, char **argv)
         {"mod", 1, 0, 0},
         {"sf", 1, 0, 0},
         {"bw", 1, 0, 0},
+        {"pw", 1, 0, 0},
         {"br", 1, 0, 0},
         {"fdev", 1, 0, 0},
         {"bt", 1, 0, 0},
@@ -114,6 +115,7 @@ int main(int argc, char **argv)
     uint8_t fdev_khz = DEFAULT_FDEV_KHZ;
     uint8_t bt = DEFAULT_BT;
     uint32_t tx_notch_freq = DEFAULT_NOTCH_FREQ;
+    uint8_t rf_pow = 0;
 
     int32_t offset_i, offset_q;
 
@@ -242,6 +244,16 @@ int main(int argc, char **argv)
                         fdev_khz = (uint8_t)arg_u;
                     }
                 }
+                else if (strcmp(long_options[option_index].name,"pw") == 0) {
+                    i = sscanf(optarg, "%u", &arg_u);
+                    if ((i != 1) || (arg_u < 1) || (arg_u > 250)) {
+                        printf("ERROR: argument parsing of --fdev argument. Use -h to print help\n");
+                        return EXIT_FAILURE;
+                    }
+                    else {
+                        rf_pow = (uint8_t)arg_u;
+                    }
+                }
                 else if (strcmp(long_options[option_index].name,"bt") == 0) {
                     i = sscanf(optarg, "%u", &arg_u);
                     if ((i != 1) || (arg_u > 3)) {
@@ -331,7 +343,7 @@ int main(int argc, char **argv)
     txlut.lut[0].pa_gain = g_pa;
     txlut.lut[0].dac_gain = g_dac;
     txlut.lut[0].mix_gain = g_mix;
-    txlut.lut[0].rf_power = 0;
+    txlut.lut[0].rf_power = rf_pow;
     lgw_txgain_setconf(&txlut);
 
     /* Start the concentrator */
@@ -420,7 +432,7 @@ int main(int argc, char **argv)
             break;
     }
     printf("Frequency: %4.3f MHz\n", freq_hz/1e6);
-    printf("TX Gains: Digital:%d DAC:%d Mixer:%d PA:%d\n", g_dig, g_dac, g_mix, g_pa);
+    printf("TX Gains: Digital:%d DAC:%d Mixer:%d PA:%d TargetPW:%d\n", g_dig, g_dac, g_mix, g_pa, rf_pow);
     if (strcmp(mod, "CW") != 0) {
         lgw_reg_r(LGW_TX_OFFSET_I, &offset_i);
         lgw_reg_r(LGW_TX_OFFSET_Q, &offset_q);

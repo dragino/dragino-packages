@@ -359,6 +359,7 @@ void open_log(void) {
         MSG("ERROR: impossible to write to log file %s\n", log_file_name);
         exit(EXIT_FAILURE);
     }
+    fprintf(stdout, "\"gateway ID\",\"node MAC\",\"UTC timestamp\",\"us count\",\"frequency\",\"RF chain\",\"RX chain\",\"status\",\"size\",\"RSSI\",\"SNR\"\n");
 
     MSG("INFO: Now writing to log file %s\n", log_file_name);
     return;
@@ -495,25 +496,32 @@ int main(int argc, char **argv)
 
             /* writing gateway ID */
             fprintf(log_file, "\"%08X%08X\",", (uint32_t)(lgwm >> 32), (uint32_t)(lgwm & 0xFFFFFFFF));
+            fprintf(stdout, "\"%08X%08X\",", (uint32_t)(lgwm >> 32), (uint32_t)(lgwm & 0xFFFFFFFF));
 
             /* writing node MAC address */
             fputs("\"\",", log_file); // TODO: need to parse payload
+            fputs("\"\",", stdout); // TODO: need to parse payload
 
             /* writing UTC timestamp*/
             fprintf(log_file, "\"%s\",", fetch_timestamp);
             // TODO: replace with GPS time when available
+            fprintf(stdout, "\"%s\",", fetch_timestamp);
 
             /* writing internal clock */
             fprintf(log_file, "%10u,", p->count_us);
+            fprintf(stdout, "%10u,", p->count_us);
 
             /* writing RX frequency */
             fprintf(log_file, "%10u,", p->freq_hz);
+            fprintf(stdout, "%10u,", p->freq_hz);
 
             /* writing RF chain */
             fprintf(log_file, "%u,", p->rf_chain);
+            fprintf(stdout, "%u,", p->rf_chain);
 
             /* writing RX modem/IF chain */
             fprintf(log_file, "%2d,", p->if_chain);
+            fprintf(stdout, "%2d,", p->if_chain);
 
             /* writing status */
             switch(p->status) {
@@ -526,6 +534,7 @@ int main(int argc, char **argv)
 
             /* writing payload size */
             fprintf(log_file, "%3u,", p->size);
+            fprintf(stdout, "%3u,", p->size);
 
             /* writing modulation */
             switch(p->modulation) {
@@ -576,9 +585,11 @@ int main(int argc, char **argv)
 
             /* writing packet RSSI */
             fprintf(log_file, "%+.0f,", p->rssi);
+            fprintf(stdout, "%+.0f,", p->rssi);
 
             /* writing packet average SNR */
             fprintf(log_file, "%+5.1f,", p->snr);
+            fprintf(stdout, "%+5.1f,", p->snr);
 
             /* writing hex-encoded payload (bundled in 32-bit words) */
             fputs("\"", log_file);
@@ -590,6 +601,8 @@ int main(int argc, char **argv)
             /* end of log file line */
             fputs("\"\n", log_file);
             fflush(log_file);
+            fputs("\n", stdout);
+            fflush(stdout);
             ++pkt_in_log;
         }
 

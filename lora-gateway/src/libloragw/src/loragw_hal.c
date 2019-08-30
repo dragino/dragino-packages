@@ -1276,6 +1276,10 @@ int lgw_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
                 p->rssi -= RSSI_MULTI_BIAS;
             }
 
+            if (p->snr < 0) {
+                p->rssi += p->snr;
+            }
+
         } else if (ifmod == IF_FSK_STD) {
             DEBUG_MSG("Note: FSK packet\n");
             switch(stat_fifo & 0x07) {

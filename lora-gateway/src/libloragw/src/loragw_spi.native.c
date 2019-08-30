@@ -54,7 +54,9 @@ Maintainer: Sylvain Miermont
 #define READ_ACCESS     0x00
 #define WRITE_ACCESS    0x80
 #define SPI_SPEED       8000000
+#ifndef LGW_DETECT
 #define SPI_DEV_PATH    "/dev/spidev1.0"
+#endif
 //#define SPI_DEV_PATH    "/dev/spidev32766.0"
 
 /* -------------------------------------------------------------------------- */

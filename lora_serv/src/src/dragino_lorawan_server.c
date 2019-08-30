@@ -20,7 +20,7 @@ Maintainer: skerlan
 /* log level */
 int DEBUG_INFO = 1;
 int DEBUG_DEBUG = 0;
-int DEBUG_WARNING = 0;
+int DEBUG_WARNING = 1;
 int DEBUG_ERROR = 1;
 int DEBUG_JOIN = 0;
 int DEBUG_UPDW = 0;

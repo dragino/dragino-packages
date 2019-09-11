@@ -22,18 +22,17 @@ else
 	server=`uci get mqtt.general.server`
 fi
 
-#Get shared MQTT Parameters
+# Get shared MQTT Parameters
 user=`uci -q get mqtt.general.username`
 pass=`uci -q get mqtt.general.password`
 clientID=`uci -q get mqtt.general.client_id` 
-cert=$CERTPATH"certfile"
-key=$CERTPATH"keyfile"
+
+
 # Get server specific MQTT parameters
 port=`uci get mqtt.$server_type.port`
 pub_format=`uci get mqtt.$server_type.topic_format`
 data_format=`uci get mqtt.$server_type.data_format`
 cafile=`uci -q get mqtt.$server_type.cafile`
-
 
 # If cafile is not required then set the fields to null
 if [[ -z "$cafile" ]];then
@@ -41,6 +40,18 @@ if [[ -z "$cafile" ]];then
 	cafile=""
 else
 	C="--cafile "
+fi
+
+# Set Certificate and Key file parameters
+if [[ -e "$CERTPATH"certfile"" ]];then
+	cert=$CERTPATH"certfile"
+else
+	cert=""
+fi
+if [[ -e "$CERTPATH"keyfile"" ]];then
+	key=$CERTPATH"keyfile"
+else
+	key=""
 fi
 
 [ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Server:Port" $server:$port

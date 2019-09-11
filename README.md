@@ -1,2 +1,2 @@
 # dragino-packages
-packages fro dragino products
+Packages for dragino products

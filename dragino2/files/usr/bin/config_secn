@@ -20,7 +20,7 @@ MESH_GROUP=`uci get secn.mesh.mesh_group`
 uci set wireless.radio0.channel=$CHANNEL
 uci set wireless.ap_0.encryption=$ENCRYPT
 uci set wireless.ap_0.key=$PASSPHRASE
-uci set wireless.ap_0.ssid=$SSID
+uci set wireless.ap_0.ssid="$SSID"
 uci set wireless.ap_0.mode="ap"
 uci set wireless.ap_0.disabled=$AP_DISABLE
 uci set wireless.ap_0.maxassoc=$MAXASSOC
@@ -176,7 +176,7 @@ fi
 if [ $WANPORT = "WiFi" ]; then
     # Set up for wlan0 WAN port
 	uci set wireless.sta_0.disabled='0'
-	uci set wireless.sta_0.ssid=$WANSSID
+	uci set wireless.sta_0.ssid="$WANSSID"
 	uci set wireless.sta_0.key=$WANPASS
 	uci set wireless.sta_0.encryption=$WANENCR
 	uci set network.wan.ifname='wlan0-2'

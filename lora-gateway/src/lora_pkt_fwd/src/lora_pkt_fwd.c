@@ -1675,17 +1675,6 @@ void thread_up(void) {
                 buff_index += 2;
             }
 
-            if (ref_ok == false) {
-                clock_gettime(CLOCK_REALTIME, &pkt_utc_time);
-                x = gmtime(&(pkt_utc_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
-                j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE-buff_index, ",\"time\":\"%04i-%02i-%02iT%02i:%02i:%02i.%06liZ\"", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (pkt_utc_time.tv_nsec)/1000); /* ISO 8601 format */
-                if (j > 0) {
-                    buff_index += j;
-                } else {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
-                    exit(EXIT_FAILURE);
-                }
-            }
             /* RAW timestamp, 8-17 useful chars */
             j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE-buff_index, "\"tmst\":%u", p->count_us);
             if (j > 0) {
@@ -1722,6 +1711,16 @@ void thread_up(void) {
                         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
                         exit(EXIT_FAILURE);
                     }
+                }
+            } else {
+                clock_gettime(CLOCK_REALTIME, &pkt_utc_time);
+                x = gmtime(&(pkt_utc_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
+                j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE-buff_index, ",\"time\":\"%04i-%02i-%02iT%02i:%02i:%02i.%06liZ\"", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (pkt_utc_time.tv_nsec)/1000); /* ISO 8601 format */
+                if (j > 0) {
+                    buff_index += j;
+                } else {
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 4));
+                    exit(EXIT_FAILURE);
                 }
             }
 

@@ -494,7 +494,6 @@ void main(int argc, char *argv[]) {
     char sql[512] = {'\0'};
 
     struct lw_t cntx = {'\0'};
-
     char appeui[17] = {'\0'};
     char appeui_r[17] = {'\0'};
     char appkey[33] = {'\0'};
@@ -513,6 +512,10 @@ void main(int argc, char *argv[]) {
     FILE *fp;
 
     char pi[8][KEYSIZE], *pt;
+
+    cntx.rx2dr = 0;
+    cntx.pfid = 0;
+    cntx.rx2freq = 0;
 
     db_init(DBPATH, &cntx);
 

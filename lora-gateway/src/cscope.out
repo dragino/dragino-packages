@@ -1,4 +1,4 @@
-cscope 15 $HOME/work/dragino-packages/lora-gateway/src -q 0000005376 0000813794
+cscope 15 $HOME/work/dragino-packages/lora-gateway/src -q 0000005386 0000817810
 	@libloragw/inc/loragw_aux.h
 
 17 #i‚de‡
@@ -59500,6 +59500,664 @@ OPMODE_SLEEP
 );
 
 738 
+	}
+}
+
+	@lora_pkt_fwd/src/single_tx.c
+
+13 
+	~<î∫o.h
+>
+
+15 
+	~"l‹agw_hÆ.h
+"
+
+16 
+	~"ødio.h
+"
+
+18 *
+›èrg
+;
+
+19 
+›töd
+, 
+›ãº
+, 
+›t›t
+;
+
+22 
+	gsf
+[8] = "7";
+
+23 
+	gbw
+[8] = "125000";
+
+24 
+	g¸
+[8] = "1";
+
+25 
+	gwd
+[8] = "52";
+
+26 
+	g¥Àn
+[8] = "8";
+
+27 
+	gpw
+[8] = "16";
+
+28 
+	g‰eq
+[16] = "868500000";
+
+30 
+	gövîtiq
+ = 0;
+
+31 
+	glo›
+ = 0;
+
+32 
+	gmode
+ = 0;
+
+35 vﬁ©ûê
+boﬁ
+ 
+	gexô_sig
+ = 
+Ál£
+;
+
+36 vﬁ©ûê
+boﬁ
+ 
+	gquô_sig
+ = 
+Ál£
+;
+
+40 
+	$¥öt_hñp
+() {
+
+41 
+	`¥ötf
+("Usage: single_tx [-f frequence] <uint> (default:868500000)Åarget frequency in Hz\n");
+
+42 
+	`¥ötf
+(" [-r] setásÑx\n");
+
+43 
+	`¥ötf
+(" [-s spreadingFactor] <uint> (default: 7)\n");
+
+44 
+	`¥ötf
+(" [-b bandwidth] <uint> default: 125k \n");
+
+45 
+	`¥ötf
+(" [-c coderate] <uint> LoRa Coding Rate [1-4] \n");
+
+46 
+	`¥ötf
+(" [-w syncword] <uint> default: 52, 0x34\n");
+
+47 
+	`¥ötf
+(" [-i] sendÖacket using inverted modulationÖolarity\n");
+
+48 
+	`¥ötf
+(" [-l] continue mode\n");
+
+49 
+	`¥ötf
+(" [-m message] <text> sendÅhis message fromÑadio\n");
+
+50 
+	`¥ötf
+(" [-h] showÅhis helpándÉxit \n");
+
+51 
+	}
+}
+
+56 
+	$maö
+(
+¨gc
+, *
+¨gv
+[])
+
+59 
+c
+;
+
+61 
+mesßge
+[248] = {'\0'};
+
+69 (
+c
+ = 
+	`gë›t
+(
+¨gc
+, 
+¨gv
+, "rf:s:b:c:w:ilp:m:h")) != -1) {
+
+70 
+c
+) {
+
+72 i‡(
+›èrg
+) {
+
+73 
+	`°∫˝y
+(
+‰eq
+, 
+›èrg
+, (freq));
+
+75 
+	`¥öt_hñp
+();
+
+76 
+	`exô
+(1);
+
+80 i‡(
+›èrg
+)
+
+81 
+	`°∫˝y
+(
+sf
+, 
+›èrg
+, (sf));
+
+83 
+	`¥öt_hñp
+();
+
+84 
+	`exô
+(1);
+
+88 
+mode
+ = 1;
+
+91 i‡(
+›èrg
+)
+
+92 
+	`°∫˝y
+(
+bw
+, 
+›èrg
+, (bw));
+
+94 
+	`¥öt_hñp
+();
+
+95 
+	`exô
+(1);
+
+99 i‡(
+›èrg
+)
+
+100 
+	`°∫˝y
+(
+¸
+, 
+›èrg
+, (cr));
+
+102 
+	`¥öt_hñp
+();
+
+103 
+	`exô
+(1);
+
+107 
+övîtiq
+ = 1;
+
+110 
+lo›
+ = 1;
+
+113 i‡(
+›èrg
+)
+
+114 
+	`°∫˝y
+(
+pw
+, 
+›èrg
+, (pw));
+
+116 
+	`¥öt_hñp
+();
+
+117 
+	`exô
+(1);
+
+121 i‡(
+›èrg
+)
+
+122 
+	`°∫˝y
+(
+wd
+, 
+›èrg
+, (wd));
+
+124 
+	`¥öt_hñp
+();
+
+125 
+	`exô
+(1);
+
+129 i‡(
+›èrg
+)
+
+130 
+	`°∫˝y
+(
+mesßge
+, 
+›èrg
+, (message));
+
+132 
+	`¥öt_hñp
+();
+
+133 
+	`exô
+(1);
+
+139 
+	`¥öt_hñp
+();
+
+140 
+	`exô
+(0);
+
+146 
+ødiodev
+ *
+l‹adev
+;
+
+147 
+l‹adev
+ = (
+ødiodev
+ *Ë
+	`mÆloc
+((radiodev));
+
+149 
+l‹adev
+->
+nss
+ = 21;
+
+150 
+l‹adev
+->
+r°
+ = 12;
+
+151 
+l‹adev
+->
+dio
+[0] = 7;
+
+152 
+l‹adev
+->
+dio
+[1] = 6;
+
+153 
+l‹adev
+->
+dio
+[2] = 8;
+
+155 
+l‹adev
+->
+•ù‹t
+ = 
+	`•i_›í
+(
+SPI_DEV_RADIO
+);
+
+157 
+l‹adev
+->
+‰eq
+ = 
+	`©ﬁ
+(freq);
+
+158 
+l‹adev
+->
+sf
+ = 
+	`©oi
+(sf);
+
+159 
+l‹adev
+->
+bw
+ = 
+	`©ﬁ
+(bw);
+
+160 
+l‹adev
+->
+¸
+ = 
+	`©oi
+(cr);
+
+161 
+l‹adev
+->
+rf_powî
+ = 
+	`©oi
+(
+pw
+);
+
+162 
+l‹adev
+->
+syncw‹d
+ = 
+	`©oi
+(
+wd
+);
+
+163 
+l‹adev
+->
+no¸c
+ = 1;
+
+164 
+l‹adev
+->
+¥Àn
+ = 
+	`©oi
+(prlen);
+
+165 
+l‹adev
+->
+övîtio
+ = 
+övîtiq
+;
+
+166 
+	`°r˝y
+(
+l‹adev
+->
+desc
+, "RFDEV");
+
+168 
+	`¥ötf
+("Radiÿ°ru˘: spù‹t=%d, fªq=%d, sf=%d, bw=%d, cr=%d, wd=0x%2x,Öw=%d, IQ=%d\n", 
+l‹adev
+->
+•ù‹t
+,Ü‹adev->
+‰eq
+,Ü‹adev->
+sf
+,Ü‹adev->
+bw
+,Ü‹adev->
+¸
+,Ü‹adev->
+syncw‹d
+,Ü‹adev->
+rf_powî
+,Ü‹adev->
+övîtio
+);
+
+170 if(!
+	`gë_ødio_vîsi⁄
+(
+l‹adev
+))
+
+171 
+˛ón
+;
+
+174 
+	`£tup_ch™√l
+(
+l‹adev
+);
+
+176 i‡(!
+mode
+) {
+
+178 
+∑ylﬂd
+[256] = {'\0'};
+
+180 i‡(
+	`°æí
+(
+mesßge
+) < 1)
+
+181 
+	`°r˝y
+(
+mesßge
+, "HELLO DRAGINO");
+
+183 i‡(
+lo›
+) {
+
+185 
+¢
+ = 0;
+
+187 
+	`¢¥ötf
+(
+∑ylﬂd
+, ’aylﬂd), "%d: HELLO DRAGINO ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ", 
+¢
+);
+
+188 
+	`sögÀ_tx
+(
+l‹adev
+, (
+uöt8_t
+ *)
+∑ylﬂd
+, 
+	`°æí
+(payload));
+
+189 ++
+¢
+;
+
+190 
+	`¶ìp
+(1);
+
+193 
+	`¢¥ötf
+(
+∑ylﬂd
+, ’aylﬂd), "%s", 
+mesßge
+);
+
+194 
+	`sögÀ_tx
+(
+l‹adev
+, (
+uöt8_t
+ *)
+∑ylﬂd
+, 
+	`°æí
+(payload));
+
+197 
+lgw_pkt_rx_s
+ 
+rxpkt
+;
+
+199 
+	`rxl‹a
+(
+l‹adev
+->
+•ù‹t
+, 1);
+
+200 
+	`¥ötf
+("\nLi°íögáàSF%ò⁄ %.6l‡Mhz.", 
+l‹adev
+->
+sf
+, ()÷‹adev->
+‰eq
+)/1000000);
+
+202 if(
+	`digôÆRód
+(
+l‹adev
+->
+dio
+[0]) == 1) {
+
+203 
+	`mem£t
+(
+rxpkt
+.
+∑ylﬂd
+, 0, (rxpkt.payload));
+
+204 
+	`ª˚ived
+(
+l‹adev
+->
+•ù‹t
+, &
+rxpkt
+);
+
+205 
+	`Ârötf
+(
+°dîr
+, "echÿª˚ived: %s,Ñssi=%f\n", 
+rxpkt
+.
+∑ylﬂd
+,Ñxpkt.
+rssi
+);
+
+211 
+˛ón
+:
+
+213 
+	`‰ì
+(
+l‹adev
+);
+
+215 
+	`¥ötf
+("INFO: Exôög %s\n", 
+¨gv
+[0]);
+
+216 
+	`exô
+(
+EXIT_SUCCESS
+);
+
+217 
 	}
 }
 
@@ -130622,8 +131280,8 @@ __END_DECLS
 .
 1
 /usr/include
-84
-2272
+85
+2301
 libloragw/inc/loragw_aux.h
 libloragw/inc/loragw_fpga.h
 libloragw/inc/loragw_gps.h
@@ -130661,6 +131319,7 @@ lora_pkt_fwd/src/jitqueue.c
 lora_pkt_fwd/src/lora_pkt_fwd.c
 lora_pkt_fwd/src/parson.c
 lora_pkt_fwd/src/radio.c
+lora_pkt_fwd/src/single_tx.c
 lora_pkt_fwd/src/timersync.c
 tmp/lora_pkt_fwd.c
 util_ack/src/util_ack.c

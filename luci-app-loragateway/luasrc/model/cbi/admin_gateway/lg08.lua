@@ -46,11 +46,12 @@ o:value("1",  "Little message output")
 o:value("2",  "More verbose output")
 o:value("3",  "Many verbose output")
 
-o = s:taboption("general", ListValue, "provider", translate("Service Provider"))
-o.optional = true
-o.default = "ttn"
-o:value("ttn", "The Things Network")
-o:value("custom", "--custom--")
+local sp = s:taboption("general",ListValue, "provider", translate("Service Provider"))
+sp.default = "ttn"
+sp:value("ttn", "The Things Network")
+sp:value("tencent", "Tencent LoRaWAN Server")
+sp:value("local", "Built-In LoRaWAN Server")
+sp:value("custom", "--custom--")
 
 o = s:taboption("general", Value, "custom_server", translate("LoraWAN server Address"))
 o.optional = true
@@ -72,6 +73,16 @@ o:value("router.jp.thethings.network", "router.jp.thethings.network")
 o:value("thethings.meshed.com.au", "ttn-router-asia-se")
 o:value("as923.thethings.meshed.com.au", "meshed-router")
 o:value("ttn.opennetworkinfrastructure.org", "switch-router")
+
+local tencent_addr = s:taboption("general", ListValue, "tencent_server", translate("Server Address"))
+tencent_addr:depends("provider","tencent")
+tencent_addr.default = "cn.thethings.network"
+tencent_addr:value("cn.thethings.network", "cn.thethings.network")
+
+local local_addr = s:taboption("general",ListValue, "local_server",translate("Server Address"))
+local_addr:depends("provider","local")
+local_addr.default = "127.0.0.1"
+local_addr:value("127.0.0.1", "127.0.0.1")
 
 o = s:taboption("general", Value, "upp", translate("Server port for upstream"))
 o.optional = true

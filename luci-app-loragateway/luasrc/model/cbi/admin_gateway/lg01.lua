@@ -39,6 +39,8 @@ lv:value("3",  "Many verbose output")
 local sp = s:option(ListValue, "provider", translate("Service Provider"))
 sp.default = "ttn"
 sp:value("ttn", "The Things Network")
+sp:value("tencent", "Tencent LoRaWAN Server")
+sp:value("local", "Built-In LoRaWAN Server")
 sp:value("custom", "--custom--")
 
 local sv = s:option(Value, "custom_server", translate("Server Address"))
@@ -61,11 +63,22 @@ ttn_addr:value("as923.thethings.meshed.com.au", "meshed-router")
 ttn_addr:value("ttn.opennetworkinfrastructure.org", "switch-router")
 ttn_addr:value("router.cn.thethings.network", "router.cn.thethings.network")
 
+local tencent_addr = s:option(ListValue, "tencent_server", translate("Server Address"))
+tencent_addr:depends("provider","tencent")
+tencent_addr.default = "cn.thethings.network"
+tencent_addr:value("cn.thethings.network", "cn.thethings.network")
+
+local local_addr = s:option(ListValue, "local_server",translate("Server Address"))
+local_addr:depends("provider","local")
+local_addr.default = "127.0.0.1"
+local_addr:value("127.0.0.1", "127.0.0.1")
+
+
 local sp = s:option(Value, "port", translate("Server upstream Port"))
 sp.datatype = "port"
 sp.default = "1700"
 
-local dport = s:option(Value, "dwport", translate("Server dwonstream Port"))
+local dport = s:option(Value, "dwport", translate("Server downstream Port"))
 dport.datatype = "port"
 dport.default = "1700"
 
@@ -85,6 +98,7 @@ long.placeholder = "Location Info"
 local rf_power = s:option(Value, "RFPOWER", translate("Radio Power (Unit:dBm)"))
 rf_power.placeholder = "range 5 ~ 20 dBm"
 rf_power.datatype = "rangelength(1,2)"
+rf_power.default = "20"
 
 s = m:section(NamedSection, "radio1", "lorawan", translate("Radio Settings"),translate("Radio settings for Channel"))
 local rf_fre = s:option(Value, "RFFREQ", translate("Frequency (Unit:Hz)"))

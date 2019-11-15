@@ -12,53 +12,225 @@ old=`date +%s`
 
 CERTPATH="/etc/iot/cert/"
 
-server_type=`uci get mqtt.general.server_type`
-QoS=`uci get mqtt.general.QoS`
-
-# Check if the MQTT Server is a fix server
-if [ `uci get mqtt.$server_type.fix_server` == "1" ] ;then
-	server=`uci get mqtt.$server_type.server`
-else
-	server=`uci get mqtt.general.server`
-fi
-
-# Get shared MQTT Parameters
-user=`uci -q get mqtt.general.username`
-pass=`uci -q get mqtt.general.password`
-clientID=`uci -q get mqtt.general.client_id` 
-
+server_type=`uci get mqtt.common.server_type`
+hostname=`uci get system.@[0].hostname`
 
 # Get server specific MQTT parameters
-port=`uci get mqtt.$server_type.port`
-pub_format=`uci get mqtt.$server_type.topic_format`
-data_format=`uci get mqtt.$server_type.data_format`
+server=`uci -q get mqtt.$server_type.url`
+port=`uci -q get mqtt.$server_type.port`
+certfile=`uci -q get mqtt.$server_type.cert`
+keyfile=`uci -q get mqtt.$server_type.key`
 cafile=`uci -q get mqtt.$server_type.cafile`
+user=`uci -q get mqtt.$server_type.user`
+pass=`uci -q get mqtt.$server_type.pwd`
+clientID=`uci -q get mqtt.$server_type.cid` 
 
-# If cafile is not required then set the fields to null
+pub_qos=`uci -q get mqtt.$server_type.pub_qos`
+pub_topic_format=`uci -q get mqtt.$server_type.pub_topic`
+
+data_format=`uci -q get mqtt.$server_type.data`
+pub_enable=`uci -q get mqtt.common.pub_enable`
+
+sub_qos=`uci -q get mqtt.$server_type.sub_qos`
+sub_topic=`uci -q get mqtt.$server_type.sub_topic`
+sub_enable=`uci -q get mqtt.common.sub_enable`
+
+if [ "$pub_enable" != "checked" ];then
+  pub_enable=0
+fi
+if [ "$sub_enable" != "checked" ];then
+  sub_enable=0
+fi
+
+# Set CA File parameter or set the fields to null
 if [[ -z "$cafile" ]];then
 	C=" "
 	cafile=""
 else
 	C="--cafile "
+	cafile=$CERTPATH$cafile
 fi
 
 # Set Certificate and Key file parameters
-if [[ -e "$CERTPATH"certfile"" ]];then
-	cert=$CERTPATH"certfile"
+if [[ -e "$CERTPATH$certfile" ]];then
+	cert=$CERTPATH$certfile
 else
 	cert=""
 fi
-if [[ -e "$CERTPATH"keyfile"" ]];then
-	key=$CERTPATH"keyfile"
+if [[ -e "$CERTPATH$keyfile" ]];then
+	key=$CERTPATH$keyfile
 else
 	key=""
 fi
 
-[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Server:Port" $server:$port
-[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Topic Format: " $pub_format
-[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Data Format: " $data_format
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Publish enable:   " $pub_enable
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Subscribe enable: " $sub_enable
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Server:Port       " $server:$port
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Pub Topic Format: " $pub_topic_format
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Pub Data Format:  " $data_format
+[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Sub Topic Format: " $sub_topic
 
-#Run Forever
+# Kill any old Publish / Subscribe copies left running
+killall -q "mosquitto_pub"
+killall -q "mosquitto_sub"
+
+# ----------------------------------------
+# Set up for Subscription
+
+# Check board type and set "radio"
+if [ -f /var/iot/board ]; then
+  board_type=`cat /var/iot/board`
+else
+	board_type="LG01"
+fi
+
+if [ "$board_type" == "LG01" ]; then
+  RADIO="radio1"
+	FREQ="RFFREQ"
+	SF="RFSF"
+	BW="RFBW"
+	CR="RFCR"
+elif [ "$board_type" == "LG02" ]; then
+  RADIO="radio2"
+	FREQ="TXFREQ"
+	SF="TXSF"
+	BW="TXBW"
+	CR="TXCR"
+else # No suitable board type
+  RADIO=0
+  sub_enable=0
+	logger "[IoT.MQTT]:Not suitable board type - mosquitto_sub not called."
+fi
+
+# Get LoRa radio parameters
+freq=`uci -q get gateway.$RADIO.$FREQ`
+sf=`uci -q get gateway.$RADIO.$SF`
+bw=`uci -q get gateway.$RADIO.$BW`
+cr=`uci -q get gateway.$RADIO.$CR`
+
+# Check for valid LoRa radio params
+if [ -z "$freq" ] || [ -z "$sf" ] || [ -z "$bw" ] || [ -z "$cr" ] ; then 
+	sub_enable=0
+	logger "[IoT.MQTT]:Invalid LoRa radio params - mosquitto_sub not called."
+fi
+
+# Start Subscribe if required
+if [ "$sub_enable" != "0" ];then
+
+	LORA=" " # Clear string in case not reqd
+  if [ "$board_type" == "LG01" ] || [ "$board_type" == "LG02" ]; then
+
+	  bwstr=125      #set default value
+	  case $bw in 
+	    "500000") bwstr="500";;
+	    "250000") bwstr="250";;
+	    "125000") bwstr="125";;
+	    "62500")  bwstr="62.5";;
+	    "41700")  bwstr="47.8";;
+	    "31250")  bwstr="31.25";;
+	    "20800")  bwstr="20.8";;
+	    "15600")  bwstr="15.6";;
+	    "10400")  bwstr="10.4";;
+	    "7800")   bwstr="7.8";;
+	  esac
+
+	  FREQSTR=$(awk "BEGIN {printf \"%.1f\", $freq/1000000}")
+	  DATR="SF"$sf"BW"$bwstr
+	  CODR="4/"$cr
+	  LORA=" -z --freq $FREQSTR --datr $DATR --codr $CODR"
+  fi
+
+	# Replace topic macros
+	sub_topic=`echo ${sub_topic/CHANNEL/$remote_id}`  
+	sub_topic=`echo ${sub_topic/CLIENTID/$clientID}`				
+	sub_topic=`echo ${sub_topic/WRITE_API/$channel_API}`
+	sub_topic=`echo ${sub_topic/USERNAME/$user}`
+	sub_topic=`echo ${sub_topic/HOSTNAME/$hostname}`
+
+	if [ $DEBUG -ge 10 ]; then
+		# Set debug flag
+		D="-d"
+		echo " "
+		echo "Board Type: "$board_type
+		echo "-----"
+		echo "Subscribe Parameters"
+		echo "server: "$server
+		echo "port: "$port
+		echo "user: "$user
+		echo "pass: "$pass
+		echo "sub_qos: "$sub_qos
+		echo "cert: "$cert
+		echo "key: "$key
+		echo "cafile: "$cafile
+		echo "clientID: "$clientID
+		echo "sub_topic: "$sub_topic
+		echo "sub_enable: "$sub_enable
+		echo "LORA: "$LORA
+		echo "------"
+	fi
+
+  # Start the subscription process
+	# 1. Case with User, Password and Client ID present
+	if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then  
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic -u $user -P "$pass" $C $cafile $LORA &
+
+	# 2. Case with Certificate, Key and ClientID present
+	elif [ ! -z "$cert" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then 
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic --cert $cert --key $key $C $cafile $LORA &
+
+	# 3. Case with no User, Certificate or ClientID present
+	elif [ -z "$user" ] && [ -z "$cert" ] && [ -z "$clientID" ]; then 
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -t $sub_topic $LORA &
+
+	# 3A. Case with no User, no Certificate, but with ClientID present
+	elif [ -z "$user" ] && [ -z "$cert" ] && [ ! -z "$clientID" ]; then
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic $LORA &
+
+	# 4. Case with User and ClientID present, but no Password and no Certificate present
+	elif [ -z "$pass" ] && [ -z "$cert" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then  
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic -u $user $LORA &
+
+	# 5. Else - invalid parameters, just log
+	else
+		logger "[IoT.MQTT]:Invalid Parameters - mosquitto_sub not called."
+	fi
+
+fi
+
+# -----------------------------------
+# Set up for Publish
+
+# Set up channels directory
+mkdir -p /var/iot/channels
+
+# Check if Publish is enabled, exit if not
+if [ "$pub_enable" == "0" ]; then
+	if [ $DEBUG -ge 10 ]; then
+		echo "Publish not enabled. Exit"
+	fi
+	exit # Nothing more to do
+fi
+
+if [ $DEBUG -ge 10 ]; then
+	echo " "
+	echo "-----"
+	echo "Starting Publish process - waiting for input"
+	echo " "
+	echo "-----"
+	echo "Publish Parameters"
+	echo "server: "$server
+	echo "port: "$port
+	echo "user: "$user
+	echo "pass: "$pass
+	echo "pub_qos: "$pub_qos
+	echo "cert: "$cert
+	echo "key: "$key
+	echo "cafile: "$cafile
+	echo "clientID: "$clientID
+	echo "------"
+fi
+
+# Run Forever - process publish requests.
 while [ 1 ]
 do
 	now=`date +%s`
@@ -68,26 +240,31 @@ do
 		[ $DEBUG -ge 2 ] && logger "[IoT.MQTT]: Check for sensor update"
 		if [ -n "$CID" ];then
 			[ $DEBUG -ge 2 ] && [ -n "$CID" ] && logger "[IoT.MQTT]: Found Data at Local Channels:" $CID
+
 			for channel in $CID; do
-				HAS_CID=`uci show mqtt | grep 'local_id=' | grep $channel | awk -F '[][]' '{print $2}'`
+				HAS_CID=`uci show mqtt | grep 'local_id=' | grep $channel | cut -d . -f 2`
 				if [ -n "$HAS_CID" ];then
 					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
 
 					# Get values
-					remote_id=`uci get mqtt.@channels[$HAS_CID].remote_id`
-					channel_API=`uci -q get mqtt.@channels[$HAS_CID].write_api_key`
+					remote_id=`uci -q get mqtt.$HAS_CID.remote_id`
+					local_id=`uci -q get mqtt.$HAS_CID.local_id`
+					channel_API=`uci -q get mqtt.$HAS_CID.write_api_key`
 					data=`cat /var/iot/channels/$channel`
 
 					# Generate Topic and Data strings
 					# Initialise strings
-					topic=$pub_format
 					mqtt_data=$data_format
+					pub_topic=$pub_topic_format
+
 					# Replace topic macros
-					topic=`echo ${topic/CHANNEL/$remote_id}`  
-					topic=`echo ${topic/CLIENTID/$clientID}`				
-					topic=`echo ${topic/WRITE_API/$channel_API}`
-					topic=`echo ${topic/USERNAME/$user}`
+					pub_topic=`echo ${pub_topic/CHANNEL/$remote_id}`  
+					pub_topic=`echo ${pub_topic/CLIENTID/$clientID}`				
+					pub_topic=`echo ${pub_topic/WRITE_API/$channel_API}`
+					pub_topic=`echo ${pub_topic/USERNAME/$user}`
+					pub_topic=`echo ${pub_topic/HOSTNAME/$hostname}`
 					# Replace data macros
+					mqtt_data=`echo ${mqtt_data/HOSTNAME/$hostname}`  
 					mqtt_data=`echo ${mqtt_data/CHANNEL/$remote_id}`
 					mqtt_data=`echo ${mqtt_data/DATA/$data}`  
 
@@ -103,14 +280,14 @@ do
 						logger "[IoT.MQTT]:server[-h]: "$server
 						logger "[IoT.MQTT]:port[-p]: "$port
 						logger "[IoT.MQTT]:user[-u]: "$user
-						logger "[IoT.MQTT]:pass[-P]: "$P$pass
-						logger "[IoT.MQTT]:QoS[-q]: "$QoS
+						logger "[IoT.MQTT]:pass[-P]: "$pass
+						logger "[IoT.MQTT]:pub_qos[-q]: "$pub_qos
 						logger "[IoT.MQTT]:cafile[--cafile]: "$cafile
 						logger "[IoT.MQTT]:cert[--cert]: "$cert
 						logger "[IoT.MQTT]:key[--key]: "$key
-						logger "[IoT.MQTT]:clientID[-u]: "$clientID
+						logger "[IoT.MQTT]:clientID[-i]: "$clientID
 						logger "[IoT.MQTT]:remote_id: "$remote_id
-						logger "[IoT.MQTT]:topic[-t]: "$topic
+						logger "[IoT.MQTT]:pub_topic[-t]: "$pub_topic
 						logger "[IoT.MQTT]:mqtt_data[-m]: "$mqtt_data
 						logger "[IoT.MQTT]:------"
 					fi 
@@ -128,28 +305,46 @@ do
 						echo "server: "$server
 						echo "port: "$port
 						echo "user: "$user
-						echo "pass: "$P$pass
-						echo "QoS: "$QoS
+						echo "pass: "$pass
+						echo "pub_qos: "$pub_qos
 						echo "cert: "$cert
 						echo "key: "$key
 						echo "cafile: "$cafile
 						echo "clientID: "$clientID
 						echo "remoteID: "$remote_id
-						echo "topic: "$topic
+						echo "pub_topic: "$pub_topic
 						echo "mqtt_data: "$mqtt_data
 						echo "------"
 					fi
 					# ------------------------------------------
 
-					# Send MQTT Command
-					if [ ! -z "$pass" ]; then  # Check for password 
-						mosquitto_pub $D -h $server -p $port -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile -u $user -P "$pass" 
-					elif [ ! -z "$cert" ]; then # Check for cert
-						mosquitto_pub $D -h $server -p $port -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile --cert $cert --key $key
+					# Call MQTT Publish command
+					# 1. Case with User, Password and Client ID present
+					if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then  
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" -u $user -P "$pass" $C $cafile
+
+					# 2. Case with Certificate, Key and ClientID present
+					elif [ ! -z "$cert" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" --cert $cert --key $key $C $cafile
+
+					# 3. Case with no User, Certificate or ClientID present
+					elif [ -z "$user" ] && [ -z "$cert" ] && [ -z "$clientID" ]; then
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -t $pub_topic -m "$mqtt_data" 
+
+					# 3A. Case with no User, Certificate, but with ClientID present
+					elif [ -z "$user" ] && [ -z "$cert" ] && [ ! -z "$clientID" ]; then
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data"
+
+					# 4. Case with User and ClientID present, but no Password and no Certificate present
+					elif [ -z "$pass" ] && [ -z "$cert" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" -u $user
+
+					# 5. Else - invalid parameters, just log
 					else
-						mosquitto_pub $D -h $server -p $port -q $QoS -i $clientID -t $topic -m "$mqtt_data" $C $cafile -u $user 
+						logger "[IoT.MQTT]:Invalid Parameters - mosquitto_pub not called."
 					fi
 
+					# ------------------------------------------
 					# Delete the Channel info
 					rm /var/iot/channels/$channel
 				else
@@ -158,6 +353,8 @@ do
 				fi
 			done
 		fi
+  else
+    sleep 1 # Wait before looping to check time
 	fi
 done
 

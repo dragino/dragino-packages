@@ -212,8 +212,8 @@ static void show_help() {
     MSG("\n");
     MSG("e.g. add a application: dls_utili --addapp --appname dragino\n");
     MSG("\n--------------------------------------------------------------------------------\n");
-    MSG("--adddev              add a device return DEVEUI APPEUI and APPKEY\n");
-    MSG("--mandev              add a device by manual\n");
+    MSG("--adddev              add a device return DEVEUI APPEUI and APPKEY, need to use with --appname\n");
+    MSG("--mandev              add a device manually\n");
     MSG("--listdev             list all devices info, or the device index by deveui\n");
     MSG("\n");
     MSG("e.g. add a device:    dls_utili --adddev --appname dragino\n");

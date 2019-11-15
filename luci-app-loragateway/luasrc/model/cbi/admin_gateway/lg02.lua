@@ -40,6 +40,8 @@ lv:value("3",  "Many verbose output")
 local sp = s:option(ListValue, "provider", translate("Service Provider"))
 sp.default = "ttn"
 sp:value("ttn", "The Things Network")
+sp:value("tencent", "Tencent LoRaWAN Server")
+sp:value("local", "Built-In LoRaWAN Server")
 sp:value("custom", "--custom--")
 
 local sv = s:option(Value, "custom_server", translate("Server Address"))
@@ -62,9 +64,24 @@ ttn_addr:value("as923.thethings.meshed.com.au", "meshed-router")
 ttn_addr:value("ttn.opennetworkinfrastructure.org", "switch-router")
 ttn_addr:value("router.cn.thethings.network", "router.cn.thethings.network")
 
-local sp = s:option(Value, "port", translate("Server Port"))
+local tencent_addr = s:option(ListValue, "tencent_server", translate("Server Address"))
+tencent_addr:depends("provider","tencent")
+tencent_addr.default = "cn.thethings.network"
+tencent_addr:value("cn.thethings.network", "cn.thethings.network")
+
+local local_addr = s:option(ListValue, "local_server",translate("Server Address"))
+local_addr:depends("provider","local")
+local_addr.default = "127.0.0.1"
+local_addr:value("127.0.0.1", "127.0.0.1")
+
+
+local sp = s:option(Value, "port", translate("Server upstream Port"))
 sp.datatype = "port"
 sp.default = "1700"
+
+local dport = s:option(Value, "dwport", translate("Server downstream Port"))
+dport.datatype = "port"
+dport.default = "1700"
 
 local gid = s:option(Value, "GWID", translate("Gateway ID"))
 gid.placeholder = "Gateway ID from Server"

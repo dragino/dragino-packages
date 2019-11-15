@@ -51,6 +51,10 @@ uci:save("tcp_client")
 local old_time = os.time()
 local cur_time = old_time
 
+function sleep(n)
+  os.execute("sleep " .. tonumber(n))
+end
+
 
 while 1
 do 
@@ -82,4 +86,5 @@ do
 		end
 		old_time = cur_time
 	end 
+sleep(1)  -- Wait before looping to check time
 end 

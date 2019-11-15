@@ -43,9 +43,18 @@ sp.default = "1883"
 sp:depends("server_type","general")
 --sp.rmempty  = false
 
+local at = s:option(ListValue, "auth_type", translate("Authentication Type"))
+at.placeholder = "Select Authentication Type"
+at.default = "id_pass"
+at:value("id_pass",  "UserID / Password")
+at:value("cert_key",  "Certificate / Key")
+at:value("cafile",  "CA File Only")
+at:depends("server_type","general")
+
 local user = s:option(Value, "username", translate("User Name [-u]"))
 user.placeholder = "MQTT User Name"
-user:depends("server_type","general")
+user:depends("auth_type","id_pass")
+user:depends("auth_type","cafile")
 user:depends("server_type","thingspeak")
 user:depends("server_type","mydevices")
 user:depends("server_type","lewei50")
@@ -54,7 +63,8 @@ user:depends("server_type","azureiothub")
 
 local password = s:option(Value, "password", translate("Password [-P]"))
 password.placeholder = "MQTT password"
-password:depends("server_type","general")
+password:depends("auth_type","id_pass")
+password:depends("auth_type","cafile")
 password:depends("server_type","thingspeak")
 password:depends("server_type","mydevices")
 password:depends("server_type","lewei50")
@@ -64,19 +74,33 @@ password:depends("server_type","azureiothub")
 local cid = s:option(Value, "client_id", translate("Client ID [-i]"))
 cid.placeholder = "MQTT Client ID"
 
-local qos = s:option(ListValue, "QoS", translate("Quality of service level [-q]"))
-qos.default = "0"
-qos:value("0",  "QoS 0")
-qos:value("1",  "QoS 1")
-qos:value("2",  "QoS 2")
+local pub_qos = s:option(ListValue, "pub_QoS", translate("Publish QoS level [-q]"))
+pub_qos.default = "0"
+pub_qos:value("9",  "Disabled")
+pub_qos:value("0",  "QoS 0")
+pub_qos:value("1",  "QoS 1")
+pub_qos:value("2",  "QoS 2")
 
-local topic_format = s:option(Value, "topic_format", translate("Topic Format [-t]"))
+local topic_format = s:option(Value, "topic_format", translate("Publish Topic Format [-t]"))
 topic_format.placeholder = "MQTT publish topic format"
 topic_format:depends("server_type","general")
 
-local data_format = s:option(Value, "data_format", translate("Data String Format [-m]"))
+local data_format = s:option(Value, "data_format", translate("Publish Data Format [-m]"))
 data_format.placeholder = "MQTT publish data format"
 data_format:depends("server_type","general")
+
+
+local sub_qos = s:option(ListValue, "sub_QoS", translate("Subscribe QoS level [-q]"))
+sub_qos.default = "9"
+sub_qos:value("9",  "Disabled")
+sub_qos:value("0",  "QoS 0")
+sub_qos:value("1",  "QoS 1")
+sub_qos:value("2",  "QoS 2")
+
+local sub_topic_format = s:option(Value, "sub_topic_format", translate("Subscribe Topic Format [-t]"))
+sub_topic_format.placeholder = "MQTT subscribe topic format"
+sub_topic_format:depends("server_type","general")
+
 
 channels = m:section(TypedSection, "channels", translate("MQTT Channel"),translate("Match between Local Channel and remote channel"))
 channels.anonymous = true

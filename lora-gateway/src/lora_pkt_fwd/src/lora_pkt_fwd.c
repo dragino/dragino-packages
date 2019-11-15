@@ -1996,15 +1996,9 @@ void thread_up(void) {
                 if (errno != EAGAIN) { /* timeout */
                 /* server connection error */
                     shutdown(sock_up, SHUT_RDWR);
-                    shutdown(sock_down, SHUT_RDWR);
                     if ((sock_up = init_socket(serv_addr, serv_port_up,\
                                     (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
                         exit(EXIT_FAILURE);
-
-                    if ((sock_down = init_socket(serv_addr, serv_port_down,\
-                                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
-                        exit(EXIT_FAILURE);
-
                 }
 
                 continue;
@@ -2219,6 +2213,11 @@ void thread_down(void) {
         buff_req[2] = token_l;
 
         /* send PULL request and record time */
+        if (sock_down)
+            shutdown(sock_down, SHUT_RDWR);
+        if ((sock_down = init_socket(serv_addr, serv_port_down,
+                                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
+            exit(EXIT_FAILURE);
         send(sock_down, (void *)buff_req, sizeof buff_req, 0);
         clock_gettime(CLOCK_MONOTONIC, &send_time);
         pthread_mutex_lock(&mx_meas_dw);
@@ -2231,7 +2230,7 @@ void thread_down(void) {
         recv_time = send_time;
         while ((int)difftimespec(recv_time, send_time) < keepalive_time) {
 
-            /* try to receive a datagram */
+            /* try to receive a datagram every 0.2 second in 5 seconds*/
             msg_len = recv(sock_down, (void *)buff_down, (sizeof buff_down)-1, 0);
             clock_gettime(CLOCK_MONOTONIC, &recv_time);
 
@@ -2343,24 +2342,19 @@ void thread_down(void) {
             if (msg_len == -1) {
                 //MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] recv returned %s\n", strerror(errno)); /* too verbose */
                 if (errno != EAGAIN) { /* ! timeout */
+                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] relink recv error sockup(%d),sockdown(%d)\n", sock_up, sock_down); 
                     /* server connection error */
-                    shutdown(sock_up, SHUT_RDWR);
                     shutdown(sock_down, SHUT_RDWR);
-                    if ((sock_up = init_socket(serv_addr, serv_port_up,\
-                                    (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
-                        exit(EXIT_FAILURE);
-
-                    if ((sock_down = init_socket(serv_addr, serv_port_down,\
+                    if ((sock_down = init_socket(serv_addr, serv_port_down,
                                     (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
                         exit(EXIT_FAILURE);
-
                 }
 
                 continue;
             }
 
             /* if the datagram does not respect protocol, just ignore it */
-            if ((msg_len < 4) || (buff_down[0] != PROTOCOL_VERSION) || ((buff_down[3] != PKT_PULL_RESP) && (buff_down[3] != PKT_PULL_ACK))) {
+            if ((msg_len < 4) || ((buff_down[3] != PKT_PULL_RESP) && (buff_down[3] != PKT_PULL_ACK))) {
                 MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] ignoring invalid packet len=%d, protocol_version=%d, id=%d\n",
                         msg_len, buff_down[0], buff_down[3]);
                 continue;

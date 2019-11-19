@@ -59,6 +59,9 @@ $(OBJDIR)/%.o: src/%.c $(INCLUDES) | $(OBJDIR)
 
 ### Main program compilation and assembly
 
+#$(OBJDIR)/mac-header-decode.o: src/mac-header-decode.c $(INCLUDES) | $(OBJDIR)
+#	$(CC) -c $(CFLAGS) -I$(LGW_PATH)/inc $< -o $@
+
 $(OBJDIR)/single_tx.o: src/single_tx.c $(LGW_INC) $(INCLUDES) | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $(VFLAG) -I$(LGW_PATH)/inc $< -o $@
 
@@ -68,7 +71,7 @@ single_tx: $(OBJDIR)/single_tx.o $(LGW_PATH)/libloragw.a $(OBJDIR)/radio.o
 $(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c $(LGW_INC) $(INCLUDES) | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $(VFLAG) -I$(LGW_PATH)/inc $< -o $@
 
-$(APP_NAME): $(OBJDIR)/$(APP_NAME).o $(LGW_PATH)/libloragw.a $(OBJDIR)/parson.o $(OBJDIR)/radio.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o
-	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/radio.o -o $@ $(LIBS)
+$(APP_NAME): $(OBJDIR)/$(APP_NAME).o $(LGW_PATH)/libloragw.a $(OBJDIR)/parson.o $(OBJDIR)/radio.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/utilities.o
+	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/utilities.o $(OBJDIR)/radio.o -o $@ $(LIBS)
 
 ### EOF

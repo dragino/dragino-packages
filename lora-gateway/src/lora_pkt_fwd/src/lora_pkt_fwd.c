@@ -59,6 +59,21 @@ Maintainer: Michael Coracin
 #include "loragw_gps.h"
 #include "loragw_aux.h"
 #include "loragw_reg.h"
+#include "mac-header-decode.h"
+
+/* ------------------------------------------------------- */
+/* --- PUBLIC VARIABLE ----------------------------------- */
+/* --- debug info: DEBUG level --------------------------- */
+
+uint8_t DEBUG_PKT_FWD    = 0;  
+uint8_t DEBUG_MAC_HEAD   = 0;
+uint8_t DEBUG_JIT        = 0;
+uint8_t DEBUG_JIT_ERROR  = 0;
+uint8_t DEBUG_TIMERSYNC  = 0;
+uint8_t DEBUG_BEACON     = 0;
+uint8_t DEBUG_INFO       = 1;
+uint8_t DEBUG_WARNING    = 1;
+uint8_t DEBUG_ERROR      = 1;
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS ------------------------------------------------------- */
@@ -243,7 +258,12 @@ static bool sx1276 = false;
 static char server_type[16] = "server_type";
 static FILE *fp = NULL;
 
+/* --- debuglevel option ----------------------*/
+static char debug_level_char[16] = "debug_level";
+static uint8_t debug_level_uint = 1;
+
 /* -------------------------------------------------------------------------- */
+
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
 
 static void sig_handler(int sigio);
@@ -1228,6 +1248,71 @@ int main(void)
                     (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
         exit(EXIT_FAILURE);
 
+    if (!get_config("general", debug_level_char, sizeof(debug_level_char)))
+        debug_level_uint = 2;
+    else 
+        debug_level_uint = atoi(debug_level_char);
+
+    switch(debug_level_uint) {
+        case 0: /*only ERROR debug info */
+            DEBUG_PKT_FWD    = 0;  
+            DEBUG_MAC_HEAD   = 0;
+            DEBUG_JIT        = 0;
+            DEBUG_JIT_ERROR  = 0;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 0;
+            DEBUG_INFO       = 0;
+            DEBUG_WARNING    = 0;
+            DEBUG_ERROR      = 1;
+            break;
+        case 1:  /* PKT_FWD MSG output */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_MAC_HEAD   = 0;
+            DEBUG_JIT        = 0;
+            DEBUG_JIT_ERROR  = 0;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 0;
+            DEBUG_INFO       = 0;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            break;
+        case 2:  /* PKT_FWD MSG and MAC_HEAD output */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_MAC_HEAD   = 1;
+            DEBUG_JIT        = 0;
+            DEBUG_JIT_ERROR  = 0;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 0;
+            DEBUG_INFO       = 0;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            break;
+        case 3:  /* PKT_FWD MSG and MAC_HEAD and JIT output */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_MAC_HEAD   = 1;
+            DEBUG_JIT        = 1;
+            DEBUG_JIT_ERROR  = 1;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 0;
+            DEBUG_INFO       = 0;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            break;
+        case 4:  /* more verbose */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_MAC_HEAD   = 1;
+            DEBUG_JIT        = 1;
+            DEBUG_JIT_ERROR  = 1;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 1;
+            DEBUG_INFO       = 1;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            break;
+        default: /* default is 2 level */
+            break;
+    }
+
     /* init transifer radio device */
     /* spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21 */
     char sx1276_tx[8] = "sx1276";
@@ -1241,7 +1326,7 @@ int main(void)
     /* mqtt or lorawan */
     get_config("general", server_type, sizeof(server_type));
 
-    MSG_DEBUG(DEBUG_LOG, "INFO~ sx1276:%d, sxtxpw:%d, model:%s, server_type:%s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model, server_type);
+    MSG_DEBUG(DEBUG_INFO, "INFO~ sx1276:%d, sxtxpw:%d, model:%s, server_type:%s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model, server_type);
 
     /* only LG08P with sx1276 */
 
@@ -1446,7 +1531,7 @@ int main(void)
         } else {
             printf("REPORT~ # SX1301 time (PPS): %u\n", trig_tstamp);
         }
-        jit_print_queue (&jit_queue, false, DEBUG_LOG);
+        jit_print_queue (&jit_queue, false, DEBUG_INFO);
         MSG_DEBUG(DEBUG_GPS, "### [GPS] ###\n");
         if (gps_enabled == true) {
             /* no need for mutex, display is not critical */
@@ -1557,6 +1642,8 @@ void thread_up(void) {
     uint32_t mote_addr = 0;
     uint16_t mote_fcnt = 0;
 
+    LoRaMacMessageData_t macmsg;
+
     /* set upstream socket RX timeout */
     /*
     i = setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof push_timeout_half);
@@ -1635,7 +1722,7 @@ void thread_up(void) {
             switch(p->status) {
                 case STAT_CRC_OK:
                     meas_nb_rx_ok += 1;
-                    MSG_DEBUG(DEBUG_INFO, "INFO~ Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
+                    //MSG_DEBUG(DEBUG_INFO, "INFO~ Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
                     if (!fwd_valid_pkt) {
                         pthread_mutex_unlock(&mx_meas_up);
                         continue; /* skip that packet */
@@ -1891,6 +1978,7 @@ void thread_up(void) {
             buff_up[buff_index] = '}';
             ++buff_index;
             ++pkt_in_dgram;
+
             if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp") || !strcmp(server_type, "customized")) {  // mqtt mode or tcpudp mode for loraRAW 
                 char tmp[256] = {'\0'};
                 char chan_path[32] = {'\0'};
@@ -1980,7 +2068,12 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = 0; /* add string terminator, for safety */
 
-        fprintf(stdout, "RXTX~ %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        macmsg.Buffer = p->payload;
+        macmsg.BufSize = p->size;
+        if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) ) 
+            printf_mac_header(&macmsg);
+        
         /* send datagram to server */
         send(sock_up, (void *)buff_up, buff_index, 0);
         clock_gettime(CLOCK_MONOTONIC, &send_time);
@@ -2057,6 +2150,8 @@ void thread_down(void) {
     struct tref local_ref; /* time reference used for GPS <-> timestamp conversion */
     struct timespec gps_tx; /* GPS time that needs to be converted to timestamp */
 
+    LoRaMacMessageData_t macmsg; /* LoraMacMessageData for decode mac header */
+
     /* beacon variables */
     struct lgw_pkt_tx_s beacon_pkt;
     uint8_t beacon_chan;
@@ -2083,16 +2178,6 @@ void thread_down(void) {
     enum jit_error_e jit_result = JIT_ERROR_OK;
     enum jit_pkt_type_e downlink_type;
 
-    /* set downstream socket RX timeout */
-    /*
-    i = setsockopt(sock_down, SOL_SOCKET, SO_RCVTIMEO, (void *)&pull_timeout, sizeof pull_timeout);
-    if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [down] setsockopt returned %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-    */
-
-    /* pre-fill the pull request buffer with fixed fields */
     buff_req[0] = PROTOCOL_VERSION;
     buff_req[3] = PKT_PULL_DATA;
     *(uint32_t *)(buff_req + 4) = net_mac_h;
@@ -2382,7 +2467,8 @@ void thread_down(void) {
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
             MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
-            fprintf(stdout, "RXTX~ %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+            MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+
 
             /* initialize TX struct and try to parse JSON */
             memset(&txpkt, 0, sizeof txpkt);
@@ -2696,8 +2782,15 @@ void thread_down(void) {
                 pthread_mutex_unlock(&mx_meas_dw);
             }
 
+            /* output the payload header struct */
+            macmsg.Buffer = txpkt.payload;
+            macmsg.BufSize = txpkt.size;
+            if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) ) 
+                printf_mac_header(&macmsg);
+
             /* Send acknoledge datagram to server */
             send_tx_ack(buff_down[1], buff_down[2], jit_result);
+
         }
     }
     MSG_DEBUG(DEBUG_INFO, "INFO~ End of downstream thread\n");

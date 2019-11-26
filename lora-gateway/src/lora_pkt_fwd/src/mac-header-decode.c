@@ -62,7 +62,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
     
     switch (macMsg->MHDR.Bits.MType) {
         case FRAME_TYPE_DATA_CONFIRMED_UP:
-            MSG_DEBUG(DEBUG_MAC_HEAD, "DATA_CONF_UP: {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_CONF_UP: {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.AdrAckReq,
@@ -73,7 +73,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_UP: 
-            MSG_DEBUG(DEBUG_MAC_HEAD, "DATA_UNCONF_UP:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_UNCONF_UP:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.AdrAckReq,
@@ -84,7 +84,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_CONFIRMED_DOWN:
-            MSG_DEBUG(DEBUG_MAC_HEAD, "DATA_CONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_CONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.Ack,
@@ -95,7 +95,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_DOWN:
-            MSG_DEBUG(DEBUG_MAC_HEAD, "DATA_UNCONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_UNCONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.Ack,
@@ -106,10 +106,10 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_JOIN_ACCEPT: 
-            MSG_DEBUG(DEBUG_MAC_HEAD, "JOIN_ACCEPT:{Message ...}\n");
+            MSG_DEBUG(DEBUG_PKT_FWD, "JOIN_ACCEPT:{Message ...}\n");
             break;
         case FRAME_TYPE_JOIN_REQ: 
-            MSG_DEBUG(DEBUG_MAC_HEAD, "JOIN_REQ:{Message ...}\n");
+            MSG_DEBUG(DEBUG_PKT_FWD, "JOIN_REQ:{Message ...}\n");
             break;
         default:
             break;

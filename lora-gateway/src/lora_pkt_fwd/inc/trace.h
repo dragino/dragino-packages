@@ -11,7 +11,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include <stdint.h>
 
 extern uint8_t DEBUG_PKT_FWD;   
-extern uint8_t DEBUG_MAC_HEAD;
+extern uint8_t DEBUG_REPORT;
 extern uint8_t DEBUG_JIT;       
 extern uint8_t DEBUG_JIT_ERROR; 
 extern uint8_t DEBUG_TIMERSYNC; 

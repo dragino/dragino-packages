@@ -156,6 +156,9 @@ static pthread_mutex_t mx_radio_lock = PTHREAD_MUTEX_INITIALIZER; /* control acc
 
 /* measurements to establish statistics */
 static pthread_mutex_t mx_meas_up = PTHREAD_MUTEX_INITIALIZER; /* control access to the upstream measurements */
+
+static pthread_mutex_t mx_sock_up = PTHREAD_MUTEX_INITIALIZER; /* control access to the upstream file descript */
+
 static uint32_t meas_nb_rx_rcv = 0; /* count packets received */
 static uint32_t meas_nb_rx_ok = 0; /* count packets received with PAYLOAD CRC OK */
 static uint32_t meas_nb_rx_bad = 0; /* count packets received with PAYLOAD CRC ERROR */
@@ -700,9 +703,9 @@ int main(int argc, char *argv[])
             pthread_mutex_lock(&mx_radio_lock); /* lock the radio device */
             setup_channel(rfdev);
             rxlora(rfdev, RXMODE_SINGLE);  /* star lora single receive mode */
-	    clock_gettime(CLOCK_MONOTONIC, &start_time);
+	        clock_gettime(CLOCK_MONOTONIC, &start_time);
 
-	    start_time = end_time;
+	        start_time = end_time;
 
             while ((digitalRead(rfdev->dio[1]) != 1) && ((int)difftimespec(end_time, start_time) < RXRF_TIMEOUT_S)) {  /* receive timeout, if no readdigital or readerror? */
             //while ((digitalRead(rfdev->dio[1]) != 1)) {  /* receive timeout, if no readdigital or readerror? */
@@ -774,6 +777,7 @@ int main(int argc, char *argv[])
             } /* while loop test receive if timeout */
             pthread_mutex_unlock(&mx_radio_lock);
         }
+            wait_ms(FETCH_SLEEP_MS);
     }
 
     if (!strcmp(server_type, "lorawan")) {
@@ -808,6 +812,8 @@ void thread_stat(void) {
 
     int j;
 
+    uint32_t push_send = 0, push_ack = 0;
+
     /* variables to get local copies of measurements */
     uint32_t cp_nb_rx_rcv;
     uint32_t cp_nb_rx_ok;
@@ -835,9 +841,15 @@ void thread_stat(void) {
     float up_ack_ratio;
     float dw_ack_ratio;
 
+    /* ping measurement variables */
+    struct timespec send_time;
+    struct timespec recv_time;
+
     static char status_report[STATUS_SIZE]; /* status report as a JSON object */
 
     int stat_index=0;
+
+    uint8_t buff_ack[32]; /* buffer to receive acknowledges */
 
     /* pre-fill the data buffer with fixed fields */
     status_report[0] = PROTOCOL_VERSION;
@@ -950,6 +962,44 @@ void thread_stat(void) {
         //send the update
         send(sock_up, (void *)status_report, stat_index, 0);
 
+        push_send++;
+        recv_time = send_time;
+
+        clock_gettime(CLOCK_MONOTONIC, &send_time);
+
+        /* wait for acknowledge (in keepalive time (5s) ,to catch extra packets) */
+        while ((int)difftimespec(recv_time, send_time) < keepalive_time) {
+                j = recv(sock_up, (void *)buff_ack, sizeof buff_ack, 0);
+                clock_gettime(CLOCK_MONOTONIC, &recv_time);
+                if (j == -1) {
+                    if (errno == EAGAIN) { /* timeout */
+                        continue;
+                    }
+                    break;
+                } else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
+                    //MSG("WARNING: [up] ignored invalid non-ACL packet\n");
+                    continue;
+                } else {
+                    MSG_LOG(DEBUG_INFO, "INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                    push_ack++;
+                    break;
+                }
+        }
+
+        if (push_ack < labs(push_send * 0.9)) {
+            push_ack = 0;
+            push_send = 0;
+            pthread_mutex_lock(&mx_sock_up);
+            if (sock_up) close(sock_up);
+            if ((sock_up = init_socket(server, serv_port_up,
+                                               (void *)&push_timeout_half, 
+                                               sizeof(push_timeout_half))) == -1) {
+                pthread_mutex_unlock(&mx_sock_up);
+                exit(EXIT_FAILURE);
+            }
+            pthread_mutex_unlock(&mx_sock_up);
+        }
+
         /* wait for next reporting interval */
         wait_ms(1000 * stat_interval);
     }
@@ -972,15 +1022,10 @@ void thread_up(void) {
     /* data buffers */
     uint8_t buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
     int buff_index;
-    uint8_t buff_ack[32]; /* buffer to receive acknowledges */
 
     /* protocol variables */
     uint8_t token_h; /* random token for acknowledgement matching */
     uint8_t token_l; /* random token for acknowledgement matching */
-    
-    /* ping measurement variables */
-    struct timespec send_time;
-    struct timespec recv_time;
     
     /* set upstream socket RX timeout */
     i = setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof push_timeout_half);
@@ -992,6 +1037,7 @@ void thread_up(void) {
     /* pre-fill the data buffer with fixed fields */
     buff_up[0] = PROTOCOL_VERSION;
     buff_up[3] = PKT_PUSH_DATA;
+
     *(uint32_t *)(buff_up + 4) = net_mac_h;
     *(uint32_t *)(buff_up + 8) = net_mac_l;
     
@@ -1051,33 +1097,13 @@ void thread_up(void) {
         MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (RXPKT): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
             
         /* send datagram to server */
+        pthread_mutex_lock(&mx_sock_up);
         send(sock_up, (void *)buff_up, buff_index, 0);
-        clock_gettime(CLOCK_MONOTONIC, &send_time);
+        pthread_mutex_unlock(&mx_sock_up);
+
         pthread_mutex_lock(&mx_meas_up);
         meas_up_dgram_sent += 1;
         meas_up_network_byte += buff_index;
-        
-        /* wait for acknowledge (in 2 times, to catch extra packets) */
-        for (i=0; i<2; ++i) {
-                j = recv(sock_up, (void *)buff_ack, sizeof buff_ack, 0);
-                clock_gettime(CLOCK_MONOTONIC, &recv_time);
-                if (j == -1) {
-                    if (errno == EAGAIN) { /* timeout */
-                    continue;
-                    }
-                    break;
-                } else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
-                    //MSG("WARNING: [up] ignored invalid non-ACL packet\n");
-                    continue;
-                } else if ((buff_ack[1] != token_h) || (buff_ack[2] != token_l)) {
-                    //MSG("WARNING: [up] ignored out-of sync ACK packet\n");
-                    continue;
-                } else {
-                    MSG_LOG(DEBUG_INFO, "INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
-                    meas_up_ack_rcv += 1;
-                    break;
-                }
-        }
         pthread_mutex_unlock(&mx_meas_up);
 
         /* clean a packet */
@@ -1099,6 +1125,8 @@ void thread_up(void) {
 void thread_down(void) {
 
     int i; /* loop variables */
+
+    uint32_t pull_send = 0, pull_ack = 0;
 
     /* configuration and metadata for an outbound packet */
     struct pkt_tx_s txpkt;
@@ -1164,6 +1192,9 @@ void thread_down(void) {
 
 	/* send PULL request and record time */
 	send(sock_down, (void *)buff_req, sizeof buff_req, 0);
+    
+    pull_send++;
+
 	clock_gettime(CLOCK_MONOTONIC, &send_time);
         //MSG("INFOERROR [down] send pull_data, %ld\n", send_time.tv_nsec);
 	pthread_mutex_lock(&mx_meas_dw);
@@ -1219,6 +1250,7 @@ void thread_down(void) {
 		    } else { /* out-of-sync token */
 			    MSG_LOG(DEBUG_INFO, "INFO~ [down] received out-of-sync ACK\n");
 		    }
+            pull_ack++;
 		    continue;
 	    }
 	    
@@ -1412,7 +1444,16 @@ void thread_down(void) {
 
             /* Send acknoledge datagram to server */
             send_tx_ack(buff_down[1], buff_down[2], jit_result);
-	}
+	    }
+
+        if (pull_ack < labs(pull_send * 0.9)) {
+            pull_ack = 0;
+            pull_send = 0;
+            if (sock_down) close(sock_down);
+            if ((sock_down = init_socket(server, serv_port_down,
+                            (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
+                exit(EXIT_FAILURE);
+        }
     }
     MSG_LOG(DEBUG_INFO, "\nINFO~ End of downstream thread\n");
 }
@@ -1456,7 +1497,7 @@ void thread_push(void) {
             continue;
         }
 
-	while ((ptr = readdir(dir)) != NULL) {
+	    while ((ptr = readdir(dir)) != NULL) {
             if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) /* current dir OR parrent dir */
                 continue;
 

@@ -66,7 +66,7 @@ Maintainer: Michael Coracin
 /* --- debug info: DEBUG level --------------------------- */
 
 uint8_t DEBUG_PKT_FWD    = 0;  
-uint8_t DEBUG_MAC_HEAD   = 0;
+uint8_t DEBUG_REPORT   = 0;
 uint8_t DEBUG_JIT        = 0;
 uint8_t DEBUG_JIT_ERROR  = 0;
 uint8_t DEBUG_TIMERSYNC  = 0;
@@ -120,6 +120,7 @@ uint8_t DEBUG_ERROR      = 1;
 #define STD_FSK_PREAMB  5
 
 #define STATUS_SIZE     200
+#define STAT_BUFF_SIZE  256
 #define TX_BUFF_SIZE    ((540 * NB_PKT_MAX) + 30 + STATUS_SIZE)
 
 #define UNIX_GPS_EPOCH_OFFSET 315964800 /* Number of seconds ellapsed between 01.Jan.1970 00:00:00
@@ -224,9 +225,7 @@ static bool gps_coord_valid; /* could we get valid GPS coordinates ? */
 static struct coord_s meas_gps_coord; /* GPS position of the gateway */
 static struct coord_s meas_gps_err; /* GPS position of the gateway */
 
-static pthread_mutex_t mx_stat_rep = PTHREAD_MUTEX_INITIALIZER; /* control access to the status report */
-static bool report_ready = false; /* true when there is a new report to send to the server */
-static char status_report[STATUS_SIZE]; /* status report as a JSON object */
+static pthread_mutex_t mx_sockup = PTHREAD_MUTEX_INITIALIZER; /* control access to the sock_up reconnect */
 
 /* beacon parameters */
 static uint32_t beacon_period = 0; /* set beaconing period, must be a sub-multiple of 86400, the nb of sec in a day */
@@ -1101,7 +1100,7 @@ static int init_socket(const char *servaddr, const char *servport, const char *r
 int main(void)
 {
     struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
-    int i; /* loop variable and temporary variable for return value */
+    int i, j; /* loop variable and temporary variable for return value */
     int x;
 
     /* configuration file related */
@@ -1256,7 +1255,7 @@ int main(void)
     switch(debug_level_uint) {
         case 0: /*only ERROR debug info */
             DEBUG_PKT_FWD    = 0;  
-            DEBUG_MAC_HEAD   = 0;
+            DEBUG_REPORT     = 0;
             DEBUG_JIT        = 0;
             DEBUG_JIT_ERROR  = 0;
             DEBUG_TIMERSYNC  = 0;
@@ -1267,7 +1266,7 @@ int main(void)
             break;
         case 1:  /* PKT_FWD MSG output */
             DEBUG_PKT_FWD    = 1;  
-            DEBUG_MAC_HEAD   = 0;
+            DEBUG_REPORT     = 0;
             DEBUG_JIT        = 0;
             DEBUG_JIT_ERROR  = 0;
             DEBUG_TIMERSYNC  = 0;
@@ -1278,7 +1277,7 @@ int main(void)
             break;
         case 2:  /* PKT_FWD MSG and MAC_HEAD output */
             DEBUG_PKT_FWD    = 1;  
-            DEBUG_MAC_HEAD   = 1;
+            DEBUG_REPORT     = 1;
             DEBUG_JIT        = 0;
             DEBUG_JIT_ERROR  = 0;
             DEBUG_TIMERSYNC  = 0;
@@ -1289,7 +1288,7 @@ int main(void)
             break;
         case 3:  /* PKT_FWD MSG and MAC_HEAD and JIT output */
             DEBUG_PKT_FWD    = 1;  
-            DEBUG_MAC_HEAD   = 1;
+            DEBUG_REPORT     = 1;
             DEBUG_JIT        = 1;
             DEBUG_JIT_ERROR  = 1;
             DEBUG_TIMERSYNC  = 0;
@@ -1300,7 +1299,7 @@ int main(void)
             break;
         case 4:  /* more verbose */
             DEBUG_PKT_FWD    = 1;  
-            DEBUG_MAC_HEAD   = 1;
+            DEBUG_REPORT     = 1;
             DEBUG_JIT        = 1;
             DEBUG_JIT_ERROR  = 1;
             DEBUG_TIMERSYNC  = 0;
@@ -1402,13 +1401,29 @@ int main(void)
     sigaction(SIGTERM, &sigact, NULL); /* default "kill" command */
 
     /* main loop task : statistics collection */
-    while (!exit_sig && !quit_sig) {
-        /* wait for next reporting interval */
-        wait_ms(1000 * stat_interval);
+    
+    uint32_t stat_send = 0, push_ack = 0;
 
-        /* get timestamp for statistics */
-        t = time(NULL);
-        strftime(stat_timestamp, sizeof stat_timestamp, "%F %T %Z", gmtime(&t));
+    /* ping measurement variables */
+    struct timespec send_time;
+    struct timespec recv_time;
+
+    /* stat buffers */
+    uint8_t buff_stat[STAT_BUFF_SIZE]; /* buffer to compose the upstream packet */
+    int buff_index;
+    uint8_t stat_ack[32]; /* buffer to receive acknowledges */
+
+    /* protocol variables */
+    uint8_t token_h; /* random token for acknowledgement matching */
+    uint8_t token_l; /* random token for acknowledgement matching */
+
+    buff_stat[0] = PROTOCOL_VERSION;
+    buff_stat[3] = PKT_PUSH_DATA;
+    *(uint32_t *)(buff_stat + 4) = net_mac_h;
+    *(uint32_t *)(buff_stat + 8) = net_mac_l;
+
+    while (!exit_sig && !quit_sig) {
+
 
         /* access upstream statistics, copy and reset them */
         pthread_mutex_lock(&mx_meas_up);
@@ -1498,40 +1513,44 @@ int main(void)
             cp_gps_coord = reference_coord;
         }
 
+        /* get timestamp for statistics */
+        t = time(NULL);
+        strftime(stat_timestamp, sizeof stat_timestamp, "%F %T %Z", gmtime(&t));
+
         /* display a report */
-        printf("\nREPORT~ ################## Report at: %s ##################\n", stat_timestamp);
-        printf("REPORT~ ### [UPSTREAM] ###\n");
-        printf("REPORT~ # RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
-        printf("REPORT~ # CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
-        printf("REPORT~ # RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
-        printf("REPORT~ # PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
-        printf("REPORT~ # PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
-        printf("REPORT~ ### [DOWNSTREAM] ###\n");
-        printf("REPORT~ # PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
-        printf("REPORT~ # PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
-        printf("REPORT~ # RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
-        printf("REPORT~ # TX errors: %u\n", cp_nb_tx_fail);
+        MSG_DEBUG(DEBUG_REPORT, "\nREPORT~ ################## Report at: %s ##################\n", stat_timestamp);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ ### [UPSTREAM] ###\n");
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n", 100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio, 100.0 * rx_nocrc_ratio);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ ### [DOWNSTREAM] ###\n");
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok+cp_nb_tx_fail), cp_dw_payload_byte);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # TX errors: %u\n", cp_nb_tx_fail);
         if (cp_nb_tx_requested != 0 ) {
-            printf("REPORT~ # TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_packet);
-            printf("REPORT~ # TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_beacon);
-            printf("REPORT~ # TX rejected (too late): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_late);
-            printf("REPORT~ # TX rejected (too early): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_early);
+            MSG_DEBUG(DEBUG_REPORT, "REPORT~ # TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_packet);
+            MSG_DEBUG(DEBUG_REPORT, "REPORT~ # TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_collision_beacon);
+            MSG_DEBUG(DEBUG_REPORT, "REPORT~ # TX rejected (too late): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_late);
+            MSG_DEBUG(DEBUG_REPORT, "REPORT~ # TX rejected (too early): %.2f%% (req:%u, rej:%u)\n", 100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested, cp_nb_tx_requested, cp_nb_tx_rejected_too_early);
         }
-        printf("REPORT~ # BEACON queued: %u\n", cp_nb_beacon_queued);
-        printf("REPORT~ # BEACON sent so far: %u\n", cp_nb_beacon_sent);
-        printf("REPORT~ # BEACON rejected: %u\n", cp_nb_beacon_rejected);
-        printf("REPORT~ ### [PPS] ###\n");
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # BEACON queued: %u\n", cp_nb_beacon_queued);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # BEACON sent so far: %u\n", cp_nb_beacon_sent);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ # BEACON rejected: %u\n", cp_nb_beacon_rejected);
+        MSG_DEBUG(DEBUG_REPORT, "REPORT~ ### [PPS] ###\n");
         
         /* get timestamp captured on PPM pulse  */
         pthread_mutex_lock(&mx_concent);
         i = lgw_get_trigcnt(&trig_tstamp);
         pthread_mutex_unlock(&mx_concent);
         if (i != LGW_HAL_SUCCESS) {
-            printf("REPORT~ # SX1301 time (PPS): unknown\n");
+            MSG_DEBUG(DEBUG_REPORT, "REPORT~ # SX1301 time (PPS): unknown\n");
         } else {
-            printf("REPORT~ # SX1301 time (PPS): %u\n", trig_tstamp);
+            MSG_DEBUG(DEBUG_REPORT, "REPORT~ # SX1301 time (PPS): %u\n", trig_tstamp);
         }
-        jit_print_queue (&jit_queue, false, DEBUG_INFO);
+        jit_print_queue(&jit_queue, false, DEBUG_INFO);
         MSG_DEBUG(DEBUG_GPS, "### [GPS] ###\n");
         if (gps_enabled == true) {
             /* no need for mutex, display is not critical */
@@ -1552,15 +1571,75 @@ int main(void)
         }
         MSG_DEBUG(DEBUG_GPS, "##### END #####\n");
 
+        /* start composing datagram with the header */
+        token_h = (uint8_t)rand(); /* random token */
+        token_l = (uint8_t)rand(); /* random token */
+        buff_stat[1] = token_h;
+        buff_stat[2] = token_l;
+        buff_index = 12; /* 12-byte header */
+
         /* generate a JSON report (will be sent to server by upstream thread) */
-        pthread_mutex_lock(&mx_stat_rep);
+
         if (((gps_enabled == true) && (coord_ok == true)) || (gps_fake_enable == true)) {
-            snprintf(status_report, STATUS_SIZE, "\"stat\":{\"time\":\"%s\",\"lati\":%.5f,\"long\":%.5f,\"alti\":%i,\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u}", stat_timestamp, cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt, cp_nb_rx_rcv, cp_nb_rx_ok, cp_up_pkt_fwd, 100.0 * up_ack_ratio, cp_dw_dgram_rcv, cp_nb_tx_ok);
+            j = snprintf((char *)(buff_stat + buff_index), STAT_BUFF_SIZE - buff_index, "{\"stat\":{\"time\":\"%s\",\"lati\":%.5f,\"long\":%.5f,\"alti\":%i,\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u}", stat_timestamp, cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt, cp_nb_rx_rcv, cp_nb_rx_ok, cp_up_pkt_fwd, 100.0 * up_ack_ratio, cp_dw_dgram_rcv, cp_nb_tx_ok);
         } else {
-            snprintf(status_report, STATUS_SIZE, "\"stat\":{\"time\":\"%s\",\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u}", stat_timestamp, cp_nb_rx_rcv, cp_nb_rx_ok, cp_up_pkt_fwd, 100.0 * up_ack_ratio, cp_dw_dgram_rcv, cp_nb_tx_ok);
+            j = snprintf((char *)(buff_stat + buff_index), STAT_BUFF_SIZE - buff_index,  "{\"stat\":{\"time\":\"%s\",\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u}", stat_timestamp, cp_nb_rx_rcv, cp_nb_rx_ok, cp_up_pkt_fwd, 100.0 * up_ack_ratio, cp_dw_dgram_rcv, cp_nb_tx_ok);
         }
-        report_ready = true;
-        pthread_mutex_unlock(&mx_stat_rep);
+
+        buff_index += j;
+
+        buff_stat[buff_index] = '}';
+        ++buff_index;
+        buff_stat[buff_index] = 0; /* add string terminator, for safety */
+        MSG_DEBUG(DEBUG_PKT_FWD, "STAT~ %s\n", (char *)(buff_stat + 12)); /* DEBUG: display JSON payload */
+
+        /* send datagram to server */
+        send(sock_up, (void *)buff_stat, buff_index, 0);
+
+        stat_send++;
+
+        clock_gettime(CLOCK_MONOTONIC, &send_time);
+
+        recv_time = send_time;
+
+        while ((int)difftimespec(recv_time, send_time) < keepalive_time) {
+            clock_gettime(CLOCK_MONOTONIC, &recv_time);
+            j = recv(sock_up, (void *)stat_ack, sizeof stat_ack, 0);
+            if (j == -1) {
+                /* server connection error */
+                continue;
+
+            } else if ((j < 4) || (stat_ack[0] != PROTOCOL_VERSION) || (stat_ack[3] != PKT_PUSH_ACK)) {
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [up] ignored invalid non-ACL packet\n");
+                continue;
+            /*
+            } else if ((stat_ack[1] != token_h) || (stat_ack[2] != token_l)) {
+                //MSG_DEBUG(DEBUG_INFO, "INFO~ [up] ignored out-of sync ACK packet\n");
+                continue;
+            */
+            } else {
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
+                push_ack++;
+                break;
+            }
+        }
+
+        if (push_ack < labs(stat_send * 0.9)) {  /*maybe not recv push_ack, 80% */
+            push_ack = 0;
+            stat_send = 0;
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [up] PUSH_ACK mismatch, reconnect server \n");
+            /* maybe theadup is sending message */
+            pthread_mutex_lock(&mx_sockup); /* if a lock ? */
+            if (sock_up) close(sock_up);
+            if ((sock_up = init_socket(serv_addr, serv_port_up,
+                                      (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
+                exit(EXIT_FAILURE);
+            pthread_mutex_unlock(&mx_sockup);
+        }
+
+        /* wait for next reporting interval */
+        //wait_ms(1000 * (stat_interval - keepalive_time));
+        wait_ms(1000 * stat_interval); /*may be keepalive_time big than stat_interval*/
     }
 
     /* wait for upstream thread to finish (1 fetch cycle max) */
@@ -1619,15 +1698,11 @@ void thread_up(void) {
     /* data buffers */
     uint8_t buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
     int buff_index;
-    uint8_t buff_ack[32]; /* buffer to receive acknowledges */
+    //uint8_t buff_ack[32]; /* buffer to receive acknowledges */
 
     /* protocol variables */
     uint8_t token_h; /* random token for acknowledgement matching */
     uint8_t token_l; /* random token for acknowledgement matching */
-
-    /* ping measurement variables */
-    struct timespec send_time;
-    struct timespec recv_time;
 
     /* GPS synchronization variables */
     struct timespec pkt_utc_time;
@@ -1635,23 +1710,7 @@ void thread_up(void) {
     struct timespec pkt_gps_time;
     uint64_t pkt_gps_time_ms;
 
-    /* report management variable */
-    bool send_report = false;
-
-    /* mote info variables */
-    uint32_t mote_addr = 0;
-    uint16_t mote_fcnt = 0;
-
     LoRaMacMessageData_t macmsg;
-
-    /* set upstream socket RX timeout */
-    /*
-    i = setsockopt(sock_up, SOL_SOCKET, SO_RCVTIMEO, (void *)&push_timeout_half, sizeof push_timeout_half);
-    if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] setsockopt returned %s\n", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-    */
 
     /* pre-fill the data buffer with fixed fields */
     buff_up[0] = PROTOCOL_VERSION;
@@ -1670,12 +1729,8 @@ void thread_up(void) {
             exit(EXIT_FAILURE);
         }
 
-        /* check if there are status report to send */
-        send_report = report_ready; /* copy the variable so it doesn't change mid-function */
-        /* no mutex, we're only reading */
-
         /* wait a short time if no packets, nor status report */
-        if ((nb_pkt == 0) && (send_report == false)) {
+        if (nb_pkt == 0) {
             wait_ms(FETCH_SLEEP_MS);
             continue;
         }
@@ -1708,13 +1763,17 @@ void thread_up(void) {
 
             /* Get mote information from current packet (addr, fcnt) */
             /* FHDR - DevAddr */
+            /*
             mote_addr  = p->payload[1];
             mote_addr |= p->payload[2] << 8;
             mote_addr |= p->payload[3] << 16;
             mote_addr |= p->payload[4] << 24;
+            */
             /* FHDR - FCnt */
+            /*
             mote_fcnt  = p->payload[6];
             mote_fcnt |= p->payload[7] << 8;
+            */
 
             /* basic packet filtering */
             pthread_mutex_lock(&mx_meas_up);
@@ -1722,7 +1781,6 @@ void thread_up(void) {
             switch(p->status) {
                 case STAT_CRC_OK:
                     meas_nb_rx_ok += 1;
-                    //MSG_DEBUG(DEBUG_INFO, "INFO~ Received pkt from mote: %08X (fcnt=%u)\n", mote_addr, mote_fcnt );
                     if (!fwd_valid_pkt) {
                         pthread_mutex_unlock(&mx_meas_up);
                         continue; /* skip that packet */
@@ -2031,36 +2089,12 @@ void thread_up(void) {
 
         /* restart fetch sequence without sending empty JSON if all packets have been filtered out */
         if (pkt_in_dgram == 0) {
-            if (send_report == true) {
-                /* need to clean up the beginning of the payload */
-                buff_index -= 8; /* removes "rxpk":[ */
-            } else {
-                /* all packet have been filtered out and no report, restart loop */
-                continue;
-            }
+            /* all packet have been filtered out and no report, restart loop */
+            continue;
         } else {
             /* end of packet array */
             buff_up[buff_index] = ']';
             ++buff_index;
-            /* add separator if needed */
-            if (send_report == true) {
-                buff_up[buff_index] = ',';
-                ++buff_index;
-            }
-        }
-
-        /* add status report if a new one is available */
-        if (send_report == true) {
-            pthread_mutex_lock(&mx_stat_rep);
-            report_ready = false;
-            j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE-buff_index, "%s", status_report);
-            pthread_mutex_unlock(&mx_stat_rep);
-            if (j > 0) {
-                buff_index += j;
-            } else {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] snprintf failed line %u\n", (__LINE__ - 5));
-                exit(EXIT_FAILURE);
-            }
         }
 
         /* end of JSON datagram payload */
@@ -2069,38 +2103,37 @@ void thread_up(void) {
         buff_up[buff_index] = 0; /* add string terminator, for safety */
 
         MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        
+        /* send datagram to server */
+
+        pthread_mutex_lock(&mx_sockup); /*maybe reconnect, so lock */ 
+        send(sock_up, (void *)buff_up, buff_index, 0);
+        pthread_mutex_unlock(&mx_sockup);
+
         macmsg.Buffer = p->payload;
         macmsg.BufSize = p->size;
         if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) ) 
             printf_mac_header(&macmsg);
-        
-        /* send datagram to server */
-        send(sock_up, (void *)buff_up, buff_index, 0);
-        clock_gettime(CLOCK_MONOTONIC, &send_time);
+
         pthread_mutex_lock(&mx_meas_up);
         meas_up_dgram_sent += 1;
         meas_up_network_byte += buff_index;
 
         /* wait for acknowledge (in 2 times, to catch extra packets) */
+        /* no need acknowledge in data_up, because can't receive an ack in a little time*/
+        /*
+        clock_gettime(CLOCK_MONOTONIC, &send_time);
         for (i=0; i<2; ++i) {
             j = recv(sock_up, (void *)buff_ack, sizeof buff_ack, 0);
             clock_gettime(CLOCK_MONOTONIC, &recv_time);
             if (j == -1) {
-                if (errno != EAGAIN) { /* timeout */
-                /* server connection error */
-                    shutdown(sock_up, SHUT_RDWR);
-                    if ((sock_up = init_socket(serv_addr, serv_port_up,\
-                                    (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
-                        exit(EXIT_FAILURE);
-                }
-
                 continue;
 
             } else if ((j < 4) || (buff_ack[0] != PROTOCOL_VERSION) || (buff_ack[3] != PKT_PUSH_ACK)) {
-                //MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] ignored invalid non-ACL packet\n");
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [up] ignored invalid non-ACL packet\n");
                 continue;
             } else if ((buff_ack[1] != token_h) || (buff_ack[2] != token_l)) {
-                //MSG_DEBUG(DEBUG_WARNING, "WARNING: [up] ignored out-of sync ACK packet\n");
+                //MSG_DEBUG(DEBUG_INFO, "INFO~ [up] ignored out-of sync ACK packet\n");
                 continue;
             } else {
                 MSG_DEBUG(DEBUG_INFO, "INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
@@ -2108,8 +2141,9 @@ void thread_up(void) {
                 break;
             }
         }
+        */
         pthread_mutex_unlock(&mx_meas_up);
-    }
+    }  
     MSG_DEBUG(DEBUG_INFO, "INFO~ End of upstream thread\n");
 }
 
@@ -2118,6 +2152,8 @@ void thread_up(void) {
 
 void thread_down(void) {
     int i; /* loop variables */
+
+    uint32_t pull_send = 0, pull_ack = 0; /* count pull request for reconnect the link */
 
     /* configuration and metadata for an outbound packet */
     struct lgw_pkt_tx_s txpkt;
@@ -2298,12 +2334,8 @@ void thread_down(void) {
         buff_req[2] = token_l;
 
         /* send PULL request and record time */
-        if (sock_down)
-            shutdown(sock_down, SHUT_RDWR);
-        if ((sock_down = init_socket(serv_addr, serv_port_down,
-                                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
-            exit(EXIT_FAILURE);
         send(sock_down, (void *)buff_req, sizeof buff_req, 0);
+        pull_send++;
         clock_gettime(CLOCK_MONOTONIC, &send_time);
         pthread_mutex_lock(&mx_meas_dw);
         meas_dw_pull_sent += 1;
@@ -2397,10 +2429,10 @@ void thread_down(void) {
                         last_beacon_gps_time.tv_sec = next_beacon_gps_time.tv_sec; /* keep this beacon time as reference for next one to be programmed */
 
                         /* display beacon payload */
-                        MSG_DEBUG(DEBUG_INFO, "INFO~ Beacon queued (count_us=%u, freq_hz=%u, size=%u):\n", beacon_pkt.count_us, beacon_pkt.freq_hz, beacon_pkt.size);
-                        MSG( "   => " );
+                        MSG_DEBUG(DEBUG_BEACON, "BEACON~ Beacon queued (count_us=%u, freq_hz=%u, size=%u):\n", beacon_pkt.count_us, beacon_pkt.freq_hz, beacon_pkt.size);
+                        MSG_DEBUG(DEBUG_BEACON, "   => " );
                         for (i = 0; i < beacon_pkt.size; ++i) {
-                            MSG("%02X ", beacon_pkt.payload[i]);
+                            MSG_DEBUG(DEBUG_BEACON, "%02X ", beacon_pkt.payload[i]);
                         }
                         MSG("\n");
                     } else {
@@ -2429,7 +2461,7 @@ void thread_down(void) {
                 if (errno != EAGAIN) { /* ! timeout */
                     MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] relink recv error sockup(%d),sockdown(%d)\n", sock_up, sock_down); 
                     /* server connection error */
-                    shutdown(sock_down, SHUT_RDWR);
+                    if (sock_down) close(sock_down);
                     if ((sock_down = init_socket(serv_addr, serv_port_down,
                                     (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
                         exit(EXIT_FAILURE);
@@ -2447,6 +2479,7 @@ void thread_down(void) {
 
             /* if the datagram is an ACK, check token */
             if (buff_down[3] == PKT_PULL_ACK) {
+                pull_ack++;
                 if ((buff_down[1] == token_h) && (buff_down[2] == token_l)) {
                     if (req_ack) {
                         MSG_DEBUG(DEBUG_INFO, "INFO~ [down] duplicate ACK received :)\n");
@@ -2791,6 +2824,16 @@ void thread_down(void) {
             /* Send acknoledge datagram to server */
             send_tx_ack(buff_down[1], buff_down[2], jit_result);
 
+        }
+
+        if (pull_ack < labs(pull_send * 0.9)) {  /* 10% lost */
+            pull_ack = 0;
+            pull_send = 0;
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_ACK mismatch, reconnect server\n");
+            if (sock_down) close(sock_down);
+            if ((sock_down = init_socket(serv_addr, serv_port_down,
+                                        (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
+                exit(EXIT_FAILURE);
         }
     }
     MSG_DEBUG(DEBUG_INFO, "INFO~ End of downstream thread\n");

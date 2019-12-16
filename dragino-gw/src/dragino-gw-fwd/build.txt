@@ -1,0 +1,73 @@
+For Raspberry Pi use build-pi.sh
+(Unsupported) build instructions:
+
+1. Get the required sources:
+git clone https://github.com/kersing/lora_gateway.git
+git clone https://github.com/kersing/paho.mqtt.embedded-c.git
+git clone https://github.com/kersing/ttn-gateway-connector.git
+git clone https://github.com/kersing/protobuf-c.git
+git clone https://github.com/kersing/packet_forwarder.git
+git clone https://github.com/google/protobuf.git
+
+2. Install protobuf build dependencies
+apt install protobuf-compiler
+apt install libprotobuf-dev
+apt install libprotoc-dev
+
+3. Make sure C compiler is installed and add:
+apt-get install automake
+apt install libtool
+apt install autoconf 
+
+4. To use workstation with MultiTech mCard add:
+apt install libftdi1
+apt install libftdi-dev
+apt install swig
+apt install python-dev
+apt search libusb
+apt install libusb-1.0-0
+apt install libusb-1.0-0-dev
+Get the source for libmpsse-1.3, build and install
+
+5. Configure hardware abstraction library:
+cd lora_gateway/libloragw
+Edit library.cfg to configure for the correct hardware
+
+6. Build everything
+set -e
+pushd .
+cd lora_gateway/libloragw
+git pull
+make
+popd
+pushd .
+(when cross compiling replace next two steps with 6a):
+cd protobuf-c
+git pull
+(resume here)
+make protobuf-c/libprotobuf-c.la
+rm -rf bin
+mkdir bin
+./libtool install /usr/bin/install -c protobuf-c/libprotobuf-c.la `pwd`/bin
+popd
+pushd .
+cd paho.mqtt.embedded-c
+git pull
+make
+popd
+pushd .
+cd ttn-gateway-connector
+git pull
+make clean
+make
+popd
+pushd .
+cd packet_forwarder/dragino_gw_fwd
+#git pull
+make
+popd
+
+6a. When cross compiling use for protobuf-c:
+cd protobuf-c
+./autogen.sh
+./configure --host=x86_64-pc-linux-gnu CFLAGS="-I ../protobuf/src" CXXFLAGS="-I ../protobuf/src"

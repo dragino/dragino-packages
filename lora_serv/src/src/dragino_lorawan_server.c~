@@ -31,8 +31,8 @@ struct context cntx = { '\0' };	/* sqlite3 database context */
 /* --- PRIVATE VARIABLES ------------------------------------------- */
 
 /* network sockets */
-static int sockfd_push;			/*socket for upstream from gateway */
-static int sockfd_pull;			/*socket for downstream to gateway */
+static int sockfd_push;		/*socket for upstream from gateway */
+static int sockfd_pull;		/*socket for downstream to gateway */
 
 static char gwserv[64] = "localhost";
 static char push_port[16] = "1700";
@@ -60,16 +60,17 @@ static uint32_t tmst_g;
 static void signal_handle(int signo);
 
 /* threads*/
-void thread_down(void);			/*thread for send downstream to gateway */
+void thread_down(void);		/*thread for send downstream to gateway */
 void thread_up_handle(void *);	/*thread for handling message in upstream from gateway */
 
 /* ----------------------------------------------------------------------------------------------------- */
 /* ------------------------------------------- MAIN FUNCTION ------------------------------------------- */
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
 	int i;
 	int pkt_no = 0;
-	int msg_len;				/*length of buffer received */
+	int msg_len;		/*length of buffer received */
 
 	uint8_t gweui[8];
 	char gweui_hex[17] = { '\0' };
@@ -86,8 +87,8 @@ int main(int argc, char **argv) {
 	addrlen = sizeof(cliaddr);
 
 	/* threads */
-	pthread_t th_down;			/*thread for downstream to gateway */
-	pthread_t th_up_handle;		/*thread for handing the json string in upstream */
+	pthread_t th_down;	/*thread for downstream to gateway */
+	pthread_t th_up_handle;	/*thread for handing the json string in upstream */
 
 	struct sigaction sigact;
 
@@ -117,23 +118,23 @@ int main(int argc, char **argv) {
 
 	if (!db_init(DBPATH, &cntx)) {
 		MSG_DEBUG(DEBUG_ERROR,
-				  "[DLS ERROR] [main] can't create database context\n");
+			  "[DLS ERROR] [main] can't create database context\n");
 		exit(EXIT_FAILURE);
 	}
 
 	/*create threads */
 
 	if (pthread_create(&th_down, NULL, (void *(*)(void *))thread_down, NULL)
-		!= 0) {
+	    != 0) {
 		MSG_DEBUG(DEBUG_ERROR,
-				  "[DLS ERROR] [main] impossible to create thread for downstream communicating from gateway\n");
+			  "[DLS ERROR] [main] impossible to create thread for downstream communicating from gateway\n");
 		exit(EXIT_FAILURE);
 	}
 
-	while (!exit_sig) {			/* main thread, dispatch PUSH_DATA */
+	while (!exit_sig) {	/* main thread, dispatch PUSH_DATA */
 		msg_len =
-			recvfrom(sockfd_push, buff_push, sizeof(buff_push), 0,
-					 (struct sockaddr *)&cliaddr, &addrlen);
+		    recvfrom(sockfd_push, buff_push, sizeof(buff_push), 0,
+			     (struct sockaddr *)&cliaddr, &addrlen);
 		if (msg_len < 0) {
 			//MSG("[DLS WARNING] [up] thread_up recv returned %s\n", strerror(errno));
 			continue;
@@ -145,16 +146,16 @@ int main(int argc, char **argv) {
 				break;
 			} else {
 				MSG_DEBUG(DEBUG_WARNING,
-						  "[DLS WARNING] [up] data size is 0 ,ignore!\n");
+					  "[DLS WARNING] [up] data size is 0 ,ignore!\n");
 				continue;
 			}
 		}
 		/* if the datagram does not respect the format of PUSH DATA, just ignore it */
 		if (msg_len < 12 || buff_push[0] != VERSION
-			|| buff_push[3] != PKT_PUSH_DATA) {
+		    || buff_push[3] != PKT_PUSH_DATA) {
 			/* too short for GW <-> MAC protocol */
 			MSG_DEBUG(DEBUG_WARNING,
-					  "[DLS WARNING] [up] push data format invalid, ignore!\n");
+				  "[DLS WARNING] [up] push data format invalid, ignore!\n");
 			continue;
 		}
 
@@ -167,8 +168,8 @@ int main(int argc, char **argv) {
 		/* lookup gweui: select gweui from gws where gweui = ? */
 		if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
 			MSG_DEBUG(DEBUG_WARNING,
-					  "[DLS WARNING] [up] GWEUI(%s) NOT REGISTER!\n",
-					  gweui_hex);
+				  "[DLS WARNING] [up] GWEUI(%s) NOT REGISTER!\n",
+				  gweui_hex);
 			continue;
 		}
 
@@ -183,22 +184,23 @@ int main(int argc, char **argv) {
 			buff_push_ack[3] = PKT_PUSH_ACK;
 
 			if (sendto
-				(sockfd_push, buff_push_ack, sizeof(buff_push_ack),
-				 0, (struct sockaddr *)&cliaddr, addrlen) < 0)
+			    (sockfd_push, buff_push_ack, sizeof(buff_push_ack),
+			     0, (struct sockaddr *)&cliaddr, addrlen) < 0)
 				MSG_DEBUG(DEBUG_WARNING,
-						  "[DLS WARNING] [up] send push_ack for packet_%d fail\n",
-						  pkt_no);
+					  "[DLS WARNING] [up] send push_ack for packet_%d fail\n",
+					  pkt_no);
 
 			memset(&pkt_info, 0, sizeof(struct pkt_info));
-			memcpy(pkt_info.pkt_payload, buff_push + 12, msg_len - 12);
+			memcpy(pkt_info.pkt_payload, buff_push + 12,
+			       msg_len - 12);
 			strcpy(pkt_info.gwaddr, inet_ntoa(cliaddr.sin_addr));
 			strcpy(pkt_info.gweui_hex, gweui_hex);
 			pkt_info.pkt_no = pkt_no;
 			if (pthread_create
-				(&th_up_handle, NULL, (void *)thread_up_handle,
-				 (void *)&pkt_info) != 0) {
+			    (&th_up_handle, NULL, (void *)thread_up_handle,
+			     (void *)&pkt_info) != 0) {
 				MSG_DEBUG(DEBUG_WARNING,
-						  "[DLS WARNING] [up] impossible to create thread thread_up_handle\n");
+					  "[DLS WARNING] [up] impossible to create thread thread_up_handle\n");
 				continue;
 			}
 		}
@@ -219,11 +221,12 @@ int main(int argc, char **argv) {
 	/*wait for threads to finish */
 	pthread_join(th_down, NULL);
 	MSG_DEBUG(DEBUG_INFO,
-			  "[DLS INFO] the main program on network server exit successfully\n");
+		  "[DLS INFO] the main program on network server exit successfully\n");
 	exit(EXIT_SUCCESS);
 }
 
-void signal_handle(int signo) {
+void signal_handle(int signo)
+{
 	if (signo == SIGINT || signo == SIGTERM || signo == SIGQUIT) {
 		exit_sig = true;
 		MSG("##################### Waiting For Exiting ######################\n");
@@ -232,12 +235,12 @@ void signal_handle(int signo) {
 }
 
 /*handle upstream and recognize the type */
-void thread_up_handle(void *pkt_info) {
+void thread_up_handle(void *pkt_info)
+{
 	/* when this thread exits,it will automatically release all resources */
 	pthread_detach(pthread_self());
 
 	struct pkt_info pkt;
-
 	memcpy(&pkt, pkt_info, sizeof(struct pkt_info));	/* copy the data from main thread, this data may be change */
 
 	/*json parsing variables */
@@ -248,27 +251,30 @@ void thread_up_handle(void *pkt_info) {
 
 	int i, j, size;
 	const char *str;
-	uint8_t payload[256];		/*256 is the max size defined in the specification */
+	uint8_t payload[256];	/*256 is the max size defined in the specification */
 	char tempstr[32];
 
 	struct metadata meta_data;
 	struct jsondata json_result;	/*keep the result of analyzing message from gateway */
 
 	MSG_DEBUG(DEBUG_INFO, "[DLS INFO] [handle-up] Handle(%d): %s\n",
-			  pkt.pkt_no, pkt.pkt_payload);
+		  pkt.pkt_no, pkt.pkt_payload);
 
 	/*parse JSON */
 
-	root_val = json_parse_string_with_comments((const char *)(pkt.pkt_payload));
+	root_val =
+	    json_parse_string_with_comments((const char *)(pkt.pkt_payload));
 	if (root_val == NULL) {
 		MSG("[DLS WARNING] [handel-up] packet_%d push_data contains invalid JSON\n", pkt.pkt_no);
 		goto thread_out;
 	}
 
-	rxpk_arr = json_object_get_array(json_value_get_object(root_val), "rxpk");
-	if (rxpk_arr == NULL) {		/* process gateway status */
+	rxpk_arr =
+	    json_object_get_array(json_value_get_object(root_val), "rxpk");
+	if (rxpk_arr == NULL) {	/* process gateway status */
 		rxpk_obj =
-			json_object_get_object(json_value_get_object(root_val), "stat");
+		    json_object_get_object(json_value_get_object(root_val),
+					   "stat");
 		if (rxpk_obj != NULL) {
 			struct gwinfo gwinfo = { '\0' };
 			gwinfo.gweui = pkt.gweui_hex;
@@ -278,44 +284,53 @@ void thread_up_handle(void *pkt_info) {
 			}
 			val = json_object_get_value(rxpk_obj, "lati");
 			if (val != NULL) {
-				gwinfo.lati = (double)json_value_get_number(val);
+				gwinfo.lati =
+				    (double)json_value_get_number(val);
 			}
 			val = json_object_get_value(rxpk_obj, "longt");
 			if (val != NULL) {
-				gwinfo.longt = (double)json_value_get_number(val);
+				gwinfo.longt =
+				    (double)json_value_get_number(val);
 			}
 			val = json_object_get_value(rxpk_obj, "alti");
 			if (val != NULL) {
-				gwinfo.alti = (double)json_value_get_number(val);
+				gwinfo.alti =
+				    (double)json_value_get_number(val);
 			}
 			val = json_object_get_value(rxpk_obj, "rxnb");
 			if (val != NULL) {
-				gwinfo.rxnb = (uint32_t) json_value_get_number(val);
+				gwinfo.rxnb =
+				    (uint32_t) json_value_get_number(val);
 			}
 			val = json_object_get_value(rxpk_obj, "rxok");
 			if (val != NULL) {
-				gwinfo.rxok = (uint32_t) json_value_get_number(val);
+				gwinfo.rxok =
+				    (uint32_t) json_value_get_number(val);
 			}
 			val = json_object_get_value(rxpk_obj, "rxfw");
 			if (val != NULL) {
-				gwinfo.rxfw = (uint32_t) json_value_get_number(val);
+				gwinfo.rxfw =
+				    (uint32_t) json_value_get_number(val);
 			}
 			val = json_object_get_value(rxpk_obj, "ackr");
 			if (val != NULL) {
-				gwinfo.ackr = (uint32_t) json_value_get_number(val);
+				gwinfo.ackr =
+				    (uint32_t) json_value_get_number(val);
 			}
 			val = json_object_get_value(rxpk_obj, "dwnb");
 			if (val != NULL) {
-				gwinfo.dwnb = (uint32_t) json_value_get_number(val);
+				gwinfo.dwnb =
+				    (uint32_t) json_value_get_number(val);
 			}
 			val = json_object_get_value(rxpk_obj, "txnb");
 			if (val != NULL) {
-				gwinfo.txnb = (uint32_t) json_value_get_number(val);
+				gwinfo.txnb =
+				    (uint32_t) json_value_get_number(val);
 			}
 			if (db_update_gwinfo(cntx.updategwinfo, &gwinfo)) {
 				MSG_DEBUG(DEBUG_DEBUG,
-						  "[DLS DEBUG] [up] GWEUI(%s) update status!\n",
-						  gwinfo.gweui);
+					  "[DLS DEBUG] [up] GWEUI(%s) update status!\n",
+					  gwinfo.gweui);
 			}
 		}
 		goto thread_out;
@@ -362,21 +377,25 @@ void thread_up_handle(void *pkt_info) {
 			if (strcmp("LORA", json_value_get_string(val)) == 0) {
 				val = json_object_get_value(rxpk_obj, "datr");
 				if (val != NULL) {
-					strcpy(meta_data.datrl, json_value_get_string(val));
+					strcpy(meta_data.datrl,
+					       json_value_get_string(val));
 				}
 				val = json_object_get_value(rxpk_obj, "codr");
 				if (val != NULL) {
-					strcpy(meta_data.codr, json_value_get_string(val));
+					strcpy(meta_data.codr,
+					       json_value_get_string(val));
 				}
 				val = json_object_get_value(rxpk_obj, "lsnr");
 				if (val != NULL) {
-					meta_data.lsnr = (float)json_value_get_number(val);
+					meta_data.lsnr =
+					    (float)json_value_get_number(val);
 				}
-			} else if (strcmp("FSK", json_value_get_string(val)) == 0) {
+			} else if (strcmp("FSK", json_value_get_string(val)) ==
+				   0) {
 				val = json_object_get_value(rxpk_obj, "datr");
 				if (val != NULL) {
 					meta_data.datrf = (uint32_t)
-						json_value_get_number(val);
+					    json_value_get_number(val);
 				}
 			}
 		}
@@ -395,15 +414,17 @@ void thread_up_handle(void *pkt_info) {
 		val = json_object_get_value(rxpk_obj, "data");
 		if (val != NULL) {
 			str = json_value_get_string(val);
-			if (b64_to_bin(str, strlen(str), payload, sizeof(payload)) != size) {
+			if (b64_to_bin
+			    (str, strlen(str), payload,
+			     sizeof(payload)) != size) {
 				MSG_DEBUG(DEBUG_WARNING,
-						  "[DLS WARNING] [handel-up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n",
-						  pkt.pkt_no, i);
+					  "[DLS WARNING] [handel-up] in packet_%d rxpk_%d mismatch between \"size\" and the real size once converter to binary\n",
+					  pkt.pkt_no, i);
 			}
 		} else {
 			MSG_DEBUG(DEBUG_WARNING,
-					  "[DLS WARNING] [handel-up] in packet_%d rxpk_%d contains no data\n",
-					  pkt.pkt_no, i);
+				  "[DLS WARNING] [handel-up] in packet_%d rxpk_%d contains no data\n",
+				  pkt.pkt_no, i);
 		}
 
 		/*analysis the MAC payload content */
@@ -416,7 +437,8 @@ void thread_up_handle(void *pkt_info) {
 		if (json_result.to != IGNORE) {
 			pthread_mutex_lock(&mx_gw_list);
 			list_insert_at_tail(&gw_list, json_result.msg_down,
-								sizeof(struct msg_down), assign_msg_down);
+					    sizeof(struct msg_down),
+					    assign_msg_down);
 			free(json_result.msg_down);
 			pthread_mutex_unlock(&mx_gw_list);
 		}
@@ -433,12 +455,13 @@ void thread_up_handle(void *pkt_info) {
 	pthread_exit(NULL);
 }
 
-void thread_down(void) {
+void thread_down(void)
+{
 	int pkt_no = 0;
-	int msg_len;				/*length of buffer received */
+	int msg_len;		/*length of buffer received */
 	uint8_t gweui[8];
 	char gweui_hex[17] = { '\0' };
-	uint8_t buff_pull[12];		/* buffer of PULL_DATA */
+	uint8_t buff_pull[12];	/* buffer of PULL_DATA */
 	uint8_t buff_pull_ack[4];	/*buffer to confirm the PULL_DATA */
 	uint8_t buff_pull_resp[JSON_MAX + 4];	/*buffer of PULL_RESP */
 	struct sockaddr_in cliaddr;
@@ -455,8 +478,8 @@ void thread_down(void) {
 	/*receive pull_data message from gateway */
 	while (!exit_sig) {
 		msg_len =
-			recvfrom(sockfd_pull, buff_pull, sizeof(buff_pull), 0,
-					 (struct sockaddr *)&cliaddr, &addrlen);
+		    recvfrom(sockfd_pull, buff_pull, sizeof(buff_pull), 0,
+			     (struct sockaddr *)&cliaddr, &addrlen);
 		if (msg_len < 0) {
 			//MSG("[DLS WARNING] [down] thread_down recv returned %s\n", strerror(errno));
 			continue;
@@ -467,15 +490,15 @@ void thread_down(void) {
 				break;
 			} else {
 				MSG_DEBUG(DEBUG_WARNING,
-						  "[DLS WARNING] [pull] the data size is 0 ,just ignore\n");
+					  "[DLS WARNING] [pull] the data size is 0 ,just ignore\n");
 				continue;
 			}
 		}
 		/* if the datagram does not respect the format of PULL DATA, just ignore it */
 		if (msg_len < 4 || buff_pull[0] != VERSION
-			|| buff_pull[3] != PKT_PULL_DATA) {
+		    || buff_pull[3] != PKT_PULL_DATA) {
 			MSG_DEBUG(DEBUG_WARNING,
-					  "[DLS WARNING] [pull] pull data invalid,just ignore\n");
+				  "[DLS WARNING] [pull] pull data invalid,just ignore\n");
 			continue;
 		}
 
@@ -487,8 +510,8 @@ void thread_down(void) {
 
 		if (!db_lookup_gweui(cntx.lookupgweui, gweui_hex)) {
 			MSG_DEBUG(DEBUG_WARNING,
-					  "[DLS WARNING] [pull] GWEUI(%s) NOT REGISTER !\n",
-					  gweui_hex);
+				  "[DLS WARNING] [pull] GWEUI(%s) NOT REGISTER !\n",
+				  gweui_hex);
 			continue;
 		}
 
@@ -497,32 +520,34 @@ void thread_down(void) {
 			strcpy(gwaddr, inet_ntoa(cliaddr.sin_addr));
 			pthread_mutex_lock(&mx_gw_list);
 			flag =
-				list_search_and_delete(&gw_list, gwaddr, &data,
-									   compare_msg_down,
-									   copy_msg_down, destroy_msg_down);
+			    list_search_and_delete(&gw_list, gwaddr, &data,
+						   compare_msg_down,
+						   copy_msg_down,
+						   destroy_msg_down);
 			pthread_mutex_unlock(&mx_gw_list);
 			if (flag == false) {
 				memcpy(buff_pull_ack, buff_pull, 3);
 				buff_pull_ack[3] = PKT_PULL_ACK;
 				if (sendto
-					(sockfd_pull, buff_pull_ack,
-					 sizeof(buff_pull_ack), 0,
-					 (struct sockaddr *)&cliaddr, addrlen) < 0)
+				    (sockfd_pull, buff_pull_ack,
+				     sizeof(buff_pull_ack), 0,
+				     (struct sockaddr *)&cliaddr, addrlen) < 0)
 					MSG_DEBUG(DEBUG_WARNING,
-							  "[DLS WARNING] [down] send pull_ack for packet_%d fail\n",
-							  pkt_no);
+						  "[DLS WARNING] [down] send pull_ack for packet_%d fail\n",
+						  pkt_no);
 			} else {
 				strcpy(jsonstr, data.json_string);
 				memcpy(buff_pull_resp, buff_pull, 3);
 				buff_pull_resp[3] = PKT_PULL_RESP;
-				memcpy(buff_pull_resp + 4, jsonstr, strlen(jsonstr) + 1);
+				memcpy(buff_pull_resp + 4, jsonstr,
+				       strlen(jsonstr) + 1);
 				if (sendto
-					(sockfd_pull, buff_pull_resp,
-					 sizeof(buff_pull_resp), 0,
-					 (struct sockaddr *)&cliaddr, addrlen) < 0)
+				    (sockfd_pull, buff_pull_resp,
+				     sizeof(buff_pull_resp), 0,
+				     (struct sockaddr *)&cliaddr, addrlen) < 0)
 					MSG_DEBUG(DEBUG_WARNING,
-							  "[DLS WARNING] [down] send pull_resp for packet_%d fail\n",
-							  pkt_no);
+						  "[DLS WARNING] [down] send pull_resp for packet_%d fail\n",
+						  pkt_no);
 				MSG("[DLS INFO]: [down] send pull_resp successfully\n");
 			}
 		}

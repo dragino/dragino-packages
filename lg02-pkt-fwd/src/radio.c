@@ -808,13 +808,15 @@ void txlora(radiodev *dev, struct pkt_tx_s *pkt) {
 
     writeReg(dev->spiport, REG_PAYLOAD_LENGTH, pkt->size);
 
-    gettimeofday(&current_unix_time, NULL);
-    time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
+    if (pkt->tx_mode == TIMESTAMPED) {
+        gettimeofday(&current_unix_time, NULL);
+        time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
 
-    time_us = pkt->count_us - 1495/*TX_START_DELAY*/ - time_us;
+        time_us = pkt->count_us - 1495/*TX_START_DELAY*/ - time_us;
 
-    if (pkt->tx_mode != IMMEDIATE && time_us > 0 && time_us < 30000/*TX_JIT DELAY*/)
-        wait_us(time_us);
+        if (time_us > 0 && time_us < 30000/*TX_JIT DELAY*/)
+            wait_us(time_us);
+    }
 
     // now we actually start the transmission
     opmode(dev->spiport, OPMODE_TX);

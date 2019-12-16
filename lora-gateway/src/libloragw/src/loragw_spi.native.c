@@ -55,7 +55,7 @@ Maintainer: Sylvain Miermont
 #define WRITE_ACCESS    0x80
 #define SPI_SPEED       8000000
 #ifndef LGW_DETECT
-#define SPI_DEV_PATH    "/dev/spidev1.0"
+#define SPI_DEV_PATH    (getenv("LORAGW_SPI")==NULL ? "/dev/spidev1.0" : getenv("LORAGW_SPI"))
 #endif
 //#define SPI_DEV_PATH    "/dev/spidev32766.0"
 

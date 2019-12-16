@@ -15,7 +15,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=Utilities
 	TITLE:=$(PKG_NAME)
 	MAINTAINER:=Dragino <support@dragino.com>
-	DEPENDS:=+libuci +libmosquitto-ssl +libpthread +librt
+	DEPENDS:=+libuci +libpthread +librt
 endef
 
 define Package/$(PKG_NAME)/description

@@ -3,10 +3,10 @@
 all: lg01_pkt_fwd lg02_pkt_fwd lg02_single_rx_tx spirw
 
 lg01_pkt_fwd: base64.o parson.o radio.o jitqueue.o lg01_pkt_fwd.o
-	$(CC) lg01_pkt_fwd.o base64.o parson.o radio.o jitqueue.o $(LIBS) -luci -lmosquitto -lrt -ldl -lpthread -o lg01_pkt_fwd
+	$(CC) lg01_pkt_fwd.o base64.o parson.o radio.o jitqueue.o $(LIBS) -luci -lrt -ldl -lpthread -o lg01_pkt_fwd
 
 lg02_pkt_fwd: base64.o parson.o radio.o jitqueue.o lg02_pkt_fwd.o
-	$(CC) lg02_pkt_fwd.o base64.o parson.o radio.o jitqueue.o $(LIBS) -luci -lmosquitto -lrt -ldl -lpthread -o lg02_pkt_fwd
+	$(CC) lg02_pkt_fwd.o base64.o parson.o radio.o jitqueue.o $(LIBS) -luci -lrt -ldl -lpthread -o lg02_pkt_fwd
 
 lg02_single_rx_tx: radio.o
 	$(CC) $(CFLAGS) radio.o $(LIBS) -lrt -ldl lg02_single_rx_tx.c -o lg02_single_rx_tx

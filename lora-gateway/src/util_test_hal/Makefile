@@ -11,8 +11,6 @@ CROSS_COMPILE ?=
 ### External constant definitions
 # must get library build option to know if mpsse must be linked or not
 
-include $(LGW_PATH)/library.cfg
-
 ### Constant symbols
 
 CC := $(CROSS_COMPILE)gcc
@@ -31,7 +29,7 @@ LGW_INC += $(LGW_PATH)/inc/loragw_aux.h
 
 ### Linking options
 
-LIBS := -lloragw -lrt -lm
+LIBS = -lloragw -lrt -lm
 
 ### General build targets
 

@@ -47,9 +47,9 @@ endef
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/lora-gateway
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/lora_gateway/libloragw/inc/* $(1)/usr/include/lora-gateway
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/inc/* $(1)/usr/include/lora-gateway
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/lora_gateway/libloragw/libloragw.a $(1)/usr/lib/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/libloragw.a $(1)/usr/lib/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/paho.mqtt.embedded-c/build/output/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/
 	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so
 	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so.1

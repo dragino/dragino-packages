@@ -16,7 +16,7 @@ include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)/Default
-  TITLE:=Dragino lora-gateway package
+  TITLE:=Mqtt embed libraries for c lang
   URL:=http://www.dragino.com
 endef
 
@@ -51,5 +51,5 @@ define Build/Install
 	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/libpaho-embed-mqtt3c.so
 endef
 
-$(eval $(call BuildPackage,protobuf))
+$(eval $(call BuildPackage,$(PKG_NAME))
 $(eval $(call HostBuild))

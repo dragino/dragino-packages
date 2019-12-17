@@ -56,7 +56,7 @@ define Build/InstallDev
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/libttn-gateway-connector.so $(1)/usr/lib
 endef
 
-define Package/$(PKG_NAME)/install
+define Package/libttn-gateway-connector/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/libttn-gateway-connector.so $(1)/usr/lib
 endef

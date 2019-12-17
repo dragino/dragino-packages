@@ -51,5 +51,5 @@ define Build/Install
 	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/libpaho-embed-mqtt3c.so
 endef
 
-$(eval $(call BuildPackage,$(PKG_NAME))
+$(eval $(call BuildPackage,$(PKG_NAME)))
 $(eval $(call HostBuild))

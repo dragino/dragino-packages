@@ -12,12 +12,12 @@ PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
-include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)/Default
   TITLE:=Mqtt embed libraries for c lang
   URL:=http://www.dragino.com
+  MAINTAINER:=dragino.com 
 endef
 
 define Package/$(PKG_NAME)

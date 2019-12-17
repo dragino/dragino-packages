@@ -11,8 +11,6 @@ PKG_VERSION:=1.0.0
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
-SRCDIR=$(PKG_BUILD_DIR)/src
-PAHO_SRC=$(PKG_BUILD_DIR)/paho.mqtt.embedded-c
 
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
@@ -26,7 +24,7 @@ define Package/$(PKG_NAME)
 $(call Package/lora-gateway/Default)
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=+libftdi +libprotobuf-c 
+  DEPENDS:=+libftdi +libftdi1 +libprotobuf-c +libpaho-embed-mqtt3c +libttn-gateway-connector 
 endef
 
 define Package/$(PKG_NAME)/description
@@ -35,10 +33,6 @@ define Package/$(PKG_NAME)/description
 endef
 
 TARGET_CFLAGS += -Wextra -std=c99 -Iinc -I. -lm 
-
-TARGET_CFLAGS += $(FPIC) -Wall -g -O2 -I$(SRCDIR) -I$(PAHO_SRC)/MQTTClient-C/src -I$(PAHO_SRC)/MQTTPacket/src -I$(SRCDIR)/github.com/gogo/protobuf/protobuf -I$(SRCDIR)/github.com/TheThingsNetwork -DMQTT_TASK $(shell pkg-config --cflags 'libprotobuf-c >= 1.0.0')
-
-TARGET_LDFLAGS += -lpthread -lpaho-embed-mqtt3c $(shell pkg-config --libs 'libprotobuf-c >= 1.0.0')
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
@@ -50,11 +44,6 @@ define Build/InstallDev
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/inc/* $(1)/usr/include/lora-gateway
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/libloragw.a $(1)/usr/lib/
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/paho.mqtt.embedded-c/build/output/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/
-	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so
-	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so.1
-	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/libpaho-embed-mqtt3c.so
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/libttn-gateway-connector.so $(1)/usr/lib/
 endef
 
 define Package/$(PKG_NAME)/install

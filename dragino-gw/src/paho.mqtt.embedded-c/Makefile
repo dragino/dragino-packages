@@ -16,7 +16,6 @@
 
 # Note: on OS X you should install XCode and the associated command-line tools
 
-SHELL = /bin/sh
 .PHONY: clean, install, uninstall, html 
 
 # assume this is normally run in the main Paho directory
@@ -36,40 +35,20 @@ ifndef exec_prefix
 	exec_prefix = ${prefix}
 endif
 
-bindir = $(exec_prefix)/bin
-includedir = $(prefix)/include
 libdir = $(exec_prefix)/lib
 
 SOURCE_FILES_C = $(srcdir)/*.c
 
-HEADERS = $(srcdir)/*.h
-
 # The names of libraries to be built
 MQTT_EMBED_LIB_C = paho-embed-mqtt3c
 
-
-# determine current platform
-ifeq ($(OS),Windows_NT)
-	OSTYPE = $(OS)
-else
-	OSTYPE = $(shell uname -s)
-	MACHINETYPE = $(shell uname -m)
-endif
-
 CC ?= gcc
-
-ifndef INSTALL
-INSTALL = install
-endif
-INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA =  $(INSTALL) -m 644
 
 MAJOR_VERSION = 1
 MINOR_VERSION = 0
 VERSION = ${MAJOR_VERSION}.${MINOR_VERSION}
 
 EMBED_MQTTLIB_C_TARGET = ${blddir}/lib${MQTT_EMBED_LIB_C}.so.${VERSION}
-
 
 CCFLAGS_SO = -g -fPIC -Os -Wall -fvisibility=hidden -DLINUX_SO
 FLAGS_EXE = -I ${srcdir}  -L ${blddir}

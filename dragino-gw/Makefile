@@ -20,19 +20,28 @@ define Package/lora-gateway/Default
   URL:=http://www.dragino.com
 endef
 
+define Package/libttn-gateway-connector
+$(call Package/lora-gateway/Default)
+  SECTION:=utils
+  CATEGORY:=Utilities
+  DEPENDS:=+libprotobuf-c +libpaho-embed-mqtt3c 
+endef
+
 define Package/$(PKG_NAME)
 $(call Package/lora-gateway/Default)
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=+libftdi +libftdi1 +libprotobuf-c +libpaho-embed-mqtt3c +libttn-gateway-connector 
+  DEPENDS:=+libftdi +libftdi1 +libttn-gateway-connector 
+endef
+
+define Package/libttn-gateway-connector/description
+  libttn-gateway-connector is a API gateway connect to TTN server 
 endef
 
 define Package/$(PKG_NAME)/description
   dragino-gw is a gateway based on 
   a Semtech LoRa multi-channel RF receiver (a.k.a. concentrator).
 endef
-
-TARGET_CFLAGS += -Wextra -std=c99 -Iinc -I. -lm 
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
@@ -43,7 +52,13 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/lora-gateway
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/inc/* $(1)/usr/include/lora-gateway
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/libloragw.a $(1)/usr/lib/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/libloragw.a $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/libttn-gateway-connector.so $(1)/usr/lib
+endef
+
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/libttn-gateway-connector.so $(1)/usr/lib
 endef
 
 define Package/$(PKG_NAME)/install
@@ -56,4 +71,5 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/dragino-gw-fwd/conf/*.json* $(1)/etc/lora/cfg
 endef
 
+$(eval $(call BuildPackage,libttn-gateway-connector))
 $(eval $(call BuildPackage,$(PKG_NAME)))

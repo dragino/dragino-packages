@@ -6,7 +6,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=paho-embed-mqtt3c
+PKG_NAME:=libpaho-embed-mqtt3c
 PKG_VERSION:=1.0.0
 PKG_RELEASE:=1
 
@@ -52,4 +52,3 @@ define Build/Install
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
-$(eval $(call HostBuild))

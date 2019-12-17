@@ -18,6 +18,13 @@ include $(INCLUDE_DIR)/package.mk
 define Package/lora-gateway/Default
   TITLE:=Dragino lora-gateway package
   URL:=http://www.dragino.com
+  MAINTAINER:=dragino.com 
+endef
+
+define Package/libpaho-embed-mqtt3c
+$(call Package/$(PKG_NAME)/Default)
+  SECTION:=libs
+  CATEGORY:=Libraries
 endef
 
 define Package/libttn-gateway-connector
@@ -31,11 +38,6 @@ define Package/$(PKG_NAME)
 $(call Package/lora-gateway/Default)
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=+libftdi +libftdi1 +libttn-gateway-connector 
-endef
-
-define Package/libttn-gateway-connector/description
-  libttn-gateway-connector is a API gateway connect to TTN server 
 endef
 
 define Package/$(PKG_NAME)/description
@@ -52,8 +54,20 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/lora-gateway
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/inc/* $(1)/usr/include/lora-gateway
 	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/paho.mqtt.embedded-c/build/output/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/
+	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so
+	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so.1
+	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/libpaho-embed-mqtt3c.so
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/libloragw.a $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/libttn-gateway-connector.so $(1)/usr/lib
+endef
+
+define Build/libpaho-embed-mqtt3c/Install
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/paho.mqtt.embedded-c/build/output/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/
+	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so
+	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so.1
+	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/libpaho-embed-mqtt3c.so
 endef
 
 define Package/libttn-gateway-connector/install
@@ -71,5 +85,6 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/dragino-gw-fwd/conf/*.json* $(1)/etc/lora/cfg
 endef
 
+$(eval $(call BuildPackage,libpaho-embed-mqtt3c))
 $(eval $(call BuildPackage,libttn-gateway-connector))
 $(eval $(call BuildPackage,$(PKG_NAME)))

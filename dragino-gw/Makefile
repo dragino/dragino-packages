@@ -15,33 +15,33 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
 
-define Package/lora-gateway/Default
-  TITLE:=Dragino lora-gateway package
-  URL:=http://www.dragino.com
-  MAINTAINER:=dragino.com 
+define Package/$(PKG_NAME)/Default
+    TITLE:=Dragino lora-gateway package
+    URL:=http://www.dragino.com
+    MAINTAINER:=dragino
 endef
 
 define Package/libpaho-embed-mqtt3c
 $(call Package/$(PKG_NAME)/Default)
-  SECTION:=libs
-  CATEGORY:=Libraries
+    SECTION:=libs
+    CATEGORY:=Libraries
 endef
 
 define Package/libttn-gateway-connector
-$(call Package/lora-gateway/Default)
-  SECTION:=utils
-  CATEGORY:=Utilities
-  DEPENDS:=+libprotobuf-c +libpaho-embed-mqtt3c 
+$(call Package/$(PKG_NAME)/Default)
+    SECTION:=utils
+    CATEGORY:=Utilities
+    DEPENDS:=+libprotobuf-c +libpaho-embed-mqtt3c 
 endef
 
 define Package/$(PKG_NAME)
-$(call Package/lora-gateway/Default)
-  SECTION:=utils
-  CATEGORY:=Utilities
+$(call Package/$(PKG_NAME)/Default)
+    SECTION:=utils
+    CATEGORY:=Utilities
 endef
 
 define Package/$(PKG_NAME)/description
-  dragino-gw is a gateway based on 
+  Dragino-gw is a gateway based on 
   a Semtech LoRa multi-channel RF receiver (a.k.a. concentrator).
 endef
 

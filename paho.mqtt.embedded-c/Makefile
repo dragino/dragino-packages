@@ -2,7 +2,7 @@
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
-#
+# libpaho-embed-mqtt3c
 
 include $(TOPDIR)/rules.mk
 
@@ -43,7 +43,7 @@ define Build/InstallDev
 	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/libpaho-embed-mqtt3c.so
 endef
 
-define Build/Install
+define Build/$(PKG_NAME)/Install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/build/output/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/
 	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1.0 $(1)/usr/lib/libpaho-embed-mqtt3c.so

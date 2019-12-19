@@ -25,19 +25,19 @@ endif
 ### library.cfg configuration file processing
 
 ifeq ($(CFG_SPI),native)
-  CFLAGS      := -O2 -Wall -Wextra -std=c99 -Iinc -I.
+  CFLAGS_C      := -O2 -Wall -Wextra -std=c99 -Iinc -I.
   CFG_SPI_MSG := Linux native SPI driver
   CFG_SPI_OPT := CFG_SPI_NATIVE
 else ifeq ($(CFG_SPI),ftdi)
 ifeq ($(PLATFORM),multitech)
-  CFLAGS      := -O2 -Wall -Wextra -std=c99 -Iinc -I. -I/opt/mlinux/3.2.0/sysroots/arm926ejste-mlinux-linux-gnueabi/usr/include/libftdi1
+  CFLAGS_C      := -O2 -Wall -Wextra -std=c99 -Iinc -I. -I/opt/mlinux/3.2.0/sysroots/arm926ejste-mlinux-linux-gnueabi/usr/include/libftdi1
 else
-  CFLAGS      := -O2 -Wall -Wextra -std=c99 -Iinc -I. -I/usr/include/libftdi1
+  CFLAGS_C      := -O2 -Wall -Wextra -std=c99 -Iinc -I. -I/usr/include/libftdi1
 endif
   CFG_SPI_MSG := FTDI SPI-over-USB bridge using libmpsse/libftdi/libusb
   CFG_SPI_OPT := CFG_SPI_FTDI
 else ifeq ($(CFG_SPI),mac)
-  CFLAGS      := -O2 -Wall -Wextra -std=c99 -Iinc -I. -I/opt/local/include  -I/usr/local/include -I/opt/local/include/libftdi1 
+  CFLAGS_C      := -O2 -Wall -Wextra -std=c99 -Iinc -I. -I/opt/local/include  -I/usr/local/include -I/opt/local/include/libftdi1 
   CFG_SPI_MSG := FTDI SPI-over-USB bridge on the MAC using libmpsse/libftdi/libusb
   CFG_SPI_OPT := CFG_SPI_FTDI
 else
@@ -69,7 +69,7 @@ clean:
 
 ### transpose library.cfg into a C header file : config.h
 
-inc/config.h: ../VERSION library.cfg
+inc/config.h: VERSION library.cfg
 	@echo "*** Checking libloragw library configuration ***"
 	@rm -f $@
 	#File initialization
@@ -101,21 +101,21 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: src/%.c $(INCLUDES) inc/config.h | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS_C) $< -o $@
 
 ifeq ($(CFG_SPI),native)
 $(OBJDIR)/loragw_spi.o: src/loragw_spi.native.c inc/loragw_spi.h inc/config.h | $(OBJDIR) 
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS_C) $< -o $@
 else ifeq ($(CFG_SPI),ftdi)
 $(OBJDIR)/loragw_spi.o: src/loragw_spi.ftdi.c inc/loragw_spi.h inc/config.h | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS_C) $< -o $@
 else ifeq ($(CFG_SPI),mac)
 $(OBJDIR)/loragw_spi.o: src/loragw_spi.ftdi.c inc/loragw_spi.h inc/config.h | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS_C) $< -o $@
 endif
 
 $(OBJDIR)/loragw_hal.o: src/loragw_hal.c $(INCLUDES) src/arb_fw.var src/agc_fw.var src/cal_fw.var inc/config.h | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS_C) $< -o $@
 
 ### static library
 
@@ -125,18 +125,18 @@ libloragw.a: $(OBJDIR)/loragw_hal.o $(OBJDIR)/loragw_gps.o $(OBJDIR)/loragw_reg.
 ### test programs
 
 test_loragw_spi: tst/test_loragw_spi.c libloragw.a
-	$(CC) $(CFLAGS) -L. $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_C) -L. $< -o $@ $(LIBS)
 
 test_loragw_reg: tst/test_loragw_reg.c libloragw.a
-	$(CC) $(CFLAGS) -L. $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_C) -L. $< -o $@ $(LIBS)
 
 test_loragw_hal: tst/test_loragw_hal.c libloragw.a
-	$(CC) $(CFLAGS) -L. $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_C) -L. $< -o $@ $(LIBS)
 
 test_loragw_gps: tst/test_loragw_gps.c libloragw.a
-	$(CC) $(CFLAGS) -L. $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_C) -L. $< -o $@ $(LIBS)
 
 test_loragw_cal: tst/test_loragw_cal.c libloragw.a src/cal_fw.var
-	$(CC) $(CFLAGS) -L. $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_C) -L. $< -o $@ $(LIBS)
 
 ### EOF

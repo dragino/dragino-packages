@@ -22,7 +22,7 @@ RELEASE_VERSION := $(shell cat VERSION)
 CC := $(CROSS_COMPILE)gcc
 AR := $(CROSS_COMPILE)ar
 
-CFLAGS := -O2 -Wall -Wextra -Iinc -I.
+CFLAGS_C := -fPIC -O2 -Wall -Wextra -Iinc -I.
 VFLAG := -D VERSION_STRING="\"$(RELEASE_VERSION)\""
 
 ### Constants for Lora concentrator HAL library
@@ -42,18 +42,18 @@ TTN_INC := -I../ttn-gateway-connector/src -I../ttn-gateway-connector/src/github.
 LIBS:=
 
 ifeq ($(PLATFORM),multitech)
-  CFLAGS += -DMTECH
+  CFLAGS_C += -DMTECH
   LIBS += -lgcc_s
 endif
 ifeq ($(PLATFORM),multitech_spi)
-  CFLAGS += -DMTECH
+  CFLAGS_C += -DMTECH
   LIBS += -lgcc_s
 endif
 ifeq ($(PLATFORM),imst_rpi)
-  CFLAGS += -DRPI
+  CFLAGS_C += -DRPI
 endif
 ifeq ($(PLATFORM),linklabs_blowfish_rpi)
-  CFLAGS += -DRPI
+  CFLAGS_C += -DRPI
 endif
 
 ifeq ($(CFG_SPI),native)
@@ -75,9 +75,10 @@ else
   endif
 endif
 
-LIBS +=  -lpaho-embed-mqtt3c -lttn-gateway-connector $(shell pkg-config --libs 'libprotobuf-c >= 1.0.0')
+LIBS += -L../ttn-gateway-connector/bin -lttn-gateway-connector -L../paho.mqtt.embedded-c/build/output -lpaho-embed-mqtt3c -lprotobuf-c 
 
-CFLAGS += $(shell pkg-config --cflags 'libprotobuf-c >= 1.0.0')
+CFLAGS ?=
+LDFLAGS ?=
 
 ### General build targets
 
@@ -93,12 +94,12 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: src/%.c $(INCLUDES) | $(OBJDIR)
-	$(CC) -c $(CFLAGS) -I$(LGW_PATH)/inc $(TTN_INC) $< -o $@
+	$(CC) -c $(CFLAGS_C) $(CFLAGS) -I$(LGW_PATH)/inc $(TTN_INC) $< -o $@
 
 ### Main program compilation and assembly
 
 $(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c $(LGW_INC) $(INCLUDES) | $(OBJDIR)
-	$(CC) -c $(CFLAGS) $(VFLAG) -I$(LGW_PATH)/inc $(TTN_INC) $< -o $@
+	$(CC) -c $(CFLAGS_C) $(VFLAG) $(CFLAGS) -I$(LGW_PATH)/inc $(TTN_INC) $< -o $@
 
 $(APP_NAME): $(OBJDIR)/$(APP_NAME).o $(LGW_PATH)/libloragw.a $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/ghost.o $(OBJDIR)/endianext.o $(OBJDIR)/semtech_transport.o $(OBJDIR)/ttn_transport.o $(OBJDIR)/stats.o $(OBJDIR)/gwtraf_transport.o $(OBJDIR)/transport.o 
 	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/ghost.o $(OBJDIR)/endianext.o $(OBJDIR)/semtech_transport.o $(OBJDIR)/ttn_transport.o $(OBJDIR)/gwtraf_transport.o $(OBJDIR)/stats.o $(OBJDIR)/transport.o -o $@ $(LIBS)

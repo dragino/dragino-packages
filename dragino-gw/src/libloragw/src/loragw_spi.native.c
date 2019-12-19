@@ -50,7 +50,7 @@ Maintainer: Sylvain Miermont
 #define WRITE_ACCESS    0x80
 // This is handled in an other file to create more hardware freedom
 #define SPI_SPEED       (atol(getenv("LORAGW_SPEED")==NULL ? "8000000" : getenv("LORAGW_SPEED")))
-#define SPI_DEV_PATH    (getenv("LORAGW_SPI")==NULL ? "/dev/spidev0.0" : getenv("LORAGW_SPI"))
+#define SPI_DEV_PATH    (getenv("LORAGW_SPI")==NULL ? "/dev/spidev1.0" : getenv("LORAGW_SPI"))
 //#define SPI_DEV_PATH    "/dev/spidev32766.0"
 
 /* -------------------------------------------------------------------------- */

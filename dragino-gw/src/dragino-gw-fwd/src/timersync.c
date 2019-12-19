@@ -32,7 +32,7 @@ Maintainer: Michael Coracin
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS ------------------------------------------------------- */
-#ifndef __MACH__
+#ifdef __MACH__
 
 #define timersub(a, b, result)                                                \
   do {                                                                        \

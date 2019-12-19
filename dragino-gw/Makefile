@@ -23,8 +23,8 @@ endef
 
 define Package/libpaho-embed-mqtt3c
 $(call Package/$(PKG_NAME)/Default)
-    SECTION:=libs
-    CATEGORY:=Libraries
+    SECTION:=utils
+    CATEGORY:=Utilities
 endef
 
 define Package/libttn-gateway-connector
@@ -38,6 +38,7 @@ define Package/$(PKG_NAME)
 $(call Package/$(PKG_NAME)/Default)
     SECTION:=utils
     CATEGORY:=Utilities
+    DEPENDS:=+libftdi1 +libftdi +libttn-gateway-connector 
 endef
 
 define Package/$(PKG_NAME)/description

@@ -6,7 +6,7 @@ PAHO_SRC = ../paho.mqtt.embedded-c
 
 CFLAGS_C = -fPIC -Wall -g -O2 -I$(SRCDIR) -I$(PAHO_SRC)/MQTTClient-C/src -I$(PAHO_SRC)/MQTTPacket/src -I$(SRCDIR)/github.com/gogo/protobuf/protobuf -I$(SRCDIR)/github.com/TheThingsNetwork -DMQTT_TASK
 
-LDADD = -L$(PAHO_SRC)/build/output -lpthread -lpaho-embed-mqtt3c 
+LDADD = -lpthread -L$(PAHO_SRC)/build/output/ -lpaho-embed-mqtt3c 
 RM = rm -f
 NAME = ttn-gateway-connector
 TARGET_LIB = lib$(NAME).so

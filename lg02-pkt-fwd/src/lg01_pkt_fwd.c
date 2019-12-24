@@ -419,6 +419,22 @@ static int send_tx_ack(uint8_t token_h, uint8_t token_l, enum jit_error_e error)
     return send(sock_down, (void *)buff_ack, buff_index, 0);
 }
 
+
+/* output the connections status to a file (/var/iot/status) */
+static void output_status(int conn) {
+    FILE *fp;
+    fp = fopen("/var/iot/status", "w+");
+    if (NULL != fp) {
+        if (conn != 0) 
+            fprintf(fp, "online\n"); 
+        else 
+            fprintf(fp, "offline\n"); 
+        fflush(fp);
+        fclose(fp);
+    } else
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ connot open status file: /var/iot/status \n");
+}
+
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
@@ -796,6 +812,8 @@ int main(int argc, char *argv[])
 
     pthread_cancel(thrid_push); /* don't wait for push thread */
 
+    output_status(0);
+
 clean:
     free(rfdev);
 	
@@ -858,6 +876,8 @@ void thread_stat(void) {
     /* fill GEUI  8bytes */
     *(uint32_t *)(status_report + 4) = net_mac_h; 
     *(uint32_t *)(status_report + 8) = net_mac_l; 
+
+    output_status(0);
         
     while (!exit_sig && !quit_sig) {
                 
@@ -982,6 +1002,7 @@ void thread_stat(void) {
                 } else {
                     MSG_LOG(DEBUG_INFO, "INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
                     push_ack++;
+                    output_status(1);
                     break;
                 }
         }
@@ -989,6 +1010,7 @@ void thread_stat(void) {
         if (push_ack < labs(push_send * 0.9)) {
             push_ack = 0;
             push_send = 0;
+            output_status(0);
             pthread_mutex_lock(&mx_sock_up);
             if (sock_up) close(sock_up);
             if ((sock_up = init_socket(server, serv_port_up,

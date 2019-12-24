@@ -431,8 +431,7 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, struct timeval *time,
 	 *      t_packet_new - pre_delay_packet_new < t_packet_prev + post_delay_packet_prev (OVERLAP on post delay)
 	 *      t_packet_new + post_delay_packet_new > t_packet_prev - pre_delay_packet_prev (OVERLAP on pre delay)
 	 */
-	if (jit_collision_test
-	    (packet->count_us, packet_pre_delay, packet_post_delay,
+	if (jit_collision_test(packet->count_us, packet_pre_delay, packet_post_delay,
 	     queue->nodes[i].pkt.count_us, target_pre_delay,
 	     queue->nodes[i].post_delay) == true) {
 	    switch (queue->nodes[i].pkt_type) {
@@ -467,8 +466,7 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, struct timeval *time,
 
     /* Finally enqueue it */
     /* Insert packet at the end of the queue */
-    memcpy(&(queue->nodes[queue->num_pkt].pkt), packet,
-	   sizeof(struct lgw_pkt_tx_s));
+    memcpy(&(queue->nodes[queue->num_pkt].pkt), packet, sizeof(struct lgw_pkt_tx_s));
     queue->nodes[queue->num_pkt].pre_delay = packet_pre_delay;
     queue->nodes[queue->num_pkt].post_delay = packet_post_delay;
     queue->nodes[queue->num_pkt].pkt_type = pkt_type;
@@ -484,9 +482,7 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, struct timeval *time,
 
     jit_print_queue(queue, false, DEBUG_JIT);
 
-    MSG_DEBUG(DEBUG_JIT,
-	      "enqueued packet with count_us=%u (size=%u bytes, toa=%u us, type=%u)\n",
-	      packet->count_us, packet->size, packet_post_delay, pkt_type);
+    MSG_DEBUG(DEBUG_JIT, "enqueued packet with count_us=%u (size=%u bytes, toa=%u us, type=%u)\n", packet->count_us, packet->size, packet_post_delay, pkt_type);
 
     return JIT_ERROR_OK;
 }

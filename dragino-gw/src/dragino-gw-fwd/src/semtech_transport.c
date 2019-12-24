@@ -1146,38 +1146,6 @@ void semtech_thread_down(void *pic) {
     MSG("INFO: End of downstream thread\n");
 }
 
-/*
-void semtech_data_up(int idx, int nb_pkt, struct lgw_pkt_rx_s *rxpkt, bool send_report) {
-    Queue *entry;
-    Queue *last;
-
-    // queue data for transmission
-    entry = (Queue *) malloc(sizeof(Queue));
-    if (entry == NULL) {
-	MSG("ERROR: [semtech] cannot allocate memory for upstream data\n");
-	// should this be fatal?? Not for now
-	return;
-    }
-    memcpy(entry->data, rxpkt, sizeof entry->data);
-    entry->nbpkt = nb_pkt;
-    entry->next = NULL;
-    entry->status = NULL;
-    pthread_mutex_lock(&servers[idx].mx_queue);
-    last = servers[idx].queue;
-    if (last == NULL)
-	servers[idx].queue = entry;
-    else {
-	while (last->next != NULL)
-	    last = last->next;
-	last->next = entry;
-    }
-    pthread_mutex_unlock(&servers[idx].mx_queue);
-
-    // Wake send thread
-    sem_post(&servers[idx].send_sem);
-}
-*/
-
 void semtech_upstream(void *pic) {
     Queue *entry;
     int idx = (int)(long)pic;

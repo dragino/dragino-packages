@@ -377,11 +377,9 @@ static int parse_SX1301_configuration(const char *conf_file) {
     }
 
     /* point to the gateway configuration object */
-    conf_obj =
-	json_object_get_object(json_value_get_object(root_val), conf_obj_name);
+    conf_obj = json_object_get_object(json_value_get_object(root_val), conf_obj_name);
     if (conf_obj == NULL) {
-	MSG("INFO: %s does not contain a JSON object named %s\n", conf_file,
-	    conf_obj_name);
+	MSG("INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
 	return -1;
     } else {
 	MSG("INFO: %s does contain a JSON object named %s, parsing SX1301 parameters\n", conf_file, conf_obj_name);
@@ -581,11 +579,9 @@ static int parse_SX1301_configuration(const char *conf_file) {
 	    MSG("INFO: radio %i disabled\n", i);
 	} else {		/* radio enabled, will parse the other parameters */
 	    snprintf(param_name, sizeof param_name, "radio_%i.freq", i);
-	    rfconf.freq_hz =
-		(uint32_t) json_object_dotget_number(conf_obj, param_name);
+	    rfconf.freq_hz = (uint32_t) json_object_dotget_number(conf_obj, param_name);
 	    snprintf(param_name, sizeof param_name, "radio_%i.rssi_offset", i);
-	    rfconf.rssi_offset =
-		(float)json_object_dotget_number(conf_obj, param_name);
+	    rfconf.rssi_offset = (float)json_object_dotget_number(conf_obj, param_name);
 	    snprintf(param_name, sizeof param_name, "radio_%i.type", i);
 	    str = json_object_dotget_string(conf_obj, param_name);
 	    if (!strncmp(str, "SX1255", 6)) {
@@ -601,16 +597,10 @@ static int parse_SX1301_configuration(const char *conf_file) {
 		rfconf.tx_enable = (bool) json_value_get_boolean(val);
 		if (rfconf.tx_enable == true) {
 		    /* tx is enabled on this rf chain, we need its frequency range */
-		    snprintf(param_name, sizeof param_name,
-			     "radio_%i.tx_freq_min", i);
-		    tx_freq_min[i] =
-			(uint32_t) json_object_dotget_number(conf_obj,
-							     param_name);
-		    snprintf(param_name, sizeof param_name,
-			     "radio_%i.tx_freq_max", i);
-		    tx_freq_max[i] =
-			(uint32_t) json_object_dotget_number(conf_obj,
-							     param_name);
+		    snprintf(param_name, sizeof param_name, "radio_%i.tx_freq_min", i);
+		    tx_freq_min[i] = (uint32_t) json_object_dotget_number(conf_obj, param_name);
+		    snprintf(param_name, sizeof param_name, "radio_%i.tx_freq_max", i);
+		    tx_freq_max[i] = (uint32_t) json_object_dotget_number(conf_obj, param_name);
 		    if ((tx_freq_min[i] == 0) || (tx_freq_max[i] == 0)) {
 			MSG("WARNING: no frequency range specified for TX rf chain %d\n", i);
 		    }
@@ -647,11 +637,9 @@ static int parse_SX1301_configuration(const char *conf_file) {
 	    MSG("INFO: Lora multi-SF channel %i disabled\n", i);
 	} else {		/* Lora multi-SF channel enabled, will parse the other parameters */
 	    snprintf(param_name, sizeof param_name, "chan_multiSF_%i.radio", i);
-	    ifconf.rf_chain =
-		(uint32_t) json_object_dotget_number(conf_obj, param_name);
+	    ifconf.rf_chain = (uint32_t) json_object_dotget_number(conf_obj, param_name);
 	    snprintf(param_name, sizeof param_name, "chan_multiSF_%i.if", i);
-	    ifconf.freq_hz =
-		(int32_t) json_object_dotget_number(conf_obj, param_name);
+	    ifconf.freq_hz = (int32_t) json_object_dotget_number(conf_obj, param_name);
 	    // TODO: handle individual SF enabling and disabling (spread_factor)
 	    MSG("INFO: Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 7 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
 	}
@@ -677,14 +665,9 @@ static int parse_SX1301_configuration(const char *conf_file) {
 	if (ifconf.enable == false) {
 	    MSG("INFO: Lora standard channel %i disabled\n", i);
 	} else {
-	    ifconf.rf_chain =
-		(uint32_t) json_object_dotget_number(conf_obj,
-						     "chan_Lora_std.radio");
-	    ifconf.freq_hz =
-		(int32_t) json_object_dotget_number(conf_obj,
-						    "chan_Lora_std.if");
-	    bw = (uint32_t) json_object_dotget_number(conf_obj,
-						      "chan_Lora_std.bandwidth");
+	    ifconf.rf_chain = (uint32_t) json_object_dotget_number(conf_obj, "chan_Lora_std.radio");
+	    ifconf.freq_hz = (int32_t) json_object_dotget_number(conf_obj, "chan_Lora_std.if");
+	    bw = (uint32_t) json_object_dotget_number(conf_obj, "chan_Lora_std.bandwidth");
 	    switch (bw) {
 	    case 500000:
 		ifconf.bandwidth = BW_500KHZ;
@@ -698,8 +681,7 @@ static int parse_SX1301_configuration(const char *conf_file) {
 	    default:
 		ifconf.bandwidth = BW_UNDEFINED;
 	    }
-	    sf = (uint32_t) json_object_dotget_number(conf_obj,
-						      "chan_Lora_std.spread_factor");
+	    sf = (uint32_t) json_object_dotget_number(conf_obj, "chan_Lora_std.spread_factor");
 	    switch (sf) {
 	    case 7:
 		ifconf.datarate = DR_LORA_SF7;
@@ -745,19 +727,11 @@ static int parse_SX1301_configuration(const char *conf_file) {
 	if (ifconf.enable == false) {
 	    MSG("INFO: FSK channel %i disabled\n", i);
 	} else {
-	    ifconf.rf_chain =
-		(uint32_t) json_object_dotget_number(conf_obj,
-						     "chan_FSK.radio");
-	    ifconf.freq_hz =
-		(int32_t) json_object_dotget_number(conf_obj, "chan_FSK.if");
-	    bw = (uint32_t) json_object_dotget_number(conf_obj,
-						      "chan_FSK.bandwidth");
-	    fdev =
-		(uint32_t) json_object_dotget_number(conf_obj,
-						     "chan_FSK.freq_deviation");
-	    ifconf.datarate =
-		(uint32_t) json_object_dotget_number(conf_obj,
-						     "chan_FSK.datarate");
+	    ifconf.rf_chain = (uint32_t) json_object_dotget_number(conf_obj, "chan_FSK.radio");
+	    ifconf.freq_hz = (int32_t) json_object_dotget_number(conf_obj, "chan_FSK.if");
+	    bw = (uint32_t) json_object_dotget_number(conf_obj, "chan_FSK.bandwidth");
+	    fdev = (uint32_t) json_object_dotget_number(conf_obj, "chan_FSK.freq_deviation");
+	    ifconf.datarate = (uint32_t) json_object_dotget_number(conf_obj, "chan_FSK.datarate");
 
 	    /* if chan_FSK.bandwidth is set, it has priority over chan_FSK.freq_deviation */
 	    if ((bw == 0) && (fdev != 0)) {
@@ -900,8 +874,7 @@ static int parse_gateway_configuration(const char *conf_file) {
 		servers[ic].type = semtech;
 	    }
 	    /* For semtech protocol, if there are no ports report and progress to the next entry */
-	    if (servers[ic].type == semtech
-		&& ((val1 == NULL) || (val2 == NULL))) {
+	    if (servers[ic].type == semtech && ((val1 == NULL) || (val2 == NULL))) {
 		MSG("INFO: Skipping server \"%s\" with at least one invalid port number\n", servers[ic].addr);
 		continue;
 	    }
@@ -917,8 +890,7 @@ static int parse_gateway_configuration(const char *conf_file) {
 		    MSG("INFO: Skipping server \"%s\" due to missing gateway key\n", servers[ic].addr);
 		    continue;
 		} else {
-		    strncpy(servers[ic].gw_key, vgwkey,
-			    sizeof servers[ic].gw_key);
+		    strncpy(servers[ic].gw_key, vgwkey, sizeof servers[ic].gw_key);
 		}
 		if (strchr(servers[ic].addr, ':') != NULL) {
 		    // port specified
@@ -933,8 +905,7 @@ static int parse_gateway_configuration(const char *conf_file) {
 	    /* If the server was explicitly disabled, report and progress to the next entry */
 	    if ((val != NULL) && ((json_value_get_type(val)) == JSONBoolean)
 		&& ((bool) json_value_get_boolean(val) == false)) {
-		MSG("INFO: Skipping disabled server \"%s\"\n",
-		    servers[ic].addr);
+		MSG("INFO: Skipping disabled server \"%s\"\n", servers[ic].addr);
 		continue;
 	    }
 
@@ -957,10 +928,8 @@ static int parse_gateway_configuration(const char *conf_file) {
 	    serv_count = 1;
 	    servers[0].live = false;
 	    strncpy(servers[0].addr, str, sizeof servers[0].addr);
-	    snprintf(servers[0].port_up, sizeof servers[0].port_up, "%u",
-		     (uint16_t) json_value_get_number(val1));
-	    snprintf(servers[0].port_down, sizeof servers[0].port_down, "%u",
-		     (uint16_t) json_value_get_number(val2));
+	    snprintf(servers[0].port_up, sizeof servers[0].port_up, "%u", (uint16_t) json_value_get_number(val1));
+	    snprintf(servers[0].port_down, sizeof servers[0].port_down, "%u", (uint16_t) json_value_get_number(val2));
 	    MSG("INFO: Server configured to \"%s\", with port up \"%s\" and port down \"%s\"\n", servers[0].addr, servers[0].port_up, servers[0].port_down);
 	}
     }
@@ -976,12 +945,9 @@ static int parse_gateway_configuration(const char *conf_file) {
 	key = json_object_get_string(conf_obj, "ttn_gateway_key");
 	addr = json_object_get_string(conf_obj, "ttn_address");
 	if (id != NULL && key != NULL && addr != NULL) {
-	    strncpy(servers[serv_count].addr, addr,
-		    sizeof servers[serv_count].addr);
-	    strncpy(servers[serv_count].gw_id, id,
-		    sizeof servers[serv_count].gw_id);
-	    strncpy(servers[serv_count].gw_key, key,
-		    sizeof servers[serv_count].gw_key);
+	    strncpy(servers[serv_count].addr, addr, sizeof servers[serv_count].addr);
+	    strncpy(servers[serv_count].gw_id, id, sizeof servers[serv_count].gw_id);
+	    strncpy(servers[serv_count].gw_key, key, sizeof servers[serv_count].gw_key);
 	    servers[serv_count].enabled = true;
 	    servers[serv_count].live = false;
 	    servers[serv_count].type = ttn_gw_bridge;
@@ -996,10 +962,8 @@ static int parse_gateway_configuration(const char *conf_file) {
     if (serv_count == 0) {
 	MSG("INFO: Using defaults for server and ports (specific ports are ignored if no server is defined)");
 	snprintf(servers[0].addr, sizeof(servers[0].addr), STR(DEFAULT_SERVER));
-	snprintf(servers[0].port_up, sizeof(servers[0].port_up),
-		 STR(DEFAULT_PORT_UP));
-	snprintf(servers[0].port_down, sizeof(servers[0].port_down),
-		 STR(DEFAULT_PORT_DW));
+	snprintf(servers[0].port_up, sizeof(servers[0].port_up), STR(DEFAULT_PORT_UP));
+	snprintf(servers[0].port_down, sizeof(servers[0].port_down), STR(DEFAULT_PORT_DW));
 	servers[0].live = false;
 	serv_count = 1;
     }
@@ -1008,15 +972,13 @@ static int parse_gateway_configuration(const char *conf_file) {
     str = json_object_get_string(conf_obj, "ghost_address");
     if (str != NULL) {
 	snprintf(ghost_addr, sizeof ghost_addr, "%s", str);
-	MSG("INFO: ghost hostname or IP address is configured to \"%s\"\n",
-	    ghost_addr);
+	MSG("INFO: ghost hostname or IP address is configured to \"%s\"\n", ghost_addr);
     }
 
     /* get ghost connection port (optional) */
     val = json_object_get_value(conf_obj, "ghost_port");
     if (val != NULL) {
-	snprintf(ghost_port, sizeof ghost_port, "%u",
-		 (uint16_t) json_value_get_number(val));
+	snprintf(ghost_port, sizeof ghost_port, "%u", (uint16_t) json_value_get_number(val));
 	MSG("INFO: ghost port is configured to \"%s\"\n", ghost_port);
     }
 
@@ -1038,10 +1000,8 @@ static int parse_gateway_configuration(const char *conf_file) {
     val = json_object_get_value(conf_obj, "stat_damping");
     if (val != NULL) {
 	stat_damping = (int)json_value_get_number(val);
-	stat_damping =
-	    (stat_damping <= 0) ? 1 : (stat_damping >= 100) ? 99 : stat_damping;
-	MSG("INFO: Damping for statistical info is configured to  %u%%\n",
-	    stat_damping);
+	stat_damping = (stat_damping <= 0) ? 1 : (stat_damping >= 100) ? 99 : stat_damping;
+	MSG("INFO: Damping for statistical info is configured to  %u%%\n", stat_damping);
     }
 
     /* get keep-alive interval (in seconds) for downstream (optional) */
@@ -1735,15 +1695,13 @@ int main(int argc, char *argv[]) {
     transport_start();
 
     /* sanity check on configuration variables */
-    // TODO
 
-    //TODO: Check if there are any live servers available, if not we should exit since there cannot be any
-    // sensible course of action. Actually it would be best to redesign the whole communication loop, and take
-    // the socket constructors to be inside a try-retry loop. That way we can respond to severs that implemented
-    // there UDP handling erroneously, or any other temporal obstruction in the communication
-    // path (broken stacks in routers for example) Now, contact may be lost for ever and a manual
-    // restart at this side is required.
-    // => This has been 'resolved' by allowing the forwarder to exit at stalled servers.
+    /** TODO ***************************************************************************
+
+    ** TODO: Check if there are any live servers available, if not we should exit since there cannot be any  sensible course of action. 
+    ** Actually it would be best to redesign the whole communication loop, and take the socket constructors to be inside a try-retry loop. That way we can respond to severs that implemented there UDP handling erroneously, or any other temporal obstruction in the communication path (broken stacks in routers for example) Now, contact may be lost for ever and a manual restart at this side is required.
+    **  => This has been 'resolved' by allowing the forwarder to exit at stalled servers.
+    **/
 
     /* starting the concentrator */
     if (radiostream_enabled == true) {
@@ -1766,6 +1724,7 @@ int main(int argc, char *argv[]) {
 	    MSG("ERROR: [main] impossible to create upstream thread\n");
 	    exit(EXIT_FAILURE);
 	}
+
 	i = pthread_create(&thrid_dispatch, NULL, (void *(*)(void *))thread_dispatch_rxpkt, NULL);
 	if (i != 0) {
 	    MSG("ERROR: [main] impossible to create dispatch thread\n");
@@ -1774,6 +1733,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (downstream_enabled == true) {
+	/* JIT queue initialization */
+	jit_queue_init(&jit_queue);
+
 	for (ic = 0; ic < serv_count; ic++)
 	    if (servers[ic].live == true && servers[ic].type == semtech
 		&& servers[ic].downstream == true) {
@@ -1786,16 +1748,13 @@ int main(int argc, char *argv[]) {
 		}
 	    }
 
-	/* JIT queue initialization */
-	jit_queue_init(&jit_queue);
-
-	i = pthread_create(&thrid_jit, NULL, (void *(*)(void *))thread_jit,
-			   NULL);
+	i = pthread_create(&thrid_jit, NULL, (void *(*)(void *))thread_jit, NULL);
 	if (i != 0) {
 	    MSG("ERROR: [main] impossible to create JIT thread\n");
 	    exit(EXIT_FAILURE);
 	}
     }
+
     // Timer synchronization needed for downstream ...
     if (gps_active == true || downstream_enabled == true) {
 	i = pthread_create(&thrid_timersync, NULL,

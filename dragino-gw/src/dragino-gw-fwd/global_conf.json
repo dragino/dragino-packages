@@ -240,7 +240,7 @@
         "stat_file": "stats.txt",                 /* Put or the whole path, or only a file name */
         /* For human communication */
         "platform": "*",                          /* Platform definition, put a asterix here for the system value, max 24 chars. */
-        "contact_email": "operator@gateway.tst",  /* Email of gateway operator, max 40 chars*/
+        "contact_email": "dragino@dragino.com",  /* Email of gateway operator, max 40 chars*/
         "description": "Update me"                /* Public description of this device, max 64 chars */
     }
 }

@@ -1094,6 +1094,21 @@ static int init_socket(const char *servaddr, const char *servport, const char *r
     return sockfd;
 }
 
+/* output the connections status to a file (/var/iot/status) */
+static void output_status(int conn) {
+    FILE *fp;
+    fp = fopen("/var/iot/status", "w+");
+    if (NULL != fp) {
+        if (conn != 0) 
+            fprintf(fp, "online\n"); 
+        else 
+            fprintf(fp, "offline\n"); 
+        fflush(fp);
+        fclose(fp);
+    } else
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ connot open status file: /var/iot/status \n");
+}
+
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
@@ -1422,6 +1437,8 @@ int main(void)
     *(uint32_t *)(buff_stat + 4) = net_mac_h;
     *(uint32_t *)(buff_stat + 8) = net_mac_l;
 
+    output_status(0);  /* init the status of connection */
+
     while (!exit_sig && !quit_sig) {
 
 
@@ -1620,14 +1637,16 @@ int main(void)
             } else {
                 MSG_DEBUG(DEBUG_INFO, "INFO~ [up] PUSH_ACK received in %i ms\n", (int)(1000 * difftimespec(recv_time, send_time)));
                 push_ack++;
+                output_status(1);
                 break;
             }
         }
 
-        if (push_ack < labs(stat_send * 0.9)) {  /*maybe not recv push_ack, 80% */
+        if (push_ack < labs(stat_send * 0.9)) {  /*maybe not recv push_ack, 90% */
             push_ack = 0;
             stat_send = 0;
             MSG_DEBUG(DEBUG_INFO, "INFO~ [up] PUSH_ACK mismatch, reconnect server \n");
+            output_status(0);
             /* maybe theadup is sending message */
             pthread_mutex_lock(&mx_sockup); /* if a lock ? */
             if (sock_up) close(sock_up);
@@ -1641,6 +1660,8 @@ int main(void)
         //wait_ms(1000 * (stat_interval - keepalive_time));
         wait_ms(1000 * stat_interval); /*may be keepalive_time big than stat_interval*/
     }
+
+    output_status(0);  /* exist, reset the status */
 
     /* wait for upstream thread to finish (1 fetch cycle max) */
     pthread_join(thrid_up, NULL);
@@ -1698,7 +1719,12 @@ void thread_up(void) {
     /* data buffers */
     uint8_t buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
     int buff_index;
-    //uint8_t buff_ack[32]; /* buffer to receive acknowledges */
+    uint8_t buff_ack[32]; /* buffer to receive acknowledges */
+
+
+    /* local timekeeping variables */
+    struct timespec send_time; /* time of the pull request */
+    struct timespec recv_time; /* time of return from recv socket call */
 
     /* protocol variables */
     uint8_t token_h; /* random token for acknowledgement matching */
@@ -2121,7 +2147,6 @@ void thread_up(void) {
 
         /* wait for acknowledge (in 2 times, to catch extra packets) */
         /* no need acknowledge in data_up, because can't receive an ack in a little time*/
-        /*
         clock_gettime(CLOCK_MONOTONIC, &send_time);
         for (i=0; i<2; ++i) {
             j = recv(sock_up, (void *)buff_ack, sizeof buff_ack, 0);
@@ -2141,7 +2166,7 @@ void thread_up(void) {
                 break;
             }
         }
-        */
+        
         pthread_mutex_unlock(&mx_meas_up);
     }  
     MSG_DEBUG(DEBUG_INFO, "INFO~ End of upstream thread\n");

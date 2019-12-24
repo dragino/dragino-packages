@@ -19,7 +19,7 @@ fi
 echo "Accessing concentrator reset pin through GPIO$IOT_SK_SX1301_RESET_PIN..."
 
 WAIT_GPIO() {
-    sleep 0.1
+    sleep 1
 }
 
 iot_sk_init() {

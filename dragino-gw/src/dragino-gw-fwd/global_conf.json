@@ -199,15 +199,18 @@
 
     "gateway_conf": {
         /* change with default server address/ports, or overwrite in local_conf.json */
-        "gateway_ID": "AA555A0000000000",
+        "gateway_ID": "a840411b0000aaaa",
         /* Systems (set logger to true for logs per (!) packet) */
         "gps": false,
         "beacon": false,
         "logger": true,
+        "debug_log": true,
+        "debug_jit": true,
+        "debug_pkt_fwd": true,
         /* Streams */
         "upstream": true,
         "downstream": true,
-        "ghoststream": false,
+        "ghoststream": true,
         "radiostream": true,
         "statusstream": true,
         /* node server, (for standard server, fall back for poly packet & multi protocol packet server) */
@@ -241,6 +244,6 @@
         /* For human communication */
         "platform": "*",                          /* Platform definition, put a asterix here for the system value, max 24 chars. */
         "contact_email": "dragino@dragino.com",  /* Email of gateway operator, max 40 chars*/
-        "description": "Update me"                /* Public description of this device, max 64 chars */
+        "description": "Dragino Lora gateway"                /* Public description of this device, max 64 chars */
     }
 }

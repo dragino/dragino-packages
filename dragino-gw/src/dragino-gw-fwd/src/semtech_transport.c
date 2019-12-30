@@ -43,9 +43,6 @@ Modifications for multi protocol use: Jac Kersing
 #include <assert.h>
 
 #include <sys/socket.h>		/* socket specific definitions */
-#include <netinet/in.h>		/* INET constants and stuff */
-#include <arpa/inet.h>		/* IP address conversion stuff */
-#include <netdb.h>		/* gai_strerror */
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -159,12 +156,12 @@ extern pthread_mutex_t mx_stat_rep;
 extern char status_report[];
 extern long push_timeout_ms;
 
+/* gateway <-> MAC protocol variables */
+extern uint32_t net_mac_h;	/* Most Significant Nibble, network order */
+extern uint32_t net_mac_l;	/* Least Significant Nibble, network order */
+
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES (GLOBAL) ------------------------------------------- */
-
-/* gateway <-> MAC protocol variables */
-static uint32_t net_mac_h;	/* Most Significant Nibble, network order */
-static uint32_t net_mac_l;	/* Least Significant Nibble, network order */
 
 /* network protocol variables */
 static struct timeval push_timeout_half = { 0, (PUSH_TIMEOUT_MS * 500) };	/* cut in half, critical for throughput */
@@ -191,121 +188,24 @@ static uint16_t crc_ccit(const uint8_t * data, unsigned size) {
 }
 
 void semtech_init(int idx) {
-    /* network socket creation */
-    struct addrinfo hints;
-    struct addrinfo *result;	/* store result of getaddrinfo */
-    struct addrinfo *q;		/* pointer to move into *result data */
-    char host_name[64];
-    char port_name[64];
     int i;
-
-    /* process some of the configuration variables */
-    net_mac_h = htonl((uint32_t) (0xFFFFFFFF & (lgwm >> 32)));
-    net_mac_l = htonl((uint32_t) (0xFFFFFFFF & lgwm));
-
-    /* prepare hints to open network sockets */
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET;	/* WA: Forcing IPv4 as AF_UNSPEC makes connection on localhost to fail */
-    hints.ai_socktype = SOCK_DGRAM;
 
     /* Initialize server variables */
     servers[idx].live = false;
     servers[idx].contact = time(NULL);
 
-    /* look for server address w/ upstream port */
-    i = getaddrinfo(servers[idx].addr, servers[idx].port_up, &hints, &result);
-    if (i != 0) {
-	MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n",
-	    servers[idx].addr, servers[idx].port_up, gai_strerror(i));
-	freeaddrinfo(result);
-	return;
-    }
+    /* init socket for communicate */
+    if ((servers[idx].sock_up = init_socket(servers[idx].addr, servers[idx].port_up,
+                    (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
+        return;
 
-    /* try to open socket for upstream traffic */
-    for (q = result; q != NULL; q = q->ai_next) {
-	servers[idx].sock_up = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
-	if (servers[idx].sock_up == -1)
-	    continue;		/* try next field */
-	else
-	    break;		/* success, get out of loop */
-    }
-    if (q == NULL) {
-	MSG("ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", servers[idx].addr, servers[idx].port_up);
-	i = 1;
-	for (q = result; q != NULL; q = q->ai_next) {
-	    getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name,
-			port_name, sizeof port_name, NI_NUMERICHOST);
-	    MSG("INFO: [up] result %i host:%s service:%s\n", i, host_name, port_name);
-	    ++i;
-	}
-	freeaddrinfo(result);
-	return;
-    }
-
-    /* connect so we can send/receive packet with the server only */
-    i = connect(servers[idx].sock_up, q->ai_addr, q->ai_addrlen);
-    if (i != 0) {
-	MSG("ERROR: [up] connect on address %s (port %s) returned: %s\n",
-	    servers[idx].addr, servers[idx].port_up, strerror(errno));
-	freeaddrinfo(result);
-	return;
-    }
-
-    /* look for server address w/ downstream port */
-    i = getaddrinfo(servers[idx].addr, servers[idx].port_down, &hints, &result);
-    if (i != 0) {
-	MSG("ERROR: [down] getaddrinfo on address %s (port %s) returned: %s\n",
-	    servers[idx].addr, servers[idx].port_down, gai_strerror(i));
-	freeaddrinfo(result);
-	return;
-    }
-
-    /* try to open socket for downstream traffic */
-    for (q = result; q != NULL; q = q->ai_next) {
-	servers[idx].sock_down = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
-	if (servers[idx].sock_down == -1)
-	    continue;		/* try next field */
-	else
-	    break;		/* success, get out of loop */
-    }
-    if (q == NULL) {
-	MSG("ERROR: [down] failed to open socket to any of server %s addresses (port %s)\n", servers[idx].addr, servers[idx].port_down);
-	i = 1;
-	for (q = result; q != NULL; q = q->ai_next) {
-	    getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name,
-			port_name, sizeof port_name, NI_NUMERICHOST);
-	    MSG("INFO: [down] result %i host:%s service:%s\n", i, host_name, port_name);
-	    ++i;
-	}
-	freeaddrinfo(result);
-	return;
-    }
-
-    freeaddrinfo(result);
-
-    /* connect so we can send/receive packet with the server only */
-    i = connect(servers[idx].sock_down, q->ai_addr, q->ai_addrlen);
-    if (i != 0) {
-	MSG("ERROR: [down] connect address %s (port %s) returned: %s\n",
-	    servers[idx].addr, servers[idx].port_down, strerror(errno));
-	return;
-    }
+    if ((servers[idx].sock_down = init_socket(servers[idx].addr, servers[idx].port_down,
+                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
+        return;
 
     /* If we made it through to here, this server is live */
     servers[idx].live = true;
     MSG("INFO: Successfully contacted server %s\n", servers[idx].addr);
-
-    /* set upstream socket RX timeout */
-    push_timeout_half.tv_usec = 500 * push_timeout_ms;
-    if (servers[idx].live == true) {
-	i = setsockopt(servers[idx].sock_up, SOL_SOCKET, SO_RCVTIMEO,
-		       (void *)&push_timeout_half, sizeof push_timeout_half);
-	if (i != 0) {
-	    MSG("ERROR: [up] setsockopt for server %s returned %s\n",
-		servers[idx].addr, strerror(errno));
-	    exit(EXIT_FAILURE);
-	}
-    }
 
     i = pthread_create(&servers[idx].t_up, NULL,
 		       (void *(*)(void *))semtech_upstream, (void *)(long)idx);
@@ -409,10 +309,11 @@ static int send_tx_ack(int ic, uint8_t token_h, uint8_t token_l,
 
     /* send datagram to server */
     return send(servers[ic].sock_down, (void *)buff_ack, buff_index, 0);
+    MSG("INFO: [TTN] Start TTN upstream pthread....\n");
 }
 
 void semtech_thread_down(void *pic) {
-    int i;			/* loop variables */
+    int i = 0;			/* loop variables */
     int ic = (int)(long)pic;
 
     /* configuration and metadata for an outbound packet */
@@ -474,16 +375,6 @@ void semtech_thread_down(void *pic) {
     char json[300], iso_timestamp[24];
     time_t system_time;
     int j, buff_index;
-
-    /* set downstream socket RX timeout */
-    i = setsockopt(servers[ic].sock_down, SOL_SOCKET, SO_RCVTIMEO,
-		   (void *)&pull_timeout, sizeof pull_timeout);
-    if (i != 0) {
-	//TODO Should this failure bring the application down?
-	MSG("ERROR: [down] setsockopt for server %s returned %s\n",
-	    servers[ic].addr, strerror(errno));
-	exit(EXIT_FAILURE);
-    }
 
     /* pre-fill the pull request buffer with fixed fields */
     buff_req[0] = PROTOCOL_VERSION;
@@ -590,8 +481,7 @@ void semtech_thread_down(void *pic) {
 		    if (last_beacon_gps_time.tv_sec == 0) {
 			/* if no beacon has been queued, get next slot from current UTC time */
 			diff_beacon_time = time_reference_gps.utc.tv_sec % ((time_t) beacon_period);
-			next_beacon_gps_time.tv_sec = time_reference_gps.utc.tv_sec +
-			    ((time_t) beacon_period - diff_beacon_time);
+			next_beacon_gps_time.tv_sec = time_reference_gps.utc.tv_sec + ((time_t) beacon_period - diff_beacon_time);
 		    } else {
 			/* if there is already a beacon, take it as reference */
 			next_beacon_gps_time.tv_sec = last_beacon_gps_time.tv_sec + beacon_period;
@@ -600,12 +490,9 @@ void semtech_thread_down(void *pic) {
 		    next_beacon_gps_time.tv_sec += (retry * beacon_period);
 		    next_beacon_gps_time.tv_nsec = 0;
 
-		    MSG_DEBUG(DEBUG_BEACON, "GPS-now : %s",
-			      ctime(&time_reference_gps.utc.tv_sec));
-		    MSG_DEBUG(DEBUG_BEACON, "GPS-last: %s",
-			      ctime(&last_beacon_gps_time.tv_sec));
-		    MSG_DEBUG(DEBUG_BEACON, "GPS-next: %s",
-			      ctime(&next_beacon_gps_time.tv_sec));
+		    MSG_DEBUG(DEBUG_BEACON, "GPS-now : %s", ctime(&time_reference_gps.utc.tv_sec));
+		    MSG_DEBUG(DEBUG_BEACON, "GPS-last: %s", ctime(&last_beacon_gps_time.tv_sec));
+		    MSG_DEBUG(DEBUG_BEACON, "GPS-next: %s", ctime(&next_beacon_gps_time.tv_sec));
 
 		    /* convert UTC time to concentrator time, and set packet counter for JiT trigger */
 		    lgw_utc2cnt(time_reference_gps, next_beacon_gps_time,
@@ -662,7 +549,8 @@ void semtech_thread_down(void *pic) {
 			if (jit_result != JIT_ERROR_COLLISION_BEACON) {
 			    increment_down(BEACON_REJECTED);
 			}
-			/** In case previous enqueue failed, we retry one period later until it succeeds 
+			/** In case previous enqueue failed, 
+                         ** we retry one period later until it succeeds 
 			 ** Note: In case the GPS has been unlocked for a while, there can be lots of retries be done from last beacon time to a new valid one 
                          **/
 			retry++;
@@ -796,8 +684,7 @@ void semtech_thread_down(void *pic) {
 			continue;
 		    }
 
-		    i = sscanf(str, "%4hd-%2hd-%2hdT%2hd:%2hd:%9lf", 
-                                     &x0, &x1, &x2, &x3, &x4, &x5);
+		    i = sscanf(str, "%4hd-%2hd-%2hdT%2hd:%2hd:%9lf", &x0, &x1, &x2, &x3, &x4, &x5);
 		    if (i != 6) {
 			LOGGER("WARNING: [down] \"txpk.time\" must follow ISO 8601 format, TX aborted\n");
 			json_value_free(root_val);
@@ -867,8 +754,7 @@ void semtech_thread_down(void *pic) {
 		continue;
 	    }
 	    txpkt.rf_chain = (uint8_t) json_value_get_number(val);
-	    j = snprintf((json + buff_index), 300 - buff_index,
-			 ",\"rf_chain\":%d", txpkt.rf_chain);
+	    j = snprintf((json + buff_index), 300 - buff_index, ",\"rf_chain\":%d", txpkt.rf_chain);
 	    if (j > 0) {
 		buff_index += j;
 	    }
@@ -877,8 +763,7 @@ void semtech_thread_down(void *pic) {
 	    val = json_object_get_value(txpk_obj, "powe");
 	    if (val != NULL) {
 		txpkt.rf_power = (int8_t) json_value_get_number(val) - antenna_gain;
-		j = snprintf((json + buff_index), 300 - buff_index,
-			     ",\"rf_power\":%d", txpkt.rf_power);
+		j = snprintf((json + buff_index), 300 - buff_index, ",\"rf_power\":%d", txpkt.rf_power);
 		if (j > 0) {
 		    buff_index += j;
 		}
@@ -960,8 +845,7 @@ void semtech_thread_down(void *pic) {
 		    json_value_free(root_val);
 		    continue;
 		}
-		j = snprintf((json + buff_index), 300 - buff_index,
-			     "\"coding_rate\":\"%s\"", str);
+		j = snprintf((json + buff_index), 300 - buff_index, "\"coding_rate\":\"%s\"", str);
 		if (j > 0) {
 		    buff_index += j;
 		}
@@ -994,12 +878,12 @@ void semtech_thread_down(void *pic) {
 		if (val != NULL) {
 		    i = (int)json_value_get_number(val);
 		    if (i >= MIN_LORA_PREAMB) {
-			txpkt.preamble = (uint16_t) i;
+			txpkt.preamble = (uint16_t)i;
 		    } else {
-			txpkt.preamble = (uint16_t) MIN_LORA_PREAMB;
+			txpkt.preamble = (uint16_t)MIN_LORA_PREAMB;
 		    }
 		} else {
-		    txpkt.preamble = (uint16_t) STD_LORA_PREAMB;
+		    txpkt.preamble = (uint16_t)STD_LORA_PREAMB;
 		}
 
 	    } else if (strcmp(str, "FSK") == 0) {
@@ -1013,7 +897,7 @@ void semtech_thread_down(void *pic) {
 		    json_value_free(root_val);
 		    continue;
 		}
-		txpkt.datarate = (uint32_t) (json_value_get_number(val));
+		txpkt.datarate = (uint32_t)(json_value_get_number(val));
 
 		/* parse frequency deviation (mandatory) */
 		val = json_object_get_value(txpk_obj, "fdev");
@@ -1065,8 +949,7 @@ void semtech_thread_down(void *pic) {
 		json_value_free(root_val);
 		continue;
 	    }
-	    i = b64_to_bin(str, strlen(str), txpkt.payload,
-			   sizeof txpkt.payload);
+	    i = b64_to_bin(str, strlen(str), txpkt.payload, sizeof txpkt.payload);
 	    if (i != txpkt.size) {
 		LOGGER("WARNING: [down] mismatch between .size and .data size once converter to binary\n");
 	    }
@@ -1108,8 +991,7 @@ void semtech_thread_down(void *pic) {
 		    }
 		}
 		if (pwr_level != txpkt.rf_power) {
-		    LOGGER("INFO: RF Power adjusted to %d from %d\n", pwr_level,
-			   txpkt.rf_power);
+		    LOGGER("INFO: RF Power adjusted to %d from %d\n", pwr_level, txpkt.rf_power);
 		    txpkt.rf_power = pwr_level;
 		}
 	    }
@@ -1117,13 +999,10 @@ void semtech_thread_down(void *pic) {
 	    /* insert packet to be sent into JIT queue */
 	    if (jit_result == JIT_ERROR_OK) {
 		gettimeofday(&current_unix_time, NULL);
-		get_concentrator_time(&current_concentrator_time,
-				      current_unix_time);
-		jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt,
-				downlink_type);
+		get_concentrator_time(&current_concentrator_time, current_unix_time);
+		jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
 		if (jit_result != JIT_ERROR_OK) {
-		    LOGGER("ERROR: Packet REJECTED (jit error=%d)\n",
-			   jit_result);
+		    LOGGER("ERROR: Packet REJECTED (jit error=%d)\n", jit_result);
 		}
 		increment_down(TX_REQUESTED);
 	    }
@@ -1140,6 +1019,7 @@ void semtech_thread_down(void *pic) {
 	    ++buff_index;
 	    /* end of JSON datagram payload */
 	    json[buff_index] = 0;	/* add string terminator, for safety */
+            MSG("[semtech_down]INFO~ (for downtraf) %s\n", json);
 	    transport_send_downtraf(json, ++buff_index);
 	}
     }
@@ -1191,12 +1071,11 @@ void semtech_upstream(void *pic) {
 	sem_wait(&servers[idx].send_sem);
 
 	// dequeue data
-	pthread_mutex_lock(&servers[idx].mx_queue);
 	entry = servers[idx].queue;
 	if (entry == NULL) {
-	    pthread_mutex_unlock(&servers[idx].mx_queue);
 	    continue;
 	}
+	pthread_mutex_lock(&servers[idx].mx_queue);
 	servers[idx].queue = entry->next;
 	pthread_mutex_unlock(&servers[idx].mx_queue);
 	rxpkt = entry->data;
@@ -1223,8 +1102,7 @@ void semtech_upstream(void *pic) {
 
 	/* Make when we are, define the start of the packet array. */
 	system_time = time(NULL);
-	strftime(iso_timestamp, sizeof iso_timestamp, "%FT%TZ",
-		 gmtime(&system_time));
+	strftime(iso_timestamp, sizeof iso_timestamp, "%FT%TZ", gmtime(&system_time));
 	j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index,
 		     "{\"time\":\"%s\",\"rxpk\":[", iso_timestamp);
 	if (j > 0) {
@@ -1309,8 +1187,7 @@ void semtech_upstream(void *pic) {
 	    }
 
 	    /* Packet concentrator channel, RF chain & RX frequency, 34-36 useful chars */
-	    j = snprintf((char *)(buff_up + buff_index),
-			 TX_BUFF_SIZE - buff_index,
+	    j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index,
 			 ",\"chan\":%1u,\"rfch\":%1u,\"freq\":%.6lf",
 			 p->if_chain, p->rf_chain, ((double)p->freq_hz / 1e6));
 	    if (j > 0) {
@@ -1344,46 +1221,38 @@ void semtech_upstream(void *pic) {
 
 	    /* Packet modulation, 13-14 useful chars */
 	    if (p->modulation == MOD_LORA) {
-		memcpy((void *)(buff_up + buff_index),
-		       (void *)",\"modu\":\"LORA\"", 14);
+		memcpy((void *)(buff_up + buff_index), (void *)",\"modu\":\"LORA\"", 14);
 		buff_index += 14;
 
 		/* Lora datarate & bandwidth, 16-19 useful chars */
 		switch (p->datarate) {
 		case DR_LORA_SF7:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"datr\":\"SF7", 12);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF7", 12);
 		    buff_index += 12;
 		    break;
 		case DR_LORA_SF8:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"datr\":\"SF8", 12);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF8", 12);
 		    buff_index += 12;
 		    break;
 		case DR_LORA_SF9:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"datr\":\"SF9", 12);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF9", 12);
 		    buff_index += 12;
 		    break;
 		case DR_LORA_SF10:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"datr\":\"SF10", 13);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF10", 13);
 		    buff_index += 13;
 		    break;
 		case DR_LORA_SF11:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"datr\":\"SF11", 13);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF11", 13);
 		    buff_index += 13;
 		    break;
 		case DR_LORA_SF12:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"datr\":\"SF12", 13);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF12", 13);
 		    buff_index += 13;
 		    break;
 		default:
 		    MSG("ERROR: [up] lora packet with unknown datarate\n");
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"datr\":\"SF?", 12);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"datr\":\"SF?", 12);
 		    buff_index += 12;
 		    continue;	/* skip that packet */
 		    //exit(EXIT_FAILURE);
@@ -1412,43 +1281,35 @@ void semtech_upstream(void *pic) {
 		/* Packet ECC coding rate, 11-13 useful chars */
 		switch (p->coderate) {
 		case CR_LORA_4_5:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"codr\":\"4/5\"", 13);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/5\"", 13);
 		    buff_index += 13;
 		    break;
 		case CR_LORA_4_6:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"codr\":\"4/6\"", 13);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/6\"", 13);
 		    buff_index += 13;
 		    break;
 		case CR_LORA_4_7:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"codr\":\"4/7\"", 13);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/7\"", 13);
 		    buff_index += 13;
 		    break;
 		case CR_LORA_4_8:
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"codr\":\"4/8\"", 13);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"4/8\"", 13);
 		    buff_index += 13;
 		    break;
 		case 0:	/* treat the CR0 case (mostly false sync) */
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"codr\":\"OFF\"", 13);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"OFF\"", 13);
 		    buff_index += 13;
 		    break;
 		default:
 		    MSG("ERROR: [up] lora packet with unknown coderate\n");
-		    memcpy((void *)(buff_up + buff_index),
-			   (void *)",\"codr\":\"?\"", 11);
+		    memcpy((void *)(buff_up + buff_index), (void *)",\"codr\":\"?\"", 11);
 		    buff_index += 11;
 		    continue;	/* skip that packet */
 		    //exit(EXIT_FAILURE);
 		}
 
 		/* Lora SNR, 11-13 useful chars */
-		j = snprintf((char *)(buff_up + buff_index),
-			     TX_BUFF_SIZE - buff_index, ",\"lsnr\":%.1f",
-			     p->snr);
+		j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"lsnr\":%.1f", p->snr);
 		if (j > 0) {
 		    buff_index += j;
 		} else {

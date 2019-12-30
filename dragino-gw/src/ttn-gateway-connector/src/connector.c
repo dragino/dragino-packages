@@ -69,6 +69,7 @@ int ttngwc_connect(TTN *s, const char *host_name, int port, const char *key) {
   int err;
   MQTTPacket_connectData connect = MQTTPacket_connectData_initializer;
 
+  printf("TTN-connector:NetworkConnect\n");
   err = NetworkConnect(&session->network, (char *)host_name, port);
   if (err != SUCCESS) 
     goto exit;
@@ -97,6 +98,7 @@ int ttngwc_connect(TTN *s, const char *host_name, int port, const char *key) {
       &will, (uint8_t *)connect.will.message.lenstring.data);
 #endif
 
+  printf("TTN-connector:MqttConnect\n");
   err = MQTTConnect(&session->client, &connect);
 #if SEND_DISCONNECT_WILL
   free(connect.will.message.lenstring.data);

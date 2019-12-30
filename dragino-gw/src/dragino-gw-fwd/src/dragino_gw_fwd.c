@@ -238,6 +238,11 @@ bool statusstream_enabled = true;	/* controls the data flow of status informatio
 static bool ghoststream_enabled = false;	/* controls the data flow from ghost-node to server       */
 static bool radiostream_enabled = true;	/* controls the data flow from radio-node to server       */
 
+
+/* gateway <-> MAC protocol variables */
+uint32_t net_mac_h; /* Most Significant Nibble, network order */
+uint32_t net_mac_l; /* Least Significant Nibble, network order */
+
 /* Informational status fields */
 char gateway_id[20] = "";	/* string form of gateway mac address */
 char platform[24] = DISPLAY_PLATFORM;	/* platform definition */
@@ -1443,70 +1448,9 @@ void sighup_handler() {
     }
 }
 
-static int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len) {
-    int i, sockfd;
-    /* network socket creation */
-    struct addrinfo hints;
-    struct addrinfo *result; /* store result of getaddrinfo */
-    struct addrinfo *q; /* pointer to move into *result data */
-
-    char host_name[64];
-    char port_name[64];
-
-    /* prepare hints to open network sockets */
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET; /* WA: Forcing IPv4 as AF_UNSPEC makes connection on localhost to fail */
-    hints.ai_socktype = SOCK_DGRAM;
-
-    /* look for server address w/ upstream port */
-    i = getaddrinfo(servaddr, servport, &hints, &result);
-    if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n", servaddr, servport, gai_strerror(i));
-        return -1;
-    }
-
-    /* try to open socket for upstream traffic */
-    for (q = result; q != NULL; q = q->ai_next) {
-        sockfd = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
-        if (sockfd == -1) continue; /* try next field */
-        else break; /* success, get out of loop */
-    }
-
-    if (q == NULL) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n", servaddr, servport);
-        i = 1;
-        for (q=result; q!=NULL; q=q->ai_next) {
-            getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-            MSG_DEBUG(DEBUG_INFO, "INFO~ [up] result %i host:%s service:%s\n", i, host_name, port_name);
-            ++i;
-        }
-
-        return -1;
-    }
-
-    /* connect so we can send/receive packet with the server only */
-    i = connect(sockfd, q->ai_addr, q->ai_addrlen);
-    if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] connect returned %s\n", strerror(errno));
-        return -1;
-    }
-
-    freeaddrinfo(result);
-
-    if ((setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, rectimeout, len)) != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [up] setsockopt returned %s\n", strerror(errno));
-        return -1;
-    }
-
-    MSG_DEBUG(DEBUG_INFO, "INFO~ sockfd=%d\n", sockfd);
-
-    return sockfd;
-}
-
 /* reload config if manager server give a comand configreload*/
 static int parse_config(const char *conf_file) {
     int ret;
-
     ret = parse_SX1301_configuration(conf_file);
     if (ret == -1)
 	return ret;
@@ -1520,8 +1464,7 @@ static int parse_config(const char *conf_file) {
 int main(int argc, char *argv[]) {
     struct sigaction sigact;	/* SIGQUIT&SIGINT&SIGTERM signal handling */
     struct sigaction sighupact;	/* SIGHUP signal handling */
-    int i;			/* loop variable and temporary variable for return value */
-    int ic;			/* Server loop variable */
+    int i, j, ic;			/* loop variable and temporary variable for return value */
 
     /* configuration file related */
     char *global_cfg_name = "global_conf.json";	/* contain global (typically network-wide) configuration */
@@ -1552,9 +1495,7 @@ int main(int argc, char *argv[]) {
     time_t current_time = time(NULL);
     int stall_time[MAX_SERVERS] = { 0 };
 
-    while ((i =
-	    getopt_long(argc, argv, short_options, long_options,
-			&opt_ind)) >= 0) {
+    while ((i = getopt_long(argc, argv, short_options, long_options, &opt_ind)) >= 0) {
 	switch (i) {
 	case 0:
 	    break;
@@ -1588,12 +1529,9 @@ int main(int argc, char *argv[]) {
 	}
     }
 
-    snprintf(global_cfg_path, sizeof(global_cfg_path), "%s%s", cfg_dir,
-	     global_cfg_name);
-    snprintf(local_cfg_path, sizeof(local_cfg_path), "%s%s", cfg_dir,
-	     local_cfg_name);
-    snprintf(debug_cfg_path, sizeof(debug_cfg_path), "%s%s", cfg_dir,
-	     debug_cfg_name);
+    snprintf(global_cfg_path, sizeof(global_cfg_path), "%s%s", cfg_dir, global_cfg_name);
+    snprintf(local_cfg_path, sizeof(local_cfg_path), "%s%s", cfg_dir, local_cfg_name);
+    snprintf(debug_cfg_path, sizeof(debug_cfg_path), "%s%s", cfg_dir, debug_cfg_name);
 
     /* redirect stdout, stderr to logfile if specified */
     int logfile_fd;
@@ -1612,10 +1550,8 @@ int main(int argc, char *argv[]) {
     }
 
     /* display version informations */
-    MSG("*** Multi Protocol Packet Forwarder for Lora Gateway ***\nVersion: "
-	VERSION_STRING "\n");
-    MSG("*** Lora concentrator HAL library version info ***\n%s\n***\n",
-	lgw_version_info());
+    MSG("*** Multi Protocol Packet Forwarder for Lora Gateway ***\nVersion: " VERSION_STRING "\n");
+    MSG("*** Lora concentrator HAL library version info ***\n%s\n***\n", lgw_version_info());
 
     /* display host endianness */
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -1634,29 +1570,25 @@ int main(int argc, char *argv[]) {
 
     /* load configuration files */
     if (access(debug_cfg_path, R_OK) == 0) {	/* if there is a debug conf, parse only the debug conf */
-	MSG("INFO: found debug configuration file %s, parsing it\n",
-	    debug_cfg_path);
+	MSG("INFO: found debug configuration file %s, parsing it\n", debug_cfg_path);
 	MSG("INFO: other configuration files will be ignored\n");
 	parse_cplan_configuration(debug_cfg_path);
 	parse_SX1301_configuration(debug_cfg_path);
 	parse_gateway_configuration(debug_cfg_path);
     } else if (access(global_cfg_path, R_OK) == 0) {	/* if there is a global conf, parse it and then try to parse local conf  */
-	MSG("INFO: found global configuration file %s, parsing it\n",
-	    global_cfg_path);
+	MSG("INFO: found global configuration file %s, parsing it\n", global_cfg_path);
 	parse_cplan_configuration(global_cfg_path);
 	parse_SX1301_configuration(global_cfg_path);
 	parse_gateway_configuration(global_cfg_path);
 	if (access(local_cfg_path, R_OK) == 0) {
-	    MSG("INFO: found local configuration file %s, parsing it\n",
-		local_cfg_path);
+	    MSG("INFO: found local configuration file %s, parsing it\n", local_cfg_path);
 	    MSG("INFO: redefined parameters will overwrite global parameters\n");
 	    parse_cplan_configuration(local_cfg_path);
 	    parse_SX1301_configuration(local_cfg_path);
 	    parse_gateway_configuration(local_cfg_path);
 	}
     } else if (access(local_cfg_path, R_OK) == 0) {	/* if there is only a local conf, parse it and that's all */
-	MSG("INFO: found local configuration file %s, parsing it\n",
-	    local_cfg_path);
+	MSG("INFO: found local configuration file %s, parsing it\n", local_cfg_path);
 	parse_cplan_configuration(local_cfg_path);
 	parse_SX1301_configuration(local_cfg_path);
 	parse_gateway_configuration(local_cfg_path);
@@ -1674,8 +1606,7 @@ int main(int argc, char *argv[]) {
 		gps_active = false;
 		gps_ref_valid = false;
 	    } else {
-		MSG("INFO: [main] TTY port %s open for GPS synchronization\n",
-		    gps_tty_path);
+		MSG("INFO: [main] TTY port %s open for GPS synchronization\n", gps_tty_path);
 		gps_active = true;
 		gps_ref_valid = false;
 	    }
@@ -1687,6 +1618,10 @@ int main(int argc, char *argv[]) {
 
     /* get timezone info */
     tzset();
+
+    /* process some of the configuration variables */
+    net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (lgwm>>32)));
+    net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  lgwm  ));
 
     /* clear statistics */
     stats_init();
@@ -1736,17 +1671,19 @@ int main(int argc, char *argv[]) {
 	/* JIT queue initialization */
 	jit_queue_init(&jit_queue);
 
-	for (ic = 0; ic < serv_count; ic++)
-	    if (servers[ic].live == true && servers[ic].type == semtech
-		&& servers[ic].downstream == true) {
+	for (ic = 0; ic < serv_count; ic++) {
+	    if (servers[ic].live == true && servers[ic].type == semtech 
+                    && servers[ic].downstream == true) {
 		i = pthread_create(&servers[ic].t_down, NULL,
-				   (void *(*)(void *))semtech_thread_down,
-				   (void *)(long)ic);
+				  (void *(*)(void *))semtech_thread_down, (void *)(long)ic);
 		if (i != 0) {
 		    MSG("ERROR: [main] impossible to create downstream thread\n");
 		    exit(EXIT_FAILURE);
 		}
+
+                break;  /* ignor other semtech server */
 	    }
+        }
 
 	i = pthread_create(&thrid_jit, NULL, (void *(*)(void *))thread_jit, NULL);
 	if (i != 0) {
@@ -1767,14 +1704,12 @@ int main(int argc, char *argv[]) {
 
     /* spawn thread to manage GPS */
     if (gps_active == true) {
-	i = pthread_create(&thrid_gps, NULL, (void *(*)(void *))thread_gps,
-			   NULL);
+	i = pthread_create(&thrid_gps, NULL, (void *(*)(void *))thread_gps, NULL);
 	if (i != 0) {
 	    MSG("ERROR: [main] impossible to create GPS thread\n");
 	    exit(EXIT_FAILURE);
 	}
-	i = pthread_create(&thrid_valid, NULL, (void *(*)(void *))thread_valid,
-			   NULL);
+	i = pthread_create(&thrid_valid, NULL, (void *(*)(void *))thread_valid, NULL);
 	if (i != 0) {
 	    MSG("ERROR: [main] impossible to create validation thread\n");
 	    exit(EXIT_FAILURE);
@@ -1803,16 +1738,14 @@ int main(int argc, char *argv[]) {
     }
 
     /* Check if we have anything to do */
-    if ((radiostream_enabled == false) && (ghoststream_enabled == false)
-	&& (statusstream_enabled == false)) {
+    if ((radiostream_enabled == false) && (ghoststream_enabled == false) && (statusstream_enabled == false)) {
 	MSG("WARNING: [main] All streams have been disabled, gateway may be completely silent.\n");
     }
 
     /* spawn thread for watchdog */
     if (wd_enabled == true) {
 	last_loop = time(NULL);
-	i = pthread_create(&thrid_watchdog, NULL,
-			   (void *(*)(void *))thread_watchdog, NULL);
+	i = pthread_create(&thrid_watchdog, NULL, (void *(*)(void *))thread_watchdog, NULL);
 	if (i != 0) {
 	    MSG("ERROR: [main] impossible to create watchdog thread\n");
 	    exit(EXIT_FAILURE);
@@ -1820,20 +1753,71 @@ int main(int argc, char *argv[]) {
     }
 
     /* main loop task : statistics transmission */
+
+    /* local timekeeping variables */
+    struct timespec send_time;	/* time of the pull request */
+    struct timespec recv_time;	/* time of return from recv socket call */
+
+    uint8_t buff_stat[STATUS_SIZE]; /* buffer to compose the upstream packet */
+    int buff_index;
+    uint8_t stat_ack[32]; /* buffer to receive acknowledges */
+
+    buff_stat[0] = PROTOCOL_VERSION;
+    buff_stat[3] = PKT_PUSH_DATA;
+    *(uint32_t *)(buff_stat + 4) = net_mac_h;
+    *(uint32_t *)(buff_stat + 8) = net_mac_l;
+
+    /* protocol variables */
+    uint8_t token_h;		/* random token for acknowledgement matching */
+    uint8_t token_l;		/* random token for acknowledgement matching */
+
     while (!exit_sig && !quit_sig && !reload_sig) {
 	/* wait for next reporting interval */
 	wait_ms(1000 * stat_interval);
 
-	if (exit_sig || quit_sig) {
+	if (exit_sig || quit_sig || reload_sig) {
 	    break;
 	}
 	// Create statistics report
 	stats_report();
 
-        /* status report single send for easy handle data*/
+        /* status report single send for easy handle data
+         * only one semtech for each gateway
+         * */
+
 	for (i = 0; i < serv_count; i++) {
 	    if (servers[i].live == true && servers[i].type == semtech) {
-                send(servers[i].sock_up, (void *)status_report, strlen(status_report), 0); // TODO: send for each other server, using thread to receive response
+                token_h = (uint8_t)rand(); /* random token */
+                token_l = (uint8_t)rand(); /* random token */
+                buff_stat[1] = token_h;
+                buff_stat[2] = token_l;
+                buff_index = 12; /* 12-byte header */
+                j = snprintf((char *)(buff_stat + buff_index), STATUS_SIZE- buff_index, "%s", status_report);
+                buff_index += j;
+                buff_stat[buff_index] = 0; /* add string terminator, for safety */
+                send(servers[i].sock_up, (void *)buff_stat, buff_index, 0); 
+                MSG("INFO: [status-up] %s\n", status_report);
+	        clock_gettime(CLOCK_MONOTONIC, &send_time);
+	        recv_time = send_time;
+	        while ((int)difftimespec(recv_time, send_time) < keepalive_time) {
+                    j = recv(servers[i].sock_up, (void *)stat_ack, (sizeof stat_ack) - 1, 0);
+                    clock_gettime(CLOCK_MONOTONIC, &recv_time);
+                    if (j == -1) {
+                        continue;
+                    } else if ((j < 4) || (stat_ack[0] != PROTOCOL_VERSION)
+		        || (stat_ack[3] != PKT_PUSH_ACK)) {
+		        continue;
+                    } else if ((stat_ack[1] != token_h) || (stat_ack[2] != token_l)) {
+                        LOGGER("WARNING: [status-up] ignored out-of sync ACK packet\n");
+                        continue;
+                    } else {
+                        LOGGER("INFO: [status-up] for server %s PUSH_ACK received in %i ms\n",
+                               servers[i].addr, (int)(1000 * difftimespec(recv_time, send_time)));
+                        servers[i].contact = time(NULL);
+                        break;
+                    }
+                }
+                break;  /* if servers is semth type , ignore other less */
             }
         }
 
@@ -1998,10 +1982,9 @@ void thread_dispatch_rxpkt(void) {
 	}
 
         for (i = 0; i < MAX_SERVERS; i++) {
-            thrd_arg[i].idx = i; 
-            thrd_arg[i].queue = entry;
-
-            if (servers[i].enabled == true && servers[i].upstream == true) {
+            if (servers[i].live == true && servers[i].upstream == true) {
+                thrd_arg[i].idx = i; 
+                thrd_arg[i].queue = entry;
                 r = pthread_create(&thrid_dis[i], NULL, (void * (*)(void *))thread_rxpkt_enqueue, (void *)(Thrdarg *)&thrd_arg[i]);
                 if (r != 0) 
                     MSG("ERROR: dispatch data in semth server error\n");
@@ -2012,7 +1995,7 @@ void thread_dispatch_rxpkt(void) {
          * If that thread has already terminated, then pthread_join() returns immediately. no need attention the error return by join .
          * */
         for (i = 0; i < MAX_SERVERS; i++) {
-            if (servers[i].enabled == true && servers[i].upstream == true) 
+            if (servers[i].live == true && servers[i].upstream == true) 
                 pthread_join(thrid_dis[i], NULL);
         }
 
@@ -2036,7 +2019,7 @@ void thread_rxpkt_enqueue(void *rxpkt_Q) {
 
     entry = (Queue *) malloc(sizeof(Queue));
     if (entry == NULL) {
-	MSG("ERROR: [semtech] cannot allocate memory for upstream data\n");
+	MSG("ERROR: [rx_enqueue] cannot allocate memory for upstream data\n");
 	return;
     }
     memcpy(entry, thrd_arg->queue, sizeof(Queue));
@@ -2091,8 +2074,6 @@ void thread_jit(void) {
     MSG("INFO: JIT thread activated.\n");
 
     while (!exit_sig && !quit_sig) {
-	wait_ms(10);
-
 	/* transfer data and metadata to the concentrator, and schedule TX */
 	gettimeofday(&current_unix_time, NULL);
 	get_concentrator_time(&current_concentrator_time, current_unix_time);
@@ -2114,8 +2095,7 @@ void thread_jit(void) {
 			LOGGER("WARNING: [jit] lgw_status failed\n");
 		    } else {
 			if (tx_status == TX_EMITTING) {
-			    LOGGER
-				("ERROR: concentrator is currently emitting\n");
+			    LOGGER("ERROR: concentrator is currently emitting\n");
 			    print_tx_status(tx_status);
 			    continue;
 			} else if (tx_status == TX_SCHEDULED) {
@@ -2143,9 +2123,11 @@ void thread_jit(void) {
 		}
 	    }
 	} else if (jit_result == JIT_ERROR_EMPTY) {
+	    wait_ms(10);
 	    /* Do nothing, it can happen */
 	} else {
 	    LOGGER("ERROR: jit_peek failed with %d\n", jit_result);
+	    wait_ms(10);
 	}
     }
 

@@ -88,6 +88,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dragino-gw-fwd/dragino_gw_fwd $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/reset_lgw.sh $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/ttn-gateway-connector_test $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/lora
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/dragino-gw-fwd/*conf.json $(1)/etc/lora
 	$(INSTALL_DIR) $(1)/etc/lora/cfg

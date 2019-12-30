@@ -21,7 +21,7 @@ SRCS += $(SRCDIR)/../$(PAHO_SRC)/MQTTClient-C/src/linux/MQTTLinux.c
 
 OBJS = $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
-all: $(BINDIR)/$(TARGET_LIB)
+all: $(BINDIR)/$(TARGET_LIB) $(BINDIR)/$(NAME)_test
 
 .PHONY: build
 build: $(BINDIR)/$(TARGET_LIB)
@@ -52,7 +52,7 @@ test: $(BINDIR)/$(NAME)_test
 	LD_LIBRARY_PATH=$(BINDIR):/usr/local/lib/ ./$(BINDIR)/$(NAME)_test
 
 $(BINDIR)/$(NAME)_test: $(BINDIR)/$(TARGET_LIB)
-	$(CC) -fPIC -Wall -g -O2 -I$(SRCDIR) -I$(SRCDIR)/github.com/gogo/protobuf/protobuf -I$(SRCDIR)/github.com/TheThingsNetwork $(shell pkg-config --cflags 'libprotobuf-c >= 1.0.0') src/test.c -o $@ -L$(BINDIR) -l$(NAME)
+	$(CC) -fPIC -Wall -g -O2 -I$(SRCDIR) -I$(SRCDIR)/github.com/gogo/protobuf/protobuf -I$(SRCDIR)/github.com/TheThingsNetwork src/test.c -o $@ -L$(BINDIR) -l$(NAME) -L$(PAHO_SRC)/build/output/ -lpaho-embed-mqtt3c -I/usr/lib -lprotobuf-c
 
 .PHONY: clean
 clean:

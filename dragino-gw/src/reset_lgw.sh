@@ -11,7 +11,7 @@
 # The reset pin of SX1301 is wired with RPi GPIO7
 # If used on another platform, the GPIO number can be given as parameter.
 if [ -z "$2" ]; then 
-    IOT_SK_SX1301_RESET_PIN=7
+    IOT_SK_SX1301_RESET_PIN=23
 else
     IOT_SK_SX1301_RESET_PIN=$2
 fi

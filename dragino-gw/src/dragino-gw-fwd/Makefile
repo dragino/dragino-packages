@@ -52,6 +52,11 @@ endif
 ifeq ($(PLATFORM),imst_rpi)
   CFLAGS_C += -DRPI
 endif
+ifeq ($(PLATFORM),dragino)
+  CFLAGS_C += -DDRAGINO_LGW
+endif
+
+
 ifeq ($(PLATFORM),linklabs_blowfish_rpi)
   CFLAGS_C += -DRPI
 endif

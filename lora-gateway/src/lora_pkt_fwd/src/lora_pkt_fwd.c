@@ -1254,11 +1254,11 @@ int main(void)
     net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  lgwm  ));
 
     /* init socket for communicate */
-    if ((sock_up = init_socket(serv_addr, serv_port_up,\
+    if ((sock_up = init_socket(serv_addr, serv_port_up,
                     (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
         exit(EXIT_FAILURE);
 
-    if ((sock_down = init_socket(serv_addr, serv_port_down,\
+    if ((sock_down = init_socket(serv_addr, serv_port_down,
                     (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
         exit(EXIT_FAILURE);
 

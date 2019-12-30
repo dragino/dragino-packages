@@ -65,4 +65,5 @@ void transport_status();
 void transport_data_up(int nb_pkt, struct lgw_pkt_rx_s *rxpkt, bool send_report);
 void transport_status_up(uint32_t, uint32_t, uint32_t, uint32_t);
 void transport_send_downtraf(char *json, int len);
+int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len); 
 #endif				// _TRANSPORT_H

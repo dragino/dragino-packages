@@ -115,6 +115,7 @@ void ttn_init(int idx) {
     if (debugLog == NULL) {
 	debugLog = fopen("/tmp/ttn-debug.txt", "a");
     }
+    MSG("DEBUG: [ttn_init] start init ttn\n");
     // Create upstream thread and connect
     if (servers[idx].critical) {
 	servers[idx].connecting = true;
@@ -123,6 +124,7 @@ void ttn_init(int idx) {
 	servers[idx].live = false;
     }
 
+    MSG("DEBUG: [ttn_init] wanto start ttn_upstream\n");
     int i = pthread_create(&servers[idx].t_up, NULL,
 			   (void *(*)(void *))ttn_upstream, (void *)(long)idx);
 
@@ -132,8 +134,7 @@ void ttn_init(int idx) {
     }
 }
 
-void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused))
-		  void *arg) {
+void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused)) void *arg) {
     struct lgw_pkt_tx_s txpkt;
     bool sent_immediate = false;	/* option to sent the packet immediately */
     enum jit_pkt_type_e downlink_type;
@@ -152,19 +153,16 @@ void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused))
 	MSG("INFO: [TTN] downlink %d bytes\n", (int)msg->payload.len);
 	switch (msg->protocol_configuration->protocol_case) {
 	case PROTOCOL__TX_CONFIGURATION__PROTOCOL_LORAWAN:{
-		Lorawan__TxConfiguration *lora =
-		    msg->protocol_configuration->lorawan;
+		Lorawan__TxConfiguration *lora = msg->protocol_configuration->lorawan;
 		Gateway__TxConfiguration *gtw = msg->gateway_configuration;
 
 		// clear transmit packet
 		memset(&txpkt, 0, sizeof txpkt);
 		buff_index = 0;
 		system_time = time(NULL);
-		strftime(iso_timestamp, sizeof iso_timestamp, "%FT%TZ",
-			 gmtime(&system_time));
+		strftime(iso_timestamp, sizeof iso_timestamp, "%FT%TZ", gmtime(&system_time));
 		j = snprintf((char *)(json + buff_index), 300 - buff_index,
-			     "{\"type\":\"downlink\",\"gw\":\"%016llX\",\"time\":\"%s\",",
-			     (long long unsigned int)lgwm, iso_timestamp);
+			     "{\"type\":\"downlink\",\"gw\":\"%016llX\",\"time\":\"%s\",", (long long unsigned int)lgwm, iso_timestamp);
 		if (j > 0) {
 		    buff_index += j;
 		}
@@ -252,8 +250,7 @@ void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused))
 		    txpkt.invert_pol = gtw->polarization_inversion;
 		    txpkt.preamble = (uint16_t) STD_LORA_PREAMB;
 		    j = snprintf((json + buff_index), 300 - buff_index,
-				 ",\"modulation\":\"LORA\",\"data_rate\":\"%s\",\"coding_rate\":\"%s\"",
-				 lora->data_rate, lora->coding_rate);
+				 ",\"modulation\":\"LORA\",\"data_rate\":\"%s\",\"coding_rate\":\"%s\"", lora->data_rate, lora->coding_rate);
 		    if (j > 0) {
 			buff_index += j;
 		    }
@@ -276,12 +273,8 @@ void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused))
 		}
 
 		txpkt.size = msg->payload.len;
-		memcpy(txpkt.payload, msg->payload.data,
-		       txpkt.size <
-		       sizeof txpkt.payload ? txpkt.
-		       size : sizeof txpkt.payload);
-		j = snprintf((json + buff_index), 300 - buff_index,
-			     ",\"length\":%d", txpkt.size);
+		memcpy(txpkt.payload, msg->payload.data, txpkt.size < sizeof txpkt.payload ? txpkt.  size : sizeof txpkt.payload);
+		j = snprintf((json + buff_index), 300 - buff_index, ",\"length\":%d", txpkt.size);
 		if (j > 0) {
 		    buff_index += j;
 		}
@@ -310,8 +303,7 @@ void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused))
 			}
 		    }
 		    if (pwr_level != txpkt.rf_power) {
-			MSG("INFO: RF Power adjusted to %d from %d\n",
-			    pwr_level, txpkt.rf_power);
+			MSG("INFO: RF Power adjusted to %d from %d\n", pwr_level, txpkt.rf_power);
 			txpkt.rf_power = pwr_level;
 		    }
 		}
@@ -319,10 +311,8 @@ void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused))
 		/* insert packet to be sent into JIT queue */
 		if (jit_result == JIT_ERROR_OK) {
 		    gettimeofday(&current_unix_time, NULL);
-		    get_concentrator_time(&current_concentrator_time,
-					  current_unix_time);
-		    jit_result =
-			jit_enqueue(&jit_queue, &current_concentrator_time,
+		    get_concentrator_time(&current_concentrator_time, current_unix_time);
+		    jit_result = jit_enqueue(&jit_queue, &current_concentrator_time,
 				    &txpkt, downlink_type);
 		    if (jit_result != JIT_ERROR_OK) {
 			switch (jit_result) {
@@ -386,7 +376,6 @@ void ttn_connect(int idx) {
 	} else {
 	    if (debug_mask & DEBUG_PKT_FWD) {
 		int t = 0;
-
 		while (t < waittime) {
 		    MSG_DEBUG(DEBUG_PKT_FWD, "ttn_connect: sleeping() at %d, total %d\n", t, waittime);
 		    sleep(10);
@@ -409,14 +398,16 @@ void ttn_connect(int idx) {
 				 servers[idx].gw_port, servers[idx].gw_key);
 
 	if (err != 0) {
-	    MSG("ERROR: [TTN] Connection to server \"%s\" failed, retry in %d seconds\n", servers[idx].addr, waittime);
+	    MSG("ERROR: [TTN] Connection to server \"%s:%d\" failed, retry in %d seconds\n", servers[idx].addr, servers[idx].gw_port, waittime);
 	    ttngwc_disconnect(servers[idx].ttn);
 	    ttngwc_cleanup(servers[idx].ttn);
 	    continue;
 	}
 	break;
     }
+        MSG("INFO: ended ttngwc_init_4..\n");
     if (!exit_sig && !quit_sig) {
+        MSG("INFO: ended ttngwc_init_5..\n");
 	if (ttngwc_checkconnected(servers[idx].ttn) < 1) {
 	    MSG("ERROR: Not connected when connection should be live\n");
 	    exit(1);
@@ -427,6 +418,7 @@ void ttn_connect(int idx) {
 	// initiate ping request to get RTT
 	ttngwc_sendping(servers[idx].ttn);
     }
+        MSG("INFO: ended ttngwc_init_6..\n");
 }
 
 void ttn_stop(int idx) {
@@ -473,6 +465,7 @@ void ttn_upstream(void *pic) {
     Queue *entry;
     struct timespec wait_for;
 
+    MSG("INFO: [TTN] Start TTN upstream pthread....\n");
     while (!exit_sig && !quit_sig && !reload_sig) {
 	// wait for data to arrive
 	wait_for.tv_nsec = 0;
@@ -494,12 +487,11 @@ void ttn_upstream(void *pic) {
 	    continue;
 	}
 	// dequeue data
-	pthread_mutex_lock(&servers[idx].mx_queue);
 	entry = servers[idx].queue;
 	if (entry == NULL) {
-	    pthread_mutex_unlock(&servers[idx].mx_queue);
 	    continue;
 	}
+	pthread_mutex_lock(&servers[idx].mx_queue);
 	servers[idx].queue = entry->next;
 	pthread_mutex_unlock(&servers[idx].mx_queue);
 
@@ -647,11 +639,8 @@ void ttn_upstream(void *pic) {
 	    gateway.rssi = p->rssi;
 	    gateway.has_time = 1;
 	    if (ref_ok == true) {
-		if (lgw_cnt2utc(local_ref, p->count_us, &pkt_utc_time) ==
-		    LGW_GPS_SUCCESS) {
-		    gateway.time =
-			((uint64_t) pkt_utc_time.tv_sec) * 1000000000 +
-			pkt_utc_time.tv_nsec;
+		if (lgw_cnt2utc(local_ref, p->count_us, &pkt_utc_time) == LGW_GPS_SUCCESS) {
+		    gateway.time = ((uint64_t) pkt_utc_time.tv_sec) * 1000000000 + pkt_utc_time.tv_nsec;
 		} else {
 		    system_time = time(NULL);
 		    gateway.time = ((uint64_t) system_time) * 1000000000;
@@ -665,13 +654,11 @@ void ttn_upstream(void *pic) {
 	    // send message uplink
 	    err = ttngwc_send_uplink(servers[idx].ttn, &up);
 	    if (err) {
-		MSG("ERROR: [up] TTN lora send to server \"%s\" failed\n",
-		    servers[idx].addr);
+		MSG("ERROR: [up] TTN lora send to server \"%s\" failed\n", servers[idx].addr);
 		ttn_reconnect(idx);
 		break;
 	    } else {
-		MSG("INFO: [up] TTN lora packet sent to server \"%s\"\n",
-		    servers[idx].addr);
+		MSG("INFO: [up] TTN lora packet sent to server \"%s\"\n", servers[idx].addr);
 	    }
 	}
 
@@ -680,8 +667,7 @@ void ttn_upstream(void *pic) {
     }
 }
 
-void ttn_status_up(int idx, uint32_t rx_in, uint32_t rx_ok, uint32_t tx_in,
-		   uint32_t tx_ok) {
+void ttn_status_up(int idx, uint32_t rx_in, uint32_t rx_ok, uint32_t tx_in, uint32_t tx_ok) {
     static int temp_available = 0;
     int err;
     double load[3];
@@ -711,17 +697,12 @@ void ttn_status_up(int idx, uint32_t rx_in, uint32_t rx_ok, uint32_t tx_in,
     status.has_timestamp = 1;
     gettimeofday(&current_unix_time, NULL);
     get_concentrator_time(&current_concentrator_time, current_unix_time);
-    status.timestamp =
-	current_concentrator_time.tv_sec * 1000000UL +
-	current_concentrator_time.tv_usec;
+    status.timestamp = current_concentrator_time.tv_sec * 1000000UL + current_concentrator_time.tv_usec;
     status.has_time = 1;
     pthread_mutex_lock(&mx_timeref);
     if (gps_ref_valid == true) {
-	if (lgw_cnt2utc(time_reference_gps, 0, &pkt_utc_time) ==
-	    LGW_GPS_SUCCESS) {
-	    status.time =
-		((uint64_t) pkt_utc_time.tv_sec) * 1000000000 +
-		pkt_utc_time.tv_nsec;
+	if (lgw_cnt2utc(time_reference_gps, 0, &pkt_utc_time) == LGW_GPS_SUCCESS) {
+	    status.time = ((uint64_t) pkt_utc_time.tv_sec) * 1000000000 + pkt_utc_time.tv_nsec;
 	} else {
 	    status.time = ((uint64_t) time(NULL)) * 1000000000;
 	}
@@ -757,8 +738,7 @@ void ttn_status_up(int idx, uint32_t rx_in, uint32_t rx_ok, uint32_t tx_in,
     // Get gateway temperature if available
     if (temp_available >= 0) {
 	if (temp_available > 0
-	    || access("/sys/class/hwmon/hwmon0/device/temp1_input",
-		      R_OK) == 0) {
+	    || access("/sys/class/hwmon/hwmon0/device/temp1_input", R_OK) == 0) {
 	    char buffer[20];
 	    int fd = open("/sys/class/hwmon/hwmon0/device/temp1_input", 0);
 
@@ -806,21 +786,17 @@ void ttn_status_up(int idx, uint32_t rx_in, uint32_t rx_ok, uint32_t tx_in,
 	osmetrics.has_load_15 = 1;
 	osmetrics.load_15 = load[2];
 	osmetrics.has_memory_percentage = 1;
-	osmetrics.memory_percentage =
-	    ((float)sys.totalram - sys.freeram) * 100.0 / (sys.totalram);
+	osmetrics.memory_percentage = ((float)sys.totalram - sys.freeram) * 100.0 / (sys.totalram);
 	status.os = &osmetrics;
     }
 
     if (gps_fake_enable || (gps_enabled == true && gps_ref_valid == true)) {
 	location.has_latitude = 1;
-	location.latitude =
-	    gps_fake_enable ? reference_coord.lat : meas_gps_coord.lat;
+	location.latitude = gps_fake_enable ? reference_coord.lat : meas_gps_coord.lat;
 	location.has_longitude = 1;
-	location.longitude =
-	    gps_fake_enable ? reference_coord.lon : meas_gps_coord.lon;
+	location.longitude = gps_fake_enable ? reference_coord.lon : meas_gps_coord.lon;
 	location.has_altitude = 1;
-	location.altitude =
-	    gps_fake_enable ? reference_coord.alt : meas_gps_coord.alt;
+	location.altitude = gps_fake_enable ? reference_coord.alt : meas_gps_coord.alt;
 
 	status.gps = &location;
     }
@@ -838,8 +814,7 @@ void ttn_status_up(int idx, uint32_t rx_in, uint32_t rx_ok, uint32_t tx_in,
 
 void ttn_status(int idx) {
     printf("# %s: %s\n", servers[idx].addr,
-	   servers[idx].
-	   connecting ? "Connecting" : !servers[idx].live ? "Unknown status" :
+	   servers[idx].connecting ? "Connecting" : !servers[idx].live ? "Unknown status" :
 	   ttngwc_checkconnected(servers[idx].ttn) ? "Connected" :
 	   "Broken connection");
 }

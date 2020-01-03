@@ -264,8 +264,11 @@ static uint8_t debug_level_uint = 1;
 /* -------------------------------------------------------------------------- */
 
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
+static int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len);
 
 static void sig_handler(int sigio);
+
+static void sigusr_handler(int sigio);
 
 static char uci_config_file[32] = "/etc/config/gateway";
 
@@ -303,6 +306,20 @@ static void sig_handler(int sigio) {
         exit_sig = true;
     }
     return;
+}
+
+static void sigusr_handler(int sigio) {
+    if (sigio == SIGUSR1) {
+        printf("INFO~ catch the SIGUSR1, starting reconnet the server ...\n");
+        if (sock_up) close(sock_up);
+        if (sock_down) close(sock_down);
+        if ((sock_up = init_socket(serv_addr, serv_port_up,
+                       (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
+            printf("ERROR~ (up)reconnet the server error, try again!\n");
+        if ((sock_down = init_socket(serv_addr, serv_port_down,
+                         (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
+            printf("ERROR~ (down)reconnet the server error, try again!\n");
+    }
 }
 
 static bool get_config(const char *section, char *option, int len) {
@@ -1115,6 +1132,7 @@ static void output_status(int conn) {
 int main(void)
 {
     struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
+    struct sigaction sigusr; /* SIGUSR1 signal handling */
     int i, j; /* loop variable and temporary variable for return value */
     int x;
 
@@ -1414,6 +1432,12 @@ int main(void)
     sigaction(SIGQUIT, &sigact, NULL); /* Ctrl-\ */
     sigaction(SIGINT, &sigact, NULL); /* Ctrl-C */
     sigaction(SIGTERM, &sigact, NULL); /* default "kill" command */
+
+    /* signal for reconnect */
+    sigemptyset(&sigusr.sa_mask);
+    sigusr.sa_flags = 0;
+    sigusr.sa_handler = sigusr_handler;
+    sigaction(SIGUSR1, &sigusr, NULL); /* custom signal */
 
     /* main loop task : statistics collection */
     

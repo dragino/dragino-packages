@@ -191,6 +191,7 @@ static struct jit_queue_s jit_queue;
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
+static int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len);
 
 static void sig_handler(int sigio);
 
@@ -221,7 +222,18 @@ static void sig_handler(int sigio) {
 	    quit_sig = true;;
     } else if ((sigio == SIGINT) || (sigio == SIGTERM)) {
 	    exit_sig = true;
+    } else if (sigio == SIGUSR1) {
+        printf("INFO~ catch the SIGUSR1, starting reconnet the server ...\n");
+        if (sock_up) close(sock_up);
+        if (sock_down) close(sock_down);
+        if ((sock_up = init_socket(server, serv_port_up,
+                       (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
+            printf("ERROR~ (up)reconnet the server error, try again!\n");
+        if ((sock_down = init_socket(server, serv_port_down,
+                         (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
+            printf("ERROR~ (down)reconnet the server error, try again!\n");
     }
+
     return;
 }
 
@@ -647,6 +659,7 @@ int main(int argc, char *argv[])
     sigaction(SIGQUIT, &sigact, NULL); /* Ctrl-\ */
     sigaction(SIGINT, &sigact, NULL); /* Ctrl-C */
     sigaction(SIGTERM, &sigact, NULL); /* default "kill" command */
+    sigaction(SIGUSR1, &sigact, NULL); /* custom signal */
 
     /* process some of the configuration variables */
     net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (lgwm>>32)));

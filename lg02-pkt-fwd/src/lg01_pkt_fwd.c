@@ -454,6 +454,8 @@ int main(int argc, char *argv[])
 
     struct timespec start_time; /* time of start radio receive */
     struct timespec end_time;  /* timeout of radio receive */
+	struct timespec fetch_time1;  /* used to add timestamp for MQTT */
+    struct tm * x1;        /* used to add timestamp for MQTT */
 
     unsigned long long ull = 0;
 
@@ -774,6 +776,10 @@ int main(int argc, char *argv[])
                                 
                                 fp = fopen(chan_path, "w+");
                                 if ( NULL != fp ) {
+									clock_gettime(CLOCK_REALTIME, &fetch_time1);
+									x1 = gmtime(&(fetch_time1.tv_sec)); /* split the UNIX timestamp to its calendar components */
+									fprintf(fp,"%04i-%02i-%02iT%02i:%02i:%02i,", (x1->tm_year)+1900, (x1->tm_mon)+1, x1->tm_mday, x1->tm_hour, x1->tm_min, x1->tm_sec); /* ISO 8601 format */
+									fprintf(fp, "%.0f,",pktrx[prev].rssi);
                                     fprintf(fp, "%s\n", chan_data);
                                     fflush(fp);
                                     fclose(fp);

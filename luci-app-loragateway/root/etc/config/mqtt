@@ -84,5 +84,15 @@ config servers 'AWS'
 	option sub_qos '0'
 	option sub_topic 'CLIENTID/#'
 
-
+config servers 'Alibaba'
+	option url ' '
+	option port '1883'
+	option user ' '
+	option pwd ' '
+	option data 'DATA'
+	option cid ' '
+	option pub_qos '1'
+	option pub_topic ' '
+	option sub_qos '0'
+	option sub_topic ' '
 

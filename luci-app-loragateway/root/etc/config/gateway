@@ -28,7 +28,7 @@ config settings 'general'
 	option dwport '1700'
 	option provider 'custom'
 	option DEB '1'
-	option server_type 'disabled'
+	option server_type 'lorawan'
 
 config settings 'radio1'
 	option RFFREQ '915000000'

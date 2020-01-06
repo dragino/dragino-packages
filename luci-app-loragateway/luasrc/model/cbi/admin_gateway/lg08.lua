@@ -118,7 +118,7 @@ o:value("IN", "India 865~867MHz -- IN865")
 o:value("KR", "Korea 920~923MHz -- KR920")
 o:value("AS1", "Asia 920~923MHz -- AS923-1")
 o:value("AS2", "Asia 923~925MHz -- AS923-2")
---o:value("RU", "Russia 864~870MHz")
+o:value("RU", "Russia 864~870MHz -- RU864")
 o:value("CUS", "Customized Bands")
 
 o = s:taboption("general", ListValue, "subband", translate("Frequency Sub Band"))

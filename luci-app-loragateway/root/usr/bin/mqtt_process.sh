@@ -108,7 +108,6 @@ sf=`uci -q get gateway.$RADIO.$SF`
 bw=`uci -q get gateway.$RADIO.$BW`
 cr=`uci -q get gateway.$RADIO.$CR`
 
-# Check for valid LoRa radio params
 if [ -z "$freq" ] || [ -z "$sf" ] || [ -z "$bw" ] || [ -z "$cr" ] ; then 
 	sub_enable=0
 	logger "[IoT.MQTT]:Invalid LoRa radio params - mosquitto_sub not called."
@@ -150,10 +149,52 @@ if [ "$sub_enable" != "0" ];then
 	if [ $DEBUG -ge 10 ]; then
 		# Set debug flag
 		D="-d"
+  fi
+
+  # Start the subscription process
+	# 1. Case with User, Password and Client ID present
+	if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then  
+		case="1"  
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic -u $user -P "$pass" $C $cafile $LORA &
+
+	# 2. Case with Certificate, Key and ClientID present
+	elif [ ! -z "$certfile" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then 
+		case="2"  
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic --cert $cert --key $key $C $cafile $LORA &
+
+	# 3. Case with no User, Certificate or ClientID present
+	elif [ -z "$user" ] && [ -z "$certfile" ] && [ -z "$clientID" ]; then 
+		case="3"  
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -t $sub_topic $LORA &
+
+	# 4. Case with no User, no Certificate, but with ClientID present
+	elif [ -z "$user" ] && [ -z "$certfile" ] && [ ! -z "$clientID" ]; then
+		case="4"  
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic $LORA &
+
+	# 5. Case with User and ClientID present, but no Password and no Certificate present
+	elif [ -z "$pass" ] && [ -z "$certfile" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then  
+		case="5"  
+		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic -u $user $LORA &
+
+	# 6. Case with User and Password present, but no ClientID and no Certificate present
+	elif [ ! -z "$user" ] && [ ! -z "$pass" ] && [ -z "$clientID" ] && [ -z "$certfile" ]; then
+		case="6"  
+		mosquitto_sub $D -h $server -p $port -q $sub_qos  -t $sub_topic -u $user -P "$pass"
+
+	# 0. Else - invalid parameters, just log
+	else
+		case="Invalid parameters"  
+		logger "[IoT.MQTT]:Invalid Parameters - mosquitto_sub not called."
+	fi
+
+	if [ $DEBUG -ge 10 ]; then
+		# Echo parameters to console
 		echo " "
 		echo "Board Type: "$board_type
+		echo "MQTT Subscribe Case: "$case
 		echo "-----"
-		echo "Subscribe Parameters"
+		echo "MQTT Subscribe Parameters"
 		echo "server: "$server
 		echo "port: "$port
 		echo "user: "$user
@@ -167,32 +208,6 @@ if [ "$sub_enable" != "0" ];then
 		echo "sub_enable: "$sub_enable
 		echo "LORA: "$LORA
 		echo "------"
-	fi
-
-  # Start the subscription process
-	# 1. Case with User, Password and Client ID present
-	if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then  
-		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic -u $user -P "$pass" $C $cafile $LORA &
-
-	# 2. Case with Certificate, Key and ClientID present
-	elif [ ! -z "$cert" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then 
-		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic --cert $cert --key $key $C $cafile $LORA &
-
-	# 3. Case with no User, Certificate or ClientID present
-	elif [ -z "$user" ] && [ -z "$cert" ] && [ -z "$clientID" ]; then 
-		mosquitto_sub $D -h $server -p $port -q $sub_qos -t $sub_topic $LORA &
-
-	# 3A. Case with no User, no Certificate, but with ClientID present
-	elif [ -z "$user" ] && [ -z "$cert" ] && [ ! -z "$clientID" ]; then
-		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic $LORA &
-
-	# 4. Case with User and ClientID present, but no Password and no Certificate present
-	elif [ -z "$pass" ] && [ -z "$cert" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then  
-		mosquitto_sub $D -h $server -p $port -q $sub_qos -i $clientID -t $sub_topic -u $user $LORA &
-
-	# 5. Else - invalid parameters, just log
-	else
-		logger "[IoT.MQTT]:Invalid Parameters - mosquitto_sub not called."
 	fi
 
 fi
@@ -212,17 +227,19 @@ if [ "$pub_enable" == "0" ]; then
 fi
 
 if [ $DEBUG -ge 10 ]; then
+	# Echo parameters to console
 	echo " "
 	echo "-----"
 	echo "Starting Publish process - waiting for input"
 	echo " "
 	echo "-----"
-	echo "Publish Parameters"
+	echo "MQTT Publish Parameters"
 	echo "server: "$server
 	echo "port: "$port
 	echo "user: "$user
 	echo "pass: "$pass
 	echo "pub_qos: "$pub_qos
+	echo "certfile: "$certfile
 	echo "cert: "$cert
 	echo "key: "$key
 	echo "cafile: "$cafile
@@ -250,8 +267,15 @@ do
 					remote_id=`uci -q get mqtt.$HAS_CID.remote_id`
 					local_id=`uci -q get mqtt.$HAS_CID.local_id`
 					channel_API=`uci -q get mqtt.$HAS_CID.write_api_key`
-					data=`cat /var/iot/channels/$channel`
 
+					meta=`cat /var/iot/channels/$channel` 
+					time=`echo $meta | cut -d , -f 1` 
+					rssi=`echo $meta | cut -d , -f 2` 
+					data=`echo $meta | cut  -d , -f 3-100` 
+ 
+					str=`echo $data | sed 's/{//'` 
+					json="{\"timestamp\":\"$time\",\"rssi\":\"$rssi\",$str" 
+					
 					# Generate Topic and Data strings
 					# Initialise strings
 					mqtt_data=$data_format
@@ -267,16 +291,55 @@ do
 					mqtt_data=`echo ${mqtt_data/HOSTNAME/$hostname}`  
 					mqtt_data=`echo ${mqtt_data/CHANNEL/$remote_id}`
 					mqtt_data=`echo ${mqtt_data/DATA/$data}`  
+					mqtt_data=`echo ${mqtt_data/META/$meta}`  
+					mqtt_data=`echo ${mqtt_data/JSON/$json}`  
 
 					# Initialise debug flag
 					D=" "
+					if [ $DEBUG -ge 10 ]; then
+						# Set test level debug flag
+						D="-d"
+					fi
+
+					# ------------------------------------------
+					# Call MQTT Publish command
+					# 1. Case with User, Password and Client ID present
+					if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
+						case="1"  
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" -u $user -P "$pass" $C $cafile
+					# 2. Case with Certificate, Key and ClientID present
+					elif [ ! -z "$certfile" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then
+						case="2"  
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" --cert $cert --key $key $C $cafile
+					# 3. Case with no User, Certificate or ClientID present
+					elif [ -z "$user" ] && [ -z "$certfile" ] && [ -z "$clientID" ]; then
+						case="3"  
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -t $pub_topic -m "$mqtt_data" 
+					# 4. Case with no User, Certificate, but with ClientID present
+					elif [ -z "$user" ] && [ -z "$certfile" ] && [ ! -z "$clientID" ]; then
+						case="4"  
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data"
+					# 5. Case with User and ClientID present, but no Password and no Certificate present
+					elif [ -z "$pass" ] && [ -z "$certfile" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
+						case="5"  
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" -u $user
+					# 6. Case with User and Password present, but no ClientID and no Certificate present
+					elif [ ! -z "$user" ] && [ ! -z "$pass" ] && [ -z "$clientID" ] && [ -z "$certfile" ]; then
+						case="6"  
+						mosquitto_pub $D -h $server -p $port -q $pub_qos  -t $pub_topic -m "$mqtt_data" -u $user -P "$pass"
+					# 0. Else - invalid parameters, just log
+					else
+						case="Invalid parameters"  
+						logger "[IoT.MQTT]:Invalid Parameters - mosquitto_pub not called."
+					fi
 
 					# -----------------------------------------
-					# Debug output 
+					# Debug output to log
 					if [ $DEBUG -ge 1 ]; then
 						logger "[IoT.MQTT]:  "
 						logger "[IoT.MQTT]:-----"
-						logger "[IoT.MQTT]:Parameters"
+						logger "[IoT.MQTT]:MQTT Publish Case: "$case
+						logger "[IoT.MQTT]:MQTT Publish Parameters"
 						logger "[IoT.MQTT]:server[-h]: "$server
 						logger "[IoT.MQTT]:port[-p]: "$port
 						logger "[IoT.MQTT]:user[-u]: "$user
@@ -296,17 +359,17 @@ do
 					# Debug console output for manual testing
 
 					if [ $DEBUG -ge 10 ]; then
-						# Set debug flag
-						D="-d"
 						# Echo parameters to console
 						echo " "
 						echo "-----"
-						echo "Parameters"
+						echo "MQTT Publish Case: "$case
+						echo "MQTT Publish Parameters"
 						echo "server: "$server
 						echo "port: "$port
 						echo "user: "$user
 						echo "pass: "$pass
 						echo "pub_qos: "$pub_qos
+						echo "certfile: "$certfile
 						echo "cert: "$cert
 						echo "key: "$key
 						echo "cafile: "$cafile
@@ -315,33 +378,6 @@ do
 						echo "pub_topic: "$pub_topic
 						echo "mqtt_data: "$mqtt_data
 						echo "------"
-					fi
-					# ------------------------------------------
-
-					# Call MQTT Publish command
-					# 1. Case with User, Password and Client ID present
-					if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" -u $user -P "$pass" $C $cafile
-
-					# 2. Case with Certificate, Key and ClientID present
-					elif [ ! -z "$cert" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" --cert $cert --key $key $C $cafile
-
-					# 3. Case with no User, Certificate or ClientID present
-					elif [ -z "$user" ] && [ -z "$cert" ] && [ -z "$clientID" ]; then
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -t $pub_topic -m "$mqtt_data" 
-
-					# 3A. Case with no User, Certificate, but with ClientID present
-					elif [ -z "$user" ] && [ -z "$cert" ] && [ ! -z "$clientID" ]; then
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data"
-
-					# 4. Case with User and ClientID present, but no Password and no Certificate present
-					elif [ -z "$pass" ] && [ -z "$cert" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" -u $user
-
-					# 5. Else - invalid parameters, just log
-					else
-						logger "[IoT.MQTT]:Invalid Parameters - mosquitto_pub not called."
 					fi
 
 					# ------------------------------------------

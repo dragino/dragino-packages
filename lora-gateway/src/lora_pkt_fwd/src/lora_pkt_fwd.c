@@ -2169,14 +2169,18 @@ void thread_up(void) {
         ++buff_index;
         buff_up[buff_index] = 0; /* add string terminator, for safety */
 
-        MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
         
         /* send datagram to server */
         macmsg.Buffer = p->payload;
         macmsg.BufSize = p->size;
         if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) ) 
-            if ((filter_by_fport(&macmsg, (uint8_t)fport_num)) == -1)
+            if ((filter_by_fport(&macmsg, (uint8_t)fport_num)) == -1) {
+                MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s  -- Drop due to Fport doesn't match\n", 
+                        (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
                 continue;  /* filter by fport, drop the pacakage */
+            }
+
+        MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
 
         pthread_mutex_lock(&mx_sockup); /*maybe reconnect, so lock */ 
         send(sock_up, (void *)buff_up, buff_index, 0);

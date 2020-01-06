@@ -261,6 +261,11 @@ static FILE *fp = NULL;
 static char debug_level_char[16] = "debug_level";
 static uint8_t debug_level_uint = 1;
 
+/* fport option for filter upmsg */
+static char fportnum[16] = "fportnum";
+static int fport_num = 0;
+
+
 /* -------------------------------------------------------------------------- */
 
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
@@ -1279,6 +1284,18 @@ int main(void)
     if ((sock_down = init_socket(serv_addr, serv_port_down,
                     (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
         exit(EXIT_FAILURE);
+    
+    /* Fport filter configure */
+
+    if (!get_config("general", fportnum, sizeof(fportnum)))
+        fport_num = 0;
+    else
+        fport_num = atoi(fportnum);
+
+    if (fport_num > 244 || fport_num < 0)  /* 0 - 244 */
+        fport_num = 0;
+
+    /* LOG or debug message configure */
 
     if (!get_config("general", debug_level_char, sizeof(debug_level_char)))
         debug_level_uint = 2;
@@ -2155,15 +2172,15 @@ void thread_up(void) {
         MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
         
         /* send datagram to server */
+        macmsg.Buffer = p->payload;
+        macmsg.BufSize = p->size;
+        if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) ) 
+            if ((filter_by_fport(&macmsg, (uint8_t)fport_num)) == -1)
+                continue;  /* filter by fport, drop the pacakage */
 
         pthread_mutex_lock(&mx_sockup); /*maybe reconnect, so lock */ 
         send(sock_up, (void *)buff_up, buff_index, 0);
         pthread_mutex_unlock(&mx_sockup);
-
-        macmsg.Buffer = p->payload;
-        macmsg.BufSize = p->size;
-        if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) ) 
-            printf_mac_header(&macmsg);
 
         pthread_mutex_lock(&mx_meas_up);
         meas_up_dgram_sent += 1;

@@ -286,5 +286,7 @@ LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg );
 
 void printf_mac_header( LoRaMacMessageData_t* macMsg ); 
 
+int filter_by_fport(LoRaMacMessageData_t* macMsg, uint8_t fport);
+
 
 #endif // __LORAMAC_HEADER_DECODE_H_

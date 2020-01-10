@@ -136,6 +136,11 @@ o:depends("gwcfg", "US")
 o:depends("gwcfg", "AU")
 o.default = "2"
 
+o = s:taboption("general", Value, "fportnum", translate("Fport Filter"), translate("0~243, 0 means no filter"))
+o.optional = true
+o.placeholder = "fport"
+o.datatype    = "range(0,243)"
+o.default = "0"
 
 --[[
 o = s:taboption("general", Flag, "sx1276", translate("use sx1276 for tx"))

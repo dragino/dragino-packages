@@ -49,7 +49,6 @@ start() {
 
     board=`cat /var/iot/board`
 
-    uci set system.vendor.web_model="$board"
     uci set gateway.general.model="$board"
 
     uci commit system

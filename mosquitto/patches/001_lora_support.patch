@@ -1,0 +1,144 @@
+Index: mosquitto-1.6.4/client/client_shared.c
+===================================================================
+--- mosquitto-1.6.4.orig/client/client_shared.c
++++ mosquitto-1.6.4/client/client_shared.c
+@@ -191,6 +191,12 @@ void client_config_cleanup(struct mosq_c
+ 		}
+ 		free(cfg->unsub_topics);
+ 	}
++#ifdef LORA_PUSH
++        if (cfg->datr)
++            free(cfg->datr);
++        if (cfg->codr)
++            free(cfg->codr);
++#endif
+ #ifdef WITH_SOCKS
+ 	free(cfg->socks5_host);
+ 	free(cfg->socks5_username);
+@@ -756,6 +762,40 @@ int client_config_line_proc(struct mosq_
+ 				cfg->password = strdup(argv[i+1]);
+ 			}
+ 			i++;
++#ifdef LORA_PUSH
++		}else if(!strcmp(argv[i], "-z")){
++			if(pub_or_sub != CLIENT_SUB){
++				goto unknown_option;
++			}
++			cfg->lora_push = true;
++                }else if(!strcmp(argv[i], "--freq")){
++			if(i==argc-1){
++				fprintf(stderr, "Error: --freq argument given but no frequency specified.\n\n");
++				return 1;
++			}else{
++                            cfg->freq = atof(argv[i+1]);
++                        }
++                        i++;
++                }else if(!strcmp(argv[i], "--datr")){
++			if(i==argc-1){
++				fprintf(stderr, "Error: --datr argument given but no datrate specified.\n\n");
++				return 1;
++			}else{
++                            cfg->datr = strdup(argv[i+1]);
++                        }
++                        i++;
++                }else if(!strcmp(argv[i], "--codr")){
++			if(i==argc-1){
++				fprintf(stderr, "Error: --codr argument given but no codrate specified.\n\n");
++				return 1;
++			}else{
++                            cfg->codr = strdup(argv[i+1]);
++                        }
++                        i++;
++                }else if(!strcmp(argv[i], "--ipol")){
++                            cfg->ipol = true;
++#endif
++
+ #ifdef WITH_SOCKS
+ 		}else if(!strcmp(argv[i], "--proxy")){
+ 			if(i==argc-1){
+Index: mosquitto-1.6.4/client/client_shared.h
+===================================================================
+--- mosquitto-1.6.4.orig/client/client_shared.h
++++ mosquitto-1.6.4/client/client_shared.h
+@@ -102,6 +102,13 @@ struct mosq_config {
+ 	char *format; /* sub */
+ 	int timeout; /* sub */
+ 	int sub_opts; /* sub */
++#ifdef LORA_PUSH
++        bool lora_push;
++        double freq;
++        char *datr;
++        char *codr;
++        bool ipol;
++#endif
+ #ifdef WITH_SOCKS
+ 	char *socks5_host;
+ 	int socks5_port;
+Index: mosquitto-1.6.4/client/sub_client_output.c
+===================================================================
+--- mosquitto-1.6.4.orig/client/sub_client_output.c
++++ mosquitto-1.6.4/client/sub_client_output.c
+@@ -308,8 +308,29 @@ static void formatted_print(const struct
+ 
+ void print_message(struct mosq_config *cfg, const struct mosquitto_message *message)
+ {
++        FILE *fp;
++        char chan_path[64] = {'\0'};
++        struct timeval now;
++
+ 	if(cfg->format){
+ 		formatted_print(cfg, message);
++#ifdef LORA_PUSH
++        }else if(cfg->lora_push){
++		if(message->payloadlen){
++                        srand((unsigned)time(NULL));
++                        sprintf(chan_path, "/var/iot/push/%lu", (unsigned)rand() % 99999);
++                        fp = fopen(chan_path, "w+");
++                        if (NULL != fp) {
++                                gettimeofday(&now, NULL);
++                                uint32_t tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
++                                fprintf(fp, "{\"txpk\":{\"imme\":true,\"tmst\":%lu,\"freq\":%f,\"rfch\":0,\"powe\":20,\"modu\":\"LORA\",\"datr\":\"%s\",\"codr\":\"%s\",\"ipol\":%s,\"size\":%d,\"ncrc\":true,\"data\":\"%s\"}}\n",
++                                    tmst, cfg->freq, cfg->datr, cfg->codr, cfg->ipol ? "true" : "false", message->payloadlen, message->payload);
++                                fflush(fp);
++                                fclose(fp);
++                        } else
++			    printf("prepare PUSH data ERROR\n");
++                }
++#endif
+ 	}else if(cfg->verbose){
+ 		if(message->payloadlen){
+ 			printf("%s ", message->topic);
+Index: mosquitto-1.6.4/client/sub_client.c
+===================================================================
+--- mosquitto-1.6.4.orig/client/sub_client.c
++++ mosquitto-1.6.4/client/sub_client.c
+@@ -268,6 +268,15 @@ void print_usage(void)
+ 	printf(" --psk-identity : client identity string for TLS-PSK mode.\n");
+ #endif
+ #endif
++#ifdef LORA_PUSH
++	printf("\nSettings for transfer the subscribe message via the lora radio.\n\n");
++	printf(" -z : If set, enables dragino lora push for mqtt subscribe.\n");
++	printf(" --ipol : If set, set the inverIQ true.\n");
++	printf(" --freq <float>: set the target frequency for push in MHz.\n");
++	printf(" --datr <string>: set the datarate for push such as SF7BW125.\n");
++	printf(" --codr <string>: set the coderate for push such as 4/5.\n");
++        printf("\n");
++#endif
+ #ifdef WITH_SOCKS
+ 	printf(" --proxy : SOCKS5 proxy URL of the form:\n");
+ 	printf("           socks5h://[username[:password]@]hostname[:port]\n");
+Index: mosquitto-1.6.4/client/Makefile
+===================================================================
+--- mosquitto-1.6.4.orig/client/Makefile
++++ mosquitto-1.6.4/client/Makefile
+@@ -14,6 +14,9 @@ ALL_DEPS:= static_pub static_sub static_
+ endif
+ endif
+ 
++CLIENT_LDFLAGS:= ${CLIENT_LDFLAGS} -DLORA_PUSH
++CLIENT_CPPFLAGS:= ${CLIENT_CPPFLAGS} -DLORA_PUSH
++
+ all : ${ALL_DEPS}
+ 
+ static : static_pub static_sub static_rr

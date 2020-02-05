@@ -1121,7 +1121,7 @@ static void output_status(int conn) {
     FILE *fp;
     fp = fopen("/var/iot/status", "w+");
     if (NULL != fp) {
-        if (conn != 0) 
+        if (conn == 1) 
             fprintf(fp, "online\n"); 
         else 
             fprintf(fp, "offline\n"); 
@@ -1196,6 +1196,8 @@ int main(void)
     float rx_nocrc_ratio;
     float up_ack_ratio;
     float dw_ack_ratio;
+
+    output_status(0);  /* init the status of connection */
 
     /* display version informations */
     time(&now_time);
@@ -1477,8 +1479,6 @@ int main(void)
     buff_stat[3] = PKT_PUSH_DATA;
     *(uint32_t *)(buff_stat + 4) = net_mac_h;
     *(uint32_t *)(buff_stat + 8) = net_mac_l;
-
-    output_status(0);  /* init the status of connection */
 
     while (!exit_sig && !quit_sig) {
 

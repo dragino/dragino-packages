@@ -40,6 +40,8 @@ start() {
             insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21
             /usr/bin/spirw 12 1
             if [[ "$?" == "1" ]]; then
+	    	rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
                 echo "LG08" > /var/iot/board
             else
                 echo "LG08P" > /var/iot/board

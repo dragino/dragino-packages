@@ -116,12 +116,11 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
     }
 }
 
-int filter_by_fport(LoRaMacMessageData_t* macMsg, uint8_t fport) {
+int filter_by_mac(LoRaMacMessageData_t* macMsg, uint8_t fport, uint32_t devaddr, uint8_t len) {
     if( ( macMsg == 0 ) || ( macMsg->Buffer == 0 ) )
     {
         return -1;
     }
-    
     switch (macMsg->MHDR.Bits.MType) {
         case FRAME_TYPE_DATA_CONFIRMED_UP:
             MSG_DEBUG(DEBUG_PKT_FWD, "DATA_CONF_UP: {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
@@ -135,6 +134,8 @@ int filter_by_fport(LoRaMacMessageData_t* macMsg, uint8_t fport) {
                     macMsg->MIC);
             if (fport != 0 && (macMsg->FPort != fport))
                 return -1;
+            if (devaddr != 0 && ((macMsg->FHDR.DevAddr >> (32-len)) != devaddr ))
+                return -2;
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_UP: 
             MSG_DEBUG(DEBUG_PKT_FWD, "DATA_UNCONF_UP:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
@@ -148,6 +149,8 @@ int filter_by_fport(LoRaMacMessageData_t* macMsg, uint8_t fport) {
                     macMsg->MIC);
             if (fport != 0 && (macMsg->FPort != fport))
                 return -1;
+            if (devaddr != 0 && ((macMsg->FHDR.DevAddr >> (32-len)) != devaddr ))
+                return -2;
             break;
         case FRAME_TYPE_DATA_CONFIRMED_DOWN:
             MSG_DEBUG(DEBUG_PKT_FWD, "DATA_CONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 

@@ -36,6 +36,10 @@ init_board() {
     if [[ "$DEB" -gt 1 ]]; then
         DEB="1"
     fi
+	
+    #	ps | grep "iot_keep_alive" | grep -v grep | awk '{print $1}' | xargs kill -s 9
+    #	/usr/bin/iot_keep_alive.sh &
+	
 }
 
 start_service() {

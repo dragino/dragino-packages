@@ -271,6 +271,10 @@ static uint8_t debug_level_uint = 1;
 static char fportnum[16] = "fportnum";
 static int fport_num = 0;
 
+/* devaddr option for filter upmsg */
+static char devaddr[32] = "devaddr";
+static uint32_t dev_addr_mask = 0;
+
 
 /* Decryption loramac payload */
 static char maccrypto[16] = "maccrypto";
@@ -1310,6 +1314,22 @@ int main(void)
 
     if (fport_num > 244 || fport_num < 0)  /* 0 - 244 */
         fport_num = 0;
+	MSG_DEBUG(DEBUG_INFO, "INFO~ FPort Filter: %u\n", fport_num);
+		
+    /* DevAddr filter configure */
+	int tmp=0;
+    if (!get_config("general", devaddr, sizeof(devaddr)))
+        dev_addr_mask = 0;
+    else
+		for (i=0;i<(int)strlen(devaddr);i++)   // Convert String to uint_32 hex
+		{
+			tmp = toupper(devaddr[i]) - 0x30;
+			if ( tmp > 9 )
+				tmp -= 7;
+			dev_addr_mask = ((dev_addr_mask << ( (i==0)? 0:4)) | tmp);
+		}
+			  
+	MSG_DEBUG(DEBUG_INFO, "INFO~ DevAddrMask: 0x%X\n", dev_addr_mask);
 
     /* LOG or debug message configure */
 
@@ -2206,10 +2226,16 @@ void thread_up(void) {
         /* send datagram to server */
         macmsg.Buffer = p->payload;
         macmsg.BufSize = p->size;
-        if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) ) 
-            if ((filter_by_fport(&macmsg, (uint8_t)fport_num)) == -1) {
-                MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s  -- Drop due to Fport doesn't match\n", 
-                        (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg)) 
+            i = filter_by_mac(&macmsg, (uint8_t)fport_num,(uint32_t)dev_addr_mask, (uint8_t)strlen(devaddr)*4);
+			if ( i == -1 ){
+	            MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s  -- Drop due to Fport doesn't match %u\n", 
+                        (char *)(buff_up + 12),fport_num); /* DEBUG: display JSON payload */
+                continue;  /* filter by fport, drop the pacakage */			
+			}
+            if ( i == -2 ) {
+                MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s  -- Drop due to DevAddr doesn't match mask (0x%X)\n", 
+                       (char *)(buff_up + 12),dev_addr_mask); /* DEBUG: display JSON payload */
                 continue;  /* filter by fport, drop the pacakage */
             }
 

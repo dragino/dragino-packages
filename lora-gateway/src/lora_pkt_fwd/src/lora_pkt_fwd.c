@@ -60,6 +60,8 @@ Maintainer: Michael Coracin
 #include "loragw_aux.h"
 #include "loragw_reg.h"
 #include "mac-header-decode.h"
+#include "db.h"
+#include "loramac-crypto.h"
 
 /* ------------------------------------------------------- */
 /* --- PUBLIC VARIABLE ----------------------------------- */
@@ -133,6 +135,10 @@ uint8_t DEBUG_ERROR      = 1;
 #define DEFAULT_BEACON_BW_HZ        125000
 #define DEFAULT_BEACON_POWER        14
 #define DEFAULT_BEACON_INFODESC     0
+
+/*stream direction*/
+#define UP                          0
+#define DOWN                        1
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES (GLOBAL) ------------------------------------------- */
@@ -265,6 +271,14 @@ static uint8_t debug_level_uint = 1;
 static char fportnum[16] = "fportnum";
 static int fport_num = 0;
 
+
+/* Decryption loramac payload */
+static char maccrypto[16] = "maccrypto";
+static int maccrypto_num = 0;
+static char dbpath[32] = "dbpath";
+
+/* context of sqlite database */
+static struct context cntx = {'\0'};
 
 /* -------------------------------------------------------------------------- */
 
@@ -1334,7 +1348,7 @@ int main(void)
             DEBUG_JIT_ERROR  = 0;
             DEBUG_TIMERSYNC  = 0;
             DEBUG_BEACON     = 0;
-            DEBUG_INFO       = 0;
+            DEBUG_INFO       = 1;
             DEBUG_WARNING    = 1;
             DEBUG_ERROR      = 1;
             break;
@@ -1377,7 +1391,16 @@ int main(void)
     /* mqtt or lorawan */
     get_config("general", server_type, sizeof(server_type));
 
-    MSG_DEBUG(DEBUG_INFO, "INFO~ sx1276:%d, sxtxpw:%d, model:%s, server_type:%s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model, server_type);
+    /* sqlitedb, mac decrypto */
+    if(!get_config("general", maccrypto, sizeof(maccrypto)))
+        maccrypto_num = 0;
+    else
+        maccrypto_num = atoi(maccrypto);
+
+    if(!get_config("general", dbpath, sizeof(dbpath)))
+        strcpy(dbpath, "/root/devskey");
+
+    MSG_DEBUG(DEBUG_INFO, "INFO~ sx1276:%d, sxtxpw:%d, model:%s, server_type:%s, maccrypto: %s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model, server_type, maccrypto_num? "yes" : "no");
 
     /* only LG08P with sx1276 */
 
@@ -1399,6 +1422,14 @@ int main(void)
             free(sxradio);
     }
 
+    if (maccrypto_num != 0) {
+        if(!db_init(dbpath, &cntx)) {
+            MSG_DEBUG(DEBUG_WARNING, "Can't init sqlite database, Ignore!\n");
+            maccrypto_num = 0;
+        } else 
+            MSG_DEBUG(DEBUG_INFO, "mac payload will be decrypt!\n");
+    }
+        
     /* starting the concentrator */
     i = lgw_start();
     if (i == LGW_HAL_SUCCESS) {
@@ -1778,6 +1809,8 @@ void thread_up(void) {
     uint64_t pkt_gps_time_ms;
 
     LoRaMacMessageData_t macmsg;
+
+    uint8_t frame_payload[256] = {'\0'};  /* prepare payload for join accept */
 
     /* pre-fill the data buffer with fixed fields */
     buff_up[0] = PROTOCOL_VERSION;
@@ -2211,6 +2244,28 @@ void thread_up(void) {
                 break;
             }
         }
+
+        if (maccrypto_num) {
+            struct devinfo devinfo = { .devaddr = macmsg.FHDR.DevAddr };
+            if (db_lookup_skey(cntx.lookupskey, (void *) &devinfo)) {
+                MSG_DEBUG(DEBUG_INFO, "[Decrypto] appskey: %02X%02X\n", devinfo.appskey[1], devinfo.appskey[2]);
+                LoRaMacPayloadDecrypt(p->payload, p->size, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)macmsg.FHDR.FCnt, frame_payload);
+                FILE *fp;
+                char pushpath[128];
+                snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
+                fp = fopen(pushpath, "w+");
+                if (NULL == fp)
+                    MSG_DEBUG(DEBUG_INFO, "[Decrypto] Fail to open push path: %s\n", pushpath);
+                else { 
+                    fprintf(fp, "%s", frame_payload); 
+                    fflush(fp); 
+                    fclose(fp);
+                }
+            } else
+                MSG_DEBUG(DEBUG_WARNING, "DECRYPT~ can't find sessionkey for %08X\n",
+                        devinfo.devaddr);
+        }
+
         
         pthread_mutex_unlock(&mx_meas_up);
     }  

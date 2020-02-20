@@ -3,22 +3,6 @@
  *
  * \brief     Helper functions implementation
  *
- * \copyright Revised BSD License, see section \ref LICENSE.
- *
- * \code
- *                ______                              _
- *               / _____)             _              | |
- *              ( (____  _____ ____ _| |_ _____  ____| |__
- *               \____ \| ___ |    (_   _) ___ |/ ___)  _ \
- *               _____) ) ____| | | || |_| ____( (___| | | |
- *              (______/|_____)_|_|_| \__)_____)\____)_| |_|
- *              (C)2013-2017 Semtech
- *
- * \endcode
- *
- * \author    Miguel Luis ( Semtech )
- *
- * \author    Gregory Cristian ( Semtech )
  */
 #ifndef __UTILITIES_H__
 #define __UTILITIES_H__
@@ -161,5 +145,13 @@ void BoardCriticalSectionBegin( uint32_t *mask );
  * \param [IN] mask Pointer to a variable where the CPU IRQ mask was stored
  */
 void BoardCriticalSectionEnd( uint32_t *mask );
+
+/*!
+ * convert the strings to hex format
+ *
+ * \param [IN] dest
+ * \param [out] src Pointer to a variable where the dest convert to
+ */
+void str2hex(uint8_t* dest, char* src, int len);
 
 #endif // __UTILITIES_H__

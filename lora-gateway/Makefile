@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=lora_gateway
-PKG_VERSION:=1.2.4
+PKG_VERSION:=1.2.5
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -24,7 +24,7 @@ define Package/lora-gateway
 $(call Package/lora-gateway/Default)
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=+libuci +libftdi
+  DEPENDS:=+libuci +libftdi +libsqlite3
 endef
 
 define Package/lora-gateway/description
@@ -32,7 +32,7 @@ define Package/lora-gateway/description
   a Semtech LoRa multi-channel RF receiver (a.k.a. concentrator).
 endef
 
-TARGET_CFLAGS += $(FPIC) -O2 -Wall -Wextra -std=c99 -Iinc -I. -lm
+TARGET_CFLAGS += $(FPIC) -O2 -Wall -Wextra -std=c99 -DBIGENDIAN -Iinc -I. -lm
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)

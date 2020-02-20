@@ -44,17 +44,17 @@ typedef union uLoRaMacDLSettings
     struct sDLSettingsBits
     {
         /*!
-         * Data rate of a downlink using the second receive window
+         * Indicates network server LoRaWAN implementation version 1.1 or later.
          */
-        uint8_t RX2DataRate     : 4;
+        uint8_t OptNeg          : 1;
         /*!
          * Offset between up and downlink datarate of first reception slot
          */
         uint8_t RX1DRoffset     : 3;
         /*!
-         * Indicates network server LoRaWAN implementation version 1.1 or later.
+         * Data rate of a downlink using the second receive window
          */
-        uint8_t OptNeg          : 1;
+        uint8_t RX2DataRate     : 4;
     }Bits;
 }LoRaMacDLSettings_t;
 

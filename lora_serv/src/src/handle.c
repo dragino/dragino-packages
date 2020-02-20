@@ -365,7 +365,7 @@ void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payl
             FILE *fp;
             char pushpath[128];
             snprintf(pushpath, sizeof(pushpath), "%s/%s", PUSHPATH, devinfo.devaddr_hex);
-            fp = fopen(PUSHPATH, "w+"); 
+            fp = fopen(pushpath, "w+"); 
             if (NULL == fp) 
                 MSG_DEBUG(DEBUG_INFO, "[DLS INFO] Fail to open push path: %s\n", pushpath);
             else {

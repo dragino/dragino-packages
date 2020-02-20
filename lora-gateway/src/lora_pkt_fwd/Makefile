@@ -22,7 +22,7 @@ RELEASE_VERSION := `cat ../VERSION`
 CC := $(CROSS_COMPILE)gcc
 AR := $(CROSS_COMPILE)ar
 
-CFLAGS := -O2 -Wall -Wextra -std=c99 -Iinc -I.
+CFLAGS := -O2 -Wall -Wextra -std=c99 -DBIGENDIAN -Iinc -I.
 VFLAG := -D VERSION_STRING="\"$(RELEASE_VERSION)\""
 
 ### Constants for Lora concentrator HAL library
@@ -38,7 +38,7 @@ LGW_INC += $(LGW_PATH)/inc/loragw_gps.h
 
 ### Linking options
 
-LIBS := -lloragw -luci -lrt -lpthread -lm
+LIBS := -lloragw -luci -lrt -lsqlite3 -lpthread -lm
 
 ### General build targets
 
@@ -61,9 +61,15 @@ $(OBJDIR)/%.o: src/%.c $(INCLUDES) | $(OBJDIR)
 
 #$(OBJDIR)/mac-header-decode.o: src/mac-header-decode.c $(INCLUDES) | $(OBJDIR)
 #	$(CC) -c $(CFLAGS) -I$(LGW_PATH)/inc $< -o $@
+#
+$(OBJDIR)/loramac-crypto.o: src/loramac-crypto.c inc/loramac-crypto.h inc/aes.h inc/cmac.h inc/utilities.h | $(OBJDIR)
+	$(CC) -c $(CFLAGS) $< -o $@
 
 $(OBJDIR)/single_tx.o: src/single_tx.c $(LGW_INC) $(INCLUDES) | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $(VFLAG) -I$(LGW_PATH)/inc $< -o $@
+
+$(OBJDIR)/db.o: src/db.c inc/db.h inc/utilities.h | $(OBJDIR)
+	$(CC) -c $(CFLAGS) $< -o $@
 
 single_tx: $(OBJDIR)/single_tx.o $(LGW_PATH)/libloragw.a $(OBJDIR)/radio.o
 	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/radio.o -o $@ $(LIBS)
@@ -71,7 +77,7 @@ single_tx: $(OBJDIR)/single_tx.o $(LGW_PATH)/libloragw.a $(OBJDIR)/radio.o
 $(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c $(LGW_INC) $(INCLUDES) | $(OBJDIR)
 	$(CC) -c $(CFLAGS) $(VFLAG) -I$(LGW_PATH)/inc $< -o $@
 
-$(APP_NAME): $(OBJDIR)/$(APP_NAME).o $(LGW_PATH)/libloragw.a $(OBJDIR)/parson.o $(OBJDIR)/radio.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/utilities.o
-	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/utilities.o $(OBJDIR)/radio.o -o $@ $(LIBS)
+$(APP_NAME): $(OBJDIR)/$(APP_NAME).o $(LGW_PATH)/libloragw.a $(OBJDIR)/parson.o $(OBJDIR)/radio.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/utilities.o $(OBJDIR)/db.o $(OBJDIR)/aes.o $(OBJDIR)/cmac.o $(OBJDIR)/loramac-crypto.o
+	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/utilities.o $(OBJDIR)/radio.o $(OBJDIR)/db.o $(OBJDIR)/aes.o $(OBJDIR)/cmac.o $(OBJDIR)/loramac-crypto.o -o $@ $(LIBS)
 
 ### EOF

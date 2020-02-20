@@ -90,3 +90,22 @@ int8_t Nibble2HexChar( uint8_t a )
         return '?';
     }
 }
+
+void str2hex(uint8_t* dest, char* src, int len) {
+    int i;
+    char ch1;
+    char ch2;
+    uint8_t ui1;
+    uint8_t ui2;
+    for(i = 0; i < len; i++) {
+        ch1 = src[i*2];
+        ch2 = src[i*2 + 1];
+        ui1 = toupper(ch1) - 0x30;
+        if (ui1 > 9)
+            ui1 -= 7;
+        ui2 = toupper(ch2) - 0x30;
+        if (ui2 > 9)
+            ui2 -= 7;
+        dest[i] = ui1*16 + ui2;
+    }
+}

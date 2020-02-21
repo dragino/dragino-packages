@@ -1813,7 +1813,6 @@ void thread_up(void) {
     int buff_index;
     uint8_t buff_ack[32]; /* buffer to receive acknowledges */
 
-
     /* local timekeeping variables */
     struct timespec send_time; /* time of the pull request */
     struct timespec recv_time; /* time of return from recv socket call */
@@ -1830,7 +1829,8 @@ void thread_up(void) {
 
     LoRaMacMessageData_t macmsg;
 
-    uint8_t frame_payload[256] = {'\0'};  /* prepare payload for join accept */
+    uint8_t payloaden[256] = {'\0'};  /* data which have decrypted */
+    uint8_t payloadtxt[256] = {'\0'};  /* data which have decrypted */
 
     /* pre-fill the data buffer with fixed fields */
     buff_up[0] = PROTOCOL_VERSION;
@@ -2272,10 +2272,13 @@ void thread_up(void) {
         }
 
         if (maccrypto_num) {
+            int fsize = 0;
             struct devinfo devinfo = { .devaddr = macmsg.FHDR.DevAddr };
             if (db_lookup_skey(cntx.lookupskey, (void *) &devinfo)) {
-                MSG_DEBUG(DEBUG_INFO, "[Decrypto] appskey: %02X%02X\n", devinfo.appskey[1], devinfo.appskey[2]);
-                LoRaMacPayloadDecrypt(p->payload, p->size, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)macmsg.FHDR.FCnt, frame_payload);
+                MSG_DEBUG(DEBUG_INFO, "[Decrypto] appskey: %02X%02X, fcnt: %u\n", devinfo.appskey[1], devinfo.appskey[2], macmsg.FHDR.FCnt);
+                fsize = p->size - 13 - macmsg.FHDR.FCtrl.Bits.FOptsLen; 
+                memcpy(payloaden, p->payload + 9 + macmsg.FHDR.FCtrl.Bits.FOptsLen, fsize);
+                LoRaMacPayloadDecrypt(payloaden, fsize, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)macmsg.FHDR.FCnt, payloadtxt);
                 FILE *fp;
                 char pushpath[128];
                 snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
@@ -2283,7 +2286,7 @@ void thread_up(void) {
                 if (NULL == fp)
                     MSG_DEBUG(DEBUG_INFO, "[Decrypto] Fail to open push path: %s\n", pushpath);
                 else { 
-                    fprintf(fp, "%s", frame_payload); 
+                    fprintf(fp, "%s", payloadtxt); 
                     fflush(fp); 
                     fclose(fp);
                 }

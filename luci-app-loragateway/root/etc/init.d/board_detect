@@ -4,21 +4,9 @@ START=50
 STOP=90
 
 start() {
-    if [ ! -d /var/iot ]; then 
-        mkdir /var/iot
-    fi
-
-    if [ ! -d /var/iot/channels ]; then
-        mkdir /var/iot/channels
-    fi
-
-    if [ ! -d /var/iot/receive ]; then
-        mkdir /var/iot/receive
-    fi
-
-    if [ ! -d /var/iot/push ]; then 
-        mkdir /var/iot/push
-    fi
+    mkdir -p /var/iot/channels
+    mkdir -p /var/iot/receive
+	mkdir -p /var/iot/push
 
     rmmod gpio_keys_polled
     modprobe gpio_keys_polled
@@ -41,7 +29,7 @@ start() {
             /usr/bin/spirw 12 1
             if [[ "$?" == "1" ]]; then
 	    	rmmod spi-gpio-custom
-		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+			insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
                 echo "LG08" > /var/iot/board
             else
                 echo "LG08P" > /var/iot/board
@@ -50,6 +38,7 @@ start() {
     fi
 
     board=`cat /var/iot/board`
+	model=$board
 
     uci set gateway.general.model="$board"
 
@@ -60,6 +49,41 @@ start() {
     if [[ "$DEB" -gt 1 ]]; then
         DEB="1"
     fi
+
+	# Detect Cellular USB device	
+	cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c > /tmp/cell_detect.txt
+	
+	# Detect model
+	is_lps8=$(hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c "lps8")
+	is_dlos8=$(hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c "los8")
+	
+	if [ $board == "LG08" ] || [ $board == "LG08P" ];then
+		model=LG308
+	fi
+	
+	if [ $board == "LG01" ];then
+		model=LG308
+	fi	
+	
+	if [ $is_lps8 == "1" ]; then
+	  model="LPS8"
+	elif [ $is_dlos8 == "1" ]; then
+	  model="DLOS8"
+	fi
+	case $model in
+		LG01) pic="Dragino-LG01.png"
+		;;
+		LG02) pic="Dragino-LG02.png"
+		;;
+		LG308)	pic="Dragino-LG308.png"
+		;;
+		LPS8)	pic="Dragino-LPS8.png"
+		;;
+		DLOS8) pic="Dragino-DLOS8.png"
+		;;
+	esac
+	echo $model > /tmp/iot/model.txt
+	echo $pic   > /tmp/iot/pic.txt
 }
 
 stop() {

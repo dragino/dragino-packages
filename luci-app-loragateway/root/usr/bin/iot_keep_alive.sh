@@ -21,7 +21,8 @@ ONE="1"
 ZERO="0"
 iot_online=0
 default_gw_3g=0
-is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c lps9`
+offline_flag=""
+is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c lps8`
 last_reload_time=`date +%s`
 
 board=`cat /var/iot/board`
@@ -248,10 +249,13 @@ do
 		# IoT Connection is ok
 		[ "$is_lps8" = "1" ] && echo 0 > /sys/class/gpio/gpio21/value
 		echo 1 > /sys/class/leds/dragino2\:red\:system/brightness
+		[ "$offline_flag" = "1" ] && offline_flag="0" && echo "`date`: switch to online" >> /var/status_log
 	elif [ $has_internet -eq 1 ]; then
 		# IoT Connection Fail, but Internet Up
 		/usr/bin/blink-start 100   #GPIO28 blink, periodically: 200ms
 		[ "$is_lps8" = "1" ] && echo 0 > /sys/class/gpio/gpio21/value
+		[ "$offline_flag" = "0" ] && echo "`date`: switch to offline" >> /var/status_log
+		offline_flag="1"
 		reload_iot_service
 	else 
 		# IoT Connection Fail, Internet Down

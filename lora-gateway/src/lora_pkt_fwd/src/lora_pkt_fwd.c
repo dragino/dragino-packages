@@ -140,6 +140,8 @@ uint8_t DEBUG_ERROR      = 1;
 #define UP                          0
 #define DOWN                        1
 
+#define MAXPAYLOAD                  512
+
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES (GLOBAL) ------------------------------------------- */
 
@@ -1829,8 +1831,8 @@ void thread_up(void) {
 
     LoRaMacMessageData_t macmsg;
 
-    uint8_t payloaden[256] = {'\0'};  /* data which have decrypted */
-    uint8_t payloadtxt[256] = {'\0'};  /* data which have decrypted */
+    uint8_t payloaden[MAXPAYLOAD] = {'\0'};  /* data which have decrypted */
+    uint8_t payloadtxt[MAXPAYLOAD] = {'\0'};  /* data which have decrypted */
 
     /* pre-fill the data buffer with fixed fields */
     buff_up[0] = PROTOCOL_VERSION;

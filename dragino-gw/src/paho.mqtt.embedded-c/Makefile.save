@@ -23,28 +23,27 @@ ifndef srcdir
   srcdir = MQTTPacket/src
 endif
 
-OBJDIR = obj
-INCLUDES = $(wildcard srcdir/*.h)
-TARGET_LIB = libpahomqtt.a
+ifndef blddir
+  blddir = build/output
+endif
+
+SOURCE_FILES_C = $(srcdir)/*.c
 
 # The names of libraries to be built
+MQTT_EMBED_LIB_C = paho-embed-mqtt3c
 
 CC ?= gcc
 
-CFLAGS_S = -fPIC -O2 -Wall -DLINUX_SO -I$(srcdir)
+EMBED_MQTTLIB_C_TARGET = ${blddir}/lib${MQTT_EMBED_LIB_C}.so.1
 
-all: ${TARGET_LIB}
+CFLAGS_SO = -g -fPIC -shared -O2 -Wall -DLINUX_SO
 
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
-
-$(OBJDIR)/%.o: $(srcdir)/%.c $(INCLUDES) | $(OBJDIR)
-	$(CC) -c $(CFLAGS_S) $< -o $@
+all: ${EMBED_MQTTLIB_C_TARGET}
 	
-${TARGET_LIB}: $(OBJDIR)/MQTTConnectClient.o $(OBJDIR)/MQTTConnectServer.o $(OBJDIR)/MQTTDeserializePublish.o $(OBJDIR)/MQTTFormat.o $(OBJDIR)/MQTTPacket.o $(OBJDIR)/MQTTSerializePublish.o $(OBJDIR)/MQTTSubscribeClient.o $(OBJDIR)/MQTTSubscribeServer.o $(OBJDIR)/MQTTUnsubscribeClient.o $(OBJDIR)/MQTTUnsubscribeServer.o 
-	${AR} rcs $@ $^ 
+${EMBED_MQTTLIB_C_TARGET}: ${SOURCE_FILES_C} 
+	${CC} ${CFLAGS_SO} -o $@ $^ 
+	-ln -s lib${MQTT_EMBED_LIB_C}.so.1 ${blddir}/lib${MQTT_EMBED_LIB_C}.so
 
 clean:
-	rm -rf ${OBJDIR}/*.o
-	rm -rf ${TARGET_LIB}
+	rm -rf ${blddir}/*
 	

@@ -21,12 +21,6 @@ define Package/$(PKG_NAME)/Default
     MAINTAINER:=dragino
 endef
 
-define Package/libpaho-embed-mqtt3c
-$(call Package/$(PKG_NAME)/Default)
-    SECTION:=utils
-    CATEGORY:=Utilities
-endef
-
 define Package/libttn-gateway-connector
 $(call Package/$(PKG_NAME)/Default)
     SECTION:=utils
@@ -46,14 +40,9 @@ define Package/$(PKG_NAME)/description
   a Semtech LoRa multi-channel RF receiver (a.k.a. concentrator).
 endef
 
-define Package/libttn-gateway-connector/extra_provides
-	echo 'libpaho-embed-mqtt3c.so.1';
-endef
-
 define Package/$(PKG_NAME)/extra_provides
 	echo 'libprotobuf-c.so.1';\
 	echo 'libttn-gateway-connector.so';\
-	echo 'libpaho-embed-mqtt3c.so.1';
 endef
 
 define Build/Prepare
@@ -67,20 +56,11 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/libloragw.a $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/paho.mqtt.embedded-c/build/output/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/
-	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/libpaho-embed-mqtt3c.so
 	$(CP) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/libttn-gateway-connector.so $(1)/usr/lib
-endef
-
-define Build/libpaho-embed-mqtt3c/Install
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/paho.mqtt.embedded-c/build/output/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/
-	$(LN) $(1)/usr/lib/libpaho-embed-mqtt3c.so.1 $(1)/usr/lib/libpaho-embed-mqtt3c.so
 endef
 
 define Package/libttn-gateway-connector/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/paho.mqtt.embedded-c/build/output/libpaho-embed-mqtt3c.* $(1)/usr/lib/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ttn-gateway-connector/bin/libttn-gateway-connector.so $(1)/usr/lib
 endef
 
@@ -94,6 +74,5 @@ define Package/$(PKG_NAME)/install
 	$(CP) $(PKG_BUILD_DIR)/dragino-gw-fwd/config/??* $(1)/etc/lora/cfg
 endef
 
-$(eval $(call BuildPackage,libpaho-embed-mqtt3c))
 $(eval $(call BuildPackage,libttn-gateway-connector))
 $(eval $(call BuildPackage,$(PKG_NAME)))

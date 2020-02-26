@@ -1,0 +1,365 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BUFFER_OVERFLOW	MQTTErrors.h	/^    BUFFER_OVERFLOW = -2,$/;"	e	enum:returnCode
+CONNACK	MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
+CONNECT	MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
+DISCONNECT	MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
+DLLExport	MQTTClient.h	31;"	d
+DLLExport	MQTTClient.h	34;"	d
+DLLExport	MQTTClient.h	37;"	d
+DLLExport	MQTTConnect.h	25;"	d
+DLLExport	MQTTLinux.h	22;"	d
+DLLExport	MQTTLinux.h	25;"	d
+DLLExport	MQTTLinux.h	28;"	d
+DLLExport	MQTTPacket.h	27;"	d
+DLLExport	MQTTPacket.h	30;"	d
+DLLExport	MQTTPacket.h	33;"	d
+DLLExport	MQTTPublish.h	25;"	d
+DLLExport	MQTTSubscribe.h	25;"	d
+DLLExport	MQTTUnsubscribe.h	25;"	d
+DLLImport	MQTTClient.h	30;"	d
+DLLImport	MQTTClient.h	33;"	d
+DLLImport	MQTTClient.h	36;"	d
+DLLImport	MQTTConnect.h	22;"	d
+DLLImport	MQTTLinux.h	21;"	d
+DLLImport	MQTTLinux.h	24;"	d
+DLLImport	MQTTLinux.h	27;"	d
+DLLImport	MQTTPacket.h	26;"	d
+DLLImport	MQTTPacket.h	29;"	d
+DLLImport	MQTTPacket.h	32;"	d
+DLLImport	MQTTPublish.h	22;"	d
+DLLImport	MQTTSubscribe.h	22;"	d
+DLLImport	MQTTUnsubscribe.h	22;"	d
+DefaultClient	MQTTClient.h	118;"	d
+Dequeue	MQTTLinux.c	/^int Dequeue(Queue *queue, unsigned short *item, Timer *timer)$/;"	f
+Enqueue	MQTTLinux.c	/^int Enqueue(Queue *queue, unsigned short item)$/;"	f
+FAILURE	MQTTErrors.h	/^    FAILURE = -1,$/;"	e	enum:returnCode
+FUNC_ENTRY	StackTrace.h	25;"	d
+FUNC_ENTRY	StackTrace.h	41;"	d
+FUNC_ENTRY	StackTrace.h	53;"	d
+FUNC_ENTRY_MAX	StackTrace.h	28;"	d
+FUNC_ENTRY_MAX	StackTrace.h	44;"	d
+FUNC_ENTRY_MAX	StackTrace.h	56;"	d
+FUNC_ENTRY_MED	StackTrace.h	27;"	d
+FUNC_ENTRY_MED	StackTrace.h	43;"	d
+FUNC_ENTRY_MED	StackTrace.h	55;"	d
+FUNC_ENTRY_NOLOG	StackTrace.h	26;"	d
+FUNC_ENTRY_NOLOG	StackTrace.h	42;"	d
+FUNC_ENTRY_NOLOG	StackTrace.h	54;"	d
+FUNC_EXIT	StackTrace.h	29;"	d
+FUNC_EXIT	StackTrace.h	45;"	d
+FUNC_EXIT	StackTrace.h	57;"	d
+FUNC_EXIT_MAX	StackTrace.h	32;"	d
+FUNC_EXIT_MAX	StackTrace.h	48;"	d
+FUNC_EXIT_MAX	StackTrace.h	60;"	d
+FUNC_EXIT_MAX_RC	StackTrace.h	35;"	d
+FUNC_EXIT_MAX_RC	StackTrace.h	51;"	d
+FUNC_EXIT_MAX_RC	StackTrace.h	63;"	d
+FUNC_EXIT_MED	StackTrace.h	31;"	d
+FUNC_EXIT_MED	StackTrace.h	47;"	d
+FUNC_EXIT_MED	StackTrace.h	59;"	d
+FUNC_EXIT_MED_RC	StackTrace.h	34;"	d
+FUNC_EXIT_MED_RC	StackTrace.h	50;"	d
+FUNC_EXIT_MED_RC	StackTrace.h	62;"	d
+FUNC_EXIT_NOLOG	StackTrace.h	30;"	d
+FUNC_EXIT_NOLOG	StackTrace.h	46;"	d
+FUNC_EXIT_NOLOG	StackTrace.h	58;"	d
+FUNC_EXIT_RC	StackTrace.h	33;"	d
+FUNC_EXIT_RC	StackTrace.h	49;"	d
+FUNC_EXIT_RC	StackTrace.h	61;"	d
+MAX_MESSAGE_HANDLERS	MQTTClient.h	56;"	d
+MAX_NO_OF_REMAINING_LENGTH_BYTES	MQTTPacket.c	59;"	d	file:
+MAX_PACKET_ID	MQTTClient.h	53;"	d
+MQTTCONNECT_H_	MQTTConnect.h	19;"	d
+MQTTClient	MQTTClient.h	/^typedef struct MQTTClient$/;"	s
+MQTTClient	MQTTClient.h	/^} MQTTClient;$/;"	t	typeref:struct:MQTTClient
+MQTTClientDestroy	MQTTClient.c	/^void MQTTClientDestroy(MQTTClient *c)$/;"	f
+MQTTClientInit	MQTTClient.c	/^void MQTTClientInit(MQTTClient *c, Network *network, unsigned int command_timeout_ms,$/;"	f
+MQTTConnackFlags	MQTTConnect.h	/^} MQTTConnackFlags;	\/**< connack flags byte *\/$/;"	t	typeref:union:__anon6
+MQTTConnect	MQTTClient.c	/^int MQTTConnect(MQTTClient *c, MQTTPacket_connectData *options)$/;"	f
+MQTTConnectFlags	MQTTConnect.h	/^} MQTTConnectFlags;	\/**< connect flags byte *\/$/;"	t	typeref:union:__anon1
+MQTTDeserialize_ack	MQTTDeserializePublish.c	/^int MQTTDeserialize_ack(unsigned char* packettype, unsigned char* dup, unsigned short* packetid, unsigned char* buf, int buflen)$/;"	f
+MQTTDeserialize_connack	MQTTConnectClient.c	/^int MQTTDeserialize_connack(unsigned char* sessionPresent, unsigned char* connack_rc, unsigned char* buf, int buflen)$/;"	f
+MQTTDeserialize_connect	MQTTConnectServer.c	/^int MQTTDeserialize_connect(MQTTPacket_connectData* data, unsigned char* buf, int len)$/;"	f
+MQTTDeserialize_publish	MQTTDeserializePublish.c	/^int MQTTDeserialize_publish(unsigned char* dup, int* qos, unsigned char* retained, unsigned short* packetid, MQTTString* topicName,$/;"	f
+MQTTDeserialize_suback	MQTTSubscribeClient.c	/^int MQTTDeserialize_suback(unsigned short* packetid, int maxcount, int* count, int grantedQoSs[], unsigned char* buf, int buflen)$/;"	f
+MQTTDeserialize_subscribe	MQTTSubscribeServer.c	/^int MQTTDeserialize_subscribe(unsigned char* dup, unsigned short* packetid, int maxcount, int* count, MQTTString topicFilters[],$/;"	f
+MQTTDeserialize_unsuback	MQTTUnsubscribeClient.c	/^int MQTTDeserialize_unsuback(unsigned short* packetid, unsigned char* buf, int buflen)$/;"	f
+MQTTDeserialize_unsubscribe	MQTTUnsubscribeServer.c	/^int MQTTDeserialize_unsubscribe(unsigned char* dup, unsigned short* packetid, int maxcount, int* count, MQTTString topicFilters[],$/;"	f
+MQTTDisconnect	MQTTClient.c	/^int MQTTDisconnect(MQTTClient *c)$/;"	f
+MQTTFORMAT_H	MQTTFormat.h	18;"	d
+MQTTFormat_toClientString	MQTTFormat.c	/^char* MQTTFormat_toClientString(char* strbuf, int strbuflen, unsigned char* buf, int buflen)$/;"	f
+MQTTFormat_toServerString	MQTTFormat.c	/^char* MQTTFormat_toServerString(char* strbuf, int strbuflen, unsigned char* buf, int buflen)$/;"	f
+MQTTGetPingTime	MQTTClient.c	/^long MQTTGetPingTime(MQTTClient *c)$/;"	f
+MQTTHeader	MQTTPacket.h	/^} MQTTHeader;$/;"	t	typeref:union:__anon9
+MQTTLenString	MQTTPacket.h	/^} MQTTLenString;$/;"	t	typeref:struct:__anon12
+MQTTMessage	MQTTClient.h	/^typedef struct MQTTMessage$/;"	s
+MQTTMessage	MQTTClient.h	/^} MQTTMessage;$/;"	t	typeref:struct:MQTTMessage
+MQTTPACKET_BUFFER_TOO_SHORT	MQTTPacket.h	/^	MQTTPACKET_BUFFER_TOO_SHORT = -2,$/;"	e	enum:errors
+MQTTPACKET_H_	MQTTPacket.h	19;"	d
+MQTTPACKET_READ_COMPLETE	MQTTPacket.h	/^	MQTTPACKET_READ_COMPLETE$/;"	e	enum:errors
+MQTTPACKET_READ_ERROR	MQTTPacket.h	/^	MQTTPACKET_READ_ERROR = -1,$/;"	e	enum:errors
+MQTTPUBLISH_H_	MQTTPublish.h	19;"	d
+MQTTPacket_checkVersion	MQTTConnectServer.c	/^int MQTTPacket_checkVersion(MQTTString* protocol, int version)$/;"	f
+MQTTPacket_connectData	MQTTConnect.h	/^} MQTTPacket_connectData;$/;"	t	typeref:struct:__anon5
+MQTTPacket_connectData_initializer	MQTTConnect.h	124;"	d
+MQTTPacket_decode	MQTTPacket.c	/^int MQTTPacket_decode(int (*getcharfn)(unsigned char*, int), int* value)$/;"	f
+MQTTPacket_decodeBuf	MQTTPacket.c	/^int MQTTPacket_decodeBuf(unsigned char* buf, int* value)$/;"	f
+MQTTPacket_decodenb	MQTTPacket.c	/^static int MQTTPacket_decodenb(MQTTTransport *trp)$/;"	f	file:
+MQTTPacket_encode	MQTTPacket.c	/^int MQTTPacket_encode(unsigned char* buf, int length)$/;"	f
+MQTTPacket_equals	MQTTPacket.c	/^int MQTTPacket_equals(MQTTString* a, char* bptr)$/;"	f
+MQTTPacket_getName	MQTTFormat.c	/^const char* MQTTPacket_getName(unsigned short packetid)$/;"	f
+MQTTPacket_len	MQTTPacket.c	/^int MQTTPacket_len(int rem_len)$/;"	f
+MQTTPacket_names	MQTTFormat.c	/^const char* MQTTPacket_names[] =$/;"	v
+MQTTPacket_read	MQTTPacket.c	/^int MQTTPacket_read(unsigned char* buf, int buflen, int (*getfn)(unsigned char*, int))$/;"	f
+MQTTPacket_readnb	MQTTPacket.c	/^int MQTTPacket_readnb(unsigned char* buf, int buflen, MQTTTransport *trp)$/;"	f
+MQTTPacket_willOptions	MQTTConnect.h	/^} MQTTPacket_willOptions;$/;"	t	typeref:struct:__anon4
+MQTTPacket_willOptions_initializer	MQTTConnect.h	85;"	d
+MQTTPublish	MQTTClient.c	/^int MQTTPublish(MQTTClient *c, const char *topicName, MQTTMessage *message)$/;"	f
+MQTTRead	MQTTClient.c	/^void MQTTRead(void *arg)$/;"	f
+MQTTSUBSCRIBE_H_	MQTTSubscribe.h	19;"	d
+MQTTSendPing	MQTTClient.c	/^int MQTTSendPing(MQTTClient *c)$/;"	f
+MQTTSerialize_ack	MQTTSerializePublish.c	/^int MQTTSerialize_ack(unsigned char* buf, int buflen, unsigned char packettype, unsigned char dup, unsigned short packetid)$/;"	f
+MQTTSerialize_connack	MQTTConnectServer.c	/^int MQTTSerialize_connack(unsigned char* buf, int buflen, unsigned char connack_rc, unsigned char sessionPresent)$/;"	f
+MQTTSerialize_connect	MQTTConnectClient.c	/^int MQTTSerialize_connect(unsigned char* buf, int buflen, MQTTPacket_connectData* options)$/;"	f
+MQTTSerialize_connectLength	MQTTConnectClient.c	/^int MQTTSerialize_connectLength(MQTTPacket_connectData* options)$/;"	f
+MQTTSerialize_disconnect	MQTTConnectClient.c	/^int MQTTSerialize_disconnect(unsigned char* buf, int buflen)$/;"	f
+MQTTSerialize_pingreq	MQTTConnectClient.c	/^int MQTTSerialize_pingreq(unsigned char* buf, int buflen)$/;"	f
+MQTTSerialize_puback	MQTTSerializePublish.c	/^int MQTTSerialize_puback(unsigned char* buf, int buflen, unsigned short packetid)$/;"	f
+MQTTSerialize_pubcomp	MQTTSerializePublish.c	/^int MQTTSerialize_pubcomp(unsigned char* buf, int buflen, unsigned short packetid)$/;"	f
+MQTTSerialize_publish	MQTTSerializePublish.c	/^int MQTTSerialize_publish(unsigned char* buf, int buflen, unsigned char dup, int qos, unsigned char retained, unsigned short packetid,$/;"	f
+MQTTSerialize_publishLength	MQTTSerializePublish.c	/^int MQTTSerialize_publishLength(int qos, MQTTString topicName, int payloadlen)$/;"	f
+MQTTSerialize_pubrel	MQTTSerializePublish.c	/^int MQTTSerialize_pubrel(unsigned char* buf, int buflen, unsigned char dup, unsigned short packetid)$/;"	f
+MQTTSerialize_suback	MQTTSubscribeServer.c	/^int MQTTSerialize_suback(unsigned char* buf, int buflen, unsigned short packetid, int count, int* grantedQoSs)$/;"	f
+MQTTSerialize_subscribe	MQTTSubscribeClient.c	/^int MQTTSerialize_subscribe(unsigned char* buf, int buflen, unsigned char dup, unsigned short packetid, int count,$/;"	f
+MQTTSerialize_subscribeLength	MQTTSubscribeClient.c	/^int MQTTSerialize_subscribeLength(int count, MQTTString topicFilters[])$/;"	f
+MQTTSerialize_unsuback	MQTTUnsubscribeServer.c	/^int MQTTSerialize_unsuback(unsigned char* buf, int buflen, unsigned short packetid)$/;"	f
+MQTTSerialize_unsubscribe	MQTTUnsubscribeClient.c	/^int MQTTSerialize_unsubscribe(unsigned char* buf, int buflen, unsigned char dup, unsigned short packetid,$/;"	f
+MQTTSerialize_unsubscribeLength	MQTTUnsubscribeClient.c	/^int MQTTSerialize_unsubscribeLength(int count, MQTTString topicFilters[])$/;"	f
+MQTTSerialize_zero	MQTTConnectClient.c	/^int MQTTSerialize_zero(unsigned char* buf, int buflen, unsigned char packettype)$/;"	f
+MQTTString	MQTTPacket.h	/^} MQTTString;$/;"	t	typeref:struct:__anon13
+MQTTStringFormat_ack	MQTTFormat.c	/^int MQTTStringFormat_ack(char* strbuf, int strbuflen, unsigned char packettype, unsigned char dup, unsigned short packetid)$/;"	f
+MQTTStringFormat_connack	MQTTFormat.c	/^int MQTTStringFormat_connack(char* strbuf, int strbuflen, unsigned char connack_rc, unsigned char sessionPresent)$/;"	f
+MQTTStringFormat_connect	MQTTFormat.c	/^int MQTTStringFormat_connect(char* strbuf, int strbuflen, MQTTPacket_connectData* data)$/;"	f
+MQTTStringFormat_publish	MQTTFormat.c	/^int MQTTStringFormat_publish(char* strbuf, int strbuflen, unsigned char dup, int qos, unsigned char retained,$/;"	f
+MQTTStringFormat_suback	MQTTFormat.c	/^int MQTTStringFormat_suback(char* strbuf, int strbuflen, unsigned short packetid, int count, int* grantedQoSs)$/;"	f
+MQTTStringFormat_subscribe	MQTTFormat.c	/^int MQTTStringFormat_subscribe(char* strbuf, int strbuflen, unsigned char dup, unsigned short packetid, int count,$/;"	f
+MQTTStringFormat_unsubscribe	MQTTFormat.c	/^int MQTTStringFormat_unsubscribe(char* strbuf, int strbuflen, unsigned char dup, unsigned short packetid,$/;"	f
+MQTTString_initializer	MQTTPacket.h	87;"	d
+MQTTSubscribe	MQTTClient.c	/^int MQTTSubscribe(MQTTClient *c, const char *topicFilter, enum QoS qos, messageHandler messageHandler, void *arg)$/;"	f
+MQTTTransport	MQTTPacket.h	/^}MQTTTransport;$/;"	t	typeref:struct:__anon14
+MQTTUNSUBSCRIBE_H_	MQTTUnsubscribe.h	19;"	d
+MQTTUnsubscribe	MQTTClient.c	/^int MQTTUnsubscribe(MQTTClient *c, const char *topicFilter)$/;"	f
+MQTTVersion	MQTTConnect.h	/^	unsigned char MQTTVersion;$/;"	m	struct:__anon5
+MQTTYield	MQTTClient.c	/^int MQTTYield(MQTTClient *c, int timeout_ms)$/;"	f
+MQTTstrlen	MQTTPacket.c	/^int MQTTstrlen(MQTTString mqttstring)$/;"	f
+MessageData	MQTTClient.h	/^typedef struct MessageData$/;"	s
+MessageData	MQTTClient.h	/^} MessageData;$/;"	t	typeref:struct:MessageData
+MessageHandlers	MQTTClient.h	/^   struct MessageHandlers$/;"	s	struct:MQTTClient
+Mutex	MQTTLinux.h	/^typedef struct Mutex$/;"	s
+Mutex	MQTTLinux.h	/^} Mutex;$/;"	t	typeref:struct:Mutex
+MutexDestroy	MQTTLinux.c	/^int MutexDestroy(Mutex *mutex)$/;"	f
+MutexInit	MQTTLinux.c	/^void MutexInit(Mutex *mutex)$/;"	f
+MutexLock	MQTTLinux.c	/^int MutexLock(Mutex *mutex)$/;"	f
+MutexUnlock	MQTTLinux.c	/^int MutexUnlock(Mutex *mutex)$/;"	f
+NOSTACKTRACE	StackTrace.h	22;"	d
+Network	MQTTLinux.h	/^typedef struct Network$/;"	s
+Network	MQTTLinux.h	/^} Network;$/;"	t	typeref:struct:Network
+NetworkCheckConnected	MQTTLinux.c	/^int NetworkCheckConnected(Network *n)$/;"	f
+NetworkConnect	MQTTLinux.c	/^int NetworkConnect(Network *n, char *addr, int port)$/;"	f
+NetworkDisconnect	MQTTLinux.c	/^void NetworkDisconnect(Network *n)$/;"	f
+NetworkInit	MQTTLinux.c	/^void NetworkInit(Network *n)$/;"	f
+NetworkIsConnected	MQTTLinux.c	/^int NetworkIsConnected(Network *n)$/;"	f
+NewMessageData	MQTTClient.c	/^static void NewMessageData(MessageData *md, MQTTString *aTopicName, MQTTMessage *aMessage)$/;"	f	file:
+PINGREQ	MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
+PINGRESP	MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
+PUBACK	MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
+PUBCOMP	MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
+PUBLISH	MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
+PUBREC	MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
+PUBREL	MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
+QOS0	MQTTClient.h	/^   QOS0,$/;"	e	enum:QoS
+QOS1	MQTTClient.h	/^   QOS1,$/;"	e	enum:QoS
+QOS2	MQTTClient.h	/^   QOS2$/;"	e	enum:QoS
+QoS	MQTTClient.h	/^enum QoS$/;"	g
+Queue	MQTTLinux.h	/^typedef struct Queue$/;"	s
+Queue	MQTTLinux.h	/^} Queue;$/;"	t	typeref:struct:Queue
+QueueDestroy	MQTTLinux.c	/^int QueueDestroy(Queue *queue)$/;"	f
+QueueInit	MQTTLinux.c	/^void QueueInit(Queue *queue)$/;"	f
+STACKTRACE_H_	StackTrace.h	19;"	d
+SUBACK	MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
+SUBSCRIBE	MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
+SUCCESS	MQTTErrors.h	/^    SUCCESS = 0$/;"	e	enum:returnCode
+Semaphore	MQTTLinux.h	/^typedef struct Semaphore$/;"	s
+Semaphore	MQTTLinux.h	/^} Semaphore;$/;"	t	typeref:struct:Semaphore
+SemaphoreDestroy	MQTTLinux.c	/^int SemaphoreDestroy(Semaphore *sem)$/;"	f
+SemaphoreInit	MQTTLinux.c	/^void SemaphoreInit(Semaphore *sem)$/;"	f
+SemaphoreSignal	MQTTLinux.c	/^int SemaphoreSignal(Semaphore *sem)$/;"	f
+SemaphoreTimedWait	MQTTLinux.c	/^int SemaphoreTimedWait(Semaphore *sem, Timer *timer)$/;"	f
+SemaphoreWait	MQTTLinux.c	/^int SemaphoreWait(Semaphore *sem)$/;"	f
+TIMEOUT	MQTTErrors.h	/^    TIMEOUT = -3,$/;"	e	enum:returnCode
+Thread	MQTTLinux.h	/^typedef struct Thread$/;"	s
+Thread	MQTTLinux.h	/^} Thread;$/;"	t	typeref:struct:Thread
+ThreadExit	MQTTLinux.c	/^void ThreadExit()$/;"	f
+ThreadJoin	MQTTLinux.c	/^int ThreadJoin(Thread *thread)$/;"	f
+ThreadStart	MQTTLinux.c	/^int ThreadStart(Thread *thread, void (*fn)(void *), void *arg)$/;"	f
+ThreadStarted	MQTTLinux.c	/^int ThreadStarted(Thread *thread)$/;"	f
+Timer	MQTTLinux.h	/^typedef struct Timer$/;"	s
+Timer	MQTTLinux.h	/^} Timer;$/;"	t	typeref:struct:Timer
+TimerCountdown	MQTTLinux.c	/^void TimerCountdown(Timer *timer, unsigned int timeout)$/;"	f
+TimerCountdownMS	MQTTLinux.c	/^void TimerCountdownMS(Timer *timer, unsigned int timeout)$/;"	f
+TimerInit	MQTTLinux.c	/^void TimerInit(Timer *timer)$/;"	f
+TimerIsExpired	MQTTLinux.c	/^char TimerIsExpired(Timer *timer)$/;"	f
+TimerLeftMS	MQTTLinux.c	/^int TimerLeftMS(Timer *timer)$/;"	f
+UNSUBACK	MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
+UNSUBSCRIBE	MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
+__MQTT_CLIENT_C_	MQTTClient.h	19;"	d
+__MQTT_ERRORS_C_	MQTTErrors.h	19;"	d
+__MQTT_LINUX_	MQTTLinux.h	18;"	d
+all	MQTTConnect.h	/^	unsigned char all;	\/**< all connack flags *\/$/;"	m	union:__anon6
+all	MQTTConnect.h	/^	unsigned char all;	\/**< all connect flags *\/$/;"	m	union:__anon1
+arg	MQTTClient.h	/^      void *arg;$/;"	m	struct:MQTTClient::MessageHandlers
+bits	MQTTConnect.h	/^	} bits;$/;"	m	union:__anon1	typeref:struct:__anon1::__anon2
+bits	MQTTConnect.h	/^	} bits;$/;"	m	union:__anon1	typeref:struct:__anon1::__anon3
+bits	MQTTConnect.h	/^	} bits;$/;"	m	union:__anon6	typeref:struct:__anon6::__anon7
+bits	MQTTConnect.h	/^	} bits;$/;"	m	union:__anon6	typeref:struct:__anon6::__anon8
+bits	MQTTPacket.h	/^	} bits;$/;"	m	union:__anon9	typeref:struct:__anon9::__anon10
+bits	MQTTPacket.h	/^	} bits;$/;"	m	union:__anon9	typeref:struct:__anon9::__anon11
+buf	MQTTClient.h	/^   unsigned char *buf,$/;"	m	struct:MQTTClient
+buf_size	MQTTClient.h	/^   size_t buf_size,$/;"	m	struct:MQTTClient
+bufchar	MQTTPacket.c	/^int bufchar(unsigned char* c, int count)$/;"	f
+bufptr	MQTTPacket.c	/^static unsigned char* bufptr;$/;"	v	file:
+byte	MQTTPacket.h	/^	unsigned char byte;	                \/**< the whole byte *\/$/;"	m	union:__anon9
+cfinish	stdoutsub.c	/^void cfinish(int sig)$/;"	f
+cleansession	MQTTConnect.h	/^		unsigned int cleansession : 1;	  \/**< clean session flag *\/$/;"	m	struct:__anon1::__anon2
+cleansession	MQTTConnect.h	/^		unsigned int cleansession : 1;	  \/**< cleansession flag *\/$/;"	m	struct:__anon1::__anon3
+cleansession	MQTTConnect.h	/^	unsigned char cleansession;$/;"	m	struct:__anon5
+clientID	MQTTConnect.h	/^	MQTTString clientID;$/;"	m	struct:__anon5
+clientid	stdoutsub.c	/^   char *clientid;$/;"	m	struct:opts_struct	file:
+command_timeout_ms	MQTTClient.h	/^       command_timeout_ms;$/;"	m	struct:MQTTClient
+cstring	MQTTPacket.h	/^	char* cstring;$/;"	m	struct:__anon13
+cycle	MQTTClient.c	/^int cycle(MQTTClient *c, Timer *timer)$/;"	f
+data	MQTTPacket.h	/^	char* data;$/;"	m	struct:__anon12
+decodePacket	MQTTClient.c	/^static int decodePacket(MQTTClient *c, int *value, int timeout)$/;"	f	file:
+defaultMessageHandler	MQTTClient.h	/^   void (*defaultMessageHandler)(MessageData *);$/;"	m	struct:MQTTClient
+delimiter	stdoutsub.c	/^   char *delimiter;$/;"	m	struct:opts_struct	file:
+deliverMessage	MQTTClient.c	/^int deliverMessage(MQTTClient *c, MQTTString *topicName, MQTTMessage *message)$/;"	f
+dup	MQTTClient.h	/^   unsigned char dup;$/;"	m	struct:MQTTMessage
+dup	MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon9::__anon10
+dup	MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon9::__anon11
+end_time	MQTTLinux.h	/^   struct timeval end_time;$/;"	m	struct:Timer	typeref:struct:Timer::timeval
+errors	MQTTPacket.h	/^enum errors$/;"	g
+fp	MQTTClient.h	/^      void (*fp)(MessageData *, void *);$/;"	m	struct:MQTTClient::MessageHandlers
+getLenStringLen	MQTTPacket.c	/^int getLenStringLen(char* ptr)$/;"	f
+getNextPacketId	MQTTClient.c	/^static int getNextPacketId(MQTTClient *c)$/;"	f	file:
+getfn	MQTTPacket.h	/^	int (*getfn)(void *, unsigned char*, int); \/* must return -1 for error, 0 for call again, or the number of bytes read *\/$/;"	m	struct:__anon14
+getopts	stdoutsub.c	/^void getopts(int argc, char **argv)$/;"	f
+host	stdoutsub.c	/^   char *host;$/;"	m	struct:opts_struct	file:
+id	MQTTClient.h	/^   unsigned short id;$/;"	m	struct:MQTTMessage
+inline	StackTrace.h	40;"	d
+ipstack	MQTTClient.h	/^   Network *ipstack;$/;"	m	struct:MQTTClient
+isTopicMatched	MQTTClient.c	/^static char isTopicMatched(char *topicFilter, MQTTString *topicName)$/;"	f	file:
+isconnected	MQTTClient.h	/^   int isconnected;$/;"	m	struct:MQTTClient
+item	MQTTLinux.h	/^   unsigned short item;$/;"	m	struct:Queue
+keepAliveInterval	MQTTConnect.h	/^	unsigned short keepAliveInterval;$/;"	m	struct:__anon5
+keep_alive_interval	MQTTClient.h	/^   unsigned int keep_alive_interval;$/;"	m	struct:MQTTClient
+keepalive	MQTTClient.c	/^int keepalive(MQTTClient *c)$/;"	f
+len	MQTTPacket.h	/^	int len;$/;"	m	struct:__anon12
+len	MQTTPacket.h	/^	int len;$/;"	m	struct:__anon14
+lenstring	MQTTPacket.h	/^	MQTTLenString lenstring;$/;"	m	struct:__anon13
+linux_read	MQTTLinux.c	/^int linux_read(Network *n, unsigned char *buffer, int len, int timeout_ms)$/;"	f
+linux_write	MQTTLinux.c	/^int linux_write(Network *n, unsigned char *buffer, int len, int timeout_ms)$/;"	f
+m	MQTTLinux.h	/^   Mutex m;$/;"	m	struct:Queue
+m	MQTTLinux.h	/^   pthread_mutex_t m;$/;"	m	struct:Mutex
+main	stdoutsub.c	/^int main(int argc, char **argv)$/;"	f
+message	MQTTClient.h	/^   MQTTMessage *message;$/;"	m	struct:MessageData
+message	MQTTConnect.h	/^	MQTTString message;$/;"	m	struct:__anon4
+messageArrived	stdoutsub.c	/^void messageArrived(MessageData *md, void *arg)$/;"	f
+messageHandler	MQTTClient.h	/^typedef void (*messageHandler)(MessageData *, void *);$/;"	t
+messageHandlers	MQTTClient.h	/^   } messageHandlers[MAX_MESSAGE_HANDLERS]; \/* Message handlers are indexed by subscription topic *\/$/;"	m	struct:MQTTClient	typeref:struct:MQTTClient::MessageHandlers
+min	MQTTConnectServer.c	21;"	d	file:
+min	MQTTDeserializePublish.c	21;"	d	file:
+mqttread	MQTTLinux.h	/^   int (*mqttread)(struct Network *, unsigned char *, int, int);$/;"	m	struct:Network
+mqttwrite	MQTTLinux.h	/^   int (*mqttwrite)(struct Network *, unsigned char *, int, int);$/;"	m	struct:Network
+msgTypes	MQTTPacket.h	/^enum msgTypes$/;"	g
+multiplier	MQTTPacket.h	/^	int multiplier;$/;"	m	struct:__anon14
+my_socket	MQTTLinux.h	/^   int my_socket;$/;"	m	struct:Network
+next_packetid	MQTTClient.h	/^   unsigned int next_packetid,$/;"	m	struct:MQTTClient
+nodelimiter	stdoutsub.c	/^   int nodelimiter;$/;"	m	struct:opts_struct	file:
+opts	stdoutsub.c	/^} opts =$/;"	v	typeref:struct:opts_struct
+opts_struct	stdoutsub.c	/^struct opts_struct$/;"	s	file:
+password	MQTTConnect.h	/^		unsigned int password : 1; 			\/**< 3.1 password *\/$/;"	m	struct:__anon1::__anon2
+password	MQTTConnect.h	/^		unsigned int password : 1; 			\/**< 3.1 password *\/$/;"	m	struct:__anon1::__anon3
+password	MQTTConnect.h	/^	MQTTString password;$/;"	m	struct:__anon5
+password	stdoutsub.c	/^   char *password;$/;"	m	struct:opts_struct	file:
+payload	MQTTClient.h	/^   void *payload;$/;"	m	struct:MQTTMessage
+payloadlen	MQTTClient.h	/^   size_t payloadlen;$/;"	m	struct:MQTTMessage
+ping_outstanding	MQTTClient.h	/^   char ping_outstanding;$/;"	m	struct:MQTTClient
+ping_sent	MQTTClient.h	/^   struct timeval ping_sent;$/;"	m	struct:MQTTClient	typeref:struct:MQTTClient::timeval
+ping_time	MQTTClient.h	/^   long ping_time;$/;"	m	struct:MQTTClient
+ping_timer	MQTTClient.h	/^   Timer ping_timer;$/;"	m	struct:MQTTClient
+port	stdoutsub.c	/^   int port;$/;"	m	struct:opts_struct	file:
+qos	MQTTClient.h	/^   enum QoS qos;$/;"	m	struct:MQTTMessage	typeref:enum:MQTTMessage::QoS
+qos	MQTTConnect.h	/^	char qos;$/;"	m	struct:__anon4
+qos	MQTTPacket.h	/^		unsigned int qos : 2;				\/**< QoS value, 0, 1 or 2 *\/$/;"	m	struct:__anon9::__anon10
+qos	MQTTPacket.h	/^		unsigned int qos : 2;				\/**< QoS value, 0, 1 or 2 *\/$/;"	m	struct:__anon9::__anon11
+qos	stdoutsub.c	/^   enum QoS qos;$/;"	m	struct:opts_struct	typeref:enum:opts_struct::QoS	file:
+readChar	MQTTPacket.c	/^char readChar(unsigned char** pptr)$/;"	f
+readInt	MQTTPacket.c	/^int readInt(unsigned char** pptr)$/;"	f
+readMQTTLenString	MQTTPacket.c	/^int readMQTTLenString(MQTTString* mqttstring, unsigned char** pptr, unsigned char* enddata)$/;"	f
+readPacket	MQTTClient.c	/^static int readPacket(MQTTClient *c, Timer *timer)$/;"	f	file:
+read_thread	MQTTClient.h	/^   Thread read_thread;$/;"	m	struct:MQTTClient
+readbuf	MQTTClient.h	/^       *readbuf;$/;"	m	struct:MQTTClient
+readbuf_size	MQTTClient.h	/^       readbuf_size;$/;"	m	struct:MQTTClient
+rem_len	MQTTPacket.h	/^	int rem_len;$/;"	m	struct:__anon14
+reply	MQTTClient.h	/^   Queue reply;$/;"	m	struct:MQTTClient
+retain	MQTTPacket.h	/^		unsigned int retain : 1;		\/**< retained flag bit *\/$/;"	m	struct:__anon9::__anon10
+retain	MQTTPacket.h	/^		unsigned int retain : 1;		\/**< retained flag bit *\/$/;"	m	struct:__anon9::__anon11
+retained	MQTTClient.h	/^   unsigned char retained;$/;"	m	struct:MQTTMessage
+retained	MQTTConnect.h	/^	unsigned char retained;$/;"	m	struct:__anon4
+returnCode	MQTTErrors.h	/^enum returnCode$/;"	g
+s	MQTTLinux.h	/^   Semaphore s;$/;"	m	struct:Queue
+s	MQTTLinux.h	/^   sem_t s;$/;"	m	struct:Semaphore
+sck	MQTTPacket.h	/^	void *sck;	\/* pointer to whatever the system may use to identify the transport *\/$/;"	m	struct:__anon14
+sendPacket	MQTTClient.c	/^static int sendPacket(MQTTClient *c, int length, Timer *timer)$/;"	f	file:
+sessionpresent	MQTTConnect.h	/^		unsigned int sessionpresent : 1;    \/**< session present flag *\/$/;"	m	struct:__anon6::__anon7
+sessionpresent	MQTTConnect.h	/^		unsigned int sessionpresent : 1;    \/**< session present flag *\/$/;"	m	struct:__anon6::__anon8
+showtopics	stdoutsub.c	/^   int showtopics;$/;"	m	struct:opts_struct	file:
+started	MQTTLinux.h	/^   int started;$/;"	m	struct:Thread
+state	MQTTPacket.h	/^	char state;$/;"	m	struct:__anon14
+str	MQTTClient.h	49;"	d
+struct_id	MQTTConnect.h	/^	char struct_id[4];$/;"	m	struct:__anon4
+struct_id	MQTTConnect.h	/^	char struct_id[4];$/;"	m	struct:__anon5
+struct_version	MQTTConnect.h	/^	int struct_version;$/;"	m	struct:__anon4
+struct_version	MQTTConnect.h	/^	int struct_version;$/;"	m	struct:__anon5
+t	MQTTLinux.h	/^   pthread_t t;$/;"	m	struct:Thread
+toStop	stdoutsub.c	/^volatile int toStop = 0;$/;"	v
+topicFilter	MQTTClient.h	/^      const char *topicFilter;$/;"	m	struct:MQTTClient::MessageHandlers
+topicName	MQTTClient.h	/^   MQTTString *topicName;$/;"	m	struct:MessageData
+topicName	MQTTConnect.h	/^	MQTTString topicName;$/;"	m	struct:__anon4
+type	MQTTPacket.h	/^		unsigned int type : 4;			\/**< message type nibble *\/$/;"	m	struct:__anon9::__anon10
+type	MQTTPacket.h	/^		unsigned int type : 4;			\/**< message type nibble *\/$/;"	m	struct:__anon9::__anon11
+usage	stdoutsub.c	/^void usage()$/;"	f
+username	MQTTConnect.h	/^		unsigned int username : 1;			\/**< 3.1 user name *\/$/;"	m	struct:__anon1::__anon2
+username	MQTTConnect.h	/^		unsigned int username : 1;			\/**< 3.1 user name *\/$/;"	m	struct:__anon1::__anon3
+username	MQTTConnect.h	/^	MQTTString username;$/;"	m	struct:__anon5
+username	stdoutsub.c	/^   char *username;$/;"	m	struct:opts_struct	file:
+waitfor	MQTTClient.c	/^int waitfor(MQTTClient *c, unsigned short packet_type, Timer *timer)$/;"	f
+will	MQTTConnect.h	/^		unsigned int will : 1;			    \/**< will flag *\/$/;"	m	struct:__anon1::__anon2
+will	MQTTConnect.h	/^		unsigned int will : 1;			    \/**< will flag *\/$/;"	m	struct:__anon1::__anon3
+will	MQTTConnect.h	/^	MQTTPacket_willOptions will;$/;"	m	struct:__anon5
+willFlag	MQTTConnect.h	/^	unsigned char willFlag;$/;"	m	struct:__anon5
+willQoS	MQTTConnect.h	/^		unsigned int willQoS : 2;				\/**< will QoS value *\/$/;"	m	struct:__anon1::__anon2
+willQoS	MQTTConnect.h	/^		unsigned int willQoS : 2;				\/**< will QoS value *\/$/;"	m	struct:__anon1::__anon3
+willRetain	MQTTConnect.h	/^		unsigned int willRetain : 1;		\/**< will retain setting *\/$/;"	m	struct:__anon1::__anon2
+willRetain	MQTTConnect.h	/^		unsigned int willRetain : 1;		\/**< will retain setting *\/$/;"	m	struct:__anon1::__anon3
+writeCString	MQTTPacket.c	/^void writeCString(unsigned char** pptr, const char* string)$/;"	f
+writeChar	MQTTPacket.c	/^void writeChar(unsigned char** pptr, char c)$/;"	f
+writeInt	MQTTPacket.c	/^void writeInt(unsigned char** pptr, int anInt)$/;"	f
+writeMQTTString	MQTTPacket.c	/^void writeMQTTString(unsigned char** pptr, MQTTString mqttstring)$/;"	f
+write_mutex	MQTTClient.h	/^   Mutex write_mutex;$/;"	m	struct:MQTTClient
+xstr	MQTTClient.h	48;"	d

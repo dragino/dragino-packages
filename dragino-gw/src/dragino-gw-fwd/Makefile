@@ -75,7 +75,7 @@ else
   endif
 endif
 
-LIBS += -L../ttn-gateway-connector/bin -lttn-gateway-connector -L../paho.mqtt.embedded-c/build/output -lpaho-embed-mqtt3c -lprotobuf-c 
+LIBS += -L../ttn-gateway-connector/bin -lttn-gateway-connector -lprotobuf-c 
 
 CFLAGS ?=
 LDFLAGS ?=

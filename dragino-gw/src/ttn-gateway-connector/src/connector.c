@@ -70,6 +70,7 @@ int ttngwc_connect(TTN *s, const char *host_name, int port, const char *key) {
   MQTTPacket_connectData connect = MQTTPacket_connectData_initializer;
 
   err = NetworkConnect(&session->network, (char *)host_name, port);
+  printf("after connect\n");
   if (err != SUCCESS) 
     goto exit;
 

@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 
   // Initialize the TTN gateway with ID test
   TTN *ttn;
-  ttngwc_init(&ttn, "test", &print_downlink, NULL);
+  ttngwc_init(&ttn, "dragino-gateway-ttn-0001", &print_downlink, NULL);
   if (!ttn) {
     printf("failed to initialize TTN gateway\n");
     return -1;
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 
   // Connect to the test broker. The secret key is NULL for simplicity
   printf("connecting...\n");
-  int err = ttngwc_connect(ttn, "23.97.152.238", 1883, NULL);
+  int err = ttngwc_connect(ttn, "bridge.eu.thethings.network", 1883, "ttn-account-v2.O9GwnfvD6tIWyIxBCXgiCt33e8iI-c-9aV3sm_sFjVQbYnLR5OtgH0IkTUtpwh3_t3I2_gEPsX7oNCXnNZ7Shg");
   if (err != 0) {
     printf("connect failed: %d\n", err);
     ttngwc_cleanup(ttn);

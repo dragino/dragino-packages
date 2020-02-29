@@ -5,6 +5,9 @@ APP_NAME := dragino_gw_fwd
 ### Environment constants 
 
 LGW_PATH ?= ../libloragw
+MQTT_PATH ?= ../libmqtt
+TTN_PATH ?= ../libttn
+
 ARCH ?=
 CROSS_COMPILE ?=
 
@@ -35,24 +38,13 @@ ifneq ($(wildcard $(LGW_PATH)/inc/config.h),)
 endif
 LGW_INC += $(LGW_PATH)/inc/loragw_hal.h
 LGW_INC += $(LGW_PATH)/inc/loragw_gps.h
+TTN_INC := -I$(TTN_PATH) 
 
-TTN_INC := -I../ttn-gateway-connector/src -I../ttn-gateway-connector/src/github.com/gogo/protobuf/protobuf -I../ttn-gateway-connector/src/github.com/TheThingsNetwork
 ### Linking options
 
 LIBS:=
 
-ifeq ($(PLATFORM),multitech)
-  CFLAGS_C += -DMTECH
-  LIBS += -lgcc_s
-endif
-ifeq ($(PLATFORM),multitech_spi)
-  CFLAGS_C += -DMTECH
-  LIBS += -lgcc_s
-endif
 ifeq ($(PLATFORM),imst_rpi)
-  CFLAGS_C += -DRPI
-endif
-ifeq ($(PLATFORM),linklabs_blowfish_rpi)
   CFLAGS_C += -DRPI
 endif
 
@@ -75,7 +67,7 @@ else
   endif
 endif
 
-LIBS += -L../ttn-gateway-connector/bin -lttn-gateway-connector -lprotobuf-c 
+LIBS += -L$(MQTT_PATH) -lpahomqtt3c -L$(TTN_PATH)/obj -lttn-gateway-connector -lprotobuf-c 
 
 CFLAGS ?=
 LDFLAGS ?=

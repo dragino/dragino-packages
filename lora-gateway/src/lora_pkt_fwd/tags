@@ -52,8 +52,8 @@ Bits	inc/mac-header-decode.h	/^    }Bits;$/;"	m	union:uLoRaMacHeader	typeref:str
 BufSize	inc/mac-header-decode.h	/^    uint8_t BufSize;$/;"	m	struct:sLoRaMacMessageData
 Buffer	inc/mac-header-decode.h	/^    uint8_t* Buffer;$/;"	m	struct:sLoRaMacMessageData
 CC	Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
-CFLAGS	Makefile	/^CFLAGS := -O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
-CREATEAPBDEVS	inc/db.h	15;"	d
+CFLAGS	Makefile	/^CFLAGS := -O2 -Wall -Wextra -std=c99 -DBIGENDIAN -Iinc -I.$/;"	m
+CREATEABPDEVS	inc/db.h	15;"	d
 CRIT	src/base64.c	30;"	d	file:
 CRITICAL_SECTION_BEGIN	inc/utilities.h	122;"	d
 CRITICAL_SECTION_END	inc/utilities.h	127;"	d
@@ -67,7 +67,8 @@ DEBUG_JIT	src/lora_pkt_fwd.c	/^uint8_t DEBUG_JIT        = 0;$/;"	v
 DEBUG_JIT_ERROR	src/lora_pkt_fwd.c	/^uint8_t DEBUG_JIT_ERROR  = 0;$/;"	v
 DEBUG_PKT_FWD	src/lora_pkt_fwd.c	/^uint8_t DEBUG_PKT_FWD    = 0;  $/;"	v
 DEBUG_REPORT	src/lora_pkt_fwd.c	/^uint8_t DEBUG_REPORT   = 0;$/;"	v
-DEBUG_STMT	src/db.c	22;"	d	file:
+DEBUG_SQL	src/db.c	23;"	d	file:
+DEBUG_STMT	src/db.c	25;"	d	file:
 DEBUG_TIMERSYNC	src/lora_pkt_fwd.c	/^uint8_t DEBUG_TIMERSYNC  = 0;$/;"	v
 DEBUG_WARNING	src/lora_pkt_fwd.c	/^uint8_t DEBUG_WARNING    = 1;$/;"	v
 DEFAULT_BEACON_BW_HZ	src/lora_pkt_fwd.c	135;"	d	file:
@@ -117,8 +118,8 @@ HAVE_MEMCPY	src/aes.c	39;"	d	file:
 HAVE_UINT_32T	src/aes.c	52;"	d	file:
 HIGH	inc/radio.h	183;"	d
 INCLUDES	Makefile	/^INCLUDES = $(wildcard inc\/*.h)$/;"	m
-INITSTMT	inc/db.h	25;"	d
-INSERTTSKEY	inc/db.h	23;"	d
+INITSTMT	inc/db.h	24;"	d
+INSERTTSKEY	inc/db.h	22;"	d
 INVERTIQ2_OFF	inc/radio.h	143;"	d
 INVERTIQ2_ON	inc/radio.h	142;"	d
 INVERTIQ_RX_MASK	inc/radio.h	135;"	d
@@ -172,7 +173,7 @@ JSON_Value_Type	inc/parson.h	/^typedef int JSON_Value_Type;$/;"	t
 JSON_Value_Value	src/parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_value_value	file:
 LGW_INC	Makefile	/^LGW_INC =$/;"	m
 LGW_PATH	Makefile	/^LGW_PATH ?= ..\/libloragw$/;"	m
-LIBS	Makefile	/^LIBS := -lloragw -luci -lrt -lpthread -lm$/;"	m
+LIBS	Makefile	/^LIBS := -lloragw -luci -lrt -lsqlite3 -lpthread -lm$/;"	m
 LNA_LOW_GAIN	inc/radio.h	76;"	d
 LNA_MAX_GAIN	inc/radio.h	74;"	d
 LNA_OFF_GAIN	inc/radio.h	75;"	d
@@ -221,6 +222,7 @@ MAP_DIO2_LORA_NOP	inc/radio.h	108;"	d
 MAX	inc/utilities.h	39;"	d
 MAX	src/parson.c	44;"	d	file:
 MAXLINE	inc/radio.h	145;"	d
+MAXPAYLOAD	src/lora_pkt_fwd.c	143;"	d	file:
 MAX_NESTING	src/parson.c	38;"	d	file:
 MHDR	inc/mac-header-decode.h	/^    LoRaMacHeader_t MHDR;$/;"	m	struct:sLoRaMacMessageData
 MIC	inc/mac-header-decode.h	/^    uint32_t MIC;$/;"	m	struct:sLoRaMacMessageData
@@ -452,7 +454,9 @@ dbpath	src/lora_pkt_fwd.c	/^static char dbpath[32] = "dbpath";$/;"	v	file:
 debug_level_char	src/lora_pkt_fwd.c	/^static char debug_level_char[16] = "debug_level";$/;"	v	file:
 debug_level_uint	src/lora_pkt_fwd.c	/^static uint8_t debug_level_uint = 1;$/;"	v	file:
 desc	inc/radio.h	/^    char desc[8];$/;"	m	struct:__anon2
+dev_addr_mask	src/lora_pkt_fwd.c	/^static uint32_t dev_addr_mask = 0;$/;"	v	file:
 devaddr	inc/db.h	/^    uint32_t devaddr;$/;"	m	struct:devinfo
+devaddr	src/lora_pkt_fwd.c	/^static char devaddr[32] = "devaddr";$/;"	v	file:
 devices	src/spi-gpio.c	/^static struct platform_device *devices[BUS_COUNT_MAX];$/;"	v	typeref:struct:platform_device	file:
 devinfo	inc/db.h	/^struct devinfo {$/;"	s
 difftimespec	src/lora_pkt_fwd.c	/^static double difftimespec(struct timespec end, struct timespec beginning) {$/;"	f	file:
@@ -473,7 +477,7 @@ f9	src/aes.c	87;"	d	file:
 fb	src/aes.c	88;"	d	file:
 fd	src/aes.c	89;"	d	file:
 fe	src/aes.c	90;"	d	file:
-filter_by_fport	src/mac-header-decode.c	/^int filter_by_fport(LoRaMacMessageData_t* macMsg, uint8_t fport) {$/;"	f
+filter_by_mac	src/mac-header-decode.c	/^int filter_by_mac(LoRaMacMessageData_t* macMsg, uint8_t fport, uint32_t devaddr, uint8_t len) {$/;"	f
 fp	src/lora_pkt_fwd.c	/^static FILE *fp = NULL;$/;"	v	file:
 fport_num	src/lora_pkt_fwd.c	/^static int fport_num = 0;$/;"	v	file:
 fportnum	src/lora_pkt_fwd.c	/^static char fportnum[16] = "fportnum";$/;"	v	file:
@@ -655,8 +659,8 @@ length_type	inc/aes.h	/^typedef uint_8t length_type;$/;"	t
 lgwm	src/lora_pkt_fwd.c	/^static uint64_t lgwm = 0; \/* Lora gateway MAC address *\/$/;"	v	file:
 lookupskey	inc/db.h	/^    sqlite3_stmt* lookupskey;$/;"	m	struct:context
 loop	src/single_tx.c	/^static int loop = 0;$/;"	v	file:
-macdecrypt_num	src/lora_pkt_fwd.c	/^static int macdecrypt_num = 0;$/;"	v	file:
-macdecrypto	src/lora_pkt_fwd.c	/^static char macdecrypto[16] = "macdecrypto";$/;"	v	file:
+maccrypto	src/lora_pkt_fwd.c	/^static char maccrypto[16] = "maccrypto";$/;"	v	file:
+maccrypto_num	src/lora_pkt_fwd.c	/^static int maccrypto_num = 0;$/;"	v	file:
 main	src/lora_pkt_fwd.c	/^int main(void)$/;"	f
 main	src/single_tx.c	/^int main(int argc, char *argv[])$/;"	f
 malloc	src/parson.c	46;"	d	file:

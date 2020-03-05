@@ -14,9 +14,17 @@
 
 #define CREATEABPDEVS "\
 CREATE TABLE IF NOT EXISTS `abpdevs` (\
-  `devaddr` TEXT UNIQUE,\
-  `appskey` TEXT,\
-  `nwkskey` TEXT\
+  `devaddr` TEXT PRIMARY KEY NOT NULL,\
+  `appskey` TEXT NOT NULL,\
+  `nwkskey` TEXT NOT NULL\
+);"
+
+#define CREATEDWLINK "\
+CREATE TABLE IF NOT EXISTS `dwlink` (\
+  `id`  INTEGER PRIMARY KEY AUTOINCREMENT,\
+  `devaddr` TEXT,\
+  `data` TEXT,\
+  `status` INTEGER NOT NULL DEFAULT 0\
 );"
 
 #define INSERTTSKEY "INSERT OR IGNORE INTO abpdevs (devaddr, appskey, nwkskey) VALUES ('2604185D', '850654CCC7614CFCCFA138BDFC285E82', '5DE37E916757759FCF81CA684C253E35')"

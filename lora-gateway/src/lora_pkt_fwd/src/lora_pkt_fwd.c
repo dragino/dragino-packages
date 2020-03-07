@@ -3099,10 +3099,10 @@ void thread_down(void) {
                             pwr_level < txlut.lut[i].rf_power) {
                         pwr_level = txlut.lut[i].rf_power;
                     }
-                    if (pwr_level != txpkt.rf_power) {
-                        txpkt.rf_power = pwr_level;
-                        MSG_DEBUG(DEBUG_INFO, "INFO~ RF Power adjusted to %d from %d\n", pwr_level, txpkt.rf_power);
-                    }
+                }
+                if (pwr_level != txpkt.rf_power) {
+                    txpkt.rf_power = pwr_level;
+                    MSG_DEBUG(DEBUG_INFO, "INFO~ RF Power adjusted to %d from %d\n", pwr_level, txpkt.rf_power);
                 }
             }
 

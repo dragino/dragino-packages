@@ -50,8 +50,9 @@ start() {
         DEB="1"
     fi
 
-	# Detect Cellular USB device	
+	# Detect Cellular USB device	(and repeat to be sure)
 	cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c > /tmp/cell_detect.txt
+	(sleep 30; cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c > /tmp/cell_detect.txt) &
 	
 	# Detect model
 	is_lps8=$(hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c "lps8")
@@ -62,7 +63,7 @@ start() {
 	fi
 	
 	if [ $board == "LG01" ];then
-		model=LG308
+		model=LG01
 	fi	
 	
 	if [ $is_lps8 == "1" ]; then

@@ -27,8 +27,6 @@ CREATE TABLE IF NOT EXISTS `dwlink` (\
   `status` INTEGER NOT NULL DEFAULT 0\
 );"
 
-#define INSERTTSKEY "INSERT OR IGNORE INTO abpdevs (devaddr, appskey, nwkskey) VALUES ('2604185D', '850654CCC7614CFCCFA138BDFC285E82', '5DE37E916757759FCF81CA684C253E35')"
-
 #define INITSTMT(SQL, STMT) if (sqlite3_prepare_v2(cntx->db, SQL, -1, &STMT, NULL) != SQLITE_OK) {  \
 			    printf("failed to prepare sql; %s -> %s\n", SQL,  sqlite3_errmsg(cntx->db));\
 			    goto out;\

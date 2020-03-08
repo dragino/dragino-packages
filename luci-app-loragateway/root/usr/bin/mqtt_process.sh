@@ -11,6 +11,7 @@ UPDATE_INTERVAL=5
 old=`date +%s`
 
 CERTPATH="/etc/iot/cert/"
+CHAN_FILE="/etc/iot/channels"
 
 server_type=`uci get mqtt.common.server_type`
 hostname=`uci get system.@[0].hostname`
@@ -259,15 +260,16 @@ do
 			[ $DEBUG -ge 2 ] && [ -n "$CID" ] && logger "[IoT.MQTT]: Found Data at Local Channels:" $CID
 
 			for channel in $CID; do
-				HAS_CID=`uci show mqtt | grep 'local_id=' | grep $channel | cut -d . -f 2`
-				if [ -n "$HAS_CID" ];then
+				CHAN_INFO=`sqlite3 $CHAN_FILE "SELECT *from mapping where local = '$channel';" | awk -F '\\|' '{print $1" " $2" " $3}'`
+				if [ -n "$CHAN_INFO" ];then
 					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
 
 					# Get values
-					remote_id=`uci -q get mqtt.$HAS_CID.remote_id`
-					local_id=`uci -q get mqtt.$HAS_CID.local_id`
-					channel_API=`uci -q get mqtt.$HAS_CID.write_api_key`
-
+					local_id=`awk -F '\\|' '{print $1}'`
+					remote_id=`awk -F '\\|' '{print $2}'`
+					channel_API=`awk -F '\\|' '{print $3}'`
+					
+					# Send Data  					
 					meta=`cat /var/iot/channels/$channel` 
 					time=`echo $meta | cut -d , -f 1` 
 					rssi=`echo $meta | cut -d , -f 2` 
@@ -294,6 +296,13 @@ do
 					mqtt_data=`echo ${mqtt_data/META/$meta}`  
 					mqtt_data=`echo ${mqtt_data/JSON/$json}`  
 
+					# Send Whole File
+					if [ "$data_format" == "META" ];then 
+						PUB_MESSAGE="-f /var/iot/channels/$channel"
+					else
+						PUB_MESSAGE="-m '$mqtt_data'"
+					fi					
+					
 					# Initialise debug flag
 					D=" "
 					if [ $DEBUG -ge 10 ]; then
@@ -306,27 +315,27 @@ do
 					# 1. Case with User, Password and Client ID present
 					if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
 						case="1"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" -u $user -P "$pass" $C $cafile
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic $PUB_MESSAGE -u $user -P "$pass" $C $cafile
 					# 2. Case with Certificate, Key and ClientID present
 					elif [ ! -z "$certfile" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then
 						case="2"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" --cert $cert --key $key $C $cafile
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic $PUB_MESSAGE --cert $cert --key $key $C $cafile
 					# 3. Case with no User, Certificate or ClientID present
 					elif [ -z "$user" ] && [ -z "$certfile" ] && [ -z "$clientID" ]; then
 						case="3"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -t $pub_topic -m "$mqtt_data" 
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -t $pub_topic $PUB_MESSAGE 
 					# 4. Case with no User, Certificate, but with ClientID present
 					elif [ -z "$user" ] && [ -z "$certfile" ] && [ ! -z "$clientID" ]; then
 						case="4"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data"
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic $PUB_MESSAGE
 					# 5. Case with User and ClientID present, but no Password and no Certificate present
 					elif [ -z "$pass" ] && [ -z "$certfile" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
 						case="5"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -m "$mqtt_data" -u $user
+						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic $PUB_MESSAGE -u $user
 					# 6. Case with User and Password present, but no ClientID and no Certificate present
 					elif [ ! -z "$user" ] && [ ! -z "$pass" ] && [ -z "$clientID" ] && [ -z "$certfile" ]; then
 						case="6"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos  -t $pub_topic -m "$mqtt_data" -u $user -P "$pass"
+						mosquitto_pub $D -h $server -p $port -q $pub_qos  -t $pub_topic $PUB_MESSAGE -u $user -P "$pass"
 					# 0. Else - invalid parameters, just log
 					else
 						case="Invalid parameters"  
@@ -351,7 +360,11 @@ do
 						logger "[IoT.MQTT]:clientID[-i]: "$clientID
 						logger "[IoT.MQTT]:remote_id: "$remote_id
 						logger "[IoT.MQTT]:pub_topic[-t]: "$pub_topic
-						logger "[IoT.MQTT]:mqtt_data[-m]: "$mqtt_data
+						if [ "$data_format" == "META" ];then 
+							logger "[IoT.MQTT]:mqtt_file[-f]: /var/iot/channels/"$channel
+						else
+							logger "[IoT.MQTT]:mqtt_data[-m]: "$mqtt_data
+						fi	
 						logger "[IoT.MQTT]:------"
 					fi 
 
@@ -376,7 +389,11 @@ do
 						echo "clientID: "$clientID
 						echo "remoteID: "$remote_id
 						echo "pub_topic: "$pub_topic
-						echo "mqtt_data: "$mqtt_data
+						if [ "$data_format" == "META" ];then 
+							echo "[IoT.MQTT]:mqtt_file[-f]: /var/iot/channels/"$channel
+						else
+							echo "[IoT.MQTT]:mqtt_data[-m]: "$mqtt_data
+						fi
 						echo "------"
 					fi
 

@@ -326,7 +326,6 @@ static DWLINK* search_dwlink(char *addr);
 
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
 static int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len);
-
 static void sigusr_handler(int sigio);
 
 static char uci_config_file[32] = "/etc/config/gateway";
@@ -1357,11 +1356,36 @@ int main(void)
 	MSG_DEBUG(DEBUG_INFO, "INFO~ FPort Filter: %u\n", fport_num);
 		
     /* DevAddr filter configure */
+	int tmp=0;
     if (!get_config("general", devaddr_mask, sizeof(devaddr_mask)))
         dev_addr_mask = 0;
-    else {
-        dev_addr_mask = 1;
-	    MSG_DEBUG(DEBUG_INFO, "INFO~ DevAddrMask: 0x%s\n", devaddr_mask);
+    else 
+		for (i=0;i<(int)strlen(devaddr_mask);i++)   // Convert String to uint_32 hex
+		{
+			tmp = toupper(devaddr_mask[i]) - 0x30;
+			if ( tmp > 9 )
+				tmp -= 7;
+			dev_addr_mask = ((dev_addr_mask << ( (i==0)? 0:4)) | tmp);
+		}
+	MSG_DEBUG(DEBUG_INFO, "INFO~ DevAddrMask: 0x%X\n", dev_addr_mask);
+
+    /* sqlitedb, mac decrypto */
+	if(!get_config("general", maccrypto, sizeof(maccrypto)))
+		maccrypto_num = 0;
+    else
+        maccrypto_num = atoi(maccrypto);
+
+    if(!get_config("general", dbpath, sizeof(dbpath)))
+
+    strcpy(dbpath, "/etc/lora/devskey");
+	MSG_DEBUG(DEBUG_INFO, "INFO~ ABP Decryption: %s\n", maccrypto_num? "yes" : "no");
+
+    if (maccrypto_num != 0) {
+        if(!db_init(dbpath, &cntx)) {
+            MSG_DEBUG(DEBUG_WARNING, "WARNING~ No ABP Keys Found at %s, Ignore ABP Decryption!\n",dbpath);
+            maccrypto_num = 0;
+        } else 
+            MSG_DEBUG(DEBUG_INFO, "INFO~ Mac payload will be decrypted!\n");
     }
 
     /* LOG or debug message configure */
@@ -1445,15 +1469,9 @@ int main(void)
     get_config("general", server_type, sizeof(server_type));
 
     /* sqlitedb, mac decrypto */
-    if(!get_config("general", maccrypto, sizeof(maccrypto)))
-        maccrypto_num = 0;
-    else
-        maccrypto_num = atoi(maccrypto);
 
-    if(!get_config("general", dbpath, sizeof(dbpath)))
-        strcpy(dbpath, "/root/devskey");
 
-    MSG_DEBUG(DEBUG_INFO, "INFO~ sx1276:%d, sxtxpw:%d, model:%s, server_type:%s, maccrypto: %s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model, server_type, maccrypto_num? "yes" : "no");
+    MSG_DEBUG(DEBUG_INFO, "INFO~ sx1276:%d, sxtxpw:%d, model:%s, server_type:%s\n", atoi(sx1276_tx), atoi(sx1276_txpw), model, server_type);
 
     /* only LG08P with sx1276 */
 
@@ -1473,15 +1491,6 @@ int main(void)
             sx1276 = true;
         else
             free(sxradio);
-    }
-
-    if (maccrypto_num != 0) {
-        if(!db_init(dbpath, &cntx)) {
-            MSG_DEBUG(DEBUG_WARNING, "Can't init sqlite database, Ignore!\n");
-            maccrypto_num = 0;
-        } else { 
-            MSG_DEBUG(DEBUG_INFO, "mac payload will be decrypt!\n");
-        }
     }
 
     /* init semaphore */

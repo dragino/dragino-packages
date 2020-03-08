@@ -42,15 +42,6 @@ static bool db_createtb(struct context* cntx) {
     }
     sqlite3_finalize(createabpdevs);
 
-    INITSTMT(INSERTTSKEY, inserttskey);
-    
-    if (!db_step(inserttskey, NULL, NULL)) {
-        printf("error running table insert statement inserttskey");
-        sqlite3_finalize(inserttskey);
-        goto out;
-    }
-    sqlite3_finalize(inserttskey);
-
     return true;
 out:
     return false;

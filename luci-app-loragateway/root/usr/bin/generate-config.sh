@@ -68,10 +68,17 @@ if [ "$def_cfg" = "AU" ] || [ "$def_cfg" = "US" ] ;then
 	def_cfg="$def_cfg-$subband"
 fi
 
-if [ -f /etc/lora/cfg/"$def_cfg"-global_conf.json ] 
+model=`cat /tmp/iot/model.txt`
+if [ $model == "LG308" ] || [ $model == "DLOS8" ];then
+	chip="301"
+elif [ $model == "LPS8" ];then
+	chip="308"
+fi
+
+if [ -f /etc/lora/cfg-$chip/"$def_cfg"-global_conf.json ] 
 then 
     gen_gw_cfg
-    cp -rf /etc/lora/cfg/"$def_cfg"-global_conf.json /etc/lora/global_conf.json
+    cp -rf /etc/lora/cfg-$chip/"$def_cfg"-global_conf.json /etc/lora/global_conf.json
     echo_chan_if
 else
     rm -rf /etc/lora/local_conf.json
@@ -208,32 +215,116 @@ else
 
     json_add_object tx_lut_0
     json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "10" 
-    json_add_int "rf_power"  "14" 
-    json_add_int "dig_gain"  "0" 
+    json_add_int "mix_gain"  "9" 
+    json_add_int "rf_power"  "12" 
+    json_add_int "dig_gain"  "2" 
     json_close_object
 
     json_add_object tx_lut_1
     json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "11" 
+    json_add_int "mix_gain"  "9" 
+    json_add_int "rf_power"  "13" 
+    json_add_int "dig_gain"  "1" 
+    json_close_object
+
+    json_add_object tx_lut_2
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "10" 
+    json_add_int "rf_power"  "14" 
+    json_add_int "dig_gain"  "2" 
+    json_close_object
+
+    json_add_object tx_lut_3
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "10" 
+    json_add_int "rf_power"  "15" 
+    json_add_int "dig_gain"  "1" 
+    json_close_object
+
+    json_add_object tx_lut_4
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "10" 
     json_add_int "rf_power"  "16" 
     json_add_int "dig_gain"  "0" 
     json_close_object
 
-    json_add_object tx_lut_2
-    json_add_int "pa_gain"  "3" 
-    json_add_int "mix_gain"  "9" 
+    json_add_object tx_lut_5
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "11" 
+    json_add_int "rf_power"  "17" 
+    json_add_int "dig_gain"  "1" 
+    json_close_object
+
+    json_add_object tx_lut_6
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "11" 
+    json_add_int "rf_power"  "18" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_7
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "12" 
+    json_add_int "rf_power"  "19" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_8
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "13" 
     json_add_int "rf_power"  "20" 
     json_add_int "dig_gain"  "0" 
     json_close_object
 
-    json_add_object tx_lut_3
+    json_add_object tx_lut_9
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "14" 
+    json_add_int "rf_power"  "21" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_10
+    json_add_int "pa_gain"  "2" 
+    json_add_int "mix_gain"  "15" 
+    json_add_int "rf_power"  "22" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_11
+    json_add_int "pa_gain"  "3" 
+    json_add_int "mix_gain"  "11" 
+    json_add_int "rf_power"  "23" 
+    json_add_int "dig_gain"  "1" 
+    json_close_object
+
+    json_add_object tx_lut_12
+    json_add_int "pa_gain"  "3" 
+    json_add_int "mix_gain"  "12" 
+    json_add_int "rf_power"  "24" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_13
+    json_add_int "pa_gain"  "3" 
+    json_add_int "mix_gain"  "14" 
+    json_add_int "rf_power"  "25" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_14
+    json_add_int "pa_gain"  "3" 
+    json_add_int "mix_gain"  "14" 
+    json_add_int "rf_power"  "26" 
+    json_add_int "dig_gain"  "0" 
+    json_close_object
+
+    json_add_object tx_lut_15
     json_add_int "pa_gain"  "3" 
     json_add_int "mix_gain"  "14" 
     json_add_int "rf_power"  "27" 
     json_add_int "dig_gain"  "0" 
     json_close_object
-
+	
     #close json object SX1301_conf
     json_close_object
 

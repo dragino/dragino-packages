@@ -2335,7 +2335,7 @@ void thread_up(void) {
 }
 
 void thread_proc_rxpkt() {
-    int i; /* loop variables */
+    int idx, i; /* loop variables */
     int fsize = 0;
     struct lgw_pkt_rx_s *p; /* pointer on a RX packet */
     struct lgw_pkt_tx_s txpkt;
@@ -2360,8 +2360,8 @@ void thread_proc_rxpkt() {
         if (entry == NULL)
             continue;
         do {
-            for (i = 0; i < entry->nb_pkt; ++i) {
-                p = &entry->rxpkt[i];
+            for (idx = 0; idx < entry->nb_pkt; ++idx) {
+                p = &entry->rxpkt[idx];
                 macmsg.Buffer = p->payload;
                 macmsg.BufSize = p->size;
                 if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg)) { 
@@ -2382,7 +2382,7 @@ void thread_proc_rxpkt() {
                                 if (NULL == fp)
                                     MSG_DEBUG(DEBUG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
                                 else { 
-                                    fprintf(fp, "%s", payloadtxt); 
+                                    fwrite(payloadtxt, sizeof(uint8_t), fszie, fp);
                                     fflush(fp); 
                                     fclose(fp);
                                 }

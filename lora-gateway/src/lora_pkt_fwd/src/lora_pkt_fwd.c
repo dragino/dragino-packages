@@ -1356,18 +1356,12 @@ int main(void)
 	MSG_DEBUG(DEBUG_INFO, "INFO~ FPort Filter: %u\n", fport_num);
 		
     /* DevAddr filter configure */
-	int tmp=0;
+	//int tmp=0;
     if (!get_config("general", devaddr_mask, sizeof(devaddr_mask)))
         dev_addr_mask = 0;
     else 
-		for (i=0;i<(int)strlen(devaddr_mask);i++)   // Convert String to uint_32 hex
-		{
-			tmp = toupper(devaddr_mask[i]) - 0x30;
-			if ( tmp > 9 )
-				tmp -= 7;
-			dev_addr_mask = ((dev_addr_mask << ( (i==0)? 0:4)) | tmp);
-		}
-	MSG_DEBUG(DEBUG_INFO, "INFO~ DevAddrMask: 0x%X\n", dev_addr_mask);
+		dev_addr_mask = 1;
+	MSG_DEBUG(DEBUG_INFO, "INFO~ DevAddrMask: 0x%s\n", devaddr_mask);
 
     /* sqlitedb, mac decrypto */
 	if(!get_config("general", maccrypto, sizeof(maccrypto)))
@@ -1967,12 +1961,19 @@ void thread_up(void) {
             mote_fport = p->payload[8];  /* if optslen = 0 */
             sprintf(devchar, "%08X", mote_addr);
 
-            if (fport_num != 0 && (mote_fport == fport_num)) /* filter */
-                continue;
-            if (dev_addr_mask != 0 && (!strcmp(devchar, devaddr_mask)))
-                continue;
-
             /* basic packet filtering */
+            if (fport_num != 0 && (mote_fport == fport_num)){
+				MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to Fport doesn't match %u\n", 
+						fport_num); /* DEBUG: display JSON payload */
+				continue;
+			} /* filter */
+             
+            if (dev_addr_mask != 0 && (strncmp(devchar, devaddr_mask, strlen(devaddr_mask)) != 0 )){
+				MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to DevAddr(0x%s) doesn't match mask (0x%s)\n", 
+                       devchar,devaddr_mask); /* DEBUG: display JSON payload */
+				continue;
+			}
+
             pthread_mutex_lock(&mx_meas_up);
             meas_nb_rx_rcv += 1;
             switch(p->status) {
@@ -2365,7 +2366,8 @@ void thread_proc_rxpkt() {
                 macmsg.BufSize = p->size;
                 if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg)) { 
                     printf_mac_header(&macmsg);
-                    if (maccrypto_num) {
+					
+					if (maccrypto_num) {
                         struct devinfo devinfo = { .devaddr = macmsg.FHDR.DevAddr };
                         if (db_lookup_skey(cntx.lookupskey, (void *) &devinfo)) {
                             //MSG_DEBUG(DEBUG_INFO, "[Decrypto] appskey: %02X%02X, fcnt: %u\n", devinfo.appskey[1], devinfo.appskey[2], macmsg.FHDR.FCnt);

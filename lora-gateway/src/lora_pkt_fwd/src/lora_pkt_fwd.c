@@ -2382,7 +2382,7 @@ void thread_proc_rxpkt() {
                                 if (NULL == fp)
                                     MSG_DEBUG(DEBUG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
                                 else { 
-                                    fwrite(payloadtxt, sizeof(uint8_t), fszie, fp);
+                                    fwrite(payloadtxt, sizeof(uint8_t), fszie + 1, fp);
                                     fflush(fp); 
                                     fclose(fp);
                                 }

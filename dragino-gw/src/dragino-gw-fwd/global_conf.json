@@ -220,7 +220,13 @@
             "serv_port_up": 1700,
             "serv_port_down": 1700,
             "serv_max_stall": 0,
-            "serv_enabled": true } ],
+            "serv_enabled": true },
+          { "server_address": "bridge.eu.thethings.network",
+            "serv_port_up": 1700,
+            "serv_port_down": 1700,
+            "serv_max_stall": 0,
+            "serv_enabled": true }
+        ],
         /* adjust the following parameters for your network */
         "keepalive_interval": 10,
         "stat_interval": 30,
@@ -230,7 +236,7 @@
         "forward_crc_error": false,
         "forward_crc_disabled": false,
         /* GPS configuration */
-        "gps_tty_path": "/dev/ttyAMA0",
+        "gps_tty_path": "/dev/ttyS0",
         /* Ghost configuration (for simulating nodes) */
         "ghost_address": "127.0.0.1",
         "ghost_port": 1918,
@@ -241,6 +247,6 @@
         /* For human communication */
         "platform": "*",                          /* Platform definition, put a asterix here for the system value, max 24 chars. */
         "contact_email": "dragino@dragino.com",  /* Email of gateway operator, max 40 chars*/
-        "description": "Update me"                /* Public description of this device, max 64 chars */
+        "description": "Dragino lora gateway"    /* Public description of this device, max 64 chars */
     }
 }

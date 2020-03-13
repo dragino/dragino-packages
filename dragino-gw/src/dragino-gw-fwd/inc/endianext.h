@@ -11,7 +11,7 @@
 #ifndef ENDIANEXT_H_
 #define ENDIANEXT_H_
 
-#include <stdbool.h>		/* bool type */
+#include <stdbool.h>			/* bool type */
 
 /* Functions to test for the Endianness of the hardware. One of the functions
  * should return true, and middle Endian is old. In most case a running
@@ -33,4 +33,4 @@ void *swapcpy(void *dest, const void *src, size_t n);
  * systems do not have these available. And this works for all sizes. */
 void *tobecpy(void *dest, const void *src, size_t n);
 
-#endif				/* ENDIANEXT_H_ */
+#endif							/* ENDIANEXT_H_ */

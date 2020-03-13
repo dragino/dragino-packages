@@ -9,7 +9,7 @@
 #define _DRAGINO_H
 
 /* Human readable platform definition */
-#define DISPLAY_PLATFORM "Dragino"
+#define DISPLAY_PLATFORM "DraginoLGW"
 
 /* parameters for native spi */
 //#define SPI_SPEED		8000000

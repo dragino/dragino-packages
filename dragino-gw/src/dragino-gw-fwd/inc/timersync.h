@@ -19,13 +19,13 @@ Maintainer: Michael Coracin
 /* -------------------------------------------------------------------------- */
 /* --- DEPENDANCIES --------------------------------------------------------- */
 
-#include <sys/time.h>		/* timeval */
+#include <sys/time.h>			/* timeval */
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
 
 int get_concentrator_time(struct timeval *concent_time,
-			  struct timeval unix_time);
+						  struct timeval unix_time);
 
 void thread_timersync(void);
 

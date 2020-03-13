@@ -19,9 +19,9 @@ Maintainer: Michael Coracin
 /* -------------------------------------------------------------------------- */
 /* --- DEPENDANCIES --------------------------------------------------------- */
 
-#include <stdint.h>		/* C99 types */
-#include <stdbool.h>		/* bool type */
-#include <sys/time.h>		/* timeval */
+#include <stdint.h>				/* C99 types */
+#include <stdbool.h>			/* bool type */
+#include <sys/time.h>			/* timeval */
 
 #include "loragw_hal.h"
 #include "loragw_gps.h"
@@ -36,40 +36,40 @@ Maintainer: Michael Coracin
 /* --- PUBLIC TYPES --------------------------------------------------------- */
 
 enum jit_pkt_type_e {
-    JIT_PKT_TYPE_DOWNLINK_CLASS_A,
-    JIT_PKT_TYPE_DOWNLINK_CLASS_B,
-    JIT_PKT_TYPE_DOWNLINK_CLASS_C,
-    JIT_PKT_TYPE_BEACON
+	JIT_PKT_TYPE_DOWNLINK_CLASS_A,
+	JIT_PKT_TYPE_DOWNLINK_CLASS_B,
+	JIT_PKT_TYPE_DOWNLINK_CLASS_C,
+	JIT_PKT_TYPE_BEACON
 };
 
 enum jit_error_e {
-    JIT_ERROR_OK,		/* Packet ok to be sent */
-    JIT_ERROR_TOO_LATE,		/* Too late to send this packet */
-    JIT_ERROR_TOO_EARLY,	/* Too early to queue this packet */
-    JIT_ERROR_FULL,		/* Downlink queue is full */
-    JIT_ERROR_EMPTY,		/* Downlink queue is empty */
-    JIT_ERROR_COLLISION_PACKET,	/* A packet is already enqueued for this timeframe */
-    JIT_ERROR_COLLISION_BEACON,	/* A beacon is planned for this timeframe */
-    JIT_ERROR_TX_FREQ,		/* The required frequency for downlink is not supported */
-    JIT_ERROR_TX_POWER,		/* The required power for downlink is not supported */
-    JIT_ERROR_GPS_UNLOCKED,	/* GPS timestamp could not be used as GPS is unlocked */
-    JIT_ERROR_INVALID		/* Packet is invalid */
+	JIT_ERROR_OK,				/* Packet ok to be sent */
+	JIT_ERROR_TOO_LATE,			/* Too late to send this packet */
+	JIT_ERROR_TOO_EARLY,		/* Too early to queue this packet */
+	JIT_ERROR_FULL,				/* Downlink queue is full */
+	JIT_ERROR_EMPTY,			/* Downlink queue is empty */
+	JIT_ERROR_COLLISION_PACKET,	/* A packet is already enqueued for this timeframe */
+	JIT_ERROR_COLLISION_BEACON,	/* A beacon is planned for this timeframe */
+	JIT_ERROR_TX_FREQ,			/* The required frequency for downlink is not supported */
+	JIT_ERROR_TX_POWER,			/* The required power for downlink is not supported */
+	JIT_ERROR_GPS_UNLOCKED,		/* GPS timestamp could not be used as GPS is unlocked */
+	JIT_ERROR_INVALID			/* Packet is invalid */
 };
 
 struct jit_node_s {
-    /* API fields */
-    struct lgw_pkt_tx_s pkt;	/* TX packet */
-    enum jit_pkt_type_e pkt_type;	/* Packet type: Downlink, Beacon... */
+	/* API fields */
+	struct lgw_pkt_tx_s pkt;	/* TX packet */
+	enum jit_pkt_type_e pkt_type;	/* Packet type: Downlink, Beacon... */
 
-    /* Internal fields */
-    uint32_t pre_delay;		/* Amount of time before packet timestamp to be reserved */
-    uint32_t post_delay;	/* Amount of time after packet timestamp to be reserved (time on air) */
+	/* Internal fields */
+	uint32_t pre_delay;			/* Amount of time before packet timestamp to be reserved */
+	uint32_t post_delay;		/* Amount of time after packet timestamp to be reserved (time on air) */
 };
 
 struct jit_queue_s {
-    uint8_t num_pkt;		/* Total number of packets in the queue (downlinks, beacons...) */
-    uint8_t num_beacon;		/* Number of beacons in the queue */
-    struct jit_node_s nodes[JIT_QUEUE_MAX];	/* Nodes/packets array in the queue */
+	uint8_t num_pkt;			/* Total number of packets in the queue (downlinks, beacons...) */
+	uint8_t num_beacon;			/* Number of beacons in the queue */
+	struct jit_node_s nodes[JIT_QUEUE_MAX];	/* Nodes/packets array in the queue */
 };
 
 /* -------------------------------------------------------------------------- */
@@ -114,8 +114,8 @@ It will check if packet can be queued, with several criterias. Once the packet i
 sent over the air. So all checks should happen before the packet being actually in the queue.
 */
 enum jit_error_e jit_enqueue(struct jit_queue_s *queue, struct timeval *time,
-			     struct lgw_pkt_tx_s *packet,
-			     enum jit_pkt_type_e pkt_type);
+							 struct lgw_pkt_tx_s *packet,
+							 enum jit_pkt_type_e pkt_type);
 
 /**
 @brief Dequeue a packet from a Just-in-Time queue
@@ -130,8 +130,8 @@ This function is typically used when a packet is about to be placed on concentra
 The index is generally got using the jit_peek function.
 */
 enum jit_error_e jit_dequeue(struct jit_queue_s *queue, int index,
-			     struct lgw_pkt_tx_s *packet,
-			     enum jit_pkt_type_e *pkt_type);
+							 struct lgw_pkt_tx_s *packet,
+							 enum jit_pkt_type_e *pkt_type);
 
 /**
 @brief Check if there is a packet soon to be sent from the JiT queue.
@@ -146,7 +146,7 @@ It search the packet with the highest priority in queue, and check if its timest
 enough the current concentrator time.
 */
 enum jit_error_e jit_peek(struct jit_queue_s *queue, struct timeval *time,
-			  int *pkt_idx);
+						  int *pkt_idx);
 
 /**
 @brief Debug function to print the queue's content on console

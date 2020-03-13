@@ -41,7 +41,7 @@
 
 /* Call this to start/stop the server that communicates with the ghost node server. */
 void ghost_start(const char *ghost_addr, const char *ghost_port,
-		 const struct coord_s refcoor, const char *gwid);
+				 const struct coord_s refcoor, const char *gwid);
 void ghost_stop(void);
 
 /* Call this to pull data from the receive buffer for ghost nodes.. */

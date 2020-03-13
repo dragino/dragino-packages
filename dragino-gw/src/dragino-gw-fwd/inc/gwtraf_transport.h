@@ -13,4 +13,4 @@ void gwtraf_data_up(int idx, int nb_pkt, struct lgw_pkt_rx_s *rxpkt);
 void gwtraf_upstream(void *pic);
 void gwtraf_downtraf(int idx, char *json, int len);
 
-#endif				// _GWTRAF_PROTO_H
+#endif							// _GWTRAF_PROTO_H

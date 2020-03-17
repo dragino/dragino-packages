@@ -31,7 +31,6 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
 
 static bool db_createtb(struct context* cntx) {
     sqlite3_stmt* createabpdevs = NULL;
-    sqlite3_stmt* inserttskey = NULL;
 
     INITSTMT(CREATEABPDEVS, createabpdevs);
     

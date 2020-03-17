@@ -240,6 +240,7 @@ static struct coord_s meas_gps_coord; /* GPS position of the gateway */
 static struct coord_s meas_gps_err; /* GPS position of the gateway */
 
 static pthread_mutex_t mx_sockup = PTHREAD_MUTEX_INITIALIZER; /* control access to the sock_up reconnect */
+static pthread_mutex_t mx_sockdn= PTHREAD_MUTEX_INITIALIZER; /* control access to the sock_down reconnect */
 
 /* beacon parameters */
 static uint32_t beacon_period = 0; /* set beaconing period, must be a sub-multiple of 86400, the nb of sec in a day */
@@ -288,39 +289,50 @@ static char maccrypto[16] = "maccrypto";
 static int maccrypto_num = 0;
 static char dbpath[32] = "dbpath";
 
+/* default value of rx2 */
+static char gwcfg[8] = "gwcfg"; /*gw Regional*/
+static uint8_t rx2bw;
+static uint8_t rx2dr;
+static uint32_t rx2freq;
+
 /* context of sqlite database */
 static struct context cntx = {'\0'};
 
 /* queue about data down */
 
-#define MAX_DWLINK_PKTS   32  /* MAX number of dwlink pkts */
-#define DWFPORT           2   /* default fport for downlink */
-#define DWPATH      "/var/iot/dwlink"   /* default path for downlink */
+#define MAX_DNLINK_PKTS   32  /* MAX number of dnlink pkts */
+#define DNFPORT           2   /* default fport for downlink */
+#define DNPATH      "/var/iot/dnlink"   /* default path for downlink */
 
 static uint32_t dwfcnt = 0;  /* for local downlink frame counter */
 
-typedef struct dwlink {
+typedef struct dnlink {
     char devaddr[16];
-    char payload[512];
-    struct dwlink *pre;
-    struct dwlink *next;
-} DWLINK;
-static DWLINK *dw_link = NULL;
+    char txmode[8];
+    char pdformat[8];
+    uint8_t payload[512];
+    uint8_t psize;
+    struct dnlink *pre;
+    struct dnlink *next;
+} DNLINK;
+static DNLINK *dn_link = NULL;
 
 typedef struct pkts {
     int nb_pkt;
-    struct lgw_pkt_tx_s rxpkt[NB_PKT_MAX];
+    struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];
     struct pkts *next;
 } PKTS;
 static PKTS *rxpkts_link = NULL; /* save the payload receive from radio */
 
-static pthread_mutex_t mx_dwlink = PTHREAD_MUTEX_INITIALIZER; 
+static pthread_mutex_t mx_dnlink = PTHREAD_MUTEX_INITIALIZER; 
 static pthread_mutex_t mx_rxpkts_link = PTHREAD_MUTEX_INITIALIZER; 
 static sem_t rxpkt_rec_sem;  /* sem for alarm process upload message */
 
 static void prepare_frame(uint8_t type, struct devinfo *devinfo, uint32_t downcnt, const uint8_t* payload, int payload_size, uint8_t* frame, int* frame_size) ;
 
-static DWLINK* search_dwlink(char *addr);
+static DNLINK* search_dnlink(char *addr);
+
+static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, uint32_t us, uint8_t txmode);
 
 /* -------------------------------------------------------------------------- */
 
@@ -354,7 +366,7 @@ void thread_valid(void);
 void thread_jit(void);
 void thread_timersync(void);
 void thread_proc_rxpkt(void);
-void thread_ent_dwlink(void);
+void thread_ent_dnlink(void);
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
@@ -1210,7 +1222,7 @@ int main(void)
     pthread_t thrid_timersync;
 
     pthread_t thrid_proc_rxpkt;
-    pthread_t thrid_ent_dwlink;
+    pthread_t thrid_ent_dnlink;
 
     /* variables to get local copies of measurements */
     uint32_t cp_nb_rx_rcv;
@@ -1370,9 +1382,7 @@ int main(void)
         maccrypto_num = atoi(maccrypto);
 
     if(!get_config("general", dbpath, sizeof(dbpath)))
-
-    strcpy(dbpath, "/etc/lora/devskey");
-	MSG_DEBUG(DEBUG_INFO, "INFO~ ABP Decryption: %s\n", maccrypto_num? "yes" : "no");
+        strcpy(dbpath, "/etc/lora/devskey");
 
     if (maccrypto_num != 0) {
         if(!db_init(dbpath, &cntx)) {
@@ -1382,6 +1392,31 @@ int main(void)
             MSG_DEBUG(DEBUG_INFO, "INFO~ Mac payload will be decrypted!\n");
     }
 
+	if (!get_config("general", gwcfg, sizeof(gwcfg)))
+        strcpy(gwcfg, "EU");  /* default regional config */
+
+    if ((strstr(gwcfg, "EU") != NULL) || (strstr(gwcfg, "IN") != NULL)) {
+        rx2dr = DR_LORA_SF12;
+        rx2bw = BW_125KHZ;
+        rx2freq = 869525000UL;
+    } else if (strstr(gwcfg, "US") != NULL) {
+        rx2dr = DR_LORA_SF12;
+        rx2bw = BW_500KHZ;
+        rx2freq = 923300000UL;
+    } else if (strstr(gwcfg, "CN") != NULL) {
+        rx2dr = DR_LORA_SF12;
+        rx2bw = BW_125KHZ;
+        rx2freq = 505300000UL;
+    } else if ((strstr(gwcfg, "AU") != NULL) || (strstr(gwcfg, "KR") != NULL)) {
+        rx2dr = DR_LORA_SF12;
+        rx2bw = BW_500KHZ;
+        rx2freq = 923300000UL;
+    } else { /* AS923MHz ISM Band: Brnei, cambodia, HK, Indonesia, Japan, Taiwan, Thailand, Singapore ...*/
+        rx2dr = DR_LORA_SF12;
+        rx2bw = BW_125KHZ;
+        rx2freq = 921900000UL;
+    }
+
     /* LOG or debug message configure */
 
     if (!get_config("general", debug_level_char, sizeof(debug_level_char)))
@@ -1389,7 +1424,7 @@ int main(void)
     else 
         debug_level_uint = atoi(debug_level_char);
 
-    switch(debug_level_uint) {
+    switch (debug_level_uint) {
         case 0: /*only ERROR debug info */
             DEBUG_PKT_FWD    = 0;  
             DEBUG_REPORT     = 0;
@@ -1527,9 +1562,9 @@ int main(void)
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create proc_rxpkt thread\n");
         exit(EXIT_FAILURE);
     }
-    i = pthread_create( &thrid_ent_dwlink, NULL, (void * (*)(void *))thread_ent_dwlink, NULL);
+    i = pthread_create( &thrid_ent_dnlink, NULL, (void * (*)(void *))thread_ent_dnlink, NULL);
     if (i != 0) {
-        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create ent_dwlink thread\n");
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create ent_dnlink thread\n");
         exit(EXIT_FAILURE);
     }
 
@@ -1712,25 +1747,25 @@ int main(void)
             MSG_DEBUG(DEBUG_REPORT, "REPORT~ # SX1301 time (PPS): %u\n", trig_tstamp);
         }
         jit_print_queue(&jit_queue, false, DEBUG_INFO);
-        MSG_DEBUG(DEBUG_GPS, "### [GPS] ###\n");
+        MSG_DEBUG(DEBUG_INFO, "### [GPS] ###\n");
         if (gps_enabled == true) {
             /* no need for mutex, display is not critical */
             if (gps_ref_valid == true) {
-                MSG_DEBUG(DEBUG_GPS, "# Valid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
+                MSG_DEBUG(DEBUG_INFO, "# Valid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
             } else {
-                MSG_DEBUG(DEBUG_GPS, "# Invalid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
+                MSG_DEBUG(DEBUG_INFO, "# Invalid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
             }
             if (coord_ok == true) {
-                MSG_DEBUG(DEBUG_GPS, "# GPS coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
+                MSG_DEBUG(DEBUG_INFO, "# GPS coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
             } else {
-                MSG_DEBUG(DEBUG_GPS, "# no valid GPS coordinates available yet\n");
+                MSG_DEBUG(DEBUG_INFO, "# no valid GPS coordinates available yet\n");
             }
         } else if (gps_fake_enable == true) {
-            MSG_DEBUG(DEBUG_GPS, "# GPS *FAKE* coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
+            MSG_DEBUG(DEBUG_INFO, "# GPS *FAKE* coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
         } else {
-            MSG_DEBUG(DEBUG_GPS, "# GPS sync is disabled\n");
+            MSG_DEBUG(DEBUG_INFO, "# GPS sync is disabled\n");
         }
-        MSG_DEBUG(DEBUG_GPS, "##### END #####\n");
+        MSG_DEBUG(DEBUG_INFO, "##### END #####\n");
 
         /* start composing datagram with the header */
         token_h = (uint8_t)rand(); /* random token */
@@ -2335,20 +2370,16 @@ void thread_up(void) {
 }
 
 void thread_proc_rxpkt() {
-    int idx, i; /* loop variables */
+    int i, idx; /* loop variables */
     int fsize = 0;
     struct lgw_pkt_rx_s *p; /* pointer on a RX packet */
-    struct lgw_pkt_tx_s txpkt;
+
+    enum jit_error_e jit_result = JIT_ERROR_OK;
 
     PKTS *entry;
-    DWLINK *getdata;
+    DNLINK *dnelem;
 
     LoRaMacMessageData_t macmsg;
-
-    struct timeval current_unix_time;
-    struct timeval current_concentrator_time;
-    enum jit_error_e jit_result = JIT_ERROR_OK;
-    enum jit_pkt_type_e downlink_type;
 
     uint8_t payloaden[MAXPAYLOAD] = {'\0'};  /* data which have decrypted */
     uint8_t payloadtxt[MAXPAYLOAD] = {'\0'};  /* data which have decrypted */
@@ -2370,11 +2401,28 @@ void thread_proc_rxpkt() {
 					if (maccrypto_num) {
                         struct devinfo devinfo = { .devaddr = macmsg.FHDR.DevAddr };
                         if (db_lookup_skey(cntx.lookupskey, (void *) &devinfo)) {
-                            //MSG_DEBUG(DEBUG_INFO, "[Decrypto] appskey: %02X%02X, fcnt: %u\n", devinfo.appskey[1], devinfo.appskey[2], macmsg.FHDR.FCnt);
+
+                            /* Debug message of appskey
+                            printf("INFO~ [Decode]appskey:");
+                            for (i = 0; i < sizeof(devinfo.appskey); ++i) {
+                                printf("%02X", devinfo.appskey[i]);
+                            }
+                            printf("\n");
+                            */
+
                             if (p->size > 13) { /* offset of frmpayload */
                                 fsize = p->size - 13 - macmsg.FHDR.FCtrl.Bits.FOptsLen; 
                                 memcpy(payloaden, p->payload + 9 + macmsg.FHDR.FCtrl.Bits.FOptsLen, fsize);
                                 LoRaMacPayloadDecrypt(payloaden, fsize, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)macmsg.FHDR.FCnt, payloadtxt);
+
+                                /* Debug message of decoded payload
+                                printf("INFO~ [Decode]RX(%d):", fsize);
+                                for (i = 0; i < fsize; ++i) {
+                                    printf("%02X", payloadtxt[i]);
+                                }
+                                printf("\n");
+                                */
+
                                 FILE *fp;
                                 char pushpath[128];
                                 snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
@@ -2382,66 +2430,28 @@ void thread_proc_rxpkt() {
                                 if (NULL == fp)
                                     MSG_DEBUG(DEBUG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
                                 else { 
-                                    fwrite(payloadtxt, sizeof(uint8_t), fszie + 1, fp);
+                                    fwrite(payloadtxt, sizeof(uint8_t), fsize + 1, fp);
                                     fflush(fp); 
                                     fclose(fp);
                                 }
                             }
 
                             /* Customer downlink process */
-
                             sprintf(addr, "%08X", devinfo.devaddr);
-                            getdata = search_dwlink(addr);
-                            if (getdata != NULL) {
+                            dnelem = search_dnlink(addr);
+                            if (dnelem != NULL) {
                                 MSG_DEBUG(DEBUG_INFO, "INFO~ [procpkt]Found a match devaddr: %s\n", addr);
-                                memset(&txpkt, 0, sizeof(txpkt));
-                                txpkt.modulation = MOD_LORA;
-                                txpkt.count_us = p->count_us + 1000000UL; /* rx1 window plus 1s */
-                                downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_A;
-                                txpkt.no_crc = true;
-                                txpkt.freq_hz = p->freq_hz; /* same as the up */
-                                txpkt.rf_chain = 0;
-                                txpkt.rf_power = 24;
-                                txpkt.datarate = p->datarate;
-                                txpkt.bandwidth = p->bandwidth;
-                                txpkt.coderate = p->coderate;
-                                txpkt.invert_pol = true;
-                                txpkt.preamble = STD_LORA_PREAMB;
-                                txpkt.tx_mode = TIMESTAMPED;
-                                /* prepare MAC message */
-                                ++dwfcnt;
-                                fsize = 0;
-                                memset(payloaden, 0, sizeof(payloaden));
-                                prepare_frame(FRAME_TYPE_DATA_CONFIRMED_DOWN, &devinfo, dwfcnt, (uint8_t *)getdata->payload, strlen(getdata->payload), payloaden, &fsize);
-                                memcpy1(txpkt.payload, payloaden, fsize);
-                                txpkt.size = fsize;
-                                printf("INFO~ [procpkt]TX:");
-                                for (i = 0; i < fsize; ++i) {
-                                    printf("%02X", payloaden[i]);
-                                }
-                                printf("\n");
-                                gettimeofday(&current_unix_time, NULL);
-                                get_concentrator_time(&current_concentrator_time, current_unix_time);
-                                jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
-                                /* for debug */
-                                //char chartmp[256] = {'\0'};
-                                //memcpy(chartmp, payloaden + 9, fsize);
-                                //memset(payloadtxt, 0, sizeof(payloadtxt));
-                                //LoRaMacPayloadDecrypt(chartmp, fsize - 13, devinfo.appskey, devinfo.devaddr, DOWN, dwfcnt, payloadtxt);
-                                MSG_DEBUG(DEBUG_INFO, "INFO~ [procpkt] start down-> tmst:%u, freq:%u, psize:%u.\n",
-                                        txpkt.count_us, txpkt.freq_hz, txpkt.size);
-
-
+                                jit_result = custom_rx2dn(dnelem, &devinfo, p->count_us, TIMESTAMPED);
                                 if (jit_result == JIT_ERROR_OK) { /* Next upmsg willbe indicate if received by note */
-                                    pthread_mutex_lock(&mx_dwlink);
-                                    if (getdata == dw_link) 
-                                        dw_link = getdata->next;
-                                    if (getdata->pre != NULL)
-                                        getdata->pre->next = getdata->next;
-                                    if (getdata->next != NULL)
-                                        getdata->next->pre = getdata->pre;
-                                    free(getdata);
-                                    pthread_mutex_unlock(&mx_dwlink);
+                                    pthread_mutex_lock(&mx_dnlink);
+                                    if (dnelem == dn_link) 
+                                        dn_link = dnelem->next;
+                                    if (dnelem->pre != NULL)
+                                        dnelem->pre->next = dnelem->next;
+                                    if (dnelem->next != NULL)
+                                        dnelem->next->pre = dnelem->pre;
+                                    free(dnelem);
+                                    pthread_mutex_unlock(&mx_dnlink);
                                 } else {
                                     MSG_DEBUG(DEBUG_ERROR, "ERROR~ [procpkt]Packet REJECTED (jit error=%d)\n", jit_result);
                                 }
@@ -2663,7 +2673,9 @@ void thread_down(void) {
         while ((int)difftimespec(recv_time, send_time) < keepalive_time) {
 
             /* try to receive a datagram every 0.2 second in 5 seconds*/
+            pthread_mutex_lock(&mx_sockdn); /*maybe reconnect, so lock */ 
             msg_len = recv(sock_down, (void *)buff_down, (sizeof buff_down)-1, 0);
+            pthread_mutex_unlock(&mx_sockdn); /*maybe reconnect, so lock */ 
             clock_gettime(CLOCK_MONOTONIC, &recv_time);
 
             /* Pre-allocate beacon slots in JiT queue, to check downlink collisions */
@@ -3145,10 +3157,12 @@ void thread_down(void) {
             pull_ack = 0;
             pull_send = 0;
             MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_ACK mismatch, reconnect server\n");
+            pthread_mutex_lock(&mx_sockdn); /*maybe reconnect, so lock */ 
             if (sock_down) close(sock_down);
             if ((sock_down = init_socket(serv_addr, serv_port_down,
                                         (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
                 exit(EXIT_FAILURE);
+            pthread_mutex_unlock(&mx_sockdn); /*maybe reconnect, so lock */ 
         }
     }
     MSG_DEBUG(DEBUG_INFO, "INFO~ End of downstream thread\n");
@@ -3377,6 +3391,14 @@ void thread_gps(void) {
         }
         wr_idx += (size_t)nb_char;
 
+        /*
+        printf("\nGPS~ CHAR:");
+        for (i = 0; i < wr_idx; i++) {
+            printf("%02X", serial_buff[i]);
+        }
+        printf("\n");
+        */
+
         /*******************************************
          * Scan buffer for UBX/NMEA sync chars and *
          * attempt to decode frame if one is found *
@@ -3386,7 +3408,6 @@ void thread_gps(void) {
 
             /* Scan buffer for UBX sync char */
             if(serial_buff[rd_idx] == (char)LGW_GPS_UBX_SYNC_CHAR) {
-
                 /***********************
                  * Found UBX sync char *
                  ***********************/
@@ -3419,8 +3440,11 @@ void thread_gps(void) {
                     if(latest_msg == INVALID || latest_msg == UNKNOWN) {
                         /* checksum failed */
                         frame_size = 0;
-                    } else if (latest_msg == NMEA_RMC) { /* Get location from RMC frames */
+                    } else if (latest_msg == NMEA_GGA) { /* Get location from RMC frames */
                         gps_process_coords();
+
+                    } else if (latest_msg == NMEA_RMC) { /* Get time from RMC frames */
+                        gps_process_sync();
                     }
                 }
             }
@@ -3484,6 +3508,7 @@ void thread_valid(void) {
         /* calculate when the time reference was last updated */
         pthread_mutex_lock(&mx_timeref);
         gps_ref_age = (long)difftime(time(NULL), time_reference_gps.systime);
+        //printf("time(%u), ref(%u)\n", time(NULL), time_reference_gps.systime);
         if ((gps_ref_age >= 0) && (gps_ref_age <= GPS_REF_MAX_AGE)) {
             /* time ref is ok, validate and  */
             gps_ref_valid = true;
@@ -3534,29 +3559,35 @@ void thread_valid(void) {
     MSG_DEBUG(DEBUG_INFO, "INFO~ End of validation thread\n");
 }
 
-void thread_ent_dwlink(void) {
+void thread_ent_dnlink(void) {
     int i, j; /* loop variables */
 
     DIR *dir;
     FILE *fp;
     struct dirent *ptr;
-
     struct stat statbuf;
-
-    char dw_file[128]; 
+    char dn_file[128]; 
 
     /* data buffers */
-    char buff_down[512]; /* buffer to receive downstream packets */
-    char dw_data[512];
+    uint8_t buff_down[512]; /* buffer to receive downstream packets */
+    uint8_t dnpld[256];
+    uint8_t hexpld[256];
+    
+    uint32_t uaddr;
     char addr[16];
+    char txmode[8];
+    char pdformat[8];
+    uint8_t psize = 0;
 
-    DWLINK *entry = NULL;
-    DWLINK *tmp = NULL;
+    DNLINK *entry = NULL;
+    DNLINK *tmp = NULL;
+
+    enum jit_error_e jit_result = JIT_ERROR_OK;
 
     while (!exit_sig && !quit_sig) {
         
         /* lookup file */
-        if ((dir = opendir(DWPATH)) == NULL) {
+        if ((dir = opendir(DNPATH)) == NULL) {
             //MSG_DEBUG(DEBUG_ERROR, "ERROR~ [push]open sending path error\n");
             wait_ms(100); 
             continue;
@@ -3566,33 +3597,46 @@ void thread_ent_dwlink(void) {
             if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) /* current dir OR parrent dir */
                 continue;
 
-            MSG_DEBUG(DEBUG_INFO, "INFO~ [entdw]Looking file : %s\n", ptr->d_name);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Looking file : %s\n", ptr->d_name);
 
-            snprintf(dw_file, sizeof(dw_file), "%s/%s", DWPATH, ptr->d_name);
+            snprintf(dn_file, sizeof(dn_file), "%s/%s", DNPATH, ptr->d_name);
 
-            if (stat(dw_file, &statbuf) < 0) {
-                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [entdw]Canot stat %s!\n", ptr->d_name);
+            if (stat(dn_file, &statbuf) < 0) {
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [DNLK]Canot stat %s!\n", ptr->d_name);
                 continue;
             }
 
             if ((statbuf.st_mode & S_IFMT) == S_IFREG) {
-                if ((fp = fopen(dw_file, "r")) == NULL) {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ [entdw]Cannot open %s\n", ptr->d_name);
+                if ((fp = fopen(dn_file, "r")) == NULL) {
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ [DNLK]Cannot open %s\n", ptr->d_name);
                     continue;
                 }
 
-                memset(buff_down, 0, sizeof(buff_down));
+                memset1(buff_down, '\0', sizeof(buff_down));
 
-                fread(buff_down, sizeof(char), sizeof(buff_down), fp); /* the size less than buff_down return EOF */
+                psize = fread(buff_down, sizeof(char), sizeof(buff_down), fp); /* the size less than buff_down return EOF */
                 fclose(fp);
 
-                unlink(dw_file); /* delete the file */
+                unlink(dn_file); /* delete the file */
 
                 memset(addr, '\0', sizeof(addr));
-                memset(dw_data, '\0', sizeof(dw_data));
+                memset(pdformat, '\0', sizeof(pdformat));
+                memset(txmode, '\0', sizeof(txmode));
+                memset1(hexpld, '\0', sizeof(hexpld));
+                memset1(dnpld, '\0', sizeof(dnpld));
+
+                for (i = 0, j = 0; i < psize; i++) {
+                    if (buff_down[i] == ',')
+                        j++;
+                }
+
+                if (j < 3) { /* Error Format, ',' must be greater than or equal to 3*/
+                    MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Format error: %s\n", buff_down);
+                    continue;
+                }
 
                 for (i = 0, j = 0; i < (int)sizeof(addr); i++) {
-                    if (buff_down[i] == ',') {
+                    if (buff_down[i] == ',') { 
                         i++;
                         break;
                     }
@@ -3600,27 +3644,93 @@ void thread_ent_dwlink(void) {
                         addr[j++] = buff_down[i];
                 }
 
-                while (buff_down[i] == ' ' && i < (int)strlen(buff_down)) {
+                while (buff_down[i] == ' ' && i < psize) {
                     i++;
                 }
 
-                for (j = 0; i < (int)strlen(buff_down) + 1; i++) {
-                        dw_data[j++] = buff_down[i];
+                for (j = 0; j < (int)sizeof(txmode); i++) {
+                    if (buff_down[i] == ',') {
+                        i++;
+                        break;
+                    }
+                    if (buff_down[i] != ' ')
+                        txmode[j++] = buff_down[i];
                 }
 
-                MSG_DEBUG(DEBUG_INFO, "INFO~ [entdw]Insert dwlink-> devaddr: %s, txt: %s\n",
-                        addr, dw_data);
-                entry = (DWLINK *) malloc(sizeof(DWLINK));
+                while (buff_down[i] == ' ' && i < psize) {
+                    i++;
+                }
+
+                for (j = 0; j < (int)sizeof(pdformat); i++) {
+                    if (buff_down[i] == ',') {
+                        i++;
+                        break;
+                    }
+                    if (buff_down[i] != ' ')
+                        pdformat[j++] = buff_down[i];
+                }
+
+                while (buff_down[i] == ' ' && i < psize) {
+                    i++;
+                }
+
+                for (j = 0; i < psize + 1; i++) {
+                        dnpld[j++] = buff_down[i];
+                }
+
+                psize = j;
+
+                if ((strlen(addr) < 1) || (psize < 1))
+                    continue;
+                
+                if (strlen(txmode) < 1)
+                    strcpy(txmode, "time");
+
+                if (strlen(pdformat) < 1)
+                    strcpy(pdformat, "txt");
+
+                MSG_DEBUG(DEBUG_INFO, 
+                        "INFO~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, txt:%s\n",
+                        addr, txmode, pdformat, dnpld);
+
+                entry = (DNLINK *) malloc(sizeof(DNLINK));
                 strcpy(entry->devaddr, addr);
-                strcpy(entry->payload, dw_data);
+                if (strstr(pdformat, "hex") != NULL) { 
+                    if (psize % 2) {
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] sizeof hex payload valid\n");
+                        free(entry);
+                        continue;
+                    }
+                    hex2str(dnpld, hexpld, psize);
+                    psize = psize/2;
+                    memcpy1(entry->payload, hexpld, psize + 1);
+                } else
+                    memcpy1(entry->payload, dnpld, psize + 1);
+                strcpy(entry->txmode, txmode);
+                strcpy(entry->pdformat, pdformat);
+                entry->psize = psize;
                 entry->pre = NULL;
                 entry->next = NULL;
 
-                pthread_mutex_lock(&mx_dwlink);
+                if (strstr(entry->txmode, "imme") != NULL) {
+                    MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Pending IMMEDIATE of %s\n", addr);
+                    uaddr  = strtoul(addr, NULL, 16);
+                    struct devinfo devinfo = { .devaddr = uaddr };
+                    if (db_lookup_skey(cntx.lookupskey, (void *) &devinfo)) {
+                        jit_result = custom_rx2dn(entry, &devinfo, 0, IMMEDIATE);
+                        if (jit_result != JIT_ERROR_OK)  
+                            MSG_DEBUG(DEBUG_ERROR, "ERROR~ [DNLK]Packet REJECTED (jit error=%d)\n", jit_result);
+                    } else
+                            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]No devaddr match, Drop the link of %s\n", addr);
+                    free(entry);
+                    continue;
+                }
+
+                pthread_mutex_lock(&mx_dnlink);
                 j = 1;
-                tmp = dw_link;
+                tmp = dn_link;
                 if (tmp == NULL) {
-                    dw_link = entry;
+                    dn_link = entry;
                 } else {
                     while (tmp->next != NULL) {
                         tmp = tmp->next;
@@ -3629,22 +3739,23 @@ void thread_ent_dwlink(void) {
                     entry->pre = tmp;
                     tmp->next = entry;  
                 }
-                if (j > MAX_DWLINK_PKTS) { /* minus 1/2 pkts */
-                    MSG_DEBUG(DEBUG_INFO, "INFO~ [entdw] Adjust dwlink.\n");
+                if (j > MAX_DNLINK_PKTS) { /* minus 1/2 pkts */
+                    MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] Adjust dnlink.\n");
                     for (i = 0; i < j/2; ++i) {
-                        tmp = dw_link;
-                        dw_link = dw_link->next;
+                        tmp = dn_link;
+                        dn_link = dn_link->next;
                         if (tmp != NULL)
                             free(tmp);
                     }
                 }
-                pthread_mutex_unlock(&mx_dwlink);
-                MSG_DEBUG(DEBUG_INFO, "INFO~ [entdw] Insert OK! dwlink=%d.\n", j);
+                pthread_mutex_unlock(&mx_dnlink);
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] DNLINK PENDING!(%delems).\n", j);
             }
+            wait_ms(20); /* wait for HAT send or other process */
         }
         if (closedir(dir) < 0)
-            MSG_DEBUG(DEBUG_INFO, "INFO~ [entdw] Cannot close DIR: %s\n", DWPATH);
-        wait_ms(10);
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] Cannot close DIR: %s\n", DNPATH);
+        wait_ms(100);
     }
 }
 
@@ -3680,11 +3791,11 @@ static void prepare_frame(uint8_t type, struct devinfo *devinfo, uint32_t downcn
 
 	/*FOpts*/
 	/*Fport*/
-	frame[++index] = (DWFPORT)&0xFF;
+	frame[++index] = (DNFPORT)&0xFF;
 
 	/*encrypt the payload*/
 	encpayload = malloc(sizeof(uint8_t)*payload_size);
-	LoRaMacPayloadEncrypt(payload, payload_size, (DWFPORT == 0) ? devinfo->nwkskey : devinfo->appskey, devinfo->devaddr, DOWN, downcnt, encpayload);
+	LoRaMacPayloadEncrypt(payload, payload_size, (DNFPORT == 0) ? devinfo->nwkskey : devinfo->appskey, devinfo->devaddr, DOWN, downcnt, encpayload);
 	++index;
 	memcpy(frame+index, encpayload, payload_size);
 	free(encpayload);
@@ -3700,17 +3811,71 @@ static void prepare_frame(uint8_t type, struct devinfo *devinfo, uint32_t downcn
 	*frame_size = index + 1;
 }
 
-static DWLINK* search_dwlink(char *addr) {
-    DWLINK *entry;
+static DNLINK* search_dnlink(char *addr) {
+    DNLINK *entry;
 
-    /* pthread_mutex_lock(&mx_dwlink); only read link, I think no need a lock! */ 
-    entry = dw_link;
+    /* pthread_mutex_lock(&mx_dnlink); only read link, I think no need a lock! */ 
+    entry = dn_link;
     while (entry != NULL) {
         if (!strcmp(entry->devaddr, addr))
             break;
         entry = entry->next;
     }
     return entry;
+}
+
+static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, uint32_t us, uint8_t txmode) {
+    int i, fsize = 0;
+    uint8_t payloaden[MAXPAYLOAD] = {'\0'};  /* data which have decrypted */
+    struct lgw_pkt_tx_s txpkt;
+
+    struct timeval current_unix_time;
+    struct timeval current_concentrator_time;
+    enum jit_error_e jit_result = JIT_ERROR_OK;
+    enum jit_pkt_type_e downlink_type;
+
+    memset(&txpkt, 0, sizeof(txpkt));
+    txpkt.modulation = MOD_LORA;
+    txpkt.count_us = us + 2000000UL; /* rx2 window plus 1s */
+    txpkt.no_crc = true;
+    txpkt.freq_hz = rx2freq; /* same as the up */
+    txpkt.rf_chain = 0;
+    txpkt.rf_power = 20;
+    txpkt.datarate = rx2dr;
+    txpkt.bandwidth = rx2bw;
+    txpkt.coderate = CR_LORA_4_5;
+    txpkt.invert_pol = true;
+    txpkt.preamble = STD_LORA_PREAMB;
+    txpkt.tx_mode = txmode;
+    if (txmode)
+        downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_A;
+    else
+        downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_C;
+
+    /* prepare MAC message */
+    ++dwfcnt; /* how to count this counter ? */
+
+    memset1(payloaden, '\0', sizeof(payloaden));
+
+    prepare_frame(FRAME_TYPE_DATA_UNCONFIRMED_DOWN, devinfo, dwfcnt, (uint8_t *)dnelem->payload, dnelem->psize, payloaden, &fsize);
+
+    memcpy1(txpkt.payload, payloaden, fsize);
+
+    txpkt.size = fsize;
+
+    printf("INFO~ [CUSDN]TX(%d):", fsize);
+    for (i = 0; i < fsize; ++i) {
+        printf("%02X", payloaden[i]);
+    }
+    printf("\n");
+
+    gettimeofday(&current_unix_time, NULL);
+    get_concentrator_time(&current_concentrator_time, current_unix_time);
+    jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
+    MSG_DEBUG(DEBUG_INFO, "INFO~ [CUSDN]DNRX2-> tmst:%u, freq:%u, psize:%u.\n",
+            txpkt.count_us, txpkt.freq_hz, txpkt.size);
+
+    return jit_result;
 }
 
 

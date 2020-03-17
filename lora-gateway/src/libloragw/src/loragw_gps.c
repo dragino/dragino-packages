@@ -534,8 +534,10 @@ enum gps_msg lgw_parse_nmea(const char *serial_buff, int buff_size) {
         */
         memcpy(parser_buf, serial_buff, buff_size);
         parser_buf[buff_size] = '\0';
+        //printf("\nNote(RMC): %s\n", parser_buf);
         nb_fields = str_chop(parser_buf, buff_size, ',', str_index, ARRAY_SIZE(str_index));
-        if (nb_fields != 13) {
+        //printf("\nNote(RMC): (,)%d\n", nb_fields);
+        if (nb_fields != 14) {
             DEBUG_MSG("Warning: invalid RMC sentence (number of fields)\n");
             return IGNORED;
         }
@@ -550,7 +552,7 @@ enum gps_msg lgw_parse_nmea(const char *serial_buff, int buff_size) {
         if ((i == 4) && (j == 3)) {
             if ((gps_mod == 'A') || (gps_mod == 'D')) {
                 gps_time_ok = true;
-                DEBUG_MSG("Note: Valid RMC sentence, GPS locked, date: 20%02d-%02d-%02dT%02d:%02d:%06.3fZ\n", gps_yea, gps_mon, gps_day, gps_hou, gps_min, gps_fra + (float)gps_sec);
+                DEBUG_MSG("Note: [GPS]Valid RMC sentence, GPS locked, date: 20%02d-%02d-%02dT%02d:%02d:%06.3fZ\n", gps_yea, gps_mon, gps_day, gps_hou, gps_min, gps_fra + (float)gps_sec);
             } else {
                 gps_time_ok = false;
                 DEBUG_MSG("Note: Valid RMC sentence, no satellite fix, estimated date: 20%02d-%02d-%02dT%02d:%02d:%06.3fZ\n", gps_yea, gps_mon, gps_day, gps_hou, gps_min, gps_fra + (float)gps_sec);

@@ -154,4 +154,6 @@ void BoardCriticalSectionEnd( uint32_t *mask );
  */
 void str2hex(uint8_t* dest, char* src, int len);
 
+void hex2str(uint8_t* hex, uint8_t* str, uint8_t len);
+
 #endif // __UTILITIES_H__

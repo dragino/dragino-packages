@@ -260,14 +260,14 @@ do
 			[ $DEBUG -ge 2 ] && [ -n "$CID" ] && logger "[IoT.MQTT]: Found Data at Local Channels:" $CID
 
 			for channel in $CID; do
-				CHAN_INFO=`sqlite3 $CHAN_FILE "SELECT *from mapping where local = '$channel';" | awk -F '\\|' '{print $1" " $2" " $3}'`
+				CHAN_INFO=`sqlite3 $CHAN_FILE "SELECT *from mapping where local = '$channel';"`
 				if [ -n "$CHAN_INFO" ];then
 					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
 
 					# Get values
-					local_id=`awk -F '\\|' '{print $1}'`
-					remote_id=`awk -F '\\|' '{print $2}'`
-					channel_API=`awk -F '\\|' '{print $3}'`
+					local_id=`echo $CHAN_INFO | awk -F '\\|' '{print $1}'`
+					remote_id=`echo $CHAN_INFO | awk -F '\\|' '{print $2}'`
+					channel_API=`echo $CHAN_INFO | awk -F '\\|' '{print $3}'`
 					
 					# Send Data  					
 					meta=`cat /var/iot/channels/$channel` 

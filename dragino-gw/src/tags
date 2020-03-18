@@ -27,7 +27,7 @@ ARCH	dragino-gw-fwd/Makefile	/^ARCH ?=$/;"	m
 ARCH	libloragw/Makefile	/^ARCH ?=$/;"	m
 ARRAY_MAX_CAPACITY	dragino-gw-fwd/src/parson.c	38;"	d	file:
 ARRAY_SIZE	dragino-gw-fwd/src/base64.c	28;"	d	file:
-ARRAY_SIZE	dragino-gw-fwd/src/dragino_gw_fwd.c	80;"	d	file:
+ARRAY_SIZE	dragino-gw-fwd/src/dragino_gw_fwd.c	79;"	d	file:
 ARRAY_SIZE	dragino-gw-fwd/src/gwtraf_transport.c	72;"	d	file:
 ARRAY_SIZE	dragino-gw-fwd/src/semtech_transport.c	72;"	d	file:
 ARRAY_SIZE	libloragw/src/loragw_fpga.c	36;"	d	file:
@@ -60,11 +60,11 @@ Api__SystemStats__Loadstats_Closure	libttn/api.pb-c.h	/^typedef void (*Api__Syst
 Api__SystemStats__MemoryStats	libttn/api.pb-c.h	/^typedef struct _Api__SystemStats__MemoryStats Api__SystemStats__MemoryStats;$/;"	t	typeref:struct:_Api__SystemStats__MemoryStats
 Api__SystemStats__MemoryStats_Closure	libttn/api.pb-c.h	/^typedef void (*Api__SystemStats__MemoryStats_Closure)$/;"	t
 BEACON_GUARD	dragino-gw-fwd/src/jitqueue.c	42;"	d	file:
-BEACON_POLL_MS	dragino-gw-fwd/src/dragino_gw_fwd.c	107;"	d	file:
-BEACON_QUEUED	dragino-gw-fwd/inc/stats.h	/^    BEACON_QUEUED,$/;"	e	enum:stats_down
-BEACON_REJECTED	dragino-gw-fwd/inc/stats.h	/^    BEACON_REJECTED$/;"	e	enum:stats_down
+BEACON_POLL_MS	dragino-gw-fwd/src/dragino_gw_fwd.c	101;"	d	file:
+BEACON_QUEUED	dragino-gw-fwd/inc/stats.h	/^	BEACON_QUEUED,$/;"	e	enum:stats_down
+BEACON_REJECTED	dragino-gw-fwd/inc/stats.h	/^	BEACON_REJECTED$/;"	e	enum:stats_down
 BEACON_RESERVED	dragino-gw-fwd/src/jitqueue.c	44;"	d	file:
-BEACON_SENT	dragino-gw-fwd/inc/stats.h	/^    BEACON_SENT,$/;"	e	enum:stats_down
+BEACON_SENT	dragino-gw-fwd/inc/stats.h	/^	BEACON_SENT,$/;"	e	enum:stats_down
 BUFFER_OVERFLOW	libmqtt/MQTTErrors.h	/^    BUFFER_OVERFLOW = -2,$/;"	e	enum:returnCode
 BURST_TEST_LENGTH	libloragw/tst/test_loragw_reg.c	29;"	d	file:
 BURST_TEST_SIZE	libloragw/tst/test_loragw_spi.c	35;"	d	file:
@@ -148,19 +148,19 @@ DEBUG_PRINTF	libloragw/src/loragw_spi.ftdi.c	41;"	d	file:
 DEBUG_PRINTF	libloragw/src/loragw_spi.native.c	43;"	d	file:
 DEBUG_TIMERSYNC	dragino-gw-fwd/inc/trace.h	22;"	d
 DEFAULT_BAUDRATE	libloragw/src/loragw_gps.c	53;"	d	file:
-DEFAULT_KEEPALIVE	dragino-gw-fwd/src/dragino_gw_fwd.c	101;"	d	file:
+DEFAULT_KEEPALIVE	dragino-gw-fwd/src/dragino_gw_fwd.c	95;"	d	file:
 DEFAULT_KEEPALIVE	dragino-gw-fwd/src/gwtraf_transport.c	81;"	d	file:
 DEFAULT_KEEPALIVE	dragino-gw-fwd/src/semtech_transport.c	81;"	d	file:
 DEFAULT_NOTCH_FREQ	libloragw/tst/test_loragw_hal.c	56;"	d	file:
-DEFAULT_PORT_DW	dragino-gw-fwd/src/dragino_gw_fwd.c	100;"	d	file:
-DEFAULT_PORT_UP	dragino-gw-fwd/src/dragino_gw_fwd.c	99;"	d	file:
+DEFAULT_PORT_DW	dragino-gw-fwd/src/dragino_gw_fwd.c	94;"	d	file:
+DEFAULT_PORT_UP	dragino-gw-fwd/src/dragino_gw_fwd.c	93;"	d	file:
 DEFAULT_RSSI_OFFSET	libloragw/tst/test_loragw_cal.c	50;"	d	file:
 DEFAULT_RSSI_OFFSET	libloragw/tst/test_loragw_hal.c	55;"	d	file:
-DEFAULT_SERVER	dragino-gw-fwd/src/dragino_gw_fwd.c	98;"	d	file:
-DEFAULT_STAT	dragino-gw-fwd/src/dragino_gw_fwd.c	102;"	d	file:
+DEFAULT_SERVER	dragino-gw-fwd/src/dragino_gw_fwd.c	92;"	d	file:
+DEFAULT_STAT	dragino-gw-fwd/src/dragino_gw_fwd.c	96;"	d	file:
 DEFAULT_TX_NOTCH_FREQ	libloragw/tst/test_loragw_cal.c	49;"	d	file:
 DISCONNECT	libmqtt/MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
-DISPLAY_PLATFORM	dragino-gw-fwd/src/dragino_gw_fwd.c	94;"	d	file:
+DISPLAY_PLATFORM	dragino-gw-fwd/src/dragino_gw_fwd.c	89;"	d	file:
 DISPLAY_PLATFORM	libloragw/inc/dragino.h	12;"	d
 DISPLAY_PLATFORM	libloragw/inc/imst_rpi.h	12;"	d
 DISPLAY_PLATFORM	libloragw/inc/kerlink.h	12;"	d
@@ -197,7 +197,7 @@ EMBED_MQTTLIB_C_TARGET	libmqtt/Makefile	/^EMBED_MQTTLIB_C_TARGET = lib${MQTT_EMB
 ENDIANEXT_H_	dragino-gw-fwd/inc/endianext.h	12;"	d
 Enqueue	libmqtt/MQTTLinux.c	/^int Enqueue(Queue *queue, unsigned short item)$/;"	f
 FAILURE	libmqtt/MQTTErrors.h	/^    FAILURE = -1,$/;"	e	enum:returnCode
-FETCH_SLEEP_MS	dragino-gw-fwd/src/dragino_gw_fwd.c	106;"	d	file:
+FETCH_SLEEP_MS	dragino-gw-fwd/src/dragino_gw_fwd.c	100;"	d	file:
 FPGA_VERSION	libloragw/src/loragw_reg.c	/^const uint8_t FPGA_VERSION[] = { 28, 31, 33 }; \/* several versions could be supported *\/$/;"	v
 FREQ_SIG_NORM	libloragw/tst/test_loragw_cal.c	57;"	d	file:
 FUNC_ENTRY	libmqtt/StackTrace.h	25;"	d
@@ -310,7 +310,7 @@ GOOGLE__PROTOBUF__SOURCE_CODE_INFO__INIT	libttn/descriptor.pb-c.h	1033;"	d
 GOOGLE__PROTOBUF__SOURCE_CODE_INFO__LOCATION__INIT	libttn/descriptor.pb-c.h	975;"	d
 GOOGLE__PROTOBUF__UNINTERPRETED_OPTION__INIT	libttn/descriptor.pb-c.h	890;"	d
 GOOGLE__PROTOBUF__UNINTERPRETED_OPTION__NAME_PART__INIT	libttn/descriptor.pb-c.h	857;"	d
-GPS_REF_MAX_AGE	dragino-gw-fwd/src/dragino_gw_fwd.c	105;"	d	file:
+GPS_REF_MAX_AGE	dragino-gw-fwd/src/dragino_gw_fwd.c	99;"	d	file:
 Gateway__GPSMetadata	libttn/gateway.pb-c.h	/^typedef struct _Gateway__GPSMetadata Gateway__GPSMetadata;$/;"	t	typeref:struct:_Gateway__GPSMetadata
 Gateway__GPSMetadata_Closure	libttn/gateway.pb-c.h	/^typedef void (*Gateway__GPSMetadata_Closure)$/;"	t
 Gateway__RxMetadata	libttn/gateway.pb-c.h	/^typedef struct _Gateway__RxMetadata Gateway__RxMetadata;$/;"	t	typeref:struct:_Gateway__RxMetadata
@@ -400,39 +400,39 @@ IS_LORA_CR	libloragw/inc/loragw_hal.h	34;"	d
 IS_LORA_MULTI_DR	libloragw/inc/loragw_hal.h	33;"	d
 IS_LORA_STD_DR	libloragw/inc/loragw_hal.h	32;"	d
 IS_TX_MODE	libloragw/inc/loragw_hal.h	39;"	d
-JIT_ERROR_COLLISION_BEACON	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_COLLISION_BEACON,	\/* A beacon is planned for this timeframe *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_COLLISION_PACKET	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_COLLISION_PACKET,	\/* A packet is already enqueued for this timeframe *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_EMPTY	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_EMPTY,		\/* Downlink queue is empty *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_FULL	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_FULL,		\/* Downlink queue is full *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_GPS_UNLOCKED	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_GPS_UNLOCKED,	\/* GPS timestamp could not be used as GPS is unlocked *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_INVALID	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_INVALID		\/* Packet is invalid *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_OK	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_OK,		\/* Packet ok to be sent *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_TOO_EARLY	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_TOO_EARLY,	\/* Too early to queue this packet *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_TOO_LATE	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_TOO_LATE,		\/* Too late to send this packet *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_TX_FREQ	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_TX_FREQ,		\/* The required frequency for downlink is not supported *\/$/;"	e	enum:jit_error_e
-JIT_ERROR_TX_POWER	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_ERROR_TX_POWER,		\/* The required power for downlink is not supported *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_COLLISION_BEACON	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_COLLISION_BEACON,	\/* A beacon is planned for this timeframe *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_COLLISION_PACKET	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_COLLISION_PACKET,	\/* A packet is already enqueued for this timeframe *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_EMPTY	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_EMPTY,			\/* Downlink queue is empty *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_FULL	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_FULL,				\/* Downlink queue is full *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_GPS_UNLOCKED	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_GPS_UNLOCKED,		\/* GPS timestamp could not be used as GPS is unlocked *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_INVALID	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_INVALID			\/* Packet is invalid *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_OK	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_OK,				\/* Packet ok to be sent *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_TOO_EARLY	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_TOO_EARLY,		\/* Too early to queue this packet *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_TOO_LATE	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_TOO_LATE,			\/* Too late to send this packet *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_TX_FREQ	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_TX_FREQ,			\/* The required frequency for downlink is not supported *\/$/;"	e	enum:jit_error_e
+JIT_ERROR_TX_POWER	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_ERROR_TX_POWER,			\/* The required power for downlink is not supported *\/$/;"	e	enum:jit_error_e
 JIT_NUM_BEACON_IN_QUEUE	dragino-gw-fwd/inc/jitqueue.h	33;"	d
-JIT_PKT_TYPE_BEACON	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_PKT_TYPE_BEACON$/;"	e	enum:jit_pkt_type_e
-JIT_PKT_TYPE_DOWNLINK_CLASS_A	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_PKT_TYPE_DOWNLINK_CLASS_A,$/;"	e	enum:jit_pkt_type_e
-JIT_PKT_TYPE_DOWNLINK_CLASS_B	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_PKT_TYPE_DOWNLINK_CLASS_B,$/;"	e	enum:jit_pkt_type_e
-JIT_PKT_TYPE_DOWNLINK_CLASS_C	dragino-gw-fwd/inc/jitqueue.h	/^    JIT_PKT_TYPE_DOWNLINK_CLASS_C,$/;"	e	enum:jit_pkt_type_e
+JIT_PKT_TYPE_BEACON	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_PKT_TYPE_BEACON$/;"	e	enum:jit_pkt_type_e
+JIT_PKT_TYPE_DOWNLINK_CLASS_A	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_PKT_TYPE_DOWNLINK_CLASS_A,$/;"	e	enum:jit_pkt_type_e
+JIT_PKT_TYPE_DOWNLINK_CLASS_B	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_PKT_TYPE_DOWNLINK_CLASS_B,$/;"	e	enum:jit_pkt_type_e
+JIT_PKT_TYPE_DOWNLINK_CLASS_C	dragino-gw-fwd/inc/jitqueue.h	/^	JIT_PKT_TYPE_DOWNLINK_CLASS_C,$/;"	e	enum:jit_pkt_type_e
 JIT_QUEUE_MAX	dragino-gw-fwd/inc/jitqueue.h	32;"	d
-JSONArray	dragino-gw-fwd/inc/parson.h	/^	JSONArray = 5,$/;"	e	enum:json_value_type
-JSONBoolean	dragino-gw-fwd/inc/parson.h	/^	JSONBoolean = 6$/;"	e	enum:json_value_type
-JSONError	dragino-gw-fwd/inc/parson.h	/^	JSONError = -1,$/;"	e	enum:json_value_type
-JSONFailure	dragino-gw-fwd/inc/parson.h	/^	JSONFailure = -1$/;"	e	enum:json_result_t
-JSONNull	dragino-gw-fwd/inc/parson.h	/^	JSONNull = 1,$/;"	e	enum:json_value_type
-JSONNumber	dragino-gw-fwd/inc/parson.h	/^	JSONNumber = 3,$/;"	e	enum:json_value_type
-JSONObject	dragino-gw-fwd/inc/parson.h	/^	JSONObject = 4,$/;"	e	enum:json_value_type
-JSONString	dragino-gw-fwd/inc/parson.h	/^	JSONString = 2,$/;"	e	enum:json_value_type
-JSONSuccess	dragino-gw-fwd/inc/parson.h	/^	JSONSuccess = 0,$/;"	e	enum:json_result_t
-JSON_Array	dragino-gw-fwd/inc/parson.h	/^    typedef struct json_array_t JSON_Array;$/;"	t	typeref:struct:json_array_t
-JSON_Free_Function	dragino-gw-fwd/inc/parson.h	/^    typedef void (*JSON_Free_Function) (void *);$/;"	t
-JSON_Malloc_Function	dragino-gw-fwd/inc/parson.h	/^    typedef void *(*JSON_Malloc_Function) (size_t);$/;"	t
-JSON_Object	dragino-gw-fwd/inc/parson.h	/^    typedef struct json_object_t JSON_Object;$/;"	t	typeref:struct:json_object_t
-JSON_Status	dragino-gw-fwd/inc/parson.h	/^    typedef int JSON_Status;$/;"	t
-JSON_Value	dragino-gw-fwd/inc/parson.h	/^    typedef struct json_value_t JSON_Value;$/;"	t	typeref:struct:json_value_t
-JSON_Value_Type	dragino-gw-fwd/inc/parson.h	/^    typedef int JSON_Value_Type;$/;"	t
+JSONArray	dragino-gw-fwd/inc/parson.h	/^		JSONArray = 5,$/;"	e	enum:json_value_type
+JSONBoolean	dragino-gw-fwd/inc/parson.h	/^		JSONBoolean = 6$/;"	e	enum:json_value_type
+JSONError	dragino-gw-fwd/inc/parson.h	/^		JSONError = -1,$/;"	e	enum:json_value_type
+JSONFailure	dragino-gw-fwd/inc/parson.h	/^		JSONFailure = -1$/;"	e	enum:json_result_t
+JSONNull	dragino-gw-fwd/inc/parson.h	/^		JSONNull = 1,$/;"	e	enum:json_value_type
+JSONNumber	dragino-gw-fwd/inc/parson.h	/^		JSONNumber = 3,$/;"	e	enum:json_value_type
+JSONObject	dragino-gw-fwd/inc/parson.h	/^		JSONObject = 4,$/;"	e	enum:json_value_type
+JSONString	dragino-gw-fwd/inc/parson.h	/^		JSONString = 2,$/;"	e	enum:json_value_type
+JSONSuccess	dragino-gw-fwd/inc/parson.h	/^		JSONSuccess = 0,$/;"	e	enum:json_result_t
+JSON_Array	dragino-gw-fwd/inc/parson.h	/^	typedef struct json_array_t JSON_Array;$/;"	t	typeref:struct:json_array_t
+JSON_Free_Function	dragino-gw-fwd/inc/parson.h	/^	typedef void (*JSON_Free_Function) (void *);$/;"	t
+JSON_Malloc_Function	dragino-gw-fwd/inc/parson.h	/^	typedef void *(*JSON_Malloc_Function) (size_t);$/;"	t
+JSON_Object	dragino-gw-fwd/inc/parson.h	/^	typedef struct json_object_t JSON_Object;$/;"	t	typeref:struct:json_object_t
+JSON_Status	dragino-gw-fwd/inc/parson.h	/^	typedef int JSON_Status;$/;"	t
+JSON_Value	dragino-gw-fwd/inc/parson.h	/^	typedef struct json_value_t JSON_Value;$/;"	t	typeref:struct:json_value_t
+JSON_Value_Type	dragino-gw-fwd/inc/parson.h	/^	typedef int JSON_Value_Type;$/;"	t
 JSON_Value_Value	dragino-gw-fwd/src/parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_value_value	file:
 KEEP_ALIVE_INTERVAL	libttn/network.h	14;"	d
 LBT_CHANNEL_FREQ_NB	libloragw/inc/loragw_hal.h	156;"	d
@@ -1113,23 +1113,23 @@ PID	libloragw/inc/rak831_usb.h	16;"	d
 PID	libloragw/inc/rak833_usb.h	16;"	d
 PINGREQ	libmqtt/MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
 PINGRESP	libmqtt/MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
-PKT_FWD	dragino-gw-fwd/inc/stats.h	/^    PKT_FWD$/;"	e	enum:stats_up
-PKT_PULL_ACK	dragino-gw-fwd/src/dragino_gw_fwd.c	118;"	d	file:
+PKT_FWD	dragino-gw-fwd/inc/stats.h	/^	PKT_FWD$/;"	e	enum:stats_up
+PKT_PULL_ACK	dragino-gw-fwd/src/dragino_gw_fwd.c	112;"	d	file:
 PKT_PULL_ACK	dragino-gw-fwd/src/gwtraf_transport.c	89;"	d	file:
 PKT_PULL_ACK	dragino-gw-fwd/src/semtech_transport.c	89;"	d	file:
-PKT_PULL_DATA	dragino-gw-fwd/src/dragino_gw_fwd.c	116;"	d	file:
+PKT_PULL_DATA	dragino-gw-fwd/src/dragino_gw_fwd.c	110;"	d	file:
 PKT_PULL_DATA	dragino-gw-fwd/src/gwtraf_transport.c	87;"	d	file:
 PKT_PULL_DATA	dragino-gw-fwd/src/semtech_transport.c	87;"	d	file:
-PKT_PULL_RESP	dragino-gw-fwd/src/dragino_gw_fwd.c	117;"	d	file:
+PKT_PULL_RESP	dragino-gw-fwd/src/dragino_gw_fwd.c	111;"	d	file:
 PKT_PULL_RESP	dragino-gw-fwd/src/gwtraf_transport.c	88;"	d	file:
 PKT_PULL_RESP	dragino-gw-fwd/src/semtech_transport.c	88;"	d	file:
-PKT_PUSH_ACK	dragino-gw-fwd/src/dragino_gw_fwd.c	115;"	d	file:
+PKT_PUSH_ACK	dragino-gw-fwd/src/dragino_gw_fwd.c	109;"	d	file:
 PKT_PUSH_ACK	dragino-gw-fwd/src/gwtraf_transport.c	86;"	d	file:
 PKT_PUSH_ACK	dragino-gw-fwd/src/semtech_transport.c	86;"	d	file:
-PKT_PUSH_DATA	dragino-gw-fwd/src/dragino_gw_fwd.c	114;"	d	file:
+PKT_PUSH_DATA	dragino-gw-fwd/src/dragino_gw_fwd.c	108;"	d	file:
 PKT_PUSH_DATA	dragino-gw-fwd/src/gwtraf_transport.c	85;"	d	file:
 PKT_PUSH_DATA	dragino-gw-fwd/src/semtech_transport.c	85;"	d	file:
-PKT_TX_ACK	dragino-gw-fwd/src/dragino_gw_fwd.c	119;"	d	file:
+PKT_TX_ACK	dragino-gw-fwd/src/dragino_gw_fwd.c	113;"	d	file:
 PKT_TX_ACK	dragino-gw-fwd/src/gwtraf_transport.c	90;"	d	file:
 PKT_TX_ACK	dragino-gw-fwd/src/semtech_transport.c	90;"	d	file:
 PLL_LOCK_MAX_ATTEMPTS	libloragw/src/loragw_radio.c	70;"	d	file:
@@ -1156,7 +1156,7 @@ PROTOBUF_C_github_2ecom_2fTheThingsNetwork_2fttn_2fapi_2ftrace_2ftrace_2eproto__
 PROTOBUF_C_github_2ecom_2fgogo_2fprotobuf_2fgogoproto_2fgogo_2eproto__INCLUDED	libttn/gogo.pb-c.h	5;"	d
 PROTOBUF_C_github_2ecom_2fgogo_2fprotobuf_2fprotobuf_2fgoogle_2fprotobuf_2fdescriptor_2eproto__INCLUDED	libttn/descriptor.pb-c.h	5;"	d
 PROTOBUF_C_github_2ecom_2fgogo_2fprotobuf_2fprotobuf_2fgoogle_2fprotobuf_2fempty_2eproto__INCLUDED	libttn/empty.pb-c.h	5;"	d
-PROTOCOL_VERSION	dragino-gw-fwd/src/dragino_gw_fwd.c	109;"	d	file:
+PROTOCOL_VERSION	dragino-gw-fwd/src/dragino_gw_fwd.c	103;"	d	file:
 PROTOCOL_VERSION	dragino-gw-fwd/src/ghost.c	45;"	d	file:
 PROTOCOL_VERSION	dragino-gw-fwd/src/gwtraf_transport.c	79;"	d	file:
 PROTOCOL_VERSION	dragino-gw-fwd/src/semtech_transport.c	79;"	d	file:
@@ -1177,10 +1177,10 @@ PUBCOMP	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBAC
 PUBLISH	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
 PUBREC	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
 PUBREL	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
-PULL_TIMEOUT_MS	dragino-gw-fwd/src/dragino_gw_fwd.c	104;"	d	file:
+PULL_TIMEOUT_MS	dragino-gw-fwd/src/dragino_gw_fwd.c	98;"	d	file:
 PULL_TIMEOUT_MS	dragino-gw-fwd/src/gwtraf_transport.c	83;"	d	file:
 PULL_TIMEOUT_MS	dragino-gw-fwd/src/semtech_transport.c	83;"	d	file:
-PUSH_TIMEOUT_MS	dragino-gw-fwd/src/dragino_gw_fwd.c	103;"	d	file:
+PUSH_TIMEOUT_MS	dragino-gw-fwd/src/dragino_gw_fwd.c	97;"	d	file:
 PUSH_TIMEOUT_MS	dragino-gw-fwd/src/gwtraf_transport.c	82;"	d	file:
 PUSH_TIMEOUT_MS	dragino-gw-fwd/src/semtech_transport.c	82;"	d	file:
 Protocol__ActivationMetadata	libttn/protocol.pb-c.h	/^typedef struct _Protocol__ActivationMetadata Protocol__ActivationMetadata;$/;"	t	typeref:struct:_Protocol__ActivationMetadata
@@ -1204,7 +1204,7 @@ QOS_STATUS	libttn/network.h	19;"	d
 QOS_UP	libttn/network.h	21;"	d
 QOS_WILL	libttn/network.h	23;"	d
 QoS	libmqtt/MQTTClient.h	/^enum QoS$/;"	g
-Queue	dragino-gw-fwd/inc/transport.h	/^typedef struct _queue Queue;$/;"	t	typeref:struct:_queue
+Queue	dragino-gw-fwd/inc/transport.h	/^} Queue;$/;"	t	typeref:struct:_queue
 Queue	libmqtt/MQTTLinux.h	/^typedef struct Queue$/;"	s
 Queue	libmqtt/MQTTLinux.h	/^} Queue;$/;"	t	typeref:struct:Queue
 QueueDestroy	libmqtt/MQTTLinux.c	/^int QueueDestroy(Queue *queue)$/;"	f
@@ -1232,13 +1232,13 @@ RSSI_FSK_POLY_0	libloragw/src/loragw_hal.c	72;"	d	file:
 RSSI_FSK_POLY_1	libloragw/src/loragw_hal.c	73;"	d	file:
 RSSI_FSK_POLY_2	libloragw/src/loragw_hal.c	74;"	d	file:
 RSSI_MULTI_BIAS	libloragw/src/loragw_hal.c	71;"	d	file:
-RX_BAD	dragino-gw-fwd/inc/stats.h	/^    RX_BAD,$/;"	e	enum:stats_up
+RX_BAD	dragino-gw-fwd/inc/stats.h	/^	RX_BAD,$/;"	e	enum:stats_up
 RX_METADATA_NB	libloragw/src/loragw_hal.c	61;"	d	file:
-RX_NOCRC	dragino-gw-fwd/inc/stats.h	/^    RX_NOCRC,$/;"	e	enum:stats_up
+RX_NOCRC	dragino-gw-fwd/inc/stats.h	/^	RX_NOCRC,$/;"	e	enum:stats_up
 RX_OFF	libloragw/inc/loragw_hal.h	148;"	d
-RX_OK	dragino-gw-fwd/inc/stats.h	/^    RX_OK,$/;"	e	enum:stats_up
+RX_OK	dragino-gw-fwd/inc/stats.h	/^	RX_OK,$/;"	e	enum:stats_up
 RX_ON	libloragw/inc/loragw_hal.h	149;"	d
-RX_RCV	dragino-gw-fwd/inc/stats.h	/^    RX_RCV,$/;"	e	enum:stats_up
+RX_RCV	dragino-gw-fwd/inc/stats.h	/^	RX_RCV,$/;"	e	enum:stats_up
 RX_STATUS	libloragw/inc/loragw_hal.h	135;"	d
 RX_STATUS_UNKNOWN	libloragw/inc/loragw_hal.h	147;"	d
 RX_SUSPENDED	libloragw/inc/loragw_hal.h	150;"	d
@@ -1306,7 +1306,7 @@ SPI_SPEED	libloragw/tst/test_loragw_hal.c	40;"	d	file:
 SRCS	libttn/Makefile	/^SRCS = *.c$/;"	m
 STACKTRACE_H_	libmqtt/StackTrace.h	19;"	d
 STARTING_CAPACITY	dragino-gw-fwd/src/parson.c	37;"	d	file:
-STATUS_SIZE	dragino-gw-fwd/src/dragino_gw_fwd.c	121;"	d	file:
+STATUS_SIZE	dragino-gw-fwd/src/dragino_gw_fwd.c	115;"	d	file:
 STATUS_SIZE	dragino-gw-fwd/src/gwtraf_transport.c	92;"	d	file:
 STATUS_SIZE	dragino-gw-fwd/src/semtech_transport.c	92;"	d	file:
 STATUS_SIZE	dragino-gw-fwd/src/stats.c	48;"	d	file:
@@ -1320,10 +1320,10 @@ STD_FSK_PREAMBLE	libloragw/src/loragw_hal.c	69;"	d	file:
 STD_LORA_PREAMB	dragino-gw-fwd/inc/dragino_gw_fwd.h	28;"	d
 STD_LORA_PREAMB	dragino-gw-fwd/src/ttn_transport.c	47;"	d	file:
 STD_LORA_PREAMBLE	libloragw/src/loragw_hal.c	67;"	d	file:
-STR	dragino-gw-fwd/src/dragino_gw_fwd.c	82;"	d	file:
+STR	dragino-gw-fwd/src/dragino_gw_fwd.c	81;"	d	file:
 STR	dragino-gw-fwd/src/gwtraf_transport.c	74;"	d	file:
 STR	dragino-gw-fwd/src/semtech_transport.c	74;"	d	file:
-STRINGIFY	dragino-gw-fwd/src/dragino_gw_fwd.c	81;"	d	file:
+STRINGIFY	dragino-gw-fwd/src/dragino_gw_fwd.c	80;"	d	file:
 STRINGIFY	dragino-gw-fwd/src/gwtraf_transport.c	73;"	d	file:
 STRINGIFY	dragino-gw-fwd/src/semtech_transport.c	73;"	d	file:
 SUBACK	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
@@ -1625,10 +1625,11 @@ SemaphoreInit	libmqtt/MQTTLinux.c	/^void SemaphoreInit(Semaphore *sem)$/;"	f
 SemaphoreSignal	libmqtt/MQTTLinux.c	/^int SemaphoreSignal(Semaphore *sem)$/;"	f
 SemaphoreTimedWait	libmqtt/MQTTLinux.c	/^int SemaphoreTimedWait(Semaphore *sem, Timer *timer)$/;"	f
 SemaphoreWait	libmqtt/MQTTLinux.c	/^int SemaphoreWait(Semaphore *sem)$/;"	f
-Server	dragino-gw-fwd/inc/transport.h	/^typedef struct _server Server;$/;"	t	typeref:struct:_server
+Server	dragino-gw-fwd/inc/transport.h	/^} Server;$/;"	t	typeref:struct:_server
 Session	libttn/session.h	/^struct Session {$/;"	s
 TAKE_N_BITS_FROM	libloragw/inc/loragw_aux.h	35;"	d
 TARGET_LIB	libttn/Makefile	/^TARGET_LIB = lib$(NAME).so$/;"	m
+TDARG	dragino-gw-fwd/inc/transport.h	/^} TDARG;$/;"	t	typeref:struct:_tdarg
 TIMEOUT	libmqtt/MQTTErrors.h	/^    TIMEOUT = -3,$/;"	e	enum:returnCode
 TIMESTAMPED	libloragw/inc/loragw_hal.h	127;"	d
 TIMING_REPEAT	libloragw/tst/test_loragw_spi.c	36;"	d	file:
@@ -1641,12 +1642,12 @@ TTN	libttn/connector.h	/^typedef void TTN;$/;"	t
 TTNDownlinkHandler	libttn/connector.h	/^typedef void (*TTNDownlinkHandler)(Router__DownlinkMessage *, void *);$/;"	t
 TTN_INC	dragino-gw-fwd/Makefile	/^TTN_INC := -I$(TTN_PATH) $/;"	m
 TTN_PATH	dragino-gw-fwd/Makefile	/^TTN_PATH ?= ..\/libttn$/;"	m
-TX_BUFF_SIZE	dragino-gw-fwd/src/dragino_gw_fwd.c	122;"	d	file:
+TX_BUFF_SIZE	dragino-gw-fwd/src/dragino_gw_fwd.c	116;"	d	file:
 TX_BUFF_SIZE	dragino-gw-fwd/src/gwtraf_transport.c	93;"	d	file:
 TX_BUFF_SIZE	dragino-gw-fwd/src/semtech_transport.c	93;"	d	file:
 TX_BUFF_SIZE	dragino-gw-fwd/src/stats.c	49;"	d	file:
 TX_EMITTING	libloragw/inc/loragw_hal.h	143;"	d
-TX_FAIL	dragino-gw-fwd/inc/stats.h	/^    TX_FAIL,$/;"	e	enum:stats_down
+TX_FAIL	dragino-gw-fwd/inc/stats.h	/^	TX_FAIL,$/;"	e	enum:stats_down
 TX_FREE	libloragw/inc/loragw_hal.h	141;"	d
 TX_GAIN_LUT_SIZE_MAX	libloragw/inc/loragw_hal.h	153;"	d
 TX_JIT_DELAY	dragino-gw-fwd/src/jitqueue.c	39;"	d	file:
@@ -1654,12 +1655,12 @@ TX_MARGIN_DELAY	dragino-gw-fwd/src/jitqueue.c	37;"	d	file:
 TX_MAX_ADVANCE_DELAY	dragino-gw-fwd/src/jitqueue.c	40;"	d	file:
 TX_METADATA_NB	libloragw/src/loragw_hal.c	60;"	d	file:
 TX_OFF	libloragw/inc/loragw_hal.h	140;"	d
-TX_OK	dragino-gw-fwd/inc/stats.h	/^    TX_OK,$/;"	e	enum:stats_down
-TX_REJ_COLL_BEACON	dragino-gw-fwd/inc/stats.h	/^    TX_REJ_COLL_BEACON,$/;"	e	enum:stats_down
-TX_REJ_COLL_PACKET	dragino-gw-fwd/inc/stats.h	/^    TX_REJ_COLL_PACKET,$/;"	e	enum:stats_down
-TX_REJ_TOO_EARLY	dragino-gw-fwd/inc/stats.h	/^    TX_REJ_TOO_EARLY,$/;"	e	enum:stats_down
-TX_REJ_TOO_LATE	dragino-gw-fwd/inc/stats.h	/^    TX_REJ_TOO_LATE,$/;"	e	enum:stats_down
-TX_REQUESTED	dragino-gw-fwd/inc/stats.h	/^    TX_REQUESTED,$/;"	e	enum:stats_down
+TX_OK	dragino-gw-fwd/inc/stats.h	/^	TX_OK,$/;"	e	enum:stats_down
+TX_REJ_COLL_BEACON	dragino-gw-fwd/inc/stats.h	/^	TX_REJ_COLL_BEACON,$/;"	e	enum:stats_down
+TX_REJ_COLL_PACKET	dragino-gw-fwd/inc/stats.h	/^	TX_REJ_COLL_PACKET,$/;"	e	enum:stats_down
+TX_REJ_TOO_EARLY	dragino-gw-fwd/inc/stats.h	/^	TX_REJ_TOO_EARLY,$/;"	e	enum:stats_down
+TX_REJ_TOO_LATE	dragino-gw-fwd/inc/stats.h	/^	TX_REJ_TOO_LATE,$/;"	e	enum:stats_down
+TX_REQUESTED	dragino-gw-fwd/inc/stats.h	/^	TX_REQUESTED,$/;"	e	enum:stats_down
 TX_SCHEDULED	libloragw/inc/loragw_hal.h	142;"	d
 TX_START_DELAY	dragino-gw-fwd/src/jitqueue.c	35;"	d	file:
 TX_START_DELAY_DEFAULT	libloragw/src/loragw_hal.c	82;"	d	file:
@@ -1667,7 +1668,6 @@ TX_STATUS	libloragw/inc/loragw_hal.h	134;"	d
 TX_STATUS_UNKNOWN	libloragw/inc/loragw_hal.h	139;"	d
 TYPES__CONNECT_MESSAGE__INIT	libttn/types.pb-c.h	34;"	d
 TYPES__DISCONNECT_MESSAGE__INIT	libttn/types.pb-c.h	45;"	d
-Thrdarg	dragino-gw-fwd/inc/transport.h	/^typedef struct _thrdarg Thrdarg;  $/;"	t	typeref:struct:_thrdarg
 Thread	libmqtt/MQTTLinux.h	/^typedef struct Thread$/;"	s
 Thread	libmqtt/MQTTLinux.h	/^} Thread;$/;"	t	typeref:struct:Thread
 ThreadExit	libmqtt/MQTTLinux.c	/^void ThreadExit()$/;"	f
@@ -1695,7 +1695,7 @@ UBX_NAV_TIMEUTC	libloragw/inc/loragw_gps.h	/^    UBX_NAV_TIMEUTC  \/*!> UTC Time
 UNKNOWN	libloragw/inc/loragw_gps.h	/^    UNKNOWN,         \/*!> neutral value *\/$/;"	e	enum:gps_msg
 UNSUBACK	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
 UNSUBSCRIBE	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
-VERSION_STRING	dragino-gw-fwd/src/dragino_gw_fwd.c	90;"	d	file:
+VERSION_STRING	dragino-gw-fwd/src/dragino_gw_fwd.c	88;"	d	file:
 VFLAG	dragino-gw-fwd/Makefile	/^VFLAG := -D VERSION_STRING="\\"$(RELEASE_VERSION)\\""$/;"	m
 VID	libloragw/inc/imst_rpi.h	20;"	d
 VID	libloragw/inc/kerlink.h	20;"	d
@@ -1708,8 +1708,8 @@ VID	libloragw/inc/rak833_usb.h	15;"	d
 WAIT_GPIO	reset_lgw.sh	/^WAIT_GPIO() {$/;"	f
 WRITE_ACCESS	libloragw/src/loragw_spi.ftdi.c	48;"	d	file:
 WRITE_ACCESS	libloragw/src/loragw_spi.native.c	50;"	d	file:
-XERR_FILT_COEF	dragino-gw-fwd/src/dragino_gw_fwd.c	112;"	d	file:
-XERR_INIT_AVG	dragino-gw-fwd/src/dragino_gw_fwd.c	111;"	d	file:
+XERR_FILT_COEF	dragino-gw-fwd/src/dragino_gw_fwd.c	106;"	d	file:
+XERR_INIT_AVG	dragino-gw-fwd/src/dragino_gw_fwd.c	105;"	d	file:
 _Api__ComponentStats	libttn/api.pb-c.h	/^struct  _Api__ComponentStats$/;"	s
 _Api__ComponentStats__CPUStats	libttn/api.pb-c.h	/^struct  _Api__ComponentStats__CPUStats$/;"	s
 _Api__ComponentStats__MemoryStats	libttn/api.pb-c.h	/^struct  _Api__ComponentStats__MemoryStats$/;"	s
@@ -1834,8 +1834,8 @@ _Trace__Trace	libttn/trace.pb-c.h	/^struct  _Trace__Trace$/;"	s
 _Trace__Trace__MetadataEntry	libttn/trace.pb-c.h	/^struct  _Trace__Trace__MetadataEntry$/;"	s
 _Types__ConnectMessage	libttn/types.pb-c.h	/^struct  _Types__ConnectMessage$/;"	s
 _Types__DisconnectMessage	libttn/types.pb-c.h	/^struct  _Types__DisconnectMessage$/;"	s
-_XOPEN_SOURCE	dragino-gw-fwd/src/dragino_gw_fwd.c	29;"	d	file:
-_XOPEN_SOURCE	dragino-gw-fwd/src/dragino_gw_fwd.c	31;"	d	file:
+_XOPEN_SOURCE	dragino-gw-fwd/src/dragino_gw_fwd.c	28;"	d	file:
+_XOPEN_SOURCE	dragino-gw-fwd/src/dragino_gw_fwd.c	30;"	d	file:
 _XOPEN_SOURCE	dragino-gw-fwd/src/ghost.c	14;"	d	file:
 _XOPEN_SOURCE	dragino-gw-fwd/src/ghost.c	16;"	d	file:
 _XOPEN_SOURCE	dragino-gw-fwd/src/gwtraf_transport.c	26;"	d	file:
@@ -1858,14 +1858,14 @@ __TTN_GW_H_	libttn/connector.h	5;"	d
 __TTN_GW_NETWORK_H_	libttn/network.h	5;"	d
 __TTN_GW_SESSION_H_	libttn/session.h	5;"	d
 __compar_d_fn_t	dragino-gw-fwd/src/jitqueue.c	/^typedef int (*__compar_d_fn_t) (const void *, const void *, void *);$/;"	t	file:
-_queue	dragino-gw-fwd/inc/transport.h	/^struct _queue {$/;"	s
-_server	dragino-gw-fwd/inc/transport.h	/^struct _server {$/;"	s
-_thrdarg	dragino-gw-fwd/inc/transport.h	/^struct _thrdarg {$/;"	s
+_queue	dragino-gw-fwd/inc/transport.h	/^typedef struct _queue {$/;"	s
+_server	dragino-gw-fwd/inc/transport.h	/^typedef struct _server {$/;"	s
+_tdarg	dragino-gw-fwd/inc/transport.h	/^typedef struct _tdarg {$/;"	s
 ack	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean ack;$/;"	m	struct:_Lorawan__FCtrl
 activate	libttn/router.pb-c.h	/^  void (*activate)(Router__Router_Service *service,$/;"	m	struct:_Router__Router_Service
 activation_metadata	libttn/router.pb-c.h	/^  Protocol__ActivationMetadata *activation_metadata;$/;"	m	struct:_Router__DeviceActivationRequest
 activations	libttn/router.pb-c.h	/^  Api__Rates *activations;$/;"	m	struct:_Router__Status
-addr	dragino-gw-fwd/inc/transport.h	/^    char addr[64];		\/\/ server address$/;"	m	struct:_server
+addr	dragino-gw-fwd/inc/transport.h	/^	char addr[64];				\/\/ server address$/;"	m	struct:_server
 addr	libloragw/inc/loragw_reg.h	/^    uint8_t addr;        \/*!< base address of the register (7 bit) *\/$/;"	m	struct:lgw_reg_s
 adr	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean adr;$/;"	m	struct:_Lorawan__FCtrl
 adr_ack_req	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean adr_ack_req;$/;"	m	struct:_Lorawan__FCtrl
@@ -1953,7 +1953,7 @@ app_nonce	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData app_nonce;$/;"	m	struct:
 append_indent	dragino-gw-fwd/src/parson.c	/^static int append_indent(char *buf, int level) {$/;"	f	file:
 append_string	dragino-gw-fwd/src/parson.c	/^static int append_string(char *buf, const char *string) {$/;"	f	file:
 arg	libmqtt/MQTTClient.h	/^      void *arg;$/;"	m	struct:MQTTClient::MessageHandlers
-array	dragino-gw-fwd/src/parson.c	/^    JSON_Array *array;$/;"	m	union:json_value_value	file:
+array	dragino-gw-fwd/src/parson.c	/^	JSON_Array *array;$/;"	m	union:json_value_value	file:
 autoquit_threshold	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t autoquit_threshold = 0;	\/* enable auto-quit after a number of non-acknowledged PULL_DATA (0 = disabled) *\/$/;"	v
 available	libttn/api.pb-c.h	/^  uint64_t available;$/;"	m	struct:_Api__SystemStats__MemoryStats
 b64_to_bin	dragino-gw-fwd/src/base64.c	/^int b64_to_bin(const char *in, int size, uint8_t * out, int max_len) {$/;"	f
@@ -2036,7 +2036,7 @@ base	libttn/types.pb-c.h	/^  ProtobufCMessage base;$/;"	m	struct:_Types__Connect
 base	libttn/types.pb-c.h	/^  ProtobufCMessage base;$/;"	m	struct:_Types__DisconnectMessage
 beacon_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool beacon_enabled = false;	\/* controls the activation of the time beacon.      *\/$/;"	v
 beacon_freq_hz	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t beacon_freq_hz = 0;	\/* TX beacon frequency, in Hz *\/$/;"	v
-beacon_period	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t beacon_period = 0;	\/* set beaconing period, must be a sub-multiple of 86400, the number of seconds in a day *\/$/;"	v
+beacon_period	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t beacon_period = 0;		\/* set beaconing period, must be a sub-multiple of 86400, the number of seconds in a day *\/$/;"	v
 begin	libttn/descriptor.pb-c.h	/^  int32_t begin;$/;"	m	struct:_Google__Protobuf__GeneratedCodeInfo__Annotation
 bin_to_b64	dragino-gw-fwd/src/base64.c	/^int bin_to_b64(const uint8_t * in, int size, char *out, int max_len) {$/;"	f
 bin_to_b64_nopad	dragino-gw-fwd/src/base64.c	/^int bin_to_b64_nopad(const uint8_t * in, int size, char *out, int max_len) {$/;"	f
@@ -2048,7 +2048,7 @@ bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon6	typeref:struct:__anon6
 bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon6	typeref:struct:__anon6::__anon8
 bits	libmqtt/MQTTPacket.h	/^	} bits;$/;"	m	union:__anon9	typeref:struct:__anon9::__anon10
 bits	libmqtt/MQTTPacket.h	/^	} bits;$/;"	m	union:__anon9	typeref:struct:__anon9::__anon11
-boolean	dragino-gw-fwd/src/parson.c	/^    int boolean;$/;"	m	union:json_value_value	file:
+boolean	dragino-gw-fwd/src/parson.c	/^	int boolean;$/;"	m	union:json_value_value	file:
 boot_time	libttn/gateway.pb-c.h	/^  int64_t boot_time;$/;"	m	struct:_Gateway__Status
 bridge	libttn/gateway.pb-c.h	/^  char *bridge;$/;"	m	struct:_Gateway__Status
 buf	libmqtt/MQTTClient.h	/^   unsigned char *buf,$/;"	m	struct:MQTTClient
@@ -2062,8 +2062,8 @@ cal_offset_a_q	libloragw/src/loragw_hal.c	/^static int8_t cal_offset_a_q[8]; \/*
 cal_offset_b_i	libloragw/src/loragw_hal.c	/^static int8_t cal_offset_b_i[8]; \/* TX I offset for radio B *\/$/;"	v	file:
 cal_offset_b_q	libloragw/src/loragw_hal.c	/^static int8_t cal_offset_b_q[8]; \/* TX Q offset for radio B *\/$/;"	v	file:
 cal_res_s	libloragw/tst/test_loragw_cal.c	/^struct cal_res_s {$/;"	s	file:
-capacity	dragino-gw-fwd/src/parson.c	/^    size_t capacity;$/;"	m	struct:json_array_t	file:
-capacity	dragino-gw-fwd/src/parson.c	/^    size_t capacity;$/;"	m	struct:json_object_t	file:
+capacity	dragino-gw-fwd/src/parson.c	/^	size_t capacity;$/;"	m	struct:json_array_t	file:
+capacity	dragino-gw-fwd/src/parson.c	/^	size_t capacity;$/;"	m	struct:json_object_t	file:
 cb_arg	libttn/session.h	/^  void *cb_arg;$/;"	m	struct:Session
 cb_ghost	dragino-gw-fwd/src/ghost.c	/^static pthread_mutex_t cb_ghost = PTHREAD_MUTEX_INITIALIZER;	\/* control access to the ghoststream measurements *\/$/;"	v	file:
 cc_enable_arenas	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean cc_enable_arenas;$/;"	m	struct:_Google__Protobuf__FileOptions
@@ -2085,10 +2085,9 @@ clientID	libmqtt/MQTTConnect.h	/^	MQTTString clientID;$/;"	m	struct:__anon5
 client_streaming	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean client_streaming;$/;"	m	struct:_Google__Protobuf__MethodDescriptorProto
 clientid	libmqtt/test/stdoutsub.c	/^   char *clientid;$/;"	m	struct:opts_struct	file:
 clksrc	libloragw/inc/loragw_hal.h	/^    uint8_t clksrc;         \/*!> Index of RF chain which provides clock to concentrator *\/$/;"	m	struct:lgw_conf_board_s
-clock_gettime	dragino-gw-fwd/src/dragino_gw_fwd.c	/^int clock_gettime(int clk_id, struct timespec *t) {$/;"	f
-code_62	dragino-gw-fwd/src/base64.c	/^static char code_62 = '+';	\/* RFC 1421 standard character for code 62 *\/$/;"	v	file:
-code_63	dragino-gw-fwd/src/base64.c	/^static char code_63 = '\/';	\/* RFC 1421 standard character for code 63 *\/$/;"	v	file:
-code_pad	dragino-gw-fwd/src/base64.c	/^static char code_pad = '=';	\/* RFC 1421 padding character if padding *\/$/;"	v	file:
+code_62	dragino-gw-fwd/src/base64.c	/^static char code_62 = '+';		\/* RFC 1421 standard character for code 62 *\/$/;"	v	file:
+code_63	dragino-gw-fwd/src/base64.c	/^static char code_63 = '\/';		\/* RFC 1421 standard character for code 63 *\/$/;"	v	file:
+code_pad	dragino-gw-fwd/src/base64.c	/^static char code_pad = '=';		\/* RFC 1421 padding character if padding *\/$/;"	v	file:
 code_to_char	dragino-gw-fwd/src/base64.c	/^char code_to_char(uint8_t x) {$/;"	f
 coderate	libloragw/inc/loragw_hal.h	/^    uint8_t     coderate;       \/*!> error-correcting code of the packet (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
 coderate	libloragw/inc/loragw_hal.h	/^    uint8_t     coderate;       \/*!> error-correcting code of the packet (LoRa only) *\/$/;"	m	struct:lgw_pkt_tx_s
@@ -2099,12 +2098,12 @@ compare	dragino-gw-fwd/src/jitqueue.c	/^int compare(void *arg, const void *a, co
 component	libttn/router.pb-c.h	/^  Api__ComponentStats *component;$/;"	m	struct:_Router__Status
 connected_brokers	libttn/router.pb-c.h	/^  uint32_t connected_brokers;$/;"	m	struct:_Router__Status
 connected_gateways	libttn/router.pb-c.h	/^  uint32_t connected_gateways;$/;"	m	struct:_Router__Status
-connecting	dragino-gw-fwd/inc/transport.h	/^    bool connecting;		\/\/ Connection setup in progress$/;"	m	struct:_server
-contact	dragino-gw-fwd/inc/transport.h	/^    time_t contact;		\/\/ time of last contact$/;"	m	struct:_server
+connecting	dragino-gw-fwd/inc/transport.h	/^	bool connecting;			\/\/ Connection setup in progress$/;"	m	struct:_server
+contact	dragino-gw-fwd/inc/transport.h	/^	time_t contact;				\/\/ time of last contact$/;"	m	struct:_server
 contact_email	libttn/gateway.pb-c.h	/^  char *contact_email;$/;"	m	struct:_Gateway__Status
 coord_s	libloragw/inc/loragw_gps.h	/^struct coord_s {$/;"	s
-count	dragino-gw-fwd/src/parson.c	/^    size_t count;$/;"	m	struct:json_array_t	file:
-count	dragino-gw-fwd/src/parson.c	/^    size_t count;$/;"	m	struct:json_object_t	file:
+count	dragino-gw-fwd/src/parson.c	/^	size_t count;$/;"	m	struct:json_array_t	file:
+count	dragino-gw-fwd/src/parson.c	/^	size_t count;$/;"	m	struct:json_object_t	file:
 count_us	libloragw/inc/loragw_gps.h	/^    uint32_t        count_us;   \/*!> reference concentrator internal timestamp *\/$/;"	m	struct:tref
 count_us	libloragw/inc/loragw_hal.h	/^    uint32_t    count_us;       \/*!> internal concentrator counter for timestamping, 1 microsecond resolution *\/$/;"	m	struct:lgw_pkt_rx_s
 count_us	libloragw/inc/loragw_hal.h	/^    uint32_t    count_us;       \/*!> timestamp or delay in microseconds for TX trigger *\/$/;"	m	struct:lgw_pkt_tx_s
@@ -2113,13 +2112,13 @@ cpu	libttn/api.pb-c.h	/^  Api__SystemStats__CPUStats *cpu;$/;"	m	struct:_Api__Sy
 cpu_percentage	libttn/gateway.pb-c.h	/^  float cpu_percentage;$/;"	m	struct:_Gateway__Status__OSMetrics
 crc	libloragw/inc/loragw_hal.h	/^    uint16_t    crc;            \/*!> CRC that was received in the payload *\/$/;"	m	struct:lgw_pkt_rx_s
 crc_ccit	dragino-gw-fwd/src/semtech_transport.c	/^static uint16_t crc_ccit(const uint8_t * data, unsigned size) {$/;"	f	file:
-critical	dragino-gw-fwd/inc/transport.h	/^    bool critical;		\/\/ Transport critical? Should connect at startup?$/;"	m	struct:_server
+critical	dragino-gw-fwd/inc/transport.h	/^	bool critical;				\/\/ Transport critical? Should connect at startup?$/;"	m	struct:_server
 csharp_namespace	libttn/descriptor.pb-c.h	/^  char *csharp_namespace;$/;"	m	struct:_Google__Protobuf__FileOptions
 cstring	libmqtt/MQTTPacket.h	/^	char* cstring;$/;"	m	struct:__anon13
 ctype	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldOptions__CType ctype;$/;"	m	struct:_Google__Protobuf__FieldOptions
 cycle	libmqtt/MQTTClient.c	/^int cycle(MQTTClient *c, Timer *timer)$/;"	f
 dac_gain	libloragw/inc/loragw_hal.h	/^    uint8_t dac_gain;   \/*!> 2 bits, control of the radio DAC *\/$/;"	m	struct:lgw_tx_gain_s
-data	dragino-gw-fwd/inc/transport.h	/^    struct lgw_pkt_rx_s data[NB_PKT_MAX];$/;"	m	struct:_queue	typeref:struct:_queue::lgw_pkt_rx_s
+data	dragino-gw-fwd/inc/transport.h	/^	struct lgw_pkt_rx_s data[NB_PKT_MAX];$/;"	m	struct:_queue	typeref:struct:_queue::lgw_pkt_rx_s
 data	libmqtt/MQTTPacket.h	/^	char* data;$/;"	m	struct:__anon12
 data_rate	libttn/lorawan.pb-c.h	/^  char *data_rate;$/;"	m	struct:_Lorawan__Metadata
 data_rate	libttn/lorawan.pb-c.h	/^  char *data_rate;$/;"	m	struct:_Lorawan__TxConfiguration
@@ -2149,7 +2148,7 @@ deprecated	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean deprecated;$/;"	m	str
 deprecated	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean deprecated;$/;"	m	struct:_Google__Protobuf__MessageOptions
 deprecated	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean deprecated;$/;"	m	struct:_Google__Protobuf__MethodOptions
 deprecated	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean deprecated;$/;"	m	struct:_Google__Protobuf__ServiceOptions
-description	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char description[64] = "";	\/* used for free form description *\/$/;"	v
+description	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char description[64] = "";		\/* used for free form description *\/$/;"	v
 description	libttn/gateway.pb-c.h	/^  char *description;$/;"	m	struct:_Gateway__Status
 dev_addr	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData dev_addr;$/;"	m	struct:_Lorawan__ActivationMetadata
 dev_addr	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData dev_addr;$/;"	m	struct:_Lorawan__FHDR
@@ -2167,18 +2166,18 @@ downlink	dragino-gw-fwd/src/stats.c	/^struct statistics_downlink downlink;$/;"	v
 downlink	libttn/router.pb-c.h	/^  Api__Rates *downlink;$/;"	m	struct:_Router__Status
 downlink_handler	libttn/session.h	/^  TTNDownlinkHandler downlink_handler;$/;"	m	struct:Session
 downlink_topic	libttn/session.h	/^  char *downlink_topic;$/;"	m	struct:Session
-downstream	dragino-gw-fwd/inc/transport.h	/^    bool downstream;		\/\/ downstream enabled$/;"	m	struct:_server
+downstream	dragino-gw-fwd/inc/transport.h	/^	bool downstream;			\/\/ downstream enabled$/;"	m	struct:_server
 downstream_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool downstream_enabled = true;	\/* controls the data flow from server to end-node         *\/$/;"	v
 dsp	libttn/gateway.pb-c.h	/^  uint32_t dsp;$/;"	m	struct:_Gateway__Status
 dup	libmqtt/MQTTClient.h	/^   unsigned char dup;$/;"	m	struct:MQTTMessage
 dup	libmqtt/MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon9::__anon10
 dup	libmqtt/MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon9::__anon11
 eflt	dragino-gw-fwd/src/ghost.c	/^static float eflt(uint8_t * p, uint8_t i) {$/;"	f	file:
-email	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char email[40] = "";		\/* used for contact email *\/$/;"	v
+email	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char email[40] = "";			\/* used for contact email *\/$/;"	v
 enable	libloragw/inc/loragw_hal.h	/^    bool                        enable;             \/*!> enable or disable LBT *\/$/;"	m	struct:lgw_conf_lbt_s
 enable	libloragw/inc/loragw_hal.h	/^    bool                    enable;         \/*!> enable or disable that RF chain *\/$/;"	m	struct:lgw_conf_rxrf_s
 enable	libloragw/inc/loragw_hal.h	/^    bool        enable;         \/*!> enable or disable that IF chain *\/$/;"	m	struct:lgw_conf_rxif_s
-enabled	dragino-gw-fwd/inc/transport.h	/^    bool enabled;		\/\/ server enabled$/;"	m	struct:_server
+enabled	dragino-gw-fwd/inc/transport.h	/^	bool enabled;				\/\/ server enabled$/;"	m	struct:_server
 encrypted	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData encrypted;$/;"	m	struct:_Lorawan__JoinAcceptPayload
 encrypted_time	libttn/gateway.pb-c.h	/^  ProtobufCBinaryData encrypted_time;$/;"	m	struct:_Gateway__RxMetadata
 encrypted_time	libttn/gateway.pb-c.h	/^  ProtobufCBinaryData encrypted_time;$/;"	m	struct:_Gateway__RxMetadata__Antenna
@@ -2197,7 +2196,7 @@ extendee	libttn/descriptor.pb-c.h	/^  char *extendee;$/;"	m	struct:_Google__Prot
 extension	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto **extension;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 extension	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto **extension;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
 extension_range	libttn/descriptor.pb-c.h	/^  Google__Protobuf__DescriptorProto__ExtensionRange **extension_range;$/;"	m	struct:_Google__Protobuf__DescriptorProto
-f	dragino-gw-fwd/src/ghost.c	/^    float f;$/;"	m	union:__anon16	file:
+f	dragino-gw-fwd/src/ghost.c	/^	float f;$/;"	m	union:__anon16	file:
 f_cnt	libttn/lorawan.pb-c.h	/^  uint32_t f_cnt;$/;"	m	struct:_Lorawan__FHDR
 f_cnt	libttn/lorawan.pb-c.h	/^  uint32_t f_cnt;$/;"	m	struct:_Lorawan__Metadata
 f_cnt	libttn/lorawan.pb-c.h	/^  uint32_t f_cnt;$/;"	m	struct:_Lorawan__TxConfiguration
@@ -2209,8 +2208,8 @@ f_pending	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean f_pending;$/;"	m	struct:_
 f_port	libttn/lorawan.pb-c.h	/^  int32_t f_port;$/;"	m	struct:_Lorawan__MACPayload
 field	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto **field;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 file	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FileDescriptorProto **file;$/;"	m	struct:_Google__Protobuf__FileDescriptorSet
-flush_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool flush_enabled = false;	\/* flush output after statistics                    *\/$/;"	v
-flush_line	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool flush_line = false;	\/* flush output after every line                    *\/$/;"	v
+flush_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool flush_enabled = false;		\/* flush output after statistics                    *\/$/;"	v
+flush_line	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool flush_line = false;		\/* flush output after every line                    *\/$/;"	v
 fp	libmqtt/MQTTClient.h	/^      void (*fp)(MessageData *, void *);$/;"	m	struct:MQTTClient::MessageHandlers
 fpga	libttn/gateway.pb-c.h	/^  uint32_t fpga;$/;"	m	struct:_Gateway__Status
 fpga_regs	libloragw/src/loragw_fpga.c	/^const struct lgw_reg_s fpga_regs[LGW_FPGA_TOTALREGS] = {$/;"	v	typeref:struct:lgw_reg_s
@@ -2233,9 +2232,9 @@ fsk_rx_bw	libloragw/src/loragw_hal.c	/^static uint8_t fsk_rx_bw; \/* bandwidth s
 fsk_rx_dr	libloragw/src/loragw_hal.c	/^static uint32_t fsk_rx_dr; \/* FSK modem datarate in bauds *\/$/;"	v	file:
 fsk_sync_word	libloragw/src/loragw_hal.c	/^static uint64_t fsk_sync_word= 0xC194C1; \/* default FSK sync word (ALIGNED RIGHT, MSbit first) *\/$/;"	v	file:
 fsk_sync_word_size	libloragw/src/loragw_hal.c	/^static uint8_t fsk_sync_word_size = 3; \/* default number of bytes for FSK sync word *\/$/;"	v	file:
-fwd_error_pkt	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool fwd_error_pkt = false;	\/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	v
-fwd_nocrc_pkt	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool fwd_nocrc_pkt = false;	\/* packets with NO PAYLOAD CRC are NOT forwarded *\/$/;"	v
-fwd_valid_pkt	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool fwd_valid_pkt = true;	\/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	v
+fwd_error_pkt	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool fwd_error_pkt = false;		\/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	v
+fwd_nocrc_pkt	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool fwd_nocrc_pkt = false;		\/* packets with NO PAYLOAD CRC are NOT forwarded *\/$/;"	v
+fwd_valid_pkt	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool fwd_valid_pkt = true;		\/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	v
 gateway__gpsmetadata__descriptor	libttn/gateway.pb-c.c	/^const ProtobufCMessageDescriptor gateway__gpsmetadata__descriptor =$/;"	v
 gateway__gpsmetadata__field_descriptors	libttn/gateway.pb-c.c	/^static const ProtobufCFieldDescriptor gateway__gpsmetadata__field_descriptors[4] =$/;"	v	file:
 gateway__gpsmetadata__field_indices_by_name	libttn/gateway.pb-c.c	/^static const unsigned gateway__gpsmetadata__field_indices_by_name[] = {$/;"	v	file:
@@ -2287,7 +2286,7 @@ gateway__tx_configuration__pack	libttn/gateway.pb-c.c	/^size_t gateway__tx_confi
 gateway__tx_configuration__pack_to_buffer	libttn/gateway.pb-c.c	/^size_t gateway__tx_configuration__pack_to_buffer$/;"	f
 gateway__tx_configuration__unpack	libttn/gateway.pb-c.c	/^       gateway__tx_configuration__unpack$/;"	f
 gateway_configuration	libttn/router.pb-c.h	/^  Gateway__TxConfiguration *gateway_configuration;$/;"	m	struct:_Router__DownlinkMessage
-gateway_id	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char gateway_id[20] = "";	\/* string form of gateway mac address *\/$/;"	v
+gateway_id	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char gateway_id[20] = "";		\/* string form of gateway mac address *\/$/;"	v
 gateway_id	dragino-gw-fwd/src/ghost.c	/^static char gateway_id[16] = "";	\/* string form of gateway mac address *\/$/;"	v	file:
 gateway_id	libttn/gateway.pb-c.h	/^  char *gateway_id;$/;"	m	struct:_Gateway__RxMetadata
 gateway_id	libttn/router.pb-c.h	/^  char *gateway_id;$/;"	m	struct:_Router__GatewayStatusRequest
@@ -2310,14 +2309,14 @@ getopts	libmqtt/test/stdoutsub.c	/^void getopts(int argc, char **argv)$/;"	f
 ghost_addr	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static char ghost_addr[64] = "127.0.0.1";	\/* address of the server (host name or IPv4\/IPv6) *\/$/;"	v	file:
 ghost_get	dragino-gw-fwd/src/ghost.c	/^int ghost_get(int max_pkt, struct lgw_pkt_rx_s *pkt_data) {	\/* Calculate the number of available packets *\/$/;"	f
 ghost_port	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static char ghost_port[8] = "1914";	\/* port to listen on *\/$/;"	v	file:
-ghost_put	dragino-gw-fwd/src/ghost.c	/^int ghost_put() {		\/\/TODO: Implement this method.$/;"	f
+ghost_put	dragino-gw-fwd/src/ghost.c	/^int ghost_put() {				\/\/TODO: Implement this method.$/;"	f
 ghost_run	dragino-gw-fwd/src/ghost.c	/^volatile bool ghost_run = false;	\/* false -> ghost thread terminates cleanly *\/$/;"	v
 ghost_start	dragino-gw-fwd/src/ghost.c	/^void ghost_start(const char *ghost_addr, const char *ghost_port,$/;"	f
 ghost_stop	dragino-gw-fwd/src/ghost.c	/^void ghost_stop(void) {$/;"	f
 ghost_timeout	dragino-gw-fwd/src/ghost.c	/^struct timeval ghost_timeout = { 0, (200 * 1000) };	\/* non critical for throughput *\/$/;"	v	typeref:struct:timeval
 ghoststream_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static bool ghoststream_enabled = false;	\/* controls the data flow from ghost-node to server       *\/$/;"	v	file:
-ghst_bgn	dragino-gw-fwd/src/ghost.c	/^static uint8_t ghst_bgn;	\/* begin of circular packet buffer *\/$/;"	v	file:
-ghst_end	dragino-gw-fwd/src/ghost.c	/^static uint8_t ghst_end;	\/* end of circular packet buffer  *\/$/;"	v	file:
+ghst_bgn	dragino-gw-fwd/src/ghost.c	/^static uint8_t ghst_bgn;		\/* begin of circular packet buffer *\/$/;"	v	file:
+ghst_end	dragino-gw-fwd/src/ghost.c	/^static uint8_t ghst_end;		\/* end of circular packet buffer  *\/$/;"	v	file:
 go_package	libttn/descriptor.pb-c.h	/^  char *go_package;$/;"	m	struct:_Google__Protobuf__FileOptions
 google__protobuf__descriptor_proto__descriptor	libttn/descriptor.pb-c.c	/^const ProtobufCMessageDescriptor google__protobuf__descriptor_proto__descriptor =$/;"	v
 google__protobuf__descriptor_proto__extension_range__descriptor	libttn/descriptor.pb-c.c	/^const ProtobufCMessageDescriptor google__protobuf__descriptor_proto__extension_range__descriptor =$/;"	v
@@ -2605,15 +2604,15 @@ goroutines	libttn/api.pb-c.h	/^  uint64_t goroutines;$/;"	m	struct:_Api__Compone
 gps	libloragw/inc/loragw_gps.h	/^    struct timespec gps;        \/*!> reference GPS time (since 01.Jan.1980) *\/$/;"	m	struct:tref	typeref:struct:tref::timespec
 gps	libttn/gateway.pb-c.h	/^  Gateway__GPSMetadata *gps;$/;"	m	struct:_Gateway__RxMetadata
 gps	libttn/gateway.pb-c.h	/^  Gateway__GPSMetadata *gps;$/;"	m	struct:_Gateway__Status
-gps_active	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_active = false;	\/* is GPS present and working on the board? *\/$/;"	v
+gps_active	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_active = false;		\/* is GPS present and working on the board? *\/$/;"	v
 gps_alt	libloragw/src/loragw_gps.c	/^static short gps_alt = 0; \/* altitude *\/$/;"	v	file:
-gps_coord_valid	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_coord_valid;		\/* could we get valid GPS coordinates? *\/$/;"	v
+gps_coord_valid	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_coord_valid;			\/* could we get valid GPS coordinates? *\/$/;"	v
 gps_day	libloragw/src/loragw_gps.c	/^static short gps_day = 0; \/* day of the month (1-31) *\/$/;"	v	file:
 gps_dla	libloragw/src/loragw_gps.c	/^static short gps_dla = 0; \/* degrees of latitude *\/$/;"	v	file:
 gps_dlo	libloragw/src/loragw_gps.c	/^static short gps_dlo = 0; \/* degrees of longitude *\/$/;"	v	file:
-gps_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_enabled = false;	\/* controls the use of the GPS                      *\/$/;"	v
+gps_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_enabled = false;		\/* controls the use of the GPS                      *\/$/;"	v
 gps_fTOW	libloragw/src/loragw_gps.c	/^static int32_t gps_fTOW = 0; \/* Fractional part of iTOW (+\/-500000) in nanosec *\/$/;"	v	file:
-gps_fake_enable	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_fake_enable;		\/* fake coordinates override real coordinates *\/$/;"	v
+gps_fake_enable	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_fake_enable;			\/* fake coordinates override real coordinates *\/$/;"	v
 gps_fra	libloragw/src/loragw_gps.c	/^static float gps_fra = 0.0; \/* fractions of seconds (<1) *\/$/;"	v	file:
 gps_hou	libloragw/src/loragw_gps.c	/^static short gps_hou = 0; \/* hours (0-23) *\/$/;"	v	file:
 gps_iTOW	libloragw/src/loragw_gps.c	/^static uint32_t gps_iTOW = 0; \/* GPS time of week in milliseconds *\/$/;"	v	file:
@@ -2630,18 +2629,18 @@ gps_process_coords	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static void gps_process
 gps_process_coords	libloragw/tst/test_loragw_gps.c	/^static void gps_process_coords(void) {$/;"	f	file:
 gps_process_sync	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static void gps_process_sync(void) {$/;"	f	file:
 gps_process_sync	libloragw/tst/test_loragw_gps.c	/^static void gps_process_sync(void) {$/;"	f	file:
-gps_ref_valid	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_ref_valid;		\/* is GPS reference acceptable (ie. not too old) *\/$/;"	v
+gps_ref_valid	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool gps_ref_valid;				\/* is GPS reference acceptable (ie. not too old) *\/$/;"	v
 gps_sat	libloragw/src/loragw_gps.c	/^static short gps_sat = 0; \/* number of satellites used for fix *\/$/;"	v	file:
 gps_sec	libloragw/src/loragw_gps.c	/^static short gps_sec = 0; \/* seconds (0-60)(60 is for leap second) *\/$/;"	v	file:
 gps_time_ok	libloragw/src/loragw_gps.c	/^static bool gps_time_ok = false;$/;"	v	file:
-gps_tty_fd	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static int gps_tty_fd = -1;	\/* file descriptor of the GPS TTY port *\/$/;"	v	file:
+gps_tty_fd	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static int gps_tty_fd = -1;		\/* file descriptor of the GPS TTY port *\/$/;"	v	file:
 gps_tty_path	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static char gps_tty_path[64] = "\\0";	\/* path of the TTY port GPS is connected on *\/$/;"	v	file:
 gps_week	libloragw/src/loragw_gps.c	/^static int16_t gps_week = 0; \/* GPS week number of the navigation epoch *\/$/;"	v	file:
 gps_yea	libloragw/src/loragw_gps.c	/^static short gps_yea = 0; \/* year (2 or 4 digits) *\/$/;"	v	file:
-gw_id	dragino-gw-fwd/inc/transport.h	/^    char gw_id[64];		\/\/ gateway ID for TTN$/;"	m	struct:_server
-gw_key	dragino-gw-fwd/inc/transport.h	/^    char gw_key[200];		\/\/ gateway key to connect to TTN$/;"	m	struct:_server
-gw_port	dragino-gw-fwd/inc/transport.h	/^    int gw_port;		\/\/ gateway port$/;"	m	struct:_server
-gwtraf	dragino-gw-fwd/inc/transport.h	/^    gwtraf$/;"	e	enum:server_type
+gw_id	dragino-gw-fwd/inc/transport.h	/^	char gw_id[64];				\/\/ gateway ID for TTN$/;"	m	struct:_server
+gw_key	dragino-gw-fwd/inc/transport.h	/^	char gw_key[200];			\/\/ gateway key to connect to TTN$/;"	m	struct:_server
+gw_port	dragino-gw-fwd/inc/transport.h	/^	int gw_port;				\/\/ gateway port$/;"	m	struct:_server
+gwtraf	dragino-gw-fwd/inc/transport.h	/^	gwtraf$/;"	e	enum:server_type
 gwtraf_data_up	dragino-gw-fwd/src/gwtraf_transport.c	/^void gwtraf_data_up(int idx, int nb_pkt, struct lgw_pkt_rx_s *rxpkt) {$/;"	f
 gwtraf_downtraf	dragino-gw-fwd/src/gwtraf_transport.c	/^void gwtraf_downtraf(int idx, char *json, int len) {$/;"	f
 gwtraf_init	dragino-gw-fwd/src/gwtraf_transport.c	/^void gwtraf_init(int idx) {$/;"	f
@@ -2825,7 +2824,7 @@ idempotency_level	libttn/descriptor.pb-c.h	/^  Google__Protobuf__MethodOptions__
 identifier_value	libttn/descriptor.pb-c.h	/^  char *identifier_value;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
 idle	libttn/api.pb-c.h	/^  float idle;$/;"	m	struct:_Api__ComponentStats__CPUStats
 idle	libttn/api.pb-c.h	/^  float idle;$/;"	m	struct:_Api__SystemStats__CPUStats
-idx	dragino-gw-fwd/inc/transport.h	/^    int idx;$/;"	m	struct:_thrdarg
+idx	dragino-gw-fwd/inc/transport.h	/^	int idx;$/;"	m	struct:_tdarg
 if_chain	libloragw/inc/loragw_hal.h	/^    uint8_t     if_chain;       \/*!> by which IF chain was packet received *\/$/;"	m	struct:lgw_pkt_rx_s
 if_enable	libloragw/src/loragw_hal.c	/^static bool if_enable[LGW_IF_CHAIN_NB];$/;"	v	file:
 if_freq	libloragw/src/loragw_hal.c	/^static int32_t if_freq[LGW_IF_CHAIN_NB]; \/* relative to radio frequency, +\/- in Hz *\/$/;"	v	file:
@@ -2854,7 +2853,7 @@ is_utf16_hex	dragino-gw-fwd/src/parson.c	/^static int is_utf16_hex(const unsigne
 is_valid_utf8	dragino-gw-fwd/src/parson.c	/^static int is_valid_utf8(const char *string, size_t string_len) {$/;"	f	file:
 isconnected	libmqtt/MQTTClient.h	/^   int isconnected;$/;"	m	struct:MQTTClient
 item	libmqtt/MQTTLinux.h	/^   unsigned short item;$/;"	m	struct:Queue
-items	dragino-gw-fwd/src/parson.c	/^    JSON_Value **items;$/;"	m	struct:json_array_t	file:
+items	dragino-gw-fwd/src/parson.c	/^	JSON_Value **items;$/;"	m	struct:json_array_t	file:
 java_generic_services	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean java_generic_services;$/;"	m	struct:_Google__Protobuf__FileOptions
 java_multiple_files	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean java_multiple_files;$/;"	m	struct:_Google__Protobuf__FileOptions
 java_outer_classname	libttn/descriptor.pb-c.h	/^  char *java_outer_classname;$/;"	m	struct:_Google__Protobuf__FileOptions
@@ -2965,7 +2964,7 @@ json_parse_file	dragino-gw-fwd/src/parson.c	/^JSON_Value *json_parse_file(const 
 json_parse_file_with_comments	dragino-gw-fwd/src/parson.c	/^JSON_Value *json_parse_file_with_comments(const char *filename) {$/;"	f
 json_parse_string	dragino-gw-fwd/src/parson.c	/^JSON_Value *json_parse_string(const char *string) {$/;"	f
 json_parse_string_with_comments	dragino-gw-fwd/src/parson.c	/^JSON_Value *json_parse_string_with_comments(const char *string) {$/;"	f
-json_result_t	dragino-gw-fwd/inc/parson.h	/^    enum json_result_t {$/;"	g
+json_result_t	dragino-gw-fwd/inc/parson.h	/^	enum json_result_t {$/;"	g
 json_serialization_size	dragino-gw-fwd/src/parson.c	/^size_t json_serialization_size(const JSON_Value * value) {$/;"	f
 json_serialization_size_pretty	dragino-gw-fwd/src/parson.c	/^size_t json_serialization_size_pretty(const JSON_Value * value) {$/;"	f
 json_serialize_string	dragino-gw-fwd/src/parson.c	/^static int json_serialize_string(const char *string, char *buf) {$/;"	f	file:
@@ -2997,7 +2996,7 @@ json_value_init_object	dragino-gw-fwd/src/parson.c	/^JSON_Value *json_value_init
 json_value_init_string	dragino-gw-fwd/src/parson.c	/^JSON_Value *json_value_init_string(const char *string) {$/;"	f
 json_value_init_string_no_copy	dragino-gw-fwd/src/parson.c	/^static JSON_Value *json_value_init_string_no_copy(char *string) {$/;"	f	file:
 json_value_t	dragino-gw-fwd/src/parson.c	/^struct json_value_t {$/;"	s	file:
-json_value_type	dragino-gw-fwd/inc/parson.h	/^    enum json_value_type {$/;"	g
+json_value_type	dragino-gw-fwd/inc/parson.h	/^	enum json_value_type {$/;"	g
 json_value_value	dragino-gw-fwd/src/parson.c	/^typedef union json_value_value {$/;"	u	file:
 jstype	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldOptions__JSType jstype;$/;"	m	struct:_Google__Protobuf__FieldOptions
 keepAliveInterval	libmqtt/MQTTConnect.h	/^	unsigned short keepAliveInterval;$/;"	m	struct:__anon5
@@ -3110,14 +3109,14 @@ lgw_txgain_setconf	libloragw/src/loragw_hal.c	/^int lgw_txgain_setconf(struct lg
 lgw_utc2cnt	libloragw/src/loragw_gps.c	/^int lgw_utc2cnt(struct tref ref, struct timespec utc, uint32_t *count_us) {$/;"	f
 lgw_version_info	libloragw/src/loragw_hal.c	/^const char* lgw_version_info() {$/;"	f
 lgw_version_string	libloragw/src/loragw_hal.c	/^const char lgw_version_string[] = "Version: " LIBLORAGW_VERSION "; Options: " CFG_SPI_STR ";";$/;"	v
-lgwm	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint64_t lgwm = 0;		\/* Lora gateway MAC address *\/$/;"	v
+lgwm	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint64_t lgwm = 0;				\/* Lora gateway MAC address *\/$/;"	v
 lgwx_beacon_len	libloragw/src/loragw_hal.c	/^uint8_t lgwx_beacon_len = 0;$/;"	v
 lgwx_beacon_sf	libloragw/src/loragw_hal.c	/^uint8_t lgwx_beacon_sf = 0;$/;"	v
 lgwx_device_mode	libloragw/src/loragw_hal.c	/^uint8_t lgwx_device_mode = 0;$/;"	v
 lgwx_lbt_mode	libloragw/src/loragw_hal.c	/^uint8_t lgwx_lbt_mode = 0;$/;"	v
 linux_read	libmqtt/MQTTLinux.c	/^int linux_read(Network *n, unsigned char *buffer, int len, int timeout_ms)$/;"	f
 linux_write	libmqtt/MQTTLinux.c	/^int linux_write(Network *n, unsigned char *buffer, int len, int timeout_ms)$/;"	f
-live	dragino-gw-fwd/inc/transport.h	/^    bool live;			\/\/ Server is life?$/;"	m	struct:_server
+live	dragino-gw-fwd/inc/transport.h	/^	bool live;					\/\/ Server is life?$/;"	m	struct:_server
 lm_nw	libttn/gateway.pb-c.h	/^  uint32_t lm_nw;$/;"	m	struct:_Gateway__Status
 lm_ok	libttn/gateway.pb-c.h	/^  uint32_t lm_ok;$/;"	m	struct:_Gateway__Status
 lm_st	libttn/gateway.pb-c.h	/^  uint32_t lm_st;$/;"	m	struct:_Gateway__Status
@@ -3311,7 +3310,7 @@ major	libttn/lorawan.pb-c.h	/^  Lorawan__Major major;$/;"	m	struct:_Lorawan__MHD
 malloc	dragino-gw-fwd/src/parson.c	47;"	d	file:
 map_entry	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean map_entry;$/;"	m	struct:_Google__Protobuf__MessageOptions
 match_label	libloragw/src/loragw_gps.c	/^static bool match_label(const char *s, char *label, int size, char wildcard) {$/;"	f	file:
-max_stall	dragino-gw-fwd/inc/transport.h	/^    int max_stall;		\/\/ max number of missed responses$/;"	m	struct:_server
+max_stall	dragino-gw-fwd/inc/transport.h	/^	int max_stall;				\/\/ max number of missed responses$/;"	m	struct:_server
 meas_dw_ack_rcv	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_dw_ack_rcv[MAX_SERVERS] = { 0 };	\/* number of PULL requests acknowledged for downstream traffic *\/$/;"	v
 meas_dw_dgram_acp	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_dw_dgram_acp[MAX_SERVERS] = { 0 };	\/* response datagrams that are accepted for transmission *\/$/;"	v
 meas_dw_dgram_rcv	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_dw_dgram_rcv[MAX_SERVERS] = { 0 };	\/* count PULL response datagrams received for downstream traffic *\/$/;"	v
@@ -3320,25 +3319,25 @@ meas_dw_payload_byte	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_dw_payl
 meas_dw_pull_sent	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_dw_pull_sent[MAX_SERVERS] = { 0 };	\/* number of PULL requests sent for downstream traffic *\/$/;"	v
 meas_gps_coord	dragino-gw-fwd/src/dragino_gw_fwd.c	/^struct coord_s meas_gps_coord;	\/* GPS position of the gateway *\/$/;"	v	typeref:struct:coord_s
 meas_gps_err	dragino-gw-fwd/src/dragino_gw_fwd.c	/^struct coord_s meas_gps_err;	\/* GPS position of the gateway *\/$/;"	v	typeref:struct:coord_s
-meas_nb_beacon_queued	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_queued;$/;"	m	struct:statistics_downlink
-meas_nb_beacon_rejected	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_rejected;$/;"	m	struct:statistics_downlink
-meas_nb_beacon_sent	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_sent;$/;"	m	struct:statistics_downlink
-meas_nb_rx_bad	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_rx_bad;$/;"	m	struct:statistics_uplink
-meas_nb_rx_nocrc	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_rx_nocrc;$/;"	m	struct:statistics_uplink
-meas_nb_rx_ok	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_rx_ok;$/;"	m	struct:statistics_uplink
-meas_nb_rx_rcv	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_rx_rcv;$/;"	m	struct:statistics_uplink
-meas_nb_tx_fail	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_tx_fail;$/;"	m	struct:statistics_downlink
-meas_nb_tx_ok	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_tx_ok;$/;"	m	struct:statistics_downlink
-meas_nb_tx_rejected_collision_beacon	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_tx_rejected_collision_beacon;$/;"	m	struct:statistics_downlink
-meas_nb_tx_rejected_collision_packet	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_tx_rejected_collision_packet;$/;"	m	struct:statistics_downlink
-meas_nb_tx_rejected_too_early	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_tx_rejected_too_early;$/;"	m	struct:statistics_downlink
-meas_nb_tx_rejected_too_late	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_tx_rejected_too_late;$/;"	m	struct:statistics_downlink
-meas_nb_tx_requested	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_nb_tx_requested;$/;"	m	struct:statistics_downlink
+meas_nb_beacon_queued	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_beacon_queued;$/;"	m	struct:statistics_downlink
+meas_nb_beacon_rejected	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_beacon_rejected;$/;"	m	struct:statistics_downlink
+meas_nb_beacon_sent	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_beacon_sent;$/;"	m	struct:statistics_downlink
+meas_nb_rx_bad	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_rx_bad;$/;"	m	struct:statistics_uplink
+meas_nb_rx_nocrc	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_rx_nocrc;$/;"	m	struct:statistics_uplink
+meas_nb_rx_ok	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_rx_ok;$/;"	m	struct:statistics_uplink
+meas_nb_rx_rcv	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_rx_rcv;$/;"	m	struct:statistics_uplink
+meas_nb_tx_fail	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_tx_fail;$/;"	m	struct:statistics_downlink
+meas_nb_tx_ok	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_tx_ok;$/;"	m	struct:statistics_downlink
+meas_nb_tx_rejected_collision_beacon	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_collision_beacon;$/;"	m	struct:statistics_downlink
+meas_nb_tx_rejected_collision_packet	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_collision_packet;$/;"	m	struct:statistics_downlink
+meas_nb_tx_rejected_too_early	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_too_early;$/;"	m	struct:statistics_downlink
+meas_nb_tx_rejected_too_late	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_too_late;$/;"	m	struct:statistics_downlink
+meas_nb_tx_requested	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_nb_tx_requested;$/;"	m	struct:statistics_downlink
 meas_up_ack_rcv	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_up_ack_rcv[MAX_SERVERS] = { 0 };	\/* number of datagrams acknowledged for upstream traffic *\/$/;"	v
 meas_up_dgram_sent	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_up_dgram_sent[MAX_SERVERS] = { 0 };	\/* number of datagrams sent for upstream traffic *\/$/;"	v
 meas_up_network_byte	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_up_network_byte = 0;	\/* sum of UDP bytes sent for upstream traffic *\/$/;"	v
 meas_up_payload_byte	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint32_t meas_up_payload_byte = 0;	\/* sum of radio payload bytes sent for upstream traffic *\/$/;"	v
-meas_up_pkt_fwd	dragino-gw-fwd/inc/stats.h	/^    uint32_t meas_up_pkt_fwd;$/;"	m	struct:statistics_uplink
+meas_up_pkt_fwd	dragino-gw-fwd/inc/stats.h	/^	uint32_t meas_up_pkt_fwd;$/;"	m	struct:statistics_uplink
 memory	libttn/api.pb-c.h	/^  Api__ComponentStats__MemoryStats *memory;$/;"	m	struct:_Api__ComponentStats
 memory	libttn/api.pb-c.h	/^  Api__SystemStats__MemoryStats *memory;$/;"	m	struct:_Api__SystemStats
 memory	libttn/api.pb-c.h	/^  uint64_t memory;$/;"	m	struct:_Api__ComponentStats__MemoryStats
@@ -3366,7 +3365,6 @@ modulation	libloragw/inc/loragw_hal.h	/^    uint8_t     modulation;     \/*!> mo
 modulation	libttn/lorawan.pb-c.h	/^  Lorawan__Modulation modulation;$/;"	m	struct:_Lorawan__Metadata
 modulation	libttn/lorawan.pb-c.h	/^  Lorawan__Modulation modulation;$/;"	m	struct:_Lorawan__TxConfiguration
 moveave	dragino-gw-fwd/src/stats.c	/^static double moveave(double old, uint32_t utel, uint32_t unoe) {$/;"	f	file:
-mqtt	dragino-gw-fwd/inc/transport.h	/^    mqtt,$/;"	e	enum:server_type
 mqttread	libmqtt/MQTTLinux.h	/^   int (*mqttread)(struct Network *, unsigned char *, int, int);$/;"	m	struct:Network
 mqttwrite	libmqtt/MQTTLinux.h	/^   int (*mqttwrite)(struct Network *, unsigned char *, int, int);$/;"	m	struct:Network
 msgTypes	libmqtt/MQTTPacket.h	/^enum msgTypes$/;"	g
@@ -3376,7 +3374,7 @@ mx_jit_queue	dragino-gw-fwd/src/jitqueue.c	/^static pthread_mutex_t mx_jit_queue
 mx_meas_dw	dragino-gw-fwd/src/dragino_gw_fwd.c	/^pthread_mutex_t mx_meas_dw = PTHREAD_MUTEX_INITIALIZER;	\/* control access to the downstream measurements *\/$/;"	v
 mx_meas_gps	dragino-gw-fwd/src/dragino_gw_fwd.c	/^pthread_mutex_t mx_meas_gps = PTHREAD_MUTEX_INITIALIZER;	\/* control access to the GPS statistics *\/$/;"	v
 mx_meas_up	dragino-gw-fwd/src/dragino_gw_fwd.c	/^pthread_mutex_t mx_meas_up = PTHREAD_MUTEX_INITIALIZER;	\/* control access to the upstream measurements *\/$/;"	v
-mx_queue	dragino-gw-fwd/inc/transport.h	/^    pthread_mutex_t  mx_queue;  \/\/ control access to the queue for each server$/;"	m	struct:_server
+mx_queue	dragino-gw-fwd/inc/transport.h	/^	pthread_mutex_t mx_queue;	\/\/ control access to the queue for each server$/;"	m	struct:_server
 mx_rxqueue	dragino-gw-fwd/src/dragino_gw_fwd.c	/^pthread_mutex_t mx_rxqueue = PTHREAD_MUTEX_INITIALIZER;	\/* control access to the queues *\/$/;"	v
 mx_spi	libloragw/src/loragw_spi.ftdi.c	/^static pthread_mutex_t mx_spi = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
 mx_stat_rep	dragino-gw-fwd/src/dragino_gw_fwd.c	/^pthread_mutex_t mx_stat_rep = PTHREAD_MUTEX_INITIALIZER;	\/* control access to the status report *\/$/;"	v
@@ -3434,16 +3432,16 @@ name	libttn/descriptor.pb-c.h	/^  char *name;$/;"	m	struct:_Google__Protobuf__Me
 name	libttn/descriptor.pb-c.h	/^  char *name;$/;"	m	struct:_Google__Protobuf__OneofDescriptorProto
 name	libttn/descriptor.pb-c.h	/^  char *name;$/;"	m	struct:_Google__Protobuf__ServiceDescriptorProto
 name_part	libttn/descriptor.pb-c.h	/^  char *name_part;$/;"	m	struct:_Google__Protobuf__UninterpretedOption__NamePart
-names	dragino-gw-fwd/src/parson.c	/^    char **names;$/;"	m	struct:json_object_t	file:
+names	dragino-gw-fwd/src/parson.c	/^	char **names;$/;"	m	struct:json_object_t	file:
 nb_channel	libloragw/inc/loragw_hal.h	/^    uint8_t                     nb_channel;         \/*!> number of LBT channels *\/$/;"	m	struct:lgw_conf_lbt_s
-nbpkt	dragino-gw-fwd/inc/transport.h	/^    int nbpkt;$/;"	m	struct:_queue
+nbpkt	dragino-gw-fwd/inc/transport.h	/^	int nbpkt;$/;"	m	struct:_queue
 negative_int_value	libttn/descriptor.pb-c.h	/^  int64_t negative_int_value;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
 nested_type	libttn/descriptor.pb-c.h	/^  Google__Protobuf__DescriptorProto **nested_type;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 net_id	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData net_id;$/;"	m	struct:_Lorawan__JoinAcceptPayload
-net_mac_h	dragino-gw-fwd/src/semtech_transport.c	/^static uint32_t net_mac_h;	\/* Most Significant Nibble, network order *\/$/;"	v	file:
-net_mac_l	dragino-gw-fwd/src/semtech_transport.c	/^static uint32_t net_mac_l;	\/* Least Significant Nibble, network order *\/$/;"	v	file:
+net_mac_h	dragino-gw-fwd/src/semtech_transport.c	/^static uint32_t net_mac_h;		\/* Most Significant Nibble, network order *\/$/;"	v	file:
+net_mac_l	dragino-gw-fwd/src/semtech_transport.c	/^static uint32_t net_mac_l;		\/* Least Significant Nibble, network order *\/$/;"	v	file:
 network	libttn/session.h	/^  Network network;$/;"	m	struct:Session
-next	dragino-gw-fwd/inc/transport.h	/^    struct _queue *next;$/;"	m	struct:_queue	typeref:struct:_queue::_queue
+next	dragino-gw-fwd/inc/transport.h	/^	struct _queue *next;$/;"	m	struct:_queue	typeref:struct:_queue::_queue
 next_packetid	libmqtt/MQTTClient.h	/^   unsigned int next_packetid,$/;"	m	struct:MQTTClient
 nibble_to_hexchar	libloragw/src/loragw_gps.c	/^static char nibble_to_hexchar(uint8_t a) {$/;"	f	file:
 nmea_checksum	libloragw/src/loragw_gps.c	/^static int nmea_checksum(const char *nmea_string, int buff_size, char *checksum) {$/;"	f	file:
@@ -3451,17 +3449,17 @@ no_crc	libloragw/inc/loragw_hal.h	/^    bool        no_crc;         \/*!> if tru
 no_header	libloragw/inc/loragw_hal.h	/^    bool        no_header;      \/*!> if true, enable implicit header mode (LoRa), fixed length (FSK) *\/$/;"	m	struct:lgw_pkt_tx_s
 no_standard_descriptor_accessor	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean no_standard_descriptor_accessor;$/;"	m	struct:_Google__Protobuf__MessageOptions
 nodelimiter	libmqtt/test/stdoutsub.c	/^   int nodelimiter;$/;"	m	struct:opts_struct	file:
-nodes	dragino-gw-fwd/inc/jitqueue.h	/^    struct jit_node_s nodes[JIT_QUEUE_MAX];	\/* Nodes\/packets array in the queue *\/$/;"	m	struct:jit_queue_s	typeref:struct:jit_queue_s::jit_node_s
-null	dragino-gw-fwd/src/parson.c	/^    int null;$/;"	m	union:json_value_value	file:
-num_beacon	dragino-gw-fwd/inc/jitqueue.h	/^    uint8_t num_beacon;		\/* Number of beacons in the queue *\/$/;"	m	struct:jit_queue_s
+nodes	dragino-gw-fwd/inc/jitqueue.h	/^	struct jit_node_s nodes[JIT_QUEUE_MAX];	\/* Nodes\/packets array in the queue *\/$/;"	m	struct:jit_queue_s	typeref:struct:jit_queue_s::jit_node_s
+null	dragino-gw-fwd/src/parson.c	/^	int null;$/;"	m	union:json_value_value	file:
+num_beacon	dragino-gw-fwd/inc/jitqueue.h	/^	uint8_t num_beacon;			\/* Number of beacons in the queue *\/$/;"	m	struct:jit_queue_s
 num_bytes_in_utf8_sequence	dragino-gw-fwd/src/parson.c	/^static int num_bytes_in_utf8_sequence(unsigned char c) {$/;"	f	file:
-num_pkt	dragino-gw-fwd/inc/jitqueue.h	/^    uint8_t num_pkt;		\/* Total number of packets in the queue (downlinks, beacons...) *\/$/;"	m	struct:jit_queue_s
-number	dragino-gw-fwd/src/parson.c	/^    double number;$/;"	m	union:json_value_value	file:
+num_pkt	dragino-gw-fwd/inc/jitqueue.h	/^	uint8_t num_pkt;			\/* Total number of packets in the queue (downlinks, beacons...) *\/$/;"	m	struct:jit_queue_s
+number	dragino-gw-fwd/src/parson.c	/^	double number;$/;"	m	union:json_value_value	file:
 number	libttn/descriptor.pb-c.h	/^  int32_t number;$/;"	m	struct:_Google__Protobuf__EnumValueDescriptorProto
 number	libttn/descriptor.pb-c.h	/^  int32_t number;$/;"	m	struct:_Google__Protobuf__FieldDescriptorProto
 nwk_s_key	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData nwk_s_key;$/;"	m	struct:_Lorawan__ActivationMetadata
 objc_class_prefix	libttn/descriptor.pb-c.h	/^  char *objc_class_prefix;$/;"	m	struct:_Google__Protobuf__FileOptions
-object	dragino-gw-fwd/src/parson.c	/^    JSON_Object *object;$/;"	m	union:json_value_value	file:
+object	dragino-gw-fwd/src/parson.c	/^	JSON_Object *object;$/;"	m	union:json_value_value	file:
 offs	libloragw/inc/loragw_reg.h	/^    uint8_t offs;        \/*!< position of the register LSB (between 0 to 7) *\/$/;"	m	struct:lgw_reg_s
 offset_i_a	libloragw/tst/test_loragw_cal.c	/^    int8_t offset_i_a [8];$/;"	m	struct:cal_res_s	file:
 offset_i_b	libloragw/tst/test_loragw_cal.c	/^    int8_t offset_i_b [8];$/;"	m	struct:cal_res_s	file:
@@ -3540,19 +3538,19 @@ ping_outstanding	libmqtt/MQTTClient.h	/^   char ping_outstanding;$/;"	m	struct:M
 ping_sent	libmqtt/MQTTClient.h	/^   struct timeval ping_sent;$/;"	m	struct:MQTTClient	typeref:struct:MQTTClient::timeval
 ping_time	libmqtt/MQTTClient.h	/^   long ping_time;$/;"	m	struct:MQTTClient
 ping_timer	libmqtt/MQTTClient.h	/^   Timer ping_timer;$/;"	m	struct:MQTTClient
-pkt	dragino-gw-fwd/inc/jitqueue.h	/^    struct lgw_pkt_tx_s pkt;	\/* TX packet *\/$/;"	m	struct:jit_node_s	typeref:struct:jit_node_s::lgw_pkt_tx_s
-pkt_type	dragino-gw-fwd/inc/jitqueue.h	/^    enum jit_pkt_type_e pkt_type;	\/* Packet type: Downlink, Beacon... *\/$/;"	m	struct:jit_node_s	typeref:enum:jit_node_s::jit_pkt_type_e
+pkt	dragino-gw-fwd/inc/jitqueue.h	/^	struct lgw_pkt_tx_s pkt;	\/* TX packet *\/$/;"	m	struct:jit_node_s	typeref:struct:jit_node_s::lgw_pkt_tx_s
+pkt_type	dragino-gw-fwd/inc/jitqueue.h	/^	enum jit_pkt_type_e pkt_type;	\/* Packet type: Downlink, Beacon... *\/$/;"	m	struct:jit_node_s	typeref:enum:jit_node_s::jit_pkt_type_e
 platform	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char platform[24] = DISPLAY_PLATFORM;	\/* platform definition *\/$/;"	v
 platform	libttn/gateway.pb-c.h	/^  char *platform;$/;"	m	struct:_Gateway__Status
 polarization_inversion	libttn/gateway.pb-c.h	/^  protobuf_c_boolean polarization_inversion;$/;"	m	struct:_Gateway__TxConfiguration
 port	libmqtt/test/stdoutsub.c	/^   int port;$/;"	m	struct:opts_struct	file:
-port_down	dragino-gw-fwd/inc/transport.h	/^    char port_down[8];		\/\/ downlink port for semtech proto$/;"	m	struct:_server
-port_up	dragino-gw-fwd/inc/transport.h	/^    char port_up[8];		\/\/ uplink port for semtech proto$/;"	m	struct:_server
+port_down	dragino-gw-fwd/inc/transport.h	/^	char port_down[8];			\/\/ downlink port for semtech proto$/;"	m	struct:_server
+port_up	dragino-gw-fwd/inc/transport.h	/^	char port_up[8];			\/\/ uplink port for semtech proto$/;"	m	struct:_server
 positive_int_value	libttn/descriptor.pb-c.h	/^  uint64_t positive_int_value;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
-post_delay	dragino-gw-fwd/inc/jitqueue.h	/^    uint32_t post_delay;	\/* Amount of time after packet timestamp to be reserved (time on air) *\/$/;"	m	struct:jit_node_s
+post_delay	dragino-gw-fwd/inc/jitqueue.h	/^	uint32_t post_delay;		\/* Amount of time after packet timestamp to be reserved (time on air) *\/$/;"	m	struct:jit_node_s
 power	libttn/gateway.pb-c.h	/^  int32_t power;$/;"	m	struct:_Gateway__TxConfiguration
 ppm_ref	libloragw/tst/test_loragw_gps.c	/^struct tref ppm_ref;$/;"	v	typeref:struct:tref
-pre_delay	dragino-gw-fwd/inc/jitqueue.h	/^    uint32_t pre_delay;		\/* Amount of time before packet timestamp to be reserved *\/$/;"	m	struct:jit_node_s
+pre_delay	dragino-gw-fwd/inc/jitqueue.h	/^	uint32_t pre_delay;			\/* Amount of time before packet timestamp to be reserved *\/$/;"	m	struct:jit_node_s
 preamble	libloragw/inc/loragw_hal.h	/^    uint16_t    preamble;       \/*!> set the preamble length, 0 for default *\/$/;"	m	struct:lgw_pkt_tx_s
 printBuffer	dragino-gw-fwd/src/ghost.c	/^static void printBuffer(uint8_t * b, uint8_t len) {$/;"	f	file:
 printRX	dragino-gw-fwd/src/ghost.c	/^static void printRX(struct lgw_pkt_rx_s *p) {$/;"	f	file:
@@ -3616,9 +3614,9 @@ qos	libmqtt/MQTTConnect.h	/^	char qos;$/;"	m	struct:__anon4
 qos	libmqtt/MQTTPacket.h	/^		unsigned int qos : 2;				\/**< QoS value, 0, 1 or 2 *\/$/;"	m	struct:__anon9::__anon10
 qos	libmqtt/MQTTPacket.h	/^		unsigned int qos : 2;				\/**< QoS value, 0, 1 or 2 *\/$/;"	m	struct:__anon9::__anon11
 qos	libmqtt/test/stdoutsub.c	/^   enum QoS qos;$/;"	m	struct:opts_struct	typeref:enum:opts_struct::QoS	file:
-qsort_r	dragino-gw-fwd/src/jitqueue.c	/^static void qsort_r(void  *base, size_t nel, size_t width, __compar_d_fn_t comp, void *arg) {$/;"	f	file:
-queue	dragino-gw-fwd/inc/transport.h	/^    Queue  *queue;$/;"	m	struct:_thrdarg
-queue	dragino-gw-fwd/inc/transport.h	/^    Queue *queue;		\/\/ queue of packets uplink data$/;"	m	struct:_server
+qsort_r	dragino-gw-fwd/src/jitqueue.c	/^static void qsort_r(void *base, size_t nel, size_t width, __compar_d_fn_t comp,$/;"	f	file:
+queue	dragino-gw-fwd/inc/transport.h	/^	Queue *queue;				\/\/ queue of packets uplink data$/;"	m	struct:_server
+queue	dragino-gw-fwd/inc/transport.h	/^	Queue *queue;$/;"	m	struct:_tdarg
 quit_sig	dragino-gw-fwd/src/dragino_gw_fwd.c	/^volatile bool quit_sig = false;	\/* 1 -> application terminates without shutting down the hardware *\/$/;"	v
 quit_sig	libloragw/tst/test_loragw_gps.c	/^static int quit_sig = 0; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v	file:
 quit_sig	libloragw/tst/test_loragw_hal.c	/^static int quit_sig = 0; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v	file:
@@ -3643,11 +3641,10 @@ reference_coord	dragino-gw-fwd/src/ghost.c	/^static struct coord_s reference_coo
 reg_r_align32	libloragw/src/loragw_reg.c	/^int reg_r_align32(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, struct lgw_reg_s r, int32_t *reg_value) {$/;"	f
 reg_version	libloragw/src/loragw_radio.c	/^    uint8_t reg_version;$/;"	m	struct:lgw_radio_type_version_s	file:
 reg_w_align32	libloragw/src/loragw_reg.c	/^int reg_w_align32(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, struct lgw_reg_s r, int32_t reg_value) {$/;"	f
-reload_sig	dragino-gw-fwd/src/dragino_gw_fwd.c	/^volatile bool reload_sig = false;\/*  application reload configure *\/$/;"	v
 rem_len	libmqtt/MQTTPacket.h	/^	int rem_len;$/;"	m	struct:__anon14
 remove_comments	dragino-gw-fwd/src/parson.c	/^static void remove_comments(char *string, const char *start_token,$/;"	f	file:
 reply	libmqtt/MQTTClient.h	/^   Queue reply;$/;"	m	struct:MQTTClient
-report_ready	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool report_ready = false;	\/* true when there is a new report to send to the server *\/$/;"	v
+report_ready	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool report_ready = false;		\/* true when there is a new report to send to the server *\/$/;"	v
 reserved_name	libttn/descriptor.pb-c.h	/^  char **reserved_name;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 reserved_range	libttn/descriptor.pb-c.h	/^  Google__Protobuf__DescriptorProto__ReservedRange **reserved_range;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 reset_sx127x	libloragw/src/loragw_radio.c	/^int reset_sx127x(enum lgw_radio_type_e radio_type) {$/;"	f
@@ -3782,6 +3779,7 @@ rssi_offset	libloragw/inc/loragw_hal.h	/^    float                   rssi_offset
 rssi_offset	libloragw/inc/loragw_hal.h	/^    int8_t                      rssi_offset;        \/*!> RSSI offset to be applied to SX127x RSSI values *\/$/;"	m	struct:lgw_conf_lbt_s
 rssi_target	libloragw/inc/loragw_hal.h	/^    int8_t                      rssi_target;        \/*!> RSSI threshold to detect if channel is busy or not (dBm) *\/$/;"	m	struct:lgw_conf_lbt_s
 rtt	libttn/gateway.pb-c.h	/^  uint32_t rtt;$/;"	m	struct:_Gateway__Status
+runing	dragino-gw-fwd/inc/transport.h	/^    bool runing;$/;"	m	struct:_tdarg
 running	libttn/test/test.c	/^int running = 1;$/;"	v
 rx1_dr_offset	libttn/lorawan.pb-c.h	/^  uint32_t rx1_dr_offset;$/;"	m	struct:_Lorawan__ActivationMetadata
 rx1_dr_offset	libttn/lorawan.pb-c.h	/^  uint32_t rx1_dr_offset;$/;"	m	struct:_Lorawan__DLSettings
@@ -3797,16 +3795,16 @@ s	libmqtt/MQTTLinux.h	/^   Semaphore s;$/;"	m	struct:Queue
 s	libmqtt/MQTTLinux.h	/^   sem_t s;$/;"	m	struct:Semaphore
 scan_time_us	libloragw/inc/loragw_hal.h	/^    uint16_t scan_time_us;$/;"	m	struct:lgw_conf_lbt_chan_s
 sck	libmqtt/MQTTPacket.h	/^	void *sck;	\/* pointer to whatever the system may use to identify the transport *\/$/;"	m	struct:__anon14
-semtech	dragino-gw-fwd/inc/transport.h	/^    semtech,$/;"	e	enum:server_type
+semtech	dragino-gw-fwd/inc/transport.h	/^	semtech,$/;"	e	enum:server_type
 semtech_init	dragino-gw-fwd/src/semtech_transport.c	/^void semtech_init(int idx) {$/;"	f
 semtech_stop	dragino-gw-fwd/src/semtech_transport.c	/^void semtech_stop(int idx) {$/;"	f
 semtech_thread_down	dragino-gw-fwd/src/semtech_transport.c	/^void semtech_thread_down(void *pic) {$/;"	f
 semtech_upstream	dragino-gw-fwd/src/semtech_transport.c	/^void semtech_upstream(void *pic) {$/;"	f
 sendPacket	libmqtt/MQTTClient.c	/^static int sendPacket(MQTTClient *c, int length, Timer *timer)$/;"	f	file:
 send_buffer	libttn/session.h	/^  unsigned char *send_buffer;$/;"	m	struct:Session
-send_sem	dragino-gw-fwd/inc/transport.h	/^    sem_t send_sem;		\/\/ semaphore for sending data$/;"	m	struct:_server
+send_sem	dragino-gw-fwd/inc/transport.h	/^	sem_t send_sem;				\/\/ semaphore for sending data$/;"	m	struct:_server
 send_tx_ack	dragino-gw-fwd/src/semtech_transport.c	/^static int send_tx_ack(int ic, uint8_t token_h, uint8_t token_l,$/;"	f	file:
-serv_count	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint8_t serv_count = 0;		\/* Counter for defined servers *\/$/;"	v
+serv_count	dragino-gw-fwd/src/dragino_gw_fwd.c	/^uint8_t serv_count = 0;			\/* Counter for defined servers *\/$/;"	v
 server_streaming	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean server_streaming;$/;"	m	struct:_Google__Protobuf__MethodDescriptorProto
 server_type	dragino-gw-fwd/inc/transport.h	/^enum server_type {$/;"	g
 servers	dragino-gw-fwd/src/dragino_gw_fwd.c	/^Server servers[MAX_SERVERS];	\/* Server information *\/$/;"	v
@@ -3833,9 +3831,9 @@ snr	libttn/gateway.pb-c.h	/^  float snr;$/;"	m	struct:_Gateway__RxMetadata
 snr	libttn/gateway.pb-c.h	/^  float snr;$/;"	m	struct:_Gateway__RxMetadata__Antenna
 snr_max	libloragw/inc/loragw_hal.h	/^    float       snr_max;        \/*!> maximum packet SNR, in dB (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
 snr_min	libloragw/inc/loragw_hal.h	/^    float       snr_min;        \/*!> minimum packet SNR, in dB (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
-sock_down	dragino-gw-fwd/inc/transport.h	/^    int sock_down;		\/\/ Semtech down socket$/;"	m	struct:_server
-sock_ghost	dragino-gw-fwd/src/ghost.c	/^static int sock_ghost;		\/* socket for downstream traffic *\/$/;"	v	file:
-sock_up	dragino-gw-fwd/inc/transport.h	/^    int sock_up;		\/\/ Semtech up socket$/;"	m	struct:_server
+sock_down	dragino-gw-fwd/inc/transport.h	/^	int sock_down;				\/\/ Semtech down socket$/;"	m	struct:_server
+sock_ghost	dragino-gw-fwd/src/ghost.c	/^static int sock_ghost;			\/* socket for downstream traffic *\/$/;"	v	file:
+sock_up	dragino-gw-fwd/inc/transport.h	/^	int sock_up;				\/\/ Semtech up socket$/;"	m	struct:_server
 source_code_info	libttn/descriptor.pb-c.h	/^  Google__Protobuf__SourceCodeInfo *source_code_info;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
 source_file	libttn/descriptor.pb-c.h	/^  char *source_file;$/;"	m	struct:_Google__Protobuf__GeneratedCodeInfo__Annotation
 span	libttn/descriptor.pb-c.h	/^  int32_t *span;$/;"	m	struct:_Google__Protobuf__SourceCodeInfo__Location
@@ -3844,7 +3842,7 @@ start	libttn/descriptor.pb-c.h	/^  int32_t start;$/;"	m	struct:_Google__Protobuf
 start	libttn/descriptor.pb-c.h	/^  int32_t start;$/;"	m	struct:_Google__Protobuf__DescriptorProto__ReservedRange
 started	libmqtt/MQTTLinux.h	/^   int started;$/;"	m	struct:Thread
 startup_time	dragino-gw-fwd/src/stats.c	/^time_t startup_time;$/;"	v
-stat_damping	dragino-gw-fwd/src/dragino_gw_fwd.c	/^int stat_damping = 50;		\/* default damping for statistical values. *\/$/;"	v
+stat_damping	dragino-gw-fwd/src/dragino_gw_fwd.c	/^int stat_damping = 50;			\/* default damping for statistical values. *\/$/;"	v
 stat_file	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char stat_file[1024] = "\\0";	\/* name \/ full path of file to store results in, off by default. *\/$/;"	v
 stat_format	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char stat_format[32] = "semtech";	\/* format for json statistics. *\/$/;"	v
 stat_interval	dragino-gw-fwd/src/dragino_gw_fwd.c	/^static unsigned stat_interval = DEFAULT_STAT;	\/* time interval (in sec) at which statistics are collected and displayed *\/$/;"	v	file:
@@ -3856,15 +3854,15 @@ stats_down	dragino-gw-fwd/inc/stats.h	/^enum stats_down {$/;"	g
 stats_init	dragino-gw-fwd/src/stats.c	/^void stats_init() {$/;"	f
 stats_report	dragino-gw-fwd/src/stats.c	/^void stats_report() {$/;"	f
 stats_up	dragino-gw-fwd/inc/stats.h	/^enum stats_up {$/;"	g
-status	dragino-gw-fwd/inc/transport.h	/^    char *status;		\/\/ pointer to semtech status report$/;"	m	struct:_queue
+status	dragino-gw-fwd/inc/transport.h	/^	char *status;				\/\/ pointer to semtech status report$/;"	m	struct:_queue
 status	libloragw/inc/loragw_hal.h	/^    uint8_t     status;         \/*!> status of the received packet *\/$/;"	m	struct:lgw_pkt_rx_s
 status	libttn/router.pb-c.h	/^  Gateway__Status *status;$/;"	m	struct:_Router__GatewayStatusResponse
 status_report	dragino-gw-fwd/src/dragino_gw_fwd.c	/^char status_report[STATUS_SIZE];	\/* status report as a JSON object *\/$/;"	v
-statusstream	dragino-gw-fwd/inc/transport.h	/^    bool statusstream;		\/\/ status stream enabled$/;"	m	struct:_server
+statusstream	dragino-gw-fwd/inc/transport.h	/^	bool statusstream;			\/\/ status stream enabled$/;"	m	struct:_server
 statusstream_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool statusstream_enabled = true;	\/* controls the data flow of status information to server *\/$/;"	v
 stop	libttn/test/test.c	/^void stop(int sig) {$/;"	f
 str_chop	libloragw/src/loragw_gps.c	/^int str_chop(char *s, int buff_size, char separator, int *idx_ary, int max_idx) {$/;"	f
-string	dragino-gw-fwd/src/parson.c	/^    char *string;$/;"	m	union:json_value_value	file:
+string	dragino-gw-fwd/src/parson.c	/^	char *string;$/;"	m	union:json_value_value	file:
 string_value	libttn/descriptor.pb-c.h	/^  ProtobufCBinaryData string_value;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
 struct_id	libmqtt/MQTTConnect.h	/^	char struct_id[4];$/;"	m	struct:__anon4
 struct_id	libmqtt/MQTTConnect.h	/^	char struct_id[4];$/;"	m	struct:__anon5
@@ -3886,8 +3884,8 @@ system	libttn/api.pb-c.h	/^  float system;$/;"	m	struct:_Api__SystemStats__CPUSt
 system	libttn/router.pb-c.h	/^  Api__SystemStats *system;$/;"	m	struct:_Router__Status
 systime	libloragw/inc/loragw_gps.h	/^    time_t          systime;    \/*!> system time when solution was calculated *\/$/;"	m	struct:tref
 t	libmqtt/MQTTLinux.h	/^   pthread_t t;$/;"	m	struct:Thread
-t_down	dragino-gw-fwd/inc/transport.h	/^    pthread_t t_down;		\/\/ semtech down thread$/;"	m	struct:_server
-t_up	dragino-gw-fwd/inc/transport.h	/^    pthread_t t_up;		\/\/ upstream thread$/;"	m	struct:_server
+t_down	dragino-gw-fwd/inc/transport.h	/^	pthread_t t_down;			\/\/ semtech down thread$/;"	m	struct:_server
+t_up	dragino-gw-fwd/inc/transport.h	/^	pthread_t t_up;				\/\/ upstream thread$/;"	m	struct:_server
 temperature	libttn/gateway.pb-c.h	/^  float temperature;$/;"	m	struct:_Gateway__Status__OSMetrics
 thread_dispatch_rxpkt	dragino-gw-fwd/src/dragino_gw_fwd.c	/^void thread_dispatch_rxpkt(void) {$/;"	f
 thread_ghost	dragino-gw-fwd/src/ghost.c	/^static void thread_ghost(void) {$/;"	f	file:
@@ -3938,18 +3936,18 @@ transport_init	dragino-gw-fwd/src/transport.c	/^void transport_init() {$/;"	f
 transport_send_downtraf	dragino-gw-fwd/src/transport.c	/^void transport_send_downtraf(char *json, int len) {$/;"	f
 transport_start	dragino-gw-fwd/src/transport.c	/^void transport_start() {$/;"	f
 transport_status	dragino-gw-fwd/src/transport.c	/^void transport_status() {$/;"	f
-transport_status_up	dragino-gw-fwd/src/transport.c	/^void transport_status_up(uint32_t rx_rcv, uint32_t rx_ok, uint32_t tx_tot,$/;"	f
+transport_status_up	dragino-gw-fwd/src/transport.c	/^void transport_status_up(uint32_t rx_rcv, uint32_t rx_ok, uint32_t tx_tot, uint32_t tx_ok) {$/;"	f
 transport_stop	dragino-gw-fwd/src/transport.c	/^void transport_stop() {$/;"	f
 tref	libloragw/inc/loragw_gps.h	/^struct tref {$/;"	s
-ttn	dragino-gw-fwd/inc/transport.h	/^    TTN *ttn;			\/\/ TTN connection object$/;"	m	struct:_server
+ttn	dragino-gw-fwd/inc/transport.h	/^	TTN *ttn;					\/\/ TTN connection object$/;"	m	struct:_server
 ttn_connect	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_connect(int idx) {$/;"	f
-ttn_downlink	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused))$/;"	f
+ttn_downlink	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_downlink(Router__DownlinkMessage * msg, __attribute__ ((unused)) void *arg) {$/;"	f
 ttn_dummy_downlink	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_dummy_downlink( __attribute__ ((unused)) Router__DownlinkMessage * msg,$/;"	f
-ttn_gw_bridge	dragino-gw-fwd/inc/transport.h	/^    ttn_gw_bridge,$/;"	e	enum:server_type
+ttn_gw_bridge	dragino-gw-fwd/inc/transport.h	/^	ttn_gw_bridge,$/;"	e	enum:server_type
 ttn_init	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_init(int idx) {$/;"	f
 ttn_reconnect	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_reconnect(int idx) {$/;"	f
 ttn_status	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_status(int idx) {$/;"	f
-ttn_status_up	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_status_up(int idx, uint32_t rx_in, uint32_t rx_ok, uint32_t tx_in,$/;"	f
+ttn_status_up	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_status_up(int idx, uint32_t rx_in, uint32_t rx_ok, uint32_t tx_in, uint32_t tx_ok) {$/;"	f
 ttn_stop	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_stop(int idx) {$/;"	f
 ttn_upstream	dragino-gw-fwd/src/ttn_transport.c	/^void ttn_upstream(void *pic) {$/;"	f
 ttngwc_checkconnected	libttn/connector.c	/^int ttngwc_checkconnected(TTN *s) {$/;"	f
@@ -3974,8 +3972,8 @@ tx_notch_support	libloragw/src/loragw_fpga.c	/^static bool tx_notch_support = fa
 tx_ok	libttn/gateway.pb-c.h	/^  uint32_t tx_ok;$/;"	m	struct:_Gateway__Status
 txgain_lut	libloragw/src/loragw_hal.c	/^static struct lgw_tx_gain_lut_s txgain_lut = {$/;"	v	typeref:struct:lgw_tx_gain_lut_s	file:
 txlut	dragino-gw-fwd/src/dragino_gw_fwd.c	/^struct lgw_tx_gain_lut_s txlut;	\/* TX gain table *\/$/;"	v	typeref:struct:lgw_tx_gain_lut_s
-type	dragino-gw-fwd/inc/transport.h	/^    enum server_type type;	\/\/ type of server$/;"	m	struct:_server	typeref:enum:_server::server_type
-type	dragino-gw-fwd/src/parson.c	/^    JSON_Value_Type type;$/;"	m	struct:json_value_t	file:
+type	dragino-gw-fwd/inc/transport.h	/^	enum server_type type;		\/\/ type of server$/;"	m	struct:_server	typeref:enum:_server::server_type
+type	dragino-gw-fwd/src/parson.c	/^	JSON_Value_Type type;$/;"	m	struct:json_value_t	file:
 type	libloragw/inc/loragw_hal.h	/^    enum lgw_radio_type_e   type;           \/*!> Radio type for that RF chain (SX1255, SX1257....) *\/$/;"	m	struct:lgw_conf_rxrf_s	typeref:enum:lgw_conf_rxrf_s::lgw_radio_type_e
 type	libloragw/src/loragw_radio.c	/^    enum lgw_radio_type_e type;$/;"	m	struct:lgw_radio_type_version_s	typeref:enum:lgw_radio_type_version_s::lgw_radio_type_e	file:
 type	libmqtt/MQTTPacket.h	/^		unsigned int type : 4;			\/**< message type nibble *\/$/;"	m	struct:__anon9::__anon10
@@ -4002,7 +4000,7 @@ types__disconnect_message__number_ranges	libttn/types.pb-c.c	/^static const Prot
 types__disconnect_message__pack	libttn/types.pb-c.c	/^size_t types__disconnect_message__pack$/;"	f
 types__disconnect_message__pack_to_buffer	libttn/types.pb-c.c	/^size_t types__disconnect_message__pack_to_buffer$/;"	f
 types__disconnect_message__unpack	libttn/types.pb-c.c	/^       types__disconnect_message__unpack$/;"	f
-u	dragino-gw-fwd/src/ghost.c	/^    uint32_t u;$/;"	m	union:__anon16	file:
+u	dragino-gw-fwd/src/ghost.c	/^	uint32_t u;$/;"	m	union:__anon16	file:
 u16	dragino-gw-fwd/src/ghost.c	/^static uint16_t u16(uint8_t * p, uint8_t i) {$/;"	f	file:
 u32	dragino-gw-fwd/src/ghost.c	/^static uint32_t u32(uint8_t * p, uint8_t i) {$/;"	f	file:
 u8	dragino-gw-fwd/src/ghost.c	/^static uint8_t u8(uint8_t * p, uint8_t i) {$/;"	f	file:
@@ -4017,7 +4015,7 @@ uninterpreted_option	libttn/descriptor.pb-c.h	/^  Google__Protobuf__Uninterprete
 uplink	dragino-gw-fwd/src/stats.c	/^struct statistics_uplink uplink;$/;"	v	typeref:struct:statistics_uplink
 uplink	libttn/router.pb-c.h	/^  Api__Rates *uplink;$/;"	m	struct:_Router__Status
 uplink	libttn/router.pb-c.h	/^  void (*uplink)(Router__Router_Service *service,$/;"	m	struct:_Router__Router_Service
-upstream	dragino-gw-fwd/inc/transport.h	/^    bool upstream;		\/\/ upstream enabled$/;"	m	struct:_server
+upstream	dragino-gw-fwd/inc/transport.h	/^	bool upstream;				\/\/ upstream enabled$/;"	m	struct:_server
 upstream_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool upstream_enabled = true;	\/* controls the data flow from end-node to server         *\/$/;"	v
 uptime	libttn/api.pb-c.h	/^  uint64_t uptime;$/;"	m	struct:_Api__ComponentStats
 usage	dragino-gw-fwd/src/dragino_gw_fwd.c	/^void usage(char *proc_name) {$/;"	f
@@ -4033,14 +4031,14 @@ username	libmqtt/MQTTConnect.h	/^	MQTTString username;$/;"	m	struct:__anon5
 username	libmqtt/test/stdoutsub.c	/^   char *username;$/;"	m	struct:opts_struct	file:
 utc	libloragw/inc/loragw_gps.h	/^    struct timespec utc;        \/*!> reference UTC time (from GPS\/NMEA) *\/$/;"	m	struct:tref	typeref:struct:tref::timespec
 validate_nmea_checksum	libloragw/src/loragw_gps.c	/^static bool validate_nmea_checksum(const char *serial_buff, int buff_size) {$/;"	f	file:
-value	dragino-gw-fwd/src/parson.c	/^    JSON_Value_Value value;$/;"	m	struct:json_value_t	file:
+value	dragino-gw-fwd/src/parson.c	/^	JSON_Value_Value value;$/;"	m	struct:json_value_t	file:
 value	libttn/descriptor.pb-c.h	/^  Google__Protobuf__EnumValueDescriptorProto **value;$/;"	m	struct:_Google__Protobuf__EnumDescriptorProto
 value	libttn/trace.pb-c.h	/^  char *value;$/;"	m	struct:_Trace__Trace__MetadataEntry
-values	dragino-gw-fwd/src/parson.c	/^    JSON_Value **values;$/;"	m	struct:json_object_t	file:
+values	dragino-gw-fwd/src/parson.c	/^	JSON_Value **values;$/;"	m	struct:json_object_t	file:
 verify_utf8_sequence	dragino-gw-fwd/src/parson.c	/^static int verify_utf8_sequence(const unsigned char *string, int *len) {$/;"	f	file:
 wait_ms	libloragw/src/loragw_aux.c	/^void wait_ms(unsigned long a) {$/;"	f
 waitfor	libmqtt/MQTTClient.c	/^int waitfor(MQTTClient *c, unsigned short packet_type, Timer *timer)$/;"	f
-wd_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool wd_enabled = false;	\/* watchdog enabled                                 *\/$/;"	v
+wd_enabled	dragino-gw-fwd/src/dragino_gw_fwd.c	/^bool wd_enabled = false;		\/* watchdog enabled                                 *\/$/;"	v
 weak	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean weak;$/;"	m	struct:_Google__Protobuf__FieldOptions
 weak_dependency	libttn/descriptor.pb-c.h	/^  int32_t *weak_dependency;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
 will	libmqtt/MQTTConnect.h	/^		unsigned int will : 1;			    \/**< will flag *\/$/;"	m	struct:__anon1::__anon2

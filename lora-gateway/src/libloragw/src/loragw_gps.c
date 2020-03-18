@@ -537,7 +537,7 @@ enum gps_msg lgw_parse_nmea(const char *serial_buff, int buff_size) {
         //printf("\nNote(RMC): %s\n", parser_buf);
         nb_fields = str_chop(parser_buf, buff_size, ',', str_index, ARRAY_SIZE(str_index));
         //printf("\nNote(RMC): (,)%d\n", nb_fields);
-        if (nb_fields != 14) {
+        if (nb_fields < 13) {
             DEBUG_MSG("Warning: invalid RMC sentence (number of fields)\n");
             return IGNORED;
         }

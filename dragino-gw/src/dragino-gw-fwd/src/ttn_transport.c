@@ -54,7 +54,6 @@ extern bool fwd_nocrc_pkt;
 
 extern volatile bool exit_sig;
 extern volatile bool quit_sig;
-extern volatile bool reload_sig;
 extern uint64_t lgwm;
 
 /* TX capabilities */
@@ -470,7 +469,7 @@ void ttn_upstream(void *pic) {
 	Queue *entry;
 	struct timespec wait_for;
 
-	while (!exit_sig && !quit_sig && !reload_sig) {
+	while (!exit_sig && !quit_sig) {
 		// wait for data to arrive
 		wait_for.tv_nsec = 0;
 		wait_for.tv_sec = time(NULL) + 10;

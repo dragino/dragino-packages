@@ -33,7 +33,7 @@
 
 #include "transport.h"
 
-extern int serv_count;
+extern uint8_t serv_count;
 extern Server servers[];
 
 // Initialize all data structures
@@ -62,7 +62,7 @@ void transport_init() {
 void transport_start() {
 	int i;
 
-	MSG("INFO: [Transports] Initializing protocol for %d servers\n",
+	MSG("INFO: [Transports] Initializing protocol for %u servers\n",
 		serv_count);
 	for (i = 0; i < MAX_SERVERS; i++) {
 		if (servers[i].enabled == true) {

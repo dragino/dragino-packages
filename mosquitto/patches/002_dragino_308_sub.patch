@@ -1,0 +1,79 @@
+Index: mosquitto-1.6.4/client/sub_client_output.c
+===================================================================
+--- mosquitto-1.6.4.orig/client/sub_client_output.c
++++ mosquitto-1.6.4/client/sub_client_output.c
+@@ -330,6 +330,25 @@ void print_message(struct mosq_config *c
+                         } else
+ 			    printf("prepare PUSH data ERROR\n");
+                 }
++
++        }else if(cfg->lora_pushout){
++		if(message->payloadlen){
++                        srand((unsigned)time(NULL));
++                        sprintf(chan_path, "/var/iot/push/%lu", (unsigned)rand() % 99999);
++                        /* payload for downlink */
++                        /*
++                        snprintf(rfpayload, sizeof(rfpayload),
++                                "%s, %s, %s, %s", 
++                                addr, class, format, message->payload);
++                       */
++                        fp = fopen(chan_path, "w+");
++                        if (NULL != fp) {
++                                fwrite(message->payload, sizeof(uint8_t), message->payloadlen, fp);
++                                fflush(fp);
++                                fclose(fp);
++                        } else
++			    printf("prepare PUSH data ERROR\n");
++                }
+ #endif
+ 	}else if(cfg->verbose){
+ 		if(message->payloadlen){
+Index: mosquitto-1.6.4/client/client_shared.c
+===================================================================
+--- mosquitto-1.6.4.orig/client/client_shared.c
++++ mosquitto-1.6.4/client/client_shared.c
+@@ -133,6 +133,8 @@ void init_config(struct mosq_config *cfg
+ 	cfg->repeat_count = 1;
+ 	cfg->repeat_delay.tv_sec = 0;
+ 	cfg->repeat_delay.tv_usec = 0;
++        cfg->lora_push = false;
++        cfg->lora_pushout = false;
+ 	if(pub_or_sub == CLIENT_RR){
+ 		cfg->protocol_version = MQTT_PROTOCOL_V5;
+ 		cfg->msg_count = 1;
+@@ -794,6 +796,11 @@ int client_config_line_proc(struct mosq_
+                         i++;
+                 }else if(!strcmp(argv[i], "--ipol")){
+                             cfg->ipol = true;
++		}else if(!strcmp(argv[i], "-o")){
++			if(pub_or_sub != CLIENT_SUB){
++				goto unknown_option;
++			}
++			cfg->lora_pushout = true;
+ #endif
+ 
+ #ifdef WITH_SOCKS
+Index: mosquitto-1.6.4/client/client_shared.h
+===================================================================
+--- mosquitto-1.6.4.orig/client/client_shared.h
++++ mosquitto-1.6.4/client/client_shared.h
+@@ -108,6 +108,7 @@ struct mosq_config {
+         char *datr;
+         char *codr;
+         bool ipol;
++        bool lora_pushout;
+ #endif
+ #ifdef WITH_SOCKS
+ 	char *socks5_host;
+Index: mosquitto-1.6.4/client/sub_client.c
+===================================================================
+--- mosquitto-1.6.4.orig/client/sub_client.c
++++ mosquitto-1.6.4/client/sub_client.c
+@@ -276,6 +276,7 @@ void print_usage(void)
+ 	printf(" --datr <string>: set the datarate for push such as SF7BW125.\n");
+ 	printf(" --codr <string>: set the coderate for push such as 4/5.\n");
+         printf("\n");
++	printf(" -o : If set, enables dragino lora push for mqtt subscribe.\n");
+ #endif
+ #ifdef WITH_SOCKS
+ 	printf(" --proxy : SOCKS5 proxy URL of the form:\n");

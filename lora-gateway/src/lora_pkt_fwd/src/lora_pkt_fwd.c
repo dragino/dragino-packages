@@ -1526,6 +1526,12 @@ int main(void)
     i = sem_init(&rxpkt_rec_sem, 0, 0);
     if (i != 0)
         MSG_DEBUG(DEBUG_WARNING, "[sem]Semaphore initialization failed!\n");
+
+    /* Board reset */          
+    if (system("/usr/bin/reset_lgw.sh start") != 0) {
+        printf("ERROR~ failed to reset SX1301, check your reset_lgw.sh script\n");
+        exit(EXIT_FAILURE);
+    }
         
     /* starting the concentrator */
     i = lgw_start();

@@ -14,11 +14,11 @@ init_board() {
         process="lg01_pkt_fwd"
     elif [[ "$board" = "LG08P" ]]; then
         process="lora_pkt_fwd"
-        /usr/bin/reset_lgw.sh start
+#        /usr/bin/reset_lgw.sh start
         /usr/bin/generate-config.sh
     elif [[ "$board" = "LG08" ]]; then
         process="lora_pkt_fwd"
-        /usr/bin/reset_lgw.sh start
+#        /usr/bin/reset_lgw.sh start
         /usr/bin/generate-config.sh
     else
         exit 1

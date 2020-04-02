@@ -85,8 +85,7 @@ Modifications for multi protocol use: Jac Kersing
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE CONSTANTS ---------------------------------------------------- */
 
-#define VERSION_STRING "DraginoGW-fwd 1.0.0"
-#define DISPLAY_PLATFORM "DraginoGW"
+#define DISPLAY_PLATFORM "DraginoLGW"
 
 //TODO: This default values are a code-smell, remove.
 #define DEFAULT_SERVER      127.0.0.1	/* hostname also supported */
@@ -128,10 +127,13 @@ bool fwd_error_pkt = false;		/* packets with PAYLOAD CRC ERROR are NOT forwarded
 bool fwd_nocrc_pkt = false;		/* packets with NO PAYLOAD CRC are NOT forwarded */
 
 /* network configuration variables */
-uint8_t serv_count = 0;			/* Counter for defined servers */
 uint64_t lgwm = 0;				/* Lora gateway MAC address */
 int keepalive_time = DEFAULT_KEEPALIVE;	/* send a PULL_DATA request every X seconds, negative = disabled */
-Server servers[MAX_SERVERS];	/* Server information */
+//struct onservice ONSVR = LGW_LIST_HEAD_NOLOCK_INIT_VALUE;	/* Server information */
+
+LGW_LIST_HEAD_NOLOCK_STATIC(ONSVR, Server); 
+LGW_LIST_HEAD_NOLOCK_STATIC(JOBLS, Threads); 
+LGW_LIST_HEAD_STATIC(RXPKTS, Rxpkts); 
 
 /* statistics collection configuration variables */
 static unsigned stat_interval = DEFAULT_STAT;	/* time interval (in sec) at which statistics are collected and displayed */
@@ -152,6 +154,8 @@ bool gps_active = false;		/* is GPS present and working on the board? */
 
 /* GPS time reference */
 pthread_mutex_t mx_timeref = PTHREAD_MUTEX_INITIALIZER;	/* control access to GPS time reference */
+pthread_mutex_t mx_meas_gps = PTHREAD_MUTEX_INITIALIZER;	/* control access to the GPS statistics */
+
 bool gps_ref_valid;				/* is GPS reference acceptable (ie. not too old) */
 struct tref time_reference_gps;	/* time reference used for UTC <-> timestamp conversion */
 
@@ -178,8 +182,7 @@ uint32_t meas_dw_dgram_acp[MAX_SERVERS] = { 0 };	/* response datagrams that are 
 uint32_t meas_dw_network_byte = 0;	/* sum of UDP bytes sent for upstream traffic */
 uint32_t meas_dw_payload_byte = 0;	/* sum of radio payload bytes sent for upstream traffic */
 
-pthread_mutex_t mx_rxqueue = PTHREAD_MUTEX_INITIALIZER;	/* control access to the queues */
-pthread_mutex_t mx_meas_gps = PTHREAD_MUTEX_INITIALIZER;	/* control access to the GPS statistics */
+
 bool gps_coord_valid;			/* could we get valid GPS coordinates? */
 struct coord_s meas_gps_coord;	/* GPS position of the gateway */
 struct coord_s meas_gps_err;	/* GPS position of the gateway */
@@ -223,6 +226,7 @@ struct lgw_tx_gain_lut_s txlut;	/* TX gain table */
 uint32_t tx_freq_min[LGW_RF_CHAIN_NB];	/* lowest frequency supported by TX chain */
 uint32_t tx_freq_max[LGW_RF_CHAIN_NB];	/* highest frequency supported by TX chain */
 
+
 /* Control over the separate streams. Per default, the system behaves like a basic packet forwarder. */
 bool upstream_enabled = true;	/* controls the data flow from end-node to server         */
 bool downstream_enabled = true;	/* controls the data flow from server to end-node         */
@@ -236,9 +240,6 @@ char platform[24] = DISPLAY_PLATFORM;	/* platform definition */
 char email[40] = "";			/* used for contact email */
 char description[64] = "";		/* used for free form description */
 
-/* Channel plan */
-char *frequency_plan = NULL;
-
 /* timestamp for watchdog */
 time_t last_loop;
 
@@ -248,9 +249,12 @@ char *logfile_path = NULL;
 /* enabled debugging options */
 int debug_mask;
 
-/* semaphore and Queue for receive data and dispatch */
-Queue *rxpkt_queue = NULL;
-sem_t rxpkt_rec_sem;
+/* configuration file related */
+char cfg_dir[PATH_LEN] = { 0 };  /* no need PATH_MAX, it's too long for emble system */
+char global_cfg_name[PATH_LEN/2] = "global_conf.json";	/* contain global (typically network-wide) configuration */
+char local_cfg_name[PATH_LEN/2] = "local_conf.json";	/* contain node specific configuration, overwrite global parameters for parameters that are defined in both */
+char debug_cfg_name[PATH_LEN/2] = "debug_conf.json";	/* if present, all other configuration files are ignored */
+
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS DECLARATION ---------------------------------------- */
@@ -261,8 +265,6 @@ double difftimespec(struct timespec end, struct timespec beginning);
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
 
 static void sig_handler(int sigio);
-
-static void parse_cplan_configuration(const char *conf_file);
 
 static int parse_SX1301_configuration(const char *conf_file);
 
@@ -275,8 +277,6 @@ void thread_valid(void);
 void thread_jit(void);
 void thread_timersync(void);
 void thread_watchdog(void);
-void thread_dispatch_rxpkt(void);
-void thread_rxpkt_enqueue(void *);
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
@@ -288,47 +288,6 @@ static void sig_handler(int sigio) {
 		exit_sig = true;
 	}
 	return;
-}
-
-static void parse_cplan_configuration(const char *conf_file) {
-	const char conf_obj_name[] = "frequency_plan";
-	const char *str;
-	JSON_Value *root_val = NULL;
-	JSON_Value *val = NULL;
-
-	/* try to parse JSON */
-	root_val = json_parse_file_with_comments(conf_file);
-	if (root_val == NULL) {
-		MSG("ERROR: %s is not a valid JSON file\n", conf_file);
-		exit(EXIT_FAILURE);
-	}
-
-	val = json_object_get_value(json_value_get_object(root_val), conf_obj_name);	/* fetch value (if possible) */
-	if (val == NULL) {
-		MSG("INFO: %s does not contain a JSON object named %s\n",
-			conf_file, conf_obj_name);
-		return;
-	} else {
-		MSG("INFO: %s does contain a JSON object named %s, parsing frequency_plan\n", conf_file, conf_obj_name);
-	}
-
-	if (json_value_get_type(val) == JSONString) {
-		str = json_value_get_string(val);	/* fetch value (if possible) */
-		frequency_plan = strdup(str);
-
-		if (frequency_plan == NULL) {
-			MSG("ERROR: Unable to allocate memory for frequency_plan value");
-		}
-
-	} else {
-		MSG("WARNING: Data type for frequency_plan seems wrong, please check\n");
-		frequency_plan = NULL;
-	}
-
-	MSG("INFO: frequency plan: %s\n",
-		frequency_plan != NULL ? frequency_plan : "not set");
-
-	json_value_free(root_val);
 }
 
 static int parse_SX1301_configuration(const char *conf_file) {
@@ -732,8 +691,7 @@ static int parse_SX1301_configuration(const char *conf_file) {
 }
 
 static int parse_gateway_configuration(const char *conf_file) {
-	int i;						/* Loop variable */
-	int ic;						/* Server counter */
+	int i, ic;				    /* Loop variable */
 	const char *str;			/* pointer to sub-strings in the JSON data */
 	JSON_Value *root_val;
 	JSON_Object *conf_obj = NULL;
@@ -746,6 +704,8 @@ static int parse_gateway_configuration(const char *conf_file) {
 	JSON_Array *confservers = NULL;
 	unsigned long long ull = 0;
 	const char conf_obj_name[] = "gateway_conf";
+
+    Server *serv_entry = NULL; 
 
 	/* try to parse JSON */
 	root_val = json_parse_file_with_comments(conf_file);
@@ -778,10 +738,10 @@ static int parse_gateway_configuration(const char *conf_file) {
 	confservers = json_object_get_array(conf_obj, "servers");
 	if (confservers != NULL) {
 		/* serv_count represents the maximal number of servers to be read. */
-		serv_count = json_array_get_count(confservers);
-		MSG("INFO: Found %i servers in array.\n", serv_count);
+		ONSVR.count = json_array_get_count(confservers);
+		MSG("INFO: Found %i servers in array.\n", ONSVR.count);
 		ic = 0;
-		for (i = 0; i < serv_count && ic < MAX_SERVERS; i++) {
+		for (i = 0; i < ONSVR.count && ic < MAX_SERVERS; i++) {
 			const char *vtype = NULL, *vgwid = NULL, *vgwkey = NULL;
 			JSON_Value *vcrit = NULL;
 
@@ -798,86 +758,102 @@ static int parse_gateway_configuration(const char *conf_file) {
 			vgwkey = json_object_get_string(nw_server, "serv_gw_key");
 			vcrit = json_object_get_value(nw_server, "critical");
 
+            serv_entry = (Server)malloc(sizeof(Server));
+            if (NULL == serv_entry) {
+                MSG("WARNING~ can't assign memery for server struct, do again");
+                --i;
+                continue;
+            }
+
+            transport_init(serv_entry);
+
 			/* Try to read the fields */
 			if (str != NULL)
-				snprintf(servers[ic].addr, sizeof servers[ic].addr, "%s", str);
+				snprintf(serv_entry->addr, sizeof serv_entry->addr, "%s", str);
 			if (val1 != NULL)
-				snprintf(servers[ic].port_up, sizeof servers[ic].port_up, "%u", 
+				snprintf(serv_entry->port_up, sizeof serv_entry->port_up, "%u", 
                         (uint16_t)json_value_get_number(val1));
 			if (val2 != NULL)
-				snprintf(servers[ic].port_down, sizeof servers[ic].port_down, "%u", 
+				snprintf(serv_entry->port_down, sizeof serv_entry->port_down, "%u", 
                         (uint16_t) json_value_get_number(val2));
 			if (val3 != NULL)
-				servers[ic].max_stall = (int)json_value_get_number(val3);
+				serv_entry->max_stall = (int)json_value_get_number(val3);
 			else
-				servers[ic].max_stall = 0;
+				serv_entry->max_stall = 0;
 			if (val4 != NULL)
-				servers[ic].upstream = (bool) json_value_get_boolean(val4);
+				serv_entry->upstream = (bool) json_value_get_boolean(val4);
 			if (val5 != NULL)
-				servers[ic].downstream = (bool) json_value_get_boolean(val5);
+				serv_entry->downstream = (bool) json_value_get_boolean(val5);
 			if (vcrit != NULL)
-				servers[ic].critical = (bool) json_value_get_boolean(vcrit);
+				serv_entry->critical = (bool) json_value_get_boolean(vcrit);
 			/* If there is no server name we can only silently progress to the next entry */
 			if (str == NULL) {
+                free(serv_entry);
 				continue;
 			} else if (vtype != NULL) {
 				if (!strncmp(vtype, "semtech", 7)) {
-					servers[ic].type = semtech;
+					serv_entry->type = semtech;
 				} else if (!strncmp(vtype, "ttn", 3)) {
-					servers[ic].type = ttn_gw_bridge;
+					serv_entry->type = ttn_gw_bridge;
 				} else if (!strncmp(vtype, "gwtraf", 6)) {
-					servers[ic].type = gwtraf;
+					serv_entry->type = gwtraf;
 				} else {
-					MSG("INFO: Skipping server \"%s\" with invalid server type\n", servers[ic].addr);
+					MSG("INFO: Skipping server \"%s\" with invalid server type\n", serv_entry->addr);
+                    free(serv_entry);
 					continue;
 				}
 			} else {
-				servers[ic].type = semtech;
+				serv_entry->type = semtech;
 			}
 			/* For semtech protocol, if there are no ports report and progress to the next entry */
-			if (servers[ic].type == semtech
-				&& ((val1 == NULL) || (val2 == NULL))) {
-				MSG("INFO: Skipping server \"%s\" with at least one invalid port number\n", servers[ic].addr);
+			if (serv_entry->type == semtech
+				&& ((val1 == NULL) || (val2 == NULL))) {  /* server or port */
+				MSG("INFO: Skipping server \"%s\" with at least one invalid port number\n", serv_entry->addr);
+                free(serv_entry);
 				continue;
 			}
 			/* For TTN gateway bridge, if there is no gateway id or no gateway key report and progress to next entry */
-			if (servers[ic].type == ttn_gw_bridge) {
+			if (serv_entry->type == ttn_gw_bridge) {
 				if (vgwid == NULL) {
-					MSG("INFO: Skipping server \"%s\" due to missing gateway id\n", servers[ic].addr);
+					MSG("INFO: Skipping server \"%s\" due to missing gateway id\n", serv_entry->addr);
+                    free(serv_entry);
 					continue;
 				} else {
-					strncpy(servers[ic].gw_id, vgwid, sizeof servers[ic].gw_id);
+					strncpy(serv_entry->gw_id, vgwid, sizeof serv_entry->gw_id);
 				}
 				if (vgwkey == NULL) {
-					MSG("INFO: Skipping server \"%s\" due to missing gateway key\n", servers[ic].addr);
+					MSG("INFO: Skipping server \"%s\" due to missing gateway key\n", serv_entry->addr);
+                    free(serv_entry);
 					continue;
 				} else {
-					strncpy(servers[ic].gw_key, vgwkey, sizeof servers[ic].gw_key);
+					strncpy(serv_entry->gw_key, vgwkey, sizeof serv_entry->gw_key);
 				}
-				if (strchr(servers[ic].addr, ':') != NULL) {
+				if (strchr(serv_entry->addr, ':') != NULL) {
 					// port specified
-					char *colpos = strchr(servers[ic].addr, ':');
+					char *colpos = strchr(serv_entry->addr, ':');
 					*colpos = 0;
-					servers[ic].gw_port = atoi(colpos + 1);
+					serv_entry->gw_port = atoi(colpos + 1);
 				} else {
-					servers[ic].gw_port = 1883;
+					serv_entry->gw_port = 1883;
 				}
 			}
 			/* If the server was explicitly disabled, report and progress to the next entry */
 			if ((val != NULL) && ((json_value_get_type(val)) == JSONBoolean)
 				&& ((bool) json_value_get_boolean(val) == false)) {
-				MSG("INFO: Skipping disabled server \"%s\"\n", servers[ic].addr);
+				MSG("INFO: Skipping disabled server \"%s\"\n", serv_entry->addr);
+                free(serv_entry);
 				continue;
 			}
 
 			/* All test survived, this is a valid server, report and increase server counter. */
-			MSG("INFO: Server %i configured to \"%s\"\n", ic, servers[ic].addr);
+			MSG("INFO: Server %i configured to \"%s\"\n", ic, serv_entry->addr);
 			/* The server may be valid, it is not yet live. */
-			servers[ic].enabled = true;
-			servers[ic].live = false;
+			serv_entry->enabled = true;
+			serv_entry->live = false;
+            LGW_LIST_INSERT_TAIL(&ONSVR, serv_entry, list);
 			ic++;
 		}
-		serv_count = ic;
+		ONSVR.count = ic;
 	} else {
 		/* If there are no servers in server array fall back to old fashioned single server definition.
 		 * The difference with the original situation is that we require a complete definition. */
@@ -886,49 +862,69 @@ static int parse_gateway_configuration(const char *conf_file) {
 		val1 = json_object_get_value(conf_obj, "serv_port_up");
 		val2 = json_object_get_value(conf_obj, "serv_port_down");
 		if ((str != NULL) && (val1 != NULL) && (val2 != NULL)) {
-			serv_count = 1;
-			servers[0].live = false;
-			strncpy(servers[0].addr, str, sizeof servers[0].addr);
-			snprintf(servers[0].port_up, sizeof servers[0].port_up, "%u",
-					 (uint16_t) json_value_get_number(val1));
-			snprintf(servers[0].port_down, sizeof servers[0].port_down, "%u",
-					 (uint16_t) json_value_get_number(val2));
-			MSG("INFO: Server configured to \"%s\", with port up \"%s\" and port down \"%s\"\n", 
-                    servers[0].addr, servers[0].port_up, servers[0].port_down);
+            serv_entry = (Server)malloc(sizeof(Server));
+            if (NULL == serv_entry) {
+                MSG("WARNING~ Can't allocates for server, ignored\n");
+            } else {
+                transport_init(serv_entry);
+                ONSVR.count = 1;
+                serv_entry->live = false;
+                strncpy(serv_entry->addr, str, sizeof serv_entry->addr);
+                snprintf(serv_entry->port_up, sizeof serv_entry->port_up, "%u",
+                         (uint16_t) json_value_get_number(val1));
+                snprintf(serv_entry->port_down, sizeof serv_entry->port_down, "%u",
+                         (uint16_t) json_value_get_number(val2));
+                MSG("INFO: Server configured to \"%s\", with port up \"%s\" and port down \"%s\"\n", 
+                        serv_entry->addr, serv_entry->port_up, serv_entry->port_down);
+                LGW_LIST_INSERT_TAIL(&ONSVR, serv_entry, list);
+            }
 		}
 	}
 
 	/* Check for ttn configuration */
 	val = json_object_get_value(conf_obj, "ttn_enable");
-	if (json_value_get_type(val) == JSONBoolean
-		&& ((bool) json_value_get_boolean(val) == true)) {
+	if (json_value_get_type(val) == JSONBoolean && ((bool) json_value_get_boolean(val) == true)) {
 		const char *id = NULL, *key = NULL, *addr = NULL;
-
+        serv_entry = (Server)malloc(sizeof(Server));
+        if (NULL == serv_entry) {
+            MSG("WARNING~ ERROR allocates memery! IGNORED!\n"); 
+        } else {
 		/* Read value of ttn_gateway_id */
-		id = json_object_get_string(conf_obj, "ttn_gateway_id");
-		key = json_object_get_string(conf_obj, "ttn_gateway_key");
-		addr = json_object_get_string(conf_obj, "ttn_address");
-		if (id != NULL && key != NULL && addr != NULL) {
-			strncpy(servers[serv_count].addr, addr, sizeof servers[serv_count].addr);
-			strncpy(servers[serv_count].gw_id, id, sizeof servers[serv_count].gw_id);
-			strncpy(servers[serv_count].gw_key, key, sizeof servers[serv_count].gw_key);
-			servers[serv_count].enabled = true;
-			servers[serv_count].live = false;
-			servers[serv_count].type = ttn_gw_bridge;
-			MSG("INFO: TTN address configured to \"%s\"\n", servers[serv_count].addr);
-			serv_count++;
-		}
+            transport_init(serv_entry);
+            id = json_object_get_string(conf_obj, "ttn_gateway_id");
+            key = json_object_get_string(conf_obj, "ttn_gateway_key");
+            addr = json_object_get_string(conf_obj, "ttn_address");
+            if (id != NULL && key != NULL && addr != NULL) {
+                strncpy(serv_entry->addr, addr, sizeof serv_entry->addr);
+                strncpy(serv_entry->gw_id, id, sizeof serv_entry->gw_id);
+                strncpy(serv_entry->gw_key, key, sizeof serv_entry->gw_key);
+                serv_entry->enabled = true;
+                serv_entry->live = false;
+                serv_entry->type = ttn_gw_bridge;
+                MSG("INFO: TTN address configured to \"%s\"\n", serv_entry->addr);
+                LGW_LIST_INSERT_TAIL(&ONSVR, serv_entry, list);
+                ONSVR.count++;
+            }
+        }
 	}
 
 	/* Using the defaults in case no values are present in the JSON */
 	//TODO: Eliminate this default behavior, the server should be well configured or stop.
-	if (serv_count == 0) {
+	if (ONSVR.count == 0) {
 		MSG("INFO: Using defaults for server and ports (specific ports are ignored if no server is defined)");
-		snprintf(servers[0].addr, sizeof(servers[0].addr), STR(DEFAULT_SERVER));
-		snprintf(servers[0].port_up, sizeof(servers[0].port_up), STR(DEFAULT_PORT_UP));
-		snprintf(servers[0].port_down, sizeof(servers[0].port_down), STR(DEFAULT_PORT_DW));
-		servers[0].live = false;
-		serv_count = 1;
+        serv_entry = (Server)malloc(sizeof(Server));
+        if (NULL == serv_entry) {
+            MSG("ERROR~ allocates memery! exit!\n"); 
+            exit(FAILURE);
+        } else {
+            transport_init(serv_entry);
+            snprintf(serv_entry->addr, sizeof(serv_entry->addr), STR(DEFAULT_SERVER));
+            snprintf(serv_entry->port_up, sizeof(serv_entry->port_up), STR(DEFAULT_PORT_UP));
+            snprintf(serv_entry->port_down, sizeof(serv_entry->port_down), STR(DEFAULT_PORT_DW));
+            serv_entry->live = false;
+            LGW_LIST_INSERT_TAIL(&ONSVR, serv_entry, list);
+            ONSVR.count = 1;
+        }
 	}
 
 	/* ghost hostname or IP address (optional) */
@@ -982,8 +978,7 @@ static int parse_gateway_configuration(const char *conf_file) {
 		if (stat_interval > 60) {
 			stat_interval = 55;
 		}
-		MSG("INFO: statistics display interval is configured to %u seconds\n",
-			stat_interval);
+		MSG("INFO: statistics display interval is configured to %u seconds\n", stat_interval);
 	}
 
 	/* get time-out value (in ms) for upstream datagrams (optional) */
@@ -1405,108 +1400,48 @@ void sighup_handler() {
 	}
 }
 
-static int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len) {
-	int i, sockfd;
-
-	/* network socket creation */
-	struct addrinfo hints;
-	struct addrinfo *result;	/* store result of getaddrinfo */
-	struct addrinfo *q;			/* pointer to move into *result data */
-
-	char host_name[64];
-	char port_name[64];
-
-	/* prepare hints to open network sockets */
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET;	/* WA: Forcing IPv4 as AF_UNSPEC makes connection on localhost to fail */
-	hints.ai_socktype = SOCK_DGRAM;
-
-	/* look for server address w/ upstream port */
-	i = getaddrinfo(servaddr, servport, &hints, &result);
-	if (i != 0) {
-		MSG_DEBUG(DEBUG_ERROR,
-				  "ERROR~ [up] getaddrinfo on address %s (PORT %s) returned %s\n",
-				  servaddr, servport, gai_strerror(i));
-		return -1;
-	}
-
-	/* try to open socket for upstream traffic */
-	for (q = result; q != NULL; q = q->ai_next) {
-		sockfd = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
-		if (sockfd == -1)
-			continue;			/* try next field */
-		else
-			break;				/* success, get out of loop */
-	}
-
-	if (q == NULL) {
-		MSG("ERROR~ [up] failed to open socket to any of server %s addresses (port %s)\n",
-				  servaddr, servport);
-		i = 1;
-		for (q = result; q != NULL; q = q->ai_next) {
-			getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name,
-						port_name, sizeof port_name, NI_NUMERICHOST);
-			MSG("INFO~ [up] result %i host:%s service:%s\n",
-					  i, host_name, port_name);
-			++i;
-		}
-
-		return -1;
-	}
-
-	/* connect so we can send/receive packet with the server only */
-	i = connect(sockfd, q->ai_addr, q->ai_addrlen);
-	if (i != 0) {
-		MSG("ERROR~ [up] connect returned %s\n",
-				  strerror(errno));
-		return -1;
-	}
-
-	freeaddrinfo(result);
-
-	if ((setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, rectimeout, len)) != 0) {
-		MSG("ERROR~ [up] setsockopt returned %s\n", strerror(errno));
-		return -1;
-	}
-
-	MSG("INFO~ sockfd=%d\n", sockfd);
-
-	return sockfd;
-}
-
 /* reload config if manager server give a command configreload*/
-static int parse_config(const char *conf_file) {
-	int ret;
-
-	ret = parse_SX1301_configuration(conf_file);
-	if (ret == -1)
-		return ret;
-	ret = parse_gateway_configuration(conf_file);
-	return ret;
+static bool parse_config() {
+	/* load configuration files */
+	if (access(debug_cfg_path, R_OK) == 0) {	/* if there is a debug conf, parse only the debug conf */
+		MSG("INFO: found debug configuration file %s, parsing it\n", debug_cfg_path);
+		MSG("INFO: other configuration files will be ignored\n");
+		parse_SX1301_configuration(debug_cfg_path);
+		parse_gateway_configuration(debug_cfg_path);
+	} else if (access(global_cfg_path, R_OK) == 0) {	/* if there is a global conf, parse it and then try to parse local conf  */
+		MSG("INFO: found global configuration file %s, parsing it\n", global_cfg_path);
+		parse_SX1301_configuration(global_cfg_path);
+		parse_gateway_configuration(global_cfg_path);
+		if (access(local_cfg_path, R_OK) == 0) {
+			MSG("INFO: found local configuration file %s, parsing it\n", local_cfg_path);
+			MSG("INFO: redefined parameters will overwrite global parameters\n");
+			parse_SX1301_configuration(local_cfg_path);
+			parse_gateway_configuration(local_cfg_path);
+		}
+	} else if (access(local_cfg_path, R_OK) == 0) {	/* if there is only a local conf, parse it and that's all */
+		MSG("INFO: found local configuration file %s, parsing it\n", local_cfg_path);
+		parse_SX1301_configuration(local_cfg_path);
+		parse_gateway_configuration(local_cfg_path);
+	} else {
+        return false;
+	}
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
 int main(int argc, char *argv[]) {
-	int i;						/* loop variable and temporary variable for return value */
-	int ic;						/* Server loop variable */
+	int i, ic;						/* loop variable and temporary variable for return value */
 	struct sigaction sigact;	/* SIGQUIT&SIGINT&SIGTERM signal handling */
 	struct sigaction sighupact;	/* SIGHUP signal handling */
 
-	/* configuration file related */
-	char *global_cfg_name = "global_conf.json";	/* contain global (typically network-wide) configuration */
-	char *local_cfg_name = "local_conf.json";	/* contain node specific configuration, overwrite global parameters for parameters that are defined in both */
-	char *debug_cfg_name = "debug_conf.json";	/* if present, all other configuration files are ignored */
+    Server *serv_entry = NULL;  /* server list entry */
 
 	int opt_ind = 0;
 
-	char cfg_dir[PATH_MAX] = { 0 };
-	char global_cfg_path[PATH_MAX] = { 0 };
-	char local_cfg_path[PATH_MAX] = { 0 };
-	char debug_cfg_path[PATH_MAX] = { 0 };
 	char *proc_name = argv[0];
-	char spi_dev[PATH_MAX] = { 0 };
+	char spi_dev[PATH_LEN] = { 0 };
 	char spi_speed_s[20] = { 0 };
 	long spi_speed;
 
@@ -1578,7 +1513,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* display version informations */
-	MSG("*** Multi Protocol Packet Forwarder for Lora Gateway ***\nVersion: " VERSION_STRING "\n");
+	MSG("*** Dragino Packet Forwarder for Lora Gateway ***\n");
 	MSG("*** Lora concentrator HAL library version info ***\n%s\n***\n", lgw_version_info());
 
 	/* display host endianness */
@@ -1590,40 +1525,25 @@ int main(int argc, char *argv[]) {
 	MSG("INFO: Host endianness unknown\n");
 #endif
 
-	/* initialize transport data */
-	transport_init();
+	/* configure signal handling */
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+	sigact.sa_handler = sig_handler;
+	sigaction(SIGQUIT, &sigact, NULL);	/* Ctrl-\ */
+	sigaction(SIGINT, &sigact, NULL);	/* Ctrl-C */
+	sigaction(SIGTERM, &sigact, NULL);	/* default "kill" command */
+	sigaction(SIGQUIT, &sigact, NULL);	/* Ctrl-\ */
 
-	/* initialize sem for dispatch rxpkt data */
-	sem_init(&rxpkt_rec_sem, 0, 0);
+	sigemptyset(&sighupact.sa_mask);
+	sighupact.sa_flags = 0;
+	sighupact.sa_handler = sighup_handler;
+	sigaction(SIGHUP, &sighupact, NULL);	/* rotate logfile on HUP */
+	signal(SIGPIPE, SIG_IGN);	/* ignore writes after closing socket */
 
-	/* load configuration files */
-	if (access(debug_cfg_path, R_OK) == 0) {	/* if there is a debug conf, parse only the debug conf */
-		MSG("INFO: found debug configuration file %s, parsing it\n", debug_cfg_path);
-		MSG("INFO: other configuration files will be ignored\n");
-		parse_cplan_configuration(debug_cfg_path);
-		parse_SX1301_configuration(debug_cfg_path);
-		parse_gateway_configuration(debug_cfg_path);
-	} else if (access(global_cfg_path, R_OK) == 0) {	/* if there is a global conf, parse it and then try to parse local conf  */
-		MSG("INFO: found global configuration file %s, parsing it\n", global_cfg_path);
-		parse_cplan_configuration(global_cfg_path);
-		parse_SX1301_configuration(global_cfg_path);
-		parse_gateway_configuration(global_cfg_path);
-		if (access(local_cfg_path, R_OK) == 0) {
-			MSG("INFO: found local configuration file %s, parsing it\n", local_cfg_path);
-			MSG("INFO: redefined parameters will overwrite global parameters\n");
-			parse_cplan_configuration(local_cfg_path);
-			parse_SX1301_configuration(local_cfg_path);
-			parse_gateway_configuration(local_cfg_path);
-		}
-	} else if (access(local_cfg_path, R_OK) == 0) {	/* if there is only a local conf, parse it and that's all */
-		MSG("INFO: found local configuration file %s, parsing it\n", local_cfg_path);
-		parse_cplan_configuration(local_cfg_path);
-		parse_SX1301_configuration(local_cfg_path);
-		parse_gateway_configuration(local_cfg_path);
-	} else {
+    if (!parse_config()) {
 		MSG("ERROR: [main] failed to find any configuration file named %s, %s OR %s\n", global_cfg_path, local_cfg_path, debug_cfg_path);
-		exit(EXIT_FAILURE);
-	}
+        exit(EXIT_FAILURE);
+    }
 
 	/* Start GPS a.s.a.p., to allow it to lock */
 	if (gps_enabled == true) {
@@ -1651,16 +1571,9 @@ int main(int argc, char *argv[]) {
 	stats_init();
 
 	/* initialize protocol stacks */
-	transport_start();
-
-	/* sanity check on configuration variables */
-
-	/** TODO ***************************************************************************
-
-    ** TODO: Check if there are any live servers available, if not we should exit since there cannot be any sensible course of action. 
-    ** Actually it would be best to redesign the whole communication loop, and take the socket constructors to be inside a try-retry loop. That way we can respond to severs that implemented there UDP handling erroneously, or any other temporal obstruction in the communication path (broken stacks in routers for example) Now, contact may be lost for ever and a manual restart at this side is required.
-    **  => This has been 'resolved' by allowing the forwarder to exit at stalled servers.
-    **/
+    LGW_LIST_TRAVERSE(&ONSVR, serv_entry, list) {
+	    transport_start(serv_entry);
+    }
 
 	/* starting the concentrator */
 	if (radiostream_enabled == true) {
@@ -1678,78 +1591,40 @@ int main(int argc, char *argv[]) {
 
 	/* spawn threads to manage upstream and downstream */
 	if (upstream_enabled == true) {
-		i = pthread_create(&thrid_up, NULL, (void *(*)(void *))thread_up, NULL);
-		if (i != 0) {
+		if (!lgw_pthread_create(&thrid_up, NULL, (void *(*)(void *))thread_up, NULL))
 			MSG("ERROR: [main] impossible to create upstream thread\n");
-			exit(EXIT_FAILURE);
-		}
-
-		i = pthread_create(&thrid_dispatch, NULL, (void *(*)(void *))thread_dispatch_rxpkt, NULL);
-		if (i != 0) {
-			MSG("ERROR: [main] impossible to create dispatch thread\n");
-			exit(EXIT_FAILURE);
-		}
 	}
 
 	if (downstream_enabled == true) {
 		/* JIT queue initialization */
 		jit_queue_init(&jit_queue);
+        LGW_LIST_TRAVERSE(&ONSVR, serv_entry, list) {
+			if (serv_entry->type == semtech && serv_entry->downstream == true) {
+                    if (!lgw_pthread_create(serv_entry->t_down, 
+                                                      NULL,
+                                                      (void *(*)(void *))semtech_thread_down,
+                                                      (void *)(Server*)server)) 
+                        MSG("ERROR: [main] impossible to create downstream thread!\n");
 
-		for (ic = 0; ic < serv_count; ic++)
-			if (servers[ic].live == true && servers[ic].type == semtech
-				&& servers[ic].downstream == true) {
-				i = pthread_create(&servers[ic].t_down, NULL,
-								   (void *(*)(void *))semtech_thread_down,
-								   (void *)(long)ic);
-				if (i != 0) {
-					MSG("ERROR: [main] impossible to create downstream thread\n");
-					exit(EXIT_FAILURE);
-				}
 			}
-
-		i = pthread_create(&thrid_jit, NULL, (void *(*)(void *))thread_jit, NULL);
-		if (i != 0) {
-			MSG("ERROR: [main] impossible to create JIT thread\n");
-			exit(EXIT_FAILURE);
-		}
 	}
+
+    if (!lgw_pthread_create(&thrid_jit, NULL, (void *(*)(void *))thread_jit, NULL))
+        MSG("ERROR: [main] impossible to create JIT thread\n");
+
 	// Timer synchronization needed for downstream ...
 	if (gps_active == true || downstream_enabled == true) {
-		i = pthread_create(&thrid_timersync, NULL, (void *(*)(void *))thread_timersync, NULL);
-		if (i != 0) {
+		if (!lgw_pthread_create(&thrid_timersync, NULL, (void *(*)(void *))thread_timersync, NULL))
 			MSG("ERROR: [main] impossible to create Timer Sync thread\n");
-			exit(EXIT_FAILURE);
-		}
 	}
 
 	/* spawn thread to manage GPS */
 	if (gps_active == true) {
-		i = pthread_create(&thrid_gps, NULL, (void *(*)(void *))thread_gps, NULL);
-		if (i != 0) {
+		if (!lgw_pthread_create(&thrid_gps, NULL, (void *(*)(void *))thread_gps, NULL))
 			MSG("ERROR: [main] impossible to create GPS thread\n");
-			exit(EXIT_FAILURE);
-		}
-		i = pthread_create(&thrid_valid, NULL, (void *(*)(void *))thread_valid, NULL);
-		if (i != 0) {
+		if (!pthread_create(&thrid_valid, NULL, (void *(*)(void *))thread_valid, NULL))
 			MSG("ERROR: [main] impossible to create validation thread\n");
-			exit(EXIT_FAILURE);
-		}
 	}
-
-	/* configure signal handling */
-	sigemptyset(&sigact.sa_mask);
-	sigact.sa_flags = 0;
-	sigact.sa_handler = sig_handler;
-	sigaction(SIGQUIT, &sigact, NULL);	/* Ctrl-\ */
-	sigaction(SIGINT, &sigact, NULL);	/* Ctrl-C */
-	sigaction(SIGTERM, &sigact, NULL);	/* default "kill" command */
-	sigaction(SIGQUIT, &sigact, NULL);	/* Ctrl-\ */
-
-	sigemptyset(&sighupact.sa_mask);
-	sighupact.sa_flags = 0;
-	sighupact.sa_handler = sighup_handler;
-	sigaction(SIGHUP, &sighupact, NULL);	/* rotate logfile on HUP */
-	signal(SIGPIPE, SIG_IGN);	/* ignore writes after closing socket */
 
 	/* Start the ghost Listener */
 	if (ghoststream_enabled == true) {
@@ -1759,19 +1634,17 @@ int main(int argc, char *argv[]) {
 
 	/* Check if we have anything to do */
 	if ((radiostream_enabled == false) && (ghoststream_enabled == false)
-		&& (statusstream_enabled == false)) {
+		                               && (statusstream_enabled == false)) {
 		MSG("WARNING: [main] All streams have been disabled, gateway may be completely silent.\n");
 	}
 
 	/* spawn thread for watchdog */
 	if (wd_enabled == true) {
 		last_loop = time(NULL);
-		i = pthread_create(&thrid_watchdog, NULL,
-						   (void *(*)(void *))thread_watchdog, NULL);
-		if (i != 0) {
+		if (!lgw_pthread_create(&thrid_watchdog, 
+                                           NULL,
+						                   (void *(*)(void *))thread_watchdog, NULL))
 			MSG("ERROR: [main] impossible to create watchdog thread\n");
-			exit(EXIT_FAILURE);
-		}
 	}
 
 	/* main loop task : statistics transmission */
@@ -1785,32 +1658,20 @@ int main(int argc, char *argv[]) {
 		// Create statistics report
 		stats_report();
 
-		/* status report single send for easy handle data */
-		for (i = 0; i < serv_count; i++) {
-			if (servers[i].live == true && servers[i].type == semtech) {
-				send(servers[i].sock_up, (void *)status_report, strlen(status_report), 0);	// TODO: send for each other server, using thread to receive response
-			}
-		}
-
 		/* Exit strategies. */
 		/* Server that are 'off-line may be a reason to exit */
 		/* move to semtech_transport in due time */
 		current_time = time(NULL);
 		pthread_mutex_lock(&mx_meas_up);
-		for (i = 0; i < serv_count; i++) {
-			if (servers[i].type == semtech) {
-				stall_time[i] = (int)(current_time - servers[i].contact);
-			}
+        LGW_LIST_TRAVERSE(ONSVR, serv_entry, list) {
+			if (serv_entry->type == semtech && (serv_entry->max_stall) > 0) {
+				serv_entry->stall_time = (int)(current_time - serv_entry->contact);
+                if (serv_entry->stall_time > serv_entry->max_stall) {
+                    /* restart thread or restart netconnect */
+                }
+            }
 		}
 		pthread_mutex_unlock(&mx_meas_up);
-		for (ic = 0; ic < serv_count; ic++) {
-			if ((servers[i].type == semtech) && (servers[ic].max_stall > 0)
-				&& (stall_time[ic] > servers[ic].max_stall)) {
-				MSG("ERROR: [main] for server %s stalled for %i seconds, terminating packet forwarder.\n", 
-                        servers[ic].addr, stall_time[ic]);
-				exit(EXIT_FAILURE);	// TODO: exit the thread, not the progress
-			}
-		}
 
 		last_loop = time(NULL);
 
@@ -1833,10 +1694,9 @@ int main(int argc, char *argv[]) {
 		pthread_cancel(thrid_watchdog);
 
 	/* wait for upstream thread to finish (1 fetch cycle max) */
-	if (upstream_enabled == true) {
+	if (upstream_enabled == true) 
 		pthread_join(thrid_up, NULL);
-		pthread_join(thrid_dispatch, NULL);
-	}
+	
 	/* shut down transports */
 	transport_stop();
 
@@ -1874,11 +1734,12 @@ int main(int argc, char *argv[]) {
 
 void thread_up(void) {
 
-	Queue *entry, *last;
-
 	/* allocate memory for packet fetching and processing */
 	struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];	/* array containing inbound packets + metadata */
 	int nb_pkt;
+
+    Rxpkts *rxpkt_entry = NULL;
+    Svrxpkts *svrxpkts_entry = NULL;
 
 	MSG("INFO: [up] Thread activated for all servers.\n");
 
@@ -1909,118 +1770,64 @@ void thread_up(void) {
 			continue;
 		}
 
+        rxpkt_entry = (struct *)malloc(sizeof(struct Rxpkts));
+
+        if (NULL == rxpkt_entry) {
+            continue;
+            //MSG
+        }
+
+        rxpkt_entry->list->next = NULL;
+        rxpkt_entry->deal = false;
+        rxpkt_entry->nb_pkt = nb_pkt;
+        rxpkt_entry->bind = 0;
+        memcpy(rxpkt_entry->rxpkt, rxpkt, sizeof(lgw_pkt_rx_s) * nb_pkt);
+
+        LGW_LIST_LOCK(RXPKTS);
+        LGW_LIST_INSERT_HEAD(RXPKTS, rxpkt_entry, list);
+        LGW_LIST_UNLOCK(RXPKTS);
+
+        LGW_LIST_TRAVERSE(ONSVR, serv_entry, list) {
+            svrxpkts_entry = (Svrxpkts *)malloc(sizeof(Svrxpkts));
+            if (NULL == svrxpkts_entry) {
+                continue;
+                //MSG
+            }
+            svrxpkts_entry->list->next = NULL;
+            svrxpkts_entry->nb_pkt = rxpkt_entry->nb_pkt;
+            svrxpkts_entry->rxpkt = rxpkt_entry->rxpkt;
+            pthread_mutex_lock(&mutx_rxpkts_bind);
+            ++rxpkt_entry->bind;
+            pthread_mutex_unlock(&mutx_rxpkts_bind);
+            LGW_LIST_INSERT_TAIL(&(serv_entry->rxpkts), svrxpkts_entry, list);
+            rxpkt_entry->deal = true;
+            sem_post(&serv_entry->sema);
+        }
+
 		/* nb_pkt > 0, then stats up */
-		stats_data_up(nb_pkt, rxpkt);
+		//stats_data_up(nb_pkt, &rxpkt);
 
-		entry = (Queue *) malloc(sizeof(Queue));
-		if (entry == NULL) {
-			MSG("ERROR: [rxpkt] cannot allocate memory for rxpkt data\n");
-			continue;			/* if error drop the rxpkt data and rec again */
-		}
-
-		memcpy(entry->data, rxpkt, sizeof entry->data);
-		entry->nbpkt = nb_pkt;
-		entry->next = NULL;
-
-		pthread_mutex_lock(&mx_rxqueue);
-		last = rxpkt_queue;
-		if (last == NULL)
-			rxpkt_queue = entry;
-		else {
-			while (last->next != NULL)
-				last = last->next;
-			last->next = entry;
-		}
-		pthread_mutex_unlock(&mx_rxqueue);
-
-		sem_post(&rxpkt_rec_sem);
 	}
 
 	MSG("INFO: End of upstream thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
-/* --- THREAD 2: dispatch rxpkt data receive from radio and ghost ---------- */
-void thread_dispatch_rxpkt(void) {
-	int i, r;
-	Queue *entry;
-	TDARG thrd_arg[MAX_SERVERS];
-	pthread_t thrid_dis[MAX_SERVERS]; 
+/* --- THREAD 2: recycle rxpkts use rxpkts head --------------------- */
 
+void thread_rx_recycle(void) {
 	while (!exit_sig && !quit_sig) {
-		/* wait for rxdata arrive */
-		sem_wait(&rxpkt_rec_sem);
-		entry = rxpkt_queue;
-
-		if (entry == NULL) {
-			continue;
-		}
-
-        do {
-            for (i = 0; i < MAX_SERVERS; i++) {
-                thrd_arg[i].idx = i;
-                thrd_arg[i].runing = false;
-                thrd_arg[i].queue = entry;
-
-                if (servers[i].enabled == true && servers[i].upstream == true) {
-                    r = pthread_create(&thrid_dis[i], NULL, 
-                                         (void *(*)(void *))thread_rxpkt_enqueue,
-                                         (void *)(TDARG *) & thrd_arg[i]);
-                    if (r != 0)
-                        MSG("ERROR: [DP] cannot create thrid[%d] : %s\n", i, strerror(r));
-                    else
-                        thrd_arg[i].runing = true; 
-                }
+        sem_wait(&rxrecycle_sem);
+        LGW_LIST_LOCK(&RXPKTS);
+        LGW_LIST_TRAVERSE_SAFE_BEGIN(&RXPKTS, rxpkts_entry, list) {
+            if (rxpkts_entry->deal && (rxpkts_entry->bind = 0)) {
+                LGW_LIST_REMOVE_CURRENT(rxpkts_entry);
+                free(rxpkts_entry);
             }
-
-            /* If thrd not a threadid ? 
-             * If that thread has already terminated, then pthread_join() returns immediately. no need attention the error return by join .
-             * */
-            for (i = 0; i < MAX_SERVERS; i++) {
-                if (thrd_arg[i].runing)
-                    if ((r = pthread_join(thrid_dis[i], NULL)) != 0) 
-                        MSG("INFO: [DP]cannot joint thrid[%i]: %s\n", strerror(r));
-            }
-
-            /* delete the head of rxpkt queue */
-            pthread_mutex_lock(&mx_rxqueue);
-            rxpkt_queue = rxpkt_queue->next;
-            pthread_mutex_unlock(&mx_rxqueue);
-            free(entry);
-            entry = rxpkt_queue;
-        } while (entry != NULL);
-	}
-}
-
-void thread_rxpkt_enqueue(void *rxpkt_Q) {
-	Queue *entry;
-	Queue *last;
-	TDARG *thrd_arg;
-
-	thrd_arg = (TDARG *) rxpkt_Q;
-
-	if (servers[thrd_arg->idx].live == false)
-		return;
-
-	entry = (Queue *) malloc(sizeof(Queue));
-	if (entry == NULL) {
-		MSG("ERROR: [semtech] cannot allocate memory for upstream data\n");
-		return;
-	}
-	memcpy(entry, thrd_arg->queue, sizeof(Queue));
-	entry->status = NULL;
-	entry->next = NULL;
-	pthread_mutex_lock(&servers[thrd_arg->idx].mx_queue);
-	last = servers[thrd_arg->idx].queue;
-	if (last == NULL)
-		servers[thrd_arg->idx].queue = entry;
-	else {
-		while (last->next != NULL)
-			last = last->next;
-		last->next = entry;
-	}
-	pthread_mutex_unlock(&servers[thrd_arg->idx].mx_queue);
-	sem_post(&servers[thrd_arg->idx].send_sem);
+        }
+        LGW_LIST_UNLOCK(&RXPKTS);
+    }
+	MSG("INFO: End of rxpkts recycle thread\n");
 }
 
 void print_tx_status(uint8_t tx_status) {
@@ -2374,23 +2181,6 @@ void thread_watchdog(void) {
 			exit(254);
 		}
 	}
-}
-
-#include <stdarg.h>
-/* -- Debugging aid */
-void logmessage(const char *fmt, ...) {
-	time_t t;
-	struct tm r;
-	va_list argp;
-
-	time(&t);
-	localtime_r(&t, &r);
-	printf("%02d:%02d:%02d  ", r.tm_hour, r.tm_min, r.tm_sec);
-
-	va_start(argp, fmt);
-	vprintf(fmt, argp);
-	va_end(argp);
-	fflush(stdout);
 }
 
 /* --- EOF ------------------------------------------------------------------ */

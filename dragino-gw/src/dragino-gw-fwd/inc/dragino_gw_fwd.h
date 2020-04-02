@@ -1,23 +1,17 @@
 /*
- * mp_pkt_fwd.h
+ * DR_PKT_FWD.h
  *
  *  Created on: Aug 28, 2015
  *      Author: ruud
  */
 
-#ifndef _MP_PKT_FWD_H_
-#define _MP_PKT_FWD_H_
+#ifndef _DR_PKT_FWD_H_
+#define _DR_PKT_FWD_H_
 
 /* -------------------------------------------------------------------------- */
 /* --- MAC OSX Extensions  -------------------------------------------------- */
 
 struct timespec;
-
-#ifdef __MACH__
-#define CLOCK_REALTIME 0
-#define CLOCK_MONOTONIC 0
-int clock_gettime(int clk_id, struct timespec *t);
-#endif
 
 double difftimespec(struct timespec end, struct timespec beginning);
 
@@ -29,4 +23,7 @@ double difftimespec(struct timespec end, struct timespec beginning);
 #define MIN_FSK_PREAMB  3		/* minimum FSK preamble length for this application */
 #define STD_FSK_PREAMB  4
 
-#endif							/* _MP_PKT_FWD_H_ */
+#define PATH_LEN        64      /* no use PATH_MAX */
+
+
+#endif							/* _DR_PKT_FWD_H_ */

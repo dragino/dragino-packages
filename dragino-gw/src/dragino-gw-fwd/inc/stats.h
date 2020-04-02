@@ -30,7 +30,8 @@ enum stats_down {
 	BEACON_REJECTED
 };
 
-struct statistics_downlink {
+typedef struct statistics_downlink {
+    pthread_mutex_t mx_meas_dw;
 	uint32_t meas_nb_tx_ok;
 	uint32_t meas_nb_tx_fail;
 	uint32_t meas_nb_tx_requested;
@@ -41,7 +42,13 @@ struct statistics_downlink {
 	uint32_t meas_nb_beacon_queued;
 	uint32_t meas_nb_beacon_sent;
 	uint32_t meas_nb_beacon_rejected;
-};
+	uint32_t meas_dw_pull_sent;
+	uint32_t meas_dw_ack_rcv;
+	uint32_t meas_dw_dgram_acp;
+	uint32_t meas_dw_dgram_rcv;
+	uint32_t meas_dw_network_byte;
+	uint32_t meas_dw_payload_byte;
+} Stat_down;
 
 enum stats_up {
 	RX_RCV,
@@ -51,13 +58,18 @@ enum stats_up {
 	PKT_FWD
 };
 
-struct statistics_uplink {
+typedef struct statistics_uplink {
+    pthread_mutex_t mx_meas_up;
 	uint32_t meas_nb_rx_rcv;
 	uint32_t meas_nb_rx_ok;
 	uint32_t meas_nb_rx_bad;
 	uint32_t meas_nb_rx_nocrc;
 	uint32_t meas_up_pkt_fwd;
-};
+    uint32_t meas_up_network_byte;
+    uint32_t meas_up_payload_byte;
+    uint32_t meas_up_dgram_sent;
+    uint32_t meas_up_ack_rcv;
+} Stat_up;
 
 // Function prototypes
 void stats_init();

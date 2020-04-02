@@ -190,149 +190,47 @@ static uint16_t crc_ccit(const uint8_t * data, unsigned size) {
 	return x;
 }
 
-void semtech_init(int idx) {
-	/* network socket creation */
-	struct addrinfo hints;
-	struct addrinfo *result;	/* store result of getaddrinfo */
-	struct addrinfo *q;			/* pointer to move into *result data */
-	char host_name[64];
-	char port_name[64];
+bool semtech_init(Server *server) {
 	int i;
 
 	/* process some of the configuration variables */
 	net_mac_h = htonl((uint32_t) (0xFFFFFFFF & (lgwm >> 32)));
 	net_mac_l = htonl((uint32_t) (0xFFFFFFFF & lgwm));
 
-	/* prepare hints to open network sockets */
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_INET;	/* WA: Forcing IPv4 as AF_UNSPEC makes connection on localhost to fail */
-	hints.ai_socktype = SOCK_DGRAM;
-
 	/* Initialize server variables */
 	servers[idx].live = false;
 	servers[idx].contact = time(NULL);
 
-	/* look for server address w/ upstream port */
-	i = getaddrinfo(servers[idx].addr, servers[idx].port_up, &hints, &result);
-	if (i != 0) {
-		MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n",
-			servers[idx].addr, servers[idx].port_up, gai_strerror(i));
-		freeaddrinfo(result);
-		return;
-	}
+    do {
+        server->sock_up = init_socket(server->addr, server->port_up, (void *)&push_timeout_half, sizeof(push_timeout_half)); 
+	    if (server->sock_up == -1) {
+		    MSG("ERROR: [semtech] failed to connect to \"%s\", Try again!\n", server->addr);
+            wait_ms(100);
+        }
 
-	/* try to open socket for upstream traffic */
-	for (q = result; q != NULL; q = q->ai_next) {
-		servers[idx].sock_up =
-			socket(q->ai_family, q->ai_socktype, q->ai_protocol);
-		if (servers[idx].sock_up == -1)
-			continue;			/* try next field */
-		else
-			break;				/* success, get out of loop */
-	}
-	if (q == NULL) {
-		MSG("ERROR: [up] failed to open socket to any of server %s addresses (port %s)\n", servers[idx].addr, servers[idx].port_up);
-		i = 1;
-		for (q = result; q != NULL; q = q->ai_next) {
-			getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name,
-						port_name, sizeof port_name, NI_NUMERICHOST);
-			MSG("INFO: [up] result %i host:%s service:%s\n", 
-                    i, host_name, port_name);
-			++i;
-		}
-		freeaddrinfo(result);
-		return;
-	}
+    } while (server->sock_up == -1); 
 
-	/* connect so we can send/receive packet with the server only */
-	i = connect(servers[idx].sock_up, q->ai_addr, q->ai_addrlen);
-	if (i != 0) {
-		MSG("ERROR: [up] connect on address %s (port %s) returned: %s\n",
-			servers[idx].addr, servers[idx].port_up, strerror(errno));
-		freeaddrinfo(result);
-		return;
-	}
 
-	/* look for server address w/ downstream port */
-	i = getaddrinfo(servers[idx].addr, servers[idx].port_down, &hints, &result);
-	if (i != 0) {
-		MSG("ERROR: [down] getaddrinfo on address %s (port %s) returned: %s\n",
-			servers[idx].addr, servers[idx].port_down, gai_strerror(i));
-		freeaddrinfo(result);
-		return;
-	}
-
-	/* try to open socket for downstream traffic */
-	for (q = result; q != NULL; q = q->ai_next) {
-		servers[idx].sock_down = socket(q->ai_family, q->ai_socktype, q->ai_protocol);
-		if (servers[idx].sock_down == -1)
-			continue;			/* try next field */
-		else
-			break;				/* success, get out of loop */
-	}
-	if (q == NULL) {
-		MSG("ERROR: [down] failed to open socket to any of server %s addresses (port %s)\n", servers[idx].addr, servers[idx].port_down);
-		i = 1;
-		for (q = result; q != NULL; q = q->ai_next) {
-			getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name,
-						port_name, sizeof port_name, NI_NUMERICHOST);
-			MSG("INFO: [down] result %i host:%s service:%s\n", 
-                    i, host_name, port_name);
-			++i;
-		}
-		freeaddrinfo(result);
-		return;
-	}
-
-	freeaddrinfo(result);
-
-	/* connect so we can send/receive packet with the server only */
-	i = connect(servers[idx].sock_down, q->ai_addr, q->ai_addrlen);
-	if (i != 0) {
-		MSG("ERROR: [down] connect address %s (port %s) returned: %s\n",
-			servers[idx].addr, servers[idx].port_down, strerror(errno));
-		return;
-	}
-
-	/* If we made it through to here, this server is live */
-	servers[idx].live = true;
-	MSG("INFO: Successfully contacted server %s\n", servers[idx].addr);
-
-	/* set upstream socket RX timeout */
-	push_timeout_half.tv_usec = 500 * push_timeout_ms;
-	if (servers[idx].live == true) {
-		i = setsockopt(servers[idx].sock_up, SOL_SOCKET, SO_RCVTIMEO,
-					   (void *)&push_timeout_half, sizeof push_timeout_half);
-		if (i != 0) {
-			MSG("ERROR: [up] setsockopt for server %s returned %s\n",
-				servers[idx].addr, strerror(errno));
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	i = pthread_create(&servers[idx].t_up, NULL,
-					   (void *(*)(void *))semtech_upstream, (void *)(long)idx);
-	if (i != 0) {
-		MSG("ERROR: [semtech] failed to create upstream thread for server \"%s\"\n", servers[i].addr);
-		exit(EXIT_FAILURE);
-	}
+	do {
+        i = pthread_create(&server->t_up, 
+                                NULL,
+					            (void *(*)(void *))semtech_upstream, (void *)server);
+	    if (i != 0) {
+		    MSG("ERROR: [semtech] failed to create upstream thread for server \"%s\", Try again!\n", server->addr);
+            wait_ms(100);
+        }
+	} while (i != 0);
 }
 
-void semtech_stop(int idx) {
-	if (downstream_enabled == true && servers[idx].downstream == true) {
-		pthread_join(servers[idx].t_down, NULL);
-		sem_post(&servers[idx].send_sem);
-		pthread_join(servers[idx].t_up, NULL);
-		if (exit_sig) {
-			shutdown(servers[idx].sock_up, SHUT_RDWR);
-			shutdown(servers[idx].sock_down, SHUT_RDWR);
-		}
-	}
+void semtech_stop(Server *server) {
+	pthread_cancel(server->t_down);
+	pthread_cancel(server->t_up);
+    close(server->sock_up);
+    close(server->sock_down);
 }
 
 //TODO: Check if this is a proper generalization of servers!
-static int send_tx_ack(int ic, uint8_t token_h, uint8_t token_l,
-					   enum jit_error_e error) {
+static int send_tx_ack(Server *server, uint8_t token_h, uint8_t token_l, enum jit_error_e error) {
 	uint8_t buff_ack[64];		/* buffer to give feedback to server */
 	int buff_index;
 
@@ -372,8 +270,7 @@ static int send_tx_ack(int ic, uint8_t token_h, uint8_t token_l,
 			increment_down(TX_REJ_TOO_LATE);
 			break;
 		case JIT_ERROR_TOO_EARLY:
-			memcpy((void *)(buff_ack + buff_index), (void *)"\"TOO_EARLY\"",
-				   11);
+			memcpy((void *)(buff_ack + buff_index), (void *)"\"TOO_EARLY\"", 11);
 			buff_index += 11;
 			/* update stats */
 			increment_down(TX_REJ_TOO_EARLY);
@@ -394,8 +291,7 @@ static int send_tx_ack(int ic, uint8_t token_h, uint8_t token_l,
 			buff_index += 10;
 			break;
 		case JIT_ERROR_GPS_UNLOCKED:
-			memcpy((void *)(buff_ack + buff_index), (void *)"\"GPS_UNLOCKED\"",
-				   14);
+			memcpy((void *)(buff_ack + buff_index), (void *)"\"GPS_UNLOCKED\"", 14);
 			buff_index += 14;
 			break;
 		default:
@@ -411,13 +307,11 @@ static int send_tx_ack(int ic, uint8_t token_h, uint8_t token_l,
 	buff_ack[buff_index] = 0;	/* add string terminator, for safety */
 
 	/* send datagram to server */
-	return send(servers[ic].sock_down, (void *)buff_ack, buff_index, 0);
+	return send(server->sock_down, (void *)buff_ack, buff_index, 0);
 }
 
-void semtech_thread_down(void *pic) {
+void semtech_thread_down(Server *server) {
 	int i;						/* loop variables */
-	int ic = (int)(long)pic;
-
 	/* configuration and metadata for an outbound packet */
 	struct lgw_pkt_tx_s txpkt;
 	bool sent_immediate = false;	/* option to sent the packet immediately */
@@ -478,16 +372,6 @@ void semtech_thread_down(void *pic) {
 	time_t system_time;
 	int j, buff_index;
 
-	/* set downstream socket RX timeout */
-	i = setsockopt(servers[ic].sock_down, SOL_SOCKET, SO_RCVTIMEO,
-				   (void *)&pull_timeout, sizeof pull_timeout);
-	if (i != 0) {
-		//TODO Should this failure bring the application down?
-		MSG("ERROR: [down] setsockopt for server %s returned %s\n",
-			servers[ic].addr, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-
 	/* pre-fill the pull request buffer with fixed fields */
 	buff_req[0] = PROTOCOL_VERSION;
 	buff_req[3] = PKT_PULL_DATA;
@@ -547,7 +431,7 @@ void semtech_thread_down(void *pic) {
 		/* auto-quit if the threshold is crossed */
 		if ((autoquit_threshold > 0) && (autoquit_cnt >= autoquit_threshold)) {
 			exit_sig = true;
-			MSG("INFO: [down] for server %s the last %u PULL_DATA were not ACKed, exiting down thread for this server.\n", servers[ic].addr, autoquit_threshold);
+			MSG("INFO: [down] for server %s the last %u PULL_DATA were not ACKed, exiting down thread for this server.\n", server->addr, autoquit_threshold);
 			break;
 		}
 
@@ -558,7 +442,7 @@ void semtech_thread_down(void *pic) {
 		buff_req[2] = token_l;
 
 		/* send PULL request and record time */
-		send(servers[ic].sock_down, (void *)buff_req, sizeof buff_req, 0);
+		send(server->sock_down, (void *)buff_req, sizeof buff_req, 0);
 		clock_gettime(CLOCK_MONOTONIC, &send_time);
 		pthread_mutex_lock(&mx_meas_dw);
 		meas_dw_pull_sent[ic] += 1;
@@ -571,7 +455,7 @@ void semtech_thread_down(void *pic) {
 		while ((int)difftimespec(recv_time, send_time) < keepalive_time) {
 
 			/* try to receive a datagram */
-			msg_len = recv(servers[ic].sock_down, (void *)buff_down, (sizeof buff_down) - 1, 0);
+			msg_len = recv(server->sock_down, (void *)buff_down, (sizeof buff_down) - 1, 0);
 			clock_gettime(CLOCK_MONOTONIC, &recv_time);
 
 			/* Pre-allocate beacon slots in JiT queue, to check downlink collisions */
@@ -579,9 +463,7 @@ void semtech_thread_down(void *pic) {
 			//TODO: beacon can also work on local time base, implement.
 			beacon_loop = JIT_NUM_BEACON_IN_QUEUE - jit_queue.num_beacon;
 			retry = 0;
-			while (beacon_loop && (beacon_period != 0) && 
-                                    (beacon_enabled == true) && 
-                                    (gps_active == true)) {
+			while (beacon_loop && (beacon_period != 0) && (beacon_enabled == true) && (gps_active == true)) {
 				/* if beacon must be prepared, load it and wait for it to trigger */
 				//if ((beacon_next_pps == true) && (gps_active == true))
 				pthread_mutex_lock(&mx_timeref);
@@ -594,8 +476,7 @@ void semtech_thread_down(void *pic) {
 					if (last_beacon_gps_time.tv_sec == 0) {
 						/* if no beacon has been queued, get next slot from current UTC time */
 						diff_beacon_time = time_reference_gps.utc.tv_sec % ((time_t) beacon_period);
-						next_beacon_gps_time.tv_sec = time_reference_gps.utc.tv_sec +
-							((time_t) beacon_period - diff_beacon_time);
+						next_beacon_gps_time.tv_sec = time_reference_gps.utc.tv_sec + ((time_t) beacon_period - diff_beacon_time);
 					} else {
 						/* if there is already a beacon, take it as reference */
 						next_beacon_gps_time.tv_sec = last_beacon_gps_time.tv_sec + beacon_period;
@@ -663,12 +544,13 @@ void semtech_thread_down(void *pic) {
 						if (jit_result != JIT_ERROR_COLLISION_BEACON) {
 							increment_down(BEACON_REJECTED);
 						}
-			/*  In case previous enqueue failed, 
-             *  we retry one period later until it succeeds 
-			 ** Note: In case the GPS has been unlocked for a while, 
-             ** there can be lots of retries be done from 
-             ** last beacon time to a new valid one 
-             **/
+
+                        /*  In case previous enqueue failed, 
+                         *  we retry one period later until it succeeds 
+                         ** Note: In case the GPS has been unlocked for a while, 
+                         ** there can be lots of retries be done from 
+                         ** last beacon time to a new valid one 
+                         **/
 						retry++;
 						MSG_DEBUG(DEBUG_BEACON, "--> beacon queuing retry=%d\n", retry);
 					}
@@ -688,8 +570,10 @@ void semtech_thread_down(void *pic) {
 			if ((msg_len < 4) || (buff_down[0] != PROTOCOL_VERSION)
 				|| ((buff_down[3] != PKT_PULL_RESP)
 					&& (buff_down[3] != PKT_PULL_ACK))) {
-				//TODO Investigate why this message is logged only at shutdown, i.e. all messages produced here are collected and
-				//     spit out at program termination. This can lead to an unstable application.
+				/*TODO Investigate why this message is logged only at shutdown, i.e. 
+                 * all messages produced here are collected and spit out at program termination. 
+                 * This can lead to an unstable application.
+                 */
 				LOGGER("WARNING: [down] ignoring invalid packet len=%d, protocol_version=%d, id=%d\n", msg_len, buff_down[0], buff_down[3]);
 				continue;
 			}
@@ -705,17 +589,20 @@ void semtech_thread_down(void *pic) {
 						pthread_mutex_lock(&mx_meas_dw);
 						meas_dw_ack_rcv[ic] += 1;
 						pthread_mutex_unlock(&mx_meas_dw);
-						LOGGER("INFO: [down] for server %s PULL_ACK received in %i ms\n", servers[i].addr, (int)(1000 * difftimespec(recv_time, send_time)));
+						LOGGER("INFO: [down] for server %s PULL_ACK received in %i ms\n", server->addr, (int)(1000 * difftimespec(recv_time, send_time)));
 					}
 				} else {		/* out-of-sync token */
-					LOGGER("INFO: [down] for server %s, received out-of-sync ACK\n", servers[i].addr);
+					LOGGER("INFO: [down] for server %s, received out-of-sync ACK\n", server->addr);
 				}
 				continue;
 			}
-			//TODO: This might generate to much logging data. The reporting should be reevaluated and an option -q should be added.
-			/* the datagram is a PULL_RESP */
+			/*TODO: This might generate to much logging data. 
+             * The reporting should be reevaluated and an option -q should be added.
+             *
+			 * the datagram is a PULL_RESP 
+             * */
 			buff_down[msg_len] = 0;	/* add string terminator, just to be safe */
-			LOGGER("INFO: [down] for server %s serv_addr[ic] PULL_RESP received  - token[%d:%d] :)\n", servers[i].addr, buff_down[1], buff_down[2]);	/* very verbose */
+			LOGGER("INFO: [down] for server %s serv_addr[ic] PULL_RESP received  - token[%d:%d] :)\n", server->addr, buff_down[1], buff_down[2]);	/* very verbose */
 			MSG_DEBUG(DEBUG_LOG, "\nJSON down: %s\n", (char *)(buff_down + 4));	/* DEBUG: display JSON payload */
 
 			meas_dw_dgram_rcv[ic] += 1;	/* count all datagrams that are received */
@@ -823,8 +710,7 @@ void semtech_thread_down(void *pic) {
 						json_value_free(root_val);
 						continue;
 					} else {
-						LOGGER("INFO: [down] a packet will be sent on timestamp value %u (calculated from UTC time)\n",
-							 txpkt.count_us);
+						LOGGER("INFO: [down] a packet will be sent on timestamp value %u (calculated from UTC time)\n", txpkt.count_us);
 					}
 
 					j = snprintf((json + buff_index), 300 - buff_index,
@@ -1126,11 +1012,8 @@ void semtech_thread_down(void *pic) {
 			/* insert packet to be sent into JIT queue */
 			if (jit_result == JIT_ERROR_OK) {
 				gettimeofday(&current_unix_time, NULL);
-				get_concentrator_time(&current_concentrator_time,
-									  current_unix_time);
-				jit_result =
-					jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt,
-								downlink_type);
+				get_concentrator_time(&current_concentrator_time, current_unix_time);
+				jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
 				if (jit_result != JIT_ERROR_OK) {
 					LOGGER("ERROR: Packet REJECTED (jit error=%d)\n", jit_result);
 				}
@@ -1155,9 +1038,7 @@ void semtech_thread_down(void *pic) {
 	MSG("INFO: End of downstream thread\n");
 }
 
-void semtech_upstream(void *pic) {
-	Queue *entry;
-	int idx = (int)(long)pic;
+void semtech_upstream(Server *server) {
 	int i, j;					/* loop variables */
 	unsigned pkt_in_dgram;		/* nb on Lora packet in the current datagram */
 

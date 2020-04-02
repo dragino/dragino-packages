@@ -302,7 +302,7 @@ static struct context cntx = {'\0'};
 
 #define MAX_DNLINK_PKTS   32  /* MAX number of dnlink pkts */
 #define DNFPORT           2   /* default fport for downlink */
-#define DNPATH      "/var/iot/dnlink"   /* default path for downlink */
+#define DNPATH      "/var/iot/push"   /* default path for downlink */
 
 static uint32_t dwfcnt = 0;  /* for local downlink frame counter */
 
@@ -1383,6 +1383,8 @@ int main(void)
 
     if(!get_config("general", dbpath, sizeof(dbpath)))
         strcpy(dbpath, "/etc/lora/devskey");
+	
+	MSG_DEBUG(DEBUG_INFO, "INFO~ ABP Decryption: %s\n", maccrypto_num? "yes" : "no");
 
     if (maccrypto_num != 0) {
         if(!db_init(dbpath, &cntx)) {
@@ -2464,7 +2466,7 @@ void thread_proc_rxpkt() {
                             }
 
                         } else
-                            MSG_DEBUG(DEBUG_WARNING, "DECRYPT~ [Ignore]Cannot find sessionKey for %08X\n", devinfo.devaddr);
+                            MSG_DEBUG(DEBUG_WARNING, "DECRYPT~ [Ignore] Can't find SessionKeys for Dev %08X\n", devinfo.devaddr);
                     }
                 }
             }
@@ -3681,6 +3683,7 @@ void thread_ent_dnlink(void) {
                 }
 
                 for (j = 0; i < psize + 1; i++) {
+					if(buff_down[i] != 0 && buff_down[i] != 10 )
                         dnpld[j++] = buff_down[i];
                 }
 
@@ -3695,15 +3698,11 @@ void thread_ent_dnlink(void) {
                 if (strlen(pdformat) < 1)
                     strcpy(pdformat, "txt");
 
-                MSG_DEBUG(DEBUG_INFO, 
-                        "INFO~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, txt:%s\n",
-                        addr, txmode, pdformat, dnpld);
-
                 entry = (DNLINK *) malloc(sizeof(DNLINK));
                 strcpy(entry->devaddr, addr);
                 if (strstr(pdformat, "hex") != NULL) { 
                     if (psize % 2) {
-                        MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] sizeof hex payload valid\n");
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] Size of hex payload invalid.\n");
                         free(entry);
                         continue;
                     }
@@ -3717,6 +3716,10 @@ void thread_ent_dnlink(void) {
                 entry->psize = psize;
                 entry->pre = NULL;
                 entry->next = NULL;
+				
+                MSG_DEBUG(DEBUG_INFO, 
+                        "INFO~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d, payload:%08X\n",
+                        entry->devaddr, entry->txmode, entry->pdformat, entry->psize, entry->payload);
 
                 if (strstr(entry->txmode, "imme") != NULL) {
                     MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Pending IMMEDIATE of %s\n", addr);
@@ -3755,7 +3758,7 @@ void thread_ent_dnlink(void) {
                     }
                 }
                 pthread_mutex_unlock(&mx_dnlink);
-                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] DNLINK PENDING!(%delems).\n", j);
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] DNLINK PENDING!(%d elems).\n", j);
             }
             wait_ms(20); /* wait for HAT send or other process */
         }

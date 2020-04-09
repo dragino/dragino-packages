@@ -203,7 +203,6 @@ static char ghost_addr[64] = "127.0.0.1";	/* address of the server (host name or
 static char ghost_port[8] = "1914";	/* port to listen on */
 
 /* Variables to make the performance of forwarder locally available. */
-char stat_format[32] = "semtech";	/* format for json statistics. */
 char stat_file[1024] = "\0";	/* name / full path of file to store results in, off by default. */
 int stat_damping = 50;			/* default damping for statistical values. */
 
@@ -701,6 +700,8 @@ static int parse_gateway_configuration(const char *conf_file) {
 	JSON_Value *val3 = NULL;	/* needed to detect the absence of some fields */
 	JSON_Value *val4 = NULL;	/* needed to detect the absence of some fields */
 	JSON_Value *val5 = NULL;	/* needed to detect the absence of some fields */
+	JSON_Value *val6 = NULL;	/* needed to detect the absence of some fields */
+	JSON_Value *val7 = NULL;	/* needed to detect the absence of some fields */
 	JSON_Array *confservers = NULL;
 	unsigned long long ull = 0;
 	const char conf_obj_name[] = "gateway_conf";
@@ -742,10 +743,11 @@ static int parse_gateway_configuration(const char *conf_file) {
 		MSG("INFO: Found %i servers in array.\n", ONSVR.count);
 		ic = 0;
 		for (i = 0; i < ONSVR.count && ic < MAX_SERVERS; i++) {
-			const char *vtype = NULL, *vgwid = NULL, *vgwkey = NULL;
+			const char *vtype = NULL, *vgwid = NULL, *vgwkey = NULL, *name = NULL;
 			JSON_Value *vcrit = NULL;
 
 			nw_server = json_array_get_object(confservers, i);
+			name = json_object_get_string(nw_server, "server_name");
 			str = json_object_get_string(nw_server, "server_address");
 			val = json_object_get_value(nw_server, "serv_enabled");
 			val1 = json_object_get_value(nw_server, "serv_port_up");
@@ -753,6 +755,8 @@ static int parse_gateway_configuration(const char *conf_file) {
 			val3 = json_object_get_value(nw_server, "serv_max_stall");
 			val4 = json_object_get_value(nw_server, "serv_up_enabled");
 			val5 = json_object_get_value(nw_server, "serv_down_enabled");
+			val6 = json_object_get_value(nw_server, "serv_filter_fport");
+			val7 = json_object_get_value(nw_server, "serv_filter_devadrr");
 			vtype = json_object_get_string(nw_server, "serv_type");
 			vgwid = json_object_get_string(nw_server, "serv_gw_id");
 			vgwkey = json_object_get_string(nw_server, "serv_gw_key");
@@ -768,24 +772,30 @@ static int parse_gateway_configuration(const char *conf_file) {
             transport_init(serv_entry);
 
 			/* Try to read the fields */
+			if (vname != NULL)
+				snprintf(serv_entry->serv_info.sname, sizeof serv_entry->serv_info.sname, "%s", vname);
 			if (str != NULL)
-				snprintf(serv_entry->addr, sizeof serv_entry->addr, "%s", str);
+				snprintf(serv_entry->serv_net.addr, sizeof serv_entry->serv_net.addr, "%s", str);
 			if (val1 != NULL)
-				snprintf(serv_entry->port_up, sizeof serv_entry->port_up, "%u", 
+				snprintf(serv_entry->serv_net.port_up, sizeof serv_entry->serv_net.port_up, "%u", 
                         (uint16_t)json_value_get_number(val1));
 			if (val2 != NULL)
-				snprintf(serv_entry->port_down, sizeof serv_entry->port_down, "%u", 
+				snprintf(serv_entry->serv_net.port_down, sizeof serv_entry->serv_net.port_down, "%u", 
                         (uint16_t) json_value_get_number(val2));
 			if (val3 != NULL)
-				serv_entry->max_stall = (int)json_value_get_number(val3);
+				serv_entry->serv_stat.max_stall = (int)json_value_get_number(val3);
 			else
-				serv_entry->max_stall = 0;
+				serv_entry->serv_stat.max_stall = 0;
 			if (val4 != NULL)
-				serv_entry->upstream = (bool) json_value_get_boolean(val4);
+				serv_entry->serv_stat.upstream = (bool) json_value_get_boolean(val4);
 			if (val5 != NULL)
-				serv_entry->downstream = (bool) json_value_get_boolean(val5);
+				serv_entry->serv_stat.downstream = (bool) json_value_get_boolean(val5);
+			if (val6 != NULL)
+				serv_entry->serv_info.filter_fport = (bool) json_value_get_boolean(val6);
+			if (val7 != NULL)
+				serv_entry->serv_info.filter_devaddr = (bool) json_value_get_boolean(val7);
 			if (vcrit != NULL)
-				serv_entry->critical = (bool) json_value_get_boolean(vcrit);
+				serv_entry->serv_stat.critical = (bool) json_value_get_boolean(vcrit);
 			/* If there is no server name we can only silently progress to the next entry */
 			if (str == NULL) {
                 free(serv_entry);
@@ -798,7 +808,7 @@ static int parse_gateway_configuration(const char *conf_file) {
 				} else if (!strncmp(vtype, "gwtraf", 6)) {
 					serv_entry->type = gwtraf;
 				} else {
-					MSG("INFO: Skipping server \"%s\" with invalid server type\n", serv_entry->addr);
+					MSG("INFO: Skipping server \"%s\" with invalid server type\n", serv_entry->serv_info.sname);
                     free(serv_entry);
 					continue;
 				}
@@ -808,45 +818,45 @@ static int parse_gateway_configuration(const char *conf_file) {
 			/* For semtech protocol, if there are no ports report and progress to the next entry */
 			if (serv_entry->type == semtech
 				&& ((val1 == NULL) || (val2 == NULL))) {  /* server or port */
-				MSG("INFO: Skipping server \"%s\" with at least one invalid port number\n", serv_entry->addr);
+				MSG("INFO: Skipping server \"%s\" with at least one invalid port number\n", serv_entry->serv_info.sname);
                 free(serv_entry);
 				continue;
 			}
 			/* For TTN gateway bridge, if there is no gateway id or no gateway key report and progress to next entry */
 			if (serv_entry->type == ttn_gw_bridge) {
 				if (vgwid == NULL) {
-					MSG("INFO: Skipping server \"%s\" due to missing gateway id\n", serv_entry->addr);
+					MSG("INFO: Skipping server \"%s\" due to missing gateway id\n", serv_entry->serv_info.sname);
                     free(serv_entry);
 					continue;
 				} else {
-					strncpy(serv_entry->gw_id, vgwid, sizeof serv_entry->gw_id);
+					strncpy(serv_entry->serv_info.gw_id, vgwid, sizeof serv_entry->serv_info.gw_id);
 				}
 				if (vgwkey == NULL) {
-					MSG("INFO: Skipping server \"%s\" due to missing gateway key\n", serv_entry->addr);
+					MSG("INFO: Skipping server \"%s\" due to missing gateway key\n", serv_entry->serv_info.sname);
                     free(serv_entry);
 					continue;
 				} else {
-					strncpy(serv_entry->gw_key, vgwkey, sizeof serv_entry->gw_key);
+					strncpy(serv_entry->serv_info.gw_key, vgwkey, sizeof serv_entry->serv_info.gw_key);
 				}
-				if (strchr(serv_entry->addr, ':') != NULL) {
+				if (strchr(serv_entry->serv_net.addr, ':') != NULL) {
 					// port specified
-					char *colpos = strchr(serv_entry->addr, ':');
+					char *colpos = strchr(serv_entry->serv_net.addr, ':');
 					*colpos = 0;
-					serv_entry->gw_port = atoi(colpos + 1);
+					serv_entry->serv_info.gw_port = atoi(colpos + 1);
 				} else {
-					serv_entry->gw_port = 1883;
+					serv_entry->serv_info.gw_port = 1883;
 				}
 			}
 			/* If the server was explicitly disabled, report and progress to the next entry */
 			if ((val != NULL) && ((json_value_get_type(val)) == JSONBoolean)
 				&& ((bool) json_value_get_boolean(val) == false)) {
-				MSG("INFO: Skipping disabled server \"%s\"\n", serv_entry->addr);
+				MSG("INFO: Skipping disabled server \"%s\"\n", serv_entry->serv_info.sname );
                 free(serv_entry);
 				continue;
 			}
 
 			/* All test survived, this is a valid server, report and increase server counter. */
-			MSG("INFO: Server %i configured to \"%s\"\n", ic, serv_entry->addr);
+			MSG("INFO: Server %i configured to %s:%s\n", ic, serv_entry->serv_info.sname, serv_entry->serv_net.addr);
 			/* The server may be valid, it is not yet live. */
 			serv_entry->enabled = true;
 			serv_entry->live = false;
@@ -868,14 +878,15 @@ static int parse_gateway_configuration(const char *conf_file) {
             } else {
                 transport_init(serv_entry);
                 ONSVR.count = 1;
-                serv_entry->live = false;
-                strncpy(serv_entry->addr, str, sizeof serv_entry->addr);
-                snprintf(serv_entry->port_up, sizeof serv_entry->port_up, "%u",
+                serv_entry->serv_stat.live = false;
+                strncpy(serv_entry->serv_info.sname, "Default-Server", sizeof serv_entry->serv_info.sname);
+                strncpy(serv_entry->serv_net.addr, str, sizeof serv_entry->serv_net.addr);
+                snprintf(serv_entry->serv_net.port_up, sizeof serv_entry->serv_net.port_up, "%u",
                          (uint16_t) json_value_get_number(val1));
-                snprintf(serv_entry->port_down, sizeof serv_entry->port_down, "%u",
+                snprintf(serv_entry->serv_net.port_down, sizeof serv_entry->serv_net.port_down, "%u",
                          (uint16_t) json_value_get_number(val2));
                 MSG("INFO: Server configured to \"%s\", with port up \"%s\" and port down \"%s\"\n", 
-                        serv_entry->addr, serv_entry->port_up, serv_entry->port_down);
+                        serv_entry->serv_net.addr, serv_entry->serv_net.port_up, serv_entry->serv_net.port_down);
                 LGW_LIST_INSERT_TAIL(&ONSVR, serv_entry, list);
             }
 		}
@@ -883,25 +894,28 @@ static int parse_gateway_configuration(const char *conf_file) {
 
 	/* Check for ttn configuration */
 	val = json_object_get_value(conf_obj, "ttn_enable");
-	if (json_value_get_type(val) == JSONBoolean && ((bool) json_value_get_boolean(val) == true)) {
-		const char *id = NULL, *key = NULL, *addr = NULL;
+        if (json_value_get_type(val) == JSONBoolean && ((bool) json_value_get_boolean(val) == true)) {
+		const char *id = NULL, *key = NULL, *addr = NULL, *name = NULL;
         serv_entry = (Server)malloc(sizeof(Server));
         if (NULL == serv_entry) {
             MSG("WARNING~ ERROR allocates memery! IGNORED!\n"); 
         } else {
 		/* Read value of ttn_gateway_id */
             transport_init(serv_entry);
+            name = json_object_get_string(conf_obj, "serv_name");
             id = json_object_get_string(conf_obj, "ttn_gateway_id");
             key = json_object_get_string(conf_obj, "ttn_gateway_key");
             addr = json_object_get_string(conf_obj, "ttn_address");
+            if (name != NULL)
+                strncpy(serv_entry->serv_info.sname, name, sizeof serv_entry->serv_name.sname);
             if (id != NULL && key != NULL && addr != NULL) {
-                strncpy(serv_entry->addr, addr, sizeof serv_entry->addr);
-                strncpy(serv_entry->gw_id, id, sizeof serv_entry->gw_id);
-                strncpy(serv_entry->gw_key, key, sizeof serv_entry->gw_key);
-                serv_entry->enabled = true;
-                serv_entry->live = false;
+                strncpy(serv_entry->serv_net.addr, addr, sizeof serv_entry->serv_net.addr);
+                strncpy(serv_entry->serv_info.gw_id, id, sizeof serv_entry->serv_info.gw_id);
+                strncpy(serv_entry->serv_info.gw_key, key, sizeof serv_entry->serv_info.gw_key);
+                serv_entry->serv_stat.enabled = true;
+                serv_entry->serv_stat.live = false;
                 serv_entry->type = ttn_gw_bridge;
-                MSG("INFO: TTN address configured to \"%s\"\n", serv_entry->addr);
+                MSG("INFO: TTN address configured to %s:%s\n", serv_entry->serv_info.sname, serv_entry->serv_net.addr);
                 LGW_LIST_INSERT_TAIL(&ONSVR, serv_entry, list);
                 ONSVR.count++;
             }
@@ -918,9 +932,10 @@ static int parse_gateway_configuration(const char *conf_file) {
             exit(FAILURE);
         } else {
             transport_init(serv_entry);
-            snprintf(serv_entry->addr, sizeof(serv_entry->addr), STR(DEFAULT_SERVER));
-            snprintf(serv_entry->port_up, sizeof(serv_entry->port_up), STR(DEFAULT_PORT_UP));
-            snprintf(serv_entry->port_down, sizeof(serv_entry->port_down), STR(DEFAULT_PORT_DW));
+            snprintf(serv_entry->serv_info.sname, sizeof(serv_entry->serv_info.sname), STR(DEFAULT_SNAME));
+            snprintf(serv_entry->serv_net.addr, sizeof(serv_entry->serv_net.addr), STR(DEFAULT_SERVER));
+            snprintf(serv_entry->serv_net.port_up, sizeof(serv_entry->serv_net.port_up), STR(DEFAULT_PORT_UP));
+            snprintf(serv_entry->serv_net.port_down, sizeof(serv_entry->serv_net.port_down), STR(DEFAULT_PORT_DW));
             serv_entry->live = false;
             LGW_LIST_INSERT_TAIL(&ONSVR, serv_entry, list);
             ONSVR.count = 1;
@@ -939,13 +954,6 @@ static int parse_gateway_configuration(const char *conf_file) {
 	if (val != NULL) {
 		snprintf(ghost_port, sizeof ghost_port, "%u", (uint16_t) json_value_get_number(val));
 		MSG("INFO: ghost port is configured to \"%s\"\n", ghost_port);
-	}
-
-	/* name of format, currently recognized are semtech and lorank (optional) */
-	str = json_object_get_string(conf_obj, "stat_format");
-	if (str != NULL) {
-		snprintf(stat_format, sizeof stat_format, "%s", str);
-		MSG("INFO: format is configured to \"%s\"\n", stat_format);
 	}
 
 	/* name of file to write statistical info to (optional) */

@@ -37,17 +37,20 @@
 void transport_init(Server *server) {
 	memset(server, 0, sizeof(Server));
 	server->type = semtech;
-	server->enabled = false;
-	server->upstream = true;
-	server->downstream = true;
-	server->statusstream = true;
-	server->live = false;
-	server->connecting = false;
-	server->critical = true;
-    server->stall_time = 0;
-	server->sock_up = -1;
-	server->sock_down = -1;
-	server->queue = NULL;
+	server->serv_stat.enabled = false;
+	server->serv_stat.upstream = true;
+	server->serv_stat.downstream = true;
+	server->serv_stat.statusstream = true;
+	server->serv_stat.live = false;
+	server->serv_stat.connecting = false;
+	server->serv_stat.critical = true;
+    server->serv_stat.stall_time = 0;
+	server->serv_net.sock_up = -1;
+	server->serv_net.sock_down = -1;
+	server->serv_info.filter_fport = false;
+	server->serv_info.filter_devaddr = false;
+	server->serv_report.report_ready = false;
+	strcpy(server->serv_report.stat_farmat, "semtech");
 	server->ttn = NULL;
 	sem_init(servers->send_sem, 0, 0);
 }

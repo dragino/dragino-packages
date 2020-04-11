@@ -12,30 +12,11 @@ start() {
     modprobe gpio_keys_polled
 
     rmmod spi-gpio-custom
-    insmod spi-gpio-custom bus0=1,14,16,26,0,8000000,15 bus1=2,18,21,19,0,8000000,24
-    sleep 1
+    insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21
 
-    /usr/bin/spirw 8 0
+    insmod i2c-gpio-custom bus0=0,7,8
 
-    if [[ "$?" == "0" ]]; then
-        echo "LG02" > /var/iot/board
-    else 
-        /usr/bin/spirw 23 1
-        if [[ "$?" == "0" ]]; then
-            echo "LG01" > /var/iot/board
-        else
-            rmmod spi-gpio-custom
-            insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21
-            /usr/bin/spirw 12 1
-            if [[ "$?" == "1" ]]; then
-	    	rmmod spi-gpio-custom
-			insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
-                echo "LG08" > /var/iot/board
-            else
-                echo "LG08P" > /var/iot/board
-            fi
-        fi
-    fi
+    echo "LG302" > /var/iot/board
 
     board=`cat /var/iot/board`
 	model=$board

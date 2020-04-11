@@ -49,6 +49,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libloragw/test* $(1)/usr/lora
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/reset_lgw.sh $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libloragw/test_loragw_hal_rx $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libloragw/test_loragw_hal_tx $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/packet_forwarder/lora_pkt_fwd $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_net_downlink/net_downlink $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_chip_id/chip_id $(1)/usr/bin

@@ -1881,12 +1881,6 @@ int main(void)
         }
     }
 
-    /* Board reset */          
-    if (system("/usr/bin/reset_lgw.sh stop") != 0) {
-        printf("ERROR~ failed to reset SX1301, check your reset_lgw.sh script\n");
-        exit(EXIT_FAILURE);
-    }
-
     MSG_DEBUG(DEBUG_INFO, "INFO~ Exiting packet forwarder program\n");
     if (sxradio)
         free(sxradio);
@@ -2798,17 +2792,18 @@ void thread_down(void) {
 
             /* if no network message was received, got back to listening sock_down socket */
             if (msg_len == -1) {
-                //MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] recv returned %s\n", strerror(errno)); /* too verbose */
-                if (errno != EAGAIN) { /* ! timeout */
-                    MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] relink recv error sockup(%d),sockdown(%d)\n", sock_up, sock_down); 
-                    /* server connection error */
-                    if (sock_down) close(sock_down);
-                    if ((sock_down = init_socket(serv_addr, serv_port_down,
-                                    (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
-                        exit(EXIT_FAILURE);
-                }
-
-                continue;
+				if (!strcmp(server_type, "lorawan")){
+						//MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] recv returned %s\n", strerror(errno)); /* too verbose */
+					if (errno != EAGAIN) { /* ! timeout */
+						MSG_DEBUG(DEBUG_WARNING, "WARNING: [down] relink recv error sockup(%d),sockdown(%d)\n", sock_up, sock_down); 
+						/* server connection error */
+						if (sock_down) close(sock_down);
+						if ((sock_down = init_socket(serv_addr, serv_port_down,
+										(void *)&pull_timeout, sizeof(pull_timeout))) == -1)
+							exit(EXIT_FAILURE);
+					}			
+				}
+				continue;	
             }
 
             /* if the datagram does not respect protocol, just ignore it */
@@ -3168,15 +3163,17 @@ void thread_down(void) {
         }
 
         if (pull_ack < labs(pull_send * 0.1)) {  /* 10% lost */
-            pull_ack = 0;
-            pull_send = 0;
-            MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_ACK mismatch, reconnect server\n");
-            pthread_mutex_lock(&mx_sockdn); /*maybe reconnect, so lock */ 
-            if (sock_down) close(sock_down);
-            if ((sock_down = init_socket(serv_addr, serv_port_down,
-                                        (void *)&pull_timeout, sizeof(pull_timeout))) == -1)
-                exit(EXIT_FAILURE);
-            pthread_mutex_unlock(&mx_sockdn); /*maybe reconnect, so lock */ 
+			if (!strcmp(server_type, "lorawan")) {
+				pull_ack = 0;
+				pull_send = 0;
+				MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_ACK mismatch, reconnect server\n");
+				pthread_mutex_lock(&mx_sockdn); /*maybe reconnect, so lock */ 
+				if (sock_down) close(sock_down);
+				if ((sock_down = init_socket(serv_addr, serv_port_down,
+											(void *)&pull_timeout, sizeof(pull_timeout))) == -1)
+					exit(EXIT_FAILURE);
+				pthread_mutex_unlock(&mx_sockdn); /*maybe reconnect, so lock */ 				
+			}
         }
     }
     MSG_DEBUG(DEBUG_INFO, "INFO~ End of downstream thread\n");

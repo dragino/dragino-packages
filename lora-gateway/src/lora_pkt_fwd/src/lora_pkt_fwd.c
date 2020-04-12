@@ -1880,6 +1880,12 @@ int main(void)
             MSG_DEBUG(DEBUG_WARNING, "WARNING: failed to stop concentrator successfully\n");
         }
     }
+	
+	 /* Board reset */          
+	if (system("/usr/bin/reset_lgw.sh stop") != 0) {
+		printf("ERROR~ failed to reset SX1301, check your reset_lgw.sh script\n");
+		exit(EXIT_FAILURE);
+	}
 
     MSG_DEBUG(DEBUG_INFO, "INFO~ Exiting packet forwarder program\n");
     if (sxradio)

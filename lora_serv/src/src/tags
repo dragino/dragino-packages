@@ -1,0 +1,475 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AES_CMAC_Final	cmac.c	/^void AES_CMAC_Final(uint8_t digest[AES_CMAC_DIGEST_LENGTH], AES_CMAC_CTX *ctx)$/;"	f
+AES_CMAC_Init	cmac.c	/^void AES_CMAC_Init(AES_CMAC_CTX *ctx)$/;"	f
+AES_CMAC_SetKey	cmac.c	/^void AES_CMAC_SetKey(AES_CMAC_CTX *ctx, const uint8_t key[AES_CMAC_KEY_LENGTH])$/;"	f
+AES_CMAC_Update	cmac.c	/^void AES_CMAC_Update(AES_CMAC_CTX *ctx, const uint8_t *data, uint32_t len)$/;"	f
+APPEND_INDENT	parson.c	1097;"	d	file:
+APPEND_INDENT	parson.c	872;"	d	file:
+APPEND_STRING	parson.c	1096;"	d	file:
+APPEND_STRING	parson.c	867;"	d	file:
+APPKEYLEN	dls_utili.c	68;"	d	file:
+ARRAY_SIZE	base64.c	29;"	d	file:
+Ack	handle.c	/^        uint8_t Ack             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+Adr	handle.c	/^        uint8_t Adr             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+AdrAckReq	handle.c	/^        uint8_t AdrAckReq       : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+AesCmacCtx	LoRaMacCrypto.c	/^static AES_CMAC_CTX AesCmacCtx[1];$/;"	v	file:
+AesContext	LoRaMacCrypto.c	/^static aes_context AesContext;$/;"	v	file:
+BPOLY	aes.c	76;"	d	file:
+Bits	handle.c	/^	}Bits;$/;"	m	union:uLoRaMacDLSettings	typeref:struct:uLoRaMacDLSettings::sDLSBits	file:
+Bits	handle.c	/^	}Bits;$/;"	m	union:uLoRaMacRxDelay	typeref:struct:uLoRaMacRxDelay::sRxDBits	file:
+Bits	handle.c	/^    }Bits;$/;"	m	union:uLoRaMacFrameCtrl	typeref:struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+Bits	handle.c	/^    }Bits;$/;"	m	union:uLoRaMacHeader	typeref:struct:uLoRaMacHeader::sHdrBits	file:
+CMD_ADDAPP	dls_utili.c	56;"	d	file:
+CMD_ADDDEV	dls_utili.c	58;"	d	file:
+CMD_ADDGW	dls_utili.c	52;"	d	file:
+CMD_ADDPF	dls_utili.c	54;"	d	file:
+CMD_DELETE	dls_utili.c	62;"	d	file:
+CMD_IMPORTCSV	dls_utili.c	64;"	d	file:
+CMD_LISTAPP	dls_utili.c	57;"	d	file:
+CMD_LISTDEV	dls_utili.c	59;"	d	file:
+CMD_LISTGW	dls_utili.c	53;"	d	file:
+CMD_LISTMSG	dls_utili.c	60;"	d	file:
+CMD_LISTPF	dls_utili.c	55;"	d	file:
+CMD_MANDEV	dls_utili.c	63;"	d	file:
+CMD_UPGW	dls_utili.c	61;"	d	file:
+CRIT	base64.c	30;"	d	file:
+DEBUG	base64.c	33;"	d	file:
+DEBUG_DEBUG	dragino_lorawan_server.c	/^int DEBUG_DEBUG = 0;$/;"	v
+DEBUG_ERROR	dls_utili.c	73;"	d	file:
+DEBUG_ERROR	dragino_lorawan_server.c	/^int DEBUG_ERROR = 1;$/;"	v
+DEBUG_INFO	dragino_lorawan_server.c	/^int DEBUG_INFO = 1;$/;"	v
+DEBUG_JOIN	dragino_lorawan_server.c	/^int DEBUG_JOIN = 0;$/;"	v
+DEBUG_SQL	dls_utili.c	72;"	d	file:
+DEBUG_SQL	dragino_lorawan_server.c	/^int DEBUG_SQL = 0;$/;"	v
+DEBUG_STMT	db.c	23;"	d	file:
+DEBUG_STMT	dls_utili.c	75;"	d	file:
+DEBUG_UPDW	dragino_lorawan_server.c	/^int DEBUG_UPDW = 0;$/;"	v
+DEBUG_WARNING	dragino_lorawan_server.c	/^int DEBUG_WARNING = 1;$/;"	v
+DOWN	handle.c	23;"	d	file:
+DPOLY	aes.c	77;"	d	file:
+Del	handle.c	/^		uint8_t Del              : 4;$/;"	m	struct:uLoRaMacRxDelay::sRxDBits	file:
+FLOAT_FORMAT	parson.c	45;"	d	file:
+FOptsLen	handle.c	/^        uint8_t FOptsLen        : 4;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+FPending	handle.c	/^        uint8_t FPending        : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
+FRAME_TYPE_DATA_CONFIRMED_DOWN	handle.c	/^    FRAME_TYPE_DATA_CONFIRMED_DOWN   = 0x05,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_DATA_CONFIRMED_UP	handle.c	/^    FRAME_TYPE_DATA_CONFIRMED_UP     = 0x04,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_DATA_UNCONFIRMED_DOWN	handle.c	/^    FRAME_TYPE_DATA_UNCONFIRMED_DOWN = 0x03,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_DATA_UNCONFIRMED_UP	handle.c	/^    FRAME_TYPE_DATA_UNCONFIRMED_UP   = 0x02,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_JOIN_ACCEPT	handle.c	/^    FRAME_TYPE_JOIN_ACCEPT           = 0x01,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_JOIN_REQ	handle.c	/^    FRAME_TYPE_JOIN_REQ              = 0x00,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_PROPRIETARY	handle.c	/^    FRAME_TYPE_PROPRIETARY           = 0x07,$/;"	e	enum:eLoRaMacFrameType	file:
+FRAME_TYPE_RFU	handle.c	/^    FRAME_TYPE_RFU                   = 0x06,$/;"	e	enum:eLoRaMacFrameType	file:
+HAVE_MEMCPY	aes.c	39;"	d	file:
+HAVE_UINT_32T	aes.c	52;"	d	file:
+IS_CONT	parson.c	67;"	d	file:
+IS_NUMBER_INVALID	parson.c	57;"	d	file:
+IS_NUMBER_INVALID	parson.c	59;"	d	file:
+JOIN_ACC_SIZE	handle.c	25;"	d	file:
+JSON_Value_Value	parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_value_value	file:
+KEYHEXS	dls_utili.c	70;"	d	file:
+KEYLEN	dls_utili.c	67;"	d	file:
+KEYSIZE	dls_utili.c	69;"	d	file:
+LORAMAC_MIC_BLOCK_B0_SIZE	LoRaMacCrypto.c	32;"	d	file:
+LSHIFT	cmac.c	42;"	d	file:
+LoRaMacComputeMic	LoRaMacCrypto.c	/^void LoRaMacComputeMic( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t address, uint8_t dir, uint32_t sequenceCounter, uint32_t *mic )$/;"	f
+LoRaMacDLSettings_t	handle.c	/^}LoRaMacDLSettings_t;$/;"	t	typeref:union:uLoRaMacDLSettings	file:
+LoRaMacFrameCtrl_t	handle.c	/^}LoRaMacFrameCtrl_t;$/;"	t	typeref:union:uLoRaMacFrameCtrl	file:
+LoRaMacFrameType_t	handle.c	/^}LoRaMacFrameType_t;$/;"	t	typeref:enum:eLoRaMacFrameType	file:
+LoRaMacHeader_t	handle.c	/^}LoRaMacHeader_t;$/;"	t	typeref:union:uLoRaMacHeader	file:
+LoRaMacJoinComputeMic	LoRaMacCrypto.c	/^void LoRaMacJoinComputeMic( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t *mic )$/;"	f
+LoRaMacJoinComputeSKeys	LoRaMacCrypto.c	/^void LoRaMacJoinComputeSKeys( const uint8_t *key, const uint8_t *appNonce, uint16_t devNonce, uint8_t *nwkSKey, uint8_t *appSKey )$/;"	f
+LoRaMacJoinDecrypt	LoRaMacCrypto.c	/^void LoRaMacJoinDecrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint8_t *decBuffer )$/;"	f
+LoRaMacJoinEncrypt	LoRaMacCrypto.c	/^void LoRaMacJoinEncrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint8_t *encBuffer ){$/;"	f
+LoRaMacPayloadDecrypt	LoRaMacCrypto.c	/^void LoRaMacPayloadDecrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t address, uint8_t dir, uint32_t sequenceCounter, uint8_t *decBuffer )$/;"	f
+LoRaMacPayloadEncrypt	LoRaMacCrypto.c	/^void LoRaMacPayloadEncrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t address, uint8_t dir, uint32_t sequenceCounter, uint8_t *encBuffer )$/;"	f
+LoRaMacRxDelay_t	handle.c	/^}LoRaMacRxDelay_t;$/;"	t	typeref:union:uLoRaMacRxDelay	file:
+MAX	parson.c	51;"	d	file:
+MAX_NESTING	parson.c	43;"	d	file:
+MType	handle.c	/^        uint8_t MType           : 3;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
+Major	handle.c	/^        uint8_t Major           : 2;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
+Mic	LoRaMacCrypto.c	/^static uint8_t Mic[16];$/;"	v	file:
+MicBlockB0	LoRaMacCrypto.c	/^static uint8_t MicBlockB0[] = { 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
+NAMELEN	dls_utili.c	66;"	d	file:
+NUM_BUF_SIZE	parson.c	46;"	d	file:
+Nibble2HexChar	utilities.c	/^int8_t Nibble2HexChar( uint8_t a )$/;"	f
+OPT_ADDAPP	dls_utili.c	30;"	d	file:
+OPT_ADDDEV	dls_utili.c	32;"	d	file:
+OPT_ADDGW	dls_utili.c	26;"	d	file:
+OPT_ADDPF	dls_utili.c	28;"	d	file:
+OPT_APPEUI	dls_utili.c	43;"	d	file:
+OPT_APPKEY	dls_utili.c	46;"	d	file:
+OPT_APPNAME	dls_utili.c	36;"	d	file:
+OPT_APPSKEY	dls_utili.c	47;"	d	file:
+OPT_DELETE	dls_utili.c	45;"	d	file:
+OPT_DEVADDR	dls_utili.c	40;"	d	file:
+OPT_DEVEUI	dls_utili.c	41;"	d	file:
+OPT_GWEUI	dls_utili.c	42;"	d	file:
+OPT_IMPORTCSV	dls_utili.c	50;"	d	file:
+OPT_LISTAPP	dls_utili.c	31;"	d	file:
+OPT_LISTDEV	dls_utili.c	33;"	d	file:
+OPT_LISTGW	dls_utili.c	27;"	d	file:
+OPT_LISTMSG	dls_utili.c	39;"	d	file:
+OPT_LISTPF	dls_utili.c	29;"	d	file:
+OPT_MANDEV	dls_utili.c	49;"	d	file:
+OPT_NWKSKEY	dls_utili.c	48;"	d	file:
+OPT_PFID	dls_utili.c	38;"	d	file:
+OPT_PFNAME	dls_utili.c	37;"	d	file:
+OPT_RX2DR	dls_utili.c	34;"	d	file:
+OPT_RX2FREQ	dls_utili.c	35;"	d	file:
+OPT_UPGW	dls_utili.c	44;"	d	file:
+RAND_LOCAL_MAX	utilities.c	27;"	d	file:
+RFU	handle.c	/^		uint8_t RFU              : 1;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
+RFU	handle.c	/^		uint8_t RFU              : 4;$/;"	m	struct:uLoRaMacRxDelay::sRxDBits	file:
+RFU	handle.c	/^        uint8_t RFU             : 3;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
+RX1DRoffset	handle.c	/^		uint8_t RX1DRoffset      : 3;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
+RX2DataRate	handle.c	/^		uint8_t RX2DataRate      : 4;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
+SIZEOF_TOKEN	parson.c	48;"	d	file:
+SKIP_CHAR	parson.c	49;"	d	file:
+SKIP_WHITESPACES	parson.c	50;"	d	file:
+STARTING_CAPACITY	parson.c	42;"	d	file:
+TSNULL	dls_utili.c	77;"	d	file:
+UP	handle.c	22;"	d	file:
+USE_TABLES	aes.c	57;"	d	file:
+VERSION_1	aes.c	64;"	d	file:
+Value	handle.c	/^	uint8_t Value;$/;"	m	union:uLoRaMacDLSettings	file:
+Value	handle.c	/^	uint8_t Value;$/;"	m	union:uLoRaMacRxDelay	file:
+Value	handle.c	/^    uint8_t Value;$/;"	m	union:uLoRaMacFrameCtrl	file:
+Value	handle.c	/^    uint8_t Value;$/;"	m	union:uLoRaMacHeader	file:
+WPOLY	aes.c	75;"	d	file:
+XOR	cmac.c	49;"	d	file:
+_CRT_SECURE_NO_WARNINGS	parson.c	25;"	d	file:
+aBlock	LoRaMacCrypto.c	/^static uint8_t aBlock[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
+add_round_key	aes.c	/^static void add_round_key( uint_8t d[N_BLOCK], const uint_8t k[N_BLOCK] )$/;"	f	file:
+aes_cbc_decrypt	aes.c	/^return_type aes_cbc_decrypt( const unsigned char *in, unsigned char *out,$/;"	f
+aes_cbc_encrypt	aes.c	/^return_type aes_cbc_encrypt( const unsigned char *in, unsigned char *out,$/;"	f
+aes_decrypt	aes.c	/^return_type aes_decrypt( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK], const aes_context ctx[1] )$/;"	f
+aes_decrypt_128	aes.c	/^void aes_decrypt_128( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
+aes_decrypt_256	aes.c	/^void aes_decrypt_256( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
+aes_encrypt	aes.c	/^return_type aes_encrypt( const unsigned char in[N_BLOCK], unsigned char  out[N_BLOCK], const aes_context ctx[1] )$/;"	f
+aes_encrypt_128	aes.c	/^void aes_encrypt_128( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
+aes_encrypt_256	aes.c	/^void aes_encrypt_256( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
+aes_set_key	aes.c	/^return_type aes_set_key( const unsigned char key[], length_type keylen, aes_context ctx[1] )$/;"	f
+app_getopt	dls_utili.c	/^static int app_getopt(struct lw_t *cntx, int argc, char **argv) {$/;"	f	file:
+app_long_options	dls_utili.c	/^struct option app_long_options[] = {$/;"	v	typeref:struct:option
+append_indent	parson.c	/^static int append_indent(char *buf, int level) {$/;"	f	file:
+append_string	parson.c	/^static int append_string(char *buf, const char *string) {$/;"	f	file:
+array	parson.c	/^    JSON_Array  *array;$/;"	m	union:json_value_value	file:
+as_prepare_frame	handle.c	/^static void as_prepare_frame(uint8_t *frame_payload, uint16_t devnonce, uint8_t* appkey, uint32_t devaddr, uint8_t *nwkskey, uint8_t *appskey) {$/;"	f	file:
+assign_msg_down	handle.c	/^void assign_msg_down(void* data, const void* msg) {$/;"	f
+b64_to_bin	base64.c	/^int b64_to_bin(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
+b64_to_bin_nopad	base64.c	/^int b64_to_bin_nopad(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
+bin_to_b64	base64.c	/^int bin_to_b64(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
+bin_to_b64_nopad	base64.c	/^int bin_to_b64_nopad(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
+block_copy	aes.c	303;"	d	file:
+block_copy	aes.c	306;"	d	file:
+block_copy_nn	aes.c	302;"	d	file:
+block_copy_nn	aes.c	305;"	d	file:
+boolean	parson.c	/^    int          boolean;$/;"	m	union:json_value_value	file:
+capacity	parson.c	/^    size_t       capacity;$/;"	m	struct:json_array_t	file:
+capacity	parson.c	/^    size_t       capacity;$/;"	m	struct:json_object_t	file:
+char_to_code	base64.c	/^uint8_t char_to_code(char x) {$/;"	f
+cntx	dragino_lorawan_server.c	/^struct context cntx = { '\\0' };	\/* sqlite3 database context *\/$/;"	v	typeref:struct:context
+code_62	base64.c	/^static char code_62 = '+';	\/* RFC 1421 standard character for code 62 *\/$/;"	v	file:
+code_63	base64.c	/^static char code_63 = '\/';	\/* RFC 1421 standard character for code 63 *\/$/;"	v	file:
+code_pad	base64.c	/^static char code_pad = '=';	\/* RFC 1421 padding character if padding *\/$/;"	v	file:
+code_to_char	base64.c	/^char code_to_char(uint8_t x) {$/;"	f
+compare_msg_down	handle.c	/^int compare_msg_down(const void* data, const void* key) {$/;"	f
+copy_and_key	aes.c	/^static void copy_and_key( void *d, const void *s, const void *k )$/;"	f	file:
+copy_block	aes.c	/^static void copy_block( void *d, const void *s )$/;"	f	file:
+copy_block_nn	aes.c	/^static void copy_block_nn( uint_8t * d, const uint_8t *s, uint_8t nn )$/;"	f	file:
+copy_msg_down	handle.c	/^void copy_msg_down(void* data, const void* msg) {$/;"	f
+count	parson.c	/^    size_t       count;$/;"	m	struct:json_array_t	file:
+count	parson.c	/^    size_t       count;$/;"	m	struct:json_object_t	file:
+d2	aes.c	84;"	d	file:
+db_createtb	db.c	/^static bool db_createtb(struct context* cntx) {$/;"	f	file:
+db_destroy	db.c	/^void db_destroy(struct context* cntx) {$/;"	f
+db_destroy	dls_utili.c	/^void db_destroy(struct lw_t* cntx) {$/;"	f
+db_init	db.c	/^bool db_init(const char* dbpath, struct context* cntx) {$/;"	f
+db_init	dls_utili.c	/^bool db_init(const char* dbpath, struct lw_t* cntx) {$/;"	f
+db_insert_upmsg	db.c	/^bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* payload) {$/;"	f
+db_judge_devaddr	db.c	/^bool db_judge_devaddr(sqlite3_stmt* stmt, void* data) {$/;"	f
+db_judge_joinrepeat	db.c	/^bool db_judge_joinrepeat(sqlite3_stmt* stmt, void* data) {$/;"	f
+db_judge_msgrepeat	db.c	/^bool db_judge_msgrepeat(sqlite3_stmt* stmt, char* deveui, uint32_t tmst) {$/;"	f
+db_lookup_appkey	db.c	/^bool db_lookup_appkey(sqlite3_stmt* stmt, void* data) {$/;"	f
+db_lookup_gweui	db.c	/^bool db_lookup_gweui(sqlite3_stmt* stmt, char *gweui) {$/;"	f
+db_lookup_nwkskey	db.c	/^bool db_lookup_nwkskey(sqlite3_stmt* stmt, void* data) {$/;"	f
+db_lookup_profile	db.c	/^bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2freq) {$/;"	f
+db_step	db.c	/^static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {$/;"	f	file:
+db_step	dls_utili.c	/^static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {$/;"	f	file:
+db_update_devinfo	db.c	/^bool db_update_devinfo(sqlite3_stmt* stmt, void* data) {$/;"	f
+db_update_gwinfo	db.c	/^bool db_update_gwinfo(sqlite3_stmt* stmt, void* data) { $/;"	f
+destroy_msg_down	handle.c	/^void destroy_msg_down(void* msg) {$/;"	f
+eLoRaMacFrameType	handle.c	/^typedef enum eLoRaMacFrameType$/;"	g	file:
+exit_sig	dragino_lorawan_server.c	/^static bool exit_sig = false;$/;"	v	file:
+f1	aes.c	79;"	d	file:
+f2	aes.c	80;"	d	file:
+f3	aes.c	86;"	d	file:
+f4	aes.c	81;"	d	file:
+f8	aes.c	82;"	d	file:
+f9	aes.c	87;"	d	file:
+fb	aes.c	88;"	d	file:
+fd	aes.c	89;"	d	file:
+fe	aes.c	90;"	d	file:
+free	parson.c	54;"	d	file:
+freekey	dls_utili.c	/^static void freekey(struct lw_t *lws) {$/;"	f	file:
+fwd_affine	aes.c	/^uint_8t fwd_affine(const uint_8t x)$/;"	f
+genkey	dls_utili.c	/^static char *genkey(char *key, uint8_t len) {$/;"	f	file:
+genname	dls_utili.c	/^static char *genname(char *name, uint8_t len) {$/;"	f	file:
+get_quoted_string	parson.c	/^static char * get_quoted_string(const char **string) {$/;"	f	file:
+gf_inv	aes.c	/^static uint_8t gf_inv(const uint_8t x)$/;"	f	file:
+gfm2_sb	aes.c	209;"	d	file:
+gfm2_sb	aes.c	292;"	d	file:
+gfm2_sbox	aes.c	/^static const uint_8t gfm2_sbox[256] = sb_data(f2);$/;"	v	file:
+gfm3_sb	aes.c	210;"	d	file:
+gfm3_sb	aes.c	293;"	d	file:
+gfm3_sbox	aes.c	/^static const uint_8t gfm3_sbox[256] = sb_data(f3);$/;"	v	file:
+gfm_9	aes.c	211;"	d	file:
+gfm_9	aes.c	294;"	d	file:
+gfm_b	aes.c	212;"	d	file:
+gfm_b	aes.c	295;"	d	file:
+gfm_d	aes.c	213;"	d	file:
+gfm_d	aes.c	296;"	d	file:
+gfm_e	aes.c	214;"	d	file:
+gfm_e	aes.c	297;"	d	file:
+gfmul_9	aes.c	/^static const uint_8t gfmul_9[256] = mm_data(f9);$/;"	v	file:
+gfmul_b	aes.c	/^static const uint_8t gfmul_b[256] = mm_data(fb);$/;"	v	file:
+gfmul_d	aes.c	/^static const uint_8t gfmul_d[256] = mm_data(fd);$/;"	v	file:
+gfmul_e	aes.c	/^static const uint_8t gfmul_e[256] = mm_data(fe);$/;"	v	file:
+gw_list	dragino_lorawan_server.c	/^static linked_list gw_list;$/;"	v	file:
+gwserv	dragino_lorawan_server.c	/^static char gwserv[64] = "localhost";$/;"	v	file:
+hex_char_to_int	parson.c	/^static int hex_char_to_int(char c) {$/;"	f	file:
+hibit	aes.c	/^static uint_8t hibit(const uint_8t x)$/;"	f	file:
+i82hexstr	handle.c	/^void i82hexstr(uint8_t* uint, char* str, int size) {$/;"	f
+inv_affine	aes.c	/^uint_8t inv_affine(const uint_8t x)$/;"	f
+inv_mix_sub_columns	aes.c	/^  static void inv_mix_sub_columns( uint_8t dt[N_BLOCK] )$/;"	f	file:
+inv_shift_sub_rows	aes.c	/^static void inv_shift_sub_rows( uint_8t st[N_BLOCK] )$/;"	f	file:
+invert	dls_utili.c	/^static char *invert(char *dst, const char *src, uint8_t len) {$/;"	f	file:
+is_box	aes.c	208;"	d	file:
+is_box	aes.c	291;"	d	file:
+is_decimal	parson.c	/^static int is_decimal(const char *string, size_t length) {$/;"	f	file:
+is_valid_utf8	parson.c	/^static int is_valid_utf8(const char *string, size_t string_len) {$/;"	f	file:
+isb_data	aes.c	128;"	d	file:
+isbox	aes.c	/^static const uint_8t isbox[256] = isb_data(f1);$/;"	v	file:
+items	parson.c	/^    JSON_Value **items;$/;"	m	struct:json_array_t	file:
+json_array	parson.c	/^JSON_Array * json_array  (const JSON_Value *value) {$/;"	f
+json_array_add	parson.c	/^static JSON_Status json_array_add(JSON_Array *array, JSON_Value *value) {$/;"	f	file:
+json_array_append_boolean	parson.c	/^JSON_Status json_array_append_boolean(JSON_Array *array, int boolean) {$/;"	f
+json_array_append_null	parson.c	/^JSON_Status json_array_append_null(JSON_Array *array) {$/;"	f
+json_array_append_number	parson.c	/^JSON_Status json_array_append_number(JSON_Array *array, double number) {$/;"	f
+json_array_append_string	parson.c	/^JSON_Status json_array_append_string(JSON_Array *array, const char *string) {$/;"	f
+json_array_append_value	parson.c	/^JSON_Status json_array_append_value(JSON_Array *array, JSON_Value *value) {$/;"	f
+json_array_clear	parson.c	/^JSON_Status json_array_clear(JSON_Array *array) {$/;"	f
+json_array_free	parson.c	/^static void json_array_free(JSON_Array *array) {$/;"	f	file:
+json_array_get_array	parson.c	/^JSON_Array * json_array_get_array(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_boolean	parson.c	/^int json_array_get_boolean(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_count	parson.c	/^size_t json_array_get_count(const JSON_Array *array) {$/;"	f
+json_array_get_number	parson.c	/^double json_array_get_number(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_object	parson.c	/^JSON_Object * json_array_get_object(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_string	parson.c	/^const char * json_array_get_string(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_value	parson.c	/^JSON_Value * json_array_get_value(const JSON_Array *array, size_t index) {$/;"	f
+json_array_get_wrapping_value	parson.c	/^JSON_Value * json_array_get_wrapping_value(const JSON_Array *array) {$/;"	f
+json_array_init	parson.c	/^static JSON_Array * json_array_init(JSON_Value *wrapping_value) {$/;"	f	file:
+json_array_remove	parson.c	/^JSON_Status json_array_remove(JSON_Array *array, size_t ix) {$/;"	f
+json_array_replace_boolean	parson.c	/^JSON_Status json_array_replace_boolean(JSON_Array *array, size_t i, int boolean) {$/;"	f
+json_array_replace_null	parson.c	/^JSON_Status json_array_replace_null(JSON_Array *array, size_t i) {$/;"	f
+json_array_replace_number	parson.c	/^JSON_Status json_array_replace_number(JSON_Array *array, size_t i, double number) {$/;"	f
+json_array_replace_string	parson.c	/^JSON_Status json_array_replace_string(JSON_Array *array, size_t i, const char* string) {$/;"	f
+json_array_replace_value	parson.c	/^JSON_Status json_array_replace_value(JSON_Array *array, size_t ix, JSON_Value *value) {$/;"	f
+json_array_resize	parson.c	/^static JSON_Status json_array_resize(JSON_Array *array, size_t new_capacity) {$/;"	f	file:
+json_array_t	parson.c	/^struct json_array_t {$/;"	s	file:
+json_boolean	parson.c	/^int json_boolean(const JSON_Value *value) {$/;"	f
+json_free_serialized_string	parson.c	/^void json_free_serialized_string(char *string) {$/;"	f
+json_number	parson.c	/^double json_number (const JSON_Value *value) {$/;"	f
+json_object	parson.c	/^JSON_Object * json_object (const JSON_Value *value) {$/;"	f
+json_object_add	parson.c	/^static JSON_Status json_object_add(JSON_Object *object, const char *name, JSON_Value *value) {$/;"	f	file:
+json_object_addn	parson.c	/^static JSON_Status json_object_addn(JSON_Object *object, const char *name, size_t name_len, JSON_Value *value) {$/;"	f	file:
+json_object_clear	parson.c	/^JSON_Status json_object_clear(JSON_Object *object) {$/;"	f
+json_object_dotget_array	parson.c	/^JSON_Array * json_object_dotget_array(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_boolean	parson.c	/^int json_object_dotget_boolean(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_number	parson.c	/^double json_object_dotget_number(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_object	parson.c	/^JSON_Object * json_object_dotget_object(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_string	parson.c	/^const char * json_object_dotget_string(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dotget_value	parson.c	/^JSON_Value * json_object_dotget_value(const JSON_Object *object, const char *name) {$/;"	f
+json_object_dothas_value	parson.c	/^int json_object_dothas_value (const JSON_Object *object, const char *name) {$/;"	f
+json_object_dothas_value_of_type	parson.c	/^int json_object_dothas_value_of_type(const JSON_Object *object, const char *name, JSON_Value_Type type) {$/;"	f
+json_object_dotremove	parson.c	/^JSON_Status json_object_dotremove(JSON_Object *object, const char *name) {$/;"	f
+json_object_dotremove_internal	parson.c	/^static JSON_Status json_object_dotremove_internal(JSON_Object *object, const char *name, int free_value) {$/;"	f	file:
+json_object_dotset_boolean	parson.c	/^JSON_Status json_object_dotset_boolean(JSON_Object *object, const char *name, int boolean) {$/;"	f
+json_object_dotset_null	parson.c	/^JSON_Status json_object_dotset_null(JSON_Object *object, const char *name) {$/;"	f
+json_object_dotset_number	parson.c	/^JSON_Status json_object_dotset_number(JSON_Object *object, const char *name, double number) {$/;"	f
+json_object_dotset_string	parson.c	/^JSON_Status json_object_dotset_string(JSON_Object *object, const char *name, const char *string) {$/;"	f
+json_object_dotset_value	parson.c	/^JSON_Status json_object_dotset_value(JSON_Object *object, const char *name, JSON_Value *value) {$/;"	f
+json_object_free	parson.c	/^static void json_object_free(JSON_Object *object) {$/;"	f	file:
+json_object_get_array	parson.c	/^JSON_Array * json_object_get_array(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_boolean	parson.c	/^int json_object_get_boolean(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_count	parson.c	/^size_t json_object_get_count(const JSON_Object *object) {$/;"	f
+json_object_get_name	parson.c	/^const char * json_object_get_name(const JSON_Object *object, size_t index) {$/;"	f
+json_object_get_number	parson.c	/^double json_object_get_number(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_object	parson.c	/^JSON_Object * json_object_get_object(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_string	parson.c	/^const char * json_object_get_string(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_value	parson.c	/^JSON_Value * json_object_get_value(const JSON_Object *object, const char *name) {$/;"	f
+json_object_get_value_at	parson.c	/^JSON_Value * json_object_get_value_at(const JSON_Object *object, size_t index) {$/;"	f
+json_object_get_wrapping_value	parson.c	/^JSON_Value *json_object_get_wrapping_value(const JSON_Object *object) {$/;"	f
+json_object_getn_value	parson.c	/^static JSON_Value * json_object_getn_value(const JSON_Object *object, const char *name, size_t name_len) {$/;"	f	file:
+json_object_has_value	parson.c	/^int json_object_has_value (const JSON_Object *object, const char *name) {$/;"	f
+json_object_has_value_of_type	parson.c	/^int json_object_has_value_of_type(const JSON_Object *object, const char *name, JSON_Value_Type type) {$/;"	f
+json_object_init	parson.c	/^static JSON_Object * json_object_init(JSON_Value *wrapping_value) {$/;"	f	file:
+json_object_remove	parson.c	/^JSON_Status json_object_remove(JSON_Object *object, const char *name) {$/;"	f
+json_object_remove_internal	parson.c	/^static JSON_Status json_object_remove_internal(JSON_Object *object, const char *name, int free_value) {$/;"	f	file:
+json_object_resize	parson.c	/^static JSON_Status json_object_resize(JSON_Object *object, size_t new_capacity) {$/;"	f	file:
+json_object_set_boolean	parson.c	/^JSON_Status json_object_set_boolean(JSON_Object *object, const char *name, int boolean) {$/;"	f
+json_object_set_null	parson.c	/^JSON_Status json_object_set_null(JSON_Object *object, const char *name) {$/;"	f
+json_object_set_number	parson.c	/^JSON_Status json_object_set_number(JSON_Object *object, const char *name, double number) {$/;"	f
+json_object_set_string	parson.c	/^JSON_Status json_object_set_string(JSON_Object *object, const char *name, const char *string) {$/;"	f
+json_object_set_value	parson.c	/^JSON_Status json_object_set_value(JSON_Object *object, const char *name, JSON_Value *value) {$/;"	f
+json_object_t	parson.c	/^struct json_object_t {$/;"	s	file:
+json_parse_file	parson.c	/^JSON_Value * json_parse_file(const char *filename) {$/;"	f
+json_parse_file_with_comments	parson.c	/^JSON_Value * json_parse_file_with_comments(const char *filename) {$/;"	f
+json_parse_string	parson.c	/^JSON_Value * json_parse_string(const char *string) {$/;"	f
+json_parse_string_with_comments	parson.c	/^JSON_Value * json_parse_string_with_comments(const char *string) {$/;"	f
+json_serialization_size	parson.c	/^size_t json_serialization_size(const JSON_Value *value) {$/;"	f
+json_serialization_size_pretty	parson.c	/^size_t json_serialization_size_pretty(const JSON_Value *value) {$/;"	f
+json_serialize_string	parson.c	/^static int json_serialize_string(const char *string, char *buf) {$/;"	f	file:
+json_serialize_to_buffer	parson.c	/^JSON_Status json_serialize_to_buffer(const JSON_Value *value, char *buf, size_t buf_size_in_bytes) {$/;"	f
+json_serialize_to_buffer_pretty	parson.c	/^JSON_Status json_serialize_to_buffer_pretty(const JSON_Value *value, char *buf, size_t buf_size_in_bytes) {$/;"	f
+json_serialize_to_buffer_r	parson.c	/^static int json_serialize_to_buffer_r(const JSON_Value *value, char *buf, int level, int is_pretty, char *num_buf)$/;"	f	file:
+json_serialize_to_file	parson.c	/^JSON_Status json_serialize_to_file(const JSON_Value *value, const char *filename) {$/;"	f
+json_serialize_to_file_pretty	parson.c	/^JSON_Status json_serialize_to_file_pretty(const JSON_Value *value, const char *filename) {$/;"	f
+json_serialize_to_string	parson.c	/^char * json_serialize_to_string(const JSON_Value *value) {$/;"	f
+json_serialize_to_string_pretty	parson.c	/^char * json_serialize_to_string_pretty(const JSON_Value *value) {$/;"	f
+json_set_allocation_functions	parson.c	/^void json_set_allocation_functions(JSON_Malloc_Function malloc_fun, JSON_Free_Function free_fun) {$/;"	f
+json_set_escape_slashes	parson.c	/^void json_set_escape_slashes(int escape_slashes) {$/;"	f
+json_string	parson.c	/^const char * json_string (const JSON_Value *value) {$/;"	f
+json_type	parson.c	/^JSON_Value_Type json_type(const JSON_Value *value) {$/;"	f
+json_validate	parson.c	/^JSON_Status json_validate(const JSON_Value *schema, const JSON_Value *value) {$/;"	f
+json_value_deep_copy	parson.c	/^JSON_Value * json_value_deep_copy(const JSON_Value *value) {$/;"	f
+json_value_equals	parson.c	/^int json_value_equals(const JSON_Value *a, const JSON_Value *b) {$/;"	f
+json_value_free	parson.c	/^void json_value_free(JSON_Value *value) {$/;"	f
+json_value_get_array	parson.c	/^JSON_Array * json_value_get_array(const JSON_Value *value) {$/;"	f
+json_value_get_boolean	parson.c	/^int json_value_get_boolean(const JSON_Value *value) {$/;"	f
+json_value_get_number	parson.c	/^double json_value_get_number(const JSON_Value *value) {$/;"	f
+json_value_get_object	parson.c	/^JSON_Object * json_value_get_object(const JSON_Value *value) {$/;"	f
+json_value_get_parent	parson.c	/^JSON_Value * json_value_get_parent (const JSON_Value *value) {$/;"	f
+json_value_get_string	parson.c	/^const char * json_value_get_string(const JSON_Value *value) {$/;"	f
+json_value_get_type	parson.c	/^JSON_Value_Type json_value_get_type(const JSON_Value *value) {$/;"	f
+json_value_init_array	parson.c	/^JSON_Value * json_value_init_array(void) {$/;"	f
+json_value_init_boolean	parson.c	/^JSON_Value * json_value_init_boolean(int boolean) {$/;"	f
+json_value_init_null	parson.c	/^JSON_Value * json_value_init_null(void) {$/;"	f
+json_value_init_number	parson.c	/^JSON_Value * json_value_init_number(double number) {$/;"	f
+json_value_init_object	parson.c	/^JSON_Value * json_value_init_object(void) {$/;"	f
+json_value_init_string	parson.c	/^JSON_Value * json_value_init_string(const char *string) {$/;"	f
+json_value_init_string_no_copy	parson.c	/^static JSON_Value * json_value_init_string_no_copy(char *string) {$/;"	f	file:
+json_value_t	parson.c	/^struct json_value_t {$/;"	s	file:
+json_value_value	parson.c	/^typedef union json_value_value {$/;"	u	file:
+judge_devaddr	db.c	/^static void judge_devaddr(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
+list_delete_at_head	generic_list.c	/^void list_delete_at_head(plist list, void(*destroy)(void*)) {$/;"	f
+list_destroy	generic_list.c	/^void list_destroy(plist list, void(*destroy)(void*)) {$/;"	f
+list_init	generic_list.c	/^void list_init(plist list) {$/;"	f
+list_insert_at_tail	generic_list.c	/^void list_insert_at_tail(plist list, void* data, int size, void(*assign)(void*, const void*)) {$/;"	f
+list_is_empty	generic_list.c	/^bool list_is_empty(plist list) {$/;"	f
+list_search	generic_list.c	/^bool list_search(plist list, void* key, void* data, int(*compare)(const void*, const void*), void(*deep_copy)(void*,const void*)) {$/;"	f
+list_search_and_delete	generic_list.c	/^bool list_search_and_delete(plist list, void* key, void* data, int(*compare)(const void*, const void*), void(*deep_copy)(void*, const void*), void(*destroy)(void*)) {$/;"	f
+list_search_and_update	generic_list.c	/^void list_search_and_update (plist list, void* key, void* new_data, int size, int(*compare)(const void*, const void*),void(*assign)(void*, const void*)) {$/;"	f
+listapp	dls_utili.c	/^static void listapp(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listdev	dls_utili.c	/^static void listdev(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listgw	dls_utili.c	/^static void listgw(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listmsg	dls_utili.c	/^static void listmsg(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listpf	dls_utili.c	/^static void listpf(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+lookup_appkey	db.c	/^static void lookup_appkey(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
+lookup_nwkskey	db.c	/^static void lookup_nwkskey(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
+main	dls_utili.c	/^void main(int argc, char *argv[]) {$/;"	f
+main	dragino_lorawan_server.c	/^int main(int argc, char **argv) {$/;"	f
+malloc	parson.c	53;"	d	file:
+memcpy1	utilities.c	/^void memcpy1( uint8_t *dst, const uint8_t *src, uint16_t size )$/;"	f
+memcpyr	utilities.c	/^void memcpyr( uint8_t *dst, const uint8_t *src, uint16_t size )$/;"	f
+memset1	utilities.c	/^void memset1( uint8_t *dst, uint8_t value, uint16_t size )$/;"	f
+mix_sub_columns	aes.c	/^  static void mix_sub_columns( uint_8t dt[N_BLOCK] )$/;"	f	file:
+mm_data	aes.c	162;"	d	file:
+mx_db	dragino_lorawan_server.c	/^static pthread_mutex_t mx_db = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+mx_gw_list	dragino_lorawan_server.c	/^static pthread_mutex_t mx_gw_list = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+mx_push	dragino_lorawan_server.c	/^static pthread_mutex_t mx_push = PTHREAD_MUTEX_INITIALIZER;	\/* control access to the push_data upstream measurements *\/$/;"	v	file:
+names	parson.c	/^    char       **names;$/;"	m	struct:json_object_t	file:
+nb_push_rcv	dragino_lorawan_server.c	/^static uint32_t nb_push_rcv = 0;	\/* count push_data packets received *\/$/;"	v	file:
+next	handle.c	/^static uint32_t next = 1; $/;"	v	file:
+next	utilities.c	/^static uint32_t next = 1;$/;"	v	file:
+ns_msg_handle	handle.c	/^void ns_msg_handle(struct jsondata* result, struct metadata* meta, uint8_t* payload) {$/;"	f
+null	parson.c	/^    int          null;$/;"	m	union:json_value_value	file:
+num_bytes_in_utf8_sequence	parson.c	/^static int num_bytes_in_utf8_sequence(unsigned char c) {$/;"	f	file:
+number	parson.c	/^    double       number;$/;"	m	union:json_value_value	file:
+object	parson.c	/^    JSON_Object *object;$/;"	m	union:json_value_value	file:
+parent	parson.c	/^    JSON_Value      *parent;$/;"	m	struct:json_value_t	file:
+parse_array_value	parson.c	/^static JSON_Value * parse_array_value(const char **string, size_t nesting) {$/;"	f	file:
+parse_boolean_value	parson.c	/^static JSON_Value * parse_boolean_value(const char **string) {$/;"	f	file:
+parse_null_value	parson.c	/^static JSON_Value * parse_null_value(const char **string) {$/;"	f	file:
+parse_number_value	parson.c	/^static JSON_Value * parse_number_value(const char **string) {$/;"	f	file:
+parse_object_value	parson.c	/^static JSON_Value * parse_object_value(const char **string, size_t nesting) {$/;"	f	file:
+parse_string_value	parson.c	/^static JSON_Value * parse_string_value(const char **string) {$/;"	f	file:
+parse_utf16	parson.c	/^static int parse_utf16(const char **unprocessed, char **processed) {$/;"	f	file:
+parse_utf16_hex	parson.c	/^static int parse_utf16_hex(const char *s, unsigned int *result) {$/;"	f	file:
+parse_value	parson.c	/^static JSON_Value * parse_value(const char **string, size_t nesting) {$/;"	f	file:
+parson_escape_slashes	parson.c	/^static int parson_escape_slashes = 0;$/;"	v	file:
+parson_free	parson.c	/^static JSON_Free_Function parson_free = free;$/;"	v	file:
+parson_malloc	parson.c	/^static JSON_Malloc_Function parson_malloc = malloc;$/;"	v	file:
+parson_strdup	parson.c	/^static char * parson_strdup(const char *string) {$/;"	f	file:
+parson_strndup	parson.c	/^static char * parson_strndup(const char *string, size_t n) {$/;"	f	file:
+process_string	parson.c	/^static char* process_string(const char *input, size_t len) {$/;"	f	file:
+pull_port	dragino_lorawan_server.c	/^static char pull_port[16] = "1701";$/;"	v	file:
+pull_timeout	handle.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+push_port	dragino_lorawan_server.c	/^static char push_port[16] = "1700";$/;"	v	file:
+push_timeout_half	handle.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
+rand1	utilities.c	/^int32_t rand1( void )$/;"	f
+randr	utilities.c	/^int32_t randr( int32_t min, int32_t max )$/;"	f
+read_file	parson.c	/^static char * read_file(const char * filename) {$/;"	f	file:
+remove_comments	parson.c	/^static void remove_comments(char *string, const char *start_token, const char *end_token) {$/;"	f	file:
+revercpy	handle.c	/^void revercpy( uint8_t *dst, const uint8_t *src, int size) {$/;"	f
+sBlock	LoRaMacCrypto.c	/^static uint8_t sBlock[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
+sCtrlBits	handle.c	/^    struct sCtrlBits$/;"	s	union:uLoRaMacFrameCtrl	file:
+sDLSBits	handle.c	/^	struct sDLSBits{$/;"	s	union:uLoRaMacDLSettings	file:
+sHdrBits	handle.c	/^    struct sHdrBits$/;"	s	union:uLoRaMacHeader	file:
+sRxDBits	handle.c	/^	struct sRxDBits{$/;"	s	union:uLoRaMacRxDelay	file:
+s_box	aes.c	207;"	d	file:
+s_box	aes.c	290;"	d	file:
+sb_data	aes.c	94;"	d	file:
+sbox	aes.c	/^static const uint_8t sbox[256]  =  sb_data(f1);$/;"	v	file:
+serialize_msg_to_gw	handle.c	/^void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json_data, uint32_t tmst, int delay) {$/;"	f
+set_timer	handle.c	/^void set_timer(int sec,int msec) {$/;"	f
+shift_sub_rows	aes.c	/^static void shift_sub_rows( uint_8t st[N_BLOCK] )$/;"	f	file:
+show_help	dls_utili.c	/^static void show_help() {$/;"	f	file:
+signal_handle	dragino_lorawan_server.c	/^void signal_handle(int signo) {$/;"	f
+skip_quotes	parson.c	/^static JSON_Status skip_quotes(const char **string) {$/;"	f	file:
+sockfd_pull	dragino_lorawan_server.c	/^static int sockfd_pull;			\/*socket for downstream to gateway *\/$/;"	v	file:
+sockfd_push	dragino_lorawan_server.c	/^static int sockfd_push;			\/*socket for upstream from gateway *\/$/;"	v	file:
+sql_debug	db.c	/^static void sql_debug(sqlite3_stmt* stmt) { $/;"	f	file:
+sql_debug	dls_utili.c	/^static void sql_debug(sqlite3_stmt* stmt) { $/;"	f	file:
+srand1	utilities.c	/^void srand1( uint32_t seed )$/;"	f
+sscanf	parson.c	40;"	d	file:
+str2hex	handle.c	/^void str2hex(uint8_t* dest, char* src, int len) {$/;"	f
+string	parson.c	/^    char        *string;$/;"	m	union:json_value_value	file:
+tcp_bind	handle.c	/^void tcp_bind(const char* servaddr, const char* port, int* listenfd) {$/;"	f
+tcp_connect	handle.c	/^void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit_sig) {$/;"	f
+thread_down	dragino_lorawan_server.c	/^void thread_down(void) {$/;"	f
+thread_up_handle	dragino_lorawan_server.c	/^void thread_up_handle(void *pkt_info) {$/;"	f
+tmst_g	dragino_lorawan_server.c	/^static uint32_t tmst_g;$/;"	v	file:
+tohex	dls_utili.c	/^static char *tohex(char *dst, const char *src, uint8_t len) {$/;"	f	file:
+type	parson.c	/^    JSON_Value_Type  type;$/;"	m	struct:json_value_t	file:
+uLoRaMacDLSettings	handle.c	/^typedef union uLoRaMacDLSettings{$/;"	u	file:
+uLoRaMacFrameCtrl	handle.c	/^typedef union uLoRaMacFrameCtrl {$/;"	u	file:
+uLoRaMacHeader	handle.c	/^typedef union uLoRaMacHeader {$/;"	u	file:
+uLoRaMacRxDelay	handle.c	/^typedef union uLoRaMacRxDelay{$/;"	u	file:
+udp_bind	handle.c	/^void udp_bind(const char* servaddr, const char* port, int* sockfd, int type) {$/;"	f
+uint_32t	aes.c	/^  typedef unsigned uint_32t;  \/\/ Edited by Semtech - David Roe 1 Dec 13$/;"	t	file:
+update_decrypt_key_128	aes.c	/^static void update_decrypt_key_128( uint_8t k[N_BLOCK], uint_8t *rc )$/;"	f	file:
+update_decrypt_key_256	aes.c	/^static void update_decrypt_key_256( uint_8t k[2 * N_BLOCK], uint_8t *rc )$/;"	f	file:
+update_encrypt_key_128	aes.c	/^static void update_encrypt_key_128( uint_8t k[N_BLOCK], uint_8t *rc )$/;"	f	file:
+update_encrypt_key_256	aes.c	/^static void update_encrypt_key_256( uint_8t k[2 * N_BLOCK], uint_8t *rc )$/;"	f	file:
+value	parson.c	/^    JSON_Value_Value value;$/;"	m	struct:json_value_t	file:
+values	parson.c	/^    JSON_Value **values;$/;"	m	struct:json_object_t	file:
+verify_utf8_sequence	parson.c	/^static int verify_utf8_sequence(const unsigned char *string, int *len) {$/;"	f	file:
+wrapping_value	parson.c	/^    JSON_Value  *wrapping_value;$/;"	m	struct:json_array_t	file:
+wrapping_value	parson.c	/^    JSON_Value  *wrapping_value;$/;"	m	struct:json_object_t	file:
+xor_block	aes.c	/^static void xor_block( void *d, const void *s )$/;"	f	file:

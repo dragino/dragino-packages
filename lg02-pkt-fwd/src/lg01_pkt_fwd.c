@@ -27,7 +27,6 @@
 #include <netinet/in.h> /* INET constants and stuff */
 #include <arpa/inet.h>  /* IP address conversion stuff */
 #include <netdb.h>		/* gai_strerror */
-#include <mosquitto.h>		/* gai_strerror */
 
 #include <uci.h>
 

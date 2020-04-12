@@ -80,66 +80,66 @@ killall -q "mosquitto_sub"
 
 # Check board type and set "radio"
 if [ -f /var/iot/board ]; then
-  board_type=`cat /var/iot/board`
+	board_type=`cat /var/iot/board`
 else
 	board_type="LG01"
 fi
 
 if [ "$board_type" == "LG01" ]; then
-  RADIO="radio1"
+	RADIO="radio1"
 	FREQ="RFFREQ"
 	SF="RFSF"
 	BW="RFBW"
 	CR="RFCR"
 elif [ "$board_type" == "LG02" ]; then
-  RADIO="radio2"
+	RADIO="radio2"
 	FREQ="TXFREQ"
 	SF="TXSF"
 	BW="TXBW"
 	CR="TXCR"
-else # No suitable board type
-  RADIO=0
-  sub_enable=0
-	logger "[IoT.MQTT]:Not suitable board type - mosquitto_sub not called."
 fi
 
-# Get LoRa radio parameters
-freq=`uci -q get gateway.$RADIO.$FREQ`
-sf=`uci -q get gateway.$RADIO.$SF`
-bw=`uci -q get gateway.$RADIO.$BW`
-cr=`uci -q get gateway.$RADIO.$CR`
 
-if [ -z "$freq" ] || [ -z "$sf" ] || [ -z "$bw" ] || [ -z "$cr" ] ; then 
-	sub_enable=0
-	logger "[IoT.MQTT]:Invalid LoRa radio params - mosquitto_sub not called."
+
+
+
+LORA=" " # Clear string in case not reqd
+if [ "$board_type" == "LG01" ] || [ "$board_type" == "LG02" ]; then
+	# Get LoRa radio parameters
+	freq=`uci -q get gateway.$RADIO.$FREQ`
+	sf=`uci -q get gateway.$RADIO.$SF`
+	bw=`uci -q get gateway.$RADIO.$BW`
+	cr=`uci -q get gateway.$RADIO.$CR`
+	if [ -z "$freq" ] || [ -z "$sf" ] || [ -z "$bw" ] || [ -z "$cr" ] ; then 
+		sub_enable=0
+		logger "[IoT.MQTT]:Invalid LoRa radio params - mosquitto_sub not called."
+	else
+		bwstr=125      #set default value
+		case $bw in 
+			"500000") bwstr="500";;
+			"250000") bwstr="250";;
+			"125000") bwstr="125";;
+			"62500")  bwstr="62.5";;
+			"41700")  bwstr="47.8";;
+			"31250")  bwstr="31.25";;
+			"20800")  bwstr="20.8";;
+			"15600")  bwstr="15.6";;
+			"10400")  bwstr="10.4";;
+			"7800")   bwstr="7.8";;
+		esac
+
+		FREQSTR=$(awk "BEGIN {printf \"%.1f\", $freq/1000000}")
+		DATR="SF"$sf"BW"$bwstr
+		CODR="4/"$cr
+		LORA=" -z --freq $FREQSTR --datr $DATR --codr $CODR"
+	fi
+else
+	LORA=" -o "
 fi
 
 # Start Subscribe if required
+
 if [ "$sub_enable" != "0" ];then
-
-	LORA=" " # Clear string in case not reqd
-  if [ "$board_type" == "LG01" ] || [ "$board_type" == "LG02" ]; then
-
-	  bwstr=125      #set default value
-	  case $bw in 
-	    "500000") bwstr="500";;
-	    "250000") bwstr="250";;
-	    "125000") bwstr="125";;
-	    "62500")  bwstr="62.5";;
-	    "41700")  bwstr="47.8";;
-	    "31250")  bwstr="31.25";;
-	    "20800")  bwstr="20.8";;
-	    "15600")  bwstr="15.6";;
-	    "10400")  bwstr="10.4";;
-	    "7800")   bwstr="7.8";;
-	  esac
-
-	  FREQSTR=$(awk "BEGIN {printf \"%.1f\", $freq/1000000}")
-	  DATR="SF"$sf"BW"$bwstr
-	  CODR="4/"$cr
-	  LORA=" -z --freq $FREQSTR --datr $DATR --codr $CODR"
-  fi
-
 	# Replace topic macros
 	sub_topic=`echo ${sub_topic/CHANNEL/$remote_id}`  
 	sub_topic=`echo ${sub_topic/CLIENTID/$clientID}`				
@@ -150,7 +150,7 @@ if [ "$sub_enable" != "0" ];then
 	if [ $DEBUG -ge 10 ]; then
 		# Set debug flag
 		D="-d"
-  fi
+	fi
 
   # Start the subscription process
 	# 1. Case with User, Password and Client ID present

@@ -33,16 +33,6 @@ function index()
 
   entry({"admin", "gateway"}, alias("admin", "gateway", "iotserver"), _("Service"), 60).index = true
 
-  entry({"admin", "gateway", "mqtt"}, call("mqtt"), _("MQTT Menu"), 3)   
-
-	entry({"admin", "gateway", "http"}, cbi("admin_gateway/http"), _("HTTP / HTTPS"), 4)
-
-	entry({"admin", "gateway", "channel"}, cbi("admin_gateway/sub/channel"), nil).leaf = true
-
-	entry({"admin", "gateway", "tcp_client"}, cbi("admin_gateway/tcp_client"), _("TCP_Client"), 5)
-	entry({"admin", "gateway", "tcp_channel"}, cbi("admin_gateway/sub/tcp_channel"), nil).leaf = true
-
-	entry({"admin", "gateway", "customized_script"}, cbi("admin_gateway/customized_script"), _("Customized Script"), 6)
 
 	if f_board == 'LG02' then
 		entry({"admin", "gateway", "gateway"}, cbi("admin_gateway/lg02"), _("LoRaWan GateWay"), 2)

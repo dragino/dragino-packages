@@ -18,9 +18,9 @@ APPEND_INDENT	src/parson.c	1097;"	d	file:
 APPEND_INDENT	src/parson.c	872;"	d	file:
 APPEND_STRING	src/parson.c	1096;"	d	file:
 APPEND_STRING	src/parson.c	867;"	d	file:
-APPKEYLEN	src/lw_utili.c	60;"	d	file:
-APPLICATION_SERVER	inc/handle.h	89;"	d
-APP_NAME	Makefile	/^APP_NAME:=lora_serv$/;"	m
+APPKEYLEN	src/dls_utili.c	68;"	d	file:
+APPLICATION_SERVER	inc/handle.h	90;"	d
+APP_NAME	Makefile	/^APP_NAME:=dragino_lorawan_server$/;"	m
 ARRAY_SIZE	src/base64.c	29;"	d	file:
 Ack	src/handle.c	/^        uint8_t Ack             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
 Adr	src/handle.c	/^        uint8_t Adr             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits	file:
@@ -28,65 +28,63 @@ AdrAckReq	src/handle.c	/^        uint8_t AdrAckReq       : 1;$/;"	m	struct:uLoRa
 AesCmacCtx	src/LoRaMacCrypto.c	/^static AES_CMAC_CTX AesCmacCtx[1];$/;"	v	file:
 AesContext	src/LoRaMacCrypto.c	/^static aes_context AesContext;$/;"	v	file:
 BPOLY	src/aes.c	76;"	d	file:
-BUFF_SIZE	inc/handle.h	83;"	d
+BUFF_SIZE	inc/handle.h	84;"	d
 Bits	src/handle.c	/^	}Bits;$/;"	m	union:uLoRaMacDLSettings	typeref:struct:uLoRaMacDLSettings::sDLSBits	file:
 Bits	src/handle.c	/^	}Bits;$/;"	m	union:uLoRaMacRxDelay	typeref:struct:uLoRaMacRxDelay::sRxDBits	file:
 Bits	src/handle.c	/^    }Bits;$/;"	m	union:uLoRaMacFrameCtrl	typeref:struct:uLoRaMacFrameCtrl::sCtrlBits	file:
 Bits	src/handle.c	/^    }Bits;$/;"	m	union:uLoRaMacHeader	typeref:struct:uLoRaMacHeader::sHdrBits	file:
 CFLAGS	Makefile	/^CFLAGS := -Iinc -DBIGENDIAN -DLG08_LG02$/;"	m
-CLASS_A	inc/handle.h	100;"	d
-CLASS_B	inc/handle.h	101;"	d
-CLASS_C	inc/handle.h	102;"	d
-CLEAN_DOWNLINKS	src/database.c	32;"	d	file:
-CLEAN_UPLINKS	src/database.c	29;"	d	file:
-CMD_ADDAPP	src/lw_utili.c	51;"	d	file:
-CMD_ADDDEV	src/lw_utili.c	53;"	d	file:
-CMD_ADDGW	src/lw_utili.c	47;"	d	file:
-CMD_ADDPF	src/lw_utili.c	49;"	d	file:
-CMD_DELETE	src/lw_utili.c	57;"	d	file:
-CMD_LISTAPP	src/lw_utili.c	52;"	d	file:
-CMD_LISTDEV	src/lw_utili.c	54;"	d	file:
-CMD_LISTGW	src/lw_utili.c	48;"	d	file:
-CMD_LISTMSG	src/lw_utili.c	55;"	d	file:
-CMD_LISTPF	src/lw_utili.c	50;"	d	file:
-CMD_UPGW	src/lw_utili.c	56;"	d	file:
-COUNT_DOWNLINKS	src/database.c	33;"	d	file:
+CLASS_A	inc/handle.h	101;"	d
+CLASS_B	inc/handle.h	102;"	d
+CLASS_C	inc/handle.h	103;"	d
+CMD_ADDAPP	src/dls_utili.c	56;"	d	file:
+CMD_ADDDEV	src/dls_utili.c	58;"	d	file:
+CMD_ADDGW	src/dls_utili.c	52;"	d	file:
+CMD_ADDPF	src/dls_utili.c	54;"	d	file:
+CMD_DELETE	src/dls_utili.c	62;"	d	file:
+CMD_IMPORTCSV	src/dls_utili.c	64;"	d	file:
+CMD_LISTAPP	src/dls_utili.c	57;"	d	file:
+CMD_LISTDEV	src/dls_utili.c	59;"	d	file:
+CMD_LISTGW	src/dls_utili.c	53;"	d	file:
+CMD_LISTMSG	src/dls_utili.c	60;"	d	file:
+CMD_LISTPF	src/dls_utili.c	55;"	d	file:
+CMD_MANDEV	src/dls_utili.c	63;"	d	file:
+CMD_UPGW	src/dls_utili.c	61;"	d	file:
 CREATEAPPS	inc/db.h	58;"	d
-CREATECFG	inc/db.h	103;"	d
-CREATECFGTABLE	inc/db.h	112;"	d
+CREATECFG	inc/db.h	104;"	d
+CREATECFGTABLE	inc/db.h	113;"	d
 CREATEDEVS	inc/db.h	25;"	d
-CREATEGWPROFILE	inc/db.h	84;"	d
+CREATEGWPROFILE	inc/db.h	85;"	d
 CREATEGWS	inc/db.h	38;"	d
 CREATEUPMSG	inc/db.h	65;"	d
 CRIT	src/base64.c	30;"	d	file:
+DBPATH	inc/dls_utili.h	17;"	d
 DBPATH	inc/handle.h	51;"	d
-DBPATH	inc/lw_utili.h	17;"	d
-DB_LW_UTILI_H	inc/lw_utili.h	10;"	d
+DB_DLS_UTILI_H	inc/dls_utili.h	10;"	d
 DB_SQLITE3_H_	inc/db.h	10;"	d
 DEBUG	src/base64.c	33;"	d	file:
 DEBUG_BEACON	inc/trace.h	24;"	d
-DEBUG_DEBUG	src/lora_serv.c	/^int DEBUG_DEBUG = 0;$/;"	v
+DEBUG_DEBUG	src/dragino_lorawan_server.c	/^int DEBUG_DEBUG = 0;$/;"	v
 DEBUG_ERROR	inc/trace.h	29;"	d
-DEBUG_ERROR	src/lora_serv.c	/^int DEBUG_ERROR = 1;$/;"	v
-DEBUG_ERROR	src/lw_utili.c	64;"	d	file:
+DEBUG_ERROR	src/dls_utili.c	73;"	d	file:
+DEBUG_ERROR	src/dragino_lorawan_server.c	/^int DEBUG_ERROR = 1;$/;"	v
 DEBUG_INFO	inc/trace.h	26;"	d
-DEBUG_INFO	src/lora_serv.c	/^int DEBUG_INFO = 1;$/;"	v
+DEBUG_INFO	src/dragino_lorawan_server.c	/^int DEBUG_INFO = 1;$/;"	v
 DEBUG_JIT	inc/trace.h	21;"	d
 DEBUG_JIT_ERROR	inc/trace.h	22;"	d
-DEBUG_JOIN	src/lora_serv.c	/^int DEBUG_JOIN = 0;$/;"	v
+DEBUG_JOIN	src/dragino_lorawan_server.c	/^int DEBUG_JOIN = 0;$/;"	v
 DEBUG_LOG	inc/trace.h	25;"	d
 DEBUG_PKT_FWD	inc/trace.h	20;"	d
 DEBUG_PPM	inc/trace.h	27;"	d
-DEBUG_SQL	src/lora_serv.c	/^int DEBUG_SQL = 0;$/;"	v
-DEBUG_SQL	src/lw_utili.c	63;"	d	file:
+DEBUG_SQL	src/dls_utili.c	72;"	d	file:
+DEBUG_SQL	src/dragino_lorawan_server.c	/^int DEBUG_SQL = 0;$/;"	v
 DEBUG_STMT	src/db.c	23;"	d	file:
-DEBUG_STMT	src/lw_utili.c	66;"	d	file:
+DEBUG_STMT	src/dls_utili.c	75;"	d	file:
 DEBUG_TIMERSYNC	inc/trace.h	23;"	d
-DEBUG_UPDW	src/lora_serv.c	/^int DEBUG_UPDW = 0;$/;"	v
+DEBUG_UPDW	src/dragino_lorawan_server.c	/^int DEBUG_UPDW = 0;$/;"	v
 DEBUG_WARNING	inc/trace.h	28;"	d
-DEBUG_WARNING	src/lora_serv.c	/^int DEBUG_WARNING = 0;$/;"	v
+DEBUG_WARNING	src/dragino_lorawan_server.c	/^int DEBUG_WARNING = 1;$/;"	v
 DOWN	src/handle.c	23;"	d	file:
-DOWNLINKS_GET_FIRST	src/database.c	34;"	d	file:
 DPOLY	src/aes.c	77;"	d	file:
 Del	src/handle.c	/^		uint8_t Del              : 4;$/;"	m	struct:uLoRaMacRxDelay::sRxDBits	file:
 FLOAT_FORMAT	src/parson.c	45;"	d	file:
@@ -102,31 +100,24 @@ FRAME_TYPE_JOIN_REQ	src/handle.c	/^    FRAME_TYPE_JOIN_REQ              = 0x00,$
 FRAME_TYPE_PROPRIETARY	src/handle.c	/^    FRAME_TYPE_PROPRIETARY           = 0x07,$/;"	e	enum:eLoRaMacFrameType	file:
 FRAME_TYPE_RFU	src/handle.c	/^    FRAME_TYPE_RFU                   = 0x06,$/;"	e	enum:eLoRaMacFrameType	file:
 GENERIC_LIST_H_	inc/generic_list.h	7;"	d
-GET_FRAMECOUNTER_DOWN	src/database.c	24;"	d	file:
-GET_FRAMECOUNTER_UP	src/database.c	23;"	d	file:
-GET_KEYPARTS	src/database.c	21;"	d	file:
-GET_SESSIONDEVADDR	src/database.c	20;"	d	file:
 HANDLE_H_	inc/handle.h	18;"	d
 HAVE_MEMCPY	src/aes.c	39;"	d	file:
 HAVE_UINT_32T	src/aes.c	52;"	d	file:
-IGNORE	inc/handle.h	90;"	d
-INC_FRAMECOUNTER_DOWN	src/database.c	26;"	d	file:
-INITMSGSTMT	inc/db.h	130;"	d
-INITMSGSTMT	inc/lw_utili.h	24;"	d
-INITSTMT	inc/db.h	124;"	d
-INITSTMT	inc/lw_utili.h	20;"	d
-INITSTMT	src/database.c	55;"	d	file:
-INSERTAPPS	inc/db.h	119;"	d
-INSERTCFG	inc/db.h	122;"	d
-INSERTDEVS	inc/db.h	120;"	d
-INSERTGWPROFILE	inc/db.h	121;"	d
-INSERTGWS	inc/db.h	118;"	d
+IGNORE	inc/handle.h	91;"	d
+INITMSGSTMT	inc/db.h	132;"	d
+INITMSGSTMT	inc/dls_utili.h	24;"	d
+INITSTMT	inc/db.h	126;"	d
+INITSTMT	inc/dls_utili.h	20;"	d
+INSERTAPPS	inc/db.h	120;"	d
+INSERTCFG	inc/db.h	124;"	d
+INSERTDEVS	inc/db.h	121;"	d
+INSERTGWPROFILE	inc/db.h	122;"	d
+INSERTGWS	inc/db.h	119;"	d
 INSERTUPMSG	inc/db.h	18;"	d
-ISSQLITEERROR	src/database.c	36;"	d	file:
 IS_CONT	src/parson.c	67;"	d	file:
 IS_NUMBER_INVALID	src/parson.c	57;"	d	file:
 IS_NUMBER_INVALID	src/parson.c	59;"	d	file:
-JOIN_ACCEPT_DELAY	inc/handle.h	96;"	d
+JOIN_ACCEPT_DELAY	inc/handle.h	97;"	d
 JOIN_ACC_SIZE	src/handle.c	25;"	d	file:
 JSONArray	inc/parson.h	/^    JSONArray   = 5,$/;"	e	enum:json_value_type
 JSONBoolean	inc/parson.h	/^    JSONBoolean = 6$/;"	e	enum:json_value_type
@@ -139,7 +130,7 @@ JSONString	inc/parson.h	/^    JSONString  = 2,$/;"	e	enum:json_value_type
 JSONSuccess	inc/parson.h	/^    JSONSuccess = 0,$/;"	e	enum:json_result_t
 JSON_Array	inc/parson.h	/^typedef struct json_array_t  JSON_Array;$/;"	t	typeref:struct:json_array_t
 JSON_Free_Function	inc/parson.h	/^typedef void   (*JSON_Free_Function)(void *);$/;"	t
-JSON_MAX	inc/handle.h	87;"	d
+JSON_MAX	inc/handle.h	88;"	d
 JSON_Malloc_Function	inc/parson.h	/^typedef void * (*JSON_Malloc_Function)(size_t);$/;"	t
 JSON_Object	inc/parson.h	/^typedef struct json_object_t JSON_Object;$/;"	t	typeref:struct:json_object_t
 JSON_Status	inc/parson.h	/^typedef int JSON_Status;$/;"	t
@@ -149,18 +140,16 @@ JSON_Value_Value	src/parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_val
 JUDGEDEVADDR	inc/db.h	19;"	d
 JUDGEJOINREPEAT	inc/db.h	15;"	d
 JUDGEMSGREPEAT	inc/db.h	20;"	d
-KEYHEXS	src/lw_utili.c	61;"	d	file:
-KEYLEN	src/lw_utili.c	59;"	d	file:
+KEYHEXS	src/dls_utili.c	70;"	d	file:
+KEYLEN	src/dls_utili.c	67;"	d	file:
+KEYSIZE	src/dls_utili.c	69;"	d	file:
 LIBNOP	Makefile	/^LIBNOP := -lsqlite3 $/;"	m
 LIBS	Makefile	/^LIBS := -lsqlite3 -lpthread$/;"	m
-LIST_APPFLAGS	src/database.c	14;"	d	file:
-LIST_DEVFLAGS	src/database.c	17;"	d	file:
 LOOKUPAPPKEY	inc/db.h	16;"	d
-LOOKUPBYSTRING	src/database.c	62;"	d	file:
 LOOKUPGWEUI	inc/db.h	14;"	d
 LOOKUPNWKSKEY	inc/db.h	21;"	d
 LOOKUPPROFILE	inc/db.h	22;"	d
-LORAMAC_FRAME_MAXPAYLOAD	inc/handle.h	85;"	d
+LORAMAC_FRAME_MAXPAYLOAD	inc/handle.h	86;"	d
 LORAMAC_MIC_BLOCK_B0_SIZE	src/LoRaMacCrypto.c	32;"	d	file:
 LSHIFT	src/cmac.c	42;"	d	file:
 List	inc/generic_list.h	/^typedef struct List{$/;"	s
@@ -178,16 +167,16 @@ LoRaMacPayloadEncrypt	src/LoRaMacCrypto.c	/^void LoRaMacPayloadEncrypt( const ui
 LoRaMacRxDelay_t	src/handle.c	/^}LoRaMacRxDelay_t;$/;"	t	typeref:union:uLoRaMacRxDelay	file:
 MAX	inc/utilities.h	35;"	d
 MAX	src/parson.c	51;"	d	file:
-MAX_NB_B64	inc/handle.h	92;"	d
+MAX_NB_B64	inc/handle.h	93;"	d
 MAX_NESTING	src/parson.c	43;"	d	file:
 MIN	inc/utilities.h	26;"	d
-MSG	inc/handle.h	75;"	d
-MSG	inc/lw_utili.h	29;"	d
+MSG	inc/dls_utili.h	29;"	d
+MSG	inc/handle.h	76;"	d
 MSG	inc/trace.h	31;"	d
+MSGDBPATH	inc/dls_utili.h	18;"	d
 MSGDBPATH	inc/handle.h	54;"	d
-MSGDBPATH	inc/lw_utili.h	18;"	d
-MSG_DEBUG	inc/handle.h	76;"	d
-MSG_DEBUG	inc/lw_utili.h	31;"	d
+MSG_DEBUG	inc/dls_utili.h	31;"	d
+MSG_DEBUG	inc/handle.h	77;"	d
 MSG_DEBUG	inc/trace.h	32;"	d
 MSG_INFO	inc/trace.h	38;"	d
 MType	src/handle.c	/^        uint8_t MType           : 3;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
@@ -196,8 +185,9 @@ M_n	inc/cmac.h	/^            uint32_t       M_n;$/;"	m	struct:_AES_CMAC_CTX
 Major	src/handle.c	/^        uint8_t Major           : 2;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
 Mic	src/LoRaMacCrypto.c	/^static uint8_t Mic[16];$/;"	v	file:
 MicBlockB0	src/LoRaMacCrypto.c	/^static uint8_t MicBlockB0[] = { 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
-NB_PKT_MAX	inc/handle.h	82;"	d
-NO_DELAY	inc/handle.h	95;"	d
+NAMELEN	src/dls_utili.c	66;"	d	file:
+NB_PKT_MAX	inc/handle.h	83;"	d
+NO_DELAY	inc/handle.h	96;"	d
 NUM_BUF_SIZE	src/parson.c	46;"	d	file:
 N_BLOCK	inc/aes.h	59;"	d
 N_COL	inc/aes.h	58;"	d
@@ -207,58 +197,63 @@ Nibble2HexChar	src/utilities.c	/^int8_t Nibble2HexChar( uint8_t a )$/;"	f
 Node	inc/generic_list.h	/^typedef struct Node{$/;"	s
 OBJDIR	Makefile	/^OBJDIR = obj$/;"	m
 OBJECTS	Makefile	/^OBJECTS:=$(OBJDIR)\/$(APP_NAME).o $(OBJDIR)\/base64.o $(OBJDIR)\/parson.o $(OBJDIR)\/aes.o $(OBJDIR)\/cmac.o $(OBJDIR)\/utilities.o $(OBJDIR)\/LoRaMacCrypto.o $(OBJDIR)\/generic_list.o $(OBJDIR)\/db.o $(OBJDIR)\/handle.o$/;"	m
-OPT_ADDAPP	src/lw_utili.c	30;"	d	file:
-OPT_ADDDEV	src/lw_utili.c	32;"	d	file:
-OPT_ADDGW	src/lw_utili.c	26;"	d	file:
-OPT_ADDPF	src/lw_utili.c	28;"	d	file:
-OPT_APPEUI	src/lw_utili.c	43;"	d	file:
-OPT_APPNAME	src/lw_utili.c	36;"	d	file:
-OPT_DELETE	src/lw_utili.c	45;"	d	file:
-OPT_DEVADDR	src/lw_utili.c	40;"	d	file:
-OPT_DEVEUI	src/lw_utili.c	41;"	d	file:
-OPT_GWEUI	src/lw_utili.c	42;"	d	file:
-OPT_LISTAPP	src/lw_utili.c	31;"	d	file:
-OPT_LISTDEV	src/lw_utili.c	33;"	d	file:
-OPT_LISTGW	src/lw_utili.c	27;"	d	file:
-OPT_LISTMSG	src/lw_utili.c	39;"	d	file:
-OPT_LISTPF	src/lw_utili.c	29;"	d	file:
-OPT_PFID	src/lw_utili.c	38;"	d	file:
-OPT_PFNAME	src/lw_utili.c	37;"	d	file:
-OPT_RX2DR	src/lw_utili.c	34;"	d	file:
-OPT_RX2FREQ	src/lw_utili.c	35;"	d	file:
-OPT_UPGW	src/lw_utili.c	44;"	d	file:
-PKT_PULL_ACK	inc/handle.h	61;"	d
-PKT_PULL_DATA	inc/handle.h	59;"	d
-PKT_PULL_RESP	inc/handle.h	60;"	d
-PKT_PUSH_ACK	inc/handle.h	58;"	d
-PKT_PUSH_DATA	inc/handle.h	57;"	d
+OPT_ADDAPP	src/dls_utili.c	30;"	d	file:
+OPT_ADDDEV	src/dls_utili.c	32;"	d	file:
+OPT_ADDGW	src/dls_utili.c	26;"	d	file:
+OPT_ADDPF	src/dls_utili.c	28;"	d	file:
+OPT_APPEUI	src/dls_utili.c	43;"	d	file:
+OPT_APPKEY	src/dls_utili.c	46;"	d	file:
+OPT_APPNAME	src/dls_utili.c	36;"	d	file:
+OPT_APPSKEY	src/dls_utili.c	47;"	d	file:
+OPT_DELETE	src/dls_utili.c	45;"	d	file:
+OPT_DEVADDR	src/dls_utili.c	40;"	d	file:
+OPT_DEVEUI	src/dls_utili.c	41;"	d	file:
+OPT_GWEUI	src/dls_utili.c	42;"	d	file:
+OPT_IMPORTCSV	src/dls_utili.c	50;"	d	file:
+OPT_LISTAPP	src/dls_utili.c	31;"	d	file:
+OPT_LISTDEV	src/dls_utili.c	33;"	d	file:
+OPT_LISTGW	src/dls_utili.c	27;"	d	file:
+OPT_LISTMSG	src/dls_utili.c	39;"	d	file:
+OPT_LISTPF	src/dls_utili.c	29;"	d	file:
+OPT_MANDEV	src/dls_utili.c	49;"	d	file:
+OPT_NWKSKEY	src/dls_utili.c	48;"	d	file:
+OPT_PFID	src/dls_utili.c	38;"	d	file:
+OPT_PFNAME	src/dls_utili.c	37;"	d	file:
+OPT_RX2DR	src/dls_utili.c	34;"	d	file:
+OPT_RX2FREQ	src/dls_utili.c	35;"	d	file:
+OPT_UPGW	src/dls_utili.c	44;"	d	file:
+PKT_PULL_ACK	inc/handle.h	62;"	d
+PKT_PULL_DATA	inc/handle.h	60;"	d
+PKT_PULL_RESP	inc/handle.h	61;"	d
+PKT_PUSH_ACK	inc/handle.h	59;"	d
+PKT_PUSH_DATA	inc/handle.h	58;"	d
 POW2	inc/utilities.h	43;"	d
-PULL_TIMEOUT_MS	inc/handle.h	64;"	d
-PUSH_TIMEOUT_MS	inc/handle.h	63;"	d
+PULL_TIMEOUT_MS	inc/handle.h	65;"	d
+PUSHPATH	inc/handle.h	55;"	d
+PUSH_TIMEOUT_MS	inc/handle.h	64;"	d
 RAND_LOCAL_MAX	src/utilities.c	27;"	d	file:
-RANGE	inc/handle.h	93;"	d
-RECV_DELAY	inc/handle.h	98;"	d
+RANGE	inc/handle.h	94;"	d
+RECV_DELAY	inc/handle.h	99;"	d
 RFU	src/handle.c	/^		uint8_t RFU              : 1;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
 RFU	src/handle.c	/^		uint8_t RFU              : 4;$/;"	m	struct:uLoRaMacRxDelay::sRxDBits	file:
 RFU	src/handle.c	/^        uint8_t RFU             : 3;$/;"	m	struct:uLoRaMacHeader::sHdrBits	file:
 RX1DRoffset	src/handle.c	/^		uint8_t RX1DRoffset      : 3;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
 RX2DataRate	src/handle.c	/^		uint8_t RX2DataRate      : 4;$/;"	m	struct:uLoRaMacDLSettings::sDLSBits	file:
-SEND_INTERVAL_S	inc/handle.h	68;"	d
-SET_FRAMECOUNTER_UP	src/database.c	25;"	d	file:
+SEND_INTERVAL_S	inc/handle.h	69;"	d
 SIZEOF_TOKEN	src/parson.c	48;"	d	file:
 SKIP_CHAR	src/parson.c	49;"	d	file:
 SKIP_WHITESPACES	src/parson.c	50;"	d	file:
-SOCKET_INTERVAL_MS	inc/handle.h	67;"	d
-SOCKET_INTERVAL_S	inc/handle.h	66;"	d
+SOCKET_INTERVAL_MS	inc/handle.h	68;"	d
+SOCKET_INTERVAL_S	inc/handle.h	67;"	d
 STARTING_CAPACITY	src/parson.c	42;"	d	file:
-STR	inc/handle.h	74;"	d
-STRINGIFY	inc/handle.h	73;"	d
-TSNULL	src/lw_utili.c	68;"	d	file:
+STR	inc/handle.h	75;"	d
+STRINGIFY	inc/handle.h	74;"	d
+TSNULL	src/dls_utili.c	77;"	d	file:
 UP	src/handle.c	22;"	d	file:
 UPDATEDEVINFO	inc/db.h	17;"	d
 UPDATEGWINFO	inc/db.h	23;"	d
 USE_TABLES	src/aes.c	57;"	d	file:
-VERSION	inc/handle.h	71;"	d
+VERSION	inc/handle.h	72;"	d
 VERSION_1	src/aes.c	64;"	d	file:
 Value	src/handle.c	/^	uint8_t Value;$/;"	m	union:uLoRaMacDLSettings	file:
 Value	src/handle.c	/^	uint8_t Value;$/;"	m	union:uLoRaMacRxDelay	file:
@@ -289,15 +284,17 @@ aes_encrypt_128	src/aes.c	/^void aes_encrypt_128( const unsigned char in[N_BLOCK
 aes_encrypt_256	src/aes.c	/^void aes_encrypt_256( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
 aes_set_key	src/aes.c	/^return_type aes_set_key( const unsigned char key[], length_type keylen, aes_context ctx[1] )$/;"	f
 alti	inc/handle.h	/^    float alti;       \/*GPS altitude of the gateway in meter RX (integer)*\/$/;"	m	struct:gwinfo
-app_getopt	src/lw_utili.c	/^static int app_getopt(struct lw_t *cntx, int argc, char **argv) {$/;"	f	file:
-app_long_options	src/lw_utili.c	/^struct option app_long_options[] = {$/;"	v	typeref:struct:option
+app_getopt	src/dls_utili.c	/^static int app_getopt(struct lw_t *cntx, int argc, char **argv) {$/;"	f	file:
+app_long_options	src/dls_utili.c	/^struct option app_long_options[] = {$/;"	v	typeref:struct:option
 append_indent	src/parson.c	/^static int append_indent(char *buf, int level) {$/;"	f	file:
 append_string	src/parson.c	/^static int append_string(char *buf, const char *string) {$/;"	f	file:
-appeui	inc/lw_utili.h	/^    char appeui[17];$/;"	m	struct:lw_t
+appeui	inc/dls_utili.h	/^    char appeui[17];$/;"	m	struct:lw_t
 appeui_hex	inc/handle.h	/^    char appeui_hex[17];$/;"	m	struct:devinfo
+appkey	inc/dls_utili.h	/^    char appkey[33];$/;"	m	struct:lw_t
 appkey	inc/handle.h	/^    uint8_t appkey[16];$/;"	m	struct:devinfo
 appkey_hex	inc/handle.h	/^    uint8_t appkey_hex[33];$/;"	m	struct:devinfo
-appname	inc/lw_utili.h	/^    char appname[32];$/;"	m	struct:lw_t
+appname	inc/dls_utili.h	/^    char appname[32];$/;"	m	struct:lw_t
+appskey	inc/dls_utili.h	/^    char appskey[33];$/;"	m	struct:lw_t
 appskey	inc/handle.h	/^    uint8_t appskey[16];$/;"	m	struct:devinfo
 appskey_hex	inc/handle.h	/^    uint8_t appskey_hex[33];$/;"	m	struct:devinfo
 array	src/parson.c	/^    JSON_Array  *array;$/;"	m	union:json_value_value	file:
@@ -316,8 +313,8 @@ capacity	src/parson.c	/^    size_t       capacity;$/;"	m	struct:json_array_t	fil
 capacity	src/parson.c	/^    size_t       capacity;$/;"	m	struct:json_object_t	file:
 chan	inc/handle.h	/^	uint8_t  chan;     \/*Concentrator "IF" channel used for RX (unsigned integer)*\/$/;"	m	struct:metadata
 char_to_code	src/base64.c	/^uint8_t char_to_code(char x) {$/;"	f
-cmd	inc/lw_utili.h	/^    uint8_t cmd;$/;"	m	struct:lw_t
-cntx	src/lora_serv.c	/^struct context cntx = {'\\0'}; \/* sqlite3 database context *\/$/;"	v	typeref:struct:context
+cmd	inc/dls_utili.h	/^    uint8_t cmd;$/;"	m	struct:lw_t
+cntx	src/dragino_lorawan_server.c	/^struct context cntx = { '\\0' };	\/* sqlite3 database context *\/$/;"	v	typeref:struct:context
 code_62	src/base64.c	/^static char code_62 = '+';	\/* RFC 1421 standard character for code 62 *\/$/;"	v	file:
 code_63	src/base64.c	/^static char code_63 = '\/';	\/* RFC 1421 standard character for code 63 *\/$/;"	v	file:
 code_pad	src/base64.c	/^static char code_pad = '=';	\/* RFC 1421 padding character if padding *\/$/;"	v	file:
@@ -331,56 +328,18 @@ copy_block_nn	src/aes.c	/^static void copy_block_nn( uint_8t * d, const uint_8t 
 copy_msg_down	src/handle.c	/^void copy_msg_down(void* data, const void* msg) {$/;"	f
 count	src/parson.c	/^    size_t       count;$/;"	m	struct:json_array_t	file:
 count	src/parson.c	/^    size_t       count;$/;"	m	struct:json_object_t	file:
+csvpath	inc/dls_utili.h	/^    char csvpath[48];$/;"	m	struct:lw_t
 d2	src/aes.c	84;"	d	file:
 data	inc/generic_list.h	/^	void* data;$/;"	m	struct:Node
-data_appflags_list_rowcallback	src/database.c	/^static void data_appflags_list_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
-database_app_add	src/database.c	/^void database_app_add(context_readonly* cntx, const struct app* app) {$/;"	f
-database_app_del	src/database.c	/^void database_app_del(context_readonly* cntx, const char* eui) {$/;"	f
-database_app_get	src/database.c	/^void database_app_get(context_readonly* cntx, const char* eui, const char* name,$/;"	f
-database_app_get_rowcallback	src/database.c	/^static void database_app_get_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
-database_app_update	src/database.c	/^void database_app_update(context_readonly* cntx, const struct app* app) {$/;"	f
-database_appflags_list	src/database.c	/^void database_appflags_list(context_readonly* cntx, const char* appeui,$/;"	f
-database_apps_list	src/database.c	/^void database_apps_list(context_readonly* cntx,$/;"	f
-database_apps_list_rowcallback	src/database.c	/^static void database_apps_list_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
-database_dev_add	src/database.c	/^void database_dev_add(context_readonly* cntx, const struct dev* dev) {$/;"	f
-database_dev_del	src/database.c	/^void database_dev_del(context_readonly* cntx, const char* eui) {$/;"	f
-database_dev_get	src/database.c	/^void database_dev_get(context_readonly* cntx, const char* eui, const char* name,$/;"	f
-database_dev_get_rowcallback	src/database.c	/^static void database_dev_get_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
-database_dev_update	src/database.c	/^void database_dev_update(context_readonly* cntx, const struct dev* dev) {$/;"	f
-database_devs_list	src/database.c	/^void database_devs_list(context_readonly* cntx,$/;"	f
-database_downlink_add	src/database.c	/^void database_downlink_add(context_readonly* cntx, struct downlink* downlink) {$/;"	f
-database_downlinks_clean	src/database.c	/^void database_downlinks_clean(context_readonly* cntx, guint64 timestamp) {$/;"	f
-database_downlinks_count	src/database.c	/^int database_downlinks_count(context_readonly* cntx, const char* appeui,$/;"	f
-database_downlinks_count_rowcallback	src/database.c	/^static void database_downlinks_count_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
-database_downlinks_delete_by_token	src/database.c	/^gboolean database_downlinks_delete_by_token(context_readonly* cntx,$/;"	f
-database_downlinks_get_first	src/database.c	/^gboolean database_downlinks_get_first(context_readonly* cntx,$/;"	f
-database_downlinks_sqlitegen_callback	src/database.c	/^static void database_downlinks_sqlitegen_callback($/;"	f	file:
-database_framecounter_down_getandinc	src/database.c	/^int database_framecounter_down_getandinc(context_readonly* cntx,$/;"	f
-database_framecounter_get_rowcallback	src/database.c	/^static void database_framecounter_get_rowcallback(sqlite3_stmt* stmt,$/;"	f	file:
-database_framecounter_up_set	src/database.c	/^void database_framecounter_up_set(context_readonly* cntx, const char* devaddr,$/;"	f
-database_init	src/database.c	/^gboolean database_init(struct context* cntx, const gchar* databasepath) {$/;"	f
-database_init_createtables	src/database.c	/^static gboolean database_init_createtables(struct context* cntx) {$/;"	f	file:
-database_keyparts_get	src/database.c	/^void database_keyparts_get(context_readonly* cntx, const char* devaddr,$/;"	f
-database_keyparts_get_rowcallback	src/database.c	/^static void database_keyparts_get_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
-database_session_add	src/database.c	/^gboolean database_session_add(context_readonly* cntx,$/;"	f
-database_session_del	src/database.c	/^void database_session_del(context_readonly* cntx, const char* deveui) {$/;"	f
-database_session_get_devaddr	src/database.c	/^void database_session_get_devaddr(context_readonly* cntx, const char* devaddr,$/;"	f
-database_session_get_deveui	src/database.c	/^void database_session_get_deveui(context_readonly* cntx, const char* deveui,$/;"	f
-database_session_get_rowcallback	src/database.c	/^static void database_session_get_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
-database_stepuntilcomplete	src/database.c	/^static gboolean database_stepuntilcomplete(sqlite3_stmt* stmt,$/;"	f	file:
-database_uplink_add	src/database.c	/^void database_uplink_add(context_readonly* cntx, struct uplink* uplink) {$/;"	f
-database_uplinks_clean	src/database.c	/^void database_uplinks_clean(context_readonly* cntx, guint64 timestamp) {$/;"	f
-database_uplinks_get	src/database.c	/^void database_uplinks_get(context_readonly* cntx, const char* deveui,$/;"	f
-database_uplinks_get_rowcallback	src/database.c	/^static void database_uplinks_get_rowcallback(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
 datrf	inc/handle.h	/^	uint32_t datrf;    \/*data rate for FSK*\/$/;"	m	struct:metadata
 datrl	inc/handle.h	/^	char     datrl[10];\/* data rate for LORA*\/$/;"	m	struct:metadata
 db	inc/db.h	/^	sqlite3* db;$/;"	m	struct:context
-db	inc/lw_utili.h	/^    sqlite3 *db;$/;"	m	struct:lw_t
+db	inc/dls_utili.h	/^    sqlite3 *db;$/;"	m	struct:lw_t
 db_createtb	src/db.c	/^static bool db_createtb(struct context* cntx) {$/;"	f	file:
 db_destroy	src/db.c	/^void db_destroy(struct context* cntx) {$/;"	f
-db_destroy	src/lw_utili.c	/^void db_destroy(struct lw_t* cntx) {$/;"	f
+db_destroy	src/dls_utili.c	/^void db_destroy(struct lw_t* cntx) {$/;"	f
 db_init	src/db.c	/^bool db_init(const char* dbpath, struct context* cntx) {$/;"	f
-db_init	src/lw_utili.c	/^bool db_init(const char* dbpath, struct lw_t* cntx) {$/;"	f
+db_init	src/dls_utili.c	/^bool db_init(const char* dbpath, struct lw_t* cntx) {$/;"	f
 db_insert_upmsg	src/db.c	/^bool db_insert_upmsg(sqlite3_stmt* stmt, void* devdata, void* metadata, void* payload) {$/;"	f
 db_judge_devaddr	src/db.c	/^bool db_judge_devaddr(sqlite3_stmt* stmt, void* data) {$/;"	f
 db_judge_joinrepeat	src/db.c	/^bool db_judge_joinrepeat(sqlite3_stmt* stmt, void* data) {$/;"	f
@@ -390,15 +349,15 @@ db_lookup_gweui	src/db.c	/^bool db_lookup_gweui(sqlite3_stmt* stmt, char *gweui)
 db_lookup_nwkskey	src/db.c	/^bool db_lookup_nwkskey(sqlite3_stmt* stmt, void* data) {$/;"	f
 db_lookup_profile	src/db.c	/^bool db_lookup_profile(sqlite3_stmt* stmt, char *gweui, int* rx2dr, float* rx2freq) {$/;"	f
 db_step	src/db.c	/^static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {$/;"	f	file:
-db_step	src/lw_utili.c	/^static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {$/;"	f	file:
+db_step	src/dls_utili.c	/^static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data) {$/;"	f	file:
 db_update_devinfo	src/db.c	/^bool db_update_devinfo(sqlite3_stmt* stmt, void* data) {$/;"	f
 db_update_gwinfo	src/db.c	/^bool db_update_gwinfo(sqlite3_stmt* stmt, void* data) { $/;"	f
 destroy_msg_down	src/handle.c	/^void destroy_msg_down(void* msg) {$/;"	f
+devaddr	inc/dls_utili.h	/^    char devaddr[9];$/;"	m	struct:lw_t
 devaddr	inc/handle.h	/^	uint32_t devaddr;     $/;"	m	struct:devinfo
 devaddr	inc/handle.h	/^	uint32_t devaddr;  \/* gateway address for as downlink *\/$/;"	m	struct:jsondata
-devaddr	inc/lw_utili.h	/^    char devaddr[9];$/;"	m	struct:lw_t
 devaddr_hex	inc/handle.h	/^    char devaddr_hex[9];$/;"	m	struct:devinfo
-deveui	inc/lw_utili.h	/^    char deveui[17];$/;"	m	struct:lw_t
+deveui	inc/dls_utili.h	/^    char deveui[17];$/;"	m	struct:lw_t
 deveui_hex	inc/handle.h	/^	char deveui_hex[17];$/;"	m	struct:jsondata
 deveui_hex	inc/handle.h	/^    char deveui_hex[17];$/;"	m	struct:devinfo
 devinfo	inc/handle.h	/^struct devinfo {$/;"	s
@@ -406,7 +365,7 @@ devnonce	inc/handle.h	/^    uint16_t devnonce;$/;"	m	struct:devinfo
 devnonce_hex	inc/handle.h	/^    char devnonce_hex[7];$/;"	m	struct:devinfo
 dwnb	inc/handle.h	/^    uint32_t dwnb;    \/*Number of downlink datagrams received (unsigned integer)*\/$/;"	m	struct:gwinfo
 eLoRaMacFrameType	src/handle.c	/^typedef enum eLoRaMacFrameType$/;"	g	file:
-exit_sig	src/lora_serv.c	/^static bool exit_sig = false;$/;"	v	file:
+exit_sig	src/dragino_lorawan_server.c	/^static bool exit_sig = false;$/;"	v	file:
 f1	src/aes.c	79;"	d	file:
 f2	src/aes.c	80;"	d	file:
 f3	src/aes.c	86;"	d	file:
@@ -419,9 +378,11 @@ fd	src/aes.c	89;"	d	file:
 fe	src/aes.c	90;"	d	file:
 fport	inc/handle.h	/^	uint8_t fport;     $/;"	m	struct:metadata
 free	src/parson.c	54;"	d	file:
+freekey	src/dls_utili.c	/^static void freekey(struct lw_t *lws) {$/;"	f	file:
 freq	inc/handle.h	/^	double 	 freq;     \/*RX central frequency in MHz (unsigned float, Hz precision)*\/$/;"	m	struct:metadata
 fwd_affine	src/aes.c	/^uint_8t fwd_affine(const uint_8t x)$/;"	f
-genkey	src/lw_utili.c	/^static char *genkey(char *key, uint8_t len) {$/;"	f	file:
+genkey	src/dls_utili.c	/^static char *genkey(char *key, uint8_t len) {$/;"	f	file:
+genname	src/dls_utili.c	/^static char *genname(char *name, uint8_t len) {$/;"	f	file:
 get_quoted_string	src/parson.c	/^static char * get_quoted_string(const char **string) {$/;"	f	file:
 gf_inv	src/aes.c	/^static uint_8t gf_inv(const uint_8t x)$/;"	f	file:
 gfm2_sb	src/aes.c	209;"	d	file:
@@ -442,16 +403,16 @@ gfmul_9	src/aes.c	/^static const uint_8t gfmul_9[256] = mm_data(f9);$/;"	v	file:
 gfmul_b	src/aes.c	/^static const uint_8t gfmul_b[256] = mm_data(fb);$/;"	v	file:
 gfmul_d	src/aes.c	/^static const uint_8t gfmul_d[256] = mm_data(fd);$/;"	v	file:
 gfmul_e	src/aes.c	/^static const uint_8t gfmul_e[256] = mm_data(fe);$/;"	v	file:
-gw_list	src/lora_serv.c	/^static linked_list gw_list;$/;"	v	file:
+gw_list	src/dragino_lorawan_server.c	/^static linked_list gw_list;$/;"	v	file:
 gwaddr	inc/handle.h	/^	char    gwaddr[16];$/;"	m	struct:metadata
 gwaddr	inc/handle.h	/^	char gwaddr[16];\/*gateway address*\/$/;"	m	struct:pkt_info
 gwaddr	inc/handle.h	/^	char*  gwaddr;$/;"	m	struct:msg_down
+gweui	inc/dls_utili.h	/^    char gweui[17];$/;"	m	struct:lw_t
 gweui	inc/handle.h	/^    char* gweui;$/;"	m	struct:gwinfo
-gweui	inc/lw_utili.h	/^    char gweui[17];$/;"	m	struct:lw_t
 gweui_hex	inc/handle.h	/^	char gweui_hex[17];\/*gateway address*\/$/;"	m	struct:pkt_info
 gweui_hex	inc/handle.h	/^    char    gweui_hex[17];$/;"	m	struct:metadata
 gwinfo	inc/handle.h	/^struct gwinfo {$/;"	s
-gwserv	src/lora_serv.c	/^static char gwserv[64] = "localhost";$/;"	v	file:
+gwserv	src/dragino_lorawan_server.c	/^static char gwserv[64] = "localhost";$/;"	v	file:
 head	inc/generic_list.h	/^	struct Node* head;$/;"	m	struct:List	typeref:struct:List::Node
 hex_char_to_int	src/parson.c	/^static int hex_char_to_int(char c) {$/;"	f	file:
 hibit	src/aes.c	/^static uint_8t hibit(const uint_8t x)$/;"	f	file:
@@ -460,7 +421,7 @@ insertupmsg	inc/db.h	/^	sqlite3_stmt* insertupmsg; $/;"	m	struct:context
 inv_affine	src/aes.c	/^uint_8t inv_affine(const uint_8t x)$/;"	f
 inv_mix_sub_columns	src/aes.c	/^  static void inv_mix_sub_columns( uint_8t dt[N_BLOCK] )$/;"	f	file:
 inv_shift_sub_rows	src/aes.c	/^static void inv_shift_sub_rows( uint_8t st[N_BLOCK] )$/;"	f	file:
-invert	src/lw_utili.c	/^static char *invert(char *dst, const char *src, uint8_t len) {$/;"	f	file:
+invert	src/dls_utili.c	/^static char *invert(char *dst, const char *src, uint8_t len) {$/;"	f	file:
 is_box	src/aes.c	208;"	d	file:
 is_box	src/aes.c	291;"	d	file:
 is_decimal	src/parson.c	/^static int is_decimal(const char *string, size_t length) {$/;"	f	file:
@@ -601,11 +562,11 @@ list_node	inc/generic_list.h	/^}list_node, *pnode;$/;"	t	typeref:struct:Node
 list_search	src/generic_list.c	/^bool list_search(plist list, void* key, void* data, int(*compare)(const void*, const void*), void(*deep_copy)(void*,const void*)) {$/;"	f
 list_search_and_delete	src/generic_list.c	/^bool list_search_and_delete(plist list, void* key, void* data, int(*compare)(const void*, const void*), void(*deep_copy)(void*, const void*), void(*destroy)(void*)) {$/;"	f
 list_search_and_update	src/generic_list.c	/^void list_search_and_update (plist list, void* key, void* new_data, int size, int(*compare)(const void*, const void*),void(*assign)(void*, const void*)) {$/;"	f
-listapp	src/lw_utili.c	/^static void listapp(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
-listdev	src/lw_utili.c	/^static void listdev(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
-listgw	src/lw_utili.c	/^static void listgw(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
-listmsg	src/lw_utili.c	/^static void listmsg(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
-listpf	src/lw_utili.c	/^static void listpf(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listapp	src/dls_utili.c	/^static void listapp(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listdev	src/dls_utili.c	/^static void listdev(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listgw	src/dls_utili.c	/^static void listgw(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listmsg	src/dls_utili.c	/^static void listmsg(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
+listpf	src/dls_utili.c	/^static void listpf(sqlite3_stmt *stmt, void* data) {$/;"	f	file:
 longt	inc/handle.h	/^    float longt;      \/*GPS latitude of the gateway in degree (float, E is +)*\/$/;"	m	struct:gwinfo
 lookup_appkey	src/db.c	/^static void lookup_appkey(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
 lookup_nwkskey	src/db.c	/^static void lookup_nwkskey(sqlite3_stmt* stmt, void* data) {$/;"	f	file:
@@ -614,9 +575,9 @@ lookupgweui	inc/db.h	/^	sqlite3_stmt* lookupgweui;$/;"	m	struct:context
 lookupnwkskey	inc/db.h	/^	sqlite3_stmt* lookupnwkskey; $/;"	m	struct:context
 lookupprofile	inc/db.h	/^	sqlite3_stmt* lookupprofile; $/;"	m	struct:context
 lsnr	inc/handle.h	/^	float    lsnr;     \/*Lora SNR ratio in dB (signed float, 0.1 dB precision)*\/$/;"	m	struct:metadata
-lw_t	inc/lw_utili.h	/^struct lw_t {$/;"	s
-main	src/lora_serv.c	/^int main(int argc, char** argv) {$/;"	f
-main	src/lw_utili.c	/^void main(int argc, char *argv[]) {$/;"	f
+lw_t	inc/dls_utili.h	/^struct lw_t {$/;"	s
+main	src/dls_utili.c	/^void main(int argc, char *argv[]) {$/;"	f
+main	src/dragino_lorawan_server.c	/^int main(int argc, char **argv) {$/;"	f
 malloc	src/parson.c	53;"	d	file:
 memcpy1	src/utilities.c	/^void memcpy1( uint8_t *dst, const uint8_t *src, uint16_t size )$/;"	f
 memcpyr	src/utilities.c	/^void memcpyr( uint8_t *dst, const uint8_t *src, uint16_t size )$/;"	f
@@ -628,12 +589,12 @@ modu	inc/handle.h	/^	char     modu[5];  \/* modulation:LORA or FSK*\/$/;"	m	stru
 msg_down	inc/handle.h	/^    struct msg_down* msg_down;$/;"	m	struct:jsondata	typeref:struct:jsondata::msg_down
 msg_down	inc/handle.h	/^struct msg_down {$/;"	s
 msgdb	inc/db.h	/^    sqlite3* msgdb;$/;"	m	struct:context
-msgdb	inc/lw_utili.h	/^    sqlite3 *msgdb;$/;"	m	struct:lw_t
-mx_db	src/lora_serv.c	/^static pthread_mutex_t mx_db = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
-mx_gw_list	src/lora_serv.c	/^static pthread_mutex_t mx_gw_list = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
-mx_push	src/lora_serv.c	/^static pthread_mutex_t mx_push = PTHREAD_MUTEX_INITIALIZER; \/* control access to the push_data upstream measurements *\/$/;"	v	file:
+msgdb	inc/dls_utili.h	/^    sqlite3 *msgdb;$/;"	m	struct:lw_t
+mx_db	src/dragino_lorawan_server.c	/^static pthread_mutex_t mx_db = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+mx_gw_list	src/dragino_lorawan_server.c	/^static pthread_mutex_t mx_gw_list = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+mx_push	src/dragino_lorawan_server.c	/^static pthread_mutex_t mx_push = PTHREAD_MUTEX_INITIALIZER;	\/* control access to the push_data upstream measurements *\/$/;"	v	file:
 names	src/parson.c	/^    char       **names;$/;"	m	struct:json_object_t	file:
-nb_push_rcv	src/lora_serv.c	/^static uint32_t nb_push_rcv = 0; \/* count push_data packets received *\/$/;"	v	file:
+nb_push_rcv	src/dragino_lorawan_server.c	/^static uint32_t nb_push_rcv = 0;	\/* count push_data packets received *\/$/;"	v	file:
 next	inc/generic_list.h	/^	struct Node* next;$/;"	m	struct:Node	typeref:struct:Node::Node
 next	src/handle.c	/^static uint32_t next = 1; $/;"	v	file:
 next	src/utilities.c	/^static uint32_t next = 1;$/;"	v	file:
@@ -641,6 +602,7 @@ ns_msg_handle	src/handle.c	/^void ns_msg_handle(struct jsondata* result, struct 
 null	src/parson.c	/^    int          null;$/;"	m	union:json_value_value	file:
 num_bytes_in_utf8_sequence	src/parson.c	/^static int num_bytes_in_utf8_sequence(unsigned char c) {$/;"	f	file:
 number	src/parson.c	/^    double       number;$/;"	m	union:json_value_value	file:
+nwkskey	inc/dls_utili.h	/^    char nwkskey[33];$/;"	m	struct:lw_t
 nwkskey	inc/handle.h	/^    uint8_t nwkskey[16];$/;"	m	struct:devinfo
 nwkskey_hex	inc/handle.h	/^    uint8_t nwkskey_hex[33];$/;"	m	struct:devinfo
 object	src/parson.c	/^    JSON_Object *object;$/;"	m	union:json_value_value	file:
@@ -660,8 +622,8 @@ parson_malloc	src/parson.c	/^static JSON_Malloc_Function parson_malloc = malloc;
 parson_parson_h	inc/parson.h	25;"	d
 parson_strdup	src/parson.c	/^static char * parson_strdup(const char *string) {$/;"	f	file:
 parson_strndup	src/parson.c	/^static char * parson_strndup(const char *string, size_t n) {$/;"	f	file:
-pfid	inc/lw_utili.h	/^    uint8_t pfid;$/;"	m	struct:lw_t
-pfname	inc/lw_utili.h	/^    char pfname[32];$/;"	m	struct:lw_t
+pfid	inc/dls_utili.h	/^    uint8_t pfid;$/;"	m	struct:lw_t
+pfname	inc/dls_utili.h	/^    char pfname[32];$/;"	m	struct:lw_t
 pkt	inc/handle.h	/^struct pkt {$/;"	s
 pkt_info	inc/handle.h	/^struct pkt_info {$/;"	s
 pkt_no	inc/handle.h	/^	int  pkt_no;\/*packet number*\/$/;"	m	struct:pkt_info
@@ -669,9 +631,9 @@ pkt_payload	inc/handle.h	/^	uint8_t pkt_payload[BUFF_SIZE - 12];\/*packet payloa
 plist	inc/generic_list.h	/^}linked_list, *plist;$/;"	t	typeref:struct:List
 pnode	inc/generic_list.h	/^}list_node, *pnode;$/;"	t	typeref:struct:Node
 process_string	src/parson.c	/^static char* process_string(const char *input, size_t len) {$/;"	f	file:
-pull_port	src/lora_serv.c	/^static char pull_port[16] = "1701";$/;"	v	file:
+pull_port	src/dragino_lorawan_server.c	/^static char pull_port[16] = "1701";$/;"	v	file:
 pull_timeout	src/handle.c	/^static struct timeval pull_timeout = {0, (PULL_TIMEOUT_MS * 1000)}; \/* non critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
-push_port	src/lora_serv.c	/^static char push_port[16] = "1700";$/;"	v	file:
+push_port	src/dragino_lorawan_server.c	/^static char push_port[16] = "1700";$/;"	v	file:
 push_timeout_half	src/handle.c	/^static struct timeval push_timeout_half = {0, (PUSH_TIMEOUT_MS * 500)}; \/* cut in half, critical for throughput *\/$/;"	v	typeref:struct:timeval	file:
 rand1	src/utilities.c	/^int32_t rand1( void )$/;"	f
 randr	src/utilities.c	/^int32_t randr( int32_t min, int32_t max )$/;"	f
@@ -683,8 +645,8 @@ rfch	inc/handle.h	/^	uint8_t  rfch;     \/*Concentrator "RF chain" used for RX (
 rijndael	inc/cmac.h	/^            aes_context    rijndael;$/;"	m	struct:_AES_CMAC_CTX
 rnd	inc/aes.h	/^    uint_8t rnd;$/;"	m	struct:__anon1
 rssi	inc/handle.h	/^	float    rssi;	   \/*RSSI in dBm (signed integer, 1 dB precision)*\/$/;"	m	struct:metadata
-rx2dr	inc/lw_utili.h	/^    uint8_t rx2dr;$/;"	m	struct:lw_t
-rx2freq	inc/lw_utili.h	/^    float rx2freq;$/;"	m	struct:lw_t
+rx2dr	inc/dls_utili.h	/^    uint8_t rx2dr;$/;"	m	struct:lw_t
+rx2freq	inc/dls_utili.h	/^    float rx2freq;$/;"	m	struct:lw_t
 rxfw	inc/handle.h	/^    uint32_t rxfw;    \/*Number of radio packets forwarded (unsigned integer)*\/$/;"	m	struct:gwinfo
 rxnb	inc/handle.h	/^    uint32_t rxnb;    \/*Number of radio packets received (unsigned integer)*\/$/;"	m	struct:gwinfo
 rxok	inc/handle.h	/^    uint32_t rxok;    \/*Number of radio packets received with a valid PHY CRC*\/$/;"	m	struct:gwinfo
@@ -700,31 +662,31 @@ sbox	src/aes.c	/^static const uint_8t sbox[256]  =  sb_data(f1);$/;"	v	file:
 serialize_msg_to_gw	src/handle.c	/^void serialize_msg_to_gw(const char* data, int size, char* gweui_hex, char* json_data, uint32_t tmst, int delay) {$/;"	f
 set_timer	src/handle.c	/^void set_timer(int sec,int msec) {$/;"	f
 shift_sub_rows	src/aes.c	/^static void shift_sub_rows( uint_8t st[N_BLOCK] )$/;"	f	file:
-show_help	src/lw_utili.c	/^static void show_help() {$/;"	f	file:
-signal_handle	src/lora_serv.c	/^void signal_handle(int signo){$/;"	f
+show_help	src/dls_utili.c	/^static void show_help() {$/;"	f	file:
+signal_handle	src/dragino_lorawan_server.c	/^void signal_handle(int signo) {$/;"	f
 size	inc/handle.h	/^	uint16_t size;     \/*RF packet payload size in bytes (unsigned integer)*\/$/;"	m	struct:metadata
 skip_quotes	src/parson.c	/^static JSON_Status skip_quotes(const char **string) {$/;"	f	file:
-sockfd_pull	src/lora_serv.c	/^static int sockfd_pull;\/*socket for downstream to gateway*\/$/;"	v	file:
-sockfd_push	src/lora_serv.c	/^static int sockfd_push;\/*socket for upstream from gateway*\/$/;"	v	file:
+sockfd_pull	src/dragino_lorawan_server.c	/^static int sockfd_pull;			\/*socket for downstream to gateway *\/$/;"	v	file:
+sockfd_push	src/dragino_lorawan_server.c	/^static int sockfd_push;			\/*socket for upstream from gateway *\/$/;"	v	file:
 sql_debug	src/db.c	/^static void sql_debug(sqlite3_stmt* stmt) { $/;"	f	file:
-sql_debug	src/lw_utili.c	/^static void sql_debug(sqlite3_stmt* stmt) { $/;"	f	file:
+sql_debug	src/dls_utili.c	/^static void sql_debug(sqlite3_stmt* stmt) { $/;"	f	file:
 srand1	src/utilities.c	/^void srand1( uint32_t seed )$/;"	f
 sscanf	src/parson.c	40;"	d	file:
 stat	inc/handle.h	/^	uint8_t  stat;     \/* packet status*\/$/;"	m	struct:metadata
-stmt	inc/lw_utili.h	/^    sqlite3_stmt *stmt;$/;"	m	struct:lw_t
+stmt	inc/dls_utili.h	/^    sqlite3_stmt *stmt;$/;"	m	struct:lw_t
 str2hex	src/handle.c	/^void str2hex(uint8_t* dest, char* src, int len) {$/;"	f
 string	src/parson.c	/^    char        *string;$/;"	m	union:json_value_value	file:
 tail	inc/generic_list.h	/^	struct Node* tail;$/;"	m	struct:List	typeref:struct:List::Node
 tcp_bind	src/handle.c	/^void tcp_bind(const char* servaddr, const char* port, int* listenfd) {$/;"	f
 tcp_connect	src/handle.c	/^void tcp_connect(const char* servaddr, const char* port, int* sockfd, bool* exit_sig) {$/;"	f
-thread_down	src/lora_serv.c	/^void thread_down(void) {$/;"	f
-thread_up_handle	src/lora_serv.c	/^void thread_up_handle(void* pkt_info) {$/;"	f
+thread_down	src/dragino_lorawan_server.c	/^void thread_down(void) {$/;"	f
+thread_up_handle	src/dragino_lorawan_server.c	/^void thread_up_handle(void *pkt_info) {$/;"	f
 time	inc/handle.h	/^	char     time[28]; \/*UTC time of pkt RX, us precision, ISO 8601 'compact' format*\/$/;"	m	struct:metadata
 time	inc/handle.h	/^    char time[32];    \/*UTC 'system' time of the gateway, ISO 8601 'expanded' format*\/$/;"	m	struct:gwinfo
 tmst	inc/handle.h	/^	uint32_t tmst;     \/*raw time stamp*\/$/;"	m	struct:metadata
-tmst_g	src/lora_serv.c	/^static uint32_t tmst_g;$/;"	v	file:
+tmst_g	src/dragino_lorawan_server.c	/^static uint32_t tmst_g;$/;"	v	file:
 to	inc/handle.h	/^	int to; \/* which server to send to 1.app 2.nc 3.both 4.err 5.ignore *\/$/;"	m	struct:jsondata
-tohex	src/lw_utili.c	/^static char *tohex(char *dst, const char *src, uint8_t len) {$/;"	f	file:
+tohex	src/dls_utili.c	/^static char *tohex(char *dst, const char *src, uint8_t len) {$/;"	f	file:
 txnb	inc/handle.h	/^    uint32_t txnb;    \/*Number of packets emitted (unsigned integer)*\/$/;"	m	struct:gwinfo
 type	src/parson.c	/^    JSON_Value_Type  type;$/;"	m	struct:json_value_t	file:
 uLoRaMacDLSettings	src/handle.c	/^typedef union uLoRaMacDLSettings{$/;"	u	file:

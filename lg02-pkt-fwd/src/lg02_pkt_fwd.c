@@ -71,9 +71,7 @@
 /* --- PRIVATE VARIABLES (GLOBAL) ------------------------------------------- */
 
 /* pkt struct */
-static struct pkt_rx_s pktrx[QUEUESIZE]; /* allocat queuesize struct of pkt_rx_s */
-
-static int pt = 0, prev = 0;  /* pt is point of receive packet postion,  prev is point of process packet thread*/
+static struct pkt_rx_s pktrx; /* allocat queuesize struct of pkt_rx_s */
 
 /* signal handling variables */
 volatile bool exit_sig = false; /* 1 -> application terminates cleanly (shut down hardware, close open files, etc) */
@@ -230,13 +228,14 @@ radiodev *txdev;
 
 /* threads */
 void thread_stat(void);
-void thread_up(void);
 void thread_down(void);
 void thread_push(void);
 void thread_jit(void);
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
+
+static void push_mqtt(struct pkt_rx_s* rx_pkt);
 
 static void sig_handler(int sigio) {
     if (sigio == SIGQUIT) {
@@ -360,7 +359,9 @@ static struct pkt_rx_s *pkt_alloc(void) {
 }
 
 static void pktrx_clean(struct pkt_rx_s *rx) {
-    rx->empty = 1;
+    rx->snr = 0.0;
+    rx->rssi = 0.0;
+    rx->crc = 0;
     rx->size = 0;
     memset(rx->payload, 0, sizeof(rx->payload));
 }
@@ -520,8 +521,8 @@ static void output_status(int conn) {
 
 int main(int argc, char *argv[])
 {
+    int i, j; /* loop variable and temporary variable for return value */
     struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
-    int i; /* loop variable and temporary variable for return value */
 
     FILE *fp = NULL;
 
@@ -775,9 +776,7 @@ int main(int argc, char *argv[])
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     /* init the queue of receive packets */
-    for (i = 0; i < QUEUESIZE; i++) {  
-        pktrx_clean(&pktrx[i]);
-    }
+    pktrx_clean(&pktrx);
 	
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     /* radio device init */
@@ -897,13 +896,6 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
         }
 
-        /* spawn threads to manage upstream and downstream */
-        i = pthread_create( &thrid_up, NULL, (void * (*)(void *))thread_up, NULL);
-        if (i != 0) {
-                MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create upstream thread\n");
-                exit(EXIT_FAILURE);
-        }
-
         i = pthread_create( &thrid_down, NULL, (void * (*)(void *))thread_down, NULL);
         if (i != 0) {
                 MSG_LOG(DEBUG_ERROR, "ERROR~ [main] impossible to create downstream thread\n");
@@ -925,93 +917,89 @@ int main(int argc, char *argv[])
     }
 
     /* main thread for receive message, then process the message */
+    struct timespec fetch_time;
+    struct tm * x;
+    char fetch_timestamp[28]; /* timestamp as a text string */
+
+    /* data buffers */
+    uint8_t buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
+    int buff_index;
+
+    /* protocol variables */
+    uint8_t token_h; /* random token for acknowledgement matching */
+    uint8_t token_l; /* random token for acknowledgement matching */
+    
+    /* pre-fill the data buffer with fixed fields */
+    buff_up[0] = PROTOCOL_VERSION;
+    buff_up[3] = PKT_PUSH_DATA;
+
+    *(uint32_t *)(buff_up + 4) = net_mac_h;
+    *(uint32_t *)(buff_up + 8) = net_mac_l;
 
     rxlora(rxdev, RXMODE_SCAN);  /* star lora continue receive mode */
     MSG_LOG(DEBUG_INFO, "Listening at SF%i on %.6lf Mhz. syncword is 0x%02x on spiport%i\n", rxdev->sf, (double)(rxdev->freq)/1000000, rxdev->syncword, rxdev->spiport);
     rxlora_time = time(NULL);
     while (!exit_sig && !quit_sig) {
         now_time = time(NULL);
-        if(digitalRead(rxdev->dio[0]) == 1) {  /* read IO if RXDONE */
-            if (pktrx[pt].empty) {
-                if (received(rxdev->spiport, &pktrx[pt]) == true) {
-                    if (!strcmp(server_type, "relay")) {      /* lora relay mode, trunking */
-                        for (i = 0; i < 4; i++) {  /* payload MIC */
-                            this_mic[i] = pktrx[pt].payload[pktrx[pt].size - i - 1];
-                        }
-                        this_mic[4] = '\0';
+        if (digitalRead(rxdev->dio[0]) == 1) {  /* read IO if RXDONE */
+            if (received(rxdev->spiport, &pktrx) != true) {
+                continue;
+            } else if (!strcmp(server_type, "lorawan")) {
+                 /* local timestamp generation until we get accurate GPS time */
+                 clock_gettime(CLOCK_REALTIME, &fetch_time);
+                 x = gmtime(&(fetch_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
+                 snprintf(fetch_timestamp, sizeof fetch_timestamp, "%04i-%02i-%02iT%02i:%02i:%02i.%06liZ", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (fetch_time.tv_nsec)/1000); /* ISO 8601 format */
+                         
+                 /* get timestamp for statistics */
+                 struct timeval now;
+                 gettimeofday(&now, NULL);
+                 uint32_t tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
 
-                        if (!strlen(last_mic)) {
-                            strcpy(last_mic, this_mic);
-                        }
+                 /* start composing datagram with the header */
+                 token_h = (uint8_t)rand(); /* random token */
+                 token_l = (uint8_t)rand(); /* random token */
+                 buff_up[1] = token_h;
+                 buff_up[2] = token_l;
+                 buff_index = 12; /* 12-byte header */
 
-                        if (strcmp(last_mic, this_mic)) {  /* MIC not equal */
-                            single_tx(txdev, pktrx[pt].payload, pktrx[pt].size); 
-                            strcpy(last_mic, this_mic);
-                        }
-                        pktrx_clean(&pktrx[pt]); 
+                 j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":%.1f", fetch_timestamp, tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxdev->cr, pktrx.snr);
 
-                    } else if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp") || !strcmp(server_type, "customized")) {  // mqtt mode or tcpudp mode for loraRAW
-                        char tmp[256] = {'\0'};
-                        char chan_path[32] = {'\0'};
-                        char *chan_id = NULL;
-                        char *chan_data = NULL;
-                        int id_found = 0, data_size = pktrx[pt].size;
+                 buff_index += j;
 
-                        for (i = 0; i < pktrx[pt].size; i++) {
-                            tmp[i] = pktrx[pt].payload[i];
-                        }
+                 j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%.0f,\"size\":%u", pktrx.rssi, pktrx.size);
+                         
+                 buff_index += j;
 
-                       if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
-                            chan_data = &tmp[4];
-                        else
-                            chan_data = tmp;
+                 memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9); buff_index += 9;
+                         
+                 j = bin_to_b64((uint8_t *)pktrx.payload, pktrx.size, (char *)(buff_up + buff_index), 341); /* 255 bytes = 340 chars in b64 + null char */
 
-                        for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
-                            if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
-                                chan_id = &tmp[i + 1];
-                                ++id_found;
-                            }
+                 buff_index += j;
+                 buff_up[buff_index] = '"';
+                 ++buff_index;
+                 buff_up[buff_index] = '}';
+                 ++buff_index;
+                 buff_up[buff_index] = ']';
+                 ++buff_index;
+                 buff_up[buff_index] = '}';
+                 ++buff_index;
+                 buff_up[buff_index] = '\0'; /* add string terminator, for safety */
+                         
+                 MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (RXPKT): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+                     
+                 /* send datagram to server */
+                 pthread_mutex_lock(&mx_sock_up);
+                 send(sock_up, (void *)buff_up, buff_index, 0);
+                 pthread_mutex_unlock(&mx_sock_up);
 
-                            if (tmp[i] == '>') { 
-                                tmp[i] = '\0';
-                                chan_data = tmp + i + 1;
-                                data_size = data_size - i;
-                                ++id_found;
-                            }
-
-                            if (id_found == 2) /* found channel id */ 
-                                break;
-                                
-                        }
-
-                        if (id_found == 2) 
-                            sprintf(chan_path, "/var/iot/channels/%s", chan_id);
-                        else {
-                            static unsigned long next = 1;
-                            next = next * 1103515245 + 12345;
-                            srand((unsigned)time(NULL) + next); 
-                            sprintf(chan_path, "/var/iot/receive/%ld", (unsigned)rand() % 327689);
-                        }
-                        
-                        fp = fopen(chan_path, "w+");
-                        if ( NULL != fp ) {
-			    clock_gettime(CLOCK_REALTIME, &fetch_time1);
-		            x1 = gmtime(&(fetch_time1.tv_sec)); /* split the UNIX timestamp to its calendar components */
-                            fprintf(fp,"%04i-%02i-%02iT%02i:%02i:%02i,", (x1->tm_year)+1900, (x1->tm_mon)+1, x1->tm_mday, x1->tm_hour, x1->tm_min, x1->tm_sec); /* ISO 8601 format */
-			    fprintf(fp, "%.0f,",pktrx[pt].rssi);
-                            fprintf(fp, "%s\n", chan_data);
-                            fflush(fp);
-                            fclose(fp);
-                        } else 
-                            MSG_LOG(DEBUG_ERROR, "ERROR~ canot open file path: %s\n", chan_path); 
-
-                        pktrx_clean(&pktrx[pt]);
-                    }
-
-                    if (++pt >= QUEUESIZE)
-                        pt = 0;
-                } 
+                 pthread_mutex_lock(&mx_meas_up);
+                 meas_up_dgram_sent += 1;
+                 meas_up_network_byte += buff_index;
+                 pthread_mutex_unlock(&mx_meas_up);
+            } else {
+                 push_mqtt(&pktrx);
             }
+            pktrx_clean(&pktrx);
         } else if ((long)now_time - (long)rxlora_time > KEEPALIVE_REC) { 
             rxlora_time = now_time;
             rxlora(rxdev, RXMODE_SCAN);  /* reset lora continue receive mode */
@@ -1020,7 +1008,6 @@ int main(int argc, char *argv[])
     }
 
     if (!strcmp(server_type, "lorawan")) {
-        pthread_join(thrid_up, NULL);
         pthread_cancel(thrid_stat);
         pthread_cancel(thrid_down); /* don't wait for downstream thread */
         pthread_cancel(thrid_jit); /* don't wait for jit thread */
@@ -1250,117 +1237,6 @@ void thread_stat(void) {
         /* wait for next reporting interval */
         wait_ms(1000 * stat_interval);
     }
-}
-
-/* -------------------------------------------------------------------------- */
-/* --- THREAD 2: RECEIVING PACKETS AND FORWARDING THEM ---------------------- */
-
-void thread_up(void) {
-    int i, j; /* loop variables */
-
-    /* allocate memory for packet fetching and processing */
-    int nb_pkt;
-    
-    /* local timestamp variables until we get accurate GPS time */
-    struct timespec fetch_time;
-    struct tm * x;
-    char fetch_timestamp[28]; /* timestamp as a text string */
-    
-    /* data buffers */
-    uint8_t buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
-    int buff_index;
-
-    uint8_t token_h; 
-    uint8_t token_l;
-    
-    /* pre-fill the data buffer with fixed fields */
-    buff_up[0] = PROTOCOL_VERSION;
-    buff_up[3] = PKT_PUSH_DATA;
-    *(uint32_t *)(buff_up + 4) = net_mac_h;
-    *(uint32_t *)(buff_up + 8) = net_mac_l;
-    
-    while (!exit_sig && !quit_sig) {
-
-        //MSG("INFO~ [up] loop...\n");
-                /* fetch packets */
-
-        if (pktrx[prev].empty) {
-            if (++prev >= QUEUESIZE)
-                prev = 0;
-
-            wait_ms(FETCH_SLEEP_MS); /* wait a short time if no packets */
-            continue;
-        }
-
-        /* local timestamp generation until we get accurate GPS time */
-        clock_gettime(CLOCK_REALTIME, &fetch_time);
-        x = gmtime(&(fetch_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
-        snprintf(fetch_timestamp, sizeof fetch_timestamp, "%04i-%02i-%02iT%02i:%02i:%02i.%06liZ", (x->tm_year)+1900, (x->tm_mon)+1, x->tm_mday, x->tm_hour, x->tm_min, x->tm_sec, (fetch_time.tv_nsec)/1000); /* ISO 8601 format */
-                
-        /* get timestamp for statistics */
-        struct timeval now;
-        gettimeofday(&now, NULL);
-        uint32_t tmst = (uint32_t)(now.tv_sec*1000000 + now.tv_usec);
-
-        /* start composing datagram with the header */
-        token_h = (uint8_t)rand(); /* random token */
-        token_l = (uint8_t)rand(); /* random token */
-        buff_up[1] = token_h;
-        buff_up[2] = token_l;
-        buff_index = 12; /* 12-byte header */
-
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":%.1f", fetch_timestamp, tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxcr, pktrx[prev].snr);
-
-        /*
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":7.8", tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxcr);
-        */
-
-        buff_index += j;
-
-        j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%.0f,\"size\":%u", pktrx[prev].rssi, pktrx[prev].size);
-                
-        buff_index += j;
-
-        memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9);
-                buff_index += 9;
-                
-        j = bin_to_b64((uint8_t *)pktrx[prev].payload, pktrx[prev].size, (char *)(buff_up + buff_index), 341); /* 255 bytes = 340 chars in b64 + null char */
-
-        buff_index += j;
-        buff_up[buff_index] = '"';
-        ++buff_index;
-        buff_up[buff_index] = '}';
-        ++buff_index;
-        buff_up[buff_index] = ']';
-        ++buff_index;
-        buff_up[buff_index] = '}';
-        ++buff_index;
-        buff_up[buff_index] = '\0'; /* add string terminator, for safety */
-                
-        MSG_LOG(DEBUG_PKT_FWD, "\nRXTX~ (RXPKT): [up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
-            
-        /* send datagram to server */
-
-        pthread_mutex_lock(&mx_sock_up);
-        send(sock_up, (void *)buff_up, buff_index, 0);
-        pthread_mutex_unlock(&mx_sock_up);
-
-        pthread_mutex_lock(&mx_meas_up);
-        meas_up_dgram_sent += 1;
-        meas_up_network_byte += buff_index;
-        pthread_mutex_unlock(&mx_meas_up);
-
-        /* clean a packet */
-
-        pktrx_clean(&pktrx[prev]);
-
-        if (++prev >= QUEUESIZE)
-            prev = 0;
-
-        wait_ms(FETCH_SLEEP_MS); /* wait after receive a packet */
-        //MSG("INFO~ [up]return loop\n");
-    }
-    MSG_LOG(DEBUG_INFO, "\nINFO~ End of upstream thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1961,6 +1837,69 @@ void thread_jit(void) {
             wait_ms(10);
         }
     }
+}
+
+static void push_mqtt(struct pkt_rx_s* rx_pkt)
+{
+    int i;
+    char tmp[256] = {'\0'};
+    char chan_path[32] = {'\0'};
+    char *chan_id = NULL;
+    char *chan_data = NULL;
+    int id_found = 0, data_size = rx_pkt->size;
+
+    FILE *fp = NULL;
+
+    struct tm * x1;        /* used to add timestamp for MQTT */
+    struct timespec fetch_time;
+    
+    for (i = 0; i < rx_pkt->size; i++) {
+        tmp[i] = rx_pkt->payload[i];
+    }
+
+    if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
+        chan_data = &tmp[4];
+    else
+        chan_data = tmp;
+
+    for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
+        if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
+            chan_id = &tmp[i + 1];
+            ++id_found;
+        }
+
+        if (tmp[i] == '>') { 
+            tmp[i] = '\0';
+            chan_data = tmp + i + 1;
+            data_size = data_size - i;
+            ++id_found;
+        }
+
+        if (id_found == 2) /* found channel id */ 
+            break;
+            
+    }
+
+    if (id_found == 2) 
+        sprintf(chan_path, "/var/iot/channels/%s", chan_id);
+    else {
+        static unsigned long next = 1;
+        srand((unsigned)time(NULL));      /* random filename */
+        next = next * 1103515245 + 12345;
+        sprintf(chan_path, "/var/iot/receive/%ld", (unsigned)(next/65536) % 32768);
+    }
+    
+    fp = fopen(chan_path, "w+");
+    if ( NULL != fp ) {
+		clock_gettime(CLOCK_REALTIME, &fetch_time);
+		x1 = gmtime(&(fetch_time.tv_sec)); /* split the UNIX timestamp to its calendar components */
+		fprintf(fp,"%04i-%02i-%02iT%02i:%02i:%02i,", (x1->tm_year)+1900, (x1->tm_mon)+1, x1->tm_mday, x1->tm_hour, x1->tm_min, x1->tm_sec); /* ISO 8601 format */
+		fprintf(fp, "%.0f,",rx_pkt->rssi);
+        fprintf(fp, "%s\n", chan_data);
+        fflush(fp);
+        fclose(fp);
+    } else 
+        MSG_LOG(DEBUG_ERROR, "ERROR~ canot open file path: %s\n", chan_path); 
 }
 
 /* --- EOF ------------------------------------------------------------------ */

@@ -731,8 +731,6 @@ bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
 
         pkt_rx->rssi = readReg(spidev, REG_PKTRSSI) - rssicorr;
 
-        pkt_rx->empty = 0;  /* make sure save the received messaeg */
-
         return true;
     } /* else if (readReg(spidev, REG_OPMODE) != (OPMODE_LORA | OPMODE_RX_SINGLE)) {  //single mode
         writeReg(spidev, REG_FIFO_ADDR_PTR, 0x00);

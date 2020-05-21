@@ -269,15 +269,12 @@ struct pkt_tx_s {
 */
 
 struct pkt_rx_s {
-    uint8_t     empty;        /*!> empty label */
     float       snr;          /*!> average packet SNR, in dB (LoRa only) */
     float       rssi;         /*!> average packet RSSI in dB */
     uint16_t    crc;          /*!> CRC that was received in the payload */
     uint16_t    size;         /*!> payload size in bytes */ 
     uint8_t     payload[256]; /*!> buffer containing the payload */
 };
-
-#define QUEUESIZE 8         /*!> size of queue */
 
 /**
  @struct 

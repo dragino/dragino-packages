@@ -270,7 +270,6 @@ static uint32_t tx_freq_max[LGW_RF_CHAIN_NB]; /* highest frequency supported by 
 radiodev *sxradio;
 static bool sx1276 = false;
 static char server_type[16] = "server_type";
-static FILE *fp = NULL;
 
 /* --- debuglevel option ----------------------*/
 static char debug_level_char[16] = "debug_level";
@@ -370,6 +369,7 @@ void thread_ent_dnlink(void);
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
+void payload_deal(struct lgw_pkt_rx_s* p);
 
 static void sig_handler(int sigio) {
     if (sigio == SIGQUIT) {
@@ -491,7 +491,6 @@ static int parse_SX1301_configuration(const char * conf_file) {
             lbtconf.enable = (bool)json_value_get_boolean(val);
         } else {
             MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for lbt_cfg.enable seems wrong, please check\n");
-            lbtconf.enable = false;
         }
         if (lbtconf.enable == true) {
             val = json_object_get_value(conf_lbt_obj, "rssi_target"); /* fetch value (if possible) */
@@ -1274,14 +1273,72 @@ int main(void)
     MSG("Starting Packet Forwarder at %s\n", stat_timestamp);
     //MSG("*** Lora concentrator HAL library version info ***\n%s\n***\n", lgw_version_info());
 
-    /* display host endianness */
-    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-        MSG_DEBUG(DEBUG_INFO, "INFO~ Little endian host\n");
-    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-        MSG_DEBUG(DEBUG_INFO, "INFO~ Big endian host\n");
-    #else
-        MSG_DEBUG(DEBUG_INFO, "INFO~ Host endianness unknown\n");
-    #endif
+    /* LOG or debug message configure */
+
+    if (!get_config("general", debug_level_char, sizeof(debug_level_char)))
+        debug_level_uint = 2;
+    else 
+        debug_level_uint = atoi(debug_level_char);
+
+    switch (debug_level_uint) {
+        case 0: /*only ERROR debug info */
+            DEBUG_PKT_FWD    = 0;  
+            DEBUG_REPORT     = 0;
+            DEBUG_JIT        = 0;
+            DEBUG_JIT_ERROR  = 0;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 0;
+            DEBUG_INFO       = 0;
+            DEBUG_WARNING    = 0;
+            DEBUG_ERROR      = 1;
+            break;
+        case 1:  /* PKT_FWD MSG output */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_REPORT     = 0;
+            DEBUG_JIT        = 0;
+            DEBUG_JIT_ERROR  = 0;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 0;
+            DEBUG_INFO       = 0;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            break;
+        case 2:  /* PKT_FWD MSG and MAC_HEAD output */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_REPORT     = 1;
+            DEBUG_JIT        = 0;
+            DEBUG_JIT_ERROR  = 0;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 0;
+            DEBUG_INFO       = 1;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            break;
+        case 3:  /* PKT_FWD MSG and MAC_HEAD and JIT output */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_REPORT     = 1;
+            DEBUG_JIT        = 1;
+            DEBUG_JIT_ERROR  = 1;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 0;
+            DEBUG_INFO       = 0;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            break;
+        case 4:  /* more verbose */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_REPORT     = 1;
+            DEBUG_JIT        = 1;
+            DEBUG_JIT_ERROR  = 1;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 1;
+            DEBUG_INFO       = 1;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            break;
+        default: /* default is 2 level */
+            break;
+    }
 
     /* load configuration files */
     if (access(debug_cfg_path, R_OK) == 0) { /* if there is a debug conf, parse only the debug conf */
@@ -1417,73 +1474,6 @@ int main(void)
         rx2dr = DR_LORA_SF12;
         rx2bw = BW_125KHZ;
         rx2freq = 921900000UL;
-    }
-
-    /* LOG or debug message configure */
-
-    if (!get_config("general", debug_level_char, sizeof(debug_level_char)))
-        debug_level_uint = 2;
-    else 
-        debug_level_uint = atoi(debug_level_char);
-
-    switch (debug_level_uint) {
-        case 0: /*only ERROR debug info */
-            DEBUG_PKT_FWD    = 0;  
-            DEBUG_REPORT     = 0;
-            DEBUG_JIT        = 0;
-            DEBUG_JIT_ERROR  = 0;
-            DEBUG_TIMERSYNC  = 0;
-            DEBUG_BEACON     = 0;
-            DEBUG_INFO       = 0;
-            DEBUG_WARNING    = 0;
-            DEBUG_ERROR      = 1;
-            break;
-        case 1:  /* PKT_FWD MSG output */
-            DEBUG_PKT_FWD    = 1;  
-            DEBUG_REPORT     = 0;
-            DEBUG_JIT        = 0;
-            DEBUG_JIT_ERROR  = 0;
-            DEBUG_TIMERSYNC  = 0;
-            DEBUG_BEACON     = 0;
-            DEBUG_INFO       = 0;
-            DEBUG_WARNING    = 1;
-            DEBUG_ERROR      = 1;
-            break;
-        case 2:  /* PKT_FWD MSG and MAC_HEAD output */
-            DEBUG_PKT_FWD    = 1;  
-            DEBUG_REPORT     = 1;
-            DEBUG_JIT        = 0;
-            DEBUG_JIT_ERROR  = 0;
-            DEBUG_TIMERSYNC  = 0;
-            DEBUG_BEACON     = 0;
-            DEBUG_INFO       = 1;
-            DEBUG_WARNING    = 1;
-            DEBUG_ERROR      = 1;
-            break;
-        case 3:  /* PKT_FWD MSG and MAC_HEAD and JIT output */
-            DEBUG_PKT_FWD    = 1;  
-            DEBUG_REPORT     = 1;
-            DEBUG_JIT        = 1;
-            DEBUG_JIT_ERROR  = 1;
-            DEBUG_TIMERSYNC  = 0;
-            DEBUG_BEACON     = 0;
-            DEBUG_INFO       = 0;
-            DEBUG_WARNING    = 1;
-            DEBUG_ERROR      = 1;
-            break;
-        case 4:  /* more verbose */
-            DEBUG_PKT_FWD    = 1;  
-            DEBUG_REPORT     = 1;
-            DEBUG_JIT        = 1;
-            DEBUG_JIT_ERROR  = 1;
-            DEBUG_TIMERSYNC  = 0;
-            DEBUG_BEACON     = 1;
-            DEBUG_INFO       = 1;
-            DEBUG_WARNING    = 1;
-            DEBUG_ERROR      = 1;
-            break;
-        default: /* default is 2 level */
-            break;
     }
 
     /* init transifer radio device */
@@ -1904,10 +1894,9 @@ void thread_up(void) {
     struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX]; /* array containing inbound packets + metadata */
     struct lgw_pkt_rx_s *p; /* pointer on a RX packet */
 
-    int nb_pkt;
+    LoRaMacMessageData_t macmsg;
 
-    uint32_t mote_addr;
-    uint8_t mote_fport;
+    int nb_pkt;
 
     /* local copy of GPS time reference */
     bool ref_ok = false; /* determine if GPS time reference must be used or not */
@@ -2002,26 +1991,27 @@ void thread_up(void) {
         pkt_in_dgram = 0;
         for (i=0; i < nb_pkt; ++i) {
             p = &rxpkt[i];
-            /* FHDR - DevAddr */
-            mote_addr  = p->payload[1];
-            mote_addr |= p->payload[2] << 8;
-            mote_addr |= p->payload[3] << 16;
-            mote_addr |= p->payload[4] << 24;
-            mote_fport = p->payload[8];  /* if optslen = 0 */
-            sprintf(devchar, "%08X", mote_addr);
 
-            /* basic packet filtering */
-            if (fport_num != 0 && (mote_fport == fport_num)){
-				MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to Fport doesn't match %u\n", 
-						fport_num); /* DEBUG: display JSON payload */
-				continue;
-			} /* filter */
-             
-            if (dev_addr_mask != 0 && (strncmp(devchar, devaddr_mask, strlen(devaddr_mask)) != 0 )){
-				MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to DevAddr(0x%s) doesn't match mask (0x%s)\n", 
-                       devchar,devaddr_mask); /* DEBUG: display JSON payload */
-				continue;
-			}
+            macmsg.Buffer = p->payload;
+            macmsg.BufSize = p->size;
+            if (LORAMAC_PARSER_SUCCESS != LoRaMacParserData(&macmsg))  
+                continue;
+
+            if ((macmsg.MHDR.Bits.MType != FRAME_TYPE_JOIN_REQ) || (macmsg.MHDR.Bits.MType != FRAME_TYPE_JOIN_ACCEPT)) {
+                sprintf(devchar, "%08X", macmsg.FHDR.DevAddr);
+
+                /* basic packet filtering */
+                if (fport_num != 0 && (macmsg.FPort == fport_num)){
+                    MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to Fport doesn't match %u\n", fport_num); /* DEBUG: display JSON payload */
+                    continue;
+                } /* filter */
+                 
+                if (dev_addr_mask != 0 && (strncmp(devchar, devaddr_mask, strlen(devaddr_mask)) != 0 )){
+                    MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to DevAddr(0x%s) doesn't match mask (0x%s)\n", 
+                           devchar,devaddr_mask); /* DEBUG: display JSON payload */
+                    continue;
+                }
+            }
 
             pthread_mutex_lock(&mx_meas_up);
             meas_nb_rx_rcv += 1;
@@ -2283,55 +2273,6 @@ void thread_up(void) {
             buff_up[buff_index] = '}';
             ++buff_index;
             ++pkt_in_dgram;
-
-            if (!strcmp(server_type, "mqtt") || !strcmp(server_type, "tcpudp") || !strcmp(server_type, "customized")) {  // mqtt mode or tcpudp mode for loraRAW 
-                char tmp[256] = {'\0'};
-                char chan_path[32] = {'\0'};
-                char *chan_id = NULL;
-                char *chan_data = NULL;
-                int id_found = 0, data_size = p->size;
-
-                for (i = 0; i < p->size; i++) {
-                    tmp[i] = p->payload[i];
-                }
-
-                if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
-                    chan_data = &tmp[4];
-                else
-                    chan_data = tmp;
-
-                for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
-                    if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
-                        chan_id = &tmp[i + 1];
-                        ++id_found;
-                    }
-
-                    if (tmp[i] == '>') { 
-                        tmp[i] = '\0';
-                        chan_data = tmp + i + 1;
-                        data_size = data_size - i;
-                        ++id_found;
-                    }
-
-                    if (id_found == 2) /* found channel id */ 
-                        break;
-                }
-
-                if (id_found == 2) 
-                    sprintf(chan_path, "/var/iot/channels/%s", chan_id);
-                else {
-                    sprintf(chan_path, "/var/iot/receive/%u%u", token_l, token_h);
-                }
-                
-                fp = fopen(chan_path, "w+");
-                if ( NULL != fp ) {
-                    //fwrite(chan_data, sizeof(char), data_size, fp);  
-                    fprintf(fp, "%s\n", chan_data);
-                    fflush(fp);
-                    fclose(fp);
-                } else 
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ cannot open file path: %s\n", chan_path); 
-            }
         }
 
         /* restart fetch sequence without sending empty JSON if all packets have been filtered out */
@@ -2384,7 +2325,7 @@ void thread_up(void) {
 }
 
 void thread_proc_rxpkt() {
-    int i, idx; /* loop variables */
+    int idx; /* loop variables */
     int fsize = 0;
     struct lgw_pkt_rx_s *p; /* pointer on a RX packet */
 
@@ -2474,6 +2415,10 @@ void thread_proc_rxpkt() {
                         } else
                             MSG_DEBUG(DEBUG_WARNING, "DECRYPT~ [Ignore] Can't find SessionKeys for Dev %08X\n", devinfo.devaddr);
                     }
+                }
+
+                if (strcmp(server_type, "lorawan")) {
+                    payload_deal(p);
                 }
             }
 
@@ -3727,8 +3672,8 @@ void thread_ent_dnlink(void) {
                 entry->next = NULL;
 				
                 MSG_DEBUG(DEBUG_INFO, 
-                        "INFO~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d, payload:%08X\n",
-                        entry->devaddr, entry->txmode, entry->pdformat, entry->psize, entry->payload);
+                        "INFO~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d\n",
+                        entry->devaddr, entry->txmode, entry->pdformat, entry->psize);
 
                 if (strstr(entry->txmode, "imme") != NULL) {
                     MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Pending IMMEDIATE of %s\n", addr);
@@ -3896,5 +3841,57 @@ static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, ui
     return jit_result;
 }
 
+
+void payload_deal(struct lgw_pkt_rx_s* p) {
+    int i;
+    char tmp[256] = {'\0'};
+    char chan_path[32] = {'\0'};
+    char *chan_id = NULL;
+    char *chan_data = NULL;
+    int id_found = 0, data_size = p->size;
+
+    FILE *fp;
+
+    for (i = 0; i < p->size; i++) {
+        tmp[i] = p->payload[i];
+    }
+
+    if (tmp[2] == 0x00 && tmp[3] == 0x00) /* Maybe has HEADER ffff0000 */
+        chan_data = &tmp[4];
+    else
+        chan_data = tmp;
+
+    for (i = 0; i < 16; i++) { /* if radiohead lib then have 4 byte of RH_RF95_HEADER_LEN */
+        if (tmp[i] == '<' && id_found == 0) {  /* if id_found more than 1, '<' found  more than 1 */
+            chan_id = &tmp[i + 1];
+            ++id_found;
+        }
+
+        if (tmp[i] == '>') { 
+            tmp[i] = '\0';
+            chan_data = tmp + i + 1;
+            data_size = data_size - i;
+            ++id_found;
+        }
+
+        if (id_found == 2) /* found channel id */ 
+            break;
+    }
+
+    if (id_found == 2) 
+        sprintf(chan_path, "/var/iot/channels/%s", chan_id);
+    else {
+        sprintf(chan_path, "/var/iot/receive/%lu", time(NULL));
+    }
+    
+    fp = fopen(chan_path, "w+");
+    if ( NULL != fp ) {
+        //fwrite(chan_data, sizeof(char), data_size, fp);  
+        fprintf(fp, "%s\n", chan_data);
+        fflush(fp);
+        fclose(fp);
+    } else 
+        MSG_DEBUG(DEBUG_ERROR, "ERROR~ cannot open file path: %s\n", chan_path); 
+}
 
 /* --- EOF ------------------------------------------------------------------ */

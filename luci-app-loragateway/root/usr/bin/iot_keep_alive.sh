@@ -4,23 +4,29 @@ DEVPATH=/sys/bus/usb/devices
 #VID=12d1
 #PID=1001 
 WAN_IF='eth1' # enter name of WAN interface
-WANCARRIER=/sys/class/net/${WAN_IF}/carrier
-WIFI_IF='wlan0'
-#WIFICARRIER=/sys/class/net/${WIFI_IF}/carrier
+WAN_GW=""
+RETRY_WAN_GW=0
+
+#WiFi Interface
+WIFI_IF='wlan0-2'
 WIFI_GW=""
+RETRY_WIFI_GW=0
 wifi_ip=""
 
-#GSM_GW='10.64.64.64' # enter IP for default gateway on 3G interface
-#GSM_NAME=yun3G #enter name for 3G
-GSM_IF=`ifconfig |grep "3g-" | awk '{print $1}'` # 3g interface
-PING_HOST='1.1.1.1' # enter IP of host that you want to check,
+
+GSM_IF="3g-cellular" # 3g interface
+
+PING_HOST='1.1.1.1' # enter IP of first host to check.
+PING_HOST2='8.8.8.8' # enter IP of second host to check.
+PING_WIFI_HOST="8.8.4.4" # Use this IP to check WiFi Connection. 
+PING_WAN_HOST="139.130.4.5"  # Use this IP to check WAN connection (ns1.telstra.net)
+
 gsm_mode=0
 toggle_3g_time=90
 last_check_3g_dial=0
 ONE="1"
 ZERO="0"
 iot_online=0
-default_gw_3g=0
 offline_flag=""
 is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c lps8`
 last_reload_time=`date +%s`
@@ -35,44 +41,71 @@ fi
 echo $Cellular_CTL > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio$Cellular_CTL/direction
 
-update_state()
+
+
+chk_internet_connection()
 {
-    #echo "lan"
 	global_ping="$ZERO"
 	global_ping=`fping $PING_HOST | grep -c alive`
-	
+	if [ "$global_ping" -eq "$ZERO" ];then
+		global_ping=`fping $PING_HOST2 | grep -c alive`
+	fi
+}
+
+chk_eth1_connection()
+{
 	wan_ping="$ZERO"
-    #wan_chk=`ifconfig |grep "$WAN_IF"`
-    WAN_GW=`ip route show table all | grep "$WAN_IF" | grep default | awk '{print $3;}'` # get IP for default gateway on WAN interface
-    wan_link=`cat $WANCARRIER`
-    wan_ip=`ifconfig "$WAN_IF" | grep "inet " | awk -F'[: ]+' '{ print $4 }'`
-    logger -t iot_keep_alive "Ping WAN $wan_ip"
-    [ -n "$wan_ip" ] && wan_ping=`fping -I $WAN_IF $PING_HOST | grep -c alive`
-	[ "$wan_ping" -gt "$ZERO" ] && logger -t iot_keep_alive "WAN is alive"
-    #echo "lan-end"
 	
+	if [ `ifconfig | grep $WAN_IF -c` -gt 0 ];then
+		wan_ip="`ifconfig "$WAN_IF" | grep "inet " | awk -F'[: ]+' '{ print $4 }'`"
+		
+
+		if [ -n "$wan_ip" ]; then
+			#Try to get WAN GW 
+			if [ -z $WAN_GW ] && [ "`uci get network.wan.proto`" = "dhcp" ] && [ $RETRY_WAN_GW -lt 5 ];then
+				ifup wan
+				RETRY_WAN_GW=`expr $RETRY_WAN_GW + 1`
+				logger -t iot_keep_alive "Retry $RETRY_WAN_GW to get wan gateway"
+				sleep 20
+				WAN_GW=`ip route | grep "$WAN_IF" | grep default | awk '{print $3;}'`	
+				[ -n $WAN_GW ] && ip route add $PING_WAN_HOST via $WAN_GW dev $WAN_IF
+			fi
+			
+			# Ping Host to check eth1 connection. 
+			if [ "`ip route | grep $PING_WAN_HOST | awk '{print $3;}'`" = "$WAN_GW"  ];then
+				logger -t iot_keep_alive "Ping WAN via $WAN_GW"
+				wan_ping=`fping $PING_WAN_HOST | grep -c alive`
+			fi 
+		fi
+	fi
+}
+
+chk_wlan0_connection()
+{
     wifi_ping="$ZERO"
 
-    #wifi_chk=`ifconfig |grep "$WIFI_IF"`
-	if [ `ifconfig | grep wlan0 -c` -gt 0 ];then 
-		#echo "wifi"
-		WIFI_GW=`ip route show table all | grep "$WIFI_IF" | grep default | awk '{print $3;}'` # get IP for default gateway on WIFI interface
-		wifi_ip=`ifconfig "$WIFI_IF" | grep "inet " | awk -F'[: ]+' '{ print $4 }'`
-		#wifi_disabled=`uci get wireless.@wifi-iface[0].disabled`
-		#wifi_ap_mode=`uci get wireless.@wifi-iface[0].mode`
-		#wifi_link=`cat $WIFICARRIER`
-		logger -t iot_keep_alive "Ping WIFI $wifi_ip"
-		#[ -n "$wifi_ip" ] && [ "$wifi_ap_mode" != "ap" ] && wifi_ping=`ping -q -4 -c 3 -I $wifi_ip $PING_HOST | grep received |awk '{print $4}'`
-		[ -n "$wifi_ip" ] && wifi_ping=`fping -I $WIFI_IF $PING_HOST | grep -c alive`
-		[ "$wifi_ping" -gt "$ZERO" ] && logger -t iot_keep_alive "WiFi is alive"
-		#echo "wifi-end"
-	fi 
+	if [ `ifconfig | grep $WIFI_IF -c` -gt 0 ];then 
+		wifi_ip="`ifconfig "$WIFI_IF" | grep "inet " | awk -F'[: ]+' '{ print $4 }'`"
+		
 
-	
-	
-    default_route_if=`ip route show | grep default | awk '{print $5}'`
-	logger -t iot_keep_alive "Default interface is $default_route_if"
-
+		if [ -n "$wifi_ip" ]; then
+			#Try to get WiFi GW 
+			if [ -z $WIFI_GW ] && [ "`uci get network.wwan.proto`" = "dhcp" ] && [ $RETRY_WIFI_GW -lt 5 ];then
+				ifup wwan
+				RETRY_WIFI_GW=`expr $RETRY_WIFI_GW + 1`
+				logger -t iot_keep_alive "Retry $RETRY_WIFI_GW to get wifi GW"
+				sleep 20
+				WIFI_GW=`ip route | grep "$WIFI_IF" | grep default | awk '{print $3;}'` # get IP for default gateway on WIFI interface	
+				[ -n $WIFI_GW ] && ip route add $PING_WIFI_HOST via $WIFI_GW dev $WIFI_IF
+			fi
+			
+			# Ping  Host to check wifi connection. 
+			if [ "`ip route | grep $PING_WIFI_HOST | awk '{print $3;}'`" = "$WIFI_GW"  ];then
+				logger -t iot_keep_alive "Ping WiFi via $WIFI_GW"
+				wifi_ping=`fping $PING_WIFI_HOST | grep -c alive`
+			fi 
+		fi
+	fi 	
 }
 
 reload_iot_service()
@@ -95,7 +128,9 @@ check_3g_connection()
     gsm_chk=`ifconfig |grep "$GSM_IF"`
     gsm_ip=`ifconfig | grep '3g-' -A 1 | grep 'inet' | awk -F'[: ]+' '{ print $4 }'`
     [ -n "$gsm_ip" ] && logger -t iot_keep_alive "Ping GSM $gsm_ip" && gsm_ping=`fping -I $GSM_IF $PING_HOST | grep -c alive`
-	logger -t iot_keep_alive "gsm_ping: $gsm_ping"
+	if [ "$gsm_ping" -eq "$ZERO" ];then
+		gsm_ping=`fping -I $GSM_IF $PING_HOST2 | grep -c alive`
+	fi
 	[ "$gsm_ping" -gt "$ZERO" ] && logger -t iot_keep_alive "GSM Cellular is alive"
 	GSM_GW=`ip route show| grep $GSM_IF | awk '{print $1}'`
 	#echo "3g-end"
@@ -151,8 +186,7 @@ use_wifi_as_gateway()
 {
         # this function remove default gateway for 3G interface -
         # usually executed when moving internet connection from 3G to WIFI interface
-
-        [ -n "$previous_gw" ] && ip route del $previous_gw
+        logger -t iot_keep_alive "Moving internet connection to $WIFI_IF (WIFI) via gateway $WIFI_GW..."		
         ip route del default
         ip route add default via $WIFI_GW dev $WIFI_IF proto static src $wifi_ip
         #ip route add $WIFI_GW dev $WIFI_IF proto static scope link src $wifi_ip
@@ -191,45 +225,56 @@ toggle_3g()
 while :
 do 
 	sleep 15
-    update_state
-	[ ! -z $GSM_IF ] && default_gw_3g=`ip route show | grep default | grep $GSM_IF -c`
-	has_internet=0	
+	chk_internet_connection
 	
 	if [ "$global_ping" -gt "$ZERO" ];then   # Check if the device has internet connection
-		logger -t iot_keep_alive "Global Internet Access OK"
+		ROUTE_DF=`ip route | grep default | awk '{print $5}'`
+		logger -t iot_keep_alive "Internet Access OK: via $ROUTE_DF"
 		has_internet=1	
-		if [ "$wan_ping" -gt "$ZERO" ] || [ "$wifi_ping" -gt "$ZERO" ];then  #Check If device has WIFi or WAN Connection.
+		if [ "$ROUTE_DF" = "$WAN_IF" ] || [ "$ROUTE_DF" = "$WIFI_IF" ];then  #Check If device has WIFi or WAN Connection.
 			logger -t iot_keep_alive "use WAN or WiFi for internet access now"
-			if [ "$default_gw_3g" == "1" ];then
-				logger -t iot_keep_alive "need to switch to use ETH or WLAN"  # Device has WiFi or WAN connection but now use 3G as default gateway, Change back to WAN or WiFi
-				if [ "$wan_ping" -gt "$ZERO" ];then
-					use_wan_as_gateway
-				else
+		elif [ "$ROUTE_DF" = "$GSM_IF" ] && [ "`uci get network.cellular.backup`" = "1" ];then
+			chk_eth1_connection
+			if [ "$wan_ping" -gt "$ZERO" ];then
+				use_wan_as_gateway
+			else 
+				logger -t iot_keep_alive "XX ping ETH1 $PING_WAN_HOST via eth1 fail"
+				chk_wlan0_connection
+				if [ "$wifi_ping" -gt "$ZERO" ];then
 					use_wifi_as_gateway
+				else
+					logger -t iot_keep_alive "XX ping WiFi $PING_WIFI_HOST via wlan0-2 fail"
 				fi
 			fi
 		fi
 	else
-		if [ "$wan_ping" -gt "$ZERO" ]; then
-			has_internet=1	
+		has_internet=0
+		logger -t iot_keep_alive "Internet fail. Check interfaces for network connection"
+		chk_eth1_connection
+		if [ "$wan_ping" -gt "$ZERO" ];then
 			use_wan_as_gateway
-		elif [ "$wifi_ping" -gt "$ZERO" ]; then
 			has_internet=1
-			use_wifi_as_gateway
-		else
-			check_3g_connection
-			if [ "$gsm_ping" -gt "$ZERO" ]; then
+		else 
+			logger -t iot_keep_alive "XX ping ETH1 $PING_WAN_HOST via eth1 fail"
+			chk_wlan0_connection
+			if [ "$wifi_ping" -gt "$ZERO" ];then
+				use_wifi_as_gateway
 				has_internet=1
-				use_gsm_as_gateway
 			else
-			#All Interface doesn't have internet connection, reset all. 
-				logger -t iot_keep_alive "No internet at any interface"
-				update_gateway $WAN_IF
-				update_gateway $WIFI_IF
-			fi 
+				logger -t iot_keep_alive "XX ping WiFi $PING_WIFI_HOST via wlan0-2 fail"
+				check_3g_connection
+				if [ "$gsm_ping" -gt "$ZERO" ]; then
+					has_internet=1
+					use_gsm_as_gateway
+				else
+				#All Interface doesn't have internet connection, reset all. 
+					logger -t iot_keep_alive "No internet at any interface"
+					update_gateway $WAN_IF
+					update_gateway $WIFI_IF
+				fi 
+			fi
 		fi
-	fi
-	
+	fi	
 
 	#Show LED status
 	# echo 1 > /sys/class/leds/dragino2\:red\:system/brightness GPIO28
@@ -254,25 +299,17 @@ do
 		# IoT Connection Fail, but Internet Up
 		/usr/bin/blink-start 100   #GPIO28 blink, periodically: 200ms
 		[ "$is_lps8" = "1" ] && echo 0 > /sys/class/gpio/gpio21/value
-		[ "$offline_flag" = "0" ] && echo "`date`: switch to offline" >> /var/status_log
-		offline_flag="1"
-		reload_iot_service
+		if [ "$offline_flag" = "0" ]; then
+			echo "`date`: switch to offline" >> /var/status_log
+			offline_flag="1"
+		elif [ "$offline_flag" = "1" ]; then
+			logger -t iot_keep_alive "Reload IoT Service"
+			reload_iot_service
+		fi
 	else 
 		# IoT Connection Fail, Internet Down
 		echo 0 > /sys/class/leds/dragino2\:red\:system/brightness
 		[ "$is_lps8" = "1" ] && echo 1 > /sys/class/gpio/gpio21/value
 	fi
 	#echo "iot-end"	
-	
-    #if [ -z "$WAN_GW" ] && [ "$wan_link" -eq "$ONE" ]; then
-      #  update_gateway $WAN_IF
-     #   logger -t iot_keep_alive "no wan gateway, retry to get gateway"
-    #fi
-	
-	#if [ -n "$wifi_ip" ] && [ "$wifi_ping" -eq "$ZERO" ]; then
-    #if [ "$wifi_disabled" -eq "$ZERO" ] && [ "$wifi_ap_mode" != "ap" ] && [ "$wifi_link" -eq "$ONE" ] && [ -z "$WIFI_GW" ]; then	
-     #   update_gateway $WIFI_IF
-      #  logger -t iot_keep_alive "has wifi gateway, but no internet connection, reset WiFi DHCP"
-	#	echo "reset wifi"
-    #fi
 done

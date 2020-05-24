@@ -6,8 +6,8 @@ subband=`uci get gateway.general.subband`
 gwid=`uci get gateway.general.GWID`
 provider=`uci get gateway.general.provider`
 server=`uci get gateway.general.${provider}_server`
-upp=`uci get gateway.general.upp`
-dpp=`uci get gateway.general.dpp`
+upp=`uci get gateway.general.port`
+dpp=`uci get gateway.general.dwport`
 stat=`uci get gateway.general.stat`
 
 #################################################

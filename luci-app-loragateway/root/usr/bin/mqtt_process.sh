@@ -189,6 +189,19 @@ if [ "$sub_enable" != "0" ];then
 		logger "[IoT.MQTT]:Invalid Parameters - mosquitto_sub not called."
 	fi
 
+	msubcount=$(ps | grep -c mosquitto_sub)
+	if [ $msubcount == "2" ]; then
+		subflag="1"
+		echo "Subscribe Running." > /var/iot/status
+	fi 
+	fping -q $server
+	if [ $? -eq "0" ]; then
+		echo " Online" >> /var/iot/status
+	else
+		echo " Offline" >> /var/iot/status
+	fi
+
+
 	if [ $DEBUG -ge 10 ]; then
 		# Echo parameters to console
 		echo " "
@@ -225,6 +238,20 @@ if [ "$pub_enable" == "0" ]; then
 		echo "Publish not enabled. Exit"
 	fi
 	exit # Nothing more to do
+else
+	# Status
+	if [ $subflag == "1" ]; then
+		echo "Pub, Sub" > /var/iot/status
+	else
+		echo "Publish" > /var/iot/status
+	fi
+	echo " Enabled." >> /var/iot/status
+	fping -q $server
+	if [ $? -eq "0" ]; then
+		echo " Online" >> /var/iot/status
+	else
+		echo " Offline" >> /var/iot/status
+	fi
 fi
 
 if [ $DEBUG -ge 10 ]; then
@@ -251,9 +278,8 @@ fi
 # Run Forever - process publish requests.
 while [ 1 ]
 do
-	now=`date +%s`
-	if [ `expr $now - $old` -gt $UPDATE_INTERVAL ];then
-		old=`date +%s`
+	inotifywait -q -e 'create' /var/iot/channels/
+	
 		CID=`ls /var/iot/channels/`
 		[ $DEBUG -ge 2 ] && logger "[IoT.MQTT]: Check for sensor update"
 		if [ -n "$CID" ];then
@@ -406,8 +432,5 @@ do
 				fi
 			done
 		fi
-  else
-    sleep 1 # Wait before looping to check time
-	fi
 done
 

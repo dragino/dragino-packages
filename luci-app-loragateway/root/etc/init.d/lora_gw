@@ -24,9 +24,9 @@ init_board() {
         exit 1
     fi
 
-    if [[ "$mode" = "disabled" ]]; then
-        process_runing=`pidof $process`
-        if [[ ! -z "process_runing" ]]; then
+    if [[ "$mode" = "disabled" ]] || [[ "$mode" = "loriot" ]]; then
+        process_running=`pidof $process`
+        if [[ ! -z "process_running" ]]; then
             stop
         fi
         exit 0

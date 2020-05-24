@@ -70,7 +70,7 @@
 			"if": 300000
 		},
 		"chan_Lora_std": {
-			"desc": "Lora MAC, 500kHz, SF8, 904.6 MHz",
+			"desc": "Lora MAC, 500kHz, SF8, 911.0 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": 300000,

@@ -991,8 +991,8 @@ int32_t bw_toval(int x) {
 
 /*
     save strcpy
-    result is allways '\0' terminated
-    jstrncpy(s, "1234",4) copyies "123" + '\0'
+    result is always '\0' terminated
+    jstrncpy(s, "1234",4) copies "123" + '\0'
 */
 void jstrncpy(char *sDest, const char *sSrc, int iDestLength)
 {

@@ -1628,7 +1628,7 @@ void thread_push(void) {
                 MSG_DEBUG(DEBUG_INFO, "INFO~ [push] look file : %s\n", ptr->d_name);
 
                 if ((fp = fopen(push_file, "r")) == NULL) {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ open %s error\n, ptr->d_name");
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ open %s error\n", ptr->d_name);
                     continue;
                 }
 

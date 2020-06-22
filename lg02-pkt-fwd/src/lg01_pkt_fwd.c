@@ -747,7 +747,7 @@ int main(int argc, char *argv[])
         rxlora(rfdev, RXMODE_SINGLE);  /* star lora single receive mode */
 	    clock_gettime(CLOCK_MONOTONIC, &start_time);
 
-	    start_time = end_time;
+	    end_time = start_time;
         /* receive timeout, if no readdigital or readerror? */
         while ((digitalRead(rfdev->dio[1]) != 1) && ((int)difftimespec(end_time, start_time) < RXRF_TIMEOUT_S)) {                 
             clock_gettime(CLOCK_MONOTONIC, &end_time);

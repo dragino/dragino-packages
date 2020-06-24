@@ -30,6 +30,9 @@ Maintainer: Michael Coracin
 #define LGW_LBT_SUCCESS 0
 #define LGW_LBT_ERROR -1
 
+#define TS_HOP          20
+#define DIO_RSSI_PIN    6
+
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
 
@@ -58,6 +61,7 @@ int lbt_start(void);
 @param tx_allowed pointer to receive permission for transmission
 @return LGW_LBT_ERROR id the operation failed, LGW_LBT_SUCCESS else
 */
+int lbt_chan_is_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay, bool * tx_allowed);
 int lbt_is_channel_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay, bool * tx_allowed);
 
 /**
@@ -65,6 +69,11 @@ int lbt_is_channel_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay,
 @return true if enabled, false otherwise
 */
 bool lbt_is_enabled(void);
+
+/**
+@brief scan if LBT is enabled
+*/
+void lbt_run_rssi_scan(void* exitsig);
 
 #endif
 /* --- EOF ------------------------------------------------------------------ */

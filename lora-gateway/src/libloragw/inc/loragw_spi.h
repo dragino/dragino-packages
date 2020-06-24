@@ -31,6 +31,8 @@ Maintainer: Sylvain Miermont
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC CONSTANTS ----------------------------------------------------- */
 
+#define SPI_DEV_PATH    "/dev/spidev1.0"
+
 #define LGW_SPI_SUCCESS     0
 #define LGW_SPI_ERROR       -1
 #define LGW_BURST_CHUNK     1024
@@ -52,7 +54,7 @@ Maintainer: Sylvain Miermont
 @return status of register operation (LGW_SPI_SUCCESS/LGW_SPI_ERROR)
 */
 
-int lgw_spi_open(void **spi_target_ptr);
+int lgw_spi_open(void **spi_target_ptr, const char* spi_path);
 
 /**
 @brief LoRa concentrator SPI close

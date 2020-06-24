@@ -55,15 +55,13 @@ Maintainer: Sylvain Miermont
 #define WRITE_ACCESS    0x80
 #define SPI_SPEED       8000000
 #ifndef LGW_DETECT
-#define SPI_DEV_PATH    (getenv("LORAGW_SPI")==NULL ? "/dev/spidev1.0" : getenv("LORAGW_SPI"))
 #endif
-//#define SPI_DEV_PATH    "/dev/spidev32766.0"
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
 
 /* SPI initialization and configuration */
-int lgw_spi_open(void **spi_target_ptr) {
+int lgw_spi_open(void **spi_target_ptr, const char* spi_path) {
     int *spi_device = NULL;
     int dev;
     int a=0, b=0;
@@ -80,10 +78,10 @@ int lgw_spi_open(void **spi_target_ptr) {
     }
 
     /* open SPI device */
-    DEBUG_PRINTF("INFO: staring open SPI device %s\n", SPI_DEV_PATH);
-    dev = open(SPI_DEV_PATH, O_RDWR);
+    DEBUG_PRINTF("INFO: staring open SPI device %s\n", spi_path);
+    dev = open(spi_path, O_RDWR);
     if (dev < 0) {
-        DEBUG_PRINTF("ERROR~ failed to open SPI device %s\n", SPI_DEV_PATH);
+        DEBUG_PRINTF("ERROR~ failed to open SPI device %s\n", spi_path);
         return LGW_SPI_ERROR;
     }
 

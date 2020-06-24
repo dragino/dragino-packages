@@ -54,11 +54,6 @@ DEBUG_ARRAY	src/loragw_gps.c	43;"	d	file:
 DEBUG_ARRAY	src/loragw_gps.c	47;"	d	file:
 DEBUG_ARRAY	src/loragw_hal.c	41;"	d	file:
 DEBUG_ARRAY	src/loragw_hal.c	46;"	d	file:
-DEBUG_AUX	inc/config.h	4;"	d
-DEBUG_GPIO	inc/config.h	9;"	d
-DEBUG_GPS	inc/config.h	8;"	d
-DEBUG_HAL	inc/config.h	7;"	d
-DEBUG_LBT	inc/config.h	10;"	d
 DEBUG_MSG	src/loragw_aux.c	34;"	d	file:
 DEBUG_MSG	src/loragw_aux.c	37;"	d	file:
 DEBUG_MSG	src/loragw_fpga.c	37;"	d	file:
@@ -89,8 +84,6 @@ DEBUG_PRINTF	src/loragw_reg.c	37;"	d	file:
 DEBUG_PRINTF	src/loragw_reg.c	41;"	d	file:
 DEBUG_PRINTF	src/loragw_spi.native.c	43;"	d	file:
 DEBUG_PRINTF	src/loragw_spi.native.c	47;"	d	file:
-DEBUG_REG	inc/config.h	6;"	d
-DEBUG_SPI	inc/config.h	5;"	d
 DEFAULT_BAUDRATE	src/loragw_gps.c	58;"	d	file:
 DEFAULT_NOTCH_FREQ	tst/test_loragw_hal.c	47;"	d	file:
 DEFAULT_RSSI_OFFSET	tst/test_loragw_cal.c	49;"	d	file:
@@ -566,7 +559,6 @@ LGW_VERSION	inc/loragw_reg.h	65;"	d
 LGW_XTAL_FREQU	inc/loragw_hal.h	50;"	d
 LGW_ZERO_PAD	inc/loragw_reg.h	217;"	d
 LIBLORAGW_VERSION	Makefile	/^LIBLORAGW_VERSION := `cat ..\/VERSION`$/;"	m
-LIBLORAGW_VERSION	inc/config.h	3;"	d
 LIBS	Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
 MCU_AGC	src/loragw_hal.c	58;"	d	file:
 MCU_AGC	tst/test_loragw_cal.c	51;"	d	file:
@@ -614,7 +606,7 @@ RxBwExp	src/loragw_radio.c	/^    uint8_t     RxBwExp;$/;"	m	struct:lgw_sx127x_FS
 RxBwKHz	src/loragw_radio.c	/^    uint32_t    RxBwKHz;$/;"	m	struct:lgw_sx127x_FSK_bandwidth_s	file:
 RxBwMant	src/loragw_radio.c	/^    uint8_t     RxBwMant;$/;"	m	struct:lgw_sx127x_FSK_bandwidth_s	file:
 SET_PPM_ON	src/loragw_hal.c	51;"	d	file:
-SPI_DEV_PATH	src/loragw_spi.native.c	57;"	d	file:
+SPI_DEV_PATH	src/loragw_spi.native.c	58;"	d	file:
 SPI_SPEED	src/loragw_spi.native.c	56;"	d	file:
 STAT_CRC_BAD	inc/loragw_hal.h	122;"	d
 STAT_CRC_OK	inc/loragw_hal.h	123;"	d
@@ -934,7 +926,6 @@ WRITE_ACCESS	src/loragw_spi.native.c	55;"	d	file:
 _GNU_SOURCE	inc/loragw_gps.h	25;"	d
 _GNU_SOURCE	src/loragw_gps.c	22;"	d	file:
 _LORAGW_AUX_H	inc/loragw_aux.h	18;"	d
-_LORAGW_CONFIGURATION_H	inc/config.h	2;"	d
 _LORAGW_FPGA_REG_H	inc/loragw_fpga.h	20;"	d
 _LORAGW_GPS_H	inc/loragw_gps.h	20;"	d
 _LORAGW_HAL_H	inc/loragw_hal.h	18;"	d
@@ -1219,4 +1210,5 @@ usage	tst/test_loragw_hal.c	/^void usage(void) {$/;"	f
 utc	inc/loragw_gps.h	/^    struct timespec utc;        \/*!> reference UTC time (from GPS\/NMEA) *\/$/;"	m	struct:tref	typeref:struct:tref::timespec
 validate_nmea_checksum	src/loragw_gps.c	/^static bool validate_nmea_checksum(const char *serial_buff, int buff_size) {$/;"	f	file:
 wait_ms	src/loragw_aux.c	/^void wait_ms(unsigned long a) {$/;"	f
+wait_us	src/loragw_aux.c	/^void wait_us(unsigned long a) {$/;"	f
 xtal_err	inc/loragw_gps.h	/^    double          xtal_err;   \/*!> raw clock error (eg. <1 'slow' XTAL) *\/$/;"	m	struct:tref

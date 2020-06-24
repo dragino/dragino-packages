@@ -30,8 +30,9 @@ Maintainer: Michael Coracin
 #include "loragw_reg.h"
 #include "loragw_hal.h"
 #include "loragw_radio.h"
-#include "loragw_fpga.h"
+#include "gpio.h"
 
+#define FREQ_STEP                                   61.03515625
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS ------------------------------------------------------- */
 
@@ -103,6 +104,7 @@ const struct lgw_sx127x_FSK_bandwidth_s sx127x_FskBandwidths[] =
 /* --- PRIVATE VARIABLES ---------------------------------------------------- */
 
 extern void *lgw_spi_target; /*! generic pointer to the SPI device */
+extern void *lgw_lbt_target; /*! generic pointer to the SPI device */
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS ---------------------------------------------------- */
@@ -113,7 +115,7 @@ uint8_t sx125x_read(uint8_t channel, uint8_t addr);
 int setup_sx1272_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset);
 int setup_sx1276_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset);
 
-int reset_sx127x(enum lgw_radio_type_e radio_type);
+int reset_sx127x();
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
@@ -238,7 +240,7 @@ int setup_sx1272_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t
 
     /* Set RF carrier frequency */
     x |= lgw_sx127x_reg_w(SX1272_REG_PLLHOP, PllHop << 7);
-    freq_reg = ((uint64_t)frequency << 19) / (uint64_t)32000000;
+    freq_reg = (uint32_t)((double)frequency / (double)FREQ_STEP);
     x |= lgw_sx127x_reg_w(SX1272_REG_FRFMSB, (freq_reg >> 16) & 0xFF);
     x |= lgw_sx127x_reg_w(SX1272_REG_FRFMID, (freq_reg >> 8) & 0xFF);
     x |= lgw_sx127x_reg_w(SX1272_REG_FRFLSB, (freq_reg >> 0) & 0xFF);
@@ -287,7 +289,7 @@ int setup_sx1272_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 int setup_sx1276_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {
-    uint64_t freq_reg;
+    uint32_t freq_reg;
     uint8_t ModulationShaping = 0;
     uint8_t PllHop = 1;
     uint8_t LnaGain = 1;
@@ -314,7 +316,7 @@ int setup_sx1276_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t
 
     /* Set RF carrier frequency */
     x |= lgw_sx127x_reg_w(SX1276_REG_PLLHOP, PllHop << 7);
-    freq_reg = ((uint64_t)frequency << 19) / (uint64_t)32000000;
+    freq_reg = ((uint32_t)((double)frequency / (double)FREQ_STEP));
     x |= lgw_sx127x_reg_w(SX1276_REG_FRFMSB, (freq_reg >> 16) & 0xFF);
     x |= lgw_sx127x_reg_w(SX1276_REG_FRFMID, (freq_reg >> 8) & 0xFF);
     x |= lgw_sx127x_reg_w(SX1276_REG_FRFLSB, (freq_reg >> 0) & 0xFF);
@@ -339,6 +341,13 @@ int setup_sx1276_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t
     x |= lgw_sx127x_reg_w(SX1276_REG_PLL, 0x10); /* PLL BW set to 75 KHz */
     x |= lgw_sx127x_reg_w(0x43, 1); /* optimize PLL start-up time */
 
+    /* set DIOMAPING DIO for rssi interrupt */
+    x |= lgw_sx127x_reg_w(SX1276_REG_DIOMAPPING1, (1 << 6) & 0xFF);
+    x |= lgw_sx127x_reg_w(SX1276_REG_DIOMAPPING2, 0);
+
+    /*set rssithresh RSSI = -RssiThreshold/2[dBm] */
+    x |= lgw_sx127x_reg_w(SX1276_REG_RSSITHRESH, 160);
+
     if (x != LGW_REG_SUCCESS) {
         DEBUG_MSG("ERROR~ Failed to configure SX1276\n");
         return x;
@@ -362,31 +371,10 @@ int setup_sx1276_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int reset_sx127x(enum lgw_radio_type_e radio_type) {
-    int x;
-
-    switch(radio_type) {
-        case LGW_RADIO_TYPE_SX1276:
-            x  = lgw_fpga_reg_w(LGW_FPGA_CTRL_RADIO_RESET, 0);
-            x |= lgw_fpga_reg_w(LGW_FPGA_CTRL_RADIO_RESET, 1);
-            if (x != LGW_SPI_SUCCESS) {
-                DEBUG_MSG("ERROR~ Failed to reset sx127x\n");
-                return x;
-            }
-            break;
-        case LGW_RADIO_TYPE_SX1272:
-            x  = lgw_fpga_reg_w(LGW_FPGA_CTRL_RADIO_RESET, 1);
-            x |= lgw_fpga_reg_w(LGW_FPGA_CTRL_RADIO_RESET, 0);
-            if (x != LGW_SPI_SUCCESS) {
-                DEBUG_MSG("ERROR~ Failed to reset sx127x\n");
-                return x;
-            }
-            break;
-        default:
-            DEBUG_PRINTF("ERROR~ Failed to reset sx127x, not supported (%d)\n", radio_type);
-            return LGW_REG_ERROR;
-    }
-
+int reset_sx127x() {
+    digital_write(SX127x_RESET_IO, 1);
+    digital_write(SX127x_RESET_IO, 0);
+    wait_ms(5);
     return LGW_REG_SUCCESS;
 }
 
@@ -479,13 +467,13 @@ int lgw_setup_sx125x(uint8_t rf_chain, uint8_t rf_clkout, bool rf_enable, uint8_
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 int lgw_sx127x_reg_w(uint8_t address, uint8_t reg_value) {
-    return lgw_spi_w(lgw_spi_target, LGW_SPI_MUX_MODE1, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
+    return lgw_spi_w(lgw_lbt_target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 int lgw_sx127x_reg_r(uint8_t address, uint8_t *reg_value) {
-    return lgw_spi_r(lgw_spi_target, LGW_SPI_MUX_MODE1, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
+    return lgw_spi_r(lgw_lbt_target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -512,7 +500,7 @@ int lgw_setup_sx127x(uint32_t frequency, uint8_t modulation, enum lgw_sx127x_rxb
     /* Probing radio type */
     for (i = 0; i < (int)(sizeof supported_radio_type); i++) {
         /* Reset the radio */
-        x = reset_sx127x(supported_radio_type[i].type);
+        x = reset_sx127x();
         if (x != LGW_SPI_SUCCESS) {
             DEBUG_MSG("ERROR~ Failed to reset sx127x\n");
             return x;

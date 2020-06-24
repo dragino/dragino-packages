@@ -513,7 +513,7 @@ int lgw_connect(bool spi_only, uint32_t tx_notch_freq) {
     }
 
     /* open the SPI link */
-    spi_stat = lgw_spi_open(&lgw_spi_target);
+    spi_stat = lgw_spi_open(&lgw_spi_target, SPI_DEV_PATH);
     if (spi_stat != LGW_SPI_SUCCESS) {
         DEBUG_MSG("ERROR CONNECTING CONCENTRATOR SPI\n");
         return LGW_REG_ERROR;

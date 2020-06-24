@@ -30,6 +30,8 @@ Maintainer: Michael Coracin
 
 #define SX125x_32MHz_FRAC 15625 /* irreductible fraction for PLL register caculation */
 
+#define FREQ_STEP         61.03515625
+
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC CONSTANTS ----------------------------------------------------- */
 

@@ -3298,7 +3298,7 @@ static void gps_process_sync(void) {
 
     /* get GPS time for synchronization */
     if (i != LGW_GPS_SUCCESS) {
-        MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] could not get GPS time from GPS\n");
+        //MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] could not get GPS time from GPS\n");
         return;
     }
 

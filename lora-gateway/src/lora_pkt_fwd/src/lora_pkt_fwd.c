@@ -2392,12 +2392,15 @@ void thread_proc_rxpkt() {
 
                                 FILE *fp;
                                 char pushpath[128];
+								char rssi_snr[32] = {'\0'};
+								sprintf(rssi_snr, "%08X%08X", (short)p->rssi, (short)(p->snr*10));
                                 snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
                                 fp = fopen(pushpath, "w+");
                                 if (NULL == fp)
                                     MSG_DEBUG(DEBUG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
                                 else { 
-                                    fwrite(payloadtxt, sizeof(uint8_t), fsize + 1, fp);
+                                    fwrite(rssi_snr,sizeof(uint8_t), 16, fp);
+									fwrite(payloadtxt, sizeof(uint8_t), fsize + 1, fp);
                                     fflush(fp); 
                                     fclose(fp);
                                 }
@@ -3852,11 +3855,9 @@ static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, ui
 
 
 void payload_deal(struct lgw_pkt_rx_s* p) {
-    int i, j;
+    int i;
     char tmp[256] = {'\0'};
-    char payload[264] = {'\0'};
     char chan_path[32] = {'\0'};
-    char hexstr[32] = {'\0'};
     char *chan_id = NULL;
     char *chan_data = NULL;
     int id_found = 0, data_size = p->size;
@@ -3889,22 +3890,8 @@ void payload_deal(struct lgw_pkt_rx_s* p) {
             break;
     }
 
-    sprintf(chan_path, "%08X%08X", (short)p->rssi, (short)p->snr);
-    str2hex((uint8_t*)hexstr, (uint8_t*)chan_path, 16);
 
-    i = 0;
-    while (hexstr[i] != '\0') {
-        payload[i] = hexstr[i];
-        i++;
-    }
-    j = 0;
-    while (chan_data[j] != '\0') {
-        payload[i++] = chan_data[j++];
-    }
 
-    data_size = i;
-
-    memset(chan_path, 0, sizeof(chan_path));
     if (id_found == 2) 
         sprintf(chan_path, "/var/iot/channels/%s", chan_id);
     else {
@@ -3913,8 +3900,9 @@ void payload_deal(struct lgw_pkt_rx_s* p) {
     
     fp = fopen(chan_path, "w+");
     if ( NULL != fp ) {
-        fwrite(payload, sizeof(char), data_size, fp);  
-        //fprintf(fp, "%08X%08X%s\n", (short)p->rssi, (short)p->snr, chan_data);
+
+        //fwrite(chan_data, sizeof(char), data_size, fp);  
+        fprintf(fp, "%s\n", chan_data);
         fflush(fp);
         fclose(fp);
     } else 

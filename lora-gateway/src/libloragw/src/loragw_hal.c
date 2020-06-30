@@ -751,11 +751,13 @@ int lgw_start(void) {
     /* Configure LBT */
     if (lbt_is_enabled() == true) {
         lgw_reg_w(LGW_CLK32M_EN, 1);
+        /*
         i = lbt_setup();
         if (i != LGW_LBT_SUCCESS) {
             DEBUG_MSG("ERROR~ lbt_setup() did not return SUCCESS\n");
             return LGW_HAL_ERROR;
         }
+        */
 
         /* Start SX1301 counter and LBT FSM at the same time to be in sync */
         lgw_reg_w(LGW_CLK32M_EN, 0);
@@ -1604,7 +1606,8 @@ int lgw_send(struct lgw_pkt_tx_s pkt_data) {
     lgw_reg_wb(LGW_TX_DATA_BUF_DATA, buff, transfer_size);
     DEBUG_ARRAY(i, transfer_size, buff);
 
-    x = lbt_is_channel_free(&pkt_data, tx_start_delay, &tx_allowed);
+    //x = lbt_is_channel_free(&pkt_data, tx_start_delay, &tx_allowed);
+    x = lbt_chan_is_free(&pkt_data, tx_start_delay, &tx_allowed);
     if (x != LGW_LBT_SUCCESS) {
         DEBUG_MSG("ERROR~ Failed to check channel availability for TX\n");
         return LGW_HAL_ERROR;
@@ -1767,5 +1770,6 @@ uint32_t lgw_time_on_air(struct lgw_pkt_tx_s *packet) {
 
     return Tpacket;
 }
+
 
 /* --- EOF ------------------------------------------------------------------ */

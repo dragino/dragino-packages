@@ -61,6 +61,7 @@ Maintainer: Michael Coracin
 #include "base64.h"
 #include "radio.h"
 #include "loragw_hal.h"
+#include "loragw_lbt.h"
 #include "loragw_gps.h"
 #include "loragw_aux.h"
 #include "loragw_reg.h"
@@ -74,7 +75,7 @@ Maintainer: Michael Coracin
 /* --- debug info: DEBUG level --------------------------- */
 
 uint8_t DEBUG_PKT_FWD    = 0;  
-uint8_t DEBUG_REPORT   = 0;
+uint8_t DEBUG_REPORT     = 0;
 uint8_t DEBUG_JIT        = 0;
 uint8_t DEBUG_JIT_ERROR  = 0;
 uint8_t DEBUG_TIMERSYNC  = 0;
@@ -336,7 +337,10 @@ static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, ui
 /* -------------------------------------------------------------------------- */
 
 /* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
+static void lgw_exit_fail();
+
 static int init_socket(const char *servaddr, const char *servport, const char *rectimeout, int len);
+
 static void sigusr_handler(int sigio);
 
 static char uci_config_file[32] = "/etc/config/gateway";
@@ -1218,6 +1222,7 @@ int main(void)
     pthread_t thrid_gps;
     pthread_t thrid_valid;
     pthread_t thrid_jit;
+    pthread_t thrid_lbt;
     pthread_t thrid_timersync;
 
     pthread_t thrid_proc_rxpkt;
@@ -1531,39 +1536,39 @@ int main(void)
         MSG_DEBUG(DEBUG_INFO, "INFO~ [main] concentrator started, packet can now be received\n");
     } else {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] failed to start the concentrator\n");
-        exit(EXIT_FAILURE);
+        lgw_exit_fail();
     }
 
     /* spawn threads to manage upstream and downstream */
     i = pthread_create( &thrid_up, NULL, (void * (*)(void *))thread_up, NULL);
     if (i != 0) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create upstream thread\n");
-        exit(EXIT_FAILURE);
+        lgw_exit_fail();
     }
     i = pthread_create( &thrid_down, NULL, (void * (*)(void *))thread_down, NULL);
     if (i != 0) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create downstream thread\n");
-        exit(EXIT_FAILURE);
+        lgw_exit_fail();
     }
     i = pthread_create( &thrid_jit, NULL, (void * (*)(void *))thread_jit, NULL);
     if (i != 0) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create JIT thread\n");
-        exit(EXIT_FAILURE);
+        lgw_exit_fail();
     }
     i = pthread_create( &thrid_timersync, NULL, (void * (*)(void *))thread_timersync, NULL);
     if (i != 0) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create Timer Sync thread\n");
-        exit(EXIT_FAILURE);
+        lgw_exit_fail();
     }
     i = pthread_create( &thrid_proc_rxpkt, NULL, (void * (*)(void *))thread_proc_rxpkt, NULL);
     if (i != 0) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create proc_rxpkt thread\n");
-        exit(EXIT_FAILURE);
+        lgw_exit_fail();
     }
     i = pthread_create( &thrid_ent_dnlink, NULL, (void * (*)(void *))thread_ent_dnlink, NULL);
     if (i != 0) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create ent_dnlink thread\n");
-        exit(EXIT_FAILURE);
+        lgw_exit_fail();
     }
 
     /* spawn thread to manage GPS */
@@ -1571,12 +1576,20 @@ int main(void)
         i = pthread_create( &thrid_gps, NULL, (void * (*)(void *))thread_gps, NULL);
         if (i != 0) {
             MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create GPS thread\n");
-            exit(EXIT_FAILURE);
+            lgw_exit_fail();
         }
         i = pthread_create( &thrid_valid, NULL, (void * (*)(void *))thread_valid, NULL);
         if (i != 0) {
             MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create validation thread\n");
-            exit(EXIT_FAILURE);
+            lgw_exit_fail();
+        }
+    }
+
+    if (lbt_is_enabled() == true) {
+        i = pthread_create( &thrid_lbt, NULL, (void * (*)(void *))lbt_run_rssi_scan, (void*)&exit_sig);
+        if (i != 0) {
+            MSG_DEBUG(DEBUG_ERROR, "ERROR~ [main] impossible to create LBT thread\n");
+            lgw_exit_fail();
         }
     }
 
@@ -1796,9 +1809,9 @@ int main(void)
 
         recv_time = send_time;
 
-        while ((int)difftimespec(recv_time, send_time) < keepalive_time) {
-            clock_gettime(CLOCK_MONOTONIC, &recv_time);
+        for (i=0; i<2; ++i) {
             j = recv(sock_up, (void *)stat_ack, sizeof stat_ack, 0);
+            clock_gettime(CLOCK_MONOTONIC, &recv_time);
             if (j == -1) {
                 /* server connection error */
                 continue;
@@ -1856,6 +1869,8 @@ int main(void)
             MSG_DEBUG(DEBUG_WARNING, "WARNING: failed to close GPS successfully\n");
         }
     }
+    if (lbt_is_enabled() == true) 
+        pthread_join(thrid_lbt, NULL); /* wait for lbt thread */
 
     /* if an exit signal was received, try to quit properly */
     if (exit_sig) {
@@ -1872,10 +1887,7 @@ int main(void)
     }
 	
 	 /* Board reset */          
-	if (system("/usr/bin/reset_lgw.sh stop") != 0) {
-		printf("ERROR~ failed to reset SX1301, check your reset_lgw.sh script\n");
-		exit(EXIT_FAILURE);
-	}
+    lgw_exit_fail();
 
     MSG_DEBUG(DEBUG_INFO, "INFO~ Exiting packet forwarder program\n");
     if (sxradio)
@@ -2380,12 +2392,15 @@ void thread_proc_rxpkt() {
 
                                 FILE *fp;
                                 char pushpath[128];
+								char rssi_snr[32] = {'\0'};
+								sprintf(rssi_snr, "%08X%08X", (short)p->rssi, (short)(p->snr*10));
                                 snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
                                 fp = fopen(pushpath, "w+");
                                 if (NULL == fp)
                                     MSG_DEBUG(DEBUG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
                                 else { 
-                                    fwrite(payloadtxt, sizeof(uint8_t), fsize + 1, fp);
+                                    fwrite(rssi_snr,sizeof(uint8_t), 16, fp);
+									fwrite(payloadtxt, sizeof(uint8_t), fsize + 1, fp);
                                     fflush(fp); 
                                     fclose(fp);
                                 }
@@ -3230,23 +3245,20 @@ void thread_jit(void) {
                         pthread_mutex_unlock(&mx_meas_dw);
                     } else { 
                         /* check if concentrator is free for sending new packet */
-                        pthread_mutex_lock(&mx_concent); /* may have to wait for a fetch to finish */
-                        result = lgw_status(TX_STATUS, &tx_status);
-                        pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
-                        if (result == LGW_HAL_ERROR) {
-                            MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_status failed\n");
-                        } else {
-                            if (tx_status == TX_EMITTING) {
-                                MSG_DEBUG(DEBUG_ERROR, "ERROR~ concentrator is currently emitting\n");
-                                print_tx_status(tx_status);
-                                continue;
+                        do {
+                            pthread_mutex_lock(&mx_concent); /* may have to wait for a fetch to finish */
+                            result = lgw_status(TX_STATUS, &tx_status);
+                            pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
+                            if (result == LGW_HAL_ERROR) {
+                                MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_status failed, try again!\n");
+                                wait_ms(100);
                             } else if (tx_status == TX_SCHEDULED) {
-                                MSG_DEBUG(DEBUG_WARNING, "WARNING: a downlink was already scheduled, overwritting it...\n");
-                                print_tx_status(tx_status);
-                            } else {
-                                /* Nothing to do */
-                            }
-                        }
+                                break;
+                            } else if (tx_status != TX_FREE) {
+                                wait_ms(100);
+                            } 
+                        } while (tx_status != TX_FREE);
+
                         pthread_mutex_lock(&mx_concent); /* may have to wait for a fetch to finish */
                         result = lgw_send(pkt);
                         pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
@@ -3289,7 +3301,7 @@ static void gps_process_sync(void) {
 
     /* get GPS time for synchronization */
     if (i != LGW_GPS_SUCCESS) {
-        MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] could not get GPS time from GPS\n");
+        //MSG_DEBUG(DEBUG_WARNING, "WARNING: [gps] could not get GPS time from GPS\n");
         return;
     }
 
@@ -3878,6 +3890,8 @@ void payload_deal(struct lgw_pkt_rx_s* p) {
             break;
     }
 
+
+
     if (id_found == 2) 
         sprintf(chan_path, "/var/iot/channels/%s", chan_id);
     else {
@@ -3886,6 +3900,7 @@ void payload_deal(struct lgw_pkt_rx_s* p) {
     
     fp = fopen(chan_path, "w+");
     if ( NULL != fp ) {
+
         //fwrite(chan_data, sizeof(char), data_size, fp);  
         fprintf(fp, "%s\n", chan_data);
         fflush(fp);
@@ -3894,4 +3909,11 @@ void payload_deal(struct lgw_pkt_rx_s* p) {
         MSG_DEBUG(DEBUG_ERROR, "ERROR~ cannot open file path: %s\n", chan_path); 
 }
 
+static void lgw_exit_fail() { 
+    if (system("/usr/bin/reset_lgw.sh stop") != 0) {
+        printf("ERROR~ failed to reset SX1301, check your reset_lgw.sh script\n");
+    }
+    output_status(0);  /* exist, reset the status */
+    exit(EXIT_FAILURE);
+}
 /* --- EOF ------------------------------------------------------------------ */

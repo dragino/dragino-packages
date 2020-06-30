@@ -52,7 +52,7 @@ int main()
     }
 
     printf("Beginning of test for loragw_spi.c\n");
-    lgw_spi_open(&spi_target);
+    lgw_spi_open(&spi_target, "/dev/spidev1.0");
 
     /* normal R/W test */
     for (i = 0; i < TIMING_REPEAT; ++i)

@@ -10,6 +10,8 @@ upp=`uci get gateway.general.port`
 dpp=`uci get gateway.general.dwport`
 stat=`uci get gateway.general.stat`
 
+model=`cat /tmp/iot/model.txt`
+
 #################################################
 # "gateway_conf": {
 #         "server_address": "router.eu.thethings.network",
@@ -33,6 +35,9 @@ gen_gw_cfg() {
     json_add_int "stat_interval" "$stat"
     json_add_boolean "forward_crc_valid" 1
     json_add_boolean "forward_crc_error" 0
+	if [ $model == "DLOS8" ];then	
+		json_add_string "gps_tty_path" "/dev/ttyUSB0"
+	fi
     json_close_object
     json_dump  > /etc/lora/local_conf.json
 }
@@ -68,7 +73,7 @@ if [ "$def_cfg" = "AU" ] || [ "$def_cfg" = "US" ] ;then
 	def_cfg="$def_cfg-$subband"
 fi
 
-model=`cat /tmp/iot/model.txt`
+
 if [ $model == "LG308" ] || [ $model == "DLOS8" ];then
 	chip="301"
 elif [ $model == "LPS8" ];then
@@ -336,10 +341,12 @@ else
     json_add_int "stat_interval" "$stat"
     json_add_boolean "forward_crc_valid" 1
     json_add_boolean "forward_crc_error" 0
+	if [ $model == "DLOS8" ];then	
+		json_add_string "gps_tty_path" "/dev/ttyUSB0"
+	fi
     json_close_object
 
     json_dump  > /etc/lora/global_conf.json
 
 
-fi 
-
+fi

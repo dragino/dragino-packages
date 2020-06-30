@@ -28,7 +28,7 @@ ONE="1"
 ZERO="0"
 iot_online=0
 offline_flag=""
-is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c lps8`
+is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8"`
 last_reload_time=`date +%s`
 
 board=`cat /var/iot/board`

@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
 
 #ifndef SUCCESS
 #define SUCCESS        1

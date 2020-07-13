@@ -28,10 +28,10 @@
 /* --- DEPENDANCIES --------------------------------------------------------- */
 
 /* fix an issue between POSIX and C99 */
-#ifdef __STDC_VERSION__ >= 199901L
-#define _XOPEN_SOURCE 600
+#if __STDC_VERSION__ >= 199901L
+    #define _XOPEN_SOURCE 600
 #else
-#define _XOPEN_SOURCE 500
+    #define _XOPEN_SOURCE 500
 #endif
 
 #include <stdint.h>				/* C99 types */
@@ -53,40 +53,50 @@
 #include <arpa/inet.h>			/* IP address conversion stuff */
 #include <netdb.h>				/* gai_strerror */
 
-#include <pthread.h>
 #include <getopt.h>
 #include <limits.h>
 #include <semaphore.h>
 
 #include "fwd.h"
-#include "jitqueue.h"
-#include "timersync.h"
 #include "parson.h"
 #include "base64.h"
-#include "loragw_hal.h"
-#include "loragw_gps.h"
-#include "loragw_aux.h"
-#include "loragw_reg.h"
-#include "loragw_debug.h"
 #include "gwcfg.h"
 #include "ghost.h"
 #include "service.h"
 #include "stats.h"
 
-/* -------------------------------------------------------------------------- */
-/* --- PRIVATE VARIABLES (GLOBAL) ------------------------------------------- */
+#include "loragw_gps.h"
+#include "loragw_aux.h"
+#include "loragw_reg.h"
+#include "loragw_debug.h"
 
 /* signal handling variables */
 volatile bool exit_sig = false;	/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) */
 volatile bool quit_sig = false;	/* 1 -> application terminates without shutting down the hardware */
 
-//LGW_LIST_HEAD_NOLOCK_STATIC(thread_list, threads_s); 
-LGW_LIST_HEAD_STATIC(rxpkts_list, rxpkts_s); 
+/* -------------------------------------------------------------------------- */
+/* --- privite DECLARATION ---------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/* --- PUBLIC DECLARATION ---------------------------------------- */
+extern uint8_t LOG_PKT;
+extern uint8_t LOG_REPORT;
+extern uint8_t LOG_JIT;
+extern uint8_t LOG_JIT_ERROR;
+extern uint8_t LOG_BEACON;
+extern uint8_t LOG_INFO;
+extern uint8_t LOG_WARNING;
+extern uint8_t LOG_ERROR;
+
+/* -------------------------------------------------------------------------- */
+/* --- Privite FUNCTIONS DECLARATION ---------------------------------------- */
+void stop_clean_service(void);
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS DECLARATION ---------------------------------------- */
 
-INIT_GW;      // initialize GW
+// initialize GW
+INIT_GW;
 
 struct lgw_atexit {
     void (*func)(void);
@@ -134,10 +144,10 @@ static int register_atexit(void (*func)(void), int is_cleanup)
     }
     ae->func = func;
     ae->is_cleanup = is_cleanup;
-    lgw_LIST_LOCK(&atexits);
+    LGW_LIST_LOCK(&atexits);
     __lgw_unregister_atexit(func);
-    lgw_LIST_INSERT_HEAD(&atexits, ae, list);
-    lgw_LIST_UNLOCK(&atexits);
+    LGW_LIST_INSERT_HEAD(&atexits, ae, list);
+    LGW_LIST_UNLOCK(&atexits);
 
     return 0;
 }
@@ -168,6 +178,7 @@ void thread_valid(void);
 void thread_jit(void);
 void thread_timersync(void);
 void thread_watchdog(void);
+void thread_rxpkt_recycle(void);
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
@@ -191,16 +202,212 @@ static void sig_handler(int sigio) {
 	return;
 }
 
+void stop_clean_service(void) {
+    serv_s* serv_entry = NULL;  
+    service_stop(&GW);
+
+    LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.serv_list, serv_entry, list) {
+        LGW_LIST_REMOVE_CURRENT(list);
+        GW.serv_list.size--;
+        if (serv_entry->net != NULL)
+            lgw_free(serv_entry->net);
+        if (serv_entry->report != NULL)
+            lgw_free(serv_entry->report);
+        if (serv_entry != NULL)
+            lgw_free(serv_entry);
+    }
+    LGW_LIST_TRAVERSE_SAFE_END;
+}
+
+double difftimespec(struct timespec end, struct timespec beginning) {
+    double x;
+
+    x = 1E-9 * (double)(end.tv_nsec - beginning.tv_nsec);
+    x += (double)(end.tv_sec - beginning.tv_sec);
+    return x;
+}
+
+int get_tx_gain_lut_index(uint8_t rf_chain, int8_t rf_power, uint8_t * lut_index) {
+    uint8_t pow_index;
+    int current_best_index = -1;
+    uint8_t current_best_match = 0xFF;
+    int diff;
+
+    /* Check input parameters */
+    if (lut_index == NULL) {
+        lgw_log(LOG_ERROR, "ERROR~ %s - wrong parameter\n", __FUNCTION__);
+        return -1;
+    }
+
+    /* Search requested power in TX gain LUT */
+    for (pow_index = 0; pow_index < GW.tx.txlut[rf_chain].size; pow_index++) {
+        diff = rf_power - GW.tx.txlut[rf_chain].lut[pow_index].rf_power;
+        if (diff < 0) {
+            /* The selected power must be lower or equal to requested one */
+            continue;
+        } else {
+            /* Record the index corresponding to the closest rf_power available in LUT */
+            if ((current_best_index == -1) || (diff < current_best_match)) {
+                current_best_match = diff;
+                current_best_index = pow_index;
+            }
+        }
+    }
+
+    /* Return corresponding index */
+    if (current_best_index > -1) {
+        *lut_index = (uint8_t)current_best_index;
+    } else {
+        *lut_index = 0;
+        lgw_log(LOG_ERROR, "ERROR~ %s - failed to find tx gain lut index\n", __FUNCTION__);
+        return -1;
+    }
+
+    return 0;
+}
+
+int send_tx_ack(serv_s* serv, uint8_t token_h, uint8_t token_l, enum jit_error_e error, int32_t error_value) {
+    uint8_t buff_ack[ACK_BUFF_SIZE]; /* buffer to give feedback to server */
+    int buff_index;
+    int j;
+
+    /* reset buffer */
+    memset(&buff_ack, 0, sizeof buff_ack);
+
+    /* Prepare downlink feedback to be sent to server */
+    buff_ack[0] = PROTOCOL_VERSION;
+    buff_ack[1] = token_h;
+    buff_ack[2] = token_l;
+    buff_ack[3] = PKT_TX_ACK;
+    *(uint32_t *)(buff_ack + 4) = GW.info.net_mac_h;
+    *(uint32_t *)(buff_ack + 8) = GW.info.net_mac_l;
+    buff_index = 12; /* 12-byte header */
+
+    /* Put no JSON string if there is nothing to report */
+    if (error != JIT_ERROR_OK) {
+        /* start of JSON structure */
+        memcpy((void *)(buff_ack + buff_index), (void *)"{\"txpk_ack\":{", 13);
+        buff_index += 13;
+        /* set downlink error/warning status in JSON structure */
+        switch( error ) {
+            case JIT_ERROR_TX_POWER:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"warn\":", 7);
+                buff_index += 7;
+                break;
+            default:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"error\":", 8);
+                buff_index += 8;
+                break;
+        }
+        /* set error/warning type in JSON structure */
+        switch (error) {
+            case JIT_ERROR_FULL:
+            case JIT_ERROR_COLLISION_PACKET:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"COLLISION_PACKET\"", 18);
+                buff_index += 18;
+                /* update stats */
+                pthread_mutex_lock(&serv->report->mx_report);
+                serv->report->stat_down.meas_nb_tx_rejected_collision_packet += 1;
+                pthread_mutex_unlock(&serv->report->mx_report);
+                break;
+            case JIT_ERROR_TOO_LATE:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"TOO_LATE\"", 10);
+                buff_index += 10;
+                /* update stats */
+                pthread_mutex_lock(&serv->report->mx_report);
+                serv->report->stat_down.meas_nb_tx_rejected_too_late += 1;
+                pthread_mutex_unlock(&serv->report->mx_report);
+                break;
+            case JIT_ERROR_TOO_EARLY:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"TOO_EARLY\"", 11);
+                buff_index += 11;
+                /* update stats */
+                pthread_mutex_lock(&serv->report->mx_report);
+                serv->report->stat_down.meas_nb_tx_rejected_too_early += 1;
+                pthread_mutex_unlock(&serv->report->mx_report);
+                break;
+            case JIT_ERROR_COLLISION_BEACON:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"COLLISION_BEACON\"", 18);
+                buff_index += 18;
+                /* update stats */
+                pthread_mutex_lock(&serv->report->mx_report);
+                serv->report->stat_down.meas_nb_tx_rejected_collision_beacon += 1;
+                pthread_mutex_unlock(&serv->report->mx_report);
+                break;
+            case JIT_ERROR_TX_FREQ:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"TX_FREQ\"", 9);
+                buff_index += 9;
+                break;
+            case JIT_ERROR_TX_POWER:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"TX_POWER\"", 10);
+                buff_index += 10;
+                break;
+            case JIT_ERROR_GPS_UNLOCKED:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"GPS_UNLOCKED\"", 14);
+                buff_index += 14;
+                break;
+            default:
+                memcpy((void *)(buff_ack + buff_index), (void *)"\"UNKNOWN\"", 9);
+                buff_index += 9;
+                break;
+        }
+        /* set error/warning details in JSON structure */
+        switch (error) {
+            case JIT_ERROR_TX_POWER:
+                j = snprintf((char *)(buff_ack + buff_index), ACK_BUFF_SIZE-buff_index, ",\"value\":%d", error_value);
+                if (j > 0) {
+                    buff_index += j;
+                } else {
+                    lgw_log(LOG_ERROR, "ERROR~ [%s-up] snprintf failed line %u\n", serv->info.name, (__LINE__ - 4));
+                    break;
+                }
+                break;
+            default:
+                /* Do nothing */
+                break;
+        }
+        /* end of JSON structure */
+        memcpy((void *)(buff_ack + buff_index), (void *)"}}", 2);
+        buff_index += 2;
+    }
+
+    buff_ack[buff_index] = 0; /* add string terminator, for safety */
+
+    /* send datagram to server */
+    return send(serv->net->sock_up, (void *)buff_ack, buff_index, 0);
+}
+
+void print_tx_status(uint8_t tx_status) {
+	switch (tx_status) {
+	case TX_OFF:
+		lgw_log(LOG_INFO, "INFO~ [jit] lgw_status returned TX_OFF\n");
+		break;
+	case TX_FREE:
+		lgw_log(LOG_INFO, "INFO~ [jit] lgw_status returned TX_FREE\n");
+		break;
+	case TX_EMITTING:
+		lgw_log(LOG_INFO, "INFO~ [jit] lgw_status returned TX_EMITTING\n");
+		break;
+	case TX_SCHEDULED:
+		lgw_log(LOG_INFO, "INFO~ [jit] lgw_status returned TX_SCHEDULED\n");
+		break;
+	default:
+		lgw_log(LOG_INFO, "INFO~ [jit] lgw_status returned UNKNOWN (%d)\n", tx_status);
+		break;
+	}
+}
+
+
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
 int main(int argc, char *argv[]) {
-	int i, ic;						/* loop variable and temporary variable for return value */
+	int i;						/* loop variable and temporary variable for return value */
 	struct sigaction sigact;	/* SIGQUIT&SIGINT&SIGTERM signal handling */
 
     const char* conf_fname = "/etc/lora/global_conf.json"; /* pointer to a string we won't touch */
 
-    serv_s* serv_entry = NULL;  /* server list entry */
+    serv_s* serv_entry = NULL;  
 
 	/* threads */
 	pthread_t thrid_up;
@@ -225,24 +432,13 @@ int main(int argc, char *argv[]) {
             break;
 
         default:
-            printf( "ERROR: argument parsing options, use -h option for help\n" );
-            usage( );
-            return EXIT_FAILURE;
+            break;
         }
     }
 
 	/* display version informations */
-	MSG("*** Dragino Packet Forwarder for Lora Gateway ***\n");
-	MSG("*** Lora concentrator HAL library version info ***\n%s\n***\n", lgw_version_info());
-
-	/* display host endianness */
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-	MSG("INFO: Little endian host\n");
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-	MSG("INFO: Big endian host\n");
-#else
-	MSG("INFO: Host endianness unknown\n");
-#endif
+	lgw_log(LOG_INFO, "*** Dragino Packet Forwarder for Lora Gateway ***\n");
+	lgw_log(LOG_INFO, "*** Lora concentrator HAL library version info ***\n%s\n***\n", lgw_version_info());
 
 	/* configure signal handling */
 	sigemptyset(&sigact.sa_mask);
@@ -253,25 +449,53 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGTERM, &sigact, NULL);	/* default "kill" command */
 	sigaction(SIGQUIT, &sigact, NULL);	/* Ctrl-\ */
 
+    /* 创建一个默认的service，用来基本包处理：包解析、包解码、包保存、自定义下发等 */
+    serv_entry = (serv_s*)lgw_malloc(sizeof(serv_entry));
+    if (NULL == serv_entry) {
+        lgw_log(LOG_ERROR, "[main] ERROR~ Can't allocate pkt service, EXIT!\n");
+        exit(EXIT_FAILURE);
+    }
+    serv_entry->list.next = NULL;
+    serv_entry->rxpkt_serv = NULL;
+
+    serv_entry->net = NULL;
+    serv_entry->report = NULL;
+
+    serv_entry->state.live = false;
+
+    serv_entry->info.type = pkt;
+    strcpy(serv_entry->info.name, "PKT_SERV");;
+    //serv_entry->gw = &GW;
+
+    if (sem_init(&serv_entry->thread.sema, 0, 0) != 0) {
+        lgw_log(LOG_ERROR, "[main] ERROR~ initializes the unnamed semaphore, EXIT!\n");
+        lgw_free(serv_entry);
+        exit(EXIT_FAILURE);
+    }
+
+    serv_entry->thread.stop_sig = false;
+
+    LGW_LIST_INSERT_TAIL(&GW.serv_list, serv_entry, list);
+
     if (access(conf_fname, R_OK) == 0) { /* if there is a global conf, parse it  */
         if (!parse_cfg(conf_fname, &GW)) {
-            MSG("ERROR: [main] failed to find any configuration file named %s\n", conf_fname);
+            lgw_log(LOG_ERROR, "ERROR~ [main] failed to find any configuration file named %s\n", conf_fname);
             exit(EXIT_FAILURE);
         }
     } else {
-        MSG("ERROR: [main] failed to find any configuration file named %s\n", conf_fname);
+        lgw_log(LOG_ERROR, "ERROR~ [main] failed to find any configuration file named %s\n", conf_fname);
         exit(EXIT_FAILURE);
     }
 
 	/* Start GPS a.s.a.p., to allow it to lock */
     if (GW.gps.gps_tty_path[0] != '\0') { /* do not try to open GPS device if no path set */
-        i = lgw_gps_enable(gps_tty_path, "ubx7", 0, &GW.gps.gps_tty_fd); /* HAL only supports u-blox 7 for now */
+        i = lgw_gps_enable(GW.gps.gps_tty_path, "ubx7", 0, &GW.gps.gps_tty_fd); /* HAL only supports u-blox 7 for now */
         if (i != LGW_GPS_SUCCESS) {
-            printf("WARNING: [main] impossible to open %s for GPS sync (check permissions)\n", GW.gps.gps_tty_path);
+            lgw_log(LOG_WARNING, "WARNING~ [main] impossible to open %s for GPS sync (check permissions)\n", GW.gps.gps_tty_path);
             GW.gps.gps_enabled = false;
             GW.gps.gps_ref_valid = false;
         } else {
-            printf("INFO: [main] TTY port %s open for GPS synchronization\n", GW.gps.gps_tty_path);
+            lgw_log(LOG_INFO, "INFO~ [main] TTY port %s open for GPS synchronization\n", GW.gps.gps_tty_path);
             GW.gps.gps_enabled = true;
             GW.gps.gps_ref_valid = false;
         }
@@ -282,56 +506,68 @@ int main(int argc, char *argv[]) {
 
     /* starting ghost service */
 	if (GW.cfg.ghoststream_enabled == true) {
-        ghost_start(GW.cfg.ghost_addr, GW.cfg.ghost_port, GW.gps.reference_coord, GW.info.gateway_id);
+        ghost_start(GW.cfg.ghost_host, GW.cfg.ghost_port, GW.gps.reference_coord, GW.info.gateway_id);
         lgw_register_atexit(ghost_stop);
-        MSG("INFO: [main] Ghost listener started, ghost packets can now be received.\n");
+        lgw_log(LOG_INFO, "INFO~ [main] Ghost listener started, ghost packets can now be received.\n");
     }
 
 	/* starting the concentrator */
 	if (GW.cfg.radiostream_enabled == true) {
-		MSG("INFO: [main] Starting the concentrator\n");
+		lgw_log(LOG_INFO, "INFO~ [main] Starting the concentrator\n");
         if (system("/usr/bin/reset_lgw.sh start") != 0) {
-            MSG("ERROR: [main] failed to start SX1302, Please start again!\n");
+            lgw_log(LOG_ERROR, "ERROR~ [main] failed to start SX130X, Please start again!\n");
             exit(EXIT_FAILURE);
         } 
 		i = lgw_start();
 		if (i == LGW_HAL_SUCCESS) {
-			MSG("INFO: [main] concentrator started, radio packets can now be received.\n");
+			lgw_log(LOG_INFO, "INFO~ [main] concentrator started, radio packets can now be received.\n");
 		} else {
-			MSG("ERROR: [main] failed to start the concentrator\n");
+			lgw_log(LOG_ERROR, "ERROR~ [main] failed to start the concentrator\n");
+            if (system("/usr/bin/reset_lgw.sh stop") != 0) {
+                lgw_log(LOG_ERROR, "ERROR~ [main] failed to stop SX130X, run script reset_lgw.sh stop!\n");
+            exit(EXIT_FAILURE);
+        } 
 			exit(EXIT_FAILURE);
 		}
 	} else {
-		MSG("WARNING: Radio is disabled, radio packets cannot be sent or received.\n");
+		lgw_log(LOG_WARNING, "WARNING~ Radio is disabled, radio packets cannot be sent or received.\n");
 	}
 
-	jit_queue_init(&jit_queue);
+    if (!lgw_pthread_create(&thrid_up, NULL, (void *(*)(void *))thread_up, NULL))
+		lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create data up thread\n");
+
+    /* JIT queue initialization */
+    jit_queue_init(&GW.tx.jit_queue[0]);
+    jit_queue_init(&GW.tx.jit_queue[1]);
 
     if (!lgw_pthread_create(&thrid_jit, NULL, (void *(*)(void *))thread_jit, NULL))
-        MSG("ERROR: [main] impossible to create JIT thread\n");
+        lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create JIT thread\n");
 
 	/* spawn thread to manage GPS */
 	if (GW.gps.gps_enabled == true) {
 	    // Timer synchronization needed for downstream ...
 		if (!lgw_pthread_create(&thrid_timersync, NULL, (void *(*)(void *))thread_timersync, NULL))
-			MSG("ERROR: [main] impossible to create Timer Sync thread\n");
+			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create Timer Sync thread\n");
 		if (!lgw_pthread_create(&thrid_gps, NULL, (void *(*)(void *))thread_gps, NULL))
-			MSG("ERROR: [main] impossible to create GPS thread\n");
+			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create GPS thread\n");
 		if (!pthread_create(&thrid_valid, NULL, (void *(*)(void *))thread_valid, NULL))
-			MSG("ERROR: [main] impossible to create validation thread\n");
+			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create validation thread\n");
 	}
 
 	/* spawn thread for watchdog */
 	if (GW.cfg.wd_enabled == true) {
         GW.cfg.last_loop = time(NULL);
 		if (!lgw_pthread_create(&thrid_watchdog, NULL, (void *(*)(void *))thread_watchdog, NULL))
-			MSG("ERROR: [main] impossible to create watchdog thread\n");
+			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create watchdog thread\n");
 	}
 
 	/* initialize protocol stacks */
-    LGW_LIST_TRAVERSE(GW.serv_list, serv_entry, list) {
-	    service_start(serv_entry);
-    }
+	service_start(&GW);
+    //LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) {
+	//    service_start(serv_entry);
+    //}
+
+    lgw_register_atexit(stop_clean_service);
 
 	/* main loop task : statistics transmission */
 	while (!exit_sig && !quit_sig) {
@@ -342,7 +578,7 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 		// Create statistics report
-		stats_report();
+		stats_report(&GW);
 
 		/* Exit strategies. */
 		/* Server that are 'off-line may be a reason to exit */
@@ -353,7 +589,7 @@ int main(int argc, char *argv[]) {
 
 		pthread_mutex_lock(&GW.hal.mx_concent);
 		if (lgw_get_trigcnt(&trig_cnt_us) == LGW_HAL_SUCCESS && trig_cnt_us == 0x7E000000) {
-			MSG("ERROR: [main] unintended SX1301 reset detected, terminating packet forwarder.\n");
+			lgw_log(LOG_ERROR, "ERROR~ [main] unintended SX1301 reset detected, terminating packet forwarder.\n");
 			exit(EXIT_FAILURE);
 		}
 		pthread_mutex_unlock(&GW.hal.mx_concent);
@@ -382,17 +618,17 @@ int main(int argc, char *argv[]) {
 		if (GW.cfg.radiostream_enabled == true) {
 			i = lgw_stop();
 			if (i == LGW_HAL_SUCCESS) {
-                if (system("/usr/bin/reset_lgw.sh stop") != 0) {
-                    MSG("ERROR: failed to stop SX1302\n");
+                if (system("/usr/bin/reset_lGW.sh stop") != 0) {
+                    lgw_log(LOG_ERROR, "ERROR~ failed to stop SX1302\n");
                 } else 
-				    MSG("INFO: concentrator stopped successfully\n");
+				    lgw_log(LOG_ERROR, "INFO~ concentrator stopped successfully\n");
 			} else {
-				MSG("WARNING: failed to stop concentrator successfully\n");
+				lgw_log(LOG_WARNING, "WARNING~ failed to stop concentrator successfully\n");
 			}
 		}
 	}
 
-	MSG("INFO: Exiting packet forwarder program\n");
+	printf("INFO~ Exiting packet forwarder program\n");
 	exit(EXIT_SUCCESS);
 }
 
@@ -406,9 +642,8 @@ void thread_up(void) {
 	int nb_pkt;
 
     rxpkts_s *rxpkt_entry = NULL;
-    serv_rxpkts_s *serv_rxpkt_entry = NULL;
 
-	MSG("INFO: [up] Thread activated for all servers.\n");
+	lgw_log(LOG_INFO, "INFO~ [main-up] Thread activated for all servers.\n");
 
 	while (!exit_sig && !quit_sig) {
 
@@ -423,7 +658,7 @@ void thread_up(void) {
 		pthread_mutex_unlock(&GW.hal.mx_concent);
 
 		if (nb_pkt == LGW_HAL_ERROR) {
-			MSG("ERROR: [up] Failed packet fetch, continue\n");
+			lgw_log(LOG_ERROR, "ERROR~ [main-up] Failed packet fetch, continue\n");
             nb_pkt = 0;
 			//exit(EXIT_FAILURE);
 		}
@@ -437,28 +672,28 @@ void thread_up(void) {
 			continue;
 		}
 
-        rxpkt_entry = lgw_malloc(sizeof(rxpkt_entry)); // rxpkts结构体包含有一个lora_pkt_rx_s结构数组
+        rxpkt_entry = lgw_malloc(sizeof(rxpkts_s)); // rxpkts结构体包含有一个lora_pkt_rx_s结构数组
 
         if (NULL == rxpkt_entry) {
             continue;
         }
 
-        rxpkt_entry->list->next = NULL;
+        rxpkt_entry->list.next = NULL;
         rxpkt_entry->nb_pkt = nb_pkt;
         rxpkt_entry->bind = GW.serv_list.size;
         memcpy(rxpkt_entry->rxpkt, rxpkt, sizeof(struct lgw_pkt_rx_s) * nb_pkt);
 
-        LGW_LIST_LOCK(&rxpkts_list);
-        LGW_LIST_INSERT_HEAD(&rxpkts_list, rxpkt_entry, list);
-        LGW_LIST_UNLOCK(&rxpkts_list);
+        LGW_LIST_LOCK(&GW.rxpkts_list);
+        LGW_LIST_INSERT_HEAD(&GW.rxpkts_list, rxpkt_entry, list);
+        LGW_LIST_UNLOCK(&GW.rxpkts_list);
 
         service_handle_rxpkt(&GW, rxpkt_entry);
 
-        if (rxpkts_list.size > DEFAULT_RXPKTS_LIST_SIZE)  
-            lgw_pthread_create_background(NULL, NULL, (void * (*)(void *))thread_rxpkt_recycle, NULL); 
+        if (GW.rxpkts_list.size > DEFAULT_RXPKTS_LIST_SIZE)  
+            lgw_pthread_create_background(NULL, NULL, (void *(*)(void *))thread_rxpkt_recycle, NULL); 
 	}
 
-	MSG("INFO: End of upstream thread\n");
+	lgw_log(LOG_INFO, "INFO~ [main-up] End of upstream thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -467,112 +702,106 @@ void thread_up(void) {
 void thread_rxpkt_recycle(void) {
     rxpkts_s* rxpkts_entry = NULL;
 
-    LGW_LIST_LOCK(&rxpkts_list);
-    LGW_LIST_TRAVERSE_SAFE_BEGIN(&rxpkts_list, rxpkts_entry, list) {
-        if (rxpkts_entry->bind == 0) {
-            LGW_LIST_REMOVE_CURRENT(rxpkts_entry);
-            free(rxpkts_entry);
+    LGW_LIST_LOCK(&GW.rxpkts_list);
+    LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.rxpkts_list, rxpkts_entry, list) {
+        if (rxpkts_entry->bind < 1) {
+            LGW_LIST_REMOVE_CURRENT(list);
+            lgw_free(rxpkts_entry);
+            GW.rxpkts_list.size--;
         }
     }
-    LGW_LIST_UNLOCK(&rxpkts_list);
+    LGW_LIST_TRAVERSE_SAFE_END;
+    LGW_LIST_UNLOCK(&GW.rxpkts_list);
     
 }
-
-void print_tx_status(uint8_t tx_status) {
-	switch (tx_status) {
-	case TX_OFF:
-		MSG("INFO: [jit] lgw_status returned TX_OFF\n");
-		break;
-	case TX_FREE:
-		MSG("INFO: [jit] lgw_status returned TX_FREE\n");
-		break;
-	case TX_EMITTING:
-		MSG("INFO: [jit] lgw_status returned TX_EMITTING\n");
-		break;
-	case TX_SCHEDULED:
-		MSG("INFO: [jit] lgw_status returned TX_SCHEDULED\n");
-		break;
-	default:
-		MSG("INFO: [jit] lgw_status returned UNKNOWN (%d)\n", tx_status);
-		break;
-	}
-}
-
 /* -------------------------------------------------------------------------- */
 /* --- THREAD 3: CHECKING PACKETS TO BE SENT FROM JIT QUEUE AND SEND THEM --- */
-
 void thread_jit(void) {
-	int result = LGW_HAL_SUCCESS;
-	struct lgw_pkt_tx_s pkt;
-	int pkt_index = -1;
-	struct timeval current_unix_time;
-	struct timeval current_concentrator_time;
-	enum jit_error_e jit_result;
-	enum jit_pkt_type_e pkt_type;
-	uint8_t tx_status;
+    int result = LGW_HAL_SUCCESS;
+    struct lgw_pkt_tx_s pkt;
+    int pkt_index = -1;
+    uint32_t current_concentrator_time;
+    enum jit_error_e jit_result;
+    enum jit_pkt_type_e pkt_type;
+    uint8_t tx_status;
+    int i;
 
-	MSG("INFO: JIT thread activated.\n");
+    while (!exit_sig && !quit_sig) {
+        wait_ms(10);
 
-	while (!exit_sig && !quit_sig) {
-		wait_ms(10);
+        for (i = 0; i < LGW_RF_CHAIN_NB; i++) {
+            /* transfer data and metadata to the concentrator, and schedule TX */
+            pthread_mutex_lock(&GW.hal.mx_concent);
+            lgw_get_instcnt(&current_concentrator_time);
+            pthread_mutex_unlock(&GW.hal.mx_concent);
+            jit_result = jit_peek(&GW.tx.jit_queue[i], current_concentrator_time, &pkt_index);
+            if (jit_result == JIT_ERROR_OK) {
+                if (pkt_index > -1) {
+                    jit_result = jit_dequeue(&GW.tx.jit_queue[i], pkt_index, &pkt, &pkt_type);
+                    if (jit_result == JIT_ERROR_OK) {
+                        /* update beacon stats */
+                        if (pkt_type == JIT_PKT_TYPE_BEACON) {
+                            /* Compensate breacon frequency with xtal error */
+                            pthread_mutex_lock(&GW.hal.mx_xcorr);
+                            pkt.freq_hz = (uint32_t)(GW.hal.xtal_correct * (double)pkt.freq_hz);
+                            lgw_log(LOG_BEACON, "DEBUG~ [jit-beacon] beacon_pkt.freq_hz=%u (xtal_correct=%.15lf)\n", pkt.freq_hz, GW.hal.xtal_correct);
+                            pthread_mutex_unlock(&GW.hal.mx_xcorr);
 
-		/* transfer data and metadata to the concentrator, and schedule TX */
-		gettimeofday(&current_unix_time, NULL);
-		get_concentrator_time(&current_concentrator_time, current_unix_time);
-		jit_result = jit_peek(&jit_queue, &current_concentrator_time, &pkt_index);
-		if (jit_result == JIT_ERROR_OK) {
-			if (pkt_index > -1) {
-				jit_result = jit_dequeue(&jit_queue, pkt_index, &pkt, &pkt_type);
-				if (jit_result == JIT_ERROR_OK) {
-					/* update beacon stats */
-					if (pkt_type == JIT_PKT_TYPE_BEACON) {
-						increment_down(BEACON_SENT);
-					}
+                            /* Update statistics */
+                            pthread_mutex_lock(&GW.log.mx_report);
+                            GW.beacon.meas_nb_beacon_sent += 1;
+                            pthread_mutex_unlock(&GW.log.mx_report);
+                            lgw_log(LOG_INFO, "INFO~ [jit-beacon] Beacon dequeued (count_us=%u)\n", pkt.count_us);
+                        }
 
-					/* check if concentrator is free for sending new packet */
-					pthread_mutex_lock(&GW.hal.mx_concent);
-					result = lgw_status(TX_STATUS, &tx_status);
-					pthread_mutex_unlock(&GW.hal.mx_concent);
-					if (result == LGW_HAL_ERROR) {
-						MSG("WARNING: [jit] lgw_status failed\n");
-					} else {
-						if (tx_status == TX_EMITTING) {
-							MSG("ERROR: concentrator is currently emitting\n");
-							print_tx_status(tx_status);
-							continue;
-						} else if (tx_status == TX_SCHEDULED) {
-							MSG("WARNING: a downlink was already scheduled, overwriting it...\n");
-							print_tx_status(tx_status);
-						} else {
-							/* Nothing to do */
-						}
-					}
+                        /* check if concentrator is free for sending new packet */
+                        pthread_mutex_lock(&GW.hal.mx_concent); /* may have to wait for a fetch to finish */
+                        result = lgw_status(pkt.rf_chain, TX_STATUS, &tx_status);
+                        pthread_mutex_unlock(&GW.hal.mx_concent); /* free concentrator ASAP */
+                        if (result == LGW_HAL_ERROR) {
+                            lgw_log(LOG_WARNING, "WARNING~ [jit%d] lgw_status failed\n", i);
+                        } else {
+                            if (tx_status == TX_EMITTING) {
+                                lgw_log(LOG_ERROR, "ERROR~ [jit] concentrator is currently emitting on rf_chain %d\n", i);
+                                print_tx_status(tx_status);
+                                continue;
+                            } else if (tx_status == TX_SCHEDULED) {
+                                lgw_log(LOG_WARNING, "WARNING~ [jit] a downlink was already scheduled on rf_chain %d, overwritting it...\n", i);
+                                print_tx_status(tx_status);
+                            } else {
+                                /* Nothing to do */
+                            }
+                        }
 
-					/* send packet to concentrator */
-					pthread_mutex_lock(&GW.hal.mx_concent);	/* may have to wait for a fetch to finish */
-					result = lgw_send(pkt);
-					pthread_mutex_unlock(&GW.hal.mx_concent);	/* free concentrator ASAP */
-					if (result == LGW_HAL_ERROR) {
-						increment_down(TX_FAIL);
-						MSG("WARNING: [jit] lgw_send failed %d\n", result);
-						continue;
-					} else {
-						increment_down(TX_OK);
-						MSG_DEBUG(DEBUG_PKT_FWD, "lgw_send done: count_us=%u\n", pkt.count_us);
-					}
-				} else {
-					MSG("ERROR: jit_dequeue failed with %d\n", jit_result);
-				}
-			}
-		} else if (jit_result == JIT_ERROR_EMPTY) {
-			/* Do nothing, it can happen */
-		} else {
-			MSG("ERROR: jit_peek failed with %d\n", jit_result);
-		}
-	}
-
-	MSG("INFO: End of JIT thread\n");
+                        /* send packet to concentrator */
+                        pthread_mutex_lock(&GW.hal.mx_concent); /* may have to wait for a fetch to finish */
+                        result = lgw_send(&pkt);
+                        pthread_mutex_unlock(&GW.hal.mx_concent); /* free concentrator ASAP */
+                        if (result == LGW_HAL_ERROR) {
+                            pthread_mutex_lock(&GW.log.mx_report);
+                            GW.log.stat_dw.meas_nb_tx_fail += 1;
+                            pthread_mutex_unlock(&GW.log.mx_report);
+                            lgw_log(LOG_INFO, "WARNING~ [jit] lgw_send failed on rf_chain %d\n", i);
+                            continue;
+                        } else {
+                            pthread_mutex_lock(&GW.log.mx_report);
+                            GW.log.stat_dw.meas_nb_tx_ok += 1;
+                            pthread_mutex_unlock(&GW.log.mx_report);
+                            lgw_log(LOG_INFO, "INFO~ [jit] lgw_send done on rf_chain %d: count_us=%u\n", i, pkt.count_us);
+                        }
+                    } else {
+                        lgw_log(LOG_ERROR, "ERROR~ [jit] jit_dequeue failed on rf_chain %d with %d\n", i, jit_result);
+                    }
+                }
+            } else if (jit_result == JIT_ERROR_EMPTY) {
+                /* Do nothing, it can happen */
+            } else {
+                lgw_log(LOG_ERROR, "ERROR~ [jit] jit_peek failed on rf_chain %d with %d\n", i, jit_result);
+            }
+        }
+    }
 }
+
 
 /* -------------------------------------------------------------------------- */
 /* --- THREAD 4: PARSE GPS MESSAGE AND KEEP GATEWAY IN SYNC ----------------- */
@@ -585,7 +814,7 @@ static void gps_process_sync(void) {
 
 	/* get GPS time for synchronization */
 	if (i != LGW_GPS_SUCCESS) {
-		MSG("WARNING: [gps] could not get GPS time from GPS\n");
+		lgw_log(LOG_WARNING, "WARNING~ [gps] could not get GPS time from GPS\n");
 		return;
 	}
 
@@ -594,7 +823,7 @@ static void gps_process_sync(void) {
 	i = lgw_get_trigcnt(&trig_tstamp);
 	pthread_mutex_unlock(&GW.hal.mx_concent);
 	if (i != LGW_HAL_SUCCESS) {
-		MSG("WARNING: [gps] failed to read concentrator timestamp\n");
+		lgw_log(LOG_WARNING, "WARNING~ [gps] failed to read concentrator timestamp\n");
 		return;
 	}
 
@@ -603,7 +832,7 @@ static void gps_process_sync(void) {
 	i = lgw_gps_sync(&GW.gps.time_reference_gps, trig_tstamp, utc, gps_time);
 	pthread_mutex_unlock(&GW.gps.mx_timeref);
 	if (i != LGW_GPS_SUCCESS) {
-		MSG("WARNING: [gps] GPS out of sync, keeping previous time reference\n");
+		lgw_log(LOG_WARNING, "WARNING~ [gps] GPS out of sync, keeping previous time reference\n");
 	}
 }
 
@@ -644,7 +873,7 @@ void thread_gps(void) {
 		/* blocking non-canonical read on serial port */
 		ssize_t nb_char = read(GW.gps.gps_tty_fd, serial_buff + wr_idx, LGW_GPS_MIN_MSG_SIZE);
 		if (nb_char <= 0) {
-			MSG("WARNING: [gps] read() returned value %ld\n", nb_char);
+			lgw_log(LOG_WARNING, "WARNING~ [gps] read() returned value %d\n", nb_char);
 			continue;
 		}
 		wr_idx += (size_t) nb_char;
@@ -670,7 +899,7 @@ void thread_gps(void) {
 						frame_size = 0;
 					} else if (latest_msg == INVALID) {
 						/* message header received but message appears to be corrupted */
-						MSG("WARNING: [gps] could not get a valid message from GPS (no time)\n");
+						lgw_log(LOG_WARNING, "WARNING~ [gps] could not get a valid message from GPS (no time)\n");
 						frame_size = 0;
 					} else if (latest_msg == UBX_NAV_TIMEGPS) {
 						gps_process_sync();
@@ -722,7 +951,7 @@ void thread_gps(void) {
 			wr_idx -= LGW_GPS_MIN_MSG_SIZE;
 		}
 	}
-	MSG("INFO: End of GPS thread\n");
+	lgw_log(LOG_INFO, "INFO~ End of GPS thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -740,19 +969,7 @@ void thread_valid(void) {
 	double init_acc = 0.0;
 	double x;
 
-	MSG("INFO: Validation thread activated.\n");
-
-	/* correction debug */
-	// FILE * log_file = NULL;
-	// time_t now_time;
-	// char log_name[64];
-
-	/* initialization */
-	// time(&now_time);
-	// strftime(log_name,sizeof log_name,"xtal_err_%Y%m%dT%H%M%SZ.csv",localtime(&now_time));
-	// log_file = fopen(log_name, "w");
-	// setbuf(log_file, NULL);
-	// fprintf(log_file,"\"GW.hal.xtal_correct\",\"XERR_INIT_AVG %u XERR_FILT_COEF %u\"\n", XERR_INIT_AVG, XERR_FILT_COEF); // DEBUG
+	lgw_log(LOG_INFO, "INFO~ Validation thread activated.\n");
 
 	/* main loop task */
 	while (!exit_sig && !quit_sig) {
@@ -760,12 +977,12 @@ void thread_valid(void) {
 
 		/* calculate when the time reference was last updated */
 		pthread_mutex_lock(&GW.gps.mx_timeref);
-		gps_ref_age = (long)difftime(time(NULL), time_reference_gps.systime);
+		gps_ref_age = (long)difftime(time(NULL), GW.gps.time_reference_gps.systime);
 		if ((gps_ref_age >= 0) && (gps_ref_age <= GPS_REF_MAX_AGE)) {
 			/* time ref is ok, validate and  */
 			GW.gps.gps_ref_valid = true;
 			ref_valid_local = true;
-			xtal_err_cpy = time_reference_gps.xtal_err;
+			xtal_err_cpy = GW.gps.time_reference_gps.xtal_err;
 		} else {
 			/* time ref is too old, invalidate */
 			GW.gps.gps_ref_valid = false;
@@ -777,7 +994,7 @@ void thread_valid(void) {
 		if (ref_valid_local == false) {
 			/* couldn't sync, or sync too old -> invalidate XTAL correction */
 			pthread_mutex_lock(&GW.hal.mx_xcorr);
-			GW.hal.GW.hal.xtal_correct_ok = false;
+			GW.hal.xtal_correct_ok = false;
 			GW.hal.xtal_correct = 1.0;
 			pthread_mutex_unlock(&GW.hal.mx_xcorr);
 			init_cpt = 0;
@@ -791,7 +1008,7 @@ void thread_valid(void) {
 				/* initial average calculation */
 				pthread_mutex_lock(&GW.hal.mx_xcorr);
 				GW.hal.xtal_correct = (double)(XERR_INIT_AVG) / init_acc;
-				GW.hal.GW.hal.xtal_correct_ok = true;
+				GW.hal.xtal_correct_ok = true;
 				pthread_mutex_unlock(&GW.hal.mx_xcorr);
 				++init_cpt;
 				// fprintf(log_file,"%.18lf,\"average\"\n", GW.hal.xtal_correct); // DEBUG
@@ -804,10 +1021,10 @@ void thread_valid(void) {
 				// fprintf(log_file,"%.18lf,\"track\"\n", GW.hal.xtal_correct); // DEBUG
 			}
 		}
-		MSG_DEBUG(DEBUG_LOG, "Time ref: %s, XTAL correct: %s (%.15lf)\n", 
+		lgw_log(LOG_INFO, "Time ref: %s, XTAL correct: %s (%.15lf)\n", 
                 ref_valid_local ? "valid" : "invalid", GW.hal.xtal_correct_ok ? "valid" : "invalid", GW.hal.xtal_correct);	// DEBUG
 	}
-	MSG("INFO: End of validation thread\n");
+	lgw_log(LOG_INFO, "INFO~ End of validation thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -819,7 +1036,7 @@ void thread_watchdog(void) {
 		wait_ms(30000);
 		// timestamp updated within the last 3 stat intervals? If not assume something is wrong and exit
 		if ((time(NULL) - GW.cfg.last_loop) > (long int)((GW.cfg.time_interval * 3) + 5)) {
-			MSG("ERROR: Watchdog timer expired!\n");
+			lgw_log(LOG_ERROR, "ERROR~ [wd] Watchdog timer expired!\n");
 			exit(254);
 		}
 	}

@@ -27,6 +27,8 @@
 #ifndef _LGW_DB_H
 #define _LGW_DB_H
 
+#include <stdbool.h>
+
 #if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {
 #endif
@@ -36,6 +38,12 @@ struct lgw_db_entry {
 	char *key;
 	char data[0];
 };
+
+/*! \brief initial database */
+int lgw_db_init(void);
+
+/*! \brief find key value specified by family/key */
+bool lgw_db_key_exist(const char *key);
 
 /*! \brief Get key value specified by family/key */
 int lgw_db_get(const char *family, const char *key, char *value, int valuelen);

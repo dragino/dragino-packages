@@ -21,7 +21,7 @@
 
 /*! \file
  *
- * \brief gwdb Management
+ * \brief Gateway database Management
  *
  */
 
@@ -38,7 +38,7 @@
 
 #define MAX_DB_FIELD 256
 
-pthread_mutex_t mx_mx_dblock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mx_dblock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t dbcond;
 static sqlite3 *GWDB;
 static pthread_t syncthread;
@@ -65,7 +65,7 @@ static int init_stmt(sqlite3_stmt **stmt, const char *sql, size_t len)
 {
 	pthread_mutex_lock(&mx_dblock);
 	if (sqlite3_prepare(GWDB, sql, len, stmt, NULL) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Couldn't prepare statement '%s': %s\n", sql, sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't prepare statement '%s': %s\n", sql, sqlite3_errmsg(GWDB));
 		pthread_mutex_unlock(&mx_dblock);
 		return -1;
 	}
@@ -81,7 +81,7 @@ static int init_stmt(sqlite3_stmt **stmt, const char *sql, size_t len)
 static int clean_stmt(sqlite3_stmt **stmt, const char *sql)
 {
 	if (sqlite3_finalize(*stmt) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Couldn't finalize statement '%s': %s\n", sql, sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't finalize statement '%s': %s\n", sql, sqlite3_errmsg(GWDB));
 		*stmt = NULL;
 		return -1;
 	}
@@ -132,7 +132,7 @@ static int db_create_gwdb(void)
 
 	pthread_mutex_lock(&mx_dblock);
 	if (sqlite3_step(create_gwdb_stmt) != SQLITE_DONE) {
-		lgw_log(LOG_WARNING, "Couldn't create GWDB table: %s\n", sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't create GWDB table: %s\n", sqlite3_errmsg(GWDB));
 		res = -1;
 	}
 	sqlite3_reset(create_gwdb_stmt);
@@ -146,7 +146,7 @@ static int db_open(void)
 {
 	pthread_mutex_lock(&mx_dblock);
 	if (sqlite3_open(LGW_DB_PATH, &GWDB) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Unable to open LGW database '%s': %s\n", dbname, sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Unable to open LGW database '%s': %s\n", dbname, sqlite3_errmsg(GWDB));
 		sqlite3_close(GWDB);
 		pthread_mutex_unlock(&mx_dblock);
 		return -1;
@@ -179,7 +179,7 @@ static int db_execute_sql(const char *sql, int (*callback)(void *, int, char **,
 	int res =0;
 
 	if (sqlite3_exec(GWDB, sql, callback, arg, &errmsg) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Error executing SQL (%s): %s\n", sql, errmsg);
+		lgw_log(LOG_WARNING, "WARNING~ [db] Error executing SQL (%s): %s\n", sql, errmsg);
 		sqlite3_free(errmsg);
 		res = -1;
 	}
@@ -209,7 +209,7 @@ int lgw_db_put(const char *family, const char *key, const char *value)
 	int res = 0;
 
 	if (strlen(family) + strlen(key) + 2 > sizeof(fullkey) - 1) {
-		lgw_log(LOG_WARNING, "Family and key length must be less than %zu bytes\n", sizeof(fullkey) - 3);
+		lgw_log(LOG_WARNING, "WARNING~ [db] Family and key length must be less than %zu bytes\n", sizeof(fullkey) - 3);
 		return -1;
 	}
 
@@ -217,13 +217,13 @@ int lgw_db_put(const char *family, const char *key, const char *value)
 
 	pthread_mutex_lock(&mx_dblock);
 	if (sqlite3_bind_text(put_stmt, 1, fullkey, fullkey_len, SQLITE_STATIC) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Couldn't bind key to stmt: %s\n", sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind key to stmt: %s\n", sqlite3_errmsg(GWDB));
 		res = -1;
 	} else if (sqlite3_bind_text(put_stmt, 2, value, -1, SQLITE_STATIC) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Couldn't bind value to stmt: %s\n", sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind value to stmt: %s\n", sqlite3_errmsg(GWDB));
 		res = -1;
 	} else if (sqlite3_step(put_stmt) != SQLITE_DONE) {
-		lgw_log(LOG_WARNING, "Couldn't execute statement: %s\n", sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't execute statement: %s\n", sqlite3_errmsg(GWDB));
 		res = -1;
 	}
 
@@ -253,7 +253,7 @@ static int db_get_common(const char *family, const char *key, char **buffer, int
 	int res = 0;
 
 	if (strlen(family) + strlen(key) + 2 > sizeof(fullkey) - 1) {
-		lgw_log(LOG_WARNING, "Family and key length must be less than %zu bytes\n", sizeof(fullkey) - 3);
+		lgw_log(LOG_WARNING, "WARNING~ [db] Family and key length must be less than %zu bytes\n", sizeof(fullkey) - 3);
 		return -1;
 	}
 
@@ -261,13 +261,13 @@ static int db_get_common(const char *family, const char *key, char **buffer, int
 
 	pthread_mutex_lock(&mx_dblock);
 	if (sqlite3_bind_text(get_stmt, 1, fullkey, fullkey_len, SQLITE_STATIC) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Couldn't bind key to stmt: %s\n", sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind key to stmt: %s\n", sqlite3_errmsg(GWDB));
 		res = -1;
 	} else if (sqlite3_step(get_stmt) != SQLITE_ROW) {
-		lgw_debug(1, "Unable to find key '%s' in family '%s'\n", key, family);
+		lgw_log(LOG_DEBUG, "DEBUG~ [db] Unable to find key '%s' in family '%s'\n", key, family);
 		res = -1;
 	} else if (!(result = sqlite3_column_text(get_stmt, 0))) {
-		lgw_log(LOG_WARNING, "Couldn't get value\n");
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't get value\n");
 		res = -1;
 	} else {
 		const char *value = (const char *) result;
@@ -282,6 +282,26 @@ static int db_get_common(const char *family, const char *key, char **buffer, int
 	pthread_mutex_unlock(&mx_dblock);
 
 	return res;
+}
+
+bool lgw_db_key_exist(const char *key) {
+	pthread_mutex_lock(&dblock);
+    if (!lgw_strlen_zero(key) && (sqlite3_bind_text(showkey_stmt, 1, key, -1, SQLITE_STATIC) != SQLITE_OK)) {
+        lgw_log(LOG_WARNING, "WARNING~ [db] Could bind %s to stmt: %s\n", a->argv[2], sqlite3_errmsg(GWDB));
+        sqlite3_reset(showkey_stmt);
+        pthread_mutex_unlock(&dblock);
+        return false;
+    }
+
+    if (sqlite3_step(showkey_stmt) == SQLITE_ROW) {
+        sqlite3_reset(showkey_stmt);
+        pthread_mutex_unlock(&dblock);
+        return true;
+    }
+
+    sqlite3_reset(showkey_stmt);
+    pthread_mutex_unlock(&dblock);
+    return false;
 }
 
 int lgw_db_get(const char *family, const char *key, char *value, int valuelen)
@@ -308,7 +328,7 @@ int lgw_db_del(const char *family, const char *key)
 	int res = 0;
 
 	if (strlen(family) + strlen(key) + 2 > sizeof(fullkey) - 1) {
-		lgw_log(LOG_WARNING, "Family and key length must be less than %zu bytes\n", sizeof(fullkey) - 3);
+		lgw_log(LOG_WARNING, "WARNING~ [db] Family and key length must be less than %zu bytes\n", sizeof(fullkey) - 3);
 		return -1;
 	}
 
@@ -316,10 +336,10 @@ int lgw_db_del(const char *family, const char *key)
 
 	pthread_mutex_lock(&mx_dblock);
 	if (sqlite3_bind_text(del_stmt, 1, fullkey, fullkey_len, SQLITE_STATIC) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Couldn't bind key to stmt: %s\n", sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind key to stmt: %s\n", sqlite3_errmsg(GWDB));
 		res = -1;
 	} else if (sqlite3_step(del_stmt) != SQLITE_DONE) {
-		lgw_debug(1, "Unable to find key '%s' in family '%s'\n", key, family);
+		lgw_log(LOG_DEBUG, "DEBUG~ [db] Unable to find key '%s' in family '%s'\n", key, family);
 		res = -1;
 	}
 	sqlite3_reset(del_stmt);
@@ -350,10 +370,10 @@ int lgw_db_deltree(const char *family, const char *keytree)
 
 	pthread_mutex_lock(&mx_dblock);
 	if (!lgw_strlen_zero(prefix) && (sqlite3_bind_text(stmt, 1, prefix, -1, SQLITE_STATIC) != SQLITE_OK)) {
-		lgw_log(LOG_WARNING, "Could bind %s to stmt: %s\n", prefix, sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Could bind %s to stmt: %s\n", prefix, sqlite3_errmsg(GWDB));
 		res = -1;
 	} else if (sqlite3_step(stmt) != SQLITE_DONE) {
-		lgw_log(LOG_WARNING, "Couldn't execute stmt: %s\n", sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't execute stmt: %s\n", sqlite3_errmsg(GWDB));
 		res = -1;
 	}
 	res = sqlite3_changes(GWDB);
@@ -420,7 +440,7 @@ struct lgw_db_entry *lgw_db_gettree(const char *family, const char *keytree)
 		}
 
 		if (res >= sizeof(prefix)) {
-			lgw_log(LOG_WARNING, "Requested prefix is too long: %s\n", keytree);
+			lgw_log(LOG_WARNING, "WARNING~ [db] Requested prefix is too long: %s\n", keytree);
 			return NULL;
 		}
 	} else {
@@ -430,7 +450,7 @@ struct lgw_db_entry *lgw_db_gettree(const char *family, const char *keytree)
 
 	pthread_mutex_lock(&mx_dblock);
 	if (res && (sqlite3_bind_text(stmt, 1, prefix, res, SQLITE_STATIC) != SQLITE_OK)) {
-		lgw_log(LOG_WARNING, "Could not bind %s to stmt: %s\n", prefix, sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Could not bind %s to stmt: %s\n", prefix, sqlite3_errmsg(GWDB));
 		sqlite3_reset(stmt);
 		pthread_mutex_unlock(&mx_dblock);
 		return NULL;
@@ -451,13 +471,13 @@ struct lgw_db_entry *lgw_db_gettree_by_prefix(const char *family, const char *ke
 
 	res = snprintf(prefix, sizeof(prefix), "/%s/%s", family, key_prefix);
 	if (res >= sizeof(prefix)) {
-		lgw_log(LOG_WARNING, "Requested key prefix is too long: %s\n", key_prefix);
+		lgw_log(LOG_WARNING, "WARNING~ [db] Requested key prefix is too long: %s\n", key_prefix);
 		return NULL;
 	}
 
 	pthread_mutex_lock(&mx_dblock);
 	if (sqlite3_bind_text(gettree_prefix_stmt, 1, prefix, res, SQLITE_STATIC) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "Could not bind %s to stmt: %s\n", prefix, sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Could not bind %s to stmt: %s\n", prefix, sqlite3_errmsg(GWDB));
 		sqlite3_reset(gettree_prefix_stmt);
 		pthread_mutex_unlock(&mx_dblock);
 		return NULL;
@@ -533,7 +553,7 @@ static void *db_sync_thread(void *data)
 
 /*!
  * \internal
- * \brief Clean up resources on Asterisk shutdown
+ * \brief Clean up resources on shutdown
  */
 static void gwdb_atexit(void)
 {
@@ -553,7 +573,7 @@ static void gwdb_atexit(void)
 	pthread_mutex_unlock(&mx_dblock);
 }
 
-int db_init(void)
+int lgw_db_init(void)
 {
 	pthread_cond_init(&dbcond, NULL);
 

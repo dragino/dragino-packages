@@ -13,7 +13,7 @@
 
 #include "loragw_hal.h"
 #include "loragw_gps.h"
-#include "dragino_gw_fwd.h"
+#include "fwd.h"
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE CONSTANTS AND FIELDS ------------------------------------------ */

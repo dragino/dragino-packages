@@ -27,6 +27,15 @@
 /*! MIC field size */
 #define LORAMAC_MIC_FIELD_SIZE              4
 
+typedef struct {
+    uint32_t devaddr;
+    uint8_t appskey[16];
+    uint8_t nwkskey[16];
+    char devaddr_str[17];
+    char appskey_str[33];
+    char nwkskey_str[33];
+} devinfo_s;
+
 /*!
  * LoRaMAC field definition of DLSettings
  *

@@ -1,12 +1,10 @@
 ### Application-specific constants
 
-APP_NAME := dragino_gw_fwd
+APP_NAME := fwd
 
 ### Environment constants 
 
-LGW_PATH ?= ../libloragw
-MQTT_PATH ?= ../libmqtt
-TTN_PATH ?= ../libttn
+LGW_PATH ?= ../sx1302hal
 
 ARCH ?=
 CROSS_COMPILE ?=
@@ -38,36 +36,12 @@ ifneq ($(wildcard $(LGW_PATH)/inc/config.h),)
 endif
 LGW_INC += $(LGW_PATH)/inc/loragw_hal.h
 LGW_INC += $(LGW_PATH)/inc/loragw_gps.h
-TTN_INC := -I$(TTN_PATH) 
 
 ### Linking options
 
-LIBS:=
+LIBS += -lloragw -lrt -lpthread -lm
 
-ifeq ($(PLATFORM),imst_rpi)
-  CFLAGS_C += -DRPI
-endif
-
-ifeq ($(CFG_SPI),native)
-  LIBS += -lloragw -lrt -lpthread -lm
-else ifeq ($(CFG_SPI),ftdi)
-  LIBS += -lloragw -lrt -lpthread -lmpsse -lm -lusb-1.0
-else ifeq ($(CFG_SPI),mac)
-    LIBS += -lloragw -lpthread -lmpsse -lm
-else
-  # keep compatibility with SX1301 HAL version 1.2.x and bellow
-  ifeq ($(LGW_PHY),native)
-    LIBS += -lloragw -lrt -lpthread -lm
-  else ifeq ($(LGW_PHY),ftdi)
-    LIBS += -lloragw -lrt -lpthread -lmpsse -lm
-  else ifeq ($(LGW_PHY),mac)
-    LIBS += -lloragw -lpthread -lmpsse -lm
-  else
-    $(error [error] Can't find configuration for SPI phy)
-  endif
-endif
-
-LIBS += -L$(MQTT_PATH) -lpahomqtt3c -L$(TTN_PATH)/obj -lttn-gateway-connector -lprotobuf-c 
+#LIBS += -L$(MQTT_PATH) -lpahomqtt3c -L$(TTN_PATH)/obj -lttn-gateway-connector -lprotobuf-c 
 
 CFLAGS ?=
 LDFLAGS ?=
@@ -86,15 +60,14 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: src/%.c $(INCLUDES) | $(OBJDIR)
-	$(CC) -c $(CFLAGS_C) $(CFLAGS) -I$(LGW_PATH)/inc $(TTN_INC) $< -o $@
+	$(CC) -c $(CFLAGS_C) -I$(LGW_PATH)/inc $< -o $@
 
 ### Main program compilation and assembly
 
 $(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c $(LGW_INC) $(INCLUDES) | $(OBJDIR)
-	$(CC) -c $(CFLAGS_C) $(VFLAG) $(CFLAGS) -I$(LGW_PATH)/inc $(TTN_INC) $< -o $@
+	$(CC) -c $(CFLAGS_C) $(VFLAG) -I$(LGW_PATH)/inc $< -o $@
 
-$(APP_NAME): $(OBJDIR)/$(APP_NAME).o $(LGW_PATH)/libloragw.a $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/ghost.o $(OBJDIR)/endianext.o $(OBJDIR)/semtech_transport.o $(OBJDIR)/ttn_transport.o $(OBJDIR)/stats.o $(OBJDIR)/gwtraf_transport.o $(OBJDIR)/transport.o 
-	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/ghost.o $(OBJDIR)/endianext.o $(OBJDIR)/semtech_transport.o $(OBJDIR)/ttn_transport.o $(OBJDIR)/gwtraf_transport.o $(OBJDIR)/stats.o $(OBJDIR)/transport.o -o $@ $(LIBS)
-
+$(APP_NAME): $(OBJDIR)/$(APP_NAME).o $(LGW_PATH)/libloragw.a $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o  $(OBJDIR)/ghost.o $(OBJDIR)/endianext.o $(OBJDIR)/semtech_serv.o $(OBJDIR)/service.o $(OBJDIR)/stats.o $(OBJDIR)/gwtraf_serv.o $(OBJDIR)/pkt_serv.o $(OBJDIR)/db.o $(OBJDIR)/utilities.o $(OBJDIR)/lgwmm.o $(OBJDIR)/aes.o $(OBJDIR)/cmac.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/loramac-crypto.o
+	$(CC) -L$(LGW_PATH) $< $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o $(OBJDIR)/timersync.o $(OBJDIR)/ghost.o $(OBJDIR)/endianext.o $(OBJDIR)/semtech_serv.o $(OBJDIR)/service.o $(OBJDIR)/stats.o $(OBJDIR)/gwtraf_serv.o $(OBJDIR)/pkt_serv.o $(OBJDIR)/db.o $(OBJDIR)/utilities.o $(OBJDIR)/lgwmm.o $(OBJDIR)/aes.o $(OBJDIR)/cmac.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/loramac-crypto.o -o $@ $(LIBS)
 
 ### EOF

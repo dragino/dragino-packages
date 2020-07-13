@@ -139,6 +139,7 @@ struct name {								\
     .size = 0,                      \
 	}
 
+
 /*!
  * \brief Defines a structure to be used to hold a list of specified type, statically initialized.
  * \param name This will be the name of the defined structure.
@@ -160,6 +161,7 @@ struct name {								\
 struct name {								\
 	struct type *first;						\
 	struct type *last;						\
+    int         size;                       \
 	pthread_mutex_t lock;						\
 } name = LGW_LIST_HEAD_INIT_VALUE
 
@@ -172,6 +174,7 @@ struct name {								\
 struct name {								\
 	struct type *first;						\
 	struct type *last;						\
+    int         size;                       \
 } name = LGW_LIST_HEAD_NOLOCK_INIT_VALUE
 
 /*!
@@ -416,6 +419,7 @@ struct {								\
                 if ((head)->last == __elm) {                    \
                     (head)->last = NULL;                        \
                 }                                               \
+                (head)->size--;                                 \
             } else {                                            \
                 typeof(elm) __prev = (head)->first;             \
                 while (__prev && __prev->field.next != __elm) { \
@@ -427,6 +431,7 @@ struct {								\
                     if ((head)->last == __elm) {                \
                         (head)->last = __prev;                  \
                     }                                           \
+                    (head)->size--;                             \
                 } else {                                        \
                     __elm = NULL;                               \
                 }                                               \

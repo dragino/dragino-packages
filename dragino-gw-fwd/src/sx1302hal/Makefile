@@ -2,7 +2,6 @@
 
 LIBLORAGW_VERSION := `cat ../VERSION`
 include library.cfg
-include ../target.cfg
 
 ### constant symbols
 
@@ -11,14 +10,14 @@ CROSS_COMPILE ?=
 CC := $(CROSS_COMPILE)gcc
 AR := $(CROSS_COMPILE)ar
 
-CFLAGS_IN := -O2 -Wall -Wextra -std=c99 -Iinc -I. -I../libtools/inc
+CFLAGS_IN := -O2 -Wall -Wextra -std=c99 -Iinc -I. 
 
 OBJDIR = obj
-INCLUDES = $(wildcard inc/*.h) $(wildcard ../libtools/inc/*.h)
+INCLUDES = $(wildcard inc/*.h) 
 
 ### linking options
 
-LIBS := -lloragw -ltinymt32 -lrt -lm
+LIBS := -lloragw -lrt -lm
 
 ### general build targets
 
@@ -85,40 +84,40 @@ $(OBJDIR)/%.o: src/%.c $(INCLUDES) inc/config.h | $(OBJDIR)
 
 ### static library
 
-libloragw.a: $(OBJDIR)/loragw_spi.o $(OBJDIR)/loragw_i2c.o $(OBJDIR)/loragw_aux.o $(OBJDIR)/loragw_reg.o $(OBJDIR)/loragw_sx1250.o $(OBJDIR)/loragw_sx125x.o $(OBJDIR)/loragw_sx1302.o $(OBJDIR)/loragw_cal.o $(OBJDIR)/loragw_debug.o $(OBJDIR)/loragw_hal.o $(OBJDIR)/loragw_stts751.o $(OBJDIR)/loragw_gps.o $(OBJDIR)/loragw_sx1302_timestamp.o $(OBJDIR)/loragw_sx1302_rx.o
+libloragw.a: $(OBJDIR)/loragw_spi.o $(OBJDIR)/loragw_i2c.o $(OBJDIR)/loragw_aux.o $(OBJDIR)/loragw_reg.o $(OBJDIR)/loragw_sx1250.o $(OBJDIR)/loragw_sx125x.o $(OBJDIR)/loragw_sx1302.o $(OBJDIR)/loragw_cal.o $(OBJDIR)/tinymt32.o $(OBJDIR)/loragw_debug.o $(OBJDIR)/loragw_hal.o $(OBJDIR)/loragw_stts751.o $(OBJDIR)/loragw_gps.o $(OBJDIR)/loragw_sx1302_timestamp.o $(OBJDIR)/loragw_sx1302_rx.o
 	$(AR) rcs $@ $^
 
 ### test programs
 
 test_loragw_spi: tst/test_loragw_spi.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L. $< -o $@ $(LIBS)
 
 test_loragw_i2c: tst/test_loragw_i2c.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L. $< -o $@ $(LIBS)
 
 test_loragw_reg: tst/test_loragw_reg.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L. $< -o $@ $(LIBS)
 
 test_loragw_hal_tx: tst/test_loragw_hal_tx.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L. $< -o $@ $(LIBS)
 
 test_loragw_hal_rx: tst/test_loragw_hal_rx.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L. $< -o $@ $(LIBS)
 
 test_loragw_capture_ram: tst/test_loragw_capture_ram.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools  $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L.  $< -o $@ $(LIBS)
 
 test_loragw_cal: tst/test_loragw_cal.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools  $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L.  $< -o $@ $(LIBS)
 
 test_loragw_spi_sx1250: tst/test_loragw_spi_sx1250.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools  $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L.  $< -o $@ $(LIBS)
 
 test_loragw_counter: tst/test_loragw_counter.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools  $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L.  $< -o $@ $(LIBS)
 
 test_loragw_gps: tst/test_loragw_gps.c libloragw.a
-	$(CC) $(CFLAGS_IN) -L. -L../libtools  $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS_IN) -L.  $< -o $@ $(LIBS)
 
 
 ### EOF

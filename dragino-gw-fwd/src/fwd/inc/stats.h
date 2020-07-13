@@ -36,6 +36,8 @@
 #include "loragw_gps.h"
 
 // Definitions
+//
+#define STATUS_SIZE     200
 
 typedef enum {
 	TX_OK,
@@ -48,27 +50,7 @@ typedef enum {
 	BEACON_QUEUED,
 	BEACON_SENT,
 	BEACON_REJECTED
-} typedw;
-
-typedef struct {
-    pthread_mutex_t mx_meas_dw;
-	uint32_t meas_nb_tx_ok;
-	uint32_t meas_nb_tx_fail;
-	uint32_t meas_nb_tx_requested;
-	uint32_t meas_nb_tx_rejected_collision_packet;
-	uint32_t meas_nb_tx_rejected_collision_beacon;
-	uint32_t meas_nb_tx_rejected_too_late;
-	uint32_t meas_nb_tx_rejected_too_early;
-	uint32_t meas_nb_beacon_queued;
-	uint32_t meas_nb_beacon_sent;
-	uint32_t meas_nb_beacon_rejected;
-	uint32_t meas_dw_pull_sent;
-	uint32_t meas_dw_ack_rcv;
-	uint32_t meas_dw_dgram_acp;
-	uint32_t meas_dw_dgram_rcv;
-	uint32_t meas_dw_network_byte;
-	uint32_t meas_dw_payload_byte;
-} statdw;
+} type_dw_e;
 
 typedef enum {
 	RX_RCV,
@@ -76,10 +58,25 @@ typedef enum {
 	RX_BAD,
 	RX_NOCRC,
 	PKT_FWD
-} typeup;
+} type_up_e;
 
 typedef struct {
-    pthread_mutex_t mx_meas_up;
+	uint32_t meas_nb_tx_ok;
+	uint32_t meas_nb_tx_fail;
+	uint32_t meas_nb_tx_requested;
+	uint32_t meas_nb_tx_rejected_collision_packet;
+	uint32_t meas_nb_tx_rejected_collision_beacon;
+	uint32_t meas_nb_tx_rejected_too_late;
+	uint32_t meas_nb_tx_rejected_too_early;
+	uint32_t meas_dw_pull_sent;
+	uint32_t meas_dw_ack_rcv;
+	uint32_t meas_dw_dgram_acp;
+	uint32_t meas_dw_dgram_rcv;
+	uint32_t meas_dw_network_byte;
+	uint32_t meas_dw_payload_byte;
+} stat_dw_s;
+
+typedef struct {
 	uint32_t meas_nb_rx_rcv;
 	uint32_t meas_nb_rx_ok;
 	uint32_t meas_nb_rx_bad;
@@ -89,12 +86,22 @@ typedef struct {
     uint32_t meas_up_payload_byte;
     uint32_t meas_up_dgram_sent;
     uint32_t meas_up_ack_rcv;
-} statup;
+} stat_up_s;
 
-// Function prototypes
-void stats_init();
-void increment_down(enum stats_down type);
-void increment_up(enum stats_up type);
-void stats_data_up(int nb_pkt, struct lgw_pkt_rx_s *rxpkt);
+typedef struct {
+    bool statusstream;
+    bool report_ready;
+    char stat_format[16];               // format for json statistics
+    char status_report[STATUS_SIZE];
+    uint16_t stat_interval; 	     // time interval (in sec) at which statistics are collected and displayed
+    uint32_t meas_nb_beacon_queued;
+    uint32_t meas_nb_beacon_sent;
+    uint32_t meas_nb_beacon_rejected;
+    stat_up_s   stat_up;
+    stat_dw_s stat_down;
+    pthread_mutex_t mx_report;	 // control access to the queue for each server
+} report_s;
+
 void stats_report();
+
 #endif							// _LORA_PKTFWD_STATS_H

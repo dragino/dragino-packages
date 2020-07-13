@@ -25,9 +25,21 @@
  *      
 */
 
+#include <string.h>
+#include <stdio.h>
+
+#include <sys/socket.h>			/* socket specific definitions */
+#include <netinet/in.h>			/* INET constants and stuff */
+#include <arpa/inet.h>			/* IP address conversion stuff */
+#include <netdb.h>				/* gai_strerror */
+
+#include <errno.h>				
+
 #include "fwd.h"
+#include "db.h"
 #include "service.h"
-#include "semtect_service.h"
+#include "semtech_service.h"
+#include "pkt_service.h"
 
 int init_sock(const char *addr, const char *port, const void *timeout, int size) {
 	int i;
@@ -48,9 +60,7 @@ int init_sock(const char *addr, const char *port, const void *timeout, int size)
 	/* look for server address w/ upstream port */
 	i = getaddrinfo(addr, port, &hints, &result);
 	if (i != 0) {
-		MSG_DEBUG(DEBUG_ERROR,
-				  "ERROR~ [init_sock] getaddrinfo on address %s (PORT %s) returned %s\n",
-				  addr, port, gai_strerror(i));
+		lgw_log(LOG_INFO, "ERROR~ [init_sock] getaddrinfo on address %s (PORT %s) returned %s\n", addr, port, gai_strerror(i));
 		return -1;
 	}
 
@@ -60,16 +70,15 @@ int init_sock(const char *addr, const char *port, const void *timeout, int size)
 		if (sockfd == -1)
 			continue;			/* try next field */
 		else
-			break;				/* success, get out of loop */
+			break;			/* success, get out of loop */
 	}
 
 	if (q == NULL) {
-		MSG("ERROR~ [init_sock] failed to open socket to any of server %s addresses (port %s)\n", addr, port);
+		lgw_log(LOG_INFO, "ERROR~ [init_sock] failed to open socket to any of server %s addresses (port %s)\n", addr, port);
 		i = 1;
 		for (q = result; q != NULL; q = q->ai_next) {
 			getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name,
 						port_name, sizeof port_name, NI_NUMERICHOST);
-			MSG("INFO~ [init_sock] result %i host:%s service:%s\n", i, host_name, port_name);
 			++i;
 		}
 
@@ -79,34 +88,116 @@ int init_sock(const char *addr, const char *port, const void *timeout, int size)
 	/* connect so we can send/receive packet with the server only */
 	i = connect(sockfd, q->ai_addr, q->ai_addrlen);
 	if (i != 0) {
-		MSG("ERROR~ [init_socke] connect returned %s\n", strerror(errno));
+		lgw_log(LOG_INFO, "ERROR~ [init_socke] connect returned %s\n", strerror(errno));
 		return -1;
 	}
 
 	freeaddrinfo(result);
 
 	if ((setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, timeout, size)) != 0) {
-		MSG("ERROR~ [init_sock] setsockopt returned %s\n", strerror(errno));
+		lgw_log(LOG_INFO, "ERROR~ [init_sock] setsockopt returned %s\n", strerror(errno));
 		return -1;
 	}
 
 	return sockfd;
 }
 
-int service_handle_rxpkt(gw_s* gw, rxpkts_s* rxpkt) {
+bool pkt_basic_filter(serv_s* serv, const uint32_t addr, const uint8_t fport) {
+    char addr_key[48] = {0};
+    char fport_key[32] = {0};
+
+    snprintf(addr_key, sizeof(addr_key), "/%s/devaddr/%08X", serv->info.name, addr);
+    snprintf(fport_key, sizeof(fport_key), "/%s/fport/%u", serv->info.name, fport);
+    
+    switch(serv->filter.fport) {
+        case INCLUDE:
+            if (!lgw_db_key_exist(fport_key))
+                break; 
+            else 
+                return true;
+        case EXCLUDE:
+            if (lgw_db_key_exist(fport_key))
+                return true; 
+            else
+                break;
+        case NOTHING:
+        default:
+            break;
+    }
+
+    switch(serv->filter.devaddr) {
+        case INCLUDE:
+            return lgw_db_key_exist(addr_key); 
+        case EXCLUDE:
+            return lgw_db_key_exist(addr_key); 
+        case NOTHING:
+        default:
+            break;
+    }
+
+    return false;
+}
+
+void service_handle_rxpkt(gw_s* gw, rxpkts_s* rxpkt) {
     serv_s* serv_entry;
-    LGW_LIST_TRAVERSE(gw->serv_list, serv_entry, list) { 
-        serv_entry->rxpkt_set = rxpkt;
-        sem_post(serv_entry->pthread.sema);
+    LGW_LIST_TRAVERSE(&gw->serv_list, serv_entry, list) { 
+        serv_entry->rxpkt_serv = rxpkt;
+        sem_post(&serv_entry->thread.sema);
     }
 }
 
-int service_start(gw_s* gw) {
-
+void service_start(gw_s* gw) {
+    serv_s* serv_entry;
+    LGW_LIST_TRAVERSE(&gw->serv_list, serv_entry, list) { 
+        switch (serv_entry->info.type) {
+            case semtech:
+                semtech_start(serv_entry);
+                break;
+            case pkt:
+                pkt_start(serv_entry);
+                break;
+            default:
+                semtech_start(serv_entry);
+                break;
+        }
+    }
 }
 
 void service_stop(gw_s* gw) {
+    serv_s* serv_entry;
+    LGW_LIST_TRAVERSE(&gw->serv_list, serv_entry, list) { 
+        switch (serv_entry->info.type) {
+            case semtech:
+                semtech_stop(serv_entry);
+                break;
+            case pkt:
+                pkt_stop(serv_entry);
+                break;
+            default:
+                semtech_stop(serv_entry);
+                break;
+        }
+    }
+}
+
+uint16_t crc16(const uint8_t * data, unsigned size) {
+    const uint16_t crc_poly = 0x1021;
+    const uint16_t init_val = 0x0000;
+    uint16_t x = init_val;
+    unsigned i, j;
+
+    if (data == NULL)  {
+        return 0;
+    }
+
+    for (i=0; i<size; ++i) {
+        x ^= (uint16_t)data[i] << 8;
+        for (j=0; j<8; ++j) {
+            x = (x & 0x8000) ? (x<<1) ^ crc_poly : (x<<1);
+        }
+    }
+
+    return x;
 }
 
 
-// vi: ts=4 sw=4

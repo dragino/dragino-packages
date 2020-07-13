@@ -28,27 +28,36 @@
 #define _DR_PKT_FWD_H_
 
 #include "compiler.h"
-#include "trace.h"
+#include "logger.h"
 #include "linkedlists.h"
 #include "endianext.h"
+#include "utilities.h"
+#include "lgwmm.h"
 
-#define MAX_SERVERS         4
-#define NB_PKT_MAX          8		    /* max number of packets per fetch/send cycle */
+#include "loragw_hal.h"
+#include "loragw_aux.h"
+#include "jitqueue.h"
+#include "service.h"
+
+#define PROTOCOL_VERSION            2	        /* v1.3 */
+#define PROTOCOL_JSON_RXPK_FRAME_FORMAT 1
 
 #define MIN_LORA_PREAMB     6		    /* minimum Lora preamble length for this application */
 #define STD_LORA_PREAMB     8
 #define MIN_FSK_PREAMB      3		    /* minimum FSK preamble length for this application */
 #define STD_FSK_PREAMB      4
 
-#define PATH_LEN                    64          /* no use PATH_MAX */
+#define DEFAULT_TRY_TIMES   5           /* 某尝试失败充许继续尝试运行的次数 */
 
-#define DEFAULT_GS_SERVER           127.0.0.1	/* hostname also supported */
+#define PATH_LEN            64          /* no use PATH_MAX */
 
-#define DEFAULT_GS_PORT_UP          1780
+#define DEFAULT_GS_SERVER   127.0.0.1	/* hostname also supported */
 
-#define DEFAULT_GS_PORT_DW          1782
+#define DEFAULT_GS_PORT_UP  1780
 
-#define DEFAULT_KEEPALIVE           5	        /* default time interval for downstream keep-alive packet */
+#define DEFAULT_GS_PORT_DW  1782
+
+#define DEFAULT_KEEPALIVE   5	        /* default time interval for downstream keep-alive packet */
 
 #define DEFAULT_PULL_INTERVAL       5	        /* default time interval for send pull request */
 
@@ -64,8 +73,6 @@
 
 #define DEFAULT_RXPKTS_LIST_SIZE    8           
 
-#define PROTOCOL_VERSION            2	        /* v1.3 */
-
 #define PKT_PUSH_DATA   0
 #define PKT_PUSH_ACK    1
 #define PKT_PULL_DATA   2
@@ -73,12 +80,6 @@
 #define PKT_PULL_ACK    4
 #define PKT_TX_ACK      5
 
-#define MIN_LORA_PREAMB 6 /* minimum Lora preamble length for this application */
-#define STD_LORA_PREAMB 8
-#define MIN_FSK_PREAMB  3 /* minimum FSK preamble length for this application */
-#define STD_FSK_PREAMB  5
-
-#define STATUS_SIZE     200
 #define TX_BUFF_SIZE    ((540 * NB_PKT_MAX) + 30 + STATUS_SIZE)
 #define ACK_BUFF_SIZE   64
 
@@ -91,13 +92,6 @@
 /* Number of seconds ellapsed between 01.Jan.1970 00:00:00 and 06.Jan.1980 00:00:00 */
 #define UNIX_GPS_EPOCH_OFFSET       315964800 
                                                                           
-#define DEFAULT_BEACON_FREQ_HZ      869525000
-#define DEFAULT_BEACON_FREQ_NB      1
-#define DEFAULT_BEACON_FREQ_STEP    0
-#define DEFAULT_BEACON_DATARATE     9
-#define DEFAULT_BEACON_BW_HZ        125000
-#define DEFAULT_BEACON_POWER        14
-#define DEFAULT_BEACON_INFODESC     0
 
 /*!
  * \brief Register a function to be executed before Asterisk exits.
@@ -133,5 +127,25 @@ int lgw_register_cleanup(void (*func)(void));
  * \param func The callback function to unregister.
  */
 void lgw_unregister_atexit(void (*func)(void));
+
+/*!
+ * \brief 
+ */
+int send_tx_ack(serv_s* serv, uint8_t token_h, uint8_t token_l, enum jit_error_e error, int32_t error_value);
+
+/*!
+ * \brief 
+ */
+void print_tx_status(uint8_t tx_status);
+
+/*!
+ * \brief 
+ */
+double difftimespec(struct timespec end, struct timespec beginning); 
+
+/*!
+ * \brief 
+ */
+int get_tx_gain_lut_index(uint8_t rf_chain, int8_t rf_power, uint8_t * lut_index);
 
 #endif							/* _DR_PKT_FWD_H_ */

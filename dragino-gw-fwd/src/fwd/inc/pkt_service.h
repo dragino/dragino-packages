@@ -21,14 +21,36 @@
 
 /*!
  * \file
- * \brief Persistant data storage 
  */
 
-#ifndef _SEMTECH_PROTO_H
-#define _SEMTECH_PROTO_H
-void semtech_start(gw_s* gw);
-void semtech_stop(gw_s* gw);
-void semtech_pull_down(serv_s* serv);
-void semtech_push_up(serv_s* serv);
+#ifndef _GWTRAF_PROTO_H
+#define _GWTRAF_PROTO_H
+
+#include "linkedlists.h"
+
+/*!下发的数据结据，下发的格式是： devaddr, txmode, payload format, payload
+* txmode: time, imme
+* format: txt, hex
+**/
+
+#define DEFAULT_PAYLOAD_SIZE        256
+#define DEFAULT_DOWN_FPORT          2
+
+#define DNPATH                      "/var/iot/push" 
+
+#define UP                          0
+#define DOWN                        1
+
+typedef struct _dn_pkt {
+	LGW_LIST_ENTRY(_dn_pkt) list;
+    char devaddr[16];
+    char txmode[8];
+    char pdformat[8];
+    uint8_t payload[512];
+    uint8_t psize;
+} dn_pkt_s;
+
+int pkt_start(serv_s*);
+void pkt_stop(serv_s*);
 
 #endif						

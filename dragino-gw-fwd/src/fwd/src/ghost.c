@@ -34,14 +34,13 @@
 #include <netdb.h>				/* gai_strerror */
 
 #include <pthread.h>
-#include "trace.h"
+#include "fwd.h"
 #include "ghost.h"
 #include "endianext.h"
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS ------------------------------------------------------- */
 
-//#define MSG(args...)    printf(args) /* message that is destined to the user */ => moved to trace.h
 #define PROTOCOL_VERSION    2
 #define GHOST_DATA         11
 
@@ -91,7 +90,7 @@ static void printRX(struct lgw_pkt_rx_s *p) {
 		   "  p->bandwidth  = %i\n"
 		   "  p->datarate   = %i\n"
 		   "  p->coderate   = %i\n"
-		   "  p->rssi       = %f\n"
+		   "  p->rssis       = %f\n"
 		   "  p->snr        = %f\n"
 		   "  p->snr_min    = %f\n"
 		   "  p->snr_max    = %f\n"
@@ -100,7 +99,7 @@ static void printRX(struct lgw_pkt_rx_s *p) {
 		   "  p->payload    = %s\n",
 		   p->freq_hz, p->if_chain, p->status, p->count_us,
 		   p->rf_chain, p->modulation, p->bandwidth, p->datarate,
-		   p->coderate, p->rssi, p->snr, p->snr_min, p->snr_max,
+		   p->coderate, p->rssis, p->snr, p->snr_min, p->snr_max,
 		   p->crc, p->size, p->payload);
 }
 
@@ -140,7 +139,7 @@ static void readRX(struct lgw_pkt_rx_s *p, uint8_t * b) {
 	p->bandwidth = u8(b, 12);
 	p->datarate = u32(b, 13);
 	p->coderate = u8(b, 17);
-	p->rssi = eflt(b, 18);
+	p->rssis = eflt(b, 18);
 	p->snr = eflt(b, 22);
 	p->snr_min = eflt(b, 26);
 	p->snr_max = eflt(b, 30);
@@ -177,7 +176,7 @@ void ghost_start(const char *ghost_addr, const char *ghost_port, const struct co
 	/* Get the credentials for this server. */
 	i = getaddrinfo(ghost_addr, ghost_port, &addresses, &result);
 	if (i != 0) {
-		MSG("ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", ghost_addr, ghost_port, gai_strerror(i));
+		lgw_log(LOG_ERROR, "ERROR: [up] getaddrinfo on address %s (PORT %s) returned %s\n", ghost_addr, ghost_port, gai_strerror(i));
 		exit(EXIT_FAILURE);
 	}
 
@@ -192,11 +191,11 @@ void ghost_start(const char *ghost_addr, const char *ghost_port, const struct co
 
 	/* See if the connection was a success, if not, this is a permanent failure */
 	if (q == NULL) {
-		MSG("ERROR: [down] failed to open socket to any of server %s addresses (port %s)\n", ghost_addr, ghost_port);
+		lgw_log(LOG_ERROR, "ERROR: [down] failed to open socket to any of server %s addresses (port %s)\n", ghost_addr, ghost_port);
 		i = 1;
 		for (q = result; q != NULL; q = q->ai_next) {
 			getnameinfo(q->ai_addr, q->ai_addrlen, host_name, sizeof host_name, port_name, sizeof port_name, NI_NUMERICHOST);
-			MSG("INFO: [down] result %i host:%s service:%s\n", i, host_name, port_name);
+			lgw_log(LOG_INFO, "INFO: [down] result %i host:%s service:%s\n", i, host_name, port_name);
 			++i;
 		}
 		exit(EXIT_FAILURE);
@@ -205,7 +204,7 @@ void ghost_start(const char *ghost_addr, const char *ghost_port, const struct co
 	/* connect so we can send/receive packet with the server only */
 	i = connect(sock_ghost, q->ai_addr, q->ai_addrlen);
 	if (i != 0) {
-		MSG("ERROR: [down] connect returned %s\n", strerror(errno));
+		lgw_log(LOG_ERROR, "ERROR: [down] connect returned %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
@@ -219,7 +218,7 @@ void ghost_start(const char *ghost_addr, const char *ghost_port, const struct co
 	ghost_run = true;
 	i = lgw_pthread_create(&thrid_ghost, NULL, (void *(*)(void *))thread_ghost, NULL);
 	if (i != 0) {
-		MSG("ERROR: [main] impossible to create ghost thread\n");
+		lgw_log(LOG_ERROR, "ERROR: [main] impossible to create ghost thread\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -227,7 +226,7 @@ void ghost_start(const char *ghost_addr, const char *ghost_port, const struct co
 
 }
 
-void (*ghost_stop)(void) {
+void ghost_stop(void) {
 	ghost_run = false;			/* terminate the loop. */
 	pthread_cancel(thrid_ghost);	/* don't wait for downstream thread (is this okay??) */
 	shutdown(sock_ghost, SHUT_RDWR);	/* close the socket. */
@@ -258,7 +257,7 @@ int ghost_get(int max_pkt, struct lgw_pkt_rx_s *pkt_data) {	/* Calculate the num
 	pthread_mutex_unlock(&cb_ghost);
 
 	if (get_pkt > 0) {
-		MSG("INFO: copied %i packets from ghost, ghst_end  = %i \n", get_pkt, ghst_end);
+		lgw_log(LOG_INFO, "INFO: copied %i packets from ghost, ghst_end  = %i \n", get_pkt, ghst_end);
 		// To get more info enable this
 		//for (i=0; i<get_pkt; i++)
 		//{ printf("packet %i\n",i);
@@ -287,17 +286,17 @@ static void thread_ghost(void) {
 	uint8_t buff_req[GHST_REQ_BUFFSIZE];	/* buffer to compose pull requests */
 	int msg_len;
 
-	MSG("INFO: Ghost thread started.\n");
+	lgw_log(LOG_INFO, "INFO: Ghost thread started.\n");
 	/* set downstream socket RX timeout */
 	i = setsockopt(sock_ghost, SOL_SOCKET, SO_RCVTIMEO, (void *)&ghost_timeout, sizeof ghost_timeout);
 	if (i != 0) {
-		MSG("ERROR: [ghost] setsockopt returned %s\n", strerror(errno));
+		lgw_log(LOG_ERROR, "ERROR: [ghost] setsockopt returned %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
 	/* pre-fill the pull request buffer with fixed fields, check if there is enough space. */
 	if (sizeof(buff_req) < 4 + sizeof gateway_id + 2 * sizeof(double)) {
-		MSG("INTERNAL ERROR: [ghost] BUFFER TO SMALL.\n");
+		lgw_log(LOG_ERROR, "INTERNAL ERROR: [ghost] BUFFER TO SMALL.\n");
 		exit(EXIT_FAILURE);
 	}
 	memset(buff_req, 0, sizeof buff_req);
@@ -324,7 +323,7 @@ static void thread_ghost(void) {
 		send(sock_ghost, (void *)buff_req, sizeof buff_req, 0);
 		clock_gettime(CLOCK_MONOTONIC, &send_time);
 		//!req_ack = false;
-		//MSG("DEBUG: GHOST LOOP\n");
+		//lgw_log(LOG_ERROR, "DEBUG: GHOST LOOP\n");
 		/* listen to packets and process them until a new PULL request must be sent */
 		recv_time = send_time;
 		while ((int)difftimespec(recv_time, send_time) < NODE_CALL_SECS) {	/* try to receive a datagram */
@@ -343,7 +342,7 @@ static void thread_ghost(void) {
 				|| (msg_len > 4 + GHST_RX_BUFFSIZE)
 				|| (buff_down[0] != PROTOCOL_VERSION)
 				|| ((buff_down[3] != GHOST_DATA))) {
-				MSG("WARNING: [ghost] ignoring invalid packet len=%d, protocol_version=%d, id=%d\n", msg_len, buff_down[0], buff_down[3]);
+				lgw_log(LOG_WARNING, "WARNING: [ghost] ignoring invalid packet len=%d, protocol_version=%d, id=%d\n", msg_len, buff_down[0], buff_down[3]);
 				continue;
 			}
 
@@ -358,16 +357,16 @@ static void thread_ghost(void) {
 
 			/* make a copy to the data received to the circular buffer, and shift the write index. */
 			if (full) {
-				MSG("WARNING: [ghost] buffer is full, dropping packet)\n");
+				lgw_log(LOG_WARNING, "WARNING: [ghost] buffer is full, dropping packet)\n");
 			} else {
 				memcpy((void *)(buffRX + ghst_bgn * GHST_RX_BUFFSIZE), buff_down + 4, msg_len - 3);
 				pthread_mutex_lock(&cb_ghost);
 				ghst_bgn = next;
 				pthread_mutex_unlock(&cb_ghost);
-				MSG("RECEIVED, [ghost] ghst_bgn = %i \n", ghst_bgn);
+				lgw_log(LOG_INFO, "RECEIVED, [ghost] ghst_bgn = %i \n", ghst_bgn);
             }
         }
     }
 
-	MSG("INFO: End of ghost thread\n");
+	lgw_log(LOG_INFO, "INFO: End of ghost thread\n");
 }

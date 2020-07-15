@@ -481,7 +481,7 @@ int lgw_sx127x_reg_w(bool isftdi, uint8_t address, uint8_t reg_value) {
 
 int lgw_sx127x_reg_r(bool isftdi, uint8_t address, uint8_t *reg_value) {
     if (isftdi)
-        return lgw_ft__spi_r(lgw_lbt_target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
+        return lgw_ft_spi_r(lgw_lbt_target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
     else
         return lgw_spi_r(lgw_lbt_target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
 }

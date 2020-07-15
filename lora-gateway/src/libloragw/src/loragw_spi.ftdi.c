@@ -16,6 +16,9 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include "loragw_spi.h"
 #include "loragw_hal.h"
 
+#define  VID          0x0403
+#define  PID          0x6010
+
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS ------------------------------------------------------- */
 

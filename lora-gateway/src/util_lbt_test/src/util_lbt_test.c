@@ -176,26 +176,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    /* Check if FPGA supports LBT */
-    lgw_fpga_reg_r(LGW_FPGA_FEATURE, &val);
-    if (TAKE_N_BITS_FROM((uint8_t)val, 2, 1) != true) {
-        MSG("ERROR: LBT is not supported (0x%x)\n", (uint8_t)val);
-        return EXIT_FAILURE;
-    }
-
-    /* Get FPGA lowest frequency for LBT channels */
-    lgw_fpga_reg_r(LGW_FPGA_LBT_INITIAL_FREQ, &val);
-    switch (val) {
-        case 0:
-            f_init = 915000000;
-            break;
-        case 1:
-            f_init = 863000000;
-            break;
-        default:
-            MSG("ERROR: LBT start frequency %d is not supported\n", val);
-            return EXIT_FAILURE;
-    }
+    f_init = 915000000;
 
     /* Initialize 1st LBT channel freq if not given by user */
     if (f_start == 0) {
@@ -207,52 +188,28 @@ int main(int argc, char **argv)
     MSG("FREQ: %u\n", f_start);
 
     /* Configure SX127x and read few RSSI points */
-    lgw_setup_sx127x(f_init, MOD_FSK, LGW_SX127X_RXBW_100K_HZ, rssi_offset); /* 200KHz LBT channels */
+    lgw_setup_sx127x(isftdi, f_init, MOD_FSK, LGW_SX127X_RXBW_100K_HZ, rssi_offset); /* 200KHz LBT channels */
     for (i = 0; i < 100; i++) {
-        lgw_sx127x_reg_r(0x11, &rssi_value); /* 0x11: RegRssiValue */
+        lgw_sx127x_reg_r(isftdi, 0x11, &rssi_value); /* 0x11: RegRssiValue */
         MSG("SX127x RSSI:%i dBm\n", -(rssi_value/2));
         wait_ms(10);
     }
 
     /* Configure LBT */
     val = -2*(rssi_target_dBm);
-    lgw_fpga_reg_w(LGW_FPGA_RSSI_TARGET, val);
-    for (i = 0; i < LBT_CHANNEL_FREQ_NB; i++) {
-        freq_offset = (f_start - f_init)/100E3 + i*2; /* 200KHz between each channel */
-        lgw_fpga_reg_w(LGW_FPGA_LBT_CH0_FREQ_OFFSET+i, (int32_t)freq_offset);
-        if (scan_time_us == 5000) { /* configured to 128 by default */
-            lgw_fpga_reg_w(LGW_FPGA_LBT_SCAN_TIME_CH0+i, 1);
-        }
-    }
-
-    lgw_fpga_reg_r(LGW_FPGA_RSSI_TARGET, &val);
     MSG("RSSI_TARGET = %d\n", val);
     if (val != (-2*rssi_target_dBm)) {
         MSG("ERROR: failed to read back RSSI target register value\n");
         return EXIT_FAILURE;
     }
-    for (i = 0; i < LBT_CHANNEL_FREQ_NB; i++) {
-        lgw_fpga_reg_r(LGW_FPGA_LBT_CH0_FREQ_OFFSET+i, &val);
-        lgw_fpga_reg_r(LGW_FPGA_LBT_SCAN_TIME_CH0+i, &val2);
-        MSG("CH_%i: freq=%u (offset=%i), scan_time=%u (%i)\n", i, (uint32_t)((val*100E3)+f_init), val, (val2==1)?5000:128, val2);
-    }
-    lgw_fpga_reg_r(LGW_FPGA_VERSION, &val);
-    MSG("FPGA VERSION = %d\n", val);
-
-    /* Enable LBT FSM */
-    lgw_fpga_reg_w(LGW_FPGA_CTRL_FEATURE_START, 1);
 
     /* Start test */
     while ((quit_sig != 1) && (exit_sig != 1)) {
         MSG("~~~~\n");
         for (channel = 0; channel < LBT_CHANNEL_FREQ_NB; channel++) {
             /* Select LBT channel */
-            lgw_fpga_reg_w(LGW_FPGA_LBT_TIMESTAMP_SELECT_CH, channel);
 
             /* Get last instant when the selected channel was free */
-            lgw_fpga_reg_r(LGW_FPGA_LBT_TIMESTAMP_CH, &val);
-            timestamp = (uint32_t)(val & 0x0000FFFF) * 256; /* 16bits (1LSB = 256µs) */
-            MSG(" TIMESTAMP_CH%u = %u\n", channel, timestamp);
         }
 
         loop_cnt += 1;

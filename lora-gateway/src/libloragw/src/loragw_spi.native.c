@@ -51,8 +51,6 @@ Maintainer: Sylvain Miermont
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE CONSTANTS ---------------------------------------------------- */
 
-#define READ_ACCESS     0x00
-#define WRITE_ACCESS    0x80
 #define SPI_SPEED       8000000
 #ifndef LGW_DETECT
 #endif

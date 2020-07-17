@@ -3250,7 +3250,7 @@ void thread_jit(void) {
                             result = lgw_status(TX_STATUS, &tx_status);
                             pthread_mutex_unlock(&mx_concent); /* free concentrator ASAP */
                             if (result == LGW_HAL_ERROR) {
-                                MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_status failed, try again!\n");
+                                MSG_DEBUG(DEBUG_WARNING, "WARNING~ [jit] lgw_status failed, try again!\n");
                                 wait_ms(100);
                             } else if (tx_status == TX_SCHEDULED) {
                                 break;
@@ -3266,13 +3266,18 @@ void thread_jit(void) {
                             pthread_mutex_lock(&mx_meas_dw);
                             meas_nb_tx_fail += 1;
                             pthread_mutex_unlock(&mx_meas_dw);
-                            MSG_DEBUG(DEBUG_WARNING, "WARNING: [jit] lgw_send failed\n");
+                            MSG_DEBUG(DEBUG_WARNING, "WARNING~ [LGWSEND] lgw_send failed\n");
                             continue;
+                        } else if (result == LGW_LBT_ISSUE) {
+                            pthread_mutex_lock(&mx_meas_dw);
+                            meas_nb_tx_fail += 1;
+                            pthread_mutex_unlock(&mx_meas_dw);
+                            MSG_DEBUG(DEBUG_WARNING, "WARNING~ [LGWSEND] lgw_send failed, chan is busy\n");
                         } else {
                             pthread_mutex_lock(&mx_meas_dw);
                             meas_nb_tx_ok += 1;
                             pthread_mutex_unlock(&mx_meas_dw);
-                            MSG_DEBUG(DEBUG_INFO, "[LGWSEND]lgw_send done: count_us=%u, freq=%u, size=%u\n", pkt.count_us, pkt.freq_hz, pkt.size);
+                            MSG_DEBUG(DEBUG_INFO, "INFO~ [LGWSEND] lgw_send done: count_us=%u, freq=%u, size=%u\n", pkt.count_us, pkt.freq_hz, pkt.size);
                         }
                     }
                     

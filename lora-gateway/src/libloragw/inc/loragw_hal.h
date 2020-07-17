@@ -194,6 +194,7 @@ struct lgw_conf_lbt_chan_s {
 */
 struct lgw_conf_lbt_s {
     bool                        enable;             /*!> enable or disable LBT */
+    bool                        isftdi;             /*!> is ftdi module or not */
     int8_t                      rssi_target;        /*!> RSSI threshold to detect if channel is busy or not (dBm) */
     uint8_t                     nb_channel;         /*!> number of LBT channels */
     struct lgw_conf_lbt_chan_s  channels[LBT_CHANNEL_FREQ_NB];

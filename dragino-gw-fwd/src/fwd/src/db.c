@@ -29,11 +29,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <signal.h>
 #include <dirent.h>
 #include <sqlite3.h>
 
-#include "gw.h"
+#include "fwd.h"
 #include "db.h"
 
 #define MAX_DB_FIELD 256
@@ -146,7 +147,7 @@ static int db_open(void)
 {
 	pthread_mutex_lock(&mx_dblock);
 	if (sqlite3_open(LGW_DB_PATH, &GWDB) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "WARNING~ [db] Unable to open LGW database '%s': %s\n", dbname, sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Unable to open LGW database '%s': %s\n", LGW_DB_PATH, sqlite3_errmsg(GWDB));
 		sqlite3_close(GWDB);
 		pthread_mutex_unlock(&mx_dblock);
 		return -1;
@@ -285,22 +286,22 @@ static int db_get_common(const char *family, const char *key, char **buffer, int
 }
 
 bool lgw_db_key_exist(const char *key) {
-	pthread_mutex_lock(&dblock);
+	pthread_mutex_lock(&mx_dblock);
     if (!lgw_strlen_zero(key) && (sqlite3_bind_text(showkey_stmt, 1, key, -1, SQLITE_STATIC) != SQLITE_OK)) {
-        lgw_log(LOG_WARNING, "WARNING~ [db] Could bind %s to stmt: %s\n", a->argv[2], sqlite3_errmsg(GWDB));
+        lgw_log(LOG_WARNING, "WARNING~ [db] Could bind %s to stmt: %s\n", LGW_DB_PATH, sqlite3_errmsg(GWDB));
         sqlite3_reset(showkey_stmt);
-        pthread_mutex_unlock(&dblock);
+        pthread_mutex_unlock(&mx_dblock);
         return false;
     }
 
     if (sqlite3_step(showkey_stmt) == SQLITE_ROW) {
         sqlite3_reset(showkey_stmt);
-        pthread_mutex_unlock(&dblock);
+        pthread_mutex_unlock(&mx_dblock);
         return true;
     }
 
     sqlite3_reset(showkey_stmt);
-    pthread_mutex_unlock(&dblock);
+    pthread_mutex_unlock(&mx_dblock);
     return false;
 }
 

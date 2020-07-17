@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <pthread.h>
+#include <compiler.h>
 
 #ifndef SUCCESS
 #define SUCCESS        1
@@ -83,7 +84,7 @@
  *
  * \param [IN] seed Pseudo random generator initial value
  */
-void lgw_rand(void);
+int32_t lgw_rand(void);
 
 /*!
  * \brief Computes a random number between min and max
@@ -124,6 +125,14 @@ void lgw_memcpyr( uint8_t *dst, const uint8_t *src, uint16_t size );
  * \param [IN]  size  Number of bytes to be copied
  */
 void lgw_memset( uint8_t *dst, uint8_t value, uint16_t size );
+
+/*!
+ * \brief 
+ *
+ * \param [IN]  *str Default value
+ * \param [IN]  size  Number of bytes to be copied
+ */
+char* lgw_gen_str(char* str, int size);
 
 /*!
  * \brief Converts a nibble to an hexadecimal character
@@ -179,13 +188,9 @@ int lgw_background_stacksize(void);
 void lgw_register_thread(char *name);
 void lgw_unregister_thread(void *id);
 
-int lgw_pthread_create_stack(pthread_t *thread, pthread_attr_t *attr, void *(*start_routine)(void *),
-			     void *data, size_t stacksize, const char *file, const char *caller,
-			     int line, const char *start_fn);
+int lgw_pthread_create_stack(pthread_t *thread, pthread_attr_t *attr, void *(*start_routine)(void *), void *data, size_t stacksize, const char *file, const char *caller, int line, const char *start_fn);
 
-int lgw_pthread_create_detached_stack(pthread_t *thread, pthread_attr_t *attr, void*(*start_routine)(void *),
-				 void *data, size_t stacksize, const char *file, const char *caller,
-				 int line, const char *start_fn);
+int lgw_pthread_create_detached_stack(pthread_t *thread, pthread_attr_t *attr, void*(*start_routine)(void *), void *data, size_t stacksize, const char *file, const char *caller, int line, const char *start_fn);
 
 #define lgw_pthread_create(a, b, c, d) 				\
 	lgw_pthread_create_stack(a, b, c, d,			\
@@ -272,5 +277,25 @@ static void force_inline _lgw_assert(int condition, const char *condition_str, c
  * \return Nothing
  */
 void DO_CRASH_NORETURN lgw_do_crash(void);
+
+#ifdef LGW_DEVMODE
+#define lgw_strlen_zero(foo)    _lgw_strlen_zero(foo, __FILE__, __PRETTY_FUNCTION__, __LINE__)
+static force_inline int _lgw_strlen_zero(const char *s, const char *file, const char *function, int line)
+{
+    if (!s || (*s == '\0')) {
+        return 1;
+    }
+    if (!strcmp(s, "(null)")) {
+        lgw_log(LOG_WARNING, file, line, function, "Possible programming error: \"(null)\" is not NULL!\n");
+    }
+    return 0;
+}
+
+#else
+static force_inline int attribute_pure lgw_strlen_zero(const char *s)
+{
+    return (!s || (*s == '\0'));
+}
+#endif
 
 #endif // __UTILITIES_H__

@@ -22,6 +22,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include <pthread.h>
 #include <assert.h>
 #include <math.h>
+#include <sys/time.h>
 
 #include "logger.h"
 #include "jitqueue.h"

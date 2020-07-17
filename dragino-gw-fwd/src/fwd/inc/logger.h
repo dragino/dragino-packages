@@ -30,15 +30,16 @@
 #include <stdint.h>
 #include <stdio.h>
 
-uint8_t LOG_PKT = 0;
-uint8_t LOG_REPORT = 0;
-uint8_t LOG_JIT = 0;
-uint8_t LOG_JIT_ERROR = 0;
-uint8_t LOG_BEACON = 0;
-uint8_t LOG_INFO = 0;
-uint8_t LOG_WARNING = 0;
-uint8_t LOG_ERROR = 0;
-uint8_t LOG_DEBUG = 0;
+extern uint8_t LOG_PKT;
+extern uint8_t LOG_REPORT;
+extern uint8_t LOG_TIMERSYNC;
+extern uint8_t LOG_JIT;
+extern uint8_t LOG_JIT_ERROR;
+extern uint8_t LOG_BEACON;
+extern uint8_t LOG_INFO;
+extern uint8_t LOG_WARNING;
+extern uint8_t LOG_ERROR;
+extern uint8_t LOG_DEBUG;
 
 #define MSG(args...) printf(args) /* message that is destined to the user */
 

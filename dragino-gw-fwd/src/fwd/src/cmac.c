@@ -21,9 +21,9 @@
 
 void AES_CMAC_Init(AES_CMAC_CTX *ctx)
 {
-            memset1(ctx->X, 0, sizeof ctx->X);
+            lgw_memset(ctx->X, 0, sizeof ctx->X);
             ctx->M_n = 0;
-        memset1(ctx->rijndael.ksch, '\0', 240);
+        lgw_memset(ctx->rijndael.ksch, '\0', 240);
 }
     
 void AES_CMAC_SetKey(AES_CMAC_CTX *ctx, const uint8_t key[AES_CMAC_KEY_LENGTH])
@@ -39,7 +39,7 @@ void AES_CMAC_Update(AES_CMAC_CTX *ctx, const uint8_t *data, uint32_t len)
     
             if (ctx->M_n > 0) {
                   mlen = MIN(16 - ctx->M_n, len);
-                    memcpy1(ctx->M_last + ctx->M_n, data, mlen);
+                    lgw_memcpy(ctx->M_last + ctx->M_n, data, mlen);
                     ctx->M_n += mlen;
                     if (ctx->M_n < 16 || len == mlen)
                             return;
@@ -54,15 +54,15 @@ void AES_CMAC_Update(AES_CMAC_CTX *ctx, const uint8_t *data, uint32_t len)
                     XOR(data, ctx->X);
                     //rijndael_encrypt(&ctx->rijndael, ctx->X, ctx->X);
 
-                    memcpy1(in, &ctx->X[0], 16); //Bestela ez du ondo iten
-            aes_encrypt( in, in, &ctx->rijndael);
-                    memcpy1(&ctx->X[0], in, 16);
+                    lgw_memcpy(in, &ctx->X[0], 16); //Bestela ez du ondo iten
+                    aes_encrypt( in, in, &ctx->rijndael);
+                    lgw_memcpy(&ctx->X[0], in, 16);
 
                     data += 16;
                     len -= 16;
             }
             /* potential last block, save it */
-            memcpy1(ctx->M_last, data, len);
+            lgw_memcpy(ctx->M_last, data, len);
             ctx->M_n = len;
 }
    
@@ -71,7 +71,7 @@ void AES_CMAC_Final(uint8_t digest[AES_CMAC_DIGEST_LENGTH], AES_CMAC_CTX *ctx)
             uint8_t K[16];
         uint8_t in[16];
             /* generate subkey K1 */
-            memset1(K, '\0', 16);
+            lgw_memset(K, '\0', 16);
 
             //rijndael_encrypt(&ctx->rijndael, K, K);
 
@@ -109,9 +109,9 @@ void AES_CMAC_Final(uint8_t digest[AES_CMAC_DIGEST_LENGTH], AES_CMAC_CTX *ctx)
 
            //rijndael_encrypt(&ctx->rijndael, ctx->X, digest);
 
-       memcpy1(in, &ctx->X[0], 16); //Bestela ez du ondo iten
+       lgw_memcpy(in, &ctx->X[0], 16); //Bestela ez du ondo iten
        aes_encrypt(in, digest, &ctx->rijndael);
-           memset1(K, 0, sizeof K);
+           lgw_memset(K, 0, sizeof K);
 
 }
 

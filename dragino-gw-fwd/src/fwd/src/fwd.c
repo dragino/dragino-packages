@@ -34,14 +34,10 @@
     #define _XOPEN_SOURCE 500
 #endif
 
-#include <stdint.h>				/* C99 types */
 #include <stdbool.h>			/* bool type */
-#include <stdio.h>				/* printf, fprintf, snprintf, fopen, fputs */
-
 #include <string.h>				/* memset */
 #include <signal.h>				/* sigaction */
 #include <time.h>				/* time, clock_gettime, strftime, gmtime */
-#include <sys/time.h>			/* timeval */
 #include <unistd.h>				/* getopt, access */
 #include <stdlib.h>				/* atoi, exit */
 #include <errno.h>				/* error messages */
@@ -60,7 +56,6 @@
 #include "fwd.h"
 #include "parson.h"
 #include "base64.h"
-#include "gwcfg.h"
 #include "ghost.h"
 #include "service.h"
 #include "stats.h"
@@ -69,6 +64,8 @@
 #include "loragw_aux.h"
 #include "loragw_reg.h"
 #include "loragw_debug.h"
+#include "loragw_hal.h"
+#include "loragw_aux.h"
 
 /* signal handling variables */
 volatile bool exit_sig = false;	/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) */
@@ -79,14 +76,16 @@ volatile bool quit_sig = false;	/* 1 -> application terminates without shutting 
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC DECLARATION ---------------------------------------- */
-extern uint8_t LOG_PKT;
-extern uint8_t LOG_REPORT;
-extern uint8_t LOG_JIT;
-extern uint8_t LOG_JIT_ERROR;
-extern uint8_t LOG_BEACON;
-extern uint8_t LOG_INFO;
-extern uint8_t LOG_WARNING;
-extern uint8_t LOG_ERROR;
+uint8_t LOG_PKT = 0;
+uint8_t LOG_TIMERSYNC = 0;
+uint8_t LOG_REPORT = 0;
+uint8_t LOG_JIT = 0;
+uint8_t LOG_JIT_ERROR = 0;
+uint8_t LOG_BEACON = 0;
+uint8_t LOG_INFO = 0;
+uint8_t LOG_DEBUG = 0;
+uint8_t LOG_WARNING = 0;
+uint8_t LOG_ERROR = 0;
 
 /* -------------------------------------------------------------------------- */
 /* --- Privite FUNCTIONS DECLARATION ---------------------------------------- */
@@ -478,7 +477,7 @@ int main(int argc, char *argv[]) {
     LGW_LIST_INSERT_TAIL(&GW.serv_list, serv_entry, list);
 
     if (access(conf_fname, R_OK) == 0) { /* if there is a global conf, parse it  */
-        if (!parse_cfg(conf_fname, &GW)) {
+        if (!parsecfg(conf_fname, &GW)) {
             lgw_log(LOG_ERROR, "ERROR~ [main] failed to find any configuration file named %s\n", conf_fname);
             exit(EXIT_FAILURE);
         }

@@ -29,7 +29,11 @@
 
 #include <pthread.h>
 #include <semaphore.h>
+#include <time.h>
+#include <sys/time.h>
+
 #include "linkedlists.h"
+#include "jitqueue.h"
 #include "stats.h"
 
 #define DEFAULT_BEACON_FREQ_HZ      869525000
@@ -117,6 +121,7 @@ typedef struct _server {
 
     struct {
 	    serv_type type;		        // type of server
+        bool enabled;
         char  name[32];             // identify of server
         char* id;		            // gateway ID for service
         char* key;			        // gateway key to connect to  service
@@ -301,5 +306,10 @@ typedef struct {
                           }
 
 #define DECLARE_GW extern gw_s GW
+
+/*
+ *
+ */
+int parsecfg(const char *cfgfile, gw_s* gw);
 
 #endif							// _GW_H

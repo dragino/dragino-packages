@@ -26,6 +26,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <errno.h>
+
+#include "fwd.h"
 #include "utilities.h"
 
 #define RAND_LOCAL_MAX 2147483647L
@@ -98,10 +102,10 @@ void str2hex(uint8_t* dest, char* src, int len) {
     for(i = 0; i < len; i++) {
         ch1 = src[i*2];
         ch2 = src[i*2+1];
-        ui1 = toupper(ch1) - 0x30;
+        ui1 = (uint8_t)toupper(ch1) - 0x30;
         if (ui1 > 9)
             ui1 -= 7;
-        ui2 = toupper(ch2) - 0x30;
+        ui2 = (uint8_t)toupper(ch2) - 0x30;
         if (ui2 > 9)
             ui2 -= 7;
         dest[i] = ui1*16 + ui2;
@@ -135,6 +139,29 @@ void hex2str(uint8_t* hex, uint8_t* str, uint8_t len) {
     }
 }
 
+char* lgw_gen_str(char *str, int size) {
+    int i, flag;
+    srand(time(NULL));
+    for(i = 0; i < size - 1; i++)
+    {
+		flag = rand()%3;
+		switch(flag)
+		{
+		case 0:
+			str[i] = rand()%26 + 'a'; 
+			break;
+		case 1:
+			str[i] = rand()%26 + 'A'; 
+			break;
+		case 2:
+			str[i] = rand()%10 + '0'; 
+			break;
+		}
+    }
+    str[i] = '\0';
+    return str;
+}
+
 struct thr_arg {
 	void *(*start_routine)(void *);
 	void *data;
@@ -154,9 +181,6 @@ int lgw_pthread_create_stack(pthread_t *thread, pthread_attr_t *attr, void *(*st
 			     void *data, size_t stacksize, const char *file, const char *caller,
 			     int line, const char *start_fn)
 {
-#if !defined(LOW_MEMORY)
-	struct thr_arg *a;
-#endif
 
 	if (!attr) {
 		attr = lgw_alloca(sizeof(*attr));
@@ -181,19 +205,6 @@ int lgw_pthread_create_stack(pthread_t *thread, pthread_attr_t *attr, void *(*st
 	if ((errno = pthread_attr_setstacksize(attr, stacksize ? stacksize : LGW_STACKSIZE)))
 		lgw_log(LOG_WARNING, "pthread_attr_setstacksize: %s\n", strerror(errno));
 
-#if !defined(LOW_MEMORY)
-	if ((a = lgw_malloc(sizeof(*a)))) {
-		a->start_routine = start_routine;
-		a->data = data;
-		start_routine = dummy_start;
-		if (lgw_asprintf(&a->name, "%-20s started at [%5d] %s %s()",
-			     start_fn, line, file, caller) < 0) {
-			a->name = NULL;
-		}
-		data = a;
-	}
-#endif /* !LOW_MEMORY */
-
 	return pthread_create(thread, attr, start_routine, data); /* We're in lgw_pthread_create, so it's okay */
 }
 
@@ -214,8 +225,7 @@ int lgw_pthread_create_detached_stack(pthread_t *thread, pthread_attr_t *attr, v
 	if ((errno = pthread_attr_setdetachstate(attr, PTHREAD_CREATE_DETACHED)))
 		lgw_log(LOG_WARNING, "pthread_attr_setdetachstate: %s\n", strerror(errno));
 
-	res = lgw_pthread_create_stack(thread, attr, start_routine, data,
-	                               stacksize, file, caller, line, start_fn);
+	res = lgw_pthread_create_stack(thread, attr, start_routine, data, stacksize, file, caller, line, start_fn);
 
 	if (attr_destroy)
 		pthread_attr_destroy(attr);
@@ -226,7 +236,7 @@ int lgw_pthread_create_detached_stack(pthread_t *thread, pthread_attr_t *attr, v
 int lgw_get_tid(void)
 {
 	int ret = -1;
-	ret = pthread_self();
+	ret = (int)pthread_self();
 	return ret;
 }
 
@@ -248,13 +258,11 @@ void DO_CRASH_NORETURN __lgw_assert_failed(int condition, const char *condition_
 	 * Attempt to put it into the logger, but hope that at least
 	 * someone saw the message on stderr ...
 	 */
-	fprintf(stderr, "FRACK!, Failed assertion %s (%d) at line %d in %s of %s\n",
-		condition_str, condition, line, function, file);
-	lgw_log(__LOG_ERROR, file, line, function, "FRACK!, Failed assertion %s (%d)\n",
-		condition_str, condition);
+	fprintf(stderr, "FRACK!, Failed assertion %s (%d) at line %d in %s of %s\n", condition_str, condition, line, function, file);
+	lgw_log(LOG_ERROR, file, line, function, "FRACK!, Failed assertion %s (%d)\n", condition_str, condition);
 
 	/* Generate a backtrace for the assert */
-	lgw_log_backtrace();
+	//lgw_log_backtrace();
 
 	/*
 	 * Give the logger a chance to get the message out, just in case

@@ -27,9 +27,12 @@
  * \author Richard Mudgett <rmudgett@digium.com>
  */
 
-#include "dragino_gw_fwd.h"
+#include <stdarg.h>
+#include <stdlib.h>
 
-#define MALLOC_FAILURE_MSG \ 
+#include "fwd.h"
+
+#define MALLOC_FAILURE_MSG \
       lgw_log(LOG_ERROR, "Memory Allocation Failure in function %s at line %d of %s\n", func, lineno, file)
 
 void *__lgw__realloc(void *ptr, size_t size, const char *file, int lineno, const char *func)
@@ -39,6 +42,7 @@ void *__lgw__realloc(void *ptr, size_t size, const char *file, int lineno, const
 	if (!p) {
 		MALLOC_FAILURE_MSG;
 	}
+    return p;
 }
 
 void *__lgw_calloc(size_t nmemb, size_t size, const char *file, int lineno, const char *func)
@@ -144,27 +148,27 @@ int __lgw_vasprintf(char **strp, const char *format, va_list ap, const char *fil
 	return res;
 }
 
-void *ast_std_malloc(size_t size)
+void *lgw_std_malloc(size_t size)
 {
 	return malloc(size);
 }
 
-void *ast_std_calloc(size_t nmemb, size_t size)
+void *lgw_std_calloc(size_t nmemb, size_t size)
 {
 	return calloc(nmemb, size);
 }
 
-void *ast_std_realloc(void *ptr, size_t size)
+void *lgw_std_realloc(void *ptr, size_t size)
 {
 	return realloc(ptr, size);
 }
 
-void ast_std_free(void *ptr)
+void lgw_std_free(void *ptr)
 {
-	free(ptr);
+	lgw_free(ptr);
 }
 
-void ast_free_ptr(void *ptr)
+void lgw_free_ptr(void *ptr)
 {
-	ast_free(ptr);
+	lgw_free(ptr);
 }

@@ -27,19 +27,14 @@
 #ifndef _DR_PKT_FWD_H_
 #define _DR_PKT_FWD_H_
 
-#include "compiler.h"
 #include "logger.h"
 #include "linkedlists.h"
 #include "endianext.h"
 #include "utilities.h"
 #include "lgwmm.h"
+#include "gwcfg.h"
 
-#include "loragw_hal.h"
-#include "loragw_aux.h"
-#include "jitqueue.h"
-#include "service.h"
-
-#define PROTOCOL_VERSION            2	        /* v1.3 */
+#define PROTOCOL_VERSION                2	        /* v1.3 */
 #define PROTOCOL_JSON_RXPK_FRAME_FORMAT 1
 
 #define MIN_LORA_PREAMB     6		    /* minimum Lora preamble length for this application */
@@ -83,7 +78,7 @@
 #define TX_BUFF_SIZE    ((540 * NB_PKT_MAX) + 30 + STATUS_SIZE)
 #define ACK_BUFF_SIZE   64
 
-#define LGW_DB_PATH   "/etc/config/lgwdb.sqlite"
+#define LGW_DB_PATH         "/etc/config/lgwdb.sqlite"
 
 #define XERR_INIT_AVG       128	/* number of measurements the XTAL correction is averaged on as initial value */
 #define XERR_FILT_COEF      256	/* coefficient for low-pass XTAL error tracking */

@@ -25,15 +25,19 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <arpa/inet.h>
 
 #include "fwd.h"
+#include "parson.h"
 #include "loragw_hal.h"
 #include "loragw_gps.h"
 #include "loragw_aux.h"
 #include "loragw_reg.h"
 #include "loragw_debug.h"
+
+DECLARE_GW;
 
 static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
     int i, j;
@@ -113,13 +117,13 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
     val = json_object_get_value(conf_obj, "antenna_gain"); /* fetch value (if possible) */
     if (val != NULL) {
         if (json_value_get_type(val) == JSONNumber) {
-            antenna_gain = (int8_t)json_value_get_number(val);
+            GW.hal.antenna_gain = (int8_t)json_value_get_number(val);
         } else {
             printf("WARNING: Data type for antenna_gain seems wrong, please check\n");
-            antenna_gain = 0;
+            GW.hal.antenna_gain = 0;
         }
     }
-    printf("INFO: antenna_gain %d dBi\n", antenna_gain);
+    printf("INFO: antenna_gain %d dBi\n", GW.hal.antenna_gain);
 
     /* set timestamp configuration */
     conf_ts_obj = json_object_get_object(conf_obj, "precision_timestamp");
@@ -232,7 +236,7 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
                     snprintf(param_name, sizeof param_name, "radio_%i.tx_gain_lut", i);
                     conf_txlut_array = json_object_dotget_array(conf_obj, param_name);
                     if (conf_txlut_array != NULL) {
-                        txlut[i].size = json_array_get_count(conf_txlut_array);
+                        gw->tx.txlut[i].size = json_array_get_count(conf_txlut_array);
                         /* Detect if we have a sx125x or sx1250 configuration */
                         conf_txgain_obj = json_array_get_object(conf_txlut_array, 0);
                         val = json_object_dotget_value(conf_txgain_obj, "pwr_idx");
@@ -497,7 +501,7 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
     JSON_Array *serv_arry = NULL;
     JSON_Value *val = NULL; /* needed to detect the absence of some fields */
     const char *str; /* pointer to sub-strings in the JSON data */
-    uint32_t ull = 0;
+    unsigned long long ull = 0;
 
     serv_s* serv_entry = NULL;
 
@@ -524,14 +528,14 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
         gw->info.lgwm = ull;
         gw->info.net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (ull>>32)));
         gw->info.net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  ull  ));
-        printf("INFO: gateway MAC address is configured to %016llX\n", ull);
+        lgw_log(LOG_INFO, "INFO: gateway MAC address is configured to %016llX\n", ull);
     }
 
     str = json_object_get_string(conf_obj, "platform");
     if (str != NULL) {
         strncpy(gw->info.platform, str, sizeof gw->info.platform);
         gw->info.platform[sizeof gw->info.platform - 1] = '\0'; /* ensure string termination */
-        printf("INFO: GPS serial port path is configured to \"%s\"\n", gw->info.platform);
+        lgw_log(LOG_INFO, "INFO: GPS serial port path is configured to \"%s\"\n", gw->info.platform);
     }
 
     str = json_object_get_string(conf_obj, "email");
@@ -669,8 +673,8 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
             }
 
             /* 在这里初始化service */
-            serv_entry->list->next = NULL;
-            serv_entry->rxpkt_set = NULL;
+            serv_entry->list.next = NULL;
+            serv_entry->rxpkt_serv = NULL;
 
             /* service network information */
             serv_entry->net = (serv_net_s*)lgw_malloc(sizeof(serv_net_s));
@@ -709,7 +713,7 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
             try = 0;
 
             do {
-                if (sem_init(serv_entry->thread.sema, 0, 0) != 0) {
+                if (sem_init(&serv_entry->thread.sema, 0, 0) != 0) {
                     try++;
                 } else
                     break;
@@ -721,20 +725,18 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
                 continue;
             }
 
-            serv->thread.stop_sig = false;
-
-            serv_entry->gw = gw;
+            serv_entry->thread.stop_sig = false;
 
 			serv_obj = json_array_get_object(serv_arry, i);
 
 			str = json_object_get_string(serv_obj, "server_name");
             if (str != NULL) {
-                strncpy(serv_entry->info.serv_name, str, sizeof serv_entry->info.serv_name);
-                serv_entry->info.serv_name[sizeof serv_entry->info.serv_name - 1] = '\0'; /* ensure string termination */
+                strncpy(serv_entry->info.name, str, sizeof serv_entry->info.name);
+                serv_entry->info.name[sizeof serv_entry->info.name - 1] = '\0'; /* ensure string termination */
                 printf("INFO: Found a server name is \"%s\"\n", str);
             } else {
-                lgw_gen_string(&serv_entry->info.serv_name, sizeof(serv_entry->info.serv_name));
-                printf("INFO: The server name mustbe configure, generate a random name: %s\n", serv_entry->info.serv_name);
+                lgw_gen_str((char*)&serv_entry->info.name, sizeof(serv_entry->info.name));
+                printf("INFO: The server name mustbe configure, generate a random name: %s\n", serv_entry->info.name);
                 continue;
             }
 
@@ -744,7 +746,7 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
 					serv_entry->info.type = semtech;
                     /* 如果是semtech类型，则需要初始化report相关的数据 */
                     serv_entry->report = (report_s*)lgw_malloc(sizeof(report_s));
-                    pthread_mutex_init(serv_entry->report->mx_report, NULL);
+                    pthread_mutex_init(&serv_entry->report->mx_report, NULL);
 				} else if (!strncmp(str, "ttn", 3)) {
 					serv_entry->info.type = ttn;
 				} else if (!strncmp(str, "mqtt", 4)) {
@@ -765,7 +767,7 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
 
 			str = json_object_get_string(serv_obj, "server_address");
             if (str != NULL) {
-                strncpy(serv_entry->net->addr, str, sizeof serv_entry->net->addr.);
+                strncpy(serv_entry->net->addr, str, sizeof serv_entry->net->addr);
                 serv_entry->net->addr[sizeof serv_entry->net->addr - 1] = '\0'; /* ensure string termination */
                 printf("INFO: Found a server name is \"%s\"\n", str);
             } else {  //如果没有设置服务地址，就释放内存，读入下一条记录
@@ -776,44 +778,39 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
             if (str != NULL) {
                 strncpy(serv_entry->net->port_up, str, sizeof serv_entry->net->port_up);
                 serv_entry->net->port_up[sizeof serv_entry->net->port_up - 1] = '\0'; /* ensure string termination */
-                printf("INFO: Found a server name is \"%s\"\n", str);
+                printf("INFO: Found a serv_port_up is \"%s\"\n", serv_entry->net->port_up);
             }
 			str = json_object_get_string(serv_obj, "serv_port_down");
             if (str != NULL) {
                 strncpy(serv_entry->net->port_down, str, sizeof serv_entry->net->port_down);
                 serv_entry->net->port_down[sizeof serv_entry->net->port_down - 1] = '\0'; /* ensure string termination */
-                printf("INFO: Found a server name is \"%s\"\n", str);
+                printf("INFO: Found a serv_port_down \"%s\"\n", serv_entry->net->port_down);
             }
 
             val = json_object_get_value(serv_obj, "push_timeout_ms");
             if (val != NULL) {
                 serv_entry->net->push_timeout_half.tv_usec = 500 * (long int)json_value_get_number(val);
-                printf("INFO: Found a server name is \"%s\"\n", val);
             }
 
             val = json_object_get_value(serv_obj, "pull_timeout_ms");
             if (val != NULL) {
                 serv_entry->net->pull_timeout.tv_usec = 1000 * (long int)json_value_get_number(val);
-                printf("INFO: Found a server name is \"%s\"\n", val);
             }
 
             val = json_object_get_value(serv_obj, "pull_interval");
             if (val != NULL) {
                 serv_entry->net->pull_interval = (int)json_value_get_number(val);
-                printf("INFO: Found a server name is \"%s\"\n", val);
             }
 
             val = json_object_get_value(serv_obj, "stat_interval");
             if (val != NULL) {
                 serv_entry->report->stat_interval = (int)json_value_get_number(val);
-                printf("INFO: Found a server name is \"%s\"\n", val);
+                printf("INFO: Found a stat_interval is \"%d\"\n", serv_entry->report->stat_interval);
             }
 
             val = json_object_get_value(serv_obj, "forward_crc_valid");
             if (json_value_get_type(val) == JSONBoolean) {
                 serv_entry->filter.fwd_valid_pkt = (bool)json_value_get_boolean(val);
-
-                lgw_register_atexit(stop_clean_service);
             }
             printf("INFO: packets received with a valid CRC will%s be forwarded\n", (serv_entry->filter.fwd_valid_pkt ? "" : " NOT"));
             val = json_object_get_value(serv_obj, "forward_crc_error");
@@ -836,7 +833,7 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
                 serv_entry->filter.devaddr = (uint8_t)json_value_get_number(val);
             } 
 
-            LGW_LIST_INSERT_TAIL(gw->serv_list, serv_entry, list);
+            LGW_LIST_INSERT_TAIL(&gw->serv_list, serv_entry, list);
         }
     } else 
         printf("WARNING: No service offer.\n");
@@ -854,6 +851,8 @@ static int parse_debug_configuration(const char * conf_file) {
     JSON_Array *conf_array = NULL;
     JSON_Object *conf_obj_array = NULL;
     const char *str; /* pointer to sub-strings in the JSON data */
+
+    struct lgw_conf_debug_s debugconf;
 
     /* Initialize structure */
     memset(&debugconf, 0, sizeof debugconf);
@@ -891,7 +890,7 @@ static int parse_debug_configuration(const char * conf_file) {
             }
 
             /* global count */
-            nb_pkt_received_ref[i] = 0;
+            GW.log.nb_pkt_received_ref[i] = 0;
         }
     }
 
@@ -916,20 +915,20 @@ static int parse_debug_configuration(const char * conf_file) {
 }
 
 int parsecfg(const char *cfgfile, gw_s* gw) {
-    int ret1 = 0, ret2 = 0;
+    int ret;
     if (!strncmp(gw->hal.board, "LG301", 5)) {
-        ret1 = parse_SX1301_configuration(cfgfile, gw);
+        ret = parse_SX130x_configuration(cfgfile, gw);
     } else if (!strncmp(gw->hal.board, "LG302", 5)) { 
-        ret1 = parse_SX130x_configuration(cfgfile, gw);
+        ret = parse_SX130x_configuration(cfgfile, gw);
     } else if (!strncmp(gw->hal.board, "LG308", 5)) { 
-        ret1 = parse_SX1301_configuration(cfgfile, gw);
-    } else if (!strncmp(gw->hal.board, "LG02", 4)) { 
-        ret1 = parse_lg02_configuration(cfgfile, gw);
-    } else if (!strncmp(gw->hal.board, "LG01", 4)) { 
-        ret1 = parse_lg02_configuration(cfgfile, gw);
+        ret = parse_SX130x_configuration(cfgfile, gw);
+    //} else if (!strncmp(gw->hal.board, "LG02", 4)) { 
+    //    ret = parse_lg02_configuration(cfgfile, gw);
+    //} else if (!strncmp(gw->hal.board, "LG01", 4)) { 
+    //    ret = parse_lg02_configuration(cfgfile, gw);
     } else 
-        ret1 = parse_SX130x_configuration(cfgfile, gw);
-    ret2 = parse_gateway_configuration(cfgfile, gw);
-    return (ret1 || ret2);
+        ret = parse_SX130x_configuration(cfgfile, gw);
+    ret |= parse_gateway_configuration(cfgfile, gw);
+    return (ret);
 }
 

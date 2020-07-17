@@ -1,7 +1,6 @@
 #include <stdio.h>
 
-#include "trace.h"
-#include "utilities.h"
+#include "fwd.h"
 #include "mac-header-decode.h"
 
 LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg )
@@ -27,7 +26,7 @@ LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg )
 
     if( macMsg->FHDR.FCtrl.Bits.FOptsLen <= 15 )
     {
-        memcpy1( macMsg->FHDR.FOpts, &macMsg->Buffer[bufItr], macMsg->FHDR.FCtrl.Bits.FOptsLen );
+        lgw_memcpy( macMsg->FHDR.FOpts, &macMsg->Buffer[bufItr], macMsg->FHDR.FCtrl.Bits.FOptsLen );
         bufItr = bufItr + macMsg->FHDR.FCtrl.Bits.FOptsLen;
     }
     else
@@ -62,7 +61,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
     
     switch (macMsg->MHDR.Bits.MType) {
         case FRAME_TYPE_DATA_CONFIRMED_UP:
-            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_CONF_UP: {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            lgw_log(LOG_PKT, "DATA_CONF_UP: {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.AdrAckReq,
@@ -73,7 +72,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_UP: 
-            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_UNCONF_UP:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            lgw_log(LOG_PKT, "DATA_UNCONF_UP:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.AdrAckReq,
@@ -84,7 +83,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_CONFIRMED_DOWN:
-            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_CONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            lgw_log(LOG_PKT, "DATA_CONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.Ack,
@@ -95,7 +94,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_DOWN:
-            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_UNCONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            lgw_log(LOG_PKT, "DATA_UNCONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.Ack,
@@ -106,10 +105,10 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_JOIN_ACCEPT: 
-            MSG_DEBUG(DEBUG_PKT_FWD, "JOIN_ACCEPT:{Message ...}\n");
+            lgw_log(LOG_PKT, "JOIN_ACCEPT:{Message ...}\n");
             break;
         case FRAME_TYPE_JOIN_REQ: 
-            MSG_DEBUG(DEBUG_PKT_FWD, "JOIN_REQ:{Message ...}\n");
+            lgw_log(LOG_PKT, "JOIN_REQ:{Message ...}\n");
             break;
         default:
             break;
@@ -125,6 +124,6 @@ int filter_by_mac(LoRaMacMessageData_t* macMsg, uint8_t fport, uint32_t devaddr,
         return -1;
     if (devaddr != 0 && ((macMsg->FHDR.DevAddr >> (32-len)) != devaddr ))
         return -2;
-    }
+    
     return 0;
 }

@@ -34,6 +34,7 @@
 #include <time.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 
 #include "db.h"
@@ -121,7 +122,7 @@ static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint3
     pthread_mutex_lock(&GW.hal.mx_concent);
     lgw_get_instcnt(&current_concentrator_time);
     pthread_mutex_unlock(&GW.hal.mx_concent);
-    jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], &current_concentrator_time, &txpkt, downlink_type);
+    jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], current_concentrator_time, &txpkt, downlink_type);
     lgw_log(LOG_DEBUG, "DEBUG~ [pkt-dwn] DNRX2-> tmst:%u, freq:%u, psize:%u.\n", txpkt.count_us, txpkt.freq_hz, txpkt.size);
     return jit_result;
 }
@@ -245,8 +246,9 @@ void pkt_stop(serv_s* serv) {
 
 static void pkt_deal_up(void* arg) {
     serv_s* serv = (serv_s*) arg;
-	int i, j;					/* loop variables */
+	int i;					/* loop variables */
     int fsize = 0;
+    int index = 0;
 
 	struct lgw_pkt_rx_s *p;	/* pointer on a RX packet */
 
@@ -298,7 +300,7 @@ static void pkt_deal_up(void* arg) {
 
                 /* Debug message of appskey */
                 lgw_log(LOG_DEBUG, "\nDEBUG~ [MAC-Decode]appskey:");
-                for (i = 0; i < sizeof(devinfo.appskey); ++i) {
+                for (i = 0; i < (int)sizeof(devinfo.appskey); ++i) {
                     lgw_log(LOG_DEBUG, "%02X", devinfo.appskey[i]);
                 }
                 lgw_log(LOG_DEBUG, "\n");
@@ -335,7 +337,7 @@ static void pkt_deal_up(void* arg) {
                         if (lgw_db_get(db_family, "index", tmpstr, sizeof(tmpstr)) == -1) {
                             lgw_db_put(db_family, "index", "0");
                         } else 
-                            index = (atoi(tmpstr) % 9);
+                            index = atoi(tmpstr) % 9;
                         sprintf(db_family, "/payload/%08X/%d", devinfo.devaddr, index);
                         sprintf(db_key, "%u", p->count_us);
                         lgw_db_put(db_family, db_key, (char*)payload_txt);
@@ -368,7 +370,7 @@ static void pkt_deal_up(void* arg) {
         pthread_mutex_unlock(&GW.mx_bind_lock);
         serv->rxpkt_serv->bind -= 1;
         pthread_mutex_unlock(&GW.mx_bind_lock);
-        serv->rxpkt_serv = NULL:
+        serv->rxpkt_serv = NULL;
 	}
 }
 
@@ -524,8 +526,8 @@ static void pkt_prepare_downlink(void* arg) {
                 strcpy(entry->pdformat, pdformat);
                 entry->psize = psize;
 				
-                lgw_log(LOG_DEBUG, "DEBUG~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d, payload:%08X\n",
-                                  entry->devaddr, entry->txmode, entry->pdformat, entry->psize, entry->payload);
+                lgw_log(LOG_DEBUG, "DEBUG~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d\n",
+                                  entry->devaddr, entry->txmode, entry->pdformat, entry->psize);
 
                 if (strstr(entry->txmode, "imme") != NULL) {
                     lgw_log(LOG_INFO, "INFO~ [DNLK] Pending IMMEDIATE downlink for %s\n", addr);
@@ -537,7 +539,7 @@ static void pkt_prepare_downlink(void* arg) {
                     sprintf(db_family, "devinfo/%08X", devinfo.devaddr);
 
                     if ((lgw_db_get(db_family, "appskey", devinfo.appskey_str, sizeof(devinfo.appskey_str)) == -1) || 
-                        (lgw_db_get(db_family, "nwkskey", devinfo.devaddr_str, devinfo.nwkskey_str, sizeof(devinfo.nwkskey_str)) == -1)) {
+                        (lgw_db_get(db_family, "nwkskey", devinfo.devaddr_str, sizeof(devinfo.nwkskey_str)) == -1)) {
                         lgw_free(entry);
                         continue;
                     }

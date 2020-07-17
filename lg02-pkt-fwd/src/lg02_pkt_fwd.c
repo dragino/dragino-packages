@@ -107,8 +107,8 @@ static char rxprlen[8] = "RXPRLEN";
 static char txprlen[8] = "TXPRLEN";
 static char rx_freq[16] = "RXFREQ";            /* rx frequency of radio */
 static char tx_freq[16] = "TXFREQ";            /* tx frequency of radio */
-static char syncwd1[8] = "SYNCWD";            /* tx frequency of radio */
-static char syncwd2[8] = "SYNCWD";            /* tx frequency of radio */
+static char syncwd1[8] = "RXSYNC";            /* rx frequency of radio */
+static char syncwd2[8] = "TXSYNC";           /* tx frequency of radio */
 static char logdebug[4] = "DEB";          /* debug info option */
 static char server_type[16] = "server_type";          /* debug info option */
 static char radio_mode[8] = "mode";          /* debug info option */
@@ -836,8 +836,8 @@ int main(int argc, char *argv[])
         txdev = tmpdev;
     }
 
-    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d, syncwd=0x%02x\n", rxdev->desc, rxdev->spiport, rxdev->freq, rxdev->sf, rxdev->syncword);
-    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, sf=%d, syncwd=0x%02x\n", txdev->desc, txdev->spiport, txdev->freq, txdev->sf, txdev->syncword);
+    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, prlen=%d, sf=%d, syncwd=0x%02x, CR=4/%d, BW=%ld\n", rxdev->desc, rxdev->spiport, rxdev->freq, rxdev->prlen, rxdev->sf, rxdev->syncword,rxdev->cr,rxdev->bw);
+    MSG_LOG(DEBUG_INFO, "INFO~ %s struct: spiport=%d, freq=%ld, prlen=%d, sf=%d, syncwd=0x%02x, CR=4/%d, BW=%ld\n", txdev->desc, txdev->spiport, txdev->freq, txdev->prlen, txdev->sf, txdev->syncword,txdev->cr,txdev->bw);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

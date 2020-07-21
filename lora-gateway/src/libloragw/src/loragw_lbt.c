@@ -77,6 +77,7 @@ void *lgw_lbt_target = NULL; /*! generic pointer to the LBT device */
 /* --- PRIVATE VARIABLES ---------------------------------------------------- */
 
 static bool lbt_enable;
+static bool lbt_isftdi;
 static uint8_t lbt_nb_active_channel;
 static int8_t lbt_rssi_target_dBm;
 static int8_t lbt_rssi_offset_dB;
@@ -85,6 +86,10 @@ static struct lgw_conf_lbt_chan_s lbt_channel_cfg[LBT_CHANNEL_FREQ_NB];
 static uint32_t lbt_timestamp[LBT_CHANNEL_FREQ_NB];
 
 static bool lbt_chan_free[LBT_CHANNEL_FREQ_NB];
+//static int freq_offset[LBT_CHANNEL_FREQ_NB];
+
+/* -------------------------------------------------------------------------- */
+/* --- PUBLIC VARIABLES ------------------------------------------ */
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS ---------------------------------------------------- */
@@ -97,6 +102,8 @@ enum lgw_sx127x_rxbw_e get_rxbw_index(uint32_t hz);
 static uint64_t difftimespec(struct timespec* end, struct timespec* begin);
 
 static bool lbt_scan(uint64_t frequency, uint16_t scan_time_us);
+
+//static int is_lbt_chan(int step);
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
@@ -118,6 +125,7 @@ int lbt_setconf(struct lgw_conf_lbt_s * conf) {
 
     /* Set internal LBT config according to parameters */
     lbt_enable = conf->enable;
+    lbt_isftdi = conf->isftdi;
     lbt_nb_active_channel = conf->nb_channel;
     lbt_rssi_target_dBm = conf->rssi_target;
     lbt_rssi_offset_dB = conf->rssi_offset;
@@ -134,7 +142,12 @@ int lbt_setconf(struct lgw_conf_lbt_s * conf) {
 
 int lbt_setup(void) {
     int x, i;
-
+    /*
+    if (lbt_channel_cfg[0].freq_hz > 915000000UL)
+        lbt_start_freq = 915000000;
+    else
+        lbt_start_freq = 863000000;
+    */
     lbt_start_freq = lbt_channel_cfg[0].freq_hz;
 
     /* Configure FPGA for LBT */
@@ -149,10 +162,12 @@ int lbt_setup(void) {
     /* Configure FPGA for both active and non-active LBT channels */
     for (i=0; i<LBT_CHANNEL_FREQ_NB; i++) {
         /* Check input parameters */
+        /*
         if (lbt_channel_cfg[i].freq_hz < lbt_start_freq) {
             DEBUG_PRINTF("ERROR~ LBT channel frequency is out of range (%u)\n", lbt_channel_cfg[i].freq_hz);
             return LGW_LBT_ERROR;
         }
+        */
         if ((lbt_channel_cfg[i].scan_time_us != 128) && (lbt_channel_cfg[i].scan_time_us != 5000)) {
             DEBUG_PRINTF("ERROR~ LBT channel scan time is not supported (%u)\n", lbt_channel_cfg[i].scan_time_us);
             return LGW_LBT_ERROR;
@@ -160,10 +175,9 @@ int lbt_setup(void) {
 
     }
 
-    //freq_offset = (lbt_channel_cfg[0].freq_hz - lbt_start_freq) / 100E3; /* 100kHz unit */
     /* Configure SX127x for FSK */
 
-    x = lgw_setup_sx127x(lbt_start_freq, MOD_FSK, LGW_SX127X_RXBW_100K_HZ, lbt_rssi_offset_dB); /* 200KHz LBT channels */
+    x = lgw_setup_sx127x(lbt_isftdi, lbt_start_freq, MOD_FSK, LGW_SX127X_RXBW_100K_HZ, lbt_rssi_offset_dB); /* 200KHz LBT channels */
     if (x != LGW_REG_SUCCESS) {
         DEBUG_MSG("ERROR~ Failed to configure SX127x for LBT\n");
         return LGW_LBT_ERROR;
@@ -195,7 +209,10 @@ int lbt_start(void) {
         lgw_spi_close(lgw_lbt_target);
     }
 
-    spi_stat = lgw_spi_open(&lgw_lbt_target, SPI_LBT_PATH);
+    if (lbt_isftdi)
+        spi_stat = lgw_ft_spi_open(&lgw_lbt_target);
+    else
+        spi_stat = lgw_spi_open(&lgw_lbt_target, SPI_LBT_PATH);
 
     if (spi_stat != LGW_SPI_SUCCESS) {
         DEBUG_MSG("ERROR CONNECTING LBT TARGET\n");
@@ -219,9 +236,9 @@ static bool lbt_scan(uint64_t frequency, uint16_t scan_time_us) {
     bool rssi_int_timout;
 
     freq_reg = ((uint64_t)frequency << 19) / (uint64_t)32000000;
-    x = lgw_sx127x_reg_w(SX1276_REG_FRFMSB, (freq_reg >> 16) & 0xFF);
-    x |= lgw_sx127x_reg_w(SX1276_REG_FRFMID, (freq_reg >> 8) & 0xFF);
-    x |= lgw_sx127x_reg_w(SX1276_REG_FRFLSB, (freq_reg >> 0) & 0xFF);
+    x = lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFMSB, (freq_reg >> 16) & 0xFF);
+    x |= lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFMID, (freq_reg >> 8) & 0xFF);
+    x |= lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFLSB, (freq_reg >> 0) & 0xFF);
 
     if (x != LGW_REG_SUCCESS) {
         DEBUG_PRINTF("ERROR: can't set freq=%llu\n", frequency);
@@ -251,7 +268,7 @@ static bool lbt_scan(uint64_t frequency, uint16_t scan_time_us) {
 
     while (difftimespec(&end, &start) < scan_time_us) {
         clock_gettime(CLOCK_MONOTONIC, &end);
-        x = lgw_sx127x_reg_r(SX1276_REG_RSSIVALUE, &rssival);
+        x = lgw_sx127x_reg_r(lbt_isftdi, SX1276_REG_RSSIVALUE, &rssival);
         if (x != LGW_REG_SUCCESS)
             continue;
         rssi = -(rssival >> 1);
@@ -267,62 +284,64 @@ static bool lbt_scan(uint64_t frequency, uint16_t scan_time_us) {
 }
 
 void lbt_run_rssi_scan(void* exitsig) {
-    int i, x;
+    int i, j, x;
     bool* stopsig = (bool*) exitsig;
     uint8_t rssival = 0;
     int16_t rssi = 0;
     struct timespec start;
     struct timespec end;
-    //uint32_t time_us;
-    //struct timeval current_unix_time;
+    uint32_t time_us;
+    struct timeval current_unix_time;
     bool rssi_int_timout;
-    bool lbt_reject;
+    bool lbt_free;
 
     uint32_t freq_reg;
     //uint8_t reg_val;
 
 
-    for (i = 0; i <LBT_CHANNEL_FREQ_NB; i++) {
+    for (i = 0; i < LBT_CHANNEL_FREQ_NB; i++) {
         lbt_chan_free[i] = false;
+        //freq_offset[i] = (lbt_channel_cfg[i].freq_hz - lbt_start_freq) / 100E3;
     }
 
     while (!*stopsig) {
         for (i = 0; i < LBT_CHANNEL_FREQ_NB; i++) {
-            lbt_reject = false;
+        //for (i = 0; i < 0xFF; i++) {
+            lbt_free = true;
             rssi_int_timout = false;
 
-            x = lgw_sx127x_reg_w(SX1276_REG_PLLHOP, 1 << 7);  //FastHopOn
-            freq_reg = (uint32_t)((double)lbt_channel_cfg[i].freq_hz / (double)FREQ_STEP);
-            x |= lgw_sx127x_reg_w(SX1276_REG_FRFMSB, (uint8_t)((freq_reg >> 16) & 0xFF));
-            x |= lgw_sx127x_reg_w(SX1276_REG_FRFMID, (uint8_t)((freq_reg >> 8) & 0xFF));
-            x |= lgw_sx127x_reg_w(SX1276_REG_FRFLSB, (uint8_t)(freq_reg & 0xFF));
-            //x = lgw_setup_sx127x(lbt_channel_cfg[i], MOD_FSK, LGW_SX127X_RXBW_100K_HZ, lbt_rssi_offset_dB);
-
+            x = lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_PLLHOP, 1 << 7);  //FastHopOn
+            //freq_reg = ((uint64_t)lbt_start_freq << 19) / (uint64_t)32000000;
+            freq_reg = ((uint64_t)lbt_channel_cfg[i].freq_hz << 19) / (uint64_t)32000000;
+            x |= lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFMSB, (freq_reg >> 16) & 0xFF);
+            x |= lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFMID, (freq_reg >> 8) & 0xFF);
+            x |= lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFLSB, freq_reg & 0xFF);
             if (x != LGW_REG_SUCCESS) {
                 DEBUG_PRINTF("ERROR: can't set freq=%u\n", lbt_channel_cfg[i].freq_hz);
                 wait_us(TS_HOP);
-                continue;
             }
+            wait_ms(30);
 
-            //printf("Befor: pin val = %d\n", digital_read(DIO_RSSI_PIN));
+            //freq_reg = ((uint64_t)lbt_channel_cfg[i].freq_hz << 19) / (uint64_t)32000000;
+            //x |= lgw_sx127x_reg_w(SX1276_REG_FRFMSB, (freq_reg >> 16) & 0xFF);
+            //x |= lgw_sx127x_reg_w(SX1276_REG_FRFMID, (freq_reg >> 8) & 0xFF);
+            //x = lgw_sx127x_reg_w(SX1276_REG_PLLHOP, 1 << 7);  //FastHopOn
             
             /*
             clock_gettime(CLOCK_MONOTONIC, &start);
             end = start;
             while (digital_read(DIO_RSSI_PIN) == 0) { // while DIO0 rssi interrupt
                 clock_gettime(CLOCK_MONOTONIC, &end);
-                if (difftimespec(&end, &start) > 290) {
+                if (difftimespec(&end, &start) > 29000) {
                     rssi_int_timout = true;
                     break;
                 }
             }
-            */
-            wait_ms(3);   //respones=260us, ts_hop~30us
+            
 
-            //if (!rssi_int_timout)
-            //   printf("RSSI INTR #############\n");
-            //clock_gettime(CLOCK_MONOTONIC, &end);
-            //printf("Between %llu us\n", difftimespec(&end, &start));
+            if (!rssi_int_timout)
+               printf("RSSI INTR ##########################################################\n");
+            */
 
             /*
             x = lgw_sx127x_reg_r(SX1276_REG_IRQFLAGS1, &reg_val);
@@ -334,40 +353,30 @@ void lbt_run_rssi_scan(void* exitsig) {
             }
             */
 
-            /*
-            if (rssi_int_timout) {
-                DEBUG_PRINTF("WARNING~ %u scan rssi timeout interrut~\n",
-                                       lbt_channel_cfg[i].freq_hz);
-                continue;
-            }
-            */
-
             clock_gettime(CLOCK_MONOTONIC, &start);
             end = start;
-
             while (difftimespec(&end, &start) < lbt_channel_cfg[i].scan_time_us) {
-                clock_gettime(CLOCK_MONOTONIC, &end);
-                x = lgw_sx127x_reg_r(SX1276_REG_RSSIVALUE, &rssival);
+            //while (difftimespec(&end, &start) < 128) {
+                x = lgw_sx127x_reg_r(lbt_isftdi, SX1276_REG_RSSIVALUE, &rssival);
                 if (x != LGW_REG_SUCCESS)
                     continue;
                 rssi = -(rssival >> 1);
-                if( rssi > lbt_rssi_target_dBm ) {
-                    lbt_reject = true;
-                    lbt_chan_free[i] = false;
-                    //gettimeofday(&current_unix_time, NULL);
-                    //time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
-                    //DEBUG_PRINTF("%u: LBT reject %u, scan rssi = %d\n", time_us, lbt_channel_cfg[i].freq_hz, rssi);
-                    break;
-                }
-            }
-
-            if (!lbt_reject) {
                 //gettimeofday(&current_unix_time, NULL);
                 //time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
-                //DEBUG_PRINTF("%u: LBT accept %u, scan rssi = %d\n", time_us, lbt_channel_cfg[i].freq_hz, rssi);
-                lbt_chan_free[i] = true;
+                //DEBUG_PRINTF("%d: %u => chan = %u, rssi = %d\n", i, time_us, i*100000 + lbt_start_freq, rssi);
+                if( rssi > lbt_rssi_target_dBm ) {
+                    //DEBUG_PRINTF("%d: %u => chan = %u, rssi = %d\n", i, time_us, lbt_channel_cfg[i].freq_hz, rssi);
+                    //DEBUG_MSG("*******************************************************************\n");
+                    lbt_free = false;
+                    lbt_chan_free[i] = false;
+                    break;
+                }
+
+                clock_gettime(CLOCK_MONOTONIC, &end);
             }
 
+            if (lbt_free) 
+               lbt_chan_free[i] = true;
         }
     }
 }
@@ -393,7 +402,7 @@ int lbt_chan_is_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay, bo
         }
 
         /* Select LBT Channel corresponding to required TX frequency */
-        DEBUG_MSG("\n(LBT) ##########################################\n");
+        DEBUG_MSG("\n############################(LBT INFO)#############################\n");
         lbt_channel_ind = -1;
         for (i=0; i<lbt_nb_active_channel; i++) {
             if (is_equal_freq(pkt_data->freq_hz, lbt_channel_cfg[i].freq_hz) == true) {
@@ -408,16 +417,19 @@ int lbt_chan_is_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay, bo
             *tx_allowed = lbt_chan_free[lbt_channel_ind];
              DEBUG_MSG("INFO~ TX request allowed (LBT)\n");
         } else {
-            DEBUG_MSG("ERROR~ TX request rejected (LBT)\n");
+            DEBUG_MSG("WARNING~ TX request rejected (LBT)\n");
             *tx_allowed = false;
         }
+        gettimeofday(&current_unix_time, NULL);
+        time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
+        DEBUG_MSG("=============================================================\n");
+        DEBUG_PRINTF("TIME: %u\n", time_us);
         for (i = 0; i < lbt_nb_active_channel; i++) {
-            gettimeofday(&current_unix_time, NULL);
-            time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
-            DEBUG_PRINTF("%u: %u chan is %s\n", time_us, lbt_channel_cfg[i].freq_hz, lbt_chan_free[i] ? "Free" : "Busy"); 
+            DEBUG_PRINTF("%u chan is %s\n", lbt_channel_cfg[i].freq_hz, lbt_chan_free[i] ? "Free" : "Busy"); 
 
         }
-        DEBUG_MSG("(LBT) ##########################################\n\n");
+        DEBUG_MSG("=============================================================\n");
+        DEBUG_MSG("######################################################################\n\n");
          
     } else {
         /* Always allow if LBT is disabled */
@@ -662,5 +674,16 @@ static uint64_t difftimespec(struct timespec* end, struct timespec* begin) {
     x += 1E6 * (end->tv_sec - begin->tv_sec);
     return x;
 }
+
+/*
+static int is_lbt_chan(int step) {
+    int i;
+    for (i = 0; i < LBT_CHANNEL_FREQ_NB; i++) {
+        if (step == freq_offset[i])
+            return i;
+    }
+    return -1;
+}
+*/
 
 /* --- EOF ------------------------------------------------------------------ */

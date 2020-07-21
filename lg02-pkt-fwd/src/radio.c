@@ -590,7 +590,7 @@ bool get_radio_version(radiodev *dev)
         fprintf(stderr, "INFO~ %s: SX1276 detected, starting.\n", dev->desc);
         return true;
     } else {
-        fprintf(stderr, "ERROR~ %s: Unrecognized transceiver.\n", dev->desc);
+        fprintf(stderr, "ERROR~ %s: SX1276 Not Detected.\n", dev->desc);
         return false;
     }
 
@@ -598,7 +598,7 @@ bool get_radio_version(radiodev *dev)
 
 void setup_channel(radiodev *dev)
 {
-    MSG_LOG(DEBUG_INFO, "INFO~ Setup %s Channel: freq = %ld, sf = %d, syncwd=0x%02x, prlen=%d, cr=%d/5, spi=%d\n", \
+    //MSG_LOG(DEBUG_INFO, "INFO~ Setup %s Channel: freq = %ld, sf = %d, syncwd=0x%02x, prlen=%d, cr=%d/5, spi=%d\n", \
             dev->desc, dev->freq, dev->sf, dev->syncword, dev->prlen, dev->cr - 1, dev->spiport);
     opmode(dev->spiport, OPMODE_SLEEP);
     opmodeLora(dev->spiport);

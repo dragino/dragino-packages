@@ -104,7 +104,7 @@ static char rfbw[8] = "RFBW";
 static char rfcr[8] = "RFCR";
 static char rfprlen[8] = "RFPRLEN";
 static char rf_freq[16] = "RFFREQ";            /* rx frequency of radio */
-static char syncwd[8] = "SYNCWD";            /* tx frequency of radio */
+static char syncwd[8] = "RFSYNC";            /* tx frequency of radio */
 static char logdebug[4] = "DEB";          /* debug info option */
 static char server_type[16] = "server_type";          /* debug info option */
 
@@ -581,6 +581,7 @@ int main(int argc, char *argv[])
 
     switch (atoi(logdebug)) {
         case 1:
+		    DEBUG_INFO = 1; 
             DEBUG_PKT_FWD = 1;
             break;
         case 2:
@@ -662,7 +663,8 @@ int main(int argc, char *argv[])
     net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (lgwm>>32)));
     net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  lgwm  ));
 
-    MSG_LOG(DEBUG_INFO, "Lora Gateway service Mode=%s, gatewayID=%s\n", server_type, gatewayid);
+    MSG_LOG(DEBUG_INFO, "INFO~ LoRa Gateway Start: Service=%s, GatawayEUI=%s, Freq=%ld, prlen=%d, sf=%d, syncwd=0x%02x, CR=4/%d, BW=%ld\n", server_type, gatewayid,rfdev->freq, rfdev->prlen, rfdev->sf, rfdev->syncword,rfdev->cr,rfdev->bw);
+
 
     /* export the lora parameters for the luci ui */
     fp = fopen("/etc/lora/desc", "w+");

@@ -24,7 +24,7 @@ define Package/lora-gateway
 $(call Package/lora-gateway/Default)
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=+libuci +libftdi +libsqlite3
+  DEPENDS:=+libuci +libftdi +libsqlite3 +libmpsse
 endef
 
 define Package/lora-gateway/description
@@ -49,9 +49,9 @@ endef
 define Package/lora-gateway/install
 	$(INSTALL_DIR) $(1)/usr/lora
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libloragw/test* $(1)/usr/lora
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_spectral_scan/util_spectral_scan $(1)/usr/lora
+	#$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_spectral_scan/util_spectral_scan $(1)/usr/lora
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_spi_stress/util_spi_stress $(1)/usr/lora
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_lbt_test/util_lbt_test $(1)/usr/lora
+	#$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_lbt_test/util_lbt_test $(1)/usr/lora
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_tx_continuous/util_tx_continuous $(1)/usr/lora
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/reset_lgw.sh $(1)/usr/bin
@@ -67,6 +67,8 @@ define Package/lora-gateway/install
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/cfg-301/*.json* $(1)/etc/lora/cfg-301
 	$(INSTALL_DIR) $(1)/etc/lora/cfg-308
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/cfg-308/*.json* $(1)/etc/lora/cfg-308
+	$(INSTALL_DIR) $(1)/etc/lora/cfg-302
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/cfg-308/*.json* $(1)/etc/lora/cfg-302
 	$(INSTALL_DIR) $(1)/etc/lora/customized_scripts
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lora_pkt_fwd/customized_scripts/* $(1)/etc/lora/customized_scripts
 	$(INSTALL_DIR) $(1)/etc/lora/decoder

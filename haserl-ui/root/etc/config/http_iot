@@ -1,0 +1,30 @@
+
+config settings 'general'
+	option server_type 'general'
+	option routine_script 'http_process.sh'
+	option uplink_enabled '0'
+	option SSL '1'
+	option down_type 'json'
+	option down_para 'command_string'
+	option down_interval '10'
+	option up_enable '0'
+	option down_enable '0'
+
+config servers 'thingspeak'
+	option server 'mqtt.thingspeak.com'
+	option port '1883'
+	option up_format 'channels/CHANNEL/publish/WRITE_API'
+	option data_format 'DATA&status=MQTTPUBLISH'
+
+config servers 'mydevices'
+	option server 'mqtt.mydevices.com'
+	option port '1883'
+	option topic_format 'v1/USERNAME/things/CLIENTID/data/CHANNEL'
+	option data_format 'DATA'
+
+config servers 'lewei50'
+	option server 'mqtt.lewei50.com'
+	option port '1883'
+	option topic_format '/lw/u/CLIENTID_CHANNEL'
+	option data_format 'DATA'
+

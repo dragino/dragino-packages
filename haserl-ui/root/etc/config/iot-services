@@ -1,0 +1,8 @@
+
+config settings 'general'
+    option logdebug '0'
+    option server_type 'lorawan'
+    option email 'support@dragino.com'
+    option LAT '22.73'
+    option LON '114.23'
+

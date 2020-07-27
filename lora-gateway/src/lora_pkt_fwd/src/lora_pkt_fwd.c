@@ -1767,12 +1767,12 @@ int main(void)
                 MSG_DEBUG(DEBUG_INFO, "# Invalid time reference (age: %li sec)\n", (long)difftime(time(NULL), time_reference_gps.systime));
             }
             if (coord_ok == true) {
-                MSG_DEBUG(DEBUG_INFO, "# GPS coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
+                MSG_DEBUG(DEBUG_INFO, "# GPS coordinates: latitude %.6f, longitude %.6f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
             } else {
                 MSG_DEBUG(DEBUG_INFO, "# no valid GPS coordinates available yet\n");
             }
         } else if (gps_fake_enable == true) {
-            MSG_DEBUG(DEBUG_INFO, "# GPS *FAKE* coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
+            MSG_DEBUG(DEBUG_INFO, "# GPS *FAKE* coordinates: latitude %.6f, longitude %.6f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
         } else {
             MSG_DEBUG(DEBUG_INFO, "# GPS sync is disabled\n");
         }
@@ -1788,7 +1788,7 @@ int main(void)
         /* generate a JSON report (will be sent to server by upstream thread) */
 
         if (((gps_enabled == true) && (coord_ok == true)) || (gps_fake_enable == true)) {
-            j = snprintf((char *)(buff_stat + buff_index), STAT_BUFF_SIZE - buff_index, "{\"stat\":{\"time\":\"%s\",\"lati\":%.5f,\"long\":%.5f,\"alti\":%i,\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u}", stat_timestamp, cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt, cp_nb_rx_rcv, cp_nb_rx_ok, cp_up_pkt_fwd, 100.0 * up_ack_ratio, cp_dw_dgram_rcv, cp_nb_tx_ok);
+            j = snprintf((char *)(buff_stat + buff_index), STAT_BUFF_SIZE - buff_index, "{\"stat\":{\"time\":\"%s\",\"lati\":%.6f,\"long\":%.6f,\"alti\":%i,\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u}", stat_timestamp, cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt, cp_nb_rx_rcv, cp_nb_rx_ok, cp_up_pkt_fwd, 100.0 * up_ack_ratio, cp_dw_dgram_rcv, cp_nb_tx_ok);
         } else {
             j = snprintf((char *)(buff_stat + buff_index), STAT_BUFF_SIZE - buff_index,  "{\"stat\":{\"time\":\"%s\",\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u}", stat_timestamp, cp_nb_rx_rcv, cp_nb_rx_ok, cp_up_pkt_fwd, 100.0 * up_ack_ratio, cp_dw_dgram_rcv, cp_nb_tx_ok);
         }

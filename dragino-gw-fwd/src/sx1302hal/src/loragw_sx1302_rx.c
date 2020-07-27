@@ -23,6 +23,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 
 #include "loragw_aux.h"
 #include "loragw_reg.h"
+#include "loragw_reg_sx1302.h"
 #include "loragw_sx1302_rx.h"
 #include "loragw_sx1302_timestamp.h"
 

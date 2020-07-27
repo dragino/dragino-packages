@@ -33,8 +33,8 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include <fcntl.h>
 #include <inttypes.h>
 
-#include "loragw_reg.h"
-#include "loragw_hal.h"
+#include "loragw_hal_sx1302.h"
+#include "loragw_reg_sx1302.h"
 #include "loragw_aux.h"
 #include "loragw_spi.h"
 #include "loragw_i2c.h"
@@ -48,54 +48,6 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 /* --- DEBUG CONSTANTS ------------------------------------------------------ */
 
 #define HAL_DEBUG_FILE_LOG  0
-
-/* -------------------------------------------------------------------------- */
-/* --- PRIVATE MACROS ------------------------------------------------------- */
-
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#if DEBUG_HAL == 1
-    #define DEBUG_MSG(str)                fprintf(stderr, str)
-    #define DEBUG_PRINTF(fmt, args...)    fprintf(stderr,"%s:%d: "fmt, __FUNCTION__, __LINE__, args)
-    #define DEBUG_ARRAY(a,b,c)            for(a=0;a<b;++a) fprintf(stderr,"%x.",c[a]);fprintf(stderr,"end\n")
-    #define CHECK_NULL(a)                 if(a==NULL){fprintf(stderr,"%s:%d: ERROR: NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_HAL_ERROR;}
-#else
-    #define DEBUG_MSG(str)
-    #define DEBUG_PRINTF(fmt, args...)
-    #define DEBUG_ARRAY(a,b,c)            for(a=0;a!=0;){}
-    #define CHECK_NULL(a)                 if(a==NULL){return LGW_HAL_ERROR;}
-#endif
-
-#define TRACE()             fprintf(stderr, "@ %s %d\n", __FUNCTION__, __LINE__);
-
-#define CONTEXT_STARTED         lgw_context.is_started
-#define CONTEXT_SPI             lgw_context.board_cfg.spidev_path
-#define CONTEXT_LWAN_PUBLIC     lgw_context.board_cfg.lorawan_public
-#define CONTEXT_BOARD           lgw_context.board_cfg
-#define CONTEXT_RF_CHAIN        lgw_context.rf_chain_cfg
-#define CONTEXT_IF_CHAIN        lgw_context.if_chain_cfg
-#define CONTEXT_LORA_SERVICE    lgw_context.lora_service_cfg
-#define CONTEXT_FSK             lgw_context.fsk_cfg
-#define CONTEXT_TX_GAIN_LUT     lgw_context.tx_gain_lut
-#define CONTEXT_TIMESTAMP       lgw_context.timestamp_cfg
-#define CONTEXT_DEBUG           lgw_context.debug_cfg
-
-/* -------------------------------------------------------------------------- */
-/* --- PRIVATE CONSTANTS & TYPES -------------------------------------------- */
-
-#define FW_VERSION_AGC      1 /* Expected version of AGC firmware */
-#define FW_VERSION_ARB      1 /* Expected version of arbiter firmware */
-
-/* Useful bandwidth of SX125x radios to consider depending on channel bandwidth */
-/* Note: the below values come from lab measurements. For any question, please contact Semtech support */
-#define LGW_RF_RX_BANDWIDTH_125KHZ  1600000     /* for 125KHz channels */
-#define LGW_RF_RX_BANDWIDTH_250KHZ  1600000     /* for 250KHz channels */
-#define LGW_RF_RX_BANDWIDTH_500KHZ  1600000     /* for 500KHz channels */
-
-#define LGW_RF_RX_FREQ_MIN          100E6
-#define LGW_RF_RX_FREQ_MAX          1E9
-
-/* Version string, used to identify the library version/options once compiled */
-const char lgw_version_string[] = "Version: " LIBLORAGW_VERSION ";";
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES ---------------------------------------------------- */
@@ -184,44 +136,28 @@ FILE * log_file = NULL;
 static int     ts_fd = -1;
 static uint8_t ts_addr = 0xFF;
 
-/* -------------------------------------------------------------------------- */
-/* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int32_t lgw_sf_getval(int x);
-int32_t lgw_bw_getval(int x);
-
-/* -------------------------------------------------------------------------- */
-/* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
-
-int32_t lgw_bw_getval(int x) {
-    switch (x) {
-        case BW_500KHZ: return 500000;
-        case BW_250KHZ: return 250000;
-        case BW_125KHZ: return 125000;
-        default: return -1;
-    }
+void dbg_init_gpio(void) {
+    /* Select GPIO_6 to be controlled by HOST */
+    lgw_reg_w(SX1302_REG_GPIO_GPIO_SEL_6_SELECTION, 0);
+    /* Configure it as an OUTPUT */
+    lgw_reg_w(SX1302_REG_GPIO_GPIO_DIR_L_DIRECTION, 0xFF);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int32_t lgw_sf_getval(int x) {
-    switch (x) {
-        case DR_LORA_SF5: return 5;
-        case DR_LORA_SF6: return 6;
-        case DR_LORA_SF7: return 7;
-        case DR_LORA_SF8: return 8;
-        case DR_LORA_SF9: return 9;
-        case DR_LORA_SF10: return 10;
-        case DR_LORA_SF11: return 11;
-        case DR_LORA_SF12: return 12;
-        default: return -1;
-    }
+void dbg_toggle_gpio(void) {
+    /* Set GPIO_6 to high */
+    lgw_reg_w(SX1302_REG_GPIO_GPIO_OUT_L_OUT_VALUE, 64);
+    /* Set GPIO_6 to low */
+    lgw_reg_w(SX1302_REG_GPIO_GPIO_OUT_L_OUT_VALUE, 0);
 }
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
 
-int lgw_board_setconf(struct lgw_conf_board_s * conf) {
+int lgw_board_sx1302_setconf(struct lgw_conf_board_s * conf) {
     CHECK_NULL(conf);
 
     /* check if the concentrator is running */
@@ -237,17 +173,14 @@ int lgw_board_setconf(struct lgw_conf_board_s * conf) {
     strncpy(CONTEXT_SPI, conf->spidev_path, sizeof CONTEXT_SPI);
     CONTEXT_SPI[sizeof CONTEXT_SPI - 1] = '\0'; /* ensure string termination */
 
-    DEBUG_PRINTF("Note: board configuration: spidev_path: %s, lorawan_public:%d, clksrc:%d, full_duplex:%d\n",  CONTEXT_SPI,
-                                                                                                                CONTEXT_LWAN_PUBLIC,
-                                                                                                                CONTEXT_BOARD.clksrc,
-                                                                                                                CONTEXT_BOARD.full_duplex);
+    DEBUG_PRINTF("Note: board configuration: spidev_path: %s, lorawan_public:%d, clksrc:%d, full_duplex:%d\n",  CONTEXT_SPI, CONTEXT_LWAN_PUBLIC, CONTEXT_BOARD.clksrc, CONTEXT_BOARD.full_duplex);
 
     return LGW_HAL_SUCCESS;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_rxrf_setconf(uint8_t rf_chain, struct lgw_conf_rxrf_s * conf) {
+int lgw_rxrf_sx1302_setconf(uint8_t rf_chain, struct lgw_conf_rxrf_s * conf) {
     CHECK_NULL(conf);
 
     /* check if the concentrator is running */
@@ -293,20 +226,14 @@ int lgw_rxrf_setconf(uint8_t rf_chain, struct lgw_conf_rxrf_s * conf) {
     CONTEXT_RF_CHAIN[rf_chain].tx_enable = conf->tx_enable;
     CONTEXT_RF_CHAIN[rf_chain].single_input_mode = conf->single_input_mode;
 
-    DEBUG_PRINTF("Note: rf_chain %d configuration; en:%d freq:%d rssi_offset:%f radio_type:%d tx_enable:%d single_input_mode:%d\n",  rf_chain,
-                                                                                                                CONTEXT_RF_CHAIN[rf_chain].enable,
-                                                                                                                CONTEXT_RF_CHAIN[rf_chain].freq_hz,
-                                                                                                                CONTEXT_RF_CHAIN[rf_chain].rssi_offset,
-                                                                                                                CONTEXT_RF_CHAIN[rf_chain].type,
-                                                                                                                CONTEXT_RF_CHAIN[rf_chain].tx_enable,
-                                                                                                                CONTEXT_RF_CHAIN[rf_chain].single_input_mode);
+    DEBUG_PRINTF("Note: rf_chain %d configuration; en:%d freq:%d rssi_offset:%f radio_type:%d tx_enable:%d single_input_mode:%d\n",  rf_chain, CONTEXT_RF_CHAIN[rf_chain].enable, CONTEXT_RF_CHAIN[rf_chain].freq_hz, CONTEXT_RF_CHAIN[rf_chain].rssi_offset, CONTEXT_RF_CHAIN[rf_chain].type, CONTEXT_RF_CHAIN[rf_chain].tx_enable, CONTEXT_RF_CHAIN[rf_chain].single_input_mode);
 
     return LGW_HAL_SUCCESS;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_rxif_setconf(uint8_t if_chain, struct lgw_conf_rxif_s * conf) {
+int lgw_rxif_sx1302_setconf(uint8_t if_chain, struct lgw_conf_rxif_s * conf) {
     int32_t bw_hz;
     uint32_t rf_rx_bandwidth;
 
@@ -393,11 +320,7 @@ int lgw_rxif_setconf(uint8_t if_chain, struct lgw_conf_rxif_s * conf) {
             CONTEXT_LORA_SERVICE.implicit_crc_en   = conf->implicit_crc_en;
             CONTEXT_LORA_SERVICE.implicit_coderate = conf->implicit_coderate;
 
-            DEBUG_PRINTF("Note: LoRa 'std' if_chain %d configuration; en:%d freq:%d bw:%d dr:%d\n", if_chain,
-                                                                                                    CONTEXT_IF_CHAIN[if_chain].enable,
-                                                                                                    CONTEXT_IF_CHAIN[if_chain].freq_hz,
-                                                                                                    CONTEXT_LORA_SERVICE.bandwidth,
-                                                                                                    CONTEXT_LORA_SERVICE.datarate);
+            DEBUG_PRINTF("Note: LoRa 'std' if_chain %d configuration; en:%d freq:%d bw:%d dr:%d\n", if_chain, CONTEXT_IF_CHAIN[if_chain].enable, CONTEXT_IF_CHAIN[if_chain].freq_hz, CONTEXT_LORA_SERVICE.bandwidth, CONTEXT_LORA_SERVICE.datarate);
             break;
 
         case IF_LORA_MULTI:
@@ -422,9 +345,7 @@ int lgw_rxif_setconf(uint8_t if_chain, struct lgw_conf_rxif_s * conf) {
             CONTEXT_IF_CHAIN[if_chain].rf_chain = conf->rf_chain;
             CONTEXT_IF_CHAIN[if_chain].freq_hz = conf->freq_hz;
 
-            DEBUG_PRINTF("Note: LoRa 'multi' if_chain %d configuration; en:%d freq:%d\n",   if_chain,
-                                                                                            CONTEXT_IF_CHAIN[if_chain].enable,
-                                                                                            CONTEXT_IF_CHAIN[if_chain].freq_hz);
+            DEBUG_PRINTF("Note: LoRa 'multi' if_chain %d configuration; en:%d freq:%d\n",   if_chain, CONTEXT_IF_CHAIN[if_chain].enable, CONTEXT_IF_CHAIN[if_chain].freq_hz);
             break;
 
         case IF_FSK_STD:
@@ -454,14 +375,7 @@ int lgw_rxif_setconf(uint8_t if_chain, struct lgw_conf_rxif_s * conf) {
                 CONTEXT_FSK.sync_word_size = conf->sync_word_size;
                 CONTEXT_FSK.sync_word = conf->sync_word;
             }
-            DEBUG_PRINTF("Note: FSK if_chain %d configuration; en:%d freq:%d bw:%d dr:%d (%d real dr) sync:0x%0*" PRIu64 "\n", if_chain,
-                                                                                                                        CONTEXT_IF_CHAIN[if_chain].enable,
-                                                                                                                        CONTEXT_IF_CHAIN[if_chain].freq_hz,
-                                                                                                                        CONTEXT_FSK.bandwidth,
-                                                                                                                        CONTEXT_FSK.datarate,
-                                                                                                                        LGW_XTAL_FREQU/(LGW_XTAL_FREQU/CONTEXT_FSK.datarate),
-                                                                                                                        2*CONTEXT_FSK.sync_word_size,
-                                                                                                                        CONTEXT_FSK.sync_word);
+            DEBUG_PRINTF("Note: FSK if_chain %d configuration; en:%d freq:%d bw:%d dr:%d (%d real dr) sync:0x%0*" PRIu64 "\n", if_chain, CONTEXT_IF_CHAIN[if_chain].enable, CONTEXT_IF_CHAIN[if_chain].freq_hz, CONTEXT_FSK.bandwidth, CONTEXT_FSK.datarate, LGW_XTAL_FREQU/(LGW_XTAL_FREQU/CONTEXT_FSK.datarate), 2*CONTEXT_FSK.sync_word_size, CONTEXT_FSK.sync_word);
             break;
 
         default:
@@ -474,7 +388,7 @@ int lgw_rxif_setconf(uint8_t if_chain, struct lgw_conf_rxif_s * conf) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_txgain_setconf(uint8_t rf_chain, struct lgw_tx_gain_lut_s * conf) {
+int lgw_txgain_sx1302_setconf(uint8_t rf_chain, struct lgw_tx_gain_lut_s * conf) {
     int i;
 
     CHECK_NULL(conf);
@@ -569,7 +483,7 @@ int lgw_debug_setconf(struct lgw_conf_debug_s * conf) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_start(void) {
+int lgw_start_sx1302(void) {
     int i, err;
     int reg_stat;
 
@@ -577,7 +491,7 @@ int lgw_start(void) {
         DEBUG_MSG("Note: LoRa concentrator already started, restarting it now\n");
     }
 
-    reg_stat = lgw_connect(CONTEXT_SPI);
+    reg_stat = lgw_connect_sx1302(CONTEXT_SPI);
     if (reg_stat == LGW_REG_ERROR) {
         DEBUG_MSG("ERROR: FAIL TO CONNECT BOARD\n");
         return LGW_HAL_ERROR;
@@ -744,7 +658,7 @@ int lgw_start(void) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_stop(void) {
+int lgw_stop_sx1302(void) {
     int i, err;
 
     DEBUG_MSG("INFO: aborting TX\n");
@@ -759,7 +673,7 @@ int lgw_stop(void) {
     }
 
     DEBUG_MSG("INFO: Disconnecting\n");
-    lgw_disconnect();
+    lgw_disconnect_sx1302();
 
     DEBUG_MSG("INFO: Closing I2C\n");
     err = i2c_linuxdev_close(ts_fd);
@@ -773,7 +687,7 @@ int lgw_stop(void) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
+int lgw_receive_sx1302(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
     int res;
     uint8_t  nb_pkt_fetched = 0;
     uint16_t nb_pkt_found = 0;
@@ -834,7 +748,7 @@ int lgw_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_send(struct lgw_pkt_tx_s * pkt_data) {
+int lgw_send_sx1302(struct lgw_pkt_tx_s * pkt_data) {
     /* check if the concentrator is running */
     if (CONTEXT_STARTED == false) {
         DEBUG_MSG("ERROR: CONCENTRATOR IS NOT RUNNING, START IT BEFORE SENDING\n");
@@ -904,7 +818,7 @@ int lgw_send(struct lgw_pkt_tx_s * pkt_data) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_status(uint8_t rf_chain, uint8_t select, uint8_t *code) {
+int lgw_status_sx1302(uint8_t rf_chain, uint8_t select, uint8_t *code) {
     /* check input variables */
     CHECK_NULL(code);
     if (rf_chain >= LGW_RF_CHAIN_NB) {
@@ -936,7 +850,7 @@ int lgw_status(uint8_t rf_chain, uint8_t select, uint8_t *code) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_abort_tx(uint8_t rf_chain) {
+int lgw_abort_sx1302_tx(uint8_t rf_chain) {
     /* check input variables */
     if (rf_chain >= LGW_RF_CHAIN_NB) {
         DEBUG_MSG("ERROR: NOT A VALID RF_CHAIN NUMBER\n");
@@ -949,7 +863,7 @@ int lgw_abort_tx(uint8_t rf_chain) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_get_trigcnt(uint32_t* trig_cnt_us) {
+int lgw_get_sx1302_trigcnt(uint32_t* trig_cnt_us) {
     CHECK_NULL(trig_cnt_us);
 
     *trig_cnt_us = sx1302_timestamp_counter(true);
@@ -969,7 +883,7 @@ int lgw_get_instcnt(uint32_t* inst_cnt_us) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_get_eui(uint64_t* eui) {
+int lgw_get_sx1302_eui(uint64_t* eui) {
     CHECK_NULL(eui);
 
     if (sx1302_get_eui(eui) != LGW_REG_SUCCESS) {
@@ -980,7 +894,7 @@ int lgw_get_eui(uint64_t* eui) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_get_temperature(float* temperature) {
+int lgw_get_sx1302_temperature(float* temperature) {
     CHECK_NULL(temperature);
 
     if (stts751_get_temperature(ts_fd, ts_addr, temperature) != LGW_I2C_SUCCESS) {
@@ -988,86 +902,6 @@ int lgw_get_temperature(float* temperature) {
     }
 
     return LGW_HAL_SUCCESS;
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-const char* lgw_version_info() {
-    return lgw_version_string;
-}
-
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-uint32_t lgw_time_on_air(struct lgw_pkt_tx_s *packet) {
-    int32_t val;
-    uint8_t SF, H, DE;
-    uint16_t BW;
-    uint32_t payloadSymbNb, Tpacket;
-    double Tsym, Tpreamble, Tpayload, Tfsk;
-
-    if (packet == NULL) {
-        DEBUG_MSG("ERROR: Failed to compute time on air, wrong parameter\n");
-        return 0;
-    }
-
-    if (packet->modulation == MOD_LORA) {
-        /* Get bandwidth */
-        val = lgw_bw_getval(packet->bandwidth);
-        if (val != -1) {
-            BW = (uint16_t)(val / 1E3);
-        } else {
-            DEBUG_PRINTF("ERROR: Cannot compute time on air for this packet, unsupported bandwidth (0x%02X)\n", packet->bandwidth);
-            return 0;
-        }
-
-        /* Get datarate */
-        val = lgw_sf_getval(packet->datarate);
-        if (val != -1) {
-            SF = (uint8_t)val;
-            /* TODO: update formula for SF5/SF6 */
-            if (SF < 7) {
-                DEBUG_MSG("WARNING: clipping time on air computing to SF7 for SF5/SF6\n");
-                SF = 7;
-            }
-        } else {
-            DEBUG_PRINTF("ERROR: Cannot compute time on air for this packet, unsupported datarate (0x%02X)\n", packet->datarate);
-            return 0;
-        }
-
-        /* Duration of 1 symbol */
-        Tsym = pow(2, SF) / BW;
-
-        /* Duration of preamble */
-        Tpreamble = ((double)(packet->preamble) + 4.25) * Tsym;
-
-        /* Duration of payload */
-        H = (packet->no_header==false) ? 0 : 1; /* header is always enabled, except for beacons */
-        DE = (SF >= 11) ? 1 : 0; /* Low datarate optimization enabled for SF11 and SF12 */
-
-        payloadSymbNb = 8 + (ceil((double)(8*packet->size - 4*SF + 28 + 16 - 20*H) / (double)(4*(SF - 2*DE))) * (packet->coderate + 4)); /* Explicitely cast to double to keep precision of the division */
-
-        Tpayload = payloadSymbNb * Tsym;
-
-        /* Duration of packet */
-        Tpacket = Tpreamble + Tpayload;
-    } else if (packet->modulation == MOD_FSK) {
-        /* PREAMBLE + SYNC_WORD + PKT_LEN + PKT_PAYLOAD + CRC
-                PREAMBLE: default 5 bytes
-                SYNC_WORD: default 3 bytes
-                PKT_LEN: 1 byte (variable length mode)
-                PKT_PAYLOAD: x bytes
-                CRC: 0 or 2 bytes
-        */
-        Tfsk = (8 * (double)(packet->preamble + CONTEXT_FSK.sync_word_size + 1 + packet->size + ((packet->no_crc == true) ? 0 : 2)) / (double)packet->datarate) * 1E3;
-
-        /* Duration of packet */
-        Tpacket = (uint32_t)Tfsk + 1; /* add margin for rounding */
-    } else {
-        Tpacket = 0;
-        DEBUG_PRINTF("ERROR: Cannot compute time on air for this packet, unsupported modulation (0x%02X)\n", packet->modulation);
-    }
-
-    return Tpacket;
 }
 
 /* --- EOF ------------------------------------------------------------------ */

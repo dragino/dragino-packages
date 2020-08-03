@@ -17,7 +17,7 @@ INCLUDES = $(wildcard inc/*.h)
 
 ### linking options
 
-LIBS := -lloragw -lrt -lmpsse -lm -lusb-1.0 -lftdi
+LIBS := -lloragw -lrt -lmpsse -lm -lusb-1.0 -lftdi1
 
 ### general build targets
 

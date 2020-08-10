@@ -1,6 +1,6 @@
 ### Application-specific constants
 
-APP_NAME := util_test_hal
+APP_NAME := util_ftdi_test
 
 ### Environment constants 
 
@@ -9,7 +9,8 @@ ARCH ?=
 CROSS_COMPILE ?=
 
 ### External constant definitions
-# must get library build option to know if mpsse must be linked or not
+
+include $(LGW_PATH)/library.cfg
 
 ### Constant symbols
 
@@ -24,12 +25,12 @@ OBJDIR = obj
 # List the library sub-modules that are used by the application
 
 LGW_INC = $(LGW_PATH)/inc/config.h
-LGW_INC += $(LGW_PATH)/inc/loragw_hal.h
-LGW_INC += $(LGW_PATH)/inc/loragw_aux.h
+LGW_INC += $(LGW_PATH)/inc/loragw_reg.h
+LGW_INC += $(LGW_PATH)/inc/loragw_fpga.h
 
 ### Linking options
 
-LIBS = -lloragw -lrt -lm -lmpsse -lusb-1.0 -lftdi1
+LIBS := -lpthread -lusb-1.0 -lftdi1 -lmpsse
 
 ### General build targets
 
@@ -52,14 +53,13 @@ $(LGW_PATH)/libloragw.a: $(LGW_INC)
 	fi
 
 ### Main program compilation and assembly
-
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-$(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c $(LGW_INC) | $(OBJDIR)
-	$(CC) -c $(CFLAGS) -I$(LGW_PATH)/inc $< -o $@
+$(OBJDIR)/$(APP_NAME).o: src/$(APP_NAME).c| $(OBJDIR)
+	$(CC) -c $(CFLAGS) $< -o $@
 
-$(APP_NAME): $(OBJDIR)/$(APP_NAME).o $(LGW_PATH)/libloragw.a
-	$(CC) -L$(LGW_PATH) $< -o $@ $(LIBS)
+$(APP_NAME): $(OBJDIR)/$(APP_NAME).o 
+	$(CC) $< -o $@ $(LIBS) 
 
 ### EOF

@@ -24,7 +24,7 @@ define Package/lora-gateway
 $(call Package/lora-gateway/Default)
   SECTION:=utils
   CATEGORY:=Utilities
-  DEPENDS:=+libuci +libftdi +libsqlite3 +libmpsse
+  DEPENDS:=+libuci +libftdi1 +libsqlite3 +libmpsse
 endef
 
 define Package/lora-gateway/description

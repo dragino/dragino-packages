@@ -9,6 +9,14 @@
  *
  */
 
+#include <stdio.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "gpio.h"
 
 /*

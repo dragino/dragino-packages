@@ -12,21 +12,6 @@
 #ifndef _GPIO_H
 #define _GPIO_H
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <time.h>
-
-#include <linux/spi/spidev.h>
-#include <sys/ioctl.h>
-
-
 /*******************************************************************************
  * GPIO/SPI configure
 ********************************************************************************/

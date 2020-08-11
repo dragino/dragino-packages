@@ -115,8 +115,6 @@ uint8_t sx125x_read(uint8_t channel, uint8_t addr);
 int setup_sx1272_FSK(bool isftdi, uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset);
 int setup_sx1276_FSK(bool isftdi, uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset);
 
-int reset_sx127x(bool);
-
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
 
@@ -371,13 +369,19 @@ int setup_sx1276_FSK(bool isftdi, uint32_t frequency, enum lgw_sx127x_rxbw_e rxb
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int reset_sx127x(bool isftdi) {
+int reset_sx127x(bool isftdi, int pin, bool invert) {
     if (isftdi) {
-        return ftdi_sx127x_reset(lgw_lbt_target);
+        return ftdi_sx127x_reset(lgw_lbt_target, invert);
     } else {
-        digital_write(SX127x_RESET_IO, 1);
-        digital_write(SX127x_RESET_IO, 0);
-        wait_ms(5);
+        if (!invert) {
+            digital_write(pin, 0);
+            wait_ms(5);
+            digital_write(pin, 1);
+        } else {
+            digital_write(pin, 1);
+            wait_ms(5);
+            digital_write(pin, 0);
+        }
     }
     return LGW_REG_SUCCESS;
 }
@@ -479,6 +483,15 @@ int lgw_sx127x_reg_w(bool isftdi, uint8_t address, uint8_t reg_value) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+int lg02_reg_w(void *target, bool isftdi, uint8_t address, uint8_t reg_value) {
+    if (isftdi)
+        return lgw_ft_spi_w(target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
+    else
+        return lgw_spi_w(target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 int lgw_sx127x_reg_r(bool isftdi, uint8_t address, uint8_t *reg_value) {
     if (isftdi)
         return lgw_ft_spi_r(lgw_lbt_target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
@@ -488,13 +501,22 @@ int lgw_sx127x_reg_r(bool isftdi, uint8_t address, uint8_t *reg_value) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+int lg02_reg_r(void *target, bool isftdi, uint8_t address, uint8_t *reg_value) {
+    if (isftdi)
+        return lgw_ft_spi_r(target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
+    else
+        return lgw_spi_r(target, LGW_SPI_MUX_MODE0, LGW_SPI_MUX_TARGET_SX127X, address, reg_value);
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 int lgw_setup_sx127x(bool isftdi, uint32_t frequency, uint8_t modulation, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {
     int x, i;
     uint8_t version;
     enum lgw_radio_type_e radio_type = LGW_RADIO_TYPE_NONE;
     struct lgw_radio_type_version_s supported_radio_type[2] = {
-        {LGW_RADIO_TYPE_SX1272, 0x22},
-        {LGW_RADIO_TYPE_SX1276, 0x12}
+        {LGW_RADIO_TYPE_SX1276, 0x12},
+        {LGW_RADIO_TYPE_SX1272, 0x22}
     };
 
     /* Check parameters */
@@ -510,15 +532,15 @@ int lgw_setup_sx127x(bool isftdi, uint32_t frequency, uint8_t modulation, enum l
     /* Probing radio type */
     for (i = 0; i < (int)(sizeof supported_radio_type); i++) {
         /* Reset the radio */
-        x = reset_sx127x(isftdi);
+        x = reset_sx127x(isftdi, 12, false);
         if (x != LGW_SPI_SUCCESS) {
-            DEBUG_MSG("ERROR~ Failed to reset sx127x\n");
+            DEBUG_MSG("ERROR: Failed to reset sx127x\n");
             return x;
         }
         /* Read version register */
         x = lgw_sx127x_reg_r(isftdi, 0x42, &version);
         if (x != LGW_SPI_SUCCESS) {
-            DEBUG_MSG("ERROR~ Failed to read sx127x version register\n");
+            DEBUG_MSG("ERROR: Failed to read sx127x version register\n");
             return x;
         }
         /* Check if we got the expected version */
@@ -531,11 +553,12 @@ int lgw_setup_sx127x(bool isftdi, uint32_t frequency, uint8_t modulation, enum l
             break;
         }
     }
+
     if (radio_type == LGW_RADIO_TYPE_NONE) {
         DEBUG_MSG("ERROR~ sx127x radio has not been found\n");
         return LGW_REG_ERROR;
     }
-
+    
     /* Setup the radio */
     switch (modulation) {
         case MOD_FSK:

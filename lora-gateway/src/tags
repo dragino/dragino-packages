@@ -28,6 +28,7 @@ APP_NAME	1308_tx_test/Makefile	/^APP_NAME := 1308_tx_test$/;"	m
 APP_NAME	lora_pkt_fwd/Makefile	/^APP_NAME := lora_pkt_fwd$/;"	m
 APP_NAME	simple_reg_rw/Makefile	/^APP_NAME := simple_reg_rw$/;"	m
 APP_NAME	util_ack/Makefile	/^APP_NAME := util_ack$/;"	m
+APP_NAME	util_ftdi_test/Makefile	/^APP_NAME := util_ftdi_test$/;"	m
 APP_NAME	util_lbt_test/Makefile	/^APP_NAME := util_lbt_test$/;"	m
 APP_NAME	util_pkt_logger/Makefile	/^APP_NAME := util_pkt_logger$/;"	m
 APP_NAME	util_sink/Makefile	/^APP_NAME := util_sink$/;"	m
@@ -40,6 +41,7 @@ AR	libloragw/Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
 AR	lora_pkt_fwd/Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
 AR	simple_reg_rw/Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
 AR	util_ack/Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
+AR	util_ftdi_test/Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
 AR	util_lbt_test/Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
 AR	util_pkt_logger/Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
 AR	util_sink/Makefile	/^AR := $(CROSS_COMPILE)ar$/;"	m
@@ -53,6 +55,7 @@ ARCH	Makefile	/^ARCH ?=$/;"	m
 ARCH	libloragw/Makefile	/^ARCH ?=$/;"	m
 ARCH	lora_pkt_fwd/Makefile	/^ARCH ?=$/;"	m
 ARCH	simple_reg_rw/Makefile	/^ARCH ?=$/;"	m
+ARCH	util_ftdi_test/Makefile	/^ARCH ?=$/;"	m
 ARCH	util_lbt_test/Makefile	/^ARCH ?=$/;"	m
 ARCH	util_pkt_logger/Makefile	/^ARCH ?=$/;"	m
 ARCH	util_spectral_scan/Makefile	/^ARCH ?=$/;"	m
@@ -70,6 +73,7 @@ ARRAY_SIZE	libloragw/src/loragw_hal.c	37;"	d	file:
 ARRAY_SIZE	libloragw/src/loragw_lbt.c	46;"	d	file:
 ARRAY_SIZE	libloragw/src/loragw_radio.c	39;"	d	file:
 ARRAY_SIZE	libloragw/src/loragw_reg.c	34;"	d	file:
+ARRAY_SIZE	libloragw/src/loragw_spi.ftdi.c	25;"	d	file:
 ARRAY_SIZE	libloragw/src/loragw_spi.native.c	40;"	d	file:
 ARRAY_SIZE	libloragw/tst/test_loragw_cal.c	43;"	d	file:
 ARRAY_SIZE	libloragw/tst/test_loragw_hal.c	41;"	d	file:
@@ -130,6 +134,7 @@ CC	libloragw/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
 CC	lora_pkt_fwd/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
 CC	simple_reg_rw/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
 CC	util_ack/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
+CC	util_ftdi_test/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
 CC	util_lbt_test/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
 CC	util_pkt_logger/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
 CC	util_sink/Makefile	/^CC := $(CROSS_COMPILE)gcc$/;"	m
@@ -143,6 +148,7 @@ CFLAGS	libloragw/Makefile	/^CFLAGS := -O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
 CFLAGS	lora_pkt_fwd/Makefile	/^CFLAGS := -O2 -Wall -Wextra -std=c99 -DBIGENDIAN -Iinc -I.$/;"	m
 CFLAGS	simple_reg_rw/Makefile	/^CFLAGS=-O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
 CFLAGS	util_ack/Makefile	/^CFLAGS := -O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
+CFLAGS	util_ftdi_test/Makefile	/^CFLAGS=-O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
 CFLAGS	util_lbt_test/Makefile	/^CFLAGS=-O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
 CFLAGS	util_pkt_logger/Makefile	/^CFLAGS=-O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
 CFLAGS	util_sink/Makefile	/^CFLAGS := -O2 -Wall -Wextra -std=c99 -Iinc -I.$/;"	m
@@ -163,6 +169,8 @@ CHECK_NULL	libloragw/src/loragw_radio.c	43;"	d	file:
 CHECK_NULL	libloragw/src/loragw_radio.c	47;"	d	file:
 CHECK_NULL	libloragw/src/loragw_reg.c	38;"	d	file:
 CHECK_NULL	libloragw/src/loragw_reg.c	42;"	d	file:
+CHECK_NULL	libloragw/src/loragw_spi.ftdi.c	29;"	d	file:
+CHECK_NULL	libloragw/src/loragw_spi.ftdi.c	33;"	d	file:
 CHECK_NULL	libloragw/src/loragw_spi.native.c	44;"	d	file:
 CHECK_NULL	libloragw/src/loragw_spi.native.c	48;"	d	file:
 CREATEABPDEVS	lora_pkt_fwd/inc/db.h	15;"	d
@@ -175,6 +183,7 @@ CROSS_COMPILE	Makefile	/^CROSS_COMPILE ?=$/;"	m
 CROSS_COMPILE	libloragw/Makefile	/^CROSS_COMPILE ?=$/;"	m
 CROSS_COMPILE	lora_pkt_fwd/Makefile	/^CROSS_COMPILE ?=$/;"	m
 CROSS_COMPILE	simple_reg_rw/Makefile	/^CROSS_COMPILE ?=$/;"	m
+CROSS_COMPILE	util_ftdi_test/Makefile	/^CROSS_COMPILE ?=$/;"	m
 CROSS_COMPILE	util_lbt_test/Makefile	/^CROSS_COMPILE ?=$/;"	m
 CROSS_COMPILE	util_pkt_logger/Makefile	/^CROSS_COMPILE ?=$/;"	m
 CROSS_COMPILE	util_spectral_scan/Makefile	/^CROSS_COMPILE ?=$/;"	m
@@ -212,6 +221,8 @@ DEBUG_MSG	libloragw/src/loragw_radio.c	41;"	d	file:
 DEBUG_MSG	libloragw/src/loragw_radio.c	45;"	d	file:
 DEBUG_MSG	libloragw/src/loragw_reg.c	36;"	d	file:
 DEBUG_MSG	libloragw/src/loragw_reg.c	40;"	d	file:
+DEBUG_MSG	libloragw/src/loragw_spi.ftdi.c	27;"	d	file:
+DEBUG_MSG	libloragw/src/loragw_spi.ftdi.c	31;"	d	file:
 DEBUG_MSG	libloragw/src/loragw_spi.native.c	42;"	d	file:
 DEBUG_MSG	libloragw/src/loragw_spi.native.c	46;"	d	file:
 DEBUG_PKT_FWD	lora_pkt_fwd/src/lora_pkt_fwd.c	/^uint8_t DEBUG_PKT_FWD    = 0;  $/;"	v
@@ -227,6 +238,8 @@ DEBUG_PRINTF	libloragw/src/loragw_radio.c	42;"	d	file:
 DEBUG_PRINTF	libloragw/src/loragw_radio.c	46;"	d	file:
 DEBUG_PRINTF	libloragw/src/loragw_reg.c	37;"	d	file:
 DEBUG_PRINTF	libloragw/src/loragw_reg.c	41;"	d	file:
+DEBUG_PRINTF	libloragw/src/loragw_spi.ftdi.c	28;"	d	file:
+DEBUG_PRINTF	libloragw/src/loragw_spi.ftdi.c	32;"	d	file:
 DEBUG_PRINTF	libloragw/src/loragw_spi.native.c	43;"	d	file:
 DEBUG_PRINTF	libloragw/src/loragw_spi.native.c	47;"	d	file:
 DEBUG_REPORT	lora_pkt_fwd/src/lora_pkt_fwd.c	/^uint8_t DEBUG_REPORT     = 0;$/;"	v
@@ -662,6 +675,7 @@ LGW_IMPLICIT_PAYLOAD_LENGHT	libloragw/inc/loragw_reg.h	201;"	d
 LGW_INC	1308_tx_test/Makefile	/^LGW_INC = $(LGW_PATH)\/inc\/config.h$/;"	m
 LGW_INC	lora_pkt_fwd/Makefile	/^LGW_INC =$/;"	m
 LGW_INC	simple_reg_rw/Makefile	/^LGW_INC = $(LGW_PATH)\/inc\/config.h$/;"	m
+LGW_INC	util_ftdi_test/Makefile	/^LGW_INC = $(LGW_PATH)\/inc\/config.h$/;"	m
 LGW_INC	util_lbt_test/Makefile	/^LGW_INC = $(LGW_PATH)\/inc\/config.h$/;"	m
 LGW_INC	util_pkt_logger/Makefile	/^LGW_INC = $(LGW_PATH)\/inc\/config.h$/;"	m
 LGW_INC	util_spectral_scan/Makefile	/^LGW_INC = $(LGW_PATH)\/inc\/config.h$/;"	m
@@ -771,6 +785,7 @@ LGW_PAGE_REG	libloragw/inc/loragw_reg.h	63;"	d
 LGW_PATH	1308_tx_test/Makefile	/^LGW_PATH ?= ..\/libloragw$/;"	m
 LGW_PATH	lora_pkt_fwd/Makefile	/^LGW_PATH ?= ..\/libloragw$/;"	m
 LGW_PATH	simple_reg_rw/Makefile	/^LGW_PATH ?= ..\/libloragw$/;"	m
+LGW_PATH	util_ftdi_test/Makefile	/^LGW_PATH ?= ..\/libloragw$/;"	m
 LGW_PATH	util_lbt_test/Makefile	/^LGW_PATH ?= ..\/libloragw$/;"	m
 LGW_PATH	util_pkt_logger/Makefile	/^LGW_PATH ?= ..\/libloragw$/;"	m
 LGW_PATH	util_spectral_scan/Makefile	/^LGW_PATH ?= ..\/libloragw$/;"	m
@@ -919,16 +934,17 @@ LGW_XTAL_FREQU	libloragw/inc/loragw_hal.h	50;"	d
 LGW_ZERO_PAD	libloragw/inc/loragw_reg.h	217;"	d
 LIBLORAGW_VERSION	libloragw/Makefile	/^LIBLORAGW_VERSION := `cat ..\/VERSION`$/;"	m
 LIBS	1308_tx_test/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
-LIBS	libloragw/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
-LIBS	lora_pkt_fwd/Makefile	/^LIBS := -lloragw -luci -lrt -lsqlite3 -lpthread -lm$/;"	m
+LIBS	libloragw/Makefile	/^LIBS := -lloragw -lrt -lmpsse -lm -lusb-1.0 -lftdi1$/;"	m
+LIBS	lora_pkt_fwd/Makefile	/^LIBS := -lloragw -luci -lrt -lsqlite3 -lpthread -lm -lmpsse -lusb-1.0 -lftdi1$/;"	m
 LIBS	simple_reg_rw/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
+LIBS	util_ftdi_test/Makefile	/^LIBS := -lpthread -lusb-1.0 -lftdi1 -lmpsse$/;"	m
 LIBS	util_lbt_test/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
-LIBS	util_pkt_logger/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
+LIBS	util_pkt_logger/Makefile	/^LIBS := -lloragw -lrt -lm -lmpsse -lusb-1.0 -lftdi1$/;"	m
 LIBS	util_spectral_scan/Makefile	/^LIBS := -lloragw -lrt$/;"	m
 LIBS	util_spi_stress/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
-LIBS	util_test_hal/Makefile	/^LIBS = -lloragw -lrt -lm$/;"	m
-LIBS	util_tx_continuous/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
-LIBS	util_tx_test/Makefile	/^LIBS := -lloragw -lrt -lm$/;"	m
+LIBS	util_test_hal/Makefile	/^LIBS = -lloragw -lrt -lm -lmpsse -lusb-1.0 -lftdi1$/;"	m
+LIBS	util_tx_continuous/Makefile	/^LIBS := -lloragw -lrt -lm -lmpsse -lusb-1.0 -lftdi1$/;"	m
+LIBS	util_tx_test/Makefile	/^LIBS := -lloragw -lrt -lm -lmpsse -lusb-1.0 -lftdi1$/;"	m
 LNA_LOW_GAIN	lora_pkt_fwd/inc/radio.h	76;"	d
 LNA_MAX_GAIN	lora_pkt_fwd/inc/radio.h	74;"	d
 LNA_OFF_GAIN	lora_pkt_fwd/inc/radio.h	75;"	d
@@ -1050,6 +1066,7 @@ OBJDIR	libloragw/Makefile	/^OBJDIR = obj$/;"	m
 OBJDIR	lora_pkt_fwd/Makefile	/^OBJDIR = obj$/;"	m
 OBJDIR	simple_reg_rw/Makefile	/^OBJDIR = obj$/;"	m
 OBJDIR	util_ack/Makefile	/^OBJDIR = obj$/;"	m
+OBJDIR	util_ftdi_test/Makefile	/^OBJDIR = obj$/;"	m
 OBJDIR	util_lbt_test/Makefile	/^OBJDIR = obj$/;"	m
 OBJDIR	util_pkt_logger/Makefile	/^OBJDIR = obj$/;"	m
 OBJDIR	util_sink/Makefile	/^OBJDIR = obj$/;"	m
@@ -1076,6 +1093,8 @@ PAGE_ADDR	libloragw/src/loragw_reg.c	48;"	d	file:
 PAGE_MASK	libloragw/src/loragw_reg.c	49;"	d	file:
 PAYLOAD_LENGTH	lora_pkt_fwd/inc/radio.h	66;"	d
 PFX	lora_pkt_fwd/src/spi-gpio.c	20;"	d	file:
+PID	libloragw/src/loragw_spi.ftdi.c	20;"	d	file:
+PID	util_ftdi_test/src/util_ftdi_test.c	6;"	d	file:
 PKTS	lora_pkt_fwd/src/lora_pkt_fwd.c	/^} PKTS;$/;"	t	typeref:struct:pkts	file:
 PKT_PULL_ACK	lora_pkt_fwd/src/lora_pkt_fwd.c	121;"	d	file:
 PKT_PULL_ACK	tmp/lora_pkt_fwd.c	94;"	d	file:
@@ -1107,7 +1126,7 @@ PUSH_TIMEOUT_MS	tmp/lora_pkt_fwd.c	79;"	d	file:
 RAM_SIZE	libloragw/tst/test_loragw_cal.c	55;"	d	file:
 RAND_LOCAL_MAX	lora_pkt_fwd/src/utilities.c	33;"	d	file:
 READS_WHEN_ERROR	util_spi_stress/src/util_spi_stress.c	47;"	d	file:
-READ_ACCESS	libloragw/src/loragw_spi.native.c	54;"	d	file:
+READ_ACCESS	libloragw/inc/loragw_spi.h	48;"	d
 READ_ACCESS	lora_pkt_fwd/inc/radio.h	188;"	d
 REG_DETECTION_OPTIMIZE	lora_pkt_fwd/inc/radio.h	60;"	d
 REG_DETECTION_THRESHOLD	lora_pkt_fwd/inc/radio.h	61;"	d
@@ -1187,7 +1206,7 @@ SPI_DEV_PATH	libloragw/inc/loragw_spi.h	34;"	d
 SPI_DEV_PATH	simple_reg_rw/src/simple_reg_rw.c	/^char SPI_DEV_PATH[64] = {'\\0'};$/;"	v
 SPI_DEV_RADIO	lora_pkt_fwd/inc/radio.h	191;"	d
 SPI_LBT_PATH	libloragw/src/loragw_lbt.c	59;"	d	file:
-SPI_SPEED	libloragw/src/loragw_spi.native.c	56;"	d	file:
+SPI_SPEED	libloragw/src/loragw_spi.native.c	54;"	d	file:
 SPI_SPEED	lora_pkt_fwd/inc/radio.h	190;"	d
 STARTING_CAPACITY	lora_pkt_fwd/src/parson.c	35;"	d	file:
 STARTING_CAPACITY	util_pkt_logger/src/parson.c	35;"	d	file:
@@ -1545,6 +1564,8 @@ VERSION_1	lora_pkt_fwd/src/aes.c	64;"	d	file:
 VERSION_STRING	lora_pkt_fwd/src/lora_pkt_fwd.c	98;"	d	file:
 VERSION_STRING	tmp/lora_pkt_fwd.c	71;"	d	file:
 VFLAG	lora_pkt_fwd/Makefile	/^VFLAG := -D VERSION_STRING="\\"$(RELEASE_VERSION)\\""$/;"	m
+VID	libloragw/src/loragw_spi.ftdi.c	19;"	d	file:
+VID	util_ftdi_test/src/util_ftdi_test.c	5;"	d	file:
 Value	lora_pkt_fwd/inc/mac-header-decode.h	/^    uint8_t Value;$/;"	m	union:uLoRaMacDLSettings
 Value	lora_pkt_fwd/inc/mac-header-decode.h	/^    uint8_t Value;$/;"	m	union:uLoRaMacFrameCtrl
 Value	lora_pkt_fwd/inc/mac-header-decode.h	/^    uint8_t Value;$/;"	m	union:uLoRaMacHeader
@@ -1554,7 +1575,7 @@ Version_t	lora_pkt_fwd/inc/utilities.h	/^}Version_t;$/;"	t	typeref:union:Version
 Version_u	lora_pkt_fwd/inc/utilities.h	/^typedef union Version_u$/;"	u
 WAIT_GPIO	reset_lgw.sh	/^WAIT_GPIO() {$/;"	f
 WPOLY	lora_pkt_fwd/src/aes.c	75;"	d	file:
-WRITE_ACCESS	libloragw/src/loragw_spi.native.c	55;"	d	file:
+WRITE_ACCESS	libloragw/inc/loragw_spi.h	49;"	d
 WRITE_ACCESS	lora_pkt_fwd/inc/radio.h	189;"	d
 X	lora_pkt_fwd/inc/cmac.h	/^            uint8_t        X[16];$/;"	m	struct:_AES_CMAC_CTX
 XERR_FILT_COEF	lora_pkt_fwd/src/lora_pkt_fwd.c	115;"	d	file:
@@ -1813,6 +1834,7 @@ fsk_rx_bw	libloragw/src/loragw_hal.c	/^static uint8_t fsk_rx_bw; \/* bandwidth s
 fsk_rx_dr	libloragw/src/loragw_hal.c	/^static uint32_t fsk_rx_dr; \/* FSK modem datarate in bauds *\/$/;"	v	file:
 fsk_sync_word	libloragw/src/loragw_hal.c	/^static uint64_t fsk_sync_word= 0xC194C1; \/* default FSK sync word (ALIGNED RIGHT, MSbit first) *\/$/;"	v	file:
 fsk_sync_word_size	libloragw/src/loragw_hal.c	/^static uint8_t fsk_sync_word_size = 3; \/* default number of bytes for FSK sync word *\/$/;"	v	file:
+ftdi_sx127x_reset	libloragw/src/loragw_spi.ftdi.c	/^int ftdi_sx127x_reset(void* spi_target) {$/;"	f
 fwd_affine	lora_pkt_fwd/src/aes.c	/^uint_8t fwd_affine(const uint_8t x)$/;"	f
 fwd_error_pkt	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static bool fwd_error_pkt = false; \/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	v	file:
 fwd_error_pkt	tmp/lora_pkt_fwd.c	/^static bool fwd_error_pkt = false; \/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	v	file:
@@ -1929,6 +1951,7 @@ is_valid_utf8	lora_pkt_fwd/src/parson.c	/^static int is_valid_utf8(const char *s
 is_valid_utf8	util_pkt_logger/src/parson.c	/^static int is_valid_utf8(const char *string, size_t string_len) {$/;"	f	file:
 isb_data	lora_pkt_fwd/src/aes.c	128;"	d	file:
 isbox	lora_pkt_fwd/src/aes.c	/^static const uint_8t isbox[256] = isb_data(f1);$/;"	v	file:
+isftdi	libloragw/inc/loragw_hal.h	/^    bool                        isftdi;             \/*!> is ftdi module or not *\/$/;"	m	struct:lgw_conf_lbt_s
 items	lora_pkt_fwd/src/parson.c	/^    JSON_Value **items;$/;"	m	struct:json_array_t	file:
 items	util_pkt_logger/src/parson.c	/^    JSON_Value **items;$/;"	m	struct:json_array_t	file:
 jit_collision_test	lora_pkt_fwd/src/jitqueue.c	/^bool jit_collision_test(uint32_t p1_count_us, uint32_t p1_pre_delay, uint32_t p1_post_delay, uint32_t p2_count_us, uint32_t p2_pre_delay, uint32_t p2_post_delay) {$/;"	f
@@ -2156,6 +2179,7 @@ lbt_channel_cfg	libloragw/src/loragw_lbt.c	/^static struct lgw_conf_lbt_chan_s l
 lbt_enable	libloragw/src/loragw_lbt.c	/^static bool lbt_enable;$/;"	v	file:
 lbt_is_channel_free	libloragw/src/loragw_lbt.c	/^int lbt_is_channel_free(struct lgw_pkt_tx_s * pkt_data, uint16_t tx_start_delay, bool * tx_allowed) {$/;"	f
 lbt_is_enabled	libloragw/src/loragw_lbt.c	/^bool lbt_is_enabled(void) {$/;"	f
+lbt_isftdi	libloragw/src/loragw_lbt.c	/^static bool lbt_isftdi;$/;"	v	file:
 lbt_nb_active_channel	libloragw/src/loragw_lbt.c	/^static uint8_t lbt_nb_active_channel;$/;"	v	file:
 lbt_rssi_offset_dB	libloragw/src/loragw_lbt.c	/^static int8_t lbt_rssi_offset_dB;$/;"	v	file:
 lbt_rssi_target_dBm	libloragw/src/loragw_lbt.c	/^static int8_t lbt_rssi_target_dBm;$/;"	v	file:
@@ -2188,6 +2212,10 @@ lgw_fpga_reg_r	libloragw/src/loragw_fpga.c	/^int lgw_fpga_reg_r(uint16_t registe
 lgw_fpga_reg_rb	libloragw/src/loragw_fpga.c	/^int lgw_fpga_reg_rb(uint16_t register_id, uint8_t *data, uint16_t size) {$/;"	f
 lgw_fpga_reg_w	libloragw/src/loragw_fpga.c	/^int lgw_fpga_reg_w(uint16_t register_id, int32_t reg_value) {$/;"	f
 lgw_fpga_reg_wb	libloragw/src/loragw_fpga.c	/^int lgw_fpga_reg_wb(uint16_t register_id, uint8_t *data, uint16_t size) {$/;"	f
+lgw_ft_spi_close	libloragw/src/loragw_spi.ftdi.c	/^int lgw_ft_spi_close(void *spi_target) {$/;"	f
+lgw_ft_spi_open	libloragw/src/loragw_spi.ftdi.c	/^int lgw_ft_spi_open(void **spi_target_ptr) {$/;"	f
+lgw_ft_spi_r	libloragw/src/loragw_spi.ftdi.c	/^int lgw_ft_spi_r(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t *data) {$/;"	f
+lgw_ft_spi_w	libloragw/src/loragw_spi.ftdi.c	/^int lgw_ft_spi_w(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t data) {$/;"	f
 lgw_get_trigcnt	libloragw/src/loragw_hal.c	/^int lgw_get_trigcnt(uint32_t* trig_cnt_us) {$/;"	f
 lgw_get_tx_start_delay	libloragw/src/loragw_hal.c	/^uint16_t lgw_get_tx_start_delay(bool tx_notch_enable, uint8_t bw) {$/;"	f
 lgw_gps2cnt	libloragw/src/loragw_gps.c	/^int lgw_gps2cnt(struct tref ref, struct timespec gps_time, uint32_t *count_us) {$/;"	f
@@ -2216,7 +2244,7 @@ lgw_rxif_setconf	libloragw/src/loragw_hal.c	/^int lgw_rxif_setconf(uint8_t if_ch
 lgw_rxrf_setconf	libloragw/src/loragw_hal.c	/^int lgw_rxrf_setconf(uint8_t rf_chain, struct lgw_conf_rxrf_s conf) {$/;"	f
 lgw_send	libloragw/src/loragw_hal.c	/^int lgw_send(struct lgw_pkt_tx_s pkt_data) {$/;"	f
 lgw_setup_sx125x	libloragw/src/loragw_radio.c	/^int lgw_setup_sx125x(uint8_t rf_chain, uint8_t rf_clkout, bool rf_enable, uint8_t rf_radio_type, uint32_t freq_hz) {$/;"	f
-lgw_setup_sx127x	libloragw/src/loragw_radio.c	/^int lgw_setup_sx127x(uint32_t frequency, uint8_t modulation, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
+lgw_setup_sx127x	libloragw/src/loragw_radio.c	/^int lgw_setup_sx127x(bool isftdi, uint32_t frequency, uint8_t modulation, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
 lgw_sf_getval	libloragw/src/loragw_hal.c	/^int32_t lgw_sf_getval(int x) {$/;"	f
 lgw_soft_reset	libloragw/src/loragw_reg.c	/^int lgw_soft_reset(void) {$/;"	f
 lgw_spi_close	libloragw/src/loragw_spi.native.c	/^int lgw_spi_close(void *spi_target) {$/;"	f
@@ -2231,8 +2259,8 @@ lgw_start	libloragw/src/loragw_hal.c	/^int lgw_start(void) {$/;"	f
 lgw_status	libloragw/src/loragw_hal.c	/^int lgw_status(uint8_t select, uint8_t *code) {$/;"	f
 lgw_stop	libloragw/src/loragw_hal.c	/^int lgw_stop(void) {$/;"	f
 lgw_sx127x_FSK_bandwidth_s	libloragw/src/loragw_radio.c	/^struct lgw_sx127x_FSK_bandwidth_s {$/;"	s	file:
-lgw_sx127x_reg_r	libloragw/src/loragw_radio.c	/^int lgw_sx127x_reg_r(uint8_t address, uint8_t *reg_value) {$/;"	f
-lgw_sx127x_reg_w	libloragw/src/loragw_radio.c	/^int lgw_sx127x_reg_w(uint8_t address, uint8_t reg_value) {$/;"	f
+lgw_sx127x_reg_r	libloragw/src/loragw_radio.c	/^int lgw_sx127x_reg_r(bool isftdi, uint8_t address, uint8_t *reg_value) {$/;"	f
+lgw_sx127x_reg_w	libloragw/src/loragw_radio.c	/^int lgw_sx127x_reg_w(bool isftdi, uint8_t address, uint8_t reg_value) {$/;"	f
 lgw_sx127x_rxbw_e	libloragw/inc/loragw_radio.h	/^enum lgw_sx127x_rxbw_e {$/;"	g
 lgw_time_on_air	libloragw/src/loragw_hal.c	/^uint32_t lgw_time_on_air(struct lgw_pkt_tx_s *packet) {$/;"	f
 lgw_tx_gain_lut_s	libloragw/inc/loragw_hal.h	/^struct lgw_tx_gain_lut_s {$/;"	s
@@ -2278,6 +2306,7 @@ main	lora_pkt_fwd/src/single_tx.c	/^int main(int argc, char *argv[])$/;"	f
 main	simple_reg_rw/src/simple_reg_rw.c	/^int main(int argc, char *argv[])$/;"	f
 main	tmp/lora_pkt_fwd.c	/^int main(void)$/;"	f
 main	util_ack/src/util_ack.c	/^int main(int argc, char **argv)$/;"	f
+main	util_ftdi_test/src/util_ftdi_test.c	/^int main(void)$/;"	f
 main	util_lbt_test/src/util_lbt_test.c	/^int main(int argc, char **argv)$/;"	f
 main	util_pkt_logger/src/util_pkt_logger.c	/^int main(int argc, char **argv)$/;"	f
 main	util_sink/src/util_sink.c	/^int main(int argc, char **argv)$/;"	f
@@ -2363,6 +2392,7 @@ mx_meas_up	tmp/lora_pkt_fwd.c	/^static pthread_mutex_t mx_meas_up = PTHREAD_MUTE
 mx_rxpkts_link	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static pthread_mutex_t mx_rxpkts_link = PTHREAD_MUTEX_INITIALIZER; $/;"	v	file:
 mx_sockdn	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static pthread_mutex_t mx_sockdn= PTHREAD_MUTEX_INITIALIZER; \/* control access to the sock_down reconnect *\/$/;"	v	file:
 mx_sockup	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static pthread_mutex_t mx_sockup = PTHREAD_MUTEX_INITIALIZER; \/* control access to the sock_up reconnect *\/$/;"	v	file:
+mx_spi	libloragw/src/loragw_spi.ftdi.c	/^static pthread_mutex_t mx_spi = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
 mx_stat_rep	tmp/lora_pkt_fwd.c	/^static pthread_mutex_t mx_stat_rep = PTHREAD_MUTEX_INITIALIZER; \/* control access to the status report *\/$/;"	v	file:
 mx_timeref	lora_pkt_fwd/src/lora_pkt_fwd.c	/^static pthread_mutex_t mx_timeref = PTHREAD_MUTEX_INITIALIZER; \/* control access to GPS time reference *\/$/;"	v	file:
 mx_timeref	tmp/lora_pkt_fwd.c	/^static pthread_mutex_t mx_timeref = PTHREAD_MUTEX_INITIALIZER; \/* control access to GPS time reference *\/$/;"	v	file:
@@ -2510,7 +2540,7 @@ reg_w_align32	libloragw/src/loragw_reg.c	/^int reg_w_align32(void *spi_target, u
 remove_comments	lora_pkt_fwd/src/parson.c	/^static void remove_comments(char *string, const char *start_token, const char *end_token) {$/;"	f	file:
 remove_comments	util_pkt_logger/src/parson.c	/^static void remove_comments(char *string, const char *start_token, const char *end_token) {$/;"	f	file:
 report_ready	tmp/lora_pkt_fwd.c	/^static bool report_ready = false; \/* true when there is a new report to send to the server *\/$/;"	v	file:
-reset_sx127x	libloragw/src/loragw_radio.c	/^int reset_sx127x() {$/;"	f
+reset_sx127x	libloragw/src/loragw_radio.c	/^int reset_sx127x(bool isftdi) {$/;"	f
 return_type	lora_pkt_fwd/inc/aes.h	/^typedef uint_8t return_type;$/;"	t
 rf_chain	libloragw/inc/loragw_hal.h	/^    uint8_t     rf_chain;       \/*!> through which RF chain the packet was received *\/$/;"	m	struct:lgw_pkt_rx_s
 rf_chain	libloragw/inc/loragw_hal.h	/^    uint8_t     rf_chain;       \/*!> through which RF chain will the packet be sent *\/$/;"	m	struct:lgw_pkt_tx_s
@@ -2569,8 +2599,8 @@ setsbw	lora_pkt_fwd/src/radio.c	/^void setsbw(uint8_t spidev, long sbw)$/;"	f
 setsf	lora_pkt_fwd/src/radio.c	/^void setsf(uint8_t spidev, int sf)$/;"	f
 setsyncword	lora_pkt_fwd/src/radio.c	/^void setsyncword(uint8_t spidev, int sw)$/;"	f
 setup_channel	lora_pkt_fwd/src/radio.c	/^void setup_channel(radiodev *dev)$/;"	f
-setup_sx1272_FSK	libloragw/src/loragw_radio.c	/^int setup_sx1272_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
-setup_sx1276_FSK	libloragw/src/loragw_radio.c	/^int setup_sx1276_FSK(uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
+setup_sx1272_FSK	libloragw/src/loragw_radio.c	/^int setup_sx1272_FSK(bool isftdi, uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
+setup_sx1276_FSK	libloragw/src/loragw_radio.c	/^int setup_sx1276_FSK(bool isftdi, uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
 sf	lora_pkt_fwd/inc/radio.h	/^    uint8_t sf;$/;"	m	struct:__anon2
 sf	lora_pkt_fwd/src/single_tx.c	/^static char sf[8] = "7";$/;"	v	file:
 sf_t	lora_pkt_fwd/inc/radio.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	g

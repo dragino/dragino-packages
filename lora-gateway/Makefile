@@ -58,6 +58,7 @@ define Package/lora-gateway/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lora_pkt_fwd/single_tx $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lora_pkt_fwd/lora_pkt_fwd $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_tx_test/util_tx_test $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_lbt_test/util_lbt_test $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_test_hal/util_test_hal $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/util_pkt_logger/util_pkt_logger $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/lora

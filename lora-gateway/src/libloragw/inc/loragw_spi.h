@@ -25,6 +25,7 @@ Maintainer: Sylvain Miermont
 /* --- DEPENDANCIES --------------------------------------------------------- */
 
 #include <stdint.h>        /* C99 types*/
+#include <stdbool.h>        /* C99 types*/
 
 #include "config.h"    /* library configuration options (dynamically generated) */
 
@@ -117,7 +118,7 @@ int lgw_spi_rb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, u
 @brief sx127x ftdi device reset
 @return status of register operation (LGW_SPI_SUCCESS/LGW_SPI_ERROR)
 */
-int ftdi_sx127x_reset();
+int ftdi_sx127x_reset(void*, bool);
 
 #endif
 

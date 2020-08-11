@@ -166,9 +166,6 @@ int load_firmware(uint8_t target, uint8_t *firmware, uint16_t size);
 
 void lgw_constant_adjust(void);
 
-int32_t lgw_sf_getval(int x);
-int32_t lgw_bw_getval(int x);
-
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
 

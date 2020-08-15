@@ -240,7 +240,7 @@ typedef struct {
     uint8_t syncword;
     uint8_t invertio;
     uint8_t power;
-    char desc[8];
+    char desc[12];  // must be big enough
 }radiodev; 
 
 /**
@@ -420,6 +420,23 @@ int lockfile(int);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 int already_running(void);
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/*
+    save strcpy
+    result is always '\0' terminated
+    jstrncpy(s, "1234",4) copies "123" + '\0'
+*/
+void jstrncpy(char *sDest, const char *sSrc, int iDestLength);
+
+/*
+    Macro to avoid wrong sizeof argument
+    sample:
+        char test[10];
+        JSTRNCPY(test,"12345678")
+*/
+#define JSTRNCPY(d,s) jstrncpy(d, s, sizeof(d))
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

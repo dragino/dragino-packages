@@ -23,7 +23,7 @@ int main (int argc, char *argv[]) {
     loradev->dio[0] = 7;
     loradev->dio[1] = 6;
     loradev->dio[2] = 0;	
-    strcpy(loradev->desc, "LG02 detect");	
+    JSTRNCPY(loradev->desc, "LG02 detect");	// avoid buffer overflow
 
     if (spidev)
         loradev->spiport = lgw_spi_open(SPI_DEV_TX);

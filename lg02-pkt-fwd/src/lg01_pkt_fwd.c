@@ -479,17 +479,17 @@ int main(int argc, char *argv[])
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     /* load configuration */
-    strcpy(uci_config_file, "/etc/config/gateway");
+    JSTRNCPY(uci_config_file, "/etc/config/gateway");
 
     if (!get_config("general", provider, 16)){
-        strcpy(provider, "ttn");  
+        JSTRNCPY(provider, "ttn");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option provider=%s\n", provider);
     }
 
     snprintf(server, sizeof(server), "%s_server", provider); 
 
     if (!get_config("general", server, sizeof(server))){ /*set default:router.eu.thethings.network*/
-        strcpy(server, "router.us.thethings.network");  
+        JSTRNCPY(server, "router.us.thethings.network");
     }
 
     /*
@@ -499,12 +499,12 @@ int main(int argc, char *argv[])
     */
 
     if (!get_config("general", port, 8)){
-        strcpy(port, "1700");
+        JSTRNCPY(port, "1700");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
     }
 
     if (!get_config("general", dwport, 8)){
-        strcpy(dwport, "1700");
+        JSTRNCPY(dwport, "1700");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
     }
 
@@ -512,22 +512,22 @@ int main(int argc, char *argv[])
     strcpy(serv_port_down, dwport);
 
     if (!get_config("general", email, 32)){
-        strcpy(email, "dragino@dragino.com");
+        JSTRNCPY(email, "dragino@dragino.com");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option email=%s\n", email);
     }
 
     if (!get_config("general", gatewayid, 64)){
-        strcpy(gatewayid, "a84041ffff16c21c");      /*set default:router.eu.thethings.network*/
+        JSTRNCPY(gatewayid, "a84041ffff16c21c");      /*set default:router.eu.thethings.network*/
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option gatewayid=%s\n", gatewayid);
     } 
 
     if (!get_config("general", LAT, 16)){
-        strcpy(LAT, "0");
+        JSTRNCPY(LAT, "0");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option lat=%s\n", LAT);
     }
 
     if (!get_config("general", LON, 16)){
-        strcpy(LON, "0");
+        JSTRNCPY(LON, "0");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option lon=%s\n", LON);
     }
 
@@ -537,46 +537,46 @@ int main(int argc, char *argv[])
 
     /* server_type : 1.lorawan  2.relay  3.mqtt  4.tcpudp */
     if (!get_config("general", server_type, 16)){
-        strcpy(server_type, "lorawan");
+        JSTRNCPY(server_type, "lorawan");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option server_type=%s\n", server_type);
     }
 
     /* power for transimit form 5 to 20 */
     if (!get_config("general", rf_power, 8)){
-        strcpy(rf_power, "16");
+        JSTRNCPY(rf_power, "16");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rf_power=%s\n", rf_power);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if (!get_config("radio1", rf_freq, 16)){
-        strcpy(rf_freq, "902320000"); /* default frequency*/
+        JSTRNCPY(rf_freq, "902320000"); /* default frequency*/
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxfreq=%s\n", rf_freq);
     }
 
     if (!get_config("radio1", rfsf, 8)){
-        strcpy(rfsf, "7");
+        JSTRNCPY(rfsf, "7");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxsf=%s\n", rfsf);
     }
 
     if (!get_config("radio1", rfcr, 8)){
-        strcpy(rfcr, "5");
+        JSTRNCPY(rfcr, "5");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option coderate=%s\n", rfcr);
     }
     
     if (!get_config("radio1", rfbw, 8)){
-        strcpy(rfbw, "125000");
+        JSTRNCPY(rfbw, "125000");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxbw=%s\n", rfbw);
     }
 
     if (!get_config("radio1", rfprlen, 8)){
-        strcpy(rfprlen, "8");
+        JSTRNCPY(rfprlen, "8");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxprlen=%s\n", rfprlen);
     }
 
     if (!get_config("radio1", syncwd, 8)){
-        strcpy(syncwd, "52");  //Value 0x34 is reserved for LoRaWAN networks
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword=0x%02x\n", syncwd);
+        JSTRNCPY(syncwd, "52");  //Value 0x34 is reserved for LoRaWAN networks
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword=0x%02x\n", atoi(syncwd));
     }
 
     switch (atoi(logdebug)) {
@@ -643,7 +643,7 @@ int main(int argc, char *argv[])
     rfdev->syncword = atoi(syncwd);
     rfdev->invertio = 0;
     rfdev->power = atoi(rf_power);
-    strcpy(rfdev->desc, "RF_RADIO");
+    JSTRNCPY(rfdev->desc, "RF_RADIO");
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -749,7 +749,7 @@ int main(int argc, char *argv[])
         rxlora(rfdev, RXMODE_SINGLE);  /* star lora single receive mode */
 	    clock_gettime(CLOCK_MONOTONIC, &start_time);
 
-	    start_time = end_time;
+	    end_time = start_time;
         /* receive timeout, if no readdigital or readerror? */
         while ((digitalRead(rfdev->dio[1]) != 1) && ((int)difftimespec(end_time, start_time) < RXRF_TIMEOUT_S)) {                 
             clock_gettime(CLOCK_MONOTONIC, &end_time);
@@ -1584,7 +1584,7 @@ void thread_push(void) {
                         continue;
                 }
 
-                strcpy(txpkt.payload, str);
+                JSTRNCPY(txpkt.payload, str);
 
                 txpkt.size = (uint16_t)strlen(txpkt.payload);
 

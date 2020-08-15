@@ -988,3 +988,14 @@ int32_t bw_toval(int x) {
         default: return -1;
     }
 }
+
+/*
+    save strcpy
+    result is always '\0' terminated
+    jstrncpy(s, "1234",4) copies "123" + '\0'
+*/
+void jstrncpy(char *sDest, const char *sSrc, int iDestLength)
+{
+    strncpy(sDest, sSrc, iDestLength);
+    sDest[iDestLength - 1] = '\0';      // if "sDest" too short allways '\0' at end
+}

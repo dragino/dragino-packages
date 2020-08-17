@@ -139,14 +139,14 @@ int rx_buffer_fetch(rx_buffer_t * self) {
     CHECK_NULL(self);
 
     /* Check if there is data in the FIFO */
-    lgw_reg_rb(SX1302_REG_RX_TOP_RX_BUFFER_NB_BYTES_MSB_RX_BUFFER_NB_BYTES, buff, sizeof buff);
+    lgw_sx1302_reg_rb(SX1302_REG_RX_TOP_RX_BUFFER_NB_BYTES_MSB_RX_BUFFER_NB_BYTES, buff, sizeof buff);
     /* Workaround concentrator chip issue:
         - read MSB again
         - if MSB changed, read the full size gain
      */
-    lgw_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_NB_BYTES_MSB_RX_BUFFER_NB_BYTES, &msb);
+    lgw_sx1302_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_NB_BYTES_MSB_RX_BUFFER_NB_BYTES, &msb);
     if (buff[0] != (uint8_t)msb) {
-        lgw_reg_rb(SX1302_REG_RX_TOP_RX_BUFFER_NB_BYTES_MSB_RX_BUFFER_NB_BYTES, buff, sizeof buff);
+        lgw_sx1302_reg_rb(SX1302_REG_RX_TOP_RX_BUFFER_NB_BYTES_MSB_RX_BUFFER_NB_BYTES, buff, sizeof buff);
     }
 
     self->buffer_size  = (buff[0] << 8) | (buff[1] << 0);
@@ -339,9 +339,9 @@ uint16_t rx_buffer_read_ptr_addr(void) {
     int32_t val;
     uint16_t addr;
 
-    lgw_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_LAST_ADDR_READ_MSB_LAST_ADDR_READ, &val); /* mandatory to read MSB first */
+    lgw_sx1302_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_LAST_ADDR_READ_MSB_LAST_ADDR_READ, &val); /* mandatory to read MSB first */
     addr  = (uint16_t)(val << 8);
-    lgw_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_LAST_ADDR_READ_LSB_LAST_ADDR_READ, &val);
+    lgw_sx1302_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_LAST_ADDR_READ_LSB_LAST_ADDR_READ, &val);
     addr |= (uint16_t)val;
 
     return addr;
@@ -353,9 +353,9 @@ uint16_t rx_buffer_write_ptr_addr(void) {
     int32_t val;
     uint16_t addr;
 
-    lgw_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_LAST_ADDR_WRITE_MSB_LAST_ADDR_WRITE, &val);  /* mandatory to read MSB first */
+    lgw_sx1302_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_LAST_ADDR_WRITE_MSB_LAST_ADDR_WRITE, &val);  /* mandatory to read MSB first */
     addr  = (uint16_t)(val << 8);
-    lgw_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_LAST_ADDR_WRITE_LSB_LAST_ADDR_WRITE, &val);
+    lgw_sx1302_reg_r(SX1302_REG_RX_TOP_RX_BUFFER_LAST_ADDR_WRITE_LSB_LAST_ADDR_WRITE, &val);
     addr |= (uint16_t)val;
 
     return addr;
@@ -371,9 +371,9 @@ void rx_buffer_dump(FILE * file, uint16_t start_addr, uint16_t end_addr) {
 
     memset(rx_buffer_debug, 0, sizeof rx_buffer_debug);
 
-    lgw_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_DIRECT_RAM_IF, 1);
+    lgw_sx1302_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_DIRECT_RAM_IF, 1);
     lgw_mem_rb(0x4000 + start_addr, rx_buffer_debug, end_addr - start_addr + 1, false);
-    lgw_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_DIRECT_RAM_IF, 0);
+    lgw_sx1302_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_DIRECT_RAM_IF, 0);
 
     for (i = 0; i < (end_addr - start_addr + 1); i++) {
         if (file == NULL) {

@@ -31,13 +31,13 @@
 
 #include "fwd.h"
 #include "parson.h"
-#include "loragw_hal.h"
-#include "loragw_gps.h"
 #include "loragw_aux.h"
-#include "loragw_reg.h"
-#include "loragw_debug.h"
+#include "loragw_hal.h"
+#include "loragw_hal_sx1301.h"
+#include "loragw_hal_sx1302.h"
 
 DECLARE_GW;
+extern struct lorabo_s lorabo;
 
 static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
     int i, j;
@@ -108,7 +108,7 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
     }
     printf("INFO: spidev_path %s, lorawan_public %d, clksrc %d, full_duplex %d\n", boardconf.spidev_path, boardconf.lorawan_public, boardconf.clksrc, boardconf.full_duplex);
     /* all parameters parsed, submitting configuration to the HAL */
-    if (lgw_board_setconf(&boardconf) != LGW_HAL_SUCCESS) {
+    if (lorabo.lgw_board_setconf(&boardconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: Failed to configure board\n");
         return -1;
     }
@@ -155,7 +155,7 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
             printf("INFO: Configuring precision timestamp: max_ts_metrics:%u, nb_symbols:%u\n", tsconf.max_ts_metrics, tsconf.nb_symbols);
 
             /* all parameters parsed, submitting configuration to the HAL */
-            if (lgw_timestamp_setconf(&tsconf) != LGW_HAL_SUCCESS) {
+            if (lorabo.lgw_timestamp_setconf(&tsconf) != LGW_HAL_SUCCESS) {
                 printf("ERROR: Failed to configure precision timestamp\n");
                 return -1;
             }
@@ -313,7 +313,7 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
                         }
                         /* all parameters parsed, submitting configuration to the HAL */
                         if (gw->tx.txlut[i].size > 0) {
-                            if (lgw_txgain_setconf(i, &gw->tx.txlut[i]) != LGW_HAL_SUCCESS) {
+                            if (lorabo.lgw_txgain_setconf(i, &gw->tx.txlut[i]) != LGW_HAL_SUCCESS) {
                                 printf("ERROR: Failed to configure concentrator TX Gain LUT for rf_chain %u\n", i);
                                 return -1;
                             }
@@ -330,7 +330,7 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
             printf("INFO: radio %i enabled (type %s), center frequency %u, RSSI offset %f, tx enabled %d, single input mode %d\n", i, str, rfconf.freq_hz, rfconf.rssi_offset, rfconf.tx_enable, rfconf.single_input_mode);
         }
         /* all parameters parsed, submitting configuration to the HAL */
-        if (lgw_rxrf_setconf(i, &rfconf) != LGW_HAL_SUCCESS) {
+        if (lorabo.lgw_rxrf_setconf(i, &rfconf) != LGW_HAL_SUCCESS) {
             printf("ERROR: invalid configuration for radio %i\n", i);
             return -1;
         }
@@ -364,7 +364,7 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
             printf("INFO: Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 5 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
         }
         /* all parameters parsed, submitting configuration to the HAL */
-        if (lgw_rxif_setconf(i, &ifconf) != LGW_HAL_SUCCESS) {
+        if (lorabo.lgw_rxif_setconf(i, &ifconf) != LGW_HAL_SUCCESS) {
             printf("ERROR: invalid configuration for Lora multi-SF channel %i\n", i);
             return -1;
         }
@@ -438,7 +438,7 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
 
             printf("INFO: Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u, %s\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf, (ifconf.implicit_hdr == true) ? "Implicit header" : "Explicit header");
         }
-        if (lgw_rxif_setconf(8, &ifconf) != LGW_HAL_SUCCESS) {
+        if (lorabo.lgw_rxif_setconf(8, &ifconf) != LGW_HAL_SUCCESS) {
             printf("ERROR: invalid configuration for Lora standard channel\n");
             return -1;
         }
@@ -483,7 +483,7 @@ static int parse_SX130x_configuration(const char* conf_file, gw_s* gw) {
 
             printf("INFO: FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
         }
-        if (lgw_rxif_setconf(9, &ifconf) != LGW_HAL_SUCCESS) {
+        if (lorabo.lgw_rxif_setconf(9, &ifconf) != LGW_HAL_SUCCESS) {
             printf("ERROR: invalid configuration for FSK channel\n");
             return -1;
         }
@@ -903,7 +903,7 @@ static int parse_debug_configuration(const char * conf_file) {
     }
 
     /* Commit configuration */
-    if (lgw_debug_setconf(&debugconf) != LGW_HAL_SUCCESS) {
+    if (lorabo.lgw_debug_setconf(&debugconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: Failed to configure debug\n");
         json_value_free(root_val);
         return -1;

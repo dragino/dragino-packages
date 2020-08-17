@@ -33,6 +33,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include <fcntl.h>
 #include <inttypes.h>
 
+#include "loragw_hal.h"
 #include "loragw_hal_sx1302.h"
 #include "loragw_reg_sx1302.h"
 #include "loragw_aux.h"
@@ -43,6 +44,42 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include "loragw_sx1302.h"
 #include "loragw_stts751.h"
 #include "loragw_debug.h"
+
+/* -------------------------------------------------------------------------- */
+/* --- PRIVATE MACROS ------------------------------------------------------- */
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#if DEBUG_HAL == 1
+    #define DEBUG_MSG(str)                fprintf(stderr, str)
+    #define DEBUG_PRINTF(fmt, args...)    fprintf(stderr,"%s:%d: "fmt, __FUNCTION__, __LINE__, args)
+    #define DEBUG_ARRAY(a,b,c)            for(a=0;a<b;++a) fprintf(stderr,"%x.",c[a]);fprintf(stderr,"end\n")
+    #define CHECK_NULL(a)                 if(a==NULL){fprintf(stderr,"%s:%d: ERROR: NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_HAL_ERROR;}
+#else
+    #define DEBUG_MSG(str)
+    #define DEBUG_PRINTF(fmt, args...)
+    #define DEBUG_ARRAY(a,b,c)            for(a=0;a!=0;){}
+    #define CHECK_NULL(a)                 if(a==NULL){return LGW_HAL_ERROR;}
+#endif
+
+#define TRACE()             fprintf(stderr, "@ %s %d\n", __FUNCTION__, __LINE__);
+
+#define CONTEXT_STARTED         lgw_context.is_started
+#define CONTEXT_SPI             lgw_context.board_cfg.spidev_path
+#define CONTEXT_LWAN_PUBLIC     lgw_context.board_cfg.lorawan_public
+#define CONTEXT_BOARD           lgw_context.board_cfg
+#define CONTEXT_RF_CHAIN        lgw_context.rf_chain_cfg
+#define CONTEXT_IF_CHAIN        lgw_context.if_chain_cfg
+#define CONTEXT_LORA_SERVICE    lgw_context.lora_service_cfg
+#define CONTEXT_FSK             lgw_context.fsk_cfg
+#define CONTEXT_TX_GAIN_LUT     lgw_context.tx_gain_lut
+#define CONTEXT_TIMESTAMP       lgw_context.timestamp_cfg
+#define CONTEXT_DEBUG           lgw_context.debug_cfg
+
+/* -------------------------------------------------------------------------- */
+/* --- PRIVATE CONSTANTS & TYPES -------------------------------------------- */
+
+#define FW_VERSION_AGC      1 /* Expected version of AGC firmware */
+#define FW_VERSION_ARB      1 /* Expected version of arbiter firmware */
 
 /* -------------------------------------------------------------------------- */
 /* --- DEBUG CONSTANTS ------------------------------------------------------ */
@@ -140,18 +177,18 @@ static uint8_t ts_addr = 0xFF;
 
 void dbg_init_gpio(void) {
     /* Select GPIO_6 to be controlled by HOST */
-    lgw_reg_w(SX1302_REG_GPIO_GPIO_SEL_6_SELECTION, 0);
+    lgw_sx1302_reg_w(SX1302_REG_GPIO_GPIO_SEL_6_SELECTION, 0);
     /* Configure it as an OUTPUT */
-    lgw_reg_w(SX1302_REG_GPIO_GPIO_DIR_L_DIRECTION, 0xFF);
+    lgw_sx1302_reg_w(SX1302_REG_GPIO_GPIO_DIR_L_DIRECTION, 0xFF);
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void dbg_toggle_gpio(void) {
     /* Set GPIO_6 to high */
-    lgw_reg_w(SX1302_REG_GPIO_GPIO_OUT_L_OUT_VALUE, 64);
+    lgw_sx1302_reg_w(SX1302_REG_GPIO_GPIO_OUT_L_OUT_VALUE, 64);
     /* Set GPIO_6 to low */
-    lgw_reg_w(SX1302_REG_GPIO_GPIO_OUT_L_OUT_VALUE, 0);
+    lgw_sx1302_reg_w(SX1302_REG_GPIO_GPIO_OUT_L_OUT_VALUE, 0);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -443,7 +480,7 @@ int lgw_txgain_sx1302_setconf(uint8_t rf_chain, struct lgw_tx_gain_lut_s * conf)
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_timestamp_setconf(struct lgw_conf_timestamp_s * conf) {
+int lgw_timestamp_sx1302_setconf(struct lgw_conf_timestamp_s * conf) {
     CHECK_NULL(conf);
 
     CONTEXT_TIMESTAMP.enable_precision_ts = conf->enable_precision_ts;
@@ -455,7 +492,7 @@ int lgw_timestamp_setconf(struct lgw_conf_timestamp_s * conf) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_debug_setconf(struct lgw_conf_debug_s * conf) {
+int lgw_debug_sx1302_setconf(struct lgw_conf_debug_s * conf) {
     int i;
 
     CHECK_NULL(conf);
@@ -483,7 +520,7 @@ int lgw_debug_setconf(struct lgw_conf_debug_s * conf) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_start_sx1302(void) {
+int lgw_sx1302_start(void) {
     int i, err;
     int reg_stat;
 
@@ -491,7 +528,7 @@ int lgw_start_sx1302(void) {
         DEBUG_MSG("Note: LoRa concentrator already started, restarting it now\n");
     }
 
-    reg_stat = lgw_connect_sx1302(CONTEXT_SPI);
+    reg_stat = lgw_sx1302_connect(CONTEXT_SPI);
     if (reg_stat == LGW_REG_ERROR) {
         DEBUG_MSG("ERROR: FAIL TO CONNECT BOARD\n");
         return LGW_HAL_ERROR;
@@ -658,7 +695,7 @@ int lgw_start_sx1302(void) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_stop_sx1302(void) {
+int lgw_sx1302_stop(void) {
     int i, err;
 
     DEBUG_MSG("INFO: aborting TX\n");
@@ -673,7 +710,7 @@ int lgw_stop_sx1302(void) {
     }
 
     DEBUG_MSG("INFO: Disconnecting\n");
-    lgw_disconnect_sx1302();
+    lgw_sx1302_disconnect();
 
     DEBUG_MSG("INFO: Closing I2C\n");
     err = i2c_linuxdev_close(ts_fd);
@@ -687,7 +724,7 @@ int lgw_stop_sx1302(void) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_receive_sx1302(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
+int lgw_sx1302_receive(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
     int res;
     uint8_t  nb_pkt_fetched = 0;
     uint16_t nb_pkt_found = 0;
@@ -748,7 +785,7 @@ int lgw_receive_sx1302(uint8_t max_pkt, struct lgw_pkt_rx_s *pkt_data) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_send_sx1302(struct lgw_pkt_tx_s * pkt_data) {
+int lgw_sx1302_send(struct lgw_pkt_tx_s * pkt_data) {
     /* check if the concentrator is running */
     if (CONTEXT_STARTED == false) {
         DEBUG_MSG("ERROR: CONCENTRATOR IS NOT RUNNING, START IT BEFORE SENDING\n");
@@ -818,7 +855,7 @@ int lgw_send_sx1302(struct lgw_pkt_tx_s * pkt_data) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_status_sx1302(uint8_t rf_chain, uint8_t select, uint8_t *code) {
+int lgw_sx1302_status(uint8_t rf_chain, uint8_t select, uint8_t *code) {
     /* check input variables */
     CHECK_NULL(code);
     if (rf_chain >= LGW_RF_CHAIN_NB) {
@@ -873,7 +910,7 @@ int lgw_get_sx1302_trigcnt(uint32_t* trig_cnt_us) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-int lgw_get_instcnt(uint32_t* inst_cnt_us) {
+int lgw_get_sx1302_instcnt(uint32_t* inst_cnt_us) {
     CHECK_NULL(inst_cnt_us);
 
     *inst_cnt_us = sx1302_timestamp_counter(false);

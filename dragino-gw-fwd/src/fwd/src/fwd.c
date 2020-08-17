@@ -36,6 +36,7 @@
 
 #include <stdbool.h>			/* bool type */
 #include <string.h>				/* memset */
+#include <strings.h>				
 #include <signal.h>				/* sigaction */
 #include <time.h>				/* time, clock_gettime, strftime, gmtime */
 #include <unistd.h>				/* getopt, access */
@@ -62,10 +63,9 @@
 
 #include "loragw_gps.h"
 #include "loragw_aux.h"
-#include "loragw_reg.h"
-#include "loragw_debug.h"
 #include "loragw_hal.h"
-#include "loragw_aux.h"
+#include "loragw_hal_sx1301.h"
+#include "loragw_hal_sx1302.h"
 
 /* signal handling variables */
 volatile bool exit_sig = false;	/* 1 -> application terminates cleanly (shut down hardware, close open files, etc) */
@@ -88,14 +88,16 @@ uint8_t LOG_WARNING = 0;
 uint8_t LOG_ERROR = 0;
 
 /* -------------------------------------------------------------------------- */
-/* --- Privite FUNCTIONS DECLARATION ---------------------------------------- */
-void stop_clean_service(void);
-
-/* -------------------------------------------------------------------------- */
-/* --- PUBLIC FUNCTIONS DECLARATION ---------------------------------------- */
+/* --- PUBLIC DECLARATION ---------------------------------------- */
 
 // initialize GW
 INIT_GW;
+
+struct lorabo_s lorabo;
+
+/* -------------------------------------------------------------------------- */
+/* --- PRIVATE FUNCTIONS DECLARATION ---------------------------------------- */
+void stop_clean_service(void);
 
 struct lgw_atexit {
     void (*func)(void);
@@ -406,6 +408,8 @@ int main(int argc, char *argv[]) {
 
     const char* conf_fname = "/etc/lora/global_conf.json"; /* pointer to a string we won't touch */
 
+    char lora_radio[8] = "sx1302";  /* radio type default is sx1302 */
+
     serv_s* serv_entry = NULL;  
 
 	/* threads */
@@ -417,7 +421,7 @@ int main(int argc, char *argv[]) {
 	pthread_t thrid_watchdog;
 
     /* Parse command line options */
-    while( (i = getopt( argc, argv, "hc:" )) != -1 )
+    while( (i = getopt( argc, argv, "hc:d:" )) != -1 )
     {
         switch( i )
         {
@@ -430,6 +434,14 @@ int main(int argc, char *argv[]) {
             conf_fname = optarg;
             break;
 
+        case 'd':
+            if (NULL != optarg) {
+                strncpy(lora_radio, optarg, sizeof(lora_radio));
+            } 
+
+
+            break;
+
         default:
             break;
         }
@@ -437,7 +449,8 @@ int main(int argc, char *argv[]) {
 
 	/* display version informations */
 	lgw_log(LOG_INFO, "*** Dragino Packet Forwarder for Lora Gateway ***\n");
-	lgw_log(LOG_INFO, "*** Lora concentrator HAL library version info ***\n%s\n***\n", lgw_version_info());
+	lgw_log(LOG_INFO, "*** LoRa concentrator HAL library version info %s ***\n", lgw_version_info());
+    lgw_log(LOG_INFO, "*** LoRa radio type of board is: %s ***\n", lora_radio);
 
 	/* configure signal handling */
 	sigemptyset(&sigact.sa_mask);
@@ -447,6 +460,40 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGINT, &sigact, NULL);	/* Ctrl-C */
 	sigaction(SIGTERM, &sigact, NULL);	/* default "kill" command */
 	sigaction(SIGQUIT, &sigact, NULL);	/* Ctrl-\ */
+
+    if (!strncasecmp(lora_radio, "sx1302", 6)) {   /* equal sx1302 */
+        lorabo.lgw_board_setconf = lgw_board_sx1302_setconf;
+        lorabo.lgw_rxrf_setconf = lgw_rxrf_sx1302_setconf;
+        lorabo.lgw_rxif_setconf = lgw_rxif_sx1302_setconf;
+        lorabo.lgw_debug_setconf = lgw_debug_sx1302_setconf;
+        lorabo.lgw_txgain_setconf = lgw_txgain_sx1302_setconf;
+        lorabo.lgw_start = lgw_sx1302_start;
+        lorabo.lgw_stop = lgw_sx1302_stop;
+        lorabo.lgw_receive = lgw_sx1302_receive;
+        lorabo.lgw_send = lgw_sx1302_send;
+        lorabo.lgw_status = lgw_sx1302_status;
+        lorabo.lgw_abort_tx = lgw_abort_sx1302_tx;
+        lorabo.lgw_get_trigcnt = lgw_get_sx1302_trigcnt;
+        lorabo.lgw_get_instcnt = lgw_get_sx1302_instcnt;
+        lorabo.lgw_get_eui = lgw_get_sx1302_eui;
+        lorabo.lgw_get_temperature = lgw_get_sx1302_temperature;
+    } else {  /* sx1301 , sx1308 */
+        lorabo.lgw_board_setconf = lgw_board_sx1301_setconf;
+        lorabo.lgw_rxrf_setconf = lgw_rxrf_sx1301_setconf;
+        lorabo.lgw_rxif_setconf = lgw_rxif_sx1301_setconf;
+        lorabo.lgw_debug_setconf = NULL;
+        lorabo.lgw_txgain_setconf = lgw_txgain_sx1301_setconf;
+        lorabo.lgw_start = lgw_sx1301_start;
+        lorabo.lgw_stop = lgw_sx1301_stop;
+        lorabo.lgw_receive = lgw_sx1301_receive;
+        lorabo.lgw_send = lgw_sx1301_send;
+        lorabo.lgw_status = lgw_sx1301_status;
+        lorabo.lgw_abort_tx = lgw_abort_sx1301_tx;
+        lorabo.lgw_get_trigcnt = lgw_get_sx1301_trigcnt;
+        lorabo.lgw_get_instcnt = lgw_get_sx1301_instcnt;
+        lorabo.lgw_get_eui = lgw_get_sx1301_eui;
+        lorabo.lgw_get_temperature = lgw_get_sx1301_temperature;
+    }
 
     /* 创建一个默认的service，用来基本包处理：包解析、包解码、包保存、自定义下发等 */
     serv_entry = (serv_s*)lgw_malloc(sizeof(serv_entry));
@@ -517,7 +564,7 @@ int main(int argc, char *argv[]) {
             lgw_log(LOG_ERROR, "ERROR~ [main] failed to start SX130X, Please start again!\n");
             exit(EXIT_FAILURE);
         } 
-		i = lgw_start();
+		i = lorabo.lgw_start();
 		if (i == LGW_HAL_SUCCESS) {
 			lgw_log(LOG_INFO, "INFO~ [main] concentrator started, radio packets can now be received.\n");
 		} else {
@@ -587,7 +634,7 @@ int main(int argc, char *argv[]) {
 		uint32_t trig_cnt_us;
 
 		pthread_mutex_lock(&GW.hal.mx_concent);
-		if (lgw_get_trigcnt(&trig_cnt_us) == LGW_HAL_SUCCESS && trig_cnt_us == 0x7E000000) {
+		if (lorabo.lgw_get_trigcnt(&trig_cnt_us) == LGW_HAL_SUCCESS && trig_cnt_us == 0x7E000000) {
 			lgw_log(LOG_ERROR, "ERROR~ [main] unintended SX1301 reset detected, terminating packet forwarder.\n");
 			exit(EXIT_FAILURE);
 		}
@@ -615,7 +662,7 @@ int main(int argc, char *argv[]) {
 	if (exit_sig) {
 		/* stop the hardware */
 		if (GW.cfg.radiostream_enabled == true) {
-			i = lgw_stop();
+			i = lorabo.lgw_stop();
 			if (i == LGW_HAL_SUCCESS) {
                 if (system("/usr/bin/reset_lGW.sh stop") != 0) {
                     lgw_log(LOG_ERROR, "ERROR~ failed to stop SX1302\n");
@@ -650,7 +697,7 @@ void thread_up(void) {
 		pthread_mutex_lock(&GW.hal.mx_concent);
 
 		if (GW.cfg.radiostream_enabled == true)
-			nb_pkt = lgw_receive(NB_PKT_MAX, rxpkt);
+			nb_pkt = lorabo.lgw_receive(NB_PKT_MAX, rxpkt);
 		else
 			nb_pkt = 0;
 
@@ -731,7 +778,7 @@ void thread_jit(void) {
         for (i = 0; i < LGW_RF_CHAIN_NB; i++) {
             /* transfer data and metadata to the concentrator, and schedule TX */
             pthread_mutex_lock(&GW.hal.mx_concent);
-            lgw_get_instcnt(&current_concentrator_time);
+            lorabo.lgw_get_instcnt(&current_concentrator_time);
             pthread_mutex_unlock(&GW.hal.mx_concent);
             jit_result = jit_peek(&GW.tx.jit_queue[i], current_concentrator_time, &pkt_index);
             if (jit_result == JIT_ERROR_OK) {
@@ -755,7 +802,7 @@ void thread_jit(void) {
 
                         /* check if concentrator is free for sending new packet */
                         pthread_mutex_lock(&GW.hal.mx_concent); /* may have to wait for a fetch to finish */
-                        result = lgw_status(pkt.rf_chain, TX_STATUS, &tx_status);
+                        result = lorabo.lgw_status(pkt.rf_chain, TX_STATUS, &tx_status);
                         pthread_mutex_unlock(&GW.hal.mx_concent); /* free concentrator ASAP */
                         if (result == LGW_HAL_ERROR) {
                             lgw_log(LOG_WARNING, "WARNING~ [jit%d] lgw_status failed\n", i);
@@ -774,7 +821,7 @@ void thread_jit(void) {
 
                         /* send packet to concentrator */
                         pthread_mutex_lock(&GW.hal.mx_concent); /* may have to wait for a fetch to finish */
-                        result = lgw_send(&pkt);
+                        result = lorabo.lgw_send(&pkt);
                         pthread_mutex_unlock(&GW.hal.mx_concent); /* free concentrator ASAP */
                         if (result == LGW_HAL_ERROR) {
                             pthread_mutex_lock(&GW.log.mx_report);
@@ -819,7 +866,7 @@ static void gps_process_sync(void) {
 
 	/* get timestamp captured on PPM pulse  */
 	pthread_mutex_lock(&GW.hal.mx_concent);
-	i = lgw_get_trigcnt(&trig_tstamp);
+	i = lorabo.lgw_get_trigcnt(&trig_tstamp);
 	pthread_mutex_unlock(&GW.hal.mx_concent);
 	if (i != LGW_HAL_SUCCESS) {
 		lgw_log(LOG_WARNING, "WARNING~ [gps] failed to read concentrator timestamp\n");

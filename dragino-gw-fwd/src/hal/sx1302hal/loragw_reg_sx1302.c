@@ -24,10 +24,22 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include <stdio.h>      /* printf fprintf */
 
 #include "loragw_spi.h"
+#include "loragw_reg.h"
 #include "loragw_reg_sx1302.h"
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS ------------------------------------------------------- */
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#if DEBUG_REG == 1
+    #define DEBUG_MSG(str)              fprintf(stderr, str)
+    #define DEBUG_PRINTF(fmt, args...)  fprintf(stderr,"%s:%d: "fmt, __FUNCTION__, __LINE__, args)
+    #define CHECK_NULL(a)               if(a==NULL){fprintf(stderr,"%s:%d: ERROR: NULL POINTER AS ARGUMENT\n", __FUNCTION__, __LINE__);return LGW_REG_ERROR;}
+#else
+    #define DEBUG_MSG(str)
+    #define DEBUG_PRINTF(fmt, args...)
+    #define CHECK_NULL(a)               if(a==NULL){return LGW_REG_ERROR;}
+#endif
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE CONSTANTS ---------------------------------------------------- */
@@ -49,7 +61,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #define SX1302_REG_TIMESTAMP_BASE_ADDR 0x6100
 #define SX1302_REG_OTP_BASE_ADDR 0x6180
 
-const struct lgw_reg_s sx1302_regs[LGW_TOTALREGS+1] = {
+const struct lgw_reg_s sx1302_regs[LGW_SX1302_TOTALREGS+1] = {
     {0,SX1302_REG_COMMON_BASE_ADDR+0,0,0,2,0,1,0}, // COMMON_PAGE_PAGE
     {0,SX1302_REG_COMMON_BASE_ADDR+1,4,0,1,0,1,0}, // COMMON_CTRL0_CLK32_RIF_CTRL
     {0,SX1302_REG_COMMON_BASE_ADDR+1,3,0,1,0,1,1}, // COMMON_CTRL0_HOST_RADIO_CTRL
@@ -1103,8 +1115,6 @@ const struct lgw_reg_s sx1302_regs[LGW_TOTALREGS+1] = {
 /* -------------------------------------------------------------------------- */
 /* --- INTERNAL SHARED VARIABLES -------------------------------------------- */
 
-void *lgw_spi_target = NULL; /*! generic pointer to the SPI device */
-
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS ---------------------------------------------------- */
 
@@ -1112,7 +1122,7 @@ void *lgw_spi_target = NULL; /*! generic pointer to the SPI device */
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
 
 /* Concentrator connect */
-int lgw_connect_sx1302(const char * spidev_path) {
+int lgw_sx1302_connect(const char * spidev_path) {
     int spi_stat = LGW_SPI_SUCCESS;
     uint8_t u = 0;
 
@@ -1152,7 +1162,7 @@ int lgw_connect_sx1302(const char * spidev_path) {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 /* Concentrator disconnect */
-int lgw_disconnect_sx1302(void) {
+int lgw_sx1302_disconnect(void) {
     if (lgw_spi_target != NULL) {
         lgw_spi_close(lgw_spi_target);
         lgw_spi_target = NULL;
@@ -1161,6 +1171,159 @@ int lgw_disconnect_sx1302(void) {
     } else {
         DEBUG_MSG("WARNING: concentrator was already disconnected\n");
         return LGW_REG_ERROR;
+    }
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Write to a register addressed by name */
+int lgw_sx1302_reg_w(uint16_t register_id, int32_t reg_value) {
+    int spi_stat = LGW_SPI_SUCCESS;
+    struct lgw_reg_s r;
+
+    /* check input parameters */
+    if (register_id >= LGW_SX1302_TOTALREGS) {
+        DEBUG_MSG("ERROR: REGISTER NUMBER OUT OF DEFINED RANGE\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* check if SPI is initialised */
+    if (lgw_spi_target == NULL) {
+        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* get register struct from the struct array */
+    r = sx1302_regs[register_id];
+
+    /* reject write to read-only registers */
+    if (r.rdon == 1){
+        DEBUG_MSG("ERROR: TRYING TO WRITE A READ-ONLY REGISTER\n");
+        return LGW_REG_ERROR;
+    }
+
+    spi_stat += reg_w_align32(lgw_spi_target, LGW_SPI_MUX_TARGET_SX1302, r, reg_value);
+
+    if (spi_stat != LGW_SPI_SUCCESS) {
+        DEBUG_MSG("ERROR: SPI ERROR DURING REGISTER WRITE\n");
+        return LGW_REG_ERROR;
+    } else {
+        return LGW_REG_SUCCESS;
+    }
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Read to a register addressed by name */
+int lgw_sx1302_reg_r(uint16_t register_id, int32_t *reg_value) {
+    int spi_stat = LGW_SPI_SUCCESS;
+    struct lgw_reg_s r;
+
+    /* check input parameters */
+    CHECK_NULL(reg_value);
+    if (register_id >= LGW_SX1302_TOTALREGS) {
+        DEBUG_MSG("ERROR: REGISTER NUMBER OUT OF DEFINED RANGE\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* check if SPI is initialised */
+    if (lgw_spi_target == NULL) {
+        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* get register struct from the struct array */
+    r = sx1302_regs[register_id];
+
+    spi_stat += reg_r_align32(lgw_spi_target, LGW_SPI_MUX_TARGET_SX1302, r, reg_value);
+
+    if (spi_stat != LGW_SPI_SUCCESS) {
+        DEBUG_MSG("ERROR: SPI ERROR DURING REGISTER WRITE\n");
+        return LGW_REG_ERROR;
+    } else {
+        return LGW_REG_SUCCESS;
+    }
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Point to a register by name and do a burst write */
+int lgw_sx1302_reg_wb(uint16_t register_id, uint8_t *data, uint16_t size) {
+    int spi_stat = LGW_SPI_SUCCESS;
+    struct lgw_reg_s r;
+
+    /* check input parameters */
+    CHECK_NULL(data);
+    if (size == 0) {
+        DEBUG_MSG("ERROR: BURST OF NULL LENGTH\n");
+        return LGW_REG_ERROR;
+    }
+    if (register_id >= LGW_SX1302_TOTALREGS) {
+        DEBUG_MSG("ERROR: REGISTER NUMBER OUT OF DEFINED RANGE\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* check if SPI is initialised */
+    if (lgw_spi_target == NULL) {
+        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* get register struct from the struct array */
+    r = sx1302_regs[register_id];
+
+    /* reject write to read-only registers */
+    if (r.rdon == 1){
+        DEBUG_MSG("ERROR: TRYING TO BURST WRITE A READ-ONLY REGISTER\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* do the burst write */
+    spi_stat += lgw_spi_wb(lgw_spi_target, LGW_SPI_MUX_TARGET_SX1302, r.addr, data, size);
+
+    if (spi_stat != LGW_SPI_SUCCESS) {
+        DEBUG_MSG("ERROR: SPI ERROR DURING REGISTER BURST WRITE\n");
+        return LGW_REG_ERROR;
+    } else {
+        return LGW_REG_SUCCESS;
+    }
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* Point to a register by name and do a burst read */
+int lgw_sx1302_reg_rb(uint16_t register_id, uint8_t *data, uint16_t size) {
+    int spi_stat = LGW_SPI_SUCCESS;
+    struct lgw_reg_s r;
+
+    /* check input parameters */
+    CHECK_NULL(data);
+    if (size == 0) {
+        DEBUG_MSG("ERROR: BURST OF NULL LENGTH\n");
+        return LGW_REG_ERROR;
+    }
+    if (register_id >= LGW_SX1302_TOTALREGS) {
+        DEBUG_MSG("ERROR: REGISTER NUMBER OUT OF DEFINED RANGE\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* check if SPI is initialised */
+    if (lgw_spi_target == NULL) {
+        DEBUG_MSG("ERROR: CONCENTRATOR UNCONNECTED\n");
+        return LGW_REG_ERROR;
+    }
+
+    /* get register struct from the struct array */
+    r = sx1302_regs[register_id];
+
+    /* do the burst read */
+    spi_stat += lgw_spi_rb(lgw_spi_target, LGW_SPI_MUX_TARGET_SX1302, r.addr, data, size);
+
+    if (spi_stat != LGW_SPI_SUCCESS) {
+        DEBUG_MSG("ERROR: SPI ERROR DURING REGISTER BURST READ\n");
+        return LGW_REG_ERROR;
+    } else {
+        return LGW_REG_SUCCESS;
     }
 }
 

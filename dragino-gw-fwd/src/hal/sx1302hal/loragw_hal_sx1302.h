@@ -21,31 +21,36 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 
 
 #include "loragw_hal.h"    
+
+/* -------------------------------------------------------------------------- */
+/* --- PUBLIC TYPES --------------------------------------------------------- */
+
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
-int lgw_board_sx1302_setconf(struct lgw_conf_board_s * conf);
-int lgw_rxrf_sx1302_setconf(uint8_t rf_chain, struct lgw_conf_rxrf_s * conf);
-int lgw_rxif_sx1302_setconf(uint8_t if_chain, struct lgw_conf_rxif_s * conf);
-int lgw_txgain_sx1302_setconf(uint8_t rf_chain, struct lgw_tx_gain_lut_s * conf);
+int lgw_board_sx1302_setconf(struct lgw_conf_board_s *conf);
+int lgw_rxrf_sx1302_setconf(uint8_t rf_chain, struct lgw_conf_rxrf_s *conf);
+int lgw_rxif_sx1302_setconf(uint8_t if_chain, struct lgw_conf_rxif_s *conf);
+int lgw_txgain_sx1302_setconf(uint8_t rf_chain, struct lgw_tx_gain_lut_s *conf);
+int lgw_debug_sx1302_setconf(struct lgw_conf_debug_s *conf);
 
 /**
 @brief Configure the precision timestamp
 @param pointer to structure defining the config to be applied
 @return LGW_HAL_ERROR id the operation failed, LGW_HAL_SUCCESS else
 */
-int lgw_timestamp_setconf(struct lgw_conf_timestamp_s * conf);
+int lgw_timestamp_sx1302_setconf(struct lgw_conf_timestamp_s *conf);
 
 /**
 @brief Connect to the LoRa concentrator, reset it and configure it according to previously set parameters
 @return LGW_HAL_ERROR id the operation failed, LGW_HAL_SUCCESS else
 */
-int lgw_start_sx1302(void);
+int lgw_sx1302_start(void);
 
 /**
 @brief Stop the LoRa concentrator and disconnect it
 @return LGW_HAL_ERROR id the operation failed, LGW_HAL_SUCCESS else
 */
-int lgw_stop_sx1302(void);
+int lgw_sx1302_stop(void);
 
 /**
 @brief A non-blocking function that will fetch up to 'max_pkt' packets from the LoRa concentrator FIFO and data buffer
@@ -53,7 +58,7 @@ int lgw_stop_sx1302(void);
 @param pkt_data pointer to an array of struct that will receive the packet metadata and payload pointers
 @return LGW_HAL_ERROR id the operation failed, else the number of packets retrieved
 */
-int lgw_receive_sx1302(uint8_t max_pkt, struct lgw_pkt_rx_s * pkt_data);
+int lgw_sx1302_receive(uint8_t max_pkt, struct lgw_pkt_rx_s * pkt_data);
 
 /**
 @brief Schedule a packet to be send immediately or after a delay depending on tx_mode
@@ -79,7 +84,7 @@ trigger signal. Because there is no way to anticipate the triggering event and
 start the analog circuitry beforehand, that delay must be taken into account in
 the protocol.
 */
-int lgw_send_sx1302(struct lgw_pkt_tx_s * pkt_data);
+int lgw_sx1302_send(struct lgw_pkt_tx_s * pkt_data);
 
 /**
 @brief Give the the status of different part of the LoRa concentrator
@@ -87,7 +92,7 @@ int lgw_send_sx1302(struct lgw_pkt_tx_s * pkt_data);
 @param code is used to return the status code
 @return LGW_HAL_ERROR id the operation failed, LGW_HAL_SUCCESS else
 */
-int lgw_status_sx1302(uint8_t rf_chain, uint8_t select, uint8_t * code);
+int lgw_sx1302_status(uint8_t rf_chain, uint8_t select, uint8_t * code);
 
 /**
 @brief Abort a currently scheduled or ongoing TX

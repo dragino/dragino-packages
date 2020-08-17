@@ -1078,7 +1078,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #define SX1302_REG_CAPTURE_RAM_CLOCK_GATE_OVERRIDE_CLK_OVERRIDE 1042
 #define SX1302_REG_CAPTURE_RAM_DUMMY0_DUMMY0 1043
 
-#define LGW_TOTALREGS 1044
+#define LGW_SX1302_TOTALREGS 1044
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC MACROS -------------------------------------------------------- */
@@ -1412,17 +1412,28 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
 
 /**
+@brief LoRa concentrator register read
+@param register_id register number in the data structure describing registers
+@param reg_value pointer to a variable where to write register read value
+@return status of register operation (LGW_REG_SUCCESS/LGW_REG_ERROR)
+*/
+int lgw_sx1302_reg_r(uint16_t register_id, int32_t* reg_value);
+int lgw_sx1302_reg_w(uint16_t register_id, int32_t reg_value);
+int lgw_sx1302_reg_rb(uint16_t register_id, uint8_t* data, uint16_t size);
+int lgw_sx1302_reg_wb(uint16_t register_id, uint8_t* data, uint16_t size);
+
+/**
 @brief Connect LoRa concentrator by opening SPI link
 @param spidev_path path to the SPI device to be used to connect to the SX1302
 @return status of register operation (LGW_REG_SUCCESS/LGW_REG_ERROR)
 */
-int lgw_connect_sx1302(const char * spidev_path);
+int lgw_sx1302_connect(const char * spidev_path);
 
 /**
 @brief Disconnect LoRa concentrator by closing SPI link
 @return status of register operation (LGW_REG_SUCCESS/LGW_REG_ERROR)
 */
-int lgw_disconnect_sx1302(void);
+int lgw_sx1302_disconnect(void);
 
 #endif
 

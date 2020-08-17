@@ -25,16 +25,12 @@ define Package/$(PKG_NAME)
 $(call Package/$(PKG_NAME)/Default)
     SECTION:=utils
     CATEGORY:=Utilities
-    DEPENDS:=+libftdi1 +libftdi +libprotobuf-c
+	DEPENDS:=+libsqlite3 +libmpsse
 endef
 
 define Package/$(PKG_NAME)/description
   Dragino-gw is a gateway based on 
   a Semtech LoRa multi-channel RF receiver (a.k.a. concentrator).
-endef
-
-define Package/$(PKG_NAME)/extra_provides
-	echo 'libprotobuf-c.so.1';
 endef
 
 define Build/Prepare
@@ -44,24 +40,20 @@ endef
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/lora-gateway
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/inc/* $(1)/usr/include/lora-gateway
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/hal/*.h $(1)/usr/include/lora-gateway
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libloragw/libloragw.a $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/hal/libloragw.a $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/lib
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libttn/obj/libttn-gateway-connector.so $(1)/usr/lib
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libmqtt/libpahomqtt3c.so $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dragino-gw-fwd/dragino_gw_fwd $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/reset_lgw.sh $(1)/usr/bin
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libttn/obj/ttn-gateway-connector_test $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fwd/fwd $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/reset_lgw.sh $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/lora
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/dragino-gw-fwd/*conf.json $(1)/etc/lora
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/global_conf.json $(1)/etc/lora
 	$(INSTALL_DIR) $(1)/etc/lora/cfg
-	$(CP) $(PKG_BUILD_DIR)/dragino-gw-fwd/config/??* $(1)/etc/lora/cfg
+	$(CP) $(PKG_BUILD_DIR)/config/*json* $(1)/etc/lora/cfg
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

@@ -100,7 +100,7 @@ uint32_t timestamp_counter_get(timestamp_counter_t * self, bool pps) {
     int32_t msb;
 
     /* Get the 32MHz timestamp counter - 4 bytes */
-    x = lgw_reg_rb((pps == true) ? SX1302_REG_TIMESTAMP_TIMESTAMP_PPS_MSB2_TIMESTAMP_PPS :
+    x = lgw_sx1302_reg_rb((pps == true) ? SX1302_REG_TIMESTAMP_TIMESTAMP_PPS_MSB2_TIMESTAMP_PPS :
                                    SX1302_REG_TIMESTAMP_TIMESTAMP_MSB2_TIMESTAMP,
                                    &buff[0], 4);
     if (x != LGW_REG_SUCCESS) {
@@ -112,7 +112,7 @@ uint32_t timestamp_counter_get(timestamp_counter_t * self, bool pps) {
         - read MSB again
         - if MSB changed, read the full counter gain
      */
-    x = lgw_reg_r((pps == true) ? SX1302_REG_TIMESTAMP_TIMESTAMP_PPS_MSB2_TIMESTAMP_PPS :
+    x = lgw_sx1302_reg_r((pps == true) ? SX1302_REG_TIMESTAMP_TIMESTAMP_PPS_MSB2_TIMESTAMP_PPS :
                                   SX1302_REG_TIMESTAMP_TIMESTAMP_MSB2_TIMESTAMP,
                                   &msb);
     if (x != LGW_REG_SUCCESS) {
@@ -120,7 +120,7 @@ uint32_t timestamp_counter_get(timestamp_counter_t * self, bool pps) {
         return 0;
     }
     if (buff[0] != (uint8_t)msb) {
-        x = lgw_reg_rb((pps == true) ? SX1302_REG_TIMESTAMP_TIMESTAMP_PPS_MSB2_TIMESTAMP_PPS :
+        x = lgw_sx1302_reg_rb((pps == true) ? SX1302_REG_TIMESTAMP_TIMESTAMP_PPS_MSB2_TIMESTAMP_PPS :
                                        SX1302_REG_TIMESTAMP_TIMESTAMP_MSB2_TIMESTAMP,
                                        &buff[0], 4);
         if (x != LGW_REG_SUCCESS) {
@@ -196,20 +196,20 @@ int timestamp_counter_mode(bool enable_precision_ts, uint8_t max_ts_metrics, uin
     if (enable_precision_ts == false) {
         DEBUG_MSG("INFO: using legacy timestamp\n");
         /* Latch end-of-packet timestamp (sx1301 compatibility) */
-        lgw_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_LEGACY_TIMESTAMP, 0x01);
+        lgw_sx1302_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_LEGACY_TIMESTAMP, 0x01);
     } else {
         DEBUG_PRINTF("INFO: using precision timestamp (max_ts_metrics:%u nb_symbols:%u)\n", max_ts_metrics, nb_symbols);
         /* Latch end-of-preamble timestamp */
-        lgw_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_LEGACY_TIMESTAMP, 0x00);
-        lgw_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_TIMESTAMP_CFG_MAX_TS_METRICS, max_ts_metrics);
+        lgw_sx1302_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_LEGACY_TIMESTAMP, 0x00);
+        lgw_sx1302_reg_w(SX1302_REG_RX_TOP_RX_BUFFER_TIMESTAMP_CFG_MAX_TS_METRICS, max_ts_metrics);
 
         /* LoRa multi-SF modems */
-        lgw_reg_w(SX1302_REG_RX_TOP_TIMESTAMP_ENABLE, 0x01);
-        lgw_reg_w(SX1302_REG_RX_TOP_TIMESTAMP_NB_SYMB, nb_symbols);
+        lgw_sx1302_reg_w(SX1302_REG_RX_TOP_TIMESTAMP_ENABLE, 0x01);
+        lgw_sx1302_reg_w(SX1302_REG_RX_TOP_TIMESTAMP_NB_SYMB, nb_symbols);
 
         /* LoRa service modem */
-        lgw_reg_w(SX1302_REG_RX_TOP_LORA_SERVICE_FSK_TIMESTAMP_ENABLE, 0x01);
-        lgw_reg_w(SX1302_REG_RX_TOP_LORA_SERVICE_FSK_TIMESTAMP_NB_SYMB, nb_symbols);
+        lgw_sx1302_reg_w(SX1302_REG_RX_TOP_LORA_SERVICE_FSK_TIMESTAMP_ENABLE, 0x01);
+        lgw_sx1302_reg_w(SX1302_REG_RX_TOP_LORA_SERVICE_FSK_TIMESTAMP_NB_SYMB, nb_symbols);
     }
 
     return LGW_REG_SUCCESS;
@@ -262,9 +262,9 @@ uint32_t timestamp_counter_correction(int ifmod, uint8_t bandwidth, uint8_t data
 
     /* timestamp correction code, variable delay */
     if (ifmod == IF_LORA_STD) {
-        lgw_reg_r(SX1302_REG_RX_TOP_LORA_SERVICE_FSK_RX_CFG0_DFT_PEAK_EN, &val);
+        lgw_sx1302_reg_r(SX1302_REG_RX_TOP_LORA_SERVICE_FSK_RX_CFG0_DFT_PEAK_EN, &val);
     } else {
-        lgw_reg_r(SX1302_REG_RX_TOP_RX_CFG0_DFT_PEAK_EN, &val);
+        lgw_sx1302_reg_r(SX1302_REG_RX_TOP_RX_CFG0_DFT_PEAK_EN, &val);
     }
     if (val != 0) {
         /* TODO: should we differentiate the mode (FULL/TRACK) ? */

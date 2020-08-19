@@ -45,6 +45,7 @@
 #define IS_LORA_BW(bw)          ((bw == BW_125KHZ) || (bw == BW_250KHZ) || (bw == BW_500KHZ))
 #define IS_LORA_STD_DR(dr)      ((dr == DR_LORA_SF7) || (dr == DR_LORA_SF8) || (dr == DR_LORA_SF9) || (dr == DR_LORA_SF10) || (dr == DR_LORA_SF11) || (dr == DR_LORA_SF12))
 #define IS_LORA_MULTI_DR(dr)    ((dr & ~DR_LORA_MULTI) == 0) /* ones outside of DR_LORA_MULTI bitmask -> not a combination of LoRa datarates */
+#define IS_LORA_DR(dr)          ((dr == DR_LORA_SF5) || (dr == DR_LORA_SF6) || (dr == DR_LORA_SF7) || (dr == DR_LORA_SF8) || (dr == DR_LORA_SF9) || (dr == DR_LORA_SF10) || (dr == DR_LORA_SF11) || (dr == DR_LORA_SF12))
 #define IS_LORA_CR(cr)          ((cr == CR_LORA_4_5) || (cr == CR_LORA_4_6) || (cr == CR_LORA_4_7) || (cr == CR_LORA_4_8))
 
 #define IS_FSK_BW(bw)           ((bw >= 1) && (bw <= 7))
@@ -115,6 +116,9 @@
 #define LGW_RF_RX_BANDWIDTH_250KHZ  1000000     /* for 250KHz channels */
 #define LGW_RF_RX_BANDWIDTH_500KHZ  1100000     /* for 500KHz channels */
 
+#define LGW_RF_RX_FREQ_MIN          100E6
+#define LGW_RF_RX_FREQ_MAX          1E9
+
 #define TX_START_DELAY_DEFAULT  1497 /* Calibrated value for 500KHz BW and notch filter disabled */
 
 /* values available for the 'datarate' parameters */
@@ -184,7 +188,7 @@
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC TYPES --------------------------------------------------------- */
 
-bool lgw_is_started = false;
+extern bool lgw_is_started;
 
 /**
 @enum lgw_model_type_e
@@ -448,6 +452,13 @@ struct lorabo_s {
     @return LGW_HAL_ERROR id the operation failed, LGW_HAL_SUCCESS else
     */
     int (*lgw_txgain_setconf)(uint8_t rf_chain, struct lgw_tx_gain_lut_s *conf);
+
+    /**
+    @brief Configure the precision timestamp
+    @param pointer to structure defining the config to be applied
+    @return LGW_HAL_ERROR id the operation failed, LGW_HAL_SUCCESS else
+    */
+    int (*lgw_timestamp_setconf)(struct lgw_conf_timestamp_s *conf);
 
     /**
     @brief Connect to the LoRa concentrator, reset it and configure it according to previously set parameters

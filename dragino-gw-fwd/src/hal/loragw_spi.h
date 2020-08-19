@@ -52,7 +52,7 @@ Maintainer: Sylvain Miermont
 /* -------------------------------------------------------------------------- */
 /* --- INTERNAL SHARED VARIABLES -------------------------------------------- */
 
-void *lgw_spi_target = NULL; /*! generic pointer to the SPI device */
+extern void *lgw_spi_target; /*! generic pointer to the SPI device */
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */

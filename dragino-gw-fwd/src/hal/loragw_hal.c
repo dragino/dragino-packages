@@ -61,6 +61,11 @@ const char lgw_version_string[] = "Version: " LIBLORAGW_VERSION ";";
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+bool lgw_is_started = false;
+
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 const char* lgw_version_info() {
     return lgw_version_string;
 }

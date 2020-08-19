@@ -33,7 +33,6 @@
 #include <stdint.h>				/* C99 types */
 #include <stdbool.h>			/* bool type */
 #include "loragw_hal.h"
-#include "loragw_gps.h"
 
 // Definitions
 //

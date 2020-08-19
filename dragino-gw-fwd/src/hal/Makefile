@@ -12,14 +12,14 @@ AR := $(CROSS_COMPILE)ar
 
 VPATH := ./ lg02hal sx1301hal sx1302hal
 
-LCFLAGS = $(CFLAGS) -Ilg02hal -Isx1301hal -Isx1302hal -I.
+LCFLAGS = $(CFLAGS) -fPIC -Ilg02hal -Isx1301hal -Isx1302hal -I.
 
 OBJDIR = obj
 INCLUDES = $(wildcard *.h lg02hal/*.h sx1301hal/*.h sx1302hal/*.h)
 
-fobjs = $(OBJDIR)/loragw_hal.o $(OBJDIR)/loragw_gps.o $(OBJDIR)/loragw_reg.o $(OBJDIR)/loragw_spi.native.o $(OBJDIR)/loragw_spi.ftdi.o $(OBJDIR)/loragw_aux.o $(OBJDIR)/loragw_lbt.o $(OBJDIR)/gpio.o $(OBJDIR)/loragw_i2c.o $(OBJDIR)/loragw_debug.o
+fobjs = $(OBJDIR)/loragw_hal.o $(OBJDIR)/loragw_gps.o $(OBJDIR)/loragw_reg.o $(OBJDIR)/loragw_spi.native.o $(OBJDIR)/loragw_spi.ftdi.o $(OBJDIR)/loragw_aux.o $(OBJDIR)/loragw_lbt.o $(OBJDIR)/gpio.o $(OBJDIR)/loragw_i2c.o $(OBJDIR)/loragw_debug.o $(OBJDIR)/tinymt32.o
 
-sx1302objs = $(OBJDIR)/loragw_reg_sx1302.o $(OBJDIR)/loragw_sx1250.o $(OBJDIR)/loragw_sx125x.o $(OBJDIR)/loragw_sx1302.o $(OBJDIR)/loragw_cal.o $(OBJDIR)/loragw_debug.o $(OBJDIR)/loragw_hal.o $(OBJDIR)/loragw_stts751.o $(OBJDIR)/loragw_sx1302_timestamp.o $(OBJDIR)/loragw_sx1302_rx.o
+sx1302objs = $(OBJDIR)/loragw_hal_sx1302.o $(OBJDIR)/loragw_reg_sx1302.o $(OBJDIR)/loragw_sx1250.o $(OBJDIR)/loragw_sx125x.o $(OBJDIR)/loragw_sx1302.o $(OBJDIR)/loragw_cal.o $(OBJDIR)/loragw_hal.o $(OBJDIR)/loragw_stts751.o $(OBJDIR)/loragw_sx1302_timestamp.o $(OBJDIR)/loragw_sx1302_rx.o
 
 sx1301objs = $(OBJDIR)/loragw_hal_sx1301.o $(OBJDIR)/loragw_radio_sx1301.o $(OBJDIR)/loragw_reg_sx1301.o 
 
@@ -73,19 +73,19 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: %.c $(INCLUDES) config.h | $(OBJDIR)
-	$(CC) -c $(LCFLAGS) $< -o $@
+	$(CC) -g -c $(LCFLAGS) $< -o $@
 
 $(OBJDIR)/loragw_sx1301_hal.o: sx1301hal/loragw_sx1301_hal.c $(INCLUDES) sx1301hal/arb_fw.var sx1301hal/agc_fw.var sx1301hal/cal_fw.var config.h | $(OBJDIR)
-	$(CC) -c $(LCFLAGS) $< -o $@
+	$(CC) -g -c $(LCFLAGS) $< -o $@
 
 $(OBJDIR)/loragw_sx1302_hal.o: sx1302hal/loragw_sx1302_hal.c $(INCLUDES) sx1302hal/arb_fw.var sx1302hal/cal_fw.var sx1302hal/agc_fw_sx1250.var sx1302hal/agc_fw_sx1250.val config.h | $(OBJDIR)
-	$(CC) -c $(LCFLAGS) $< -o $@
+	$(CC) -g -c $(LCFLAGS) $< -o $@
 
 $(OBJDIR)/loragw_lg02_hal.o: sx1302hal/loragw_lg02_hal.c $(INCLUDES) config.h | $(OBJDIR)
-	$(CC) -c $(LCFLAGS) $< -o $@
+	$(CC) -g -c $(LCFLAGS) $< -o $@
 
 $(OBJDIR)/loragw_hal.o: loragw_hal.c $(INCLUDES) config.h | $(OBJDIR)
-	$(CC) -c $(LCFLAGS) $< -o $@
+	$(CC) -g -c $(LCFLAGS) $< -o $@
 
 ### static library
 

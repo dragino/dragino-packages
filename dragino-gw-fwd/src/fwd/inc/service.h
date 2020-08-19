@@ -27,7 +27,6 @@
 #ifndef _SERVICE_H
 #define _SERVICE_H
 
-#include "fwd.h"
 #include "gwcfg.h"
 
 /*!

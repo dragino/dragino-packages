@@ -700,7 +700,7 @@ int lgw_sx1302_stop(void) {
 
     DEBUG_MSG("INFO: aborting TX\n");
     for (i = 0; i < LGW_RF_CHAIN_NB; i++) {
-        lgw_abort_tx(i);
+        lgw_abort_sx1302_tx(i);
     }
 
     /* Close log file */

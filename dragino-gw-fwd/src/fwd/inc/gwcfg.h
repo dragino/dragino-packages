@@ -36,6 +36,8 @@
 #include "jitqueue.h"
 #include "stats.h"
 
+#include "loragw_gps.h"
+
 #define DEFAULT_BEACON_FREQ_HZ      869525000
 #define DEFAULT_BEACON_FREQ_NB      1
 #define DEFAULT_BEACON_FREQ_STEP    0
@@ -268,6 +270,7 @@ typedef struct {
 } gw_s;
 
 #define INIT_GW gw_s GW = {   .info.lgwm = 0,                                        \
+                              .hal.board = "LG302",                                  \
                               .hal.mx_concent = PTHREAD_MUTEX_INITIALIZER,           \
                               .hal.mx_xcorr   = PTHREAD_MUTEX_INITIALIZER,           \
                               .hal.xtal_correct_ok = false,                          \

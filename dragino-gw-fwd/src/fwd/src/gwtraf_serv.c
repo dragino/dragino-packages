@@ -38,6 +38,7 @@
 #include "gwtraf_service.h"
 
 #include "loragw_hal.h"
+#include "loragw_aux.h"
 
 DECLARE_GW;
 

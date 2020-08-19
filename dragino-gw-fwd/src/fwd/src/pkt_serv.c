@@ -49,6 +49,7 @@
 #include "mac-header-decode.h"
 
 DECLARE_GW;
+extern struct lorabo_s lorabo;
 
 static uint8_t rx2bw;
 static uint8_t rx2dr;
@@ -120,7 +121,7 @@ static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint3
     lgw_log(LOG_DEBUG, "\n");
 
     pthread_mutex_lock(&GW.hal.mx_concent);
-    lgw_get_instcnt(&current_concentrator_time);
+    lorabo.lgw_get_instcnt(&current_concentrator_time);
     pthread_mutex_unlock(&GW.hal.mx_concent);
     jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], current_concentrator_time, &txpkt, downlink_type);
     lgw_log(LOG_DEBUG, "DEBUG~ [pkt-dwn] DNRX2-> tmst:%u, freq:%u, psize:%u.\n", txpkt.count_us, txpkt.freq_hz, txpkt.size);

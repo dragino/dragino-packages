@@ -5,7 +5,7 @@
  *  | |_| |  _ <  / ___ \ |_| || || |\  | |_| |
  *  |____/|_| \_\/_/   \_\____|___|_| \_|\___/ 
  *
- * Dragino_gw_fwd -- An opensource lora gateway forward 
+ * dragino_gw_fwd -- An opensource lora gateway forward 
  *
  * See http://www.dragino.com for more information about
  * the lora gateway project. Please do not directly contact

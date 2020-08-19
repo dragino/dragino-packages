@@ -78,14 +78,15 @@ volatile bool quit_sig = false;	/* 1 -> application terminates without shutting 
 /* --- PUBLIC DECLARATION ---------------------------------------- */
 uint8_t LOG_PKT = 0;
 uint8_t LOG_TIMERSYNC = 0;
-uint8_t LOG_REPORT = 0;
+uint8_t LOG_REPORT = 1;
 uint8_t LOG_JIT = 0;
 uint8_t LOG_JIT_ERROR = 0;
 uint8_t LOG_BEACON = 0;
-uint8_t LOG_INFO = 0;
-uint8_t LOG_DEBUG = 0;
-uint8_t LOG_WARNING = 0;
-uint8_t LOG_ERROR = 0;
+uint8_t LOG_INFO = 1;
+uint8_t LOG_DEBUG = 1;
+uint8_t LOG_WARNING = 1;
+uint8_t LOG_ERROR = 1;
+uint8_t LOG_MEM = 0;
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC DECLARATION ---------------------------------------- */
@@ -191,6 +192,7 @@ static void usage( void )
     printf("~~~ Available options ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
     printf(" -h  print this help\n");
     printf(" -c <filename>  use config file other than 'global_conf.json'\n");
+    printf(" -d radio module [sx1301, sx1302, sx1308]'\n");
     printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 }
 
@@ -439,7 +441,6 @@ int main(int argc, char *argv[]) {
                 strncpy(lora_radio, optarg, sizeof(lora_radio));
             } 
 
-
             break;
 
         default:
@@ -467,6 +468,7 @@ int main(int argc, char *argv[]) {
         lorabo.lgw_rxif_setconf = lgw_rxif_sx1302_setconf;
         lorabo.lgw_debug_setconf = lgw_debug_sx1302_setconf;
         lorabo.lgw_txgain_setconf = lgw_txgain_sx1302_setconf;
+        lorabo.lgw_timestamp_setconf = lgw_timestamp_sx1302_setconf;
         lorabo.lgw_start = lgw_sx1302_start;
         lorabo.lgw_stop = lgw_sx1302_stop;
         lorabo.lgw_receive = lgw_sx1302_receive;
@@ -483,6 +485,7 @@ int main(int argc, char *argv[]) {
         lorabo.lgw_rxif_setconf = lgw_rxif_sx1301_setconf;
         lorabo.lgw_debug_setconf = NULL;
         lorabo.lgw_txgain_setconf = lgw_txgain_sx1301_setconf;
+        lorabo.lgw_timestamp_setconf = NULL;
         lorabo.lgw_start = lgw_sx1301_start;
         lorabo.lgw_stop = lgw_sx1301_stop;
         lorabo.lgw_receive = lgw_sx1301_receive;
@@ -496,7 +499,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* 创建一个默认的service，用来基本包处理：包解析、包解码、包保存、自定义下发等 */
-    serv_entry = (serv_s*)lgw_malloc(sizeof(serv_entry));
+    serv_entry = (serv_s*)lgw_malloc(sizeof(serv_s));
     if (NULL == serv_entry) {
         lgw_log(LOG_ERROR, "[main] ERROR~ Can't allocate pkt service, EXIT!\n");
         exit(EXIT_FAILURE);
@@ -524,8 +527,8 @@ int main(int argc, char *argv[]) {
     LGW_LIST_INSERT_TAIL(&GW.serv_list, serv_entry, list);
 
     if (access(conf_fname, R_OK) == 0) { /* if there is a global conf, parse it  */
-        if (!parsecfg(conf_fname, &GW)) {
-            lgw_log(LOG_ERROR, "ERROR~ [main] failed to find any configuration file named %s\n", conf_fname);
+        if (parsecfg(conf_fname, &GW)) {
+            lgw_log(LOG_ERROR, "ERROR~ [main] failed to parse configuration file named %s\n", conf_fname);
             exit(EXIT_FAILURE);
         }
     } else {

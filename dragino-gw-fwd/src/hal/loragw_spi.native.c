@@ -54,6 +54,8 @@ Maintainer: Sylvain Miermont
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
 
+void *lgw_spi_target = NULL; /*! generic pointer to the SPI device */
+
 /* SPI initialization and configuration */
 int lgw_spi_open(const char * spidev_path, void **spi_target_ptr) {
     int *spi_device = NULL;

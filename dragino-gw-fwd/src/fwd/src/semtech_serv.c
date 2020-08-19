@@ -44,7 +44,10 @@
 #include "parson.h"
 #include "base64.h"
 
+#include "loragw_aux.h"
+
 DECLARE_GW;
+extern struct lorabo_s lorabo;
 
 static void semtech_pull_down(void* arg);
 static void semtech_push_up(void* arg);
@@ -879,7 +882,7 @@ static void semtech_pull_down(void* arg) {
 
                     /* Insert beacon packet in JiT queue */
                     pthread_mutex_lock(&GW.hal.mx_concent);
-                    lgw_get_instcnt(&current_concentrator_time);
+                    lorabo.lgw_get_instcnt(&current_concentrator_time);
                     pthread_mutex_unlock(&GW.hal.mx_concent);
                     jit_result = jit_enqueue(&GW.tx.jit_queue[0], current_concentrator_time, &beacon_pkt, JIT_PKT_TYPE_BEACON);
                     if (jit_result == JIT_ERROR_OK) {
@@ -1262,7 +1265,7 @@ static void semtech_pull_down(void* arg) {
             /* insert packet to be sent into JIT queue */
             if (jit_result == JIT_ERROR_OK) {
                 pthread_mutex_lock(&GW.hal.mx_concent);
-                lgw_get_instcnt(&current_concentrator_time);
+                lorabo.lgw_get_instcnt(&current_concentrator_time);
                 pthread_mutex_unlock(&GW.hal.mx_concent);
                 jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], current_concentrator_time, &txpkt, downlink_type);
                 if (jit_result != JIT_ERROR_OK) {

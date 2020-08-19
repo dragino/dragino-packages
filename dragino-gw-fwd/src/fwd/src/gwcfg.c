@@ -664,13 +664,7 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
 		count = json_array_get_count(serv_arry);
 		printf("INFO: Found %i servers in array.\n", count);
 		for (i = 0; i < count; i++) {
-            serv_entry = (serv_s*)lgw_malloc(sizeof(serv_entry));
-            if (NULL == serv_entry) {
-                printf("WARNING~ Can't allocates for server, ignored\n");
-                if (try++ < 3) /* total try 3 times */ 
-                    --i;             
-                continue;
-            }
+            serv_entry = (serv_s*)lgw_malloc(sizeof(serv_s));
 
             /* 在这里初始化service */
             serv_entry->list.next = NULL;
@@ -678,13 +672,6 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
 
             /* service network information */
             serv_entry->net = (serv_net_s*)lgw_malloc(sizeof(serv_net_s));
-            if (NULL == serv_entry->net) {
-                printf("WARNING~ Can't allocates for server net struct, ignored\n");
-                if (try++ < 3) /* total try 3 times */ 
-                    --i;             
-                lgw_free(serv_entry);
-                continue;
-            }
             serv_entry->net->sock_up = -1;
             serv_entry->net->sock_down = -1;
             serv_entry->net->push_timeout_half.tv_sec = 0;
@@ -694,6 +681,7 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
             serv_entry->net->pull_interval = DEFAULT_PULL_INTERVAL;
             
             /* about service report information */
+            serv_entry->report = (report_s*)lgw_malloc(sizeof(report_s));
             serv_entry->report->report_ready = false;
             serv_entry->report->stat_interval = DEFAULT_STAT_INTERVAL;
 
@@ -721,6 +709,8 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
 
             if (try == 3) { /* 等于3时，sem的初始化已经失败了3次 */
                 printf("WARNING, Can't initializes the unnamed semaphore of service, ignore this element.\n");
+                lgw_free(serv_entry->net);
+                lgw_free(serv_entry->report);
                 lgw_free(serv_entry);
                 continue;
             }
@@ -771,6 +761,8 @@ static int parse_gateway_configuration(const char* conf_file, gw_s* gw) {
                 serv_entry->net->addr[sizeof serv_entry->net->addr - 1] = '\0'; /* ensure string termination */
                 printf("INFO: Found a server name is \"%s\"\n", str);
             } else {  //如果没有设置服务地址，就释放内存，读入下一条记录
+                lgw_free(serv_entry->net);
+                lgw_free(serv_entry->report);
                 lgw_free(serv_entry);
                 continue;
             }
@@ -915,7 +907,7 @@ static int parse_debug_configuration(const char * conf_file) {
 }
 
 int parsecfg(const char *cfgfile, gw_s* gw) {
-    int ret;
+    int ret = 0;
     if (!strncmp(gw->hal.board, "LG301", 5)) {
         ret = parse_SX130x_configuration(cfgfile, gw);
     } else if (!strncmp(gw->hal.board, "LG302", 5)) { 
@@ -929,6 +921,6 @@ int parsecfg(const char *cfgfile, gw_s* gw) {
     } else 
         ret = parse_SX130x_configuration(cfgfile, gw);
     ret |= parse_gateway_configuration(cfgfile, gw);
-    return (ret);
+    return ret;
 }
 

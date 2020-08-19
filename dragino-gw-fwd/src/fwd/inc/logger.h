@@ -40,6 +40,7 @@ extern uint8_t LOG_INFO;
 extern uint8_t LOG_WARNING;
 extern uint8_t LOG_ERROR;
 extern uint8_t LOG_DEBUG;
+extern uint8_t LOG_MEM;
 
 #define MSG(args...) printf(args) /* message that is destined to the user */
 

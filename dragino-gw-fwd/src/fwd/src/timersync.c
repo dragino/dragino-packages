@@ -20,6 +20,7 @@ Maintainer: Michael Coracin
 #include <pthread.h>
 
 #include "logger.h"
+#include "gwcfg.h"
 #include "timersync.h"
 #include "loragw_hal.h"
 #include "loragw_reg.h"
@@ -59,6 +60,7 @@ extern bool quit_sig;
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
 
 DECLARE_GW;
+extern struct lorabo_s lorabo;
 
 int get_concentrator_time(struct timeval *concent_time, struct timeval unix_time) {
     struct timeval local_timeval;
@@ -106,7 +108,7 @@ void thread_timersync(void) {
 
         /* Get current concentrator counter value (1MHz) */
         pthread_mutex_lock(&GW.hal.mx_concent);
-        lgw_get_trigcnt(&sx1301_timecount);
+        lorabo.lgw_get_trigcnt(&sx1301_timecount);
         pthread_mutex_unlock(&GW.hal.mx_concent);
         concentrator_timeval.tv_sec = sx1301_timecount / 1000000UL;
         concentrator_timeval.tv_usec = sx1301_timecount - (concentrator_timeval.tv_sec * 1000000UL);

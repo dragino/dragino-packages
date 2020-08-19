@@ -23,7 +23,7 @@
  * \brief memory management routines
  *
  * This file should never be \#included directly, it is included
- * by dragino_gw_fwd.h.
+ * by fwd.h.
  */
 
 #ifdef __cplusplus
@@ -32,7 +32,8 @@ extern "C" {
 
 #ifndef _LGW_MM_H
 #define _LGW_MM_H
-/* IWYU pragma: private, include "dragino_gw_fwd.h" */
+
+/* IWYU pragma: private, include "fwd.h" */
 
 void *lgw_std_malloc(size_t size) attribute_malloc;
 void *lgw_std_calloc(size_t nmemb, size_t size) attribute_malloc;
@@ -45,14 +46,13 @@ void __lgw_free(void *ptr, const char *file, int lineno, const char *func);
 void *__lgw_realloc(void *ptr, size_t size, const char *file, int lineno, const char *func);
 char *__lgw_strdup(const char *s, const char *file, int lineno, const char *func) attribute_malloc;
 char *__lgw_strndup(const char *s, size_t n, const char *file, int lineno, const char *func) attribute_malloc;
-int __lgw_asprintf(const char *file, int lineno, const char *func, char **strp, const char *format, ...)
-	__attribute__((format(printf, 5, 6)));
-int __lgw_vasprintf(char **strp, const char *format, va_list ap, const char *file, int lineno, const char *func)
-	__attribute__((format(printf, 2, 0)));
+int __lgw_asprintf(const char *file, int lineno, const char *func, char **strp, const char *format, ...) __attribute__((format(printf, 5, 6)));
+int __lgw_vasprintf(char **strp, const char *format, va_list ap, const char *file, int lineno, const char *func) __attribute__((format(printf, 2, 0)));
 
 /* Provide our own definition for lgw_free */
 
-#define lgw_free(a)  free(a)
+#define lgw_free(a)  \
+    __lgw_free((a), __FILE__, __LINE__, __PRETTY_FUNCTION__);
 
 /*!
  * \brief A wrapper for malloc()

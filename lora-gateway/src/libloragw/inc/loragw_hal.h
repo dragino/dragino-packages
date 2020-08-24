@@ -415,6 +415,12 @@ const char* lgw_version_info(void);
 */
 uint32_t lgw_time_on_air(struct lgw_pkt_tx_s *packet);
 
+/**
+@brief Return sf value or bw value 
+*/
+int32_t lgw_sf_getval(int x);
+int32_t lgw_bw_getval(int x);
+
 #endif
 
 /* --- EOF ------------------------------------------------------------------ */

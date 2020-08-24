@@ -690,9 +690,9 @@ void rxlora(radiodev *dev, uint8_t rxmode)
 
 bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
 
-    int i, rssicorr;
+    uint8_t i, rssicorr;
 
-    int irqflags = readReg(spidev, REG_IRQ_FLAGS);
+    uint8_t irqflags = readReg(spidev, REG_IRQ_FLAGS);
 
     // clean all IRQ
     writeReg(spidev, REG_IRQ_FLAGS, 0xFF);
@@ -987,4 +987,15 @@ int32_t bw_toval(int x) {
         case 7800: return BW_7K8HZ;
         default: return -1;
     }
+}
+
+/*
+    save strcpy
+    result is always '\0' terminated
+    jstrncpy(s, "1234",4) copies "123" + '\0'
+*/
+void jstrncpy(char *sDest, const char *sSrc, int iDestLength)
+{
+    strncpy(sDest, sSrc, iDestLength);
+    sDest[iDestLength - 1] = '\0';      // if "sDest" too short allways '\0' at end
 }

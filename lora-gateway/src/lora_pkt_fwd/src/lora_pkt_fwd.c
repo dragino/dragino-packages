@@ -497,6 +497,13 @@ static int parse_SX1301_configuration(const char * conf_file) {
             MSG_DEBUG(DEBUG_WARNING, "WARNING: Data type for lbt_cfg.enable seems wrong, please check\n");
         }
         if (lbtconf.enable == true) {
+            val = json_object_get_value(conf_lbt_obj, "isftdi"); /* fetch value (if possible) */
+            if (json_value_get_type(val) == JSONBoolean) {
+                lbtconf.isftdi = (bool)json_value_get_boolean(val);
+                MSG_DEBUG(DEBUG_WARNING, "INFO~ using FTDI device for lbt scan\n");
+            } else {
+                MSG_DEBUG(DEBUG_WARNING, "INFO~ using local device for lbt scan\n");
+            }
             val = json_object_get_value(conf_lbt_obj, "rssi_target"); /* fetch value (if possible) */
             if (json_value_get_type(val) == JSONNumber) {
                 lbtconf.rssi_target = (int8_t)json_value_get_number(val);

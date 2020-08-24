@@ -32,11 +32,15 @@ Maintainer: Michael Coracin
 #include <unistd.h>     /* getopt access */
 #include <stdlib.h>     /* rand */
 
+#include <time.h>      
+#include <sys/time.h>
+
 #include "loragw_aux.h"
 #include "loragw_reg.h"
+#include "loragw_spi.h"
 #include "loragw_hal.h"
 #include "loragw_radio.h"
-#include "loragw_fpga.h"
+#include "loragw_sx1276_fsk.h"
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS & CONSTANTS ------------------------------------------- */
@@ -46,8 +50,16 @@ Maintainer: Michael Coracin
 
 #define DEFAULT_SX127X_RSSI_OFFSET -1
 
+#define LGW_MIN_NOTCH_FREQ      126000U /* 126 KHz */
+#define LGW_MAX_NOTCH_FREQ      250000U /* 250 KHz */
+#define LGW_DEFAULT_NOTCH_FREQ  129000U /* 129 KHz */
+
+#define SPI_LBT_PATH    "/dev/spidev2.0"
+
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES (GLOBAL) ------------------------------------------- */
+
+void *lgw_lbt_target = NULL; /*! generic pointer to the LBT device */
 
 /* signal handling variables */
 struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
@@ -60,6 +72,8 @@ static int quit_sig = 0; /* 1 -> application terminates without shutting down th
 static void sig_handler(int sigio);
 
 void usage (void);
+
+static uint64_t difftimespec(struct timespec* end, struct timespec* begin);
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
@@ -79,6 +93,7 @@ void usage(void) {
     printf(" -f <float> frequency in MHz of the first LBT channel\n");
     printf(" -o <int>   offset in dB to be applied to the SX127x RSSI [-128..127]\n");
     printf(" -r <int>   target RSSI: signal strength target used to detect if the channel is clear or not [-128..0]\n");
+    printf(" -d <int>   use ftdi device or not [0, 1]\n");
     printf(" -s <uint>  scan time in µs for all 8 LBT channels [128,5000]\n");
 }
 
@@ -94,18 +109,20 @@ int main(int argc, char **argv)
     double f1 = 0.0;
     uint32_t f_init = 0; /* in Hz */
     uint32_t f_start = 0; /* in Hz */
-    uint16_t loop_cnt = 0;
     int8_t rssi_target_dBm = -80;
     uint16_t scan_time_us = 128;
-    uint32_t timestamp;
     uint8_t rssi_value;
+    int16_t rssi;
     int8_t rssi_offset = DEFAULT_SX127X_RSSI_OFFSET;
-    int32_t val, val2;
-    int channel;
-    uint32_t freq_offset;
+    uint64_t freq_reg;
+    bool lbt_isftdi = true;
+    struct timespec start;
+    struct timespec end;
+    uint32_t time_us;
+    struct timeval current_unix_time;
 
     /* parse command line options */
-    while ((i = getopt (argc, argv, "h:f:s:r:o:")) != -1) {
+    while ((i = getopt (argc, argv, "h:f:s:r:o:d:")) != -1) {
         switch (i) {
             case 'h':
                 usage();
@@ -152,6 +169,19 @@ int main(int argc, char **argv)
                     rssi_offset = (int8_t)xi;
                 }
                 break;
+            case 'd':
+                i = sscanf(optarg, "%i", &xi);
+                if (i != 1) {
+                    MSG("ERROR: rssi_target must be 0 or 1\n");
+                    usage();
+                    return EXIT_FAILURE;
+                } else {
+                    if (xi > 0)
+                        lbt_isftdi = true;
+                    else
+                        lbt_isftdi = false;
+                }
+                break;
             default:
                 MSG("ERROR: argument parsing use -h option for help\n");
                 usage();
@@ -170,7 +200,7 @@ int main(int argc, char **argv)
     sigaction(SIGTERM, &sigact, NULL);
 
     /* Connect to concentrator */
-    i = lgw_connect(false, LGW_DEFAULT_NOTCH_FREQ);
+    i = lgw_connect(false, 126000);
     if (i != LGW_REG_SUCCESS) {
         MSG("ERROR: lgw_connect() did not return SUCCESS\n");
         return EXIT_FAILURE;
@@ -185,35 +215,63 @@ int main(int argc, char **argv)
         MSG("ERROR: LBT start frequency %u is not supported (f_init=%u)\n", f_start, f_init);
         return EXIT_FAILURE;
     }
-    MSG("FREQ: %u\n", f_start);
+    MSG("INFO: CUR_FREQ = %u, target_rssi = %d\n", f_start, rssi_target_dBm);
 
-    /* Configure SX127x and read few RSSI points */
-    lgw_setup_sx127x(isftdi, f_init, MOD_FSK, LGW_SX127X_RXBW_100K_HZ, rssi_offset); /* 200KHz LBT channels */
-    for (i = 0; i < 100; i++) {
-        lgw_sx127x_reg_r(isftdi, 0x11, &rssi_value); /* 0x11: RegRssiValue */
-        MSG("SX127x RSSI:%i dBm\n", -(rssi_value/2));
-        wait_ms(10);
-    }
+    MSG("lbt_isftdi = %s\n", lbt_isftdi ? "YES" : "NO");
 
-    /* Configure LBT */
-    val = -2*(rssi_target_dBm);
-    MSG("RSSI_TARGET = %d\n", val);
-    if (val != (-2*rssi_target_dBm)) {
-        MSG("ERROR: failed to read back RSSI target register value\n");
+    if (lbt_isftdi)
+        i = lgw_ft_spi_open(&lgw_lbt_target);
+    else
+        i = lgw_spi_open(&lgw_lbt_target, SPI_LBT_PATH);
+
+    if (i != LGW_SPI_SUCCESS) {
+        MSG("ERROR CONNECTING LBT TARGET\n");
         return EXIT_FAILURE;
     }
 
-    /* Start test */
-    while ((quit_sig != 1) && (exit_sig != 1)) {
-        MSG("~~~~\n");
-        for (channel = 0; channel < LBT_CHANNEL_FREQ_NB; channel++) {
-            /* Select LBT channel */
+    /* Configure SX127x and read few RSSI points */
+    xi = lgw_setup_sx127x(lbt_isftdi, f_start, MOD_FSK, LGW_SX127X_RXBW_100K_HZ, rssi_offset); /* 200KHz LBT channels */
+    if (xi != LGW_REG_SUCCESS) {
+        MSG("ERROR~ Failed to configure SX127x for LBT\n");
+        return -1;
+    }
+    /*
+    for (i = 0; i < 100; i++) {
+        lgw_sx127x_reg_r(isftdi, 0x11, &rssi_value); 
+        MSG("SX127x RSSI:%i dBm\n", -(rssi_value/2));
+        wait_ms(10);
+    }
+    */
 
-            /* Get last instant when the selected channel was free */
+    while (!exit_sig && !quit_sig) {
+        for (i = 0; i < 8; i++) {
+        //for (i = 0; i < 0xFF; i++) {
+            xi = lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_PLLHOP, 1 << 7);  //FastHopOn
+            //freq_reg = ((uint64_t)lbt_start_freq << 19) / (uint64_t)32000000;
+            freq_reg = ((uint64_t)(f_start + i*200000) << 19) / (uint64_t)32000000;
+            xi |= lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFMSB, (freq_reg >> 16) & 0xFF);
+            xi |= lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFMID, (freq_reg >> 8) & 0xFF);
+            xi |= lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_FRFLSB, freq_reg & 0xFF);
+            if (xi != LGW_REG_SUCCESS) {
+                MSG("ERROR: can't set freq=%u\n", f_start + i*200000);
+                wait_us(20);
+            }
+            wait_ms(1000);
+
+            clock_gettime(CLOCK_MONOTONIC, &start);
+            end = start;
+            while (difftimespec(&end, &start) < scan_time_us) {
+                xi = lgw_sx127x_reg_r(lbt_isftdi, SX1276_REG_RSSIVALUE, &rssi_value);
+                if (xi != LGW_REG_SUCCESS)
+                    continue;
+                rssi = -(rssi_value >> 1);
+                gettimeofday(&current_unix_time, NULL);
+                time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
+                MSG("%d: %u => chan = %u, rssi = %d\n", i, time_us, i*200000 + f_start, rssi);
+                MSG("********************************************************************\n");
+                clock_gettime(CLOCK_MONOTONIC, &end);
+            }
         }
-
-        loop_cnt += 1;
-        wait_ms(400);
     }
 
     /* close SPI link */
@@ -225,6 +283,13 @@ int main(int argc, char **argv)
 
     MSG("INFO: Exiting LoRa Gateway v1.5 LBT test successfully\n");
     return EXIT_SUCCESS;
+}
+
+static uint64_t difftimespec(struct timespec* end, struct timespec* begin) {
+    uint64_t x;   
+    x = 1E-3 * (end->tv_nsec - begin->tv_nsec);
+    x += 1E6 * (end->tv_sec - begin->tv_sec);
+    return x;
 }
 
 /* --- EOF ------------------------------------------------------------------ */

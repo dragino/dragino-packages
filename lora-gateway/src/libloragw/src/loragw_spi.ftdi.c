@@ -5,7 +5,6 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 /* -------------------------------------------------------------------------- */
 /* --- DEPENDANCIES --------------------------------------------------------- */
 
-#include <stdint.h>		/* C99 types */
 #include <stdio.h>		/* printf fprintf */
 #include <stdlib.h>		/* malloc free */
 #include <string.h>		/* memcpy */
@@ -15,6 +14,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 
 #include "loragw_spi.h"
 #include "loragw_hal.h"
+#include "loragw_aux.h"
 
 #define  VID          0x0403
 #define  PID          0x6010
@@ -64,16 +64,20 @@ int lgw_ft_spi_open(void **spi_target_ptr) {
 	}
 	
 	/*it resets the SX1276 */
-	a = PinHigh(mpsse, GPIOL0);
 	b = PinLow(mpsse, GPIOL0);
+    wait_ms(10);
+	a = PinHigh(mpsse, GPIOL0);
 
 	if ((a != MPSSE_OK) || (b != MPSSE_OK)) {
 		DEBUG_MSG("ERROR: IMPOSSIBLE TO TOGGLE GPIOL1/ADBUS5\n");
 		return LGW_SPI_ERROR;
 	}
 	
-	DEBUG_PRINTF("SPI port opened and configured ok\ndesc: %s\nPID: 0x%04X\nVID: 0x%04X\nclock: %d\nLibmpsse version: 0x%02X\n", GetDescription(mpsse), GetPid(mpsse), GetVid(mpsse), GetClock(mpsse), Version());
+
+    DEBUG_PRINTF("SPI port opened and configured ok!\ndesc:%s, PID:0x%04X, VID:0x%04X, clock:%d, Libmpsse version: 0x%02X\n", GetDescription(mpsse), GetPid(mpsse), GetVid(mpsse), GetClock(mpsse), Version());
+
 	*spi_target_ptr = (void *)mpsse;
+
 	return LGW_SPI_SUCCESS;
 }
 
@@ -124,9 +128,14 @@ int lgw_ft_spi_w(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target,
 	pthread_mutex_lock(&mx_spi);
 
 	/* MPSSE transaction */
+    /*
 	a = Start(mpsse);
 	b = FastWrite(mpsse, (char *)out_buf, command_size);
 	c = Stop(mpsse);
+    */
+	a = Start(mpsse);
+	Transfer(mpsse, (char *)out_buf, command_size);
+	b = Stop(mpsse);
 
 	/* unlock USB bus */
 	pthread_mutex_unlock(&mx_spi);
@@ -207,12 +216,19 @@ int lgw_ft_spi_r(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target,
 /* transaction time: 3.7ms for 2500 data bytes @6MHz, 1kB chunks */
 /* transaction time: 0.5ms for 16 data bytes @6MHz, 1kB chunks */
 
-int ftdi_sx127x_reset(void* spi_target) {
+int ftdi_sx127x_reset(void* spi_target, bool invert) {
 	struct mpsse_context *mpsse = spi_target;
     int a, b;
 
-	a = PinHigh(mpsse, GPIOL0);
-	b = PinLow(mpsse, GPIOL0);
+    if (!invert) {
+        b = PinLow(mpsse, GPIOL0);
+        wait_ms(10);
+        a = PinHigh(mpsse, GPIOL0);
+    } else {
+        a = PinHigh(mpsse, GPIOL0);
+        wait_ms(10);
+        b = PinLow(mpsse, GPIOL0);
+    }
 	if ((a != MPSSE_OK) || (b != MPSSE_OK)) {
 		DEBUG_MSG("ERROR: reset sx127x error!\n");
 		return LGW_SPI_ERROR;

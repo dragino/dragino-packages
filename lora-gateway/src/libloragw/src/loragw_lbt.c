@@ -209,6 +209,7 @@ int lbt_start(void) {
         lgw_spi_close(lgw_lbt_target);
     }
 
+    DEBUG_PRINTF("lbt_isftdi = %s\n", lbt_isftdi ? "YES" : "NO");
     if (lbt_isftdi)
         spi_stat = lgw_ft_spi_open(&lgw_lbt_target);
     else
@@ -284,15 +285,14 @@ static bool lbt_scan(uint64_t frequency, uint16_t scan_time_us) {
 }
 
 void lbt_run_rssi_scan(void* exitsig) {
-    int i, j, x;
+    int i, x;
     bool* stopsig = (bool*) exitsig;
     uint8_t rssival = 0;
     int16_t rssi = 0;
     struct timespec start;
     struct timespec end;
-    uint32_t time_us;
-    struct timeval current_unix_time;
-    bool rssi_int_timout;
+    //uint32_t time_us;
+    //struct timeval current_unix_time;
     bool lbt_free;
 
     uint32_t freq_reg;
@@ -308,7 +308,6 @@ void lbt_run_rssi_scan(void* exitsig) {
         for (i = 0; i < LBT_CHANNEL_FREQ_NB; i++) {
         //for (i = 0; i < 0xFF; i++) {
             lbt_free = true;
-            rssi_int_timout = false;
 
             x = lgw_sx127x_reg_w(lbt_isftdi, SX1276_REG_PLLHOP, 1 << 7);  //FastHopOn
             //freq_reg = ((uint64_t)lbt_start_freq << 19) / (uint64_t)32000000;
@@ -365,7 +364,7 @@ void lbt_run_rssi_scan(void* exitsig) {
                 //time_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec;
                 //DEBUG_PRINTF("%d: %u => chan = %u, rssi = %d\n", i, time_us, i*100000 + lbt_start_freq, rssi);
                 if( rssi > lbt_rssi_target_dBm ) {
-                    //DEBUG_PRINTF("%d: %u => chan = %u, rssi = %d\n", i, time_us, lbt_channel_cfg[i].freq_hz, rssi);
+                    DEBUG_PRINTF("%d:  => chan = %u, rssi = %d\n", i, lbt_channel_cfg[i].freq_hz, rssi);
                     //DEBUG_MSG("*******************************************************************\n");
                     lbt_free = false;
                     lbt_chan_free[i] = false;

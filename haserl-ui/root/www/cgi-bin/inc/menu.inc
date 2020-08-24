@@ -17,7 +17,8 @@
 
 	<% # Set up LoRa menu for board type
 	board=$(cat /var/iot/board)
-	if [ $board == "LG08" ]; then
+	if [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ]; then
+	#if [ "$board" == "LG08" ] || [ "$board" == "LG08P" ]; then
 	%>
   <div class="dropdown"> <!-- LoRa Parameter -->
     <button class="dropbtn">LoRa <span class="fas fa-caret-down"></span></button>
@@ -44,6 +45,9 @@
   </div>
   <% else %>  
     <a href="/cgi-bin/lorawan.has">LoRaWAN</a>
+	
+	<a href="/cgi-bin/http-client.has">HTTP</a>
+	
   <% fi %>
 
 
@@ -55,17 +59,15 @@
       <a href="/cgi-bin/iot-cert.has">Certificates</a>
     </div>
   </div> 
-
-  <div class="dropdown"> <!-- TCP -->
-    <button class="dropbtn">TCP <span class="fas fa-caret-down"></span></button>
-    <div class="dropdown-content">
-      <a href="/cgi-bin/tcp-client.has">TCP Client</a>
-      <a href="/cgi-bin/tcp-chan.has">Channels</a>
-    </div>
-  </div> 
-
-  <a href="/cgi-bin/http-client.has">HTTP</a>
-
+  
+	<div class="dropdown"> <!-- TCP -->
+		<button class="dropbtn">TCP <span class="fas fa-caret-down"></span></button>
+		<div class="dropdown-content">
+			<a href="/cgi-bin/tcp-client.has">TCP Client</a>
+			<a href="/cgi-bin/tcp-chan.has">Channels</a>
+		</div>
+	</div> 
+  
   <a href="/cgi-bin/custom.has">Custom</a>
   
  <div class="dropdown"> <!-- System -->

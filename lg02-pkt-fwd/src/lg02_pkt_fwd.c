@@ -62,7 +62,7 @@
 #define MIN_LORA_PREAMB	6 /* minimum Lora preamble length for this application */
 #define STD_LORA_PREAMB	8
 
-#define TX_BUFF_SIZE	512
+#define JSON_BUFF_SIZE	1024
 #define STATUS_SIZE	1024
 
 #define PUSH_PATH   "/var/iot/push"
@@ -85,9 +85,9 @@ static bool fwd_nocrc_pkt = false; /* packets with NO PAYLOAD CRC are NOT forwar
 /* network configuration variables */
 static uint64_t lgwm = 0; /* Lora gateway MAC address */
 static char provider[16] = "provider";
-static char server[64] = {'\0'}; /* address of the server (host name or IPv4/IPv6) */
-static char port[8] = "port"; /* server port for upstream traffic */
-static char dwport[8] = "dwport"; /* server port for downstream traffic */
+static char server[64] = "server_address"; /* address of the server (host name or IPv4/IPv6) */
+static char port[8] = "upp"; /* server port for upstream traffic */
+static char dwport[8] = "dpp"; /* server port for downstream traffic */
 static char serv_port_down[8] = "1700"; /* server port for downstream traffic */
 static char serv_port_up[8] = "1700"; /* server port for upstream traffic */
 static int keepalive_time = DEFAULT_KEEPALIVE; /* send a PULL_DATA request every X seconds, negative = disabled */
@@ -558,14 +558,7 @@ int main(int argc, char *argv[])
     /* load configuration */
     strcpy(uci_config_file, "/etc/config/gateway");
 
-    if (!get_config("general", provider, 16)){
-        strcpy(provider, "ttn");  
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option provider=%s\n", provider);
-    }
-
-    snprintf(server, sizeof(server), "%s_server", provider); 
-
-    if (!get_config("general", server, sizeof(server))){ /*set default:router.eu.thethings.network*/
+    if (!get_config("server1", server, sizeof(server))){ /*set default:router.eu.thethings.network*/
         strcpy(server, "router.us.thethings.network");  
     }
 
@@ -575,14 +568,14 @@ int main(int argc, char *argv[])
     }
     */
 
-    if (!get_config("general", port, 8)){
+    if (!get_config("server1", port, 8)){
         strcpy(port, "1700");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
     }
 
     strcpy(serv_port_up, port);
 
-    if (!get_config("general", dwport, 8)){
+    if (!get_config("server1", dwport, 8)){
         strcpy(dwport, "1700");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
     }
@@ -922,7 +915,7 @@ int main(int argc, char *argv[])
     char fetch_timestamp[28]; /* timestamp as a text string */
 
     /* data buffers */
-    uint8_t buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
+    uint8_t buff_up[JSON_BUFF_SIZE]; /* buffer to compose the upstream packet */
     int buff_index;
 
     /* protocol variables */
@@ -962,15 +955,16 @@ int main(int argc, char *argv[])
                  buff_up[2] = token_l;
                  buff_index = 12; /* 12-byte header */
 
-                 j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":%.1f", fetch_timestamp, tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxdev->cr, pktrx.snr);
+                 j = snprintf((char *)(buff_up + buff_index), JSON_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%d\",\"lsnr\":%.1f", fetch_timestamp, tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxdev->cr, pktrx.snr);
 
                  buff_index += j;
 
-                 j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%.0f,\"size\":%u", pktrx.rssi, pktrx.size);
+                 j = snprintf((char *)(buff_up + buff_index), JSON_BUFF_SIZE - buff_index, ",\"rssi\":%.0f,\"size\":%u", pktrx.rssi, pktrx.size);
                          
                  buff_index += j;
 
-                 memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9); buff_index += 9;
+                 memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9); 
+                 buff_index += 9;
                          
                  j = bin_to_b64((uint8_t *)pktrx.payload, pktrx.size, (char *)(buff_up + buff_index), 341); /* 255 bytes = 340 chars in b64 + null char */
 
@@ -1628,7 +1622,7 @@ void thread_push(void) {
                 MSG_DEBUG(DEBUG_INFO, "INFO~ [push] look file : %s\n", ptr->d_name);
 
                 if ((fp = fopen(push_file, "r")) == NULL) {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ open %s error\n, ptr->d_name");
+                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ open %s error\n", ptr->d_name);
                     continue;
                 }
 

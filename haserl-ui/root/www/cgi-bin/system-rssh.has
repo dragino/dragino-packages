@@ -21,7 +21,7 @@
 <%# --- Process the form submission --- %>
 <%
 # Save parameters
-	if [ $FORM_BUTTON == "Save" ]; then
+	if [ "$FORM_BUTTON" == "Save" ]; then
 		uci set rssh.rssh.host_id="$FORM_HOST_ID"
 		uci set rssh.rssh.host_addr="$FORM_HOST_ADDR"
 		uci set rssh.rssh.host_port="$FORM_HOST_PORT"
@@ -41,7 +41,7 @@
 	fi
 	
 # Activate RSSH connection now
-	if [ $FORM_BUTTON == "Connect" ]; then
+	if [ "$FORM_BUTTON" == "Connect" ]; then
 		uci set rssh.rssh.host_id="$FORM_HOST_ID"
 		uci set rssh.rssh.host_addr="$FORM_HOST_ADDR"
 		uci set rssh.rssh.host_port="$FORM_HOST_PORT"
@@ -53,19 +53,19 @@
   fi
 
 # De-Activate RSSH connection now
-	if [ $FORM_BUTTON == "Disconnect" ]; then
+	if [ "$FORM_BUTTON" == "Disconnect" ]; then
 		/etc/init.d/DR_enable_rssh.sh stop
   fi
 
 # Generate new keys
-	if [ $FORM_BUTTON == "Generate" ]; then
+	if [ "$FORM_BUTTON" == "Generate" ]; then
     rm /etc/dropbear/id_dropbear
     rm /etc/dropbear/id_rsa.pub
     dropbearkey -f /etc/dropbear/id_dropbear -t rsa > /dev/null
     dropbearkey -y -f /etc/dropbear/id_dropbear | grep -v "Public key" | grep -v "Fingerprint" > /etc/dropbear/id_rsa.pub
   fi
 
-	if [ $FORM_BUTTON == "SetDefault" ]; then
+	if [ "$FORM_BUTTON" == "SetDefault" ]; then
 		# Set User ID
 		host_id=$default_host_id
 		uci set rssh.rssh.host_id=$default_host_id

@@ -4,7 +4,7 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "Upload" ]; then
+	if [ "$FORM_BUTTON" == "Upload" ]; then
 		if test -n "$HASERL_uploadfile_path"; then 
 		  filename=$FORM_uploadfile_name
 		  savedfile=$HASERL_uploadfile_path
@@ -43,7 +43,7 @@
       <td colspan="2"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload"></td>
       <td colspan="17">
 
-    <% if [ $FORM_BUTTON == "Upload" ]; then %>
+    <% if [ "$FORM_BUTTON" == "Upload" ]; then %>
       <p>
       You uploaded a file named <b><% echo -n $filename %></b>
       <br>
@@ -66,11 +66,11 @@
       <td colspan="1"></td>
       <td colspan="19">
     <%
-    	if [ $FORM_BUTTON == "Proceed" ]; then
+    	if [ "$FORM_BUTTON" == "Proceed" ]; then
 		%>
 				<p class="impact">*** Sysupgrade starting now... </p>
 			<%				
-				if [ $FORM_SETTINGS_ENABLE == "checked" ]; then
+				if [ "$FORM_SETTINGS_ENABLE" == "checked" ]; then
 					echo "Configuration settings will be retained."
 					settings=" "
 				else

@@ -4,7 +4,7 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 
 		uci set network.cellular.apn="$FORM_APN"
 		uci set network.cellular.dialnumber="$FORM_DIALNUMBER"
@@ -22,7 +22,7 @@
 		uci commit network
 	fi
 
-	if [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		# Set up Cellular WAN 
 		if [ "$FORM_CELL_ENABLE" == "checked" ]; then
 			uci set network.cellular.auto="1"
@@ -48,14 +48,14 @@
   
   cell_enable="0"
   cell_disabled="$(uci -q get network.cellular.auto)"
-  if [ $cell_disabled == "0" ]; then
+  if [ "$cell_disabled" == "0" ]; then
   	cell_enable="0"
   else
   	cell_enable="checked"
   fi
   
   cell_backup=$(uci -q get network.cellular.backup)
-  if [ $cell_backup == "1" ]; then
+  if [ "$cell_backup" == "1" ]; then
   	cell_backup="checked"
   fi
   

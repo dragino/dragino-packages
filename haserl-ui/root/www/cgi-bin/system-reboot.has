@@ -22,7 +22,7 @@
     <tr>
       <td>
     <%
-    	if [ $FORM_BUTTON == "REBOOT" ]; then
+    	if [ "$FORM_BUTTON" == "REBOOT" ]; then
 			echo "<p style="font-weight: bold;">*** Rebooting... </p>"
 			echo "<p style="font-weight: bold;">*** Please wait 2 minutes and connect again. </p>"
     		reboot
@@ -40,7 +40,7 @@
     <tr>
       <td>
     <%
-    	if [ $FORM_BUTTON == "RESET" ]; then
+    	if [ "$FORM_BUTTON" == "RESET" ]; then
 			echo "<p style="font-weight: bold;">*** RESET to Factory Default... </p>"
 			echo "<p style="font-weight: bold;">*** Please wait 2 minutes and connect again. </p>"
     		mtd -r erase rootfs_data

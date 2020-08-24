@@ -6,7 +6,7 @@
 
 <%# --- Process the form submission --- %>
 <%
-  if [ $FORM_BUTTON == "ADD_KEY" ];then
+  if [ "$FORM_BUTTON" == "ADD_KEY" ];then
 	if [ -n "$FORM_DEV_ADDR" ] && [ -n "$FORM_APPSKEY" ] && [ -n "$FORM_NWKSKEY" ];then
 		dev_addr=$(echo $FORM_DEV_ADDR | tr -d " " | tr '[a-z]' '[A-Z]')
 		appskey=$(echo $FORM_APPSKEY | tr -d " " | tr '[a-z]' '[A-Z]')
@@ -18,11 +18,11 @@
 	fi 
   fi
   
-  if [ $FORM_BUTTON == "DELETE" ];then
+  if [ "$FORM_BUTTON" == "DELETE" ];then
 		sqlite3 $sql_file "DELETE FROM abpdevs where devaddr = '$FORM_DEVADDR';"
   fi
 
-  if [ $FORM_BUTTON == "SAVE" ]; then
+  if [ "$FORM_BUTTON" == "SAVE" ]; then
 	if [ "$FORM_ENABLE" == "checked" ]; then
 		uci set gateway.general.maccrypto=1
 	else
@@ -41,7 +41,7 @@
 <% 
 	abp_decrypt="$(uci -q get gateway.general.maccrypto)"
 
-	if [ $abp_decrypt == "1" ]; then
+	if [ "$abp_decrypt" == "1" ]; then
 		abp_decrypt="checked"
 	else
 		abp_decrypt="0"

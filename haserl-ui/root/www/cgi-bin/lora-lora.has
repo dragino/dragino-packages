@@ -4,7 +4,8 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
+
 		uci set gateway.general.DEB="$FORM_DEBUG"
 		uci set gateway.general.stat="$FORM_KEEPALIVE"
 		uci set gateway.general.RFPOWER="$FORM_RFPOWER"
@@ -38,7 +39,17 @@
 		if [ "$FORM_GWCFG" == "US" ]; then
 			uci set gateway.general.subband="$FORM_SUBBAND_US"
 		fi
-		 
+
+		# Static GPS 
+		if [ "$FORM_FAKE_GPS" == "checked" ]; then
+			uci set gateway.general.fake_gps=1
+		else
+			uci set gateway.general.fake_gps=0
+		fi
+		uci set gateway.general.LAT="$FORM_LAT"
+		uci set gateway.general.LON="$FORM_LON"
+		uci set gateway.general.ALT="$FORM_ALT"
+		
 		# Use the FORM_RADIO0_FREQ to check if the customized form is provided
 		if [ -n "$FORM_RADIO0_FREQ" ]; then
 			if [ "$FORM_RADIO0_ENABLE" == "checked" ]; then
@@ -97,18 +108,19 @@
 		server_type=$(uci get gateway.general.server_type)
 		relay_enable=$FORM_RELAY_ENABLE
 
-		if [ $server_type == "relay" ] && [[ "$relay_enable" != "checked" ]]; then
+		if [ "$server_type" == "relay" ] && [[ "$relay_enable" != "checked" ]]; then
 			uci set gateway.general.server_type="disabled"
 			uci commit gateway
 		fi
 
-		if [ $relay_enable == "checked" ]; then
+		if [ "$relay_enable" == "checked" ]; then
 			uci set gateway.general.server_type="relay"
 			uci commit gateway
 		fi
 	fi
+	
 
-  if [ $FORM_BUTTON == "Save&Apply" ]; then
+  if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		killall -q mosquitto_sub  # Remove any remaining MQTT subscribe process
     /etc/init.d/lora_gw reload > /dev/null
     sleep 2
@@ -116,7 +128,7 @@
 		rm /var/iot/status
   fi
 
-  if [ $FORM_BUTTON == "Disable" ]; then
+  if [ "$FORM_BUTTON" == "Disable" ]; then
 		uci set gateway.general.server_type="disabled"
 		uci commit gateway
 		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
@@ -132,12 +144,12 @@
 <%# --- Get the variables for the HTML page --- %>
 <% 
 	server_type="$(uci -q get gateway.general.server_type)"
-	if [ $server_type == "relay" ]; then
+	if [ "$server_type" == "relay" ]; then
 		relay_enable="checked"
 	else
 		relay_enable="0"
 	fi
-	
+
 	debug="$(uci -q get gateway.general.DEB)"
 	keepalive="$(uci -q get gateway.general.stat)"
 	rfpower="$(uci -q get gateway.general.RFPOWER)"
@@ -163,19 +175,30 @@
 	txprlen="$(uci -q get gateway.radio2.TXPRLEN)"
 	txsync="$(uci -q get gateway.radio2.TXSYNC)"
 	
+	# Get Fake GPS info
+	fake_gps="$(uci -q get gateway.general.fake_gps)"
+	if [ $fake_gps == "1" ]; then
+		fake_gps="checked"
+	else
+		fake_gps="0"
+	fi
+	lat="$(uci -q get gateway.general.LAT)"
+	lon="$(uci -q get gateway.general.LON)"
+	alt="$(uci -q get gateway.general.ALT)"
+	
 	# Get Band and Sub-Band
 	gwcfg="$(uci -q get gateway.general.gwcfg)"
 	subband="$(uci -q get gateway.general.subband)"
 	
 	radio0_enable="$(uci -q get gateway.general.radio0_enable)"
-	if [ $radio0_enable == "1" ]; then
+	if [ "$radio0_enable" == "1" ]; then
 		radio0_enable="checked"
 	else
 		radio0_enable="0"
 	fi
 	radio0_freq="$(uci -q get gateway.general.radio0_freq)"
 	radio0_tx="$(uci -q get gateway.general.radio0_tx)"	
-	if [ $radio0_tx == "1" ]; then
+	if [ "$radio0_tx" == "1" ]; then
 		radio0_tx="checked"
 	else
 		radio0_tx="0"
@@ -184,14 +207,14 @@
 	radio0_txfreq_max="$(uci -q get gateway.general.radio0_txfreq_max)"
 	
 	radio1_enable="$(uci -q get gateway.general.radio1_enable)"	
-	if [ $radio1_enable == "1" ]; then
+	if [ "$radio1_enable" == "1" ]; then
 		radio1_enable="checked"
 	else
 		radio1_enable="0"
 	fi	
 	radio1_freq="$(uci -q get gateway.general.radio1_freq)"
 	radio1_tx="$(uci -q get gateway.general.radio1_tx)"	
-	if [ $radio1_tx == "1" ]; then
+	if [ "$radio1_tx" == "1" ]; then
 		radio1_tx="checked"
 	else
 		radio1_tx="0"
@@ -211,7 +234,7 @@
 	done
 
 	lorachan_enable="$(uci -q get gateway.general.lorachan_enable)"	
-	if [ $lorachan_enable == "1" ]; then
+	if [ "$lorachan_enable" == "1" ]; then
 		lorachan_enable="checked"
 	else
 		lorachan_enable="0"
@@ -261,7 +284,7 @@
 <form id="lora" action="<% echo -n $SCRIPT_NAME %>" method="POST">
 
 	<table class="configTable">
-		<tr><td colspan="18"></td></tr> <!--Determines the column widths-->
+		<tr><td colspan="18"><h3>   </h3></td></tr>
 		<tr>
 			<td colspan="1"></td>
 			<td colspan="4"><label for="debug">Debug Level</label></td>
@@ -273,8 +296,9 @@
 			  <option value="10" >Test</option>
 			</select> </td>
 			<td colspan="10"></td>
-			</tr>
+		</tr>
 		<script>document.getElementById("debug").value="<% echo -n $debug %>";</script>
+		
 	</table>
 
 	<div id="div1" <% echo -n $disp1 %> >
@@ -677,6 +701,38 @@
 	</table>  
 	</div>  <!-- End of custom div -->
   </div> <!-- End of div3 -->
+
+	<table class="configTable">
+	<tr><td colspan="18"><h3>Static GPS coordinates <span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+	<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    <p> Use static GPS will ignore coordinates gets from GPS module </p>
+    <p style="text-align: center;"><br>[Close]</p>
+	</div>
+	
+	</h3>
+	</td>
+	</tr>
+	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="4"><label for="fake_gps">Enable Static GPS</label></td>
+		<td colspan="3"><input type="checkbox" name="FAKE_GPS" value="checked" <% echo -n $fake_gps %>>
+		<td colspan="2"></td>
+		<td colspan="3"><label for="ALT">Altitude (m)</label></td>
+		<td colspan="3"><input type="text" name="ALT" maxlength="32" VALUE=<% echo -n $alt %> pattern="[0-9]{1,8}" ></td>
+		<td colspan=""></td>
+	</tr>
+
+	<tr>	
+		<td colspan="1"></td>
+		<td colspan="4"><label for="LAT">Latitude</label></td>
+		<td colspan="3"><input type="text" name="LAT" maxlength="32" VALUE=<% echo -n $lat %> pattern="^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$" ></td>
+		<td colspan="2"></td>
+		<td colspan="3"><label for="LON">Longitude</label></td>
+		<td colspan="3"><input type="text" name="LON" maxlength="32" VALUE=<% echo -n $lon %> pattern="^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$" ></td>
+		<td colspan="1"></td>
+	</tr>
+	</table> 
  
 <table class="configTable">
 	<tr class="rowSpacer"></tr>
@@ -738,6 +794,14 @@ function displaySubband(){
 	document.getElementById("custom").style.display = "inline";
 	}
 }
+function showHelp1() {
+document.getElementById("helptext1").style.display="inline";
+}
+
+function hideHelp() {
+document.getElementById("helptext1").style.display="none";
+}
+
 </script>
 
 </div> <!-- End of page div -->

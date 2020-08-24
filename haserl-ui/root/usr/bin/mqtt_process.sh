@@ -183,7 +183,7 @@ if [ "$sub_enable" != "0" ];then
 	fi
 
 	msubcount=$(ps | grep -c mosquitto_sub)
-	if [ $msubcount == "2" ]; then
+	if [ "$msubcount" == "2" ]; then
 		subflag="1"
 		echo "Subscribe Running." > /var/iot/status
 	fi 
@@ -233,7 +233,7 @@ if [ "$pub_enable" == "0" ]; then
 	exit # Nothing more to do
 else
 	# Status
-	if [ $subflag == "1" ]; then
+	if [ "$subflag" == "1" ]; then
 		echo "Pub, Sub" > /var/iot/status
 	else
 		echo "Publish" > /var/iot/status
@@ -324,7 +324,7 @@ do
 					# Send the File
 					if [ ! -z $DECODER ]; then
 						PUB_FLAG="-m "
-						if [ $DECODER == "ASCII" ]; then
+						if [ "$DECODER" == "ASCII" ]; then
 							#Send As ASCII String
 							rssi=`hexdump -v -e '11/1 "%c"'  -n 16 /var/iot/channels/$channel | tr A-Z a-z`
 							payload=`xxd -p /var/iot/channels/$channel`

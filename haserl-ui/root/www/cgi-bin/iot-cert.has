@@ -4,10 +4,10 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "Upload" ]; then
+	if [ "$FORM_BUTTON" == "Upload" ]; then
 		if test -n "$HASERL_uploadfile_path"; then 
 		  filename=$FORM_uploadfile_name
-		  if [ $filename != "" ]; then
+		  if [ "$filename" != "" ]; then
 		  	savedfile=$HASERL_uploadfile_path
 		  	cp $savedfile /etc/iot/cert/$filename  # Store the cert file
 		  else
@@ -43,7 +43,7 @@
     <td colspan="1"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload"></td>
     <td colspan="6">
 
-    <% if [ $FORM_BUTTON == "Upload" ]; then %>
+    <% if [ "$FORM_BUTTON" == "Upload" ]; then %>
       <p>
       You uploaded a file named:&nbsp; <% echo -n $filename %>
       <br>
@@ -59,7 +59,7 @@
   
   <tr><td colspan="8"><h3> Delete file </h3></td></tr>
     <%
-    	if [ $FORM_BUTTON == "Confirm" ]; then
+    	if [ "$FORM_BUTTON" == "Confirm" ]; then
     		delfile=$(cat /tmp/delfile.txt)
     		if [ $delfile != "" ]; then
     			rm "/etc/iot/cert/$delfile"
@@ -78,7 +78,7 @@
 
 
     <%
-    	if [ $FORM_BUTTON == "Delete" ]; then
+    	if [ "$FORM_BUTTON" == "Delete" ]; then
     		delfile=$FORM_DELFILE
     		if [[ "$delfile" != "" ]]; then
     			echo $delfile > /tmp/delfile.txt

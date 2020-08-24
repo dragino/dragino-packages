@@ -9,15 +9,15 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "SetPassword" ]; then
+	if [ "$FORM_BUTTON" == "SetPassword" ]; then
 		((echo $FORM_PASSWORD; sleep 1; echo $FORM_PASSWORD) | passwd $login; /etc/init.d/uhttpd restart) &
 	fi
 
-	if [ $FORM_BUTTON == "SetAdminPassword" ]; then
+	if [ "$FORM_BUTTON" == "SetAdminPassword" ]; then
 		((echo $FORM_PASSWORD2; sleep 1; echo $FORM_PASSWORD2) | passwd admin; /etc/init.d/uhttpd restart) &
 	fi
 	
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		echo $FORM_TIMEZONE > /etc/TZ
 		uci set system.@system[0].timezone=$FORM_TIMEZONE
 		uci commit system
@@ -33,7 +33,8 @@
 		else
 			uci set firewall.ssh.dest="DISABLE"
 		fi
-		uci commit firewall restart
+		uci commit firewall
+		/etc/init.d/firewall restart > /dev/null
 	fi
 %>
 
@@ -43,14 +44,14 @@
 	timezone=$(uci get system.@system[0].timezone)
 	
 	ssh_enabled="$(uci -q get firewall.ssh.dest)"
-  if [ $ssh_enabled == "lan" ]; then
+  if [ "$ssh_enabled" == "lan" ]; then
   	ssh_tick="checked"
   else
     ssh_tick="0"
   fi
 
 	http_enabled="$(uci -q get firewall.http.dest)"
-  if [ $http_enabled == "lan" ]; then
+  if [ "$http_enabled" == "lan" ]; then
   	http_tick="checked"
   else
     http_tick="0"
@@ -100,7 +101,7 @@
 	</table>
 </div>
 
-<% if [ $login == "root" ]; then %>
+<% if [ "$login" == "root" ]; then %>
 	<script>
 	document.getElementById("divpwd").style.visibility = "visible";
 	document.getElementById("divpwd").style.display = "inline";

@@ -4,9 +4,9 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 
-    if [ $FORM_CHANGE == "checked" ]; then
+    if [ "$FORM_CHANGE" == "checked" ]; then
       change="1"
     else 
       change="0"
@@ -21,7 +21,7 @@
 		uci commit tcp_client 
 	fi
 	
-  if [ $FORM_BUTTON == "Save&Apply" ]; then
+  if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set gateway.general.server_type="tcpudp"
 		uci commit gateway
 		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
@@ -43,7 +43,7 @@
 	port="$(uci -q get tcp_client.general.server_port)"
 	change="$(uci -q get tcp_client.general.update_onchange)"
 
-  if [ $change == "1" ]; then
+  if [ "$change" == "1" ]; then
     change="checked"
   else
     change="0"

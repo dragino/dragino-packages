@@ -63,7 +63,7 @@
 #define MIN_LORA_PREAMB	6 /* minimum Lora preamble length for this application */
 #define STD_LORA_PREAMB	8
 
-#define TX_BUFF_SIZE	512
+#define TX_BUFF_SIZE	1024
 #define STATUS_SIZE	1024
 
 #define PUSH_PATH   "/var/iot/push"
@@ -87,9 +87,9 @@ static bool fwd_nocrc_pkt = false; /* packets with NO PAYLOAD CRC are NOT forwar
 /* network configuration variables */
 static uint64_t lgwm = 0; /* Lora gateway MAC address */
 static char provider[16] = "provider";
-static char server[64] = {'\0'}; /* address of the server (host name or IPv4/IPv6) */
-static char port[8] = "port"; /* server port for upstream traffic */
-static char dwport[8] = "dwport"; /* server port for upstream traffic */
+static char server[64] = "server_address"; /* address of the server (host name or IPv4/IPv6) */
+static char port[8] = "upp"; /* server port for upstream traffic */
+static char dwport[8] = "dpp"; /* server port for upstream traffic */
 static char serv_port_down[8] = "1700"; /* server port for downstream traffic */
 static char serv_port_up[8] = "1700"; /* server port for upstream traffic */
 static int keepalive_time = DEFAULT_KEEPALIVE; /* send a PULL_DATA request every X seconds, negative = disabled */
@@ -479,32 +479,19 @@ int main(int argc, char *argv[])
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
     /* load configuration */
-    strcpy(uci_config_file, "/etc/config/gateway");
+    JSTRNCPY(uci_config_file, "/etc/config/gateway");
 
-    if (!get_config("general", provider, 16)){
-        strcpy(provider, "ttn");  
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option provider=%s\n", provider);
+    if (!get_config("server1", server, sizeof(server))){ /*set default:router.eu.thethings.network*/
+        JSTRNCPY(server, "router.us.thethings.network");
     }
 
-    snprintf(server, sizeof(server), "%s_server", provider); 
-
-    if (!get_config("general", server, sizeof(server))){ /*set default:router.eu.thethings.network*/
-        strcpy(server, "router.us.thethings.network");  
-    }
-
-    /*
-    if (!get_config("general", ttn_s, 64)){
-        strcpy(ttn_s, "router.us.thethings.network");  
-    }
-    */
-
-    if (!get_config("general", port, 8)){
-        strcpy(port, "1700");
+    if (!get_config("server1", port, 8)){
+        JSTRNCPY(port, "1700");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
     }
 
-    if (!get_config("general", dwport, 8)){
-        strcpy(dwport, "1700");
+    if (!get_config("server1", dwport, 8)){
+        JSTRNCPY(dwport, "1700");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option port=%s\n", port);
     }
 
@@ -512,22 +499,22 @@ int main(int argc, char *argv[])
     strcpy(serv_port_down, dwport);
 
     if (!get_config("general", email, 32)){
-        strcpy(email, "dragino@dragino.com");
+        JSTRNCPY(email, "dragino@dragino.com");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option email=%s\n", email);
     }
 
     if (!get_config("general", gatewayid, 64)){
-        strcpy(gatewayid, "a84041ffff16c21c");      /*set default:router.eu.thethings.network*/
+        JSTRNCPY(gatewayid, "a84041ffff16c21c");      /*set default:router.eu.thethings.network*/
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option gatewayid=%s\n", gatewayid);
     } 
 
     if (!get_config("general", LAT, 16)){
-        strcpy(LAT, "0");
+        JSTRNCPY(LAT, "0");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option lat=%s\n", LAT);
     }
 
     if (!get_config("general", LON, 16)){
-        strcpy(LON, "0");
+        JSTRNCPY(LON, "0");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option lon=%s\n", LON);
     }
 
@@ -537,46 +524,46 @@ int main(int argc, char *argv[])
 
     /* server_type : 1.lorawan  2.relay  3.mqtt  4.tcpudp */
     if (!get_config("general", server_type, 16)){
-        strcpy(server_type, "lorawan");
+        JSTRNCPY(server_type, "lorawan");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option server_type=%s\n", server_type);
     }
 
     /* power for transimit form 5 to 20 */
     if (!get_config("general", rf_power, 8)){
-        strcpy(rf_power, "16");
+        JSTRNCPY(rf_power, "16");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rf_power=%s\n", rf_power);
     }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     if (!get_config("radio1", rf_freq, 16)){
-        strcpy(rf_freq, "902320000"); /* default frequency*/
+        JSTRNCPY(rf_freq, "902320000"); /* default frequency*/
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxfreq=%s\n", rf_freq);
     }
 
     if (!get_config("radio1", rfsf, 8)){
-        strcpy(rfsf, "7");
+        JSTRNCPY(rfsf, "7");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxsf=%s\n", rfsf);
     }
 
     if (!get_config("radio1", rfcr, 8)){
-        strcpy(rfcr, "5");
+        JSTRNCPY(rfcr, "5");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option coderate=%s\n", rfcr);
     }
     
     if (!get_config("radio1", rfbw, 8)){
-        strcpy(rfbw, "125000");
+        JSTRNCPY(rfbw, "125000");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxbw=%s\n", rfbw);
     }
 
     if (!get_config("radio1", rfprlen, 8)){
-        strcpy(rfprlen, "8");
+        JSTRNCPY(rfprlen, "8");
         MSG_LOG(DEBUG_UCI, "UCIINFO~ get option rxprlen=%s\n", rfprlen);
     }
 
     if (!get_config("radio1", syncwd, 8)){
-        strcpy(syncwd, "52");  //Value 0x34 is reserved for LoRaWAN networks
-        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword=0x%02x\n", syncwd);
+        JSTRNCPY(syncwd, "52");  //Value 0x34 is reserved for LoRaWAN networks
+        MSG_LOG(DEBUG_UCI, "UCIINFO~ get option syncword=0x%02x\n", atoi(syncwd));
     }
 
     switch (atoi(logdebug)) {
@@ -643,7 +630,7 @@ int main(int argc, char *argv[])
     rfdev->syncword = atoi(syncwd);
     rfdev->invertio = 0;
     rfdev->power = atoi(rf_power);
-    strcpy(rfdev->desc, "RF_RADIO");
+    JSTRNCPY(rfdev->desc, "RF_RADIO");
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -663,7 +650,7 @@ int main(int argc, char *argv[])
     net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (lgwm>>32)));
     net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  lgwm  ));
 
-    MSG_LOG(DEBUG_INFO, "INFO~ LoRa Gateway Start: Service=%s, GatawayEUI=%s, Freq=%ld, prlen=%d, sf=%d, syncwd=0x%02x, CR=4/%d, BW=%ld\n", server_type, gatewayid,rfdev->freq, rfdev->prlen, rfdev->sf, rfdev->syncword,rfdev->cr,rfdev->bw);
+    MSG_LOG(DEBUG_INFO, "INFO~ LoRa Gateway Start: Service=%s, GatawayEUI=%s, Up Port = %s, Down Port= %s, Freq=%ld, prlen=%d, sf=%d, syncwd=0x%02x, CR=4/%d, BW=%ld\n", server_type, gatewayid, serv_port_up , serv_port_down,rfdev->freq, rfdev->prlen, rfdev->sf, rfdev->syncword,rfdev->cr,rfdev->bw);
 
 
     /* export the lora parameters for the luci ui */
@@ -738,7 +725,7 @@ int main(int argc, char *argv[])
     *(uint32_t *)(buff_up + 8) = net_mac_l;
 
     while (!exit_sig && !quit_sig) {
-        MSG_LOG(DEBUG_INFO, "INFO~ receive thread test if radio inuse: %d\n", radio_inuse); /* there is very strange, if no this line, process can't loop after jit send a message */
+        MSG_LOG(DEBUG_JIT, "INFO~ receive thread test if radio inuse: %d\n", radio_inuse); /* there is very strange, if no this line, process can't loop after jit send a message */
         if (radio_inuse) {
             wait_ms(10);
             continue;
@@ -749,7 +736,7 @@ int main(int argc, char *argv[])
         rxlora(rfdev, RXMODE_SINGLE);  /* star lora single receive mode */
 	    clock_gettime(CLOCK_MONOTONIC, &start_time);
 
-	    start_time = end_time;
+	    end_time = start_time;
         /* receive timeout, if no readdigital or readerror? */
         while ((digitalRead(rfdev->dio[1]) != 1) && ((int)difftimespec(end_time, start_time) < RXRF_TIMEOUT_S)) {                 
             clock_gettime(CLOCK_MONOTONIC, &end_time);
@@ -1584,7 +1571,7 @@ void thread_push(void) {
                         continue;
                 }
 
-                strcpy(txpkt.payload, str);
+                JSTRNCPY(txpkt.payload, str);
 
                 txpkt.size = (uint16_t)strlen(txpkt.payload);
 

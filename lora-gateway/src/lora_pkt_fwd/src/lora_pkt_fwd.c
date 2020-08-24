@@ -277,11 +277,11 @@ static char debug_level_char[16] = "debug_level";
 static uint8_t debug_level_uint = 1;
 
 /* fport option for filter upmsg */
-static char fportnum[16] = "fportnum";
+static char fportnum[16] = "fport_filter";
 static int fport_num = 0;
 
 /* devaddr option for filter upmsg */
-static char devaddr_mask[32] = "devaddr";
+static char devaddr_mask[32] = "devaddr_filter";
 static uint32_t dev_addr_mask = 0;
 
 /* Decryption loramac payload */
@@ -432,7 +432,7 @@ static int parse_SX1301_configuration(const char * conf_file) {
     int i;
     char param_name[32]; /* used to generate variable parameter names */
     const char *str; /* used to store string value from JSON object */
-    const char conf_obj_name[] = "SX1301_conf";
+    const char conf_obj_name[] = "SX130x_conf";
     JSON_Value *root_val = NULL;
     JSON_Object *conf_obj = NULL;
     JSON_Object *conf_lbt_obj = NULL;
@@ -819,10 +819,12 @@ static int parse_gateway_configuration(const char * conf_file) {
     const char conf_obj_name[] = "gateway_conf";
     JSON_Value *root_val;
     JSON_Object *conf_obj = NULL;
+    JSON_Object *serv_obj = NULL;
+    JSON_Array *serv_arry = NULL;
     JSON_Value *val = NULL; /* needed to detect the absence of some fields */
     const char *str; /* pointer to sub-strings in the JSON data */
     unsigned long long ull = 0;
-
+	
     /* try to parse JSON */
     root_val = json_parse_file_with_comments(conf_file);
     if (root_val == NULL) {
@@ -847,63 +849,78 @@ static int parse_gateway_configuration(const char * conf_file) {
         MSG_DEBUG(DEBUG_INFO, "INFO~ gateway MAC address is configured to %016llX\n", ull);
     }
 
-    /* server hostname or IP address (optional) */
-    str = json_object_get_string(conf_obj, "server_address");
-    if (str != NULL) {
-        strncpy(serv_addr, str, sizeof serv_addr);
-        MSG_DEBUG(DEBUG_INFO, "INFO~ server hostname or IP address is configured to \"%s\"\n", serv_addr);
-    }
+	
+// 开始配置Server info	
+	serv_arry = json_object_get_array(conf_obj, "servers");
+	if (serv_arry != NULL) {
+		serv_obj = json_array_get_object(serv_arry, 0);
+				
+		/* server hostname or IP address (optional) */
+		str = json_object_get_string(serv_obj, "server_address");
+		if (str != NULL) {
+			strncpy(serv_addr, str, sizeof serv_addr);
+			MSG_DEBUG(DEBUG_INFO, "INFO~ server hostname or IP address is configured to \"%s\"\n", serv_addr);
+		}
 
-    /* get up and down ports (optional) */
-    val = json_object_get_value(conf_obj, "serv_port_up");
-    if (val != NULL) {
-        snprintf(serv_port_up, sizeof serv_port_up, "%u", (uint16_t)json_value_get_number(val));
-        MSG_DEBUG(DEBUG_INFO, "INFO~ upstream port is configured to \"%s\"\n", serv_port_up);
-    }
-    val = json_object_get_value(conf_obj, "serv_port_down");
-    if (val != NULL) {
-        snprintf(serv_port_down, sizeof serv_port_down, "%u", (uint16_t)json_value_get_number(val));
-        MSG_DEBUG(DEBUG_INFO, "INFO~ downstream port is configured to \"%s\"\n", serv_port_down);
-    }
+		/* get up and down ports (optional) */
+		val = json_object_get_value(serv_obj, "serv_port_up");
+		if (val != NULL) {
+			snprintf(serv_port_up, sizeof serv_port_up, "%u", (uint16_t)json_value_get_number(val));
+			MSG_DEBUG(DEBUG_INFO, "INFO~ upstream port is configured to \"%s\"\n", serv_port_up);
+		}
+		val = json_object_get_value(serv_obj, "serv_port_down");
+		if (val != NULL) {
+			snprintf(serv_port_down, sizeof serv_port_down, "%u", (uint16_t)json_value_get_number(val));
+			MSG_DEBUG(DEBUG_INFO, "INFO~ downstream port is configured to \"%s\"\n", serv_port_down);
+		}
 
-    /* get keep-alive interval (in seconds) for downstream (optional) */
-    val = json_object_get_value(conf_obj, "keepalive_interval");
-    if (val != NULL) {
-        keepalive_time = (int)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO~ downstream keep-alive interval is configured to %u seconds\n", keepalive_time);
-    }
+		/* get keep-alive interval (in seconds) for downstream (optional) */
+		val = json_object_get_value(serv_obj, "keepalive_interval");
+		if (val != NULL) {
+			keepalive_time = (int)json_value_get_number(val);
+			MSG_DEBUG(DEBUG_INFO, "INFO~ downstream keep-alive interval is configured to %u seconds\n", keepalive_time);
+		}
 
-    /* get interval (in seconds) for statistics display (optional) */
-    val = json_object_get_value(conf_obj, "stat_interval");
-    if (val != NULL) {
-        stat_interval = (unsigned)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO~ statistics display interval is configured to %u seconds\n", stat_interval);
-    }
+		/* get interval (in seconds) for statistics display (optional) */
+		val = json_object_get_value(conf_obj, "stat_interval");
+		if (val != NULL) {
+			stat_interval = (unsigned)json_value_get_number(val);
+			MSG_DEBUG(DEBUG_INFO, "INFO~ statistics display interval is configured to %u seconds\n", stat_interval);
+		}
 
-    /* get time-out value (in ms) for upstream datagrams (optional) */
-    val = json_object_get_value(conf_obj, "push_timeout_ms");
-    if (val != NULL) {
-        push_timeout_half.tv_usec = 500 * (long int)json_value_get_number(val);
-        MSG_DEBUG(DEBUG_INFO, "INFO~ upstream PUSH_DATA time-out is configured to %u ms\n", (unsigned)(push_timeout_half.tv_usec / 500));
-    }
+		/* get time-out value (in ms) for upstream datagrams (optional) */
+		val = json_object_get_value(serv_obj, "push_timeout_ms");
+		if (val != NULL) {
+			push_timeout_half.tv_usec = 500 * (long int)json_value_get_number(val);
+			MSG_DEBUG(DEBUG_INFO, "INFO~ upstream PUSH_DATA time-out is configured to %u ms\n", (unsigned)(push_timeout_half.tv_usec / 500));
+		}
 
-    /* packet filtering parameters */
-    val = json_object_get_value(conf_obj, "forward_crc_valid");
-    if (json_value_get_type(val) == JSONBoolean) {
-        fwd_valid_pkt = (bool)json_value_get_boolean(val);
-    }
-    MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with a valid CRC will%s be forwarded\n", (fwd_valid_pkt ? "" : " NOT"));
-    val = json_object_get_value(conf_obj, "forward_crc_error");
-    if (json_value_get_type(val) == JSONBoolean) {
-        fwd_error_pkt = (bool)json_value_get_boolean(val);
-    }
-    MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with a CRC error will%s be forwarded\n", (fwd_error_pkt ? "" : " NOT"));
-    val = json_object_get_value(conf_obj, "forward_crc_disabled");
-    if (json_value_get_type(val) == JSONBoolean) {
-        fwd_nocrc_pkt = (bool)json_value_get_boolean(val);
-    }
-    MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with no CRC will%s be forwarded\n", (fwd_nocrc_pkt ? "" : " NOT"));
-
+		/* packet filtering parameters */
+		val = json_object_get_value(serv_obj, "forward_crc_valid");
+		if (json_value_get_type(val) == JSONBoolean) {
+			fwd_valid_pkt = (bool)json_value_get_boolean(val);
+		}
+		MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with a valid CRC will%s be forwarded\n", (fwd_valid_pkt ? "" : " NOT"));
+		val = json_object_get_value(serv_obj, "forward_crc_error");
+		if (json_value_get_type(val) == JSONBoolean) {
+			fwd_error_pkt = (bool)json_value_get_boolean(val);
+		}
+		MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with a CRC error will%s be forwarded\n", (fwd_error_pkt ? "" : " NOT"));
+		val = json_object_get_value(serv_obj, "forward_crc_disabled");
+		if (json_value_get_type(val) == JSONBoolean) {
+			fwd_nocrc_pkt = (bool)json_value_get_boolean(val);
+		}
+		MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with no CRC will%s be forwarded\n", (fwd_nocrc_pkt ? "" : " NOT"));
+		
+		
+	
+    } else 
+        printf("WARNING: No service offer.\n");
+	
+/////以上为服务器配置	
+	
+	
+	
     /* GPS module TTY path (optional) */
     str = json_object_get_string(conf_obj, "gps_tty_path");
     if (str != NULL) {
@@ -1420,7 +1437,7 @@ int main(void)
     
     /* Fport filter configure */
 
-    if (!get_config("general", fportnum, sizeof(fportnum)))
+    if (!get_config("server1", fportnum, sizeof(fportnum)))
         fport_num = 0;
     else
         fport_num = atoi(fportnum);
@@ -1431,7 +1448,7 @@ int main(void)
 		
     /* DevAddr filter configure */
 	//int tmp=0;
-    if (!get_config("general", devaddr_mask, sizeof(devaddr_mask)))
+    if (!get_config("server1", devaddr_mask, sizeof(devaddr_mask)))
         dev_addr_mask = 0;
     else 
 		dev_addr_mask = 1;
@@ -2013,12 +2030,12 @@ void thread_up(void) {
                 sprintf(devchar, "%08X", macmsg.FHDR.DevAddr);
 
                 /* basic packet filtering */
-                if (fport_num != 0 && (macmsg.FPort == fport_num)){
-                    MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to Fport doesn't match %u\n", fport_num); /* DEBUG: display JSON payload */
+                if (fport_num != 0 && !(macmsg.FPort == fport_num)){
+                    MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to Fport doesn't match fport filter:%u, message Fport: %u\n", fport_num,macmsg.FPort); /* DEBUG: display JSON payload */
                     continue;
                 } /* filter */
                  
-                if (dev_addr_mask != 0 && (strncmp(devchar, devaddr_mask, strlen(devaddr_mask)) != 0 )){
+                if (dev_addr_mask != 0 && strncmp(devaddr_mask, "0", 1) && (strncmp(devchar, devaddr_mask, strlen(devaddr_mask)) != 0 )){
                     MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to DevAddr(0x%s) doesn't match mask (0x%s)\n", 
                            devchar,devaddr_mask); /* DEBUG: display JSON payload */
                     continue;

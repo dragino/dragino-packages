@@ -10,11 +10,11 @@ MEMSTR="Free Memory: "$MEMFREE" / Total Memory: "$MEMTOT
 
 # Get default route
 route=$(ip route|grep default | cut -d " " -f 5)
-if [ $route == "eth1" ]; then
+if [ "$route" == "eth1" ]; then
   img="/static/img/SAT-Int-Cable"
-elif [ $route == "wlan0-2" ]; then	  
+elif [ "$route" == "wlan0-2" ]; then	  
   img="/static/img/SAT-Int-Wifi"
-elif [ $route == "3g-cellular" ]; then
+elif [ "$route" == "3g-cellular" ]; then
   img="/static/img/SAT-Int-Cell"
 fi
 
@@ -45,10 +45,10 @@ lorawan_str=""
 lorawan_disp="0"
 server_type=$(uci -q get gateway.general.server_type)
 
-if [ -e /tmp/iot/status ] && [ $internet == "1" ] && [ $server_type == "lorawan" ]; then
+if [ -e /tmp/iot/status ] && [ "$internet" == "1" ] && [ "$server_type" == "lorawan" ]; then
   status=$(cat /tmp/iot/status)
   lorawan_disp="1"
-  if [ $status == "online" ]; then
+  if [ "$status" == "online" ]; then
     lorawan_str="<span class="impactOK"> LoRaWAN Connection OK </span>"
     lorawan_img="/static/img/SAT-LoRaWAN-tick.png"
   else
@@ -58,6 +58,13 @@ fi
 
 # Get the model
 model=$(cat /tmp/iot/model.txt)
+
+  cell_detect=$(cat /tmp/cell_detect.txt)
+  if [ "$cell_detect" == "1" ]; then
+       	cellular_status="Detected"
+  else
+		cellular_status="Not Detected"
+  fi
 
 %>
 
@@ -76,13 +83,15 @@ model=$(cat /tmp/iot/model.txt)
 <table class="configTable">
 	<tr><td colspan="20"></td></tr> <!--Determines column widths-->
 	<tr class="rowSpacer"></tr>
+	<tr><td colspan="3">Device Model:</td><td colspan="17"><% echo $model %></td></tr>
+	<tr class="rowSpacer"></tr>
+	<tr><td colspan="3">Hostname:</td><td colspan="17"><% uci get system.@[0].hostname %></td></tr>
+	<tr class="rowSpacer"></tr>
 	<tr><td colspan="3">Firmware:</td><td colspan="17"><% cat /etc/banner | grep Version | awk '{print $3}' %></td></tr>
 	<tr class="rowSpacer"></tr>
 	<tr><td colspan="3">Build Time:</td><td colspan="17"><% cat /etc/banner | grep Build %></td></tr>
 	<tr class="rowSpacer"></tr>
-	<tr><td colspan="3">Hostname:</td><td colspan="17"><% uci get system.@[0].hostname %></td></tr>
-	<tr class="rowSpacer"></tr>
-	<tr><td colspan="3">Device Model:</td><td colspan="17"><% echo $model %></td></tr>
+	<tr><td colspan="3">Cellular :</td><td colspan="17"><% echo $cellular_status %></td></tr>
 	<tr class="rowSpacer"></tr>
 	<tr><td colspan="3">System Time:</td><td colspan="17"><% date %></td></tr>
 	<tr class="rowSpacer"></tr>
@@ -102,9 +111,9 @@ model=$(cat /tmp/iot/model.txt)
 		<td colspan="20">
    
   <% 
-     if [ $lorawan_disp == "1" ]; then
+     if [ "$lorawan_disp" == "1" ]; then
        echo $lorawan_str
-       if [ $status == "online" ]; then 
+       if [ "$status" == "online" ]; then 
   %> 
        <img src="<% echo -n $lorawan_img %>" width="50" height="50">
   <%

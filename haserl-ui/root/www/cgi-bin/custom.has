@@ -7,7 +7,7 @@
 <%# --- Process the form submission --- %>
 <%
 
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set customized_script.general.script_name="$FORM_SCRIPT_NAME"
 		uci set customized_script.general.para1="$FORM_PARA1"
 		uci set customized_script.general.para2="$FORM_PARA2"
@@ -23,7 +23,7 @@
 		uci commit customized_script 
 	fi
 
-  if [ $FORM_BUTTON == "Save&Apply" ]; then
+  if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set gateway.general.server_type="customized"
 		uci commit gateway
 		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process

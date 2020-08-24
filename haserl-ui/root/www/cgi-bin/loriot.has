@@ -6,7 +6,7 @@
 
 <%# --- Process form submission --- %>
 <%
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
   
 		uci set loriot.loriot.url="$FORM_URL"
     uci set loriot.loriot.port="$FORM_PORT"
@@ -17,7 +17,7 @@
 		uci commit loriot 
 	fi
 
-  if [ $FORM_BUTTON == "Save&Apply" ]; then
+  if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set gateway.general.server_type="loriot"
 		uci commit gateway
 		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
@@ -42,7 +42,7 @@
 		installed="0"
 	fi
 
-  if [ $FORM_BUTTON == "Install" ]; then
+  if [ "$FORM_BUTTON" == "Install" ]; then
   URL="http://www.dragino.com/downloads/downloads/LoRa_Gateway/LPS8/Firmware/customized_script/loriot_dragino_lg308_spi"
   installed="2"
   rm /usr/bin/loriot_dragino_lg308_spi

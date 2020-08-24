@@ -4,29 +4,29 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
-		uci set gateway.general.port="$FORM_PORT"
-		uci set gateway.general.dwport="$FORM_DWPORT"
-		uci set gateway.general.email="$FORM_EMAIL"
-		uci set gateway.general.LAT="$FORM_LAT"
-		uci set gateway.general.LON="$FORM_LON"
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set gateway.general.GWID="$FORM_GWID"
+		uci set gateway.general.email="$FORM_EMAIL"
+
 		
 		# Set up the platform provider fields
-		platform="$FORM_PLATFORM"
-		uci set gateway.general.platform="$platform"
-		provider=$(echo $platform | cut -d , -f 1)
-		uci set gateway.general.provider="$provider"
+		primary_provider="$FORM_PRIMARY_PROVIDER"
+		logger "$FORM_PRIMARY_PROVIDER"
+		uci set gateway.server1.provider="$FORM_PRIMARY_PROVIDER"
 
-		if [ $provider == "custom" ];then
+		if [ $primary_provider == "custom" ];then
 			server_address="$FORM_SERVER_ADDRESS"
-			uci set gateway.general.custom_server="$FORM_SERVER_ADDRESS"
+			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS"
+		elif [ $primary_provider == "ttn" ];then
+			server_address="$FORM_SERVER_ADDRESS_TTN"
+			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS_TTN"
 		else
-			server_address=$(echo $platform | cut -d "," -f 2)
-			uci set gateway.general.$provider"_server"="$server_address"
+			uci set gateway.server1.server_address="$primary_provider"
 		fi
-		
-		uci set gateway.general.fportnum="$FORM_FPORTNUM"	
+		uci set gateway.server1.upp="$FORM_PRI_UPP"
+		uci set gateway.server1.dpp="$FORM_PRI_DPP"
+		uci set gateway.server1.fport_filter="$FORM_PRI_FPORTNUM" 
+		uci set gateway.server1.devaddr_filter="$FORM_PRI_DEVADDR_FILTER"		
 
 		uci commit gateway
 	fi
@@ -47,20 +47,18 @@
 <%# --- Get the variables for the HTML page --- %>
 <% 
 	server_type="$(uci -q get gateway.general.server_type)"
-	debug="$(uci -q get gateway.general.DEB)"
-
-	custom_server="$(uci -q get gateway.general.custom_server)"
-	
-	platform="$(uci -q get gateway.general.platform)"
-
-	port="$(uci -q get gateway.general.port)"
-	dwport="$(uci -q get gateway.general.dwport)"
-	gwid="$(uci -q get gateway.general.GWID)"
+	gwid="$(uci -q get gateway.general.GWID)"	
 	email="$(uci -q get gateway.general.email)"
-	lat="$(uci -q get gateway.general.LAT)"
-	lon="$(uci -q get gateway.general.LON)"
+
+	primary_provider="$(uci -q get gateway.server1.provider)"
+	primary_server="$(uci -q get gateway.server1.server_address)"
+	pri_fportnum="$(uci -q get gateway.server1.fport_filter)"
+	pri_devaddr_filter="$(uci -q get gateway.server1.devaddr_filter)"
+	
+	pri_upp="$(uci -q get gateway.server1.upp)"
+	pri_dpp="$(uci -q get gateway.server1.dpp)"
 	rfpower="$(uci -q get gateway.general.RFPOWER)"
-	fportnum="$(uci -q get gateway.general.fportnum)"
+
 
 	rffreq="$(uci -q get gateway.radio1.RFFREQ)"
 	rfsf="$(uci -q get gateway.radio1.RFSF)"
@@ -105,7 +103,6 @@
 
 %>
 
-
 <%# --- Present the HTML page --- %>
 <html lang="en">
 <head>
@@ -120,65 +117,99 @@
 <form id="lora" action="<% echo -n $SCRIPT_NAME %>" method="POST">
 
 <table class="configTable">
-	<tr><td colspan="17"><h3>Server Settings</h3></td></tr> <!-- Determines the column widths -->
+	<tr><td colspan="18"><h3>General Settings</h3></td></tr>	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="EMAIL">Email</label></td>
+		<td colspan="8"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
+		<td colspan="6"></td>
+	</tr>
 	
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="4"><label for="PLATFORM">LoRaWAN Service Provider</label></td>
-		<td colspan="4"><select id='platform' name='PLATFORM' onchange="displayCustomURL()">
-		<%inc /www/cgi-bin/inc/providers.txt %>
-		  <option value="local,127.0.0.1" >Built-in</option>
-		  <option value="custom" >Custom</option>
-		</select></td>
-
-	<script>document.getElementById("platform").value="<% echo -n $platform %>";</script>
-
-		<td colspan="1"></td>
-		<td colspan="3"><label for="SERVER_ADDRESS" id="server_address_label" style="visibility:hidden;">Server Address</label></td>
-		<td colspan="3"><input type="text" id="server_address" name="SERVER_ADDRESS" VALUE="<% echo -n $custom_server %>" style="visibility:hidden;"></td>
-	</tr>
-
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="4"><label for="GWID">Gateway ID</label></td>
-		<td colspan="4"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
+		<td colspan="5"><label for="GWID">Gateway ID</label></td>
+		<td colspan="6"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
 		<td colspan="8"></td>
 	</tr>
 
+	<tr class="rowSpacer"></tr>	
+	<tr><td colspan="25"><h3>Primary LoRaWAN Server</h3></td></tr> <!-- Determines the column widths -->
+ 
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="4"><label for="PORT">Server Port Upstream</label></td>
-		<td colspan="4"><input type="text" name="PORT" maxlength="8" VALUE="<% echo -n $port %>" pattern="[0-9]{1,8}" ></td>
+		<td colspan="5"><label for="PLATFORM">Service Provider</label></td>
+		<td colspan="6"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
+		  <option value="ttn" >The Things Network</option>
+		  <option value="router.cn.thethings.network" >Tencent</option>		
+		  <option value="127.0.0.1" >Built-in for ABP Decode to MQTT</option>
+		  <option value="custom" >Custom / Private LoRaWAN</option>
+		</select></td>
+		<script>document.getElementById("primary_provider").value="<% echo -n $primary_provider %>";</script>
+
 		<td colspan="2"></td>
-		<td colspan="2"><label for="LAT">Latitude</label></td>
-		<td colspan="3"><input type="text" name="LAT" maxlength="32" VALUE=<% echo -n $lat %> pattern="^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$" ></td>
-		<td colspan="1"></td>
+		<td colspan="5"><label id="server_address_label" style="display:none;">Server Address</label></td>	
+			
+		<td colspan="9">
+			<input type="text" id="server_address" name="SERVER_ADDRESS" style="display:none;" 
+		    VALUE="<% echo -n $primary_server %>">
+			
+			<select id='server_address_ttn' name='SERVER_ADDRESS_TTN' style="display:none;">
+				<option value="router.eu.thethings.network" >TTN-router-EU</option>
+				<option value="router.us.thethings.network" >TTN-router-US-West</option>
+				<option value="router.as.thethings.network" >TTN-router-Asia-SE</option>
+				<option value="router.as1.thethings.network" >TTN-router-Asia-SE1</option>
+				<option value="router.as2.thethings.network" >TTN-router-Asia-SE2</option>
+				<option value="router.cn.thethings.network" >TTN-router-CN</option>
+				<option value="router.kr.thethings.network" >TTN-router-KR</option>
+				<option value="router.jp.thethings.network" >TTN-router-JP</option>
+				<option value="as923.thethings.meshed.com.au" >TTN-router-AU-AS923-UDP</option>
+				<option value="au915.thethings.meshed.com.au" >TTN-router-AU-AU915-UDP</option>
+				<option value="router.au.thethings.network" >TTN-router-AU-AU915/AS923-MQTT</option>
+				<option value="ttn.opennetworkinfrastructure.org" >TTN-switched-router</option>
+			</select>
+		</td>
+		<script>document.getElementById("server_address_ttn").value="<% echo -n $primary_server %>";</script>
+		
 	</tr>
 
-	<tr>	
+	<tr>
 		<td colspan="1"></td>
-		<td colspan="4"><label for="DWPORT">Server Port Downstream</label></td>
-		<td colspan="4"><input type="text" name="DWPORT" maxlength="8" VALUE="<% echo -n $dwport %>" pattern="[0-9]{1,8}" ></td>
+		<td colspan="5"><label for="PRI_UPP">Uplink Port</label></td>
+		<td colspan="6"><input type="text" name="PRI_UPP" maxlength="8" VALUE="<% echo -n $pri_upp %>" pattern="[0-9]{1,8}" ></td>
 		<td colspan="2"></td>
-		<td colspan="2"><label for="LON">Longitude</label></td>
-		<td colspan="3"><input type="text" name="LON" maxlength="32" VALUE=<% echo -n $lon %> pattern="^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$" ></td>
-		<td colspan="1"></td>
+		<td colspan="5"><label for="PRI_DPP">Downlink Port</label></td>
+		<td colspan="3"><input type="text" name="PRI_DPP" maxlength="8" VALUE="<% echo -n $pri_dpp %>" pattern="[0-9]{1,8}" ></td>
+		<td colspan=""></td>
 	</tr>
-
+	
 	<tr class="rowSpacer"></tr>
+	
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="1"><label for="EMAIL">Email</label></td>
-		<td colspan="6"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
-		<td colspan="9"></td>
+		<td colspan="16"><h4>Packet Filter</h4></td>
 	</tr>
 
-	<tr class="rowSpacer"></tr>
-	<tr><td colspan="17"><h3>Packet Filter</h3></td></tr>
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="2"><label for="FPORTNUM"><abbr title="Value:0~243:&#10 *0 for no filter&#10 *Filter Unconfirmed Data Up & Confirmed Data Up if Fport doesn't match)">Fport Filter</abbr></label></td>
-		<td colspan="2"><input type="text" name="FPORTNUM" maxlength="3" VALUE=<% echo -n $fportnum %> ></td>
+		<td colspan="5"><label for="FPORTNUM">Fport Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+		<p>Filter Unconfirmed Data Up & Confirmed Data Up if Fport doesn't match</p>
+		<p>Value Range:0~243: (0 to accept any Fport)</p> 
+		<p style="text-align: center;"><br>[Close]</p>
+		</div>
+		</td>
+		<td colspan="3"><input type="text" name="PRI_FPORTNUM" maxlength="3" VALUE=<% echo -n $pri_fportnum %> ></td>
+		
+		<td colspan="5"></td>
+		<td colspan="5"><label for="DEV_FILTER">DevAddr Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
+		<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+		<p>Filter Unconfirmed Data Up & Confirmed Data Up if Dev Addr Prefix doesn't match</p>
+		<p>Value Range:1 ~ 8 bytes hex char: (0 to accept any Dev Addr Prefix)</p> 
+		<p style="text-align: center;"><br>[Close]</p>
+		</div>
+		</td>
+		<td colspan="3"><input type="text" name="PRI_DEVADDR_FILTER" maxlength="3" VALUE=<% echo -n $pri_devaddr_filter %> ></td>
+		
 	</tr>
 	
 	<tr class="rowSpacer"></tr>
@@ -187,8 +218,8 @@
 		<td colspan="1"></td>
 		<td colspan="16">
 			<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
-		<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
-		<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
 		</td>
 	</tr>
 </table>
@@ -197,15 +228,44 @@
 </div>
 
 <script>
-function displayCustomURL(){
-	document.getElementById("server_address").style.visibility = "hidden";
-	document.getElementById("server_address_label").style.visibility = "hidden";
-	var x = document.getElementById("platform").value;
+	var x = document.getElementById("primary_provider").value;
 	if (x == "custom") {
-	document.getElementById("server_address").style.visibility = "visible";
-	document.getElementById("server_address_label").style.visibility = "visible";
+	document.getElementById("server_address").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
+	if (x == "ttn") {
+	document.getElementById("server_address_ttn").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
+
+function displayServerURL(){
+	document.getElementById("server_address_label").style.display = "none";
+	document.getElementById("server_address").style.display = "none";
+	document.getElementById("server_address_ttn").style.display = "none";
+	var x = document.getElementById("primary_provider").value;
+	if (x == "custom") {
+	document.getElementById("server_address").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
+	if (x == "ttn") {
+	document.getElementById("server_address_ttn").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
 	}
 }
+
+function showHelp1() {
+document.getElementById("helptext1").style.display="inline";
+}
+
+function showHelp2() {
+document.getElementById("helptext2").style.display="inline";
+}
+
+function hideHelp() {
+document.getElementById("helptext1").style.display="none";
+document.getElementById("helptext2").style.display="none";
+}
+
 </script>
 </body>
 </html>

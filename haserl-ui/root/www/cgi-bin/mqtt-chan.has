@@ -6,7 +6,7 @@
 <%
 	sql_file="/etc/iot/channels"
 
-	if [ $FORM_BUTTON == "ADD_CHAN" ];then
+	if [ "$FORM_BUTTON" == "ADD_CHAN" ];then
 		if [ -n "$FORM_LOCAL_ID" ] && [ -n "$FORM_REMOTE_ID" ];then
 			local_id=$(echo $FORM_LOCAL_ID)
 			remote_id=$(echo $FORM_REMOTE_ID)
@@ -17,7 +17,7 @@
 		fi 
 	fi
 	
-	if [ $FORM_BUTTON == "DELETE" ];then
+	if [ "$FORM_BUTTON" == "DELETE" ];then
 		sqlite3 $sql_file "DELETE FROM mapping where local = '$FORM_DEL_CHAN';"
 	fi
 %>

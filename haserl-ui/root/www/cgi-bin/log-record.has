@@ -27,7 +27,7 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "StartLog" ]; then
+	if [ "$FORM_BUTTON" == "StartLog" ]; then
 		touch /tmp/logging.flag
 		logging="1"
 		logready="0"
@@ -40,7 +40,7 @@
 		/usr/bin/save_log.sh &
 	fi
 	
-	if [ $FORM_BUTTON == "StopLog" ]; then
+	if [ "$FORM_BUTTON" == "StopLog" ]; then
 		rm /tmp/logging.flag
 		logging="0"
 		logready="1"
@@ -48,7 +48,7 @@
 		killall logread
 	fi
 	
-	if [ $FORM_BUTTON == "ResetLog" ]; then
+	if [ "$FORM_BUTTON" == "ResetLog" ]; then
 		rm /tmp/logfile.log
 		rm /tmp/logging.flag
 		logging="0"
@@ -58,7 +58,7 @@
 	fi
 	
 	# Just to be sure
-	if [$logging != "1" ]; then
+	if [ "$logging" != "1" ]; then
 		killall logread
 	fi
 %>
@@ -69,7 +69,7 @@
 <head>
 	<%inc /www/cgi-bin/inc/head.inc %>
 	
-	<% if [ $logging == "1" ]; then %>
+	<% if [ "$logging" == "1" ]; then %>
 	<meta http-equiv="refresh" content="10" >
 	<% fi %>
 </head>
@@ -106,13 +106,13 @@
 
 </div> <!-- End page container -->
 
-	<% if [ $logging == "1" ]; then %>
+	<% if [ "$logging" == "1" ]; then %>
 	<script> document.getElementById("logrecording").style.visibility="visible"; </script>
 	<% fi %>
-	<% if [ $maxsize == "1" ]; then %>
+	<% if [ "$maxsize" == "1" ]; then %>
 	<script> document.getElementById("logstopped").style.visibility="visible"; </script>
 	<% fi %>
-	<% if [ $logready == "1" ]; then %>
+	<% if [ "$logready" == "1" ]; then %>
 	<script> document.getElementById("logready").style.visibility="visible"; </script>
 	<% fi %>
 

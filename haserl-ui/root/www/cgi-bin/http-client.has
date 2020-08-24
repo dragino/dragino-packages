@@ -4,14 +4,14 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 
-    if [ $FORM_SSL_ENABLE == "checked" ]; then
+    if [ "$FORM_SSL_ENABLE" == "checked" ]; then
       ssl_enable="1"
     else
       ssl_enable="0"
     fi
-    if [ $FORM_DOWN_ENABLE == "checked" ]; then
+    if [ "$FORM_DOWN_ENABLE" == "checked" ]; then
     down_enable="1"
     else
       down_enable="0"
@@ -28,7 +28,7 @@
     uci commit http_iot
 	fi
 	
-	if [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		/etc/init.d/iot-http reload > /dev/null
 		rm /var/iot/status
 	fi
@@ -45,13 +45,13 @@
   param="$(uci -q get http_iot.general.down_para)"
   poll="$(uci -q get http_iot.general.down_interval)"
 
-  if [ $ssl_enable == "1" ]; then
+  if [ "$ssl_enable" == "1" ]; then
     ssl_enable="checked"
   else
     ssl_enable="0"
   fi
 
-  if [ $down_enable == "1" ]; then
+  if [ "$down_enable" == "1" ]; then
     down_enable="checked"
   else
     down_enable="0"

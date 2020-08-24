@@ -9,45 +9,149 @@ server=`uci get gateway.general.${provider}_server`
 upp=`uci get gateway.general.port`
 dpp=`uci get gateway.general.dwport`
 stat=`uci get gateway.general.stat`
+email=`uci get gateway.general.email`
+maccrypto=`uci get gateway.general.maccrypto`
+
+latitude=`uci get gateway.general.LAT`
+longitude=`uci get gateway.general.LON`
+altitude=`uci get gateway.general.ALT`
+fake_gps=`uci get gateway.general.fake_gps`
 
 model=`cat /tmp/iot/model.txt`
+json_section_name="SX130x_conf"
 
-#################################################
-# "gateway_conf": {
-#         "server_address": "router.eu.thethings.network",
-#         "serv_port_up": 1700,
-#         "serv_port_down": 1700,
-#         "keepalive_interval": 5,
-#         "stat_interval": 30,
-#         "push_timeout_ms": 30,
-#         "forward_crc_valid": true,
-#         "forward_crc_error": false
-#         }
-#################################################
 
 gen_gw_cfg() {
-    json_init
+ 
+	json_init
     json_add_object gateway_conf
-    json_add_string "gateway_ID" "$gwid"
-    json_add_string "server_address" "$server"
-    json_add_int "serv_port_up" "$upp"
-    json_add_int "serv_port_down" "$dpp"
-    json_add_int "stat_interval" "$stat"
-    json_add_boolean "forward_crc_valid" 1
-    json_add_boolean "forward_crc_error" 0
-	if [ $model == "DLOS8" ];then	
+	json_add_string "platform" "SX1$chip"
+	json_add_string "description" "Dragino LoRaWAN Gateway"	
+	json_add_string "email" "$email"
+	json_add_string "gateway_ID" "$gwid" 
+	
+	json_add_int "log_mask" "100"    # Log Level
+	json_add_boolean "radiostream_enable" 1    # Enable SX Radio TX /RX
+	
+	#ghoststream
+	json_add_boolean "ghoststream_enable" 0    # Enable virtual radio TX/RX
+	json_add_string "ghost_host" "localhost"
+	json_add_int "ghost_port" "1760" 
+	
+	#LBT Settings 
+	json_add_boolean "lbt_enable" 0
+	json_add_boolean "lbt_isftdi" 1
+
+	#Remote manager
+	json_add_boolean "manage_enable" 0
+	json_add_string	"manage_host" "host"
+	json_add_int "manage_port" "1990"
+
+	#Enable Database Configure, if enable , sqlitedb settings will overwrite globalconf settings. 
+	json_add_boolean "dbconf_enable" 1
+	
+
+	json_add_boolean "wd_enable" 1  	#Watchdog
+	
+	#ABP Communication
+	if [ "$maccrypto" = "1" ];then
+		json_add_boolean "mac_decode" 1	    #ABP Decode
+	fi
+	json_add_boolean "mac2file" 0   # Save Decode Payload to file 
+	json_add_boolean "mac2db" 0   # Save Decode Payload to database 
+	json_add_boolean "custom_downlink" 0   # Allow custom downlink
+
+        # stastatic 状态和统计的间隔时间，单位是秒*/
+	json_add_int	"stat_interval" "30"  # 这个和 server 里面的 Kepp Alive 区别? 
+
+	##GPS coordinates. use fake GPS from UI or via GPS module
+	if [ "$fake_gps" == "1" ];then
+		json_add_boolean "fake_gps" 1
+		json_add_double "ref_latitude" "$latitude"
+		json_add_double "ref_longitude" "$longitude"
+		json_add_double "ref_altitude" "$altitude"	
+	elif [ "$model" == "DLOS8" ];then	
 		json_add_string "gps_tty_path" "/dev/ttyUSB0"
 	fi
+     
+ 
+
+	###Beacon Related
+	json_add_int "beacon_period" "0"
+	json_add_int "beacon_freq_hz" "869525000"
+	json_add_int "beacon_datarate" "9"
+	json_add_int "beacon_bw_hz" "125000"	
+	json_add_int "beacon_power" "14"
+	json_add_int "beacon_infodesc" "0"	
+
+	###Servers Setting. 
+	json_add_array "servers"
+	
+		#Server1
+		json_add_object "server1"
+		
+		json_add_string "server_name" "`uci get gateway.server1.server_id`"  #name是服务的标识，必须要设置一个name   ?? 哪里需要用到，可以用 Server 1 替代吗？
+		json_add_string "server_type" "semtech"  #服务类型有：semtech, mqtt, gwtraft, ttn	几个服务类型什么区别，什么场合用到. MQTT 是指 LoRaWAN over MQTT 吧? 
+		json_add_string	"server_id"  "`uci get gateway.server1.mqtt_user`" # 类型是mqtt或ttn时才需要设置   --> 对应哪个参数?? 连接例子? 
+		json_add_string "server_key" "`uci get gateway.server1.mqtt_pass`" # 类型是mqtt或ttn时才需要设置	--> 对应哪个参数?? 连接例子?
+		json_add_string	"server_address" "`uci get gateway.server1.server_address`"   
+		json_add_int "serv_port_up" "`uci get gateway.server1.upp`"
+		json_add_int "serv_port_down" "`uci get gateway.server1.dpp`"
+		
+		#adjust the following parameters for your network 
+		json_add_int "keepalive_interval" "`uci get gateway.server1.keepalive_interval`" #以前的默认值是多少? 
+		json_add_int "push_timeout_ms" "`uci get gateway.server1.push_timeout_ms`"  #以前的默认值是多少? 
+		json_add_int "pull_timeout_ms" "`uci get gateway.server1.pull_timeout_ms`" #以前的默认值是多少?
+
+		#forward only valid packets
+		  #                   /*fport的过滤方法, 0是不处理，1是只转发数据库里设置了的fport，2不转发数据库里的fport */
+		  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
+		  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
+		json_add_int "fport_filter" "`uci get gateway.server1.fport_filter`" 
+		json_add_string "devaddr_filter" "`uci get gateway.server1.devaddr_filter`"
+		json_add_boolean "forward_crc_valid" "`uci get gateway.server1.forward_crc_valid`"
+		json_add_boolean "forward_crc_error" "`uci get gateway.server1.forward_crc_error`"
+		json_add_boolean "forward_crc_disabled" "`uci get gateway.server1.forward_crc_disabled`"
+		json_close_object 
+	
+		#Server2
+		json_add_object "server1"
+		json_add_string "server_name" "name"  #name是服务的标识，必须要设置一个name   ?? 哪里需要用到，可以用 Server 1 替代吗？
+		json_add_string "server_type" "semtech"  #服务类型有：semtech, mqtt, gwtraft, ttn	几个服务类型什么区别，什么场合用到. MQTT 是指 LoRaWAN over MQTT 吧? 
+		json_add_string	"server_id"  "mqtt_user" # 类型是mqtt或ttn时才需要设置   --> 对应哪个参数?? 连接例子? 
+		json_add_string "server_key" "mqtt_pass" # 类型是mqtt或ttn时才需要设置	--> 对应哪个参数?? 连接例子?
+		json_add_string	"server_address" "localhost"   
+		json_add_int "serv_port_up" "1730"
+		json_add_int "serv_port_down" "1730"
+		
+		#adjust the following parameters for your network 
+		json_add_int "keepalive_interval" "10" #以前的默认值是多少? 
+		json_add_int "push_timeout_ms" "100"  #以前的默认值是多少? 
+		json_add_int "pull_timeout_ms" "100" #以前的默认值是多少?
+
+		#forward only valid packets
+		  #                   /*fport的过滤方法, 0是不处理，1是只转发数据库里设置了的fport，2不转发数据库里的fport */
+		  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
+		  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
+		json_add_int "fport_filter" "0" 
+		json_add_string "devaddr_filter" "0"
+		json_add_boolean "forward_crc_valid" 1
+		json_add_boolean "forward_crc_error" 0
+		json_add_boolean "forward_crc_disabled" 0
+		json_close_object 
+		
+	json_close_array
+
     json_close_object
     json_dump  > /etc/lora/local_conf.json
 }
 
 echo_chan_if() {
-    echo "SX1301 Channels frequency" > /etc/lora/desc
+    echo "Gateway Channels frequency" > /etc/lora/desc
     echo "---------------------------------------" >> /etc/lora/desc
 
     json_load_file "/etc/lora/global_conf.json"
-    json_select SX1301_conf
+    json_select $json_section_name
     for i in `seq 0 7`
     do
         json_select chan_multiSF_$i
@@ -65,6 +169,13 @@ echo_chan_if() {
     echo "$desc" >> /etc/lora/desc
     echo "---------------------------------------" >> /etc/lora/desc
 
+    json_select chan_FSK
+    json_get_var desc desc
+    json_select ..
+    echo "chan_FSK" >> /etc/lora/desc
+    echo "$desc" >> /etc/lora/desc
+    echo "---------------------------------------" >> /etc/lora/desc
+	
     json_cleanup
 
 }
@@ -78,275 +189,20 @@ if [ $model == "LG308" ] || [ $model == "DLOS8" ];then
 	chip="301"
 elif [ $model == "LPS8" ];then
 	chip="308"
+elif [ $model == "LIG16" ];then
+	chip="302"
+	json_section_name="SX130x_conf"
 fi
+
+
+######### Generate LoRaWAN Settings   #########
+gen_gw_cfg # Generate local_conf.json
 
 if [ -f /etc/lora/cfg-$chip/"$def_cfg"-global_conf.json ] 
 then 
-    gen_gw_cfg
     cp -rf /etc/lora/cfg-$chip/"$def_cfg"-global_conf.json /etc/lora/global_conf.json
-    echo_chan_if
 else
-    rm -rf /etc/lora/local_conf.json
-    json_init
-    json_add_object SX1301_conf
-    json_add_boolean lorawan_public 1
-    json_add_int clksrc 1
-    json_add_int antenna_gain 0
-
-###########################################
-## radio_0 and radio_1
-##### "enable": true,
-##### "type": "SX1257",
-##### "freq": 867500000,
-##### "rssi_offset": -166.0,
-##### "tx_enable": true,
-##### "tx_freq_min": 863000000,
-##### "tx_freq_max": 870000000
-##########################################
-
-    for i in 0 1
-    do
-        eval radio${i}_enable=`uci get gateway.general.radio${i}_enable`
-        json_add_object radio_"$i"
-        eval json_add_boolean enable \$radio${i}_enable
-        eval cmp="\$radio${i}_enable"
-        if [ "$cmp" = "1" ]; then
-            eval radio${i}_freq=`uci get gateway.general.radio${i}_freq`
-            eval radio${i}_tx=`uci get gateway.general.radio${i}_tx`
-            json_add_string "type" "SX1257"
-            eval json_add_int freq \$radio${i}_freq
-            json_add_double rssi_offset -166.0
-            eval json_add_boolean tx_enable \$radio${i}_tx
-            eval cmp="\$radio${i}_tx"
-            if [ "$cmp" = "1" ]; then
-                eval radio${i}_txfreq_min=`uci get gateway.general.radio${i}_txfreq_min`
-                eval radio${i}_txfreq_max=`uci get gateway.general.radio${i}_txfreq_max`
-                eval json_add_int tx_freq_min \$radio${i}_txfreq_min
-                eval json_add_int tx_freq_max \$radio${i}_txfreq_max
-            fi
-        fi
-        json_close_object
-    done
-    
-
-#############################################
-##"chan_multiSF_%i": {
-##        "desc": "Lora MAC, 125kHz, all SF, 868.1 MHz",
-##        "enable": true,
-##        "radio": 1,
-##       "if": -400000
-##},
-#############################################
-
-    echo "SX1301 Channels frequency" > /etc/lora/desc
-
-    for i in `seq 0 7`
-    do
-        eval chan${i}_enable=`uci get gateway.general.chan${i}_enable`
-        json_add_object chan_multiSF_"$i"
-        eval json_add_boolean enable \$chan${i}_enable
-        eval cmp="\$chan${i}_enable"
-        if [ "$cmp" = "1" ]; then
-            eval chan${i}=`uci get gateway.general.chan${i}`
-            eval chan${i}_radio=`uci get gateway.general.chan${i}_radio`
-            eval radio_index=\$chan${i}_radio                
-            eval radio_freq=\$radio${radio_index}_freq
-            eval json_add_int "radio" \$chan${i}_radio
-            eval json_add_int "if" \$chan${i}
-            eval chan_if=\$chan${i}
-            chan_freq=`expr $radio_freq + $chan_if`
-            echo "---------------------------------------" >> /etc/lora/desc
-            echo "chan_multiSF_$i" >> /etc/lora/desc
-            echo "LORA MAC, 125kHz, all SF, $chan_freq Hz" >> /etc/lora/desc
-        fi
-        json_close_object
-    done
-        
-#############################################
-# "chan_Lora_std": {
-#             "desc": "Lora MAC, 250kHz, SF7, 868.3 MHz",
-#             "enable": true,
-#             "radio": 1,
-#             "if": -200000,
-#             "bandwidth": 250000,
-#             "spread_factor": 7
-#             },
-# "chan_FSK": {
-#             "desc": "FSK 50kbps, 868.8 MHz",
-#             "enable": true,
-#             "radio": 1,
-#             "if": 300000,
-#             "bandwidth": 125000,
-#             "datarate": 50000
-#             }
-#############################################
-    eval lorachan_enable=`uci get gateway.general.lorachan_enable`
-    json_add_object chan_Lora_std
-    eval json_add_boolean enable $lorachan_enable
-    if [ "$lorachan_enable" = "1" ]; then
-        lorachan_radio=`uci get gateway.general.lorachan_radio`
-        lorachan=`uci get gateway.general.lorachan`
-        lorachan_sf=`uci get gateway.general.lorachan_sf`
-        lorachan_bw=`uci get gateway.general.lorachan_bw`
-        json_add_int "radio" $lorachan_radio
-        json_add_int "if" $lorachan
-        json_add_int "bandwidth" $lorachan_bf
-        json_add_int "spread_factor" $lorachan_sf
-        eval radio_freq=\$radio${lorachan_radio}_freq
-        chan_freq=`expr $radio_freq - $lorachan`
-        echo "---------------------------------------" >> /etc/lora/desc
-        echo "chan_Lora_std" >> /etc/lora/desc
-        echo "LORA MAC, $lorachan_bf, $lorachan_sf, $chan_freq Mhz" >> /etc/lora/desc
-    fi
-    json_close_object
-
-    json_add_object chan_FSK
-    json_add_boolean "enable"  "1" 
-    json_add_int "radio"  "1" 
-    json_add_int "if"  "300000" 
-    json_add_int "bandwidth"  "125000" 
-    json_add_int "datarate"  "125000" 
-    json_close_object
-
-#################################################
-# "tx_lut_": {
-#             "desc": "TX gain table, index 14",
-#             "pa_gain": 3,
-#             "mix_gain": 12,
-#             "rf_power": 26,
-#             "dig_gain": 0
-#             }
-#################################################
-
-    json_add_object tx_lut_0
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "9" 
-    json_add_int "rf_power"  "12" 
-    json_add_int "dig_gain"  "2" 
-    json_close_object
-
-    json_add_object tx_lut_1
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "9" 
-    json_add_int "rf_power"  "13" 
-    json_add_int "dig_gain"  "1" 
-    json_close_object
-
-    json_add_object tx_lut_2
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "10" 
-    json_add_int "rf_power"  "14" 
-    json_add_int "dig_gain"  "2" 
-    json_close_object
-
-    json_add_object tx_lut_3
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "10" 
-    json_add_int "rf_power"  "15" 
-    json_add_int "dig_gain"  "1" 
-    json_close_object
-
-    json_add_object tx_lut_4
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "10" 
-    json_add_int "rf_power"  "16" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_5
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "11" 
-    json_add_int "rf_power"  "17" 
-    json_add_int "dig_gain"  "1" 
-    json_close_object
-
-    json_add_object tx_lut_6
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "11" 
-    json_add_int "rf_power"  "18" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_7
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "12" 
-    json_add_int "rf_power"  "19" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_8
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "13" 
-    json_add_int "rf_power"  "20" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_9
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "14" 
-    json_add_int "rf_power"  "21" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_10
-    json_add_int "pa_gain"  "2" 
-    json_add_int "mix_gain"  "15" 
-    json_add_int "rf_power"  "22" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_11
-    json_add_int "pa_gain"  "3" 
-    json_add_int "mix_gain"  "11" 
-    json_add_int "rf_power"  "23" 
-    json_add_int "dig_gain"  "1" 
-    json_close_object
-
-    json_add_object tx_lut_12
-    json_add_int "pa_gain"  "3" 
-    json_add_int "mix_gain"  "12" 
-    json_add_int "rf_power"  "24" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_13
-    json_add_int "pa_gain"  "3" 
-    json_add_int "mix_gain"  "14" 
-    json_add_int "rf_power"  "25" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_14
-    json_add_int "pa_gain"  "3" 
-    json_add_int "mix_gain"  "14" 
-    json_add_int "rf_power"  "26" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-
-    json_add_object tx_lut_15
-    json_add_int "pa_gain"  "3" 
-    json_add_int "mix_gain"  "14" 
-    json_add_int "rf_power"  "27" 
-    json_add_int "dig_gain"  "0" 
-    json_close_object
-	
-    #close json object SX1301_conf
-    json_close_object
-
-    json_add_object gateway_conf
-    json_add_string "gateway_ID" "$gwid"
-    json_add_string "server_address" "$server"
-    json_add_int "serv_port_up" "$upp"
-    json_add_int "serv_port_down" "$dpp"
-    json_add_int "stat_interval" "$stat"
-    json_add_boolean "forward_crc_valid" 1
-    json_add_boolean "forward_crc_error" 0
-	if [ $model == "DLOS8" ];then	
-		json_add_string "gps_tty_path" "/dev/ttyUSB0"
-	fi
-    json_close_object
-
-    json_dump  > /etc/lora/global_conf.json
-
-
+    cp -rf /etc/lora/cfg-$chip/EU-global_conf.json /etc/lora/global_conf.json
 fi
+
+echo_chan_if  # Show the used frequency

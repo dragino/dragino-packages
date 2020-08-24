@@ -7,13 +7,13 @@
   # Update server_type for changeFunct()
 	if [ -e /tmp/changeFunct.flag ]; then
     rm /tmp/changeFunct.flag
-    if [ $FORM_SERVER_TYPE != "" ]; then  # Make sure it is a real change
+    if [ "$FORM_SERVER_TYPE" != "" ]; then  # Make sure it is a real change
    	  uci set mqtt.common.server_type=$FORM_SERVER_TYPE
       uci commit mqtt
     fi
   fi
 
-	if [ $FORM_BUTTON == "Save" ] || [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
     server_type=$(uci -q get mqtt.common.server_type)
   
 		uci set mqtt.$server_type.url="$FORM_URL"
@@ -48,7 +48,7 @@
 		uci commit mqtt 
 	fi
 
-  if [ $FORM_BUTTON == "Save&Apply" ]; then
+  if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set gateway.general.server_type="mqtt"
 		uci commit gateway
 		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
@@ -105,7 +105,7 @@
 	sub_topic_default=" "
 	pub_topic_placeholder=" "
 	sub_topic_placeholder=" "
-	if [ $server_type == "Alibaba" ]; then
+	if [ "$server_type" == "Alibaba" ]; then
 		device_name=$(echo "$user"|cut -d "&" -f 1)
 		product_key=$(echo "$user"|cut -d "&" -f 2)
 		pub_topic_default="Default:  $product_key/$device_name/user/get"
@@ -120,11 +120,11 @@
   disp1="inline"; disp2="none";disp3="none"
 
   # Set up display options
-	if [ $server_type == "AWS" ]; then
+	if [ "$server_type" == "AWS" ]; then
 		disp1="none"; disp2="inline "; disp3="inline "
-	elif [ $server_type == "Azure" ]; then
+	elif [ "$server_type" == "Azure" ]; then
 		disp1="inline";disp2="none"; disp3="inline"
-	elif [ $server_type == "General" ]; then
+	elif [ "$server_type" == "General" ]; then
 		disp1="inline";disp2="inline"; disp3="inline"
   fi
 %>

@@ -690,9 +690,9 @@ void rxlora(radiodev *dev, uint8_t rxmode)
 
 bool received(uint8_t spidev, struct pkt_rx_s *pkt_rx) {
 
-    int i, rssicorr;
+    uint8_t i, rssicorr;
 
-    int irqflags = readReg(spidev, REG_IRQ_FLAGS);
+    uint8_t irqflags = readReg(spidev, REG_IRQ_FLAGS);
 
     // clean all IRQ
     writeReg(spidev, REG_IRQ_FLAGS, 0xFF);

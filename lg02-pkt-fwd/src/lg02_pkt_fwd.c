@@ -62,7 +62,7 @@
 #define MIN_LORA_PREAMB	6 /* minimum Lora preamble length for this application */
 #define STD_LORA_PREAMB	8
 
-#define TX_BUFF_SIZE	512
+#define JSON_BUFF_SIZE	1024
 #define STATUS_SIZE	1024
 
 #define PUSH_PATH   "/var/iot/push"
@@ -922,7 +922,7 @@ int main(int argc, char *argv[])
     char fetch_timestamp[28]; /* timestamp as a text string */
 
     /* data buffers */
-    uint8_t buff_up[TX_BUFF_SIZE]; /* buffer to compose the upstream packet */
+    uint8_t buff_up[JSON_BUFF_SIZE]; /* buffer to compose the upstream packet */
     int buff_index;
 
     /* protocol variables */
@@ -962,15 +962,16 @@ int main(int argc, char *argv[])
                  buff_up[2] = token_l;
                  buff_index = 12; /* 12-byte header */
 
-                 j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%s\",\"lsnr\":%.1f", fetch_timestamp, tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxdev->cr, pktrx.snr);
+                 j = snprintf((char *)(buff_up + buff_index), JSON_BUFF_SIZE - buff_index, "{\"rxpk\":[{\"time\":\"%s\",\"tmst\":%u,\"chan\":0,\"rfch\":1,\"freq\":%.6lf,\"stat\":1,\"modu\":\"LORA\",\"datr\":\"SF%dBW125\",\"codr\":\"4/%d\",\"lsnr\":%.1f", fetch_timestamp, tmst, (double)(rxdev->freq)/1000000, rxdev->sf, rxdev->cr, pktrx.snr);
 
                  buff_index += j;
 
-                 j = snprintf((char *)(buff_up + buff_index), TX_BUFF_SIZE - buff_index, ",\"rssi\":%.0f,\"size\":%u", pktrx.rssi, pktrx.size);
+                 j = snprintf((char *)(buff_up + buff_index), JSON_BUFF_SIZE - buff_index, ",\"rssi\":%.0f,\"size\":%u", pktrx.rssi, pktrx.size);
                          
                  buff_index += j;
 
-                 memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9); buff_index += 9;
+                 memcpy((void *)(buff_up + buff_index), (void *)",\"data\":\"", 9); 
+                 buff_index += 9;
                          
                  j = bin_to_b64((uint8_t *)pktrx.payload, pktrx.size, (char *)(buff_up + buff_index), 341); /* 255 bytes = 340 chars in b64 + null char */
 

@@ -23,34 +23,40 @@
  * \file
  */
 
-#ifndef _GWPKT_PROTO_H
-#define _GWPKT_PROTO_H
+#ifndef _MQTT_PROTO_H
+#define _MQTT_PROTO_H
 
-#include "linkedlists.h"
+#include <stdint.h>
+#include <MQTTClient.h>
 
-/*!下发的数据结据，下发的格式是： devaddr, txmode, payload format, payload
-* txmode: time, imme
-* format: txt, hex
-**/
+#define KEEP_ALIVE_INTERVAL 20
+#define COMMAND_TIMEOUT 2000
+#define READ_BUFFER_SIZE 512
+#define SEND_BUFFER_SIZE 512
 
-#define DEFAULT_PAYLOAD_SIZE        256
-#define DEFAULT_DOWN_FPORT          2
+#define QOS_STATUS QOS1
+#define QOS_DOWN QOS1
+#define QOS_UP QOS1
+#define QOS_CONNECT QOS1
+#define QOS_WILL QOS1
 
-#define DNPATH                      "/var/iot/push" 
+typedef void (*dnlink_headler_f)(MessageData*);
+  
+typedef struct _mqttsession_s {
+	Network network;
+	MQTTClient client;
+	dnlink_headler_f dnlink_handler;
+	void *cb_arg;
+	unsigned char *read_buffer;
+	unsigned char *send_buffer;
+	char *id;      
+	char *key;     
+	char *dnlink_topic;
+	char *uplink_topic;
+} mqttsession_s;
 
-#define UP                          0
-#define DOWN                        1
+int mqtt_start(serv_s*);
 
-typedef struct _dn_pkt {
-	LGW_LIST_ENTRY(_dn_pkt) list;
-    char devaddr[16];
-    char txmode[8];
-    char pdformat[8];
-    uint8_t payload[512];
-    uint8_t psize;
-} dn_pkt_s;
-
-int pkt_start(serv_s*);
-void pkt_stop(serv_s*);
+void mqtt_stop(serv_s*);
 
 #endif						

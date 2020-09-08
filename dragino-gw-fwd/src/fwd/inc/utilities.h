@@ -33,14 +33,6 @@
 #include <pthread.h>
 #include <compiler.h>
 
-#ifndef SUCCESS
-#define SUCCESS        1
-#endif
-
-#ifndef FAIL
-#define FAIL           0
-#endif
-
 #ifndef MAX_TRY
 #define MAX_TRY        3
 #endif

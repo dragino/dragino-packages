@@ -40,6 +40,7 @@
 #include "service.h"
 #include "semtech_service.h"
 #include "pkt_service.h"
+#include "mqtt_service.h"
 
 int init_sock(const char *addr, const char *port, const void *timeout, int size) {
 	int i;
@@ -156,6 +157,9 @@ void service_start(gw_s* gw) {
             case pkt:
                 pkt_start(serv_entry);
                 break;
+            case mqtt:
+                mqtt_start(serv_entry);
+                break;
             default:
                 semtech_start(serv_entry);
                 break;
@@ -172,6 +176,9 @@ void service_stop(gw_s* gw) {
                 break;
             case pkt:
                 pkt_stop(serv_entry);
+                break;
+            case mqtt:
+                mqtt_stop(serv_entry);
                 break;
             default:
                 semtech_stop(serv_entry);

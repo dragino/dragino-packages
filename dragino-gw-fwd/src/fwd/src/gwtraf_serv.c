@@ -368,6 +368,11 @@ static void gwtraf_push_up(void* arg) {
 			/* send datagram to servers sequentially */
 			send(serv->net->sock_up, (void *)buff_up, buff_index, 0);
 		}
+
+        pthread_mutex_lock(&GW.mx_bind_lock);
+        serv->rxpkt_serv->bind--;
+        pthread_mutex_unlock(&GW.mx_bind_lock);
+
 	}
 }
 

@@ -415,7 +415,7 @@ typedef struct lgw_context_s {
     struct lgw_conf_debug_s     debug_cfg;
 } lgw_context_t;
 
-struct lorabo_s {
+struct lorahal_s {
     /**
     @brief Configure the gateway board
     @param conf structure containing the configuration parameters
@@ -577,6 +577,9 @@ uint32_t lgw_time_on_air(struct lgw_pkt_tx_s *packet);
 @return pointer on a human-readable null terminated string
 */
 const char* lgw_version_info(void);
+
+#define DEFI_HAL struct lorahal_s HAL;
+#define DECLARE_HAL extern struct lorahal_s HAL;
 
 #endif
 

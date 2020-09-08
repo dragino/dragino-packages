@@ -70,7 +70,7 @@
         "gateway_ID": "AA555A002000ffff",
         /* log mask , 定义log的等级 */
         "log_mask":  100,
-        /* 是否打开 SX radio的接收和发射 */
+        /* 是否打开 SX130x radio的接收和发射 */
         "radiostream_enable": true,
         /* 是否打开 虚拟 radio 的接收和发射 */
         "ghoststream_enable": false,

@@ -29,6 +29,7 @@
 
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -44,7 +45,7 @@ void __lgw_free(void *ptr, const char *file, int lineno, const char *func)
 {
 
     if (!ptr) {
-		FREE_FAILURE_MSG;
+		//FREE_FAILURE_MSG;
         return;
     }
 
@@ -81,6 +82,8 @@ void *__lgw_malloc(size_t size, const char *file, int lineno, const char *func)
 	if (!p) {
 		MALLOC_FAILURE_MSG;
 	}
+
+    memset(p, 0, size);
 
 	return p;
 }

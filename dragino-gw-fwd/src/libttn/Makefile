@@ -10,7 +10,7 @@ SRCS = *.c
 
 OBJS = $(SRCS:%.c=$(OBJDIR)/%.o)
 
-CFLAGS_SO = -g -fPIC -shared -O2 -Wall -I$(PAHO_SRC)
+CFLAGS_SO := $(CFLAGS) -fPIC -shared -O2 -Wall -I$(PAHO_SRC)
 LDD = -lpthread -L$(PAHO_SRC) -lpahomqtt3c
 
 all: $(OBJDIR)/$(TARGET_LIB) test 

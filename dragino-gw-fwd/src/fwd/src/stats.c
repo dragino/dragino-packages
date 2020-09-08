@@ -48,7 +48,7 @@
 
 DECLARE_GW;
 
-void stats_report(serv_s *serv) {
+static void semtech_report(serv_s *serv) {
 	time_t current_time;
 	/* variables to get local copies of measurements */
 	uint32_t cp_nb_rx_rcv = 0;
@@ -213,73 +213,73 @@ void stats_report(serv_s *serv) {
 	}
 
 	/* display a report */
-	printf("\n#######################################################\n");
-	printf("##### [%s] %s #####\n", stat_timestamp, serv->info.name);
-	printf("### [UPSTREAM] ###\n");
-	printf("# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
-	printf("# CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n",
+	lgw_log(LOG_INFO, "\n#######################################################\n");
+	lgw_log(LOG_INFO, "##### [%s] %s #####\n", stat_timestamp, serv->info.name);
+	lgw_log(LOG_INFO, "### [UPSTREAM] ###\n");
+	lgw_log(LOG_INFO, "# RF packets received by concentrator: %u\n", cp_nb_rx_rcv);
+	lgw_log(LOG_INFO, "# CRC_OK: %.2f%%, CRC_FAIL: %.2f%%, NO_CRC: %.2f%%\n",
                     100.0 * rx_ok_ratio, 100.0 * rx_bad_ratio,
                     100.0 * rx_nocrc_ratio);
-	printf("# RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
-	printf("# PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
-	printf("# PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
+	lgw_log(LOG_INFO, "# RF packets forwarded: %u (%u bytes)\n", cp_up_pkt_fwd, cp_up_payload_byte);
+	lgw_log(LOG_INFO, "# PUSH_DATA datagrams sent: %u (%u bytes)\n", cp_up_dgram_sent, cp_up_network_byte);
+	lgw_log(LOG_INFO, "# PUSH_DATA acknowledged: %.2f%%\n", 100.0 * up_ack_ratio);
 
-	printf("### [DOWNSTREAM] ###\n");
-	printf("# PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
-	printf("# PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
-	printf("# RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok + cp_nb_tx_fail), cp_dw_payload_byte);
-	printf("# TX errors: %u\n", cp_nb_tx_fail);
+	lgw_log(LOG_INFO, "### [DOWNSTREAM] ###\n");
+	lgw_log(LOG_INFO, "# PULL_DATA sent: %u (%.2f%% acknowledged)\n", cp_dw_pull_sent, 100.0 * dw_ack_ratio);
+	lgw_log(LOG_INFO, "# PULL_RESP(onse) datagrams received: %u (%u bytes)\n", cp_dw_dgram_rcv, cp_dw_network_byte);
+	lgw_log(LOG_INFO, "# RF packets sent to concentrator: %u (%u bytes)\n", (cp_nb_tx_ok + cp_nb_tx_fail), cp_dw_payload_byte);
+	lgw_log(LOG_INFO, "# TX errors: %u\n", cp_nb_tx_fail);
 
 	if (cp_nb_tx_requested != 0) {
-	printf("# TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n",
-               100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, 
-               cp_nb_tx_requested,
-               cp_nb_tx_rejected_collision_packet);
-	printf("# TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n",
-               100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, 
-               cp_nb_tx_requested,
-               cp_nb_tx_rejected_collision_beacon);
-	printf("# TX rejected (too late): %.2f%% (req:%u, rej:%u)\n",
-               100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested,
-               cp_nb_tx_requested, 
-               cp_nb_tx_rejected_too_late);
-	printf("# TX rejected (too early): %.2f%% (req:%u, rej:%u)\n",
-               100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested,
-               cp_nb_tx_requested, 
-               cp_nb_tx_rejected_too_early);
+        lgw_log(LOG_INFO, "# TX rejected (collision packet): %.2f%% (req:%u, rej:%u)\n",
+                   100.0 * cp_nb_tx_rejected_collision_packet / cp_nb_tx_requested, 
+                   cp_nb_tx_requested,
+                   cp_nb_tx_rejected_collision_packet);
+        lgw_log(LOG_INFO, "# TX rejected (collision beacon): %.2f%% (req:%u, rej:%u)\n",
+                   100.0 * cp_nb_tx_rejected_collision_beacon / cp_nb_tx_requested, 
+                   cp_nb_tx_requested,
+                   cp_nb_tx_rejected_collision_beacon);
+        lgw_log(LOG_INFO, "# TX rejected (too late): %.2f%% (req:%u, rej:%u)\n",
+                   100.0 * cp_nb_tx_rejected_too_late / cp_nb_tx_requested,
+                   cp_nb_tx_requested, 
+                   cp_nb_tx_rejected_too_late);
+        lgw_log(LOG_INFO, "# TX rejected (too early): %.2f%% (req:%u, rej:%u)\n",
+                   100.0 * cp_nb_tx_rejected_too_early / cp_nb_tx_requested,
+                   cp_nb_tx_requested, 
+                   cp_nb_tx_rejected_too_early);
 	}
 
-	printf("### [BEACON] ###\n");
-	printf("# Packets queued: %u\n", cp_nb_beacon_queued);
-	printf("# Packets sent so far: %u\n", cp_nb_beacon_sent);
-	printf("# Packets rejected: %u\n", cp_nb_beacon_rejected);
+	lgw_log(LOG_INFO, "### [BEACON] ###\n");
+	lgw_log(LOG_INFO, "# Packets queued: %u\n", cp_nb_beacon_queued);
+	lgw_log(LOG_INFO, "# Packets sent so far: %u\n", cp_nb_beacon_sent);
+	lgw_log(LOG_INFO, "# Packets rejected: %u\n", cp_nb_beacon_rejected);
 
-	printf("### [JIT] ###\n");
+	lgw_log(LOG_INFO, "### [JIT] ###\n");
     jit_print_queue (&GW.tx.jit_queue[0], false, LOG_JIT);
-    printf("#--------\n");
+    lgw_log(LOG_INFO, "#--------\n");
     jit_print_queue (&GW.tx.jit_queue[1], false, LOG_JIT);
 
-    printf("### [GPS] ###\n");
+    lgw_log(LOG_INFO, "### [GPS] ###\n");
 	//TODO: this is not symmetrical. time can also be derived from other sources, fix
 	if (GW.gps.gps_enabled == true) {
-		printf("### [GPS] ###\n");
+		lgw_log(LOG_INFO, "### [GPS] ###\n");
 		/* no need for mutex, display is not critical */
 		if (GW.gps.gps_ref_valid == true) {
-			printf("# Valid gps time reference (age: %li sec)\n", (long)difftime(time(NULL), GW.gps.time_reference_gps.systime));
+			lgw_log(LOG_INFO, "# Valid gps time reference (age: %li sec)\n", (long)difftime(time(NULL), GW.gps.time_reference_gps.systime));
 		} else {
-			printf("# Invalid gps time reference (age: %li sec)\n", (long)difftime(time(NULL), GW.gps.time_reference_gps.systime));
+			lgw_log(LOG_INFO, "# Invalid gps time reference (age: %li sec)\n", (long)difftime(time(NULL), GW.gps.time_reference_gps.systime));
 		}
 
 		if (coord_ok) {
-			printf("# System GPS coordinates: latitude %.5f, longitude %.5f, altitude %i m\n",
+			lgw_log(LOG_INFO, "# System GPS coordinates: latitude %.5f, longitude %.5f, altitude %i m\n",
 				   cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
 		} else {
-			printf("# no valid GPS coordinates available yet\n");
+			lgw_log(LOG_INFO, "# no valid GPS coordinates available yet\n");
 		}
     } else if (GW.gps.gps_fake_enable == true) {
-        printf("# GPS *FAKE* coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
+        lgw_log(LOG_INFO, "# GPS *FAKE* coordinates: latitude %.5f, longitude %.5f, altitude %i m\n", cp_gps_coord.lat, cp_gps_coord.lon, cp_gps_coord.alt);
 	} else {
-		printf("### GPS IS DISABLED! \n");
+		lgw_log(LOG_INFO, "### GPS IS DISABLED! \n");
 	}
 
 	/* generate a JSON report (will be sent to serv by upstream thread) */
@@ -363,7 +363,7 @@ void stats_report(serv_s *serv) {
 					 cp_nb_tx_ok, GW.info.platform, 
                      GW.info.email, GW.info.description);
 		}
-		printf("#[%s] Semtech status report sent. \n", serv->info.name);
+		lgw_log(LOG_INFO, "#[%s] Semtech status report sent. \n", serv->info.name);
 
 		serv->report->report_ready = true;
 		pthread_mutex_unlock(&serv->report->mx_report);
@@ -372,8 +372,22 @@ void stats_report(serv_s *serv) {
 	if (other_format) 
 		json_value_free(root_value_verbose);
 
-	printf("#####[%s] Stat END #####\n", serv->info.name);
+	lgw_log(LOG_INFO, "################### [%s] END #########################\n", serv->info.name);
 
+}
+
+void report_start() {
+    serv_s* serv_entry;
+    LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) { 
+        switch (serv_entry->info.type) {
+            case semtech:
+                semtech_report(serv_entry);
+                break;
+            default:
+	            lgw_log(LOG_INFO, "#####[%s] empty report #####\n", serv_entry->info.name);
+                break;
+        }
+    }
 }
 
 

@@ -101,6 +101,18 @@ typedef enum {
     INCLUDE
 } filter_e;
 
+
+typedef struct {               // 配置文件: sx130x模块配置文件(sxcfg.json)和gw配置文件(gwcfg.json)
+    char gwcfg[32];
+    char sxcfg[48];
+} confs_s;
+
+typedef struct {
+    void* session;
+    char uptopic[64];
+    char dntopic[64];
+} mqttinfo_s;
+
 typedef struct {
     char addr[64];				// server address
     char port_up[8];			// uplink port 
@@ -110,8 +122,8 @@ typedef struct {
     int  pull_interval;	        // send a PULL_DATA request every X seconds 
     struct timeval push_timeout_half;       /* time-out value (in ms) for upstream datagrams */
     struct timeval pull_timeout;
+    mqttinfo_s *mqtt;
 } serv_net_s;
-
 
 /*!
  * \brief server是一个描述什么样服务的数据结构
@@ -124,9 +136,8 @@ typedef struct _server {
     struct {
 	    serv_type type;		        // type of server
         bool enabled;
-        char  name[32];             // identify of server
-        char* id;		            // gateway ID for service
-        char* key;			        // gateway key to connect to  service
+        char name[32];              // identify of server
+        char *key;			    // gateway key to connect to service
     } info;
 
     struct {
@@ -180,17 +191,7 @@ typedef struct {
         bool xtal_correct_ok;
         double xtal_correct;
         uint8_t antenna_gain;
-        /*
-        union {
-            struct sx1301_conf*  sx1301conf;
-            struct sx1302_conf*  sx1302conf;
-            struct sx1308_conf*  sx1308conf;
-        } sxmt;
-        union {
-            struct sx1276_conf*  sx1276conf;
-            struct sx1261_conf*  sx1261conf;
-        } sxsg;
-        */
+        confs_s confs;
         pthread_mutex_t mx_xcorr;
         pthread_mutex_t mx_concent;
     } hal;
@@ -209,7 +210,6 @@ typedef struct {
         char   ghost_port[16];
         region_s   region;
         uint32_t autoquit_threshold;/* enable auto-quit after a number of non-acknowledged PULL_DATA (0 = disabled) */
-        struct lgw_conf_debug_s* debugconf;
     } cfg;
 
     /* GPS configuration and synchronization */
@@ -270,7 +270,9 @@ typedef struct {
 } gw_s;
 
 #define INIT_GW gw_s GW = {   .info.lgwm = 0,                                        \
-                              .hal.board = "LG302",                                  \
+                              .hal.board = "sx1302",                                 \
+                              .hal.confs = { .gwcfg = "/etc/lora/gwcfg.json",        \
+                                             .sxcfg = "/etc/lora/sxcfg.json", },     \
                               .hal.mx_concent = PTHREAD_MUTEX_INITIALIZER,           \
                               .hal.mx_xcorr   = PTHREAD_MUTEX_INITIALIZER,           \
                               .hal.xtal_correct_ok = false,                          \
@@ -313,6 +315,6 @@ typedef struct {
 /*
  *
  */
-int parsecfg(const char *cfgfile, gw_s* gw);
+int parsecfg();
 
 #endif							// _GW_H

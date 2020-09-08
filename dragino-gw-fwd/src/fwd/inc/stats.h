@@ -101,6 +101,6 @@ typedef struct {
     pthread_mutex_t mx_report;	 // control access to the queue for each server
 } report_s;
 
-void stats_report();
+void report_start();
 
 #endif							// _LORA_PKTFWD_STATS_H

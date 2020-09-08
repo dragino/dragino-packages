@@ -182,6 +182,8 @@ int lgw_pthread_create_stack(pthread_t *thread, pthread_attr_t *attr, void *(*st
 			     int line, const char *start_fn)
 {
 
+    int res;
+
 	if (!attr) {
 		attr = lgw_alloca(sizeof(*attr));
 		pthread_attr_init(attr);
@@ -205,7 +207,10 @@ int lgw_pthread_create_stack(pthread_t *thread, pthread_attr_t *attr, void *(*st
 	if ((errno = pthread_attr_setstacksize(attr, stacksize ? stacksize : LGW_STACKSIZE)))
 		lgw_log(LOG_WARNING, "pthread_attr_setstacksize: %s\n", strerror(errno));
 
-	return pthread_create(thread, attr, start_routine, data); /* We're in lgw_pthread_create, so it's okay */
+	if ((res = pthread_create(thread, attr, start_routine, data))) /* We're in lgw_pthread_create, so it's okay */
+	    lgw_log(LOG_ERROR, "%s->%s:%s:%d pthread_create: %s\n", caller, file, start_fn, line, strerror(res));
+
+    return res;
 }
 
 

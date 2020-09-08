@@ -6,25 +6,22 @@ export
 
 ### general build targets
 
-.PHONY: all clean install install_conf hal fwd 
+.PHONY: all clean install install_conf hal fwd libmqtt
 
-all: hal fwd 
+all: hal libmqtt fwd 
 
 hal: 
 	$(MAKE) all -e -C $@
 
-fwd: hal
+fwd: hal libmqtt
+	$(MAKE) all -e -C $@
+
+libmqtt: 
 	$(MAKE) all -e -C $@
 
 clean:
 	$(MAKE) clean -e -C hal
 	$(MAKE) clean -e -C fwd
-
-install:
-	$(MAKE) install -e -C hal
-	$(MAKE) install -e -C fwd
-
-install_conf:
-	$(MAKE) install_conf -e -C fwd
+	$(MAKE) clean -e -C libmqtt
 
 ### EOF

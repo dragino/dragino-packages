@@ -49,7 +49,7 @@
 #include "mac-header-decode.h"
 
 DECLARE_GW;
-extern struct lorabo_s lorabo;
+DECLARE_HAL;
 
 static uint8_t rx2bw;
 static uint8_t rx2dr;
@@ -82,7 +82,7 @@ static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint3
     txpkt.count_us = us + 2000000UL; /* rx2 window plus 1s */
     txpkt.no_crc = true;
     txpkt.freq_hz = rx2freq; /* same as the up */
-    txpkt.rf_chain = 1;
+    txpkt.rf_chain = 0;
     txpkt.rf_power = 20;
     txpkt.datarate = rx2dr;
     txpkt.bandwidth = rx2bw;
@@ -95,20 +95,20 @@ static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint3
     else
         downlink_type = JIT_PKT_TYPE_DOWNLINK_CLASS_C;
 
-    /* 这个key重启将会删除 */
+    /* 这个key重启将会删除, 下发的计数器 */
     sprintf(db_family, "/downlink/%08X", devinfo->devaddr);
     if (lgw_db_get(db_family, "fcnt", tmpstr, sizeof(tmpstr)) == -1) {
         lgw_db_put(db_family, "fcnt", "0");
     } else { 
         dwfcnt = atol(tmpstr);
-        sprintf(tmpstr, "%u", ++dwfcnt);
-        lgw_db_put(db_family, "fcnt", "0");
+        sprintf(tmpstr, "%u", dwfcnt + 1);
+        lgw_db_put(db_family, "fcnt", tmpstr);
     }
 
     /* prepare MAC message */
     lgw_memset(payload_en, '\0', sizeof(payload_en));
 
-    prepare_frame(FRAME_TYPE_DATA_UNCONFIRMED_DOWN, devinfo, dwfcnt, (uint8_t *)dnelem->payload, dnelem->psize, payload_en, &fsize);
+    prepare_frame(FRAME_TYPE_DATA_UNCONFIRMED_DOWN, devinfo, dwfcnt++, (uint8_t *)dnelem->payload, dnelem->psize, payload_en, &fsize);
 
     lgw_memcpy(txpkt.payload, payload_en, fsize);
 
@@ -121,7 +121,7 @@ static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint3
     lgw_log(LOG_DEBUG, "\n");
 
     pthread_mutex_lock(&GW.hal.mx_concent);
-    lorabo.lgw_get_instcnt(&current_concentrator_time);
+    HAL.lgw_get_instcnt(&current_concentrator_time);
     pthread_mutex_unlock(&GW.hal.mx_concent);
     jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], current_concentrator_time, &txpkt, downlink_type);
     lgw_log(LOG_DEBUG, "DEBUG~ [pkt-dwn] DNRX2-> tmst:%u, freq:%u, psize:%u.\n", txpkt.count_us, txpkt.freq_hz, txpkt.size);
@@ -247,6 +247,7 @@ void pkt_stop(serv_s* serv) {
 
 static void pkt_deal_up(void* arg) {
     serv_s* serv = (serv_s*) arg;
+    lgw_log(LOG_INFO, "INFO~ [%s] Staring pkt_deal_up thread\n", serv->info.name);
 	int i;					/* loop variables */
     int fsize = 0;
     int index = 0;
@@ -377,6 +378,8 @@ static void pkt_deal_up(void* arg) {
 
 static void pkt_prepare_downlink(void* arg) {
     serv_s* serv = (serv_s*) arg;
+    lgw_log(LOG_INFO, "INFO~ [%s] Staring pkt_prepare_downlink thread\n", serv->info.name);
+    
     int i, j; /* loop variables */
 
     DIR *dir;

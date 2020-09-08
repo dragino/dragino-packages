@@ -47,7 +47,7 @@
 #include "loragw_aux.h"
 
 DECLARE_GW;
-extern struct lorabo_s lorabo;
+DECLARE_HAL;
 
 static void semtech_pull_down(void* arg);
 static void semtech_push_up(void* arg);
@@ -86,6 +86,7 @@ int semtech_stop(serv_s* serv) {
 
 static void semtech_push_up(void* arg) {
     serv_s* serv = (serv_s*) arg;
+    lgw_log(LOG_WARNING, "INFO~ [%s] Starting semtech_push_up thread.\n", serv->info.name);
 
     int i, j; /* loop variables */
     int retry;
@@ -606,6 +607,7 @@ static void semtech_push_up(void* arg) {
 
 static void semtech_pull_down(void* arg) {
     serv_s* serv = (serv_s*) arg;
+    lgw_log(LOG_WARNING, "INFO~ [%s] Starting semtech_push_down thread.\n", serv->info.name);
 
     int i; /* loop variables */
     int retry;
@@ -882,7 +884,7 @@ static void semtech_pull_down(void* arg) {
 
                     /* Insert beacon packet in JiT queue */
                     pthread_mutex_lock(&GW.hal.mx_concent);
-                    lorabo.lgw_get_instcnt(&current_concentrator_time);
+                    HAL.lgw_get_instcnt(&current_concentrator_time);
                     pthread_mutex_unlock(&GW.hal.mx_concent);
                     jit_result = jit_enqueue(&GW.tx.jit_queue[0], current_concentrator_time, &beacon_pkt, JIT_PKT_TYPE_BEACON);
                     if (jit_result == JIT_ERROR_OK) {
@@ -1265,7 +1267,7 @@ static void semtech_pull_down(void* arg) {
             /* insert packet to be sent into JIT queue */
             if (jit_result == JIT_ERROR_OK) {
                 pthread_mutex_lock(&GW.hal.mx_concent);
-                lorabo.lgw_get_instcnt(&current_concentrator_time);
+                HAL.lgw_get_instcnt(&current_concentrator_time);
                 pthread_mutex_unlock(&GW.hal.mx_concent);
                 jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], current_concentrator_time, &txpkt, downlink_type);
                 if (jit_result != JIT_ERROR_OK) {

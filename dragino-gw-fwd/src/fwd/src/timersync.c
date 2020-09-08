@@ -60,13 +60,13 @@ extern bool quit_sig;
 /* --- PUBLIC FUNCTIONS DEFINITION ------------------------------------------ */
 
 DECLARE_GW;
-extern struct lorabo_s lorabo;
+DECLARE_HAL;
 
 int get_concentrator_time(struct timeval *concent_time, struct timeval unix_time) {
     struct timeval local_timeval;
 
     if (concent_time == NULL) {
-        MSG("ERROR: %s invalid parameter\n", __FUNCTION__);
+        lgw_log(LOG_ERROR, "ERROR: %s invalid parameter\n", __FUNCTION__);
         return -1;
     }
 
@@ -74,13 +74,13 @@ int get_concentrator_time(struct timeval *concent_time, struct timeval unix_time
     timersub(&unix_time, &offset_unix_concent, &local_timeval);
     pthread_mutex_unlock(&mx_timersync);
 
-    /* TODO: handle sx1301 coutner wrap-up !! */
+    /* TODO: handle sx130x coutner wrap-up !! */
     concent_time->tv_sec = local_timeval.tv_sec;
     concent_time->tv_usec = local_timeval.tv_usec;
 
     lgw_log(LOG_TIMERSYNC, " --> TIME: unix current time is   %ld,%ld\n", unix_time.tv_sec, unix_time.tv_usec);
     lgw_log(LOG_TIMERSYNC, "           offset is              %ld,%ld\n", offset_unix_concent.tv_sec, offset_unix_concent.tv_usec);
-    lgw_log(LOG_TIMERSYNC, "           sx1301 current time is %ld,%ld\n", local_timeval.tv_sec, local_timeval.tv_usec);
+    lgw_log(LOG_TIMERSYNC, "           sx130x current time is %ld,%ld\n", local_timeval.tv_sec, local_timeval.tv_usec);
 
     return 0;
 }
@@ -91,14 +91,14 @@ int get_concentrator_time(struct timeval *concent_time, struct timeval unix_time
 void thread_timersync(void) {
     struct timeval unix_timeval;
     struct timeval concentrator_timeval;
-    uint32_t sx1301_timecount = 0;
+    uint32_t sx130x_timecount = 0;
     struct timeval offset_previous = {0,0};
     struct timeval offset_drift = {0,0}; /* delta between current and previous offset */
 
     while (!exit_sig && !quit_sig) {
         /* Regularly disable GPS mode of concentrator's counter, in order to get
             real timer value for synchronizing with host's unix timer */
-        MSG("\nINFO: Disabling GPS mode for concentrator's counter...\n");
+        lgw_log(LOG_INFO, "\nINFO: Disabling GPS mode for concentrator's counter...\n");
         //pthread_mutex_lock(&GW.hal.mx_concent);
         //lgw_reg_w(LGW_GPS_EN, 0);
         //pthread_mutex_unlock(&GW.hal.mx_concent);
@@ -108,33 +108,33 @@ void thread_timersync(void) {
 
         /* Get current concentrator counter value (1MHz) */
         pthread_mutex_lock(&GW.hal.mx_concent);
-        lorabo.lgw_get_trigcnt(&sx1301_timecount);
+        HAL.lgw_get_trigcnt(&sx130x_timecount);
         pthread_mutex_unlock(&GW.hal.mx_concent);
-        concentrator_timeval.tv_sec = sx1301_timecount / 1000000UL;
-        concentrator_timeval.tv_usec = sx1301_timecount - (concentrator_timeval.tv_sec * 1000000UL);
+        concentrator_timeval.tv_sec = sx130x_timecount / 1000000UL;
+        concentrator_timeval.tv_usec = sx130x_timecount - (concentrator_timeval.tv_sec * 1000000UL);
 
         /* Compute offset between unix and concentrator timers, with microsecond precision */
         offset_previous.tv_sec = offset_unix_concent.tv_sec;
         offset_previous.tv_usec = offset_unix_concent.tv_usec;
 
-        /* TODO: handle sx1301 coutner wrap-up */
+        /* TODO: handle sx130x coutner wrap-up */
         pthread_mutex_lock(&mx_timersync); /* protect global variable access */
         timersub(&unix_timeval, &concentrator_timeval, &offset_unix_concent);
         pthread_mutex_unlock(&mx_timersync);
 
         timersub(&offset_unix_concent, &offset_previous, &offset_drift);
 
-        lgw_log(LOG_TIMERSYNC, "  sx1301    = %u (µs) - timeval (%ld,%ld)\n",
-                                                                    sx1301_timecount,
-                                                                    concentrator_timeval.tv_sec,
-                                                                    concentrator_timeval.tv_usec);
+        lgw_log(LOG_TIMERSYNC, "  sx130x = %u (µs) - timeval (%ld,%ld)\n",
+                                          sx130x_timecount,
+                                          concentrator_timeval.tv_sec,
+                                          concentrator_timeval.tv_usec);
         lgw_log(LOG_TIMERSYNC, "  unix_timeval = %ld,%ld\n", unix_timeval.tv_sec, unix_timeval.tv_usec);
 
-        MSG("INFO: host/sx1301 time offset=(%lds:%ldµs) - drift=%ldµs\n",
-            offset_unix_concent.tv_sec,
-            offset_unix_concent.tv_usec,
-            offset_drift.tv_sec * 1000000UL + offset_drift.tv_usec);
-        MSG("INFO: Enabling GPS mode for concentrator's counter.\n\n");
+        lgw_log(LOG_INFO, "INFO: host/sx130x time offset=(%lds:%ldµs) - drift=%ldµs\n",
+                            offset_unix_concent.tv_sec,
+                            offset_unix_concent.tv_usec,
+                            offset_drift.tv_sec * 1000000UL + offset_drift.tv_usec);
+        lgw_log(LOG_INFO, "INFO: Enabling GPS mode for concentrator's counter.\n\n");
         //pthread_mutex_lock(&GW.hal.mx_concent); /* TODO: Is it necessary to protect here? */
         //lgw_reg_w(LGW_GPS_EN, 1);
         //pthread_mutex_unlock(&GW.hal.mx_concent);

@@ -773,7 +773,7 @@ static int parse_gateway_configuration(const char* conf_file) {
 
     /* servers configure */
 	serv_arry = json_object_get_array(conf_obj, "servers");
-	if (serv_arry != NULL) {
+	if ( NULL != serv_arry) {
 		/* serv_count represents the maximal number of servers to be read. */
         int count = 0, i = 0, try = 0;
 		count = json_array_get_count(serv_arry);
@@ -967,7 +967,7 @@ static int parse_gateway_configuration(const char* conf_file) {
             LGW_LIST_INSERT_TAIL(&GW.serv_list, serv_entry, list);
         }
     } else 
-        lgw_log(LOG_INFO, "WARNING: None service offer.\n");
+        lgw_log(LOG_WARNING, "WARNING~ [GWCFG] None service offer.\n");
 
     /* free JSON parsing data structure */
     json_value_free(root_val);

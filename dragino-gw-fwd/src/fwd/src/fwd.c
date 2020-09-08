@@ -77,7 +77,7 @@ volatile bool quit_sig = false;	/* 1 -> application terminates without shutting 
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC DECLARATION ---------------------------------------- */
-uint8_t LOG_PKT = 0;
+uint8_t LOG_PKT = 1;
 uint8_t LOG_TIMERSYNC = 0;
 uint8_t LOG_REPORT = 1;
 uint8_t LOG_JIT = 0;
@@ -758,6 +758,8 @@ static void thread_up(void) {
 
 static void thread_rxpkt_recycle(void) {
     rxpkts_s* rxpkts_entry = NULL;
+
+	lgw_log(LOG_INFO, "INFO~ [MAIN] Runing pkts recycle thread\n");
 
     LGW_LIST_LOCK(&GW.rxpkts_list);
     LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.rxpkts_list, rxpkts_entry, list) {

@@ -197,7 +197,7 @@ static dn_pkt_s* search_dn_list(const char* addr) {
 
 int pkt_start(serv_s* serv) {
     if (lgw_pthread_create_detached(&serv->thread.t_up, NULL, (void *(*)(void *))pkt_deal_up, serv)) {
-        lgw_log(LOG_WARNING, "WARNING~ [%s] Can't create pkt deal pthread.\n", serv->info.name);
+        lgw_log(LOG_WARNING, "WARNING~ [%s] Can't create packages deal pthread.\n", serv->info.name);
         return -1;
     }
 

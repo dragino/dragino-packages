@@ -224,7 +224,7 @@ static void semtech_push_up(void* arg) {
             serv->report->stat_up.meas_up_pkt_fwd += 1;
             serv->report->stat_up.meas_up_payload_byte += p->size;
             pthread_mutex_unlock(&serv->report->mx_report);
-            lgw_log(LOG_INFO, "\nINFO~ [%s-up] received pkt from mote: %08X (fcnt=%u)\n", serv->info.name, mote_addr, mote_fcnt);
+            lgw_log(LOG_INFO, "\nINFO~ [%s-up] received packages from mote: %08X (fcnt=%u)\n", serv->info.name, mote_addr, mote_fcnt);
 
 			/* Start of packet, add inter-packet separator if necessary */
 			if (pkt_in_dgram == 0) {
@@ -508,6 +508,8 @@ static void semtech_push_up(void* arg) {
         serv->rxpkt_serv->bind--;
         pthread_mutex_unlock(&GW.mx_bind_lock);
 
+        serv->rxpkt_serv = NULL;
+
 		/* restart fetch sequence without sending empty JSON if all packets have been filtered out */
 		if (pkt_in_dgram == 0) {
             if (serv->report->report_ready == true) {
@@ -549,7 +551,7 @@ static void semtech_push_up(void* arg) {
 		++buff_index;
 		buff_up[buff_index] = 0; /* add string terminator, for safety */
 
-		lgw_log(LOG_PKT, "PKT~ \n%s JSON up: %s\n", serv->info.name, (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+		lgw_log(LOG_PKT, "PKT~ \n[%s] JSON up: %s\n", serv->info.name, (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
 
 		/* send datagram to server */
         retry = 0;
@@ -564,7 +566,7 @@ static void semtech_push_up(void* arg) {
                 break;
         }
 
-        if (serv->net->sock_up == -1)
+        if (serv->net->sock_up == -1)  // drop 
             continue;
 
 		send(serv->net->sock_up, (void *)buff_up, buff_index, 0);

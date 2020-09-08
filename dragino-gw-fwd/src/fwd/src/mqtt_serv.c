@@ -223,6 +223,10 @@ static void mqtt_push_up(void* arg) {
 	while (!serv->thread.stop_sig) {
 		// wait for data to arrive
 		sem_wait(&serv->thread.sema);
+
+        if (serv->rxpkt_serv == NULL)
+            continue;
+
 		for (i = 0; i < serv->rxpkt_serv->nb_pkt; ++i) {
 			p = &serv->rxpkt_serv->rxpkt[i];
 			/* basic packet filtering */
@@ -256,6 +260,8 @@ static void mqtt_push_up(void* arg) {
         pthread_mutex_lock(&GW.mx_bind_lock);
         serv->rxpkt_serv->bind--;
         pthread_mutex_unlock(&GW.mx_bind_lock);
+
+        serv->rxpkt_serv = NULL;
     }
 }
 

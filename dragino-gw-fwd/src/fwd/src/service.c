@@ -142,7 +142,7 @@ bool pkt_basic_filter(serv_s* serv, const uint32_t addr, const uint8_t fport) {
 void service_handle_rxpkt(gw_s* gw, rxpkts_s* rxpkt) {
     serv_s* serv_entry;
     LGW_LIST_TRAVERSE(&gw->serv_list, serv_entry, list) { 
-        serv_entry->rxpkt_serv = rxpkt;
+        //serv_entry->rxpkt_serv = rxpkt;
         sem_post(&serv_entry->thread.sema);
     }
 }

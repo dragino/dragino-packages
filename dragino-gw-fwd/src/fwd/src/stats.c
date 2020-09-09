@@ -347,6 +347,8 @@ static void semtech_report(serv_s *serv) {
 	if (serv->report->statusstream && semtech_format) {
 		pthread_mutex_lock(&serv->report->mx_report);
 
+        memset(serv->report->status_report, 0, sizeof(serv->report->status_report));
+
 		if ((GW.gps.gps_enabled && coord_ok) || GW.gps.gps_fake_enable) {
 			snprintf(serv->report->status_report, STATUS_SIZE,
 					 "{\"stat\":{\"time\":\"%s\",\"lati\":%.5f,\"long\":%.5f,\"alti\":%i,\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u,\"pfrm\":\"%s\",\"mail\":\"%s\",\"desc\":\"%s\"}}",
@@ -372,7 +374,7 @@ static void semtech_report(serv_s *serv) {
 	if (other_format) 
 		json_value_free(root_value_verbose);
 
-	lgw_log(LOG_INFO, "################### [%s] END #########################\n", serv->info.name);
+	lgw_log(LOG_INFO, "################### [%s] end of reporting #########################\n", serv->info.name);
 
 }
 
@@ -384,7 +386,7 @@ void report_start() {
                 semtech_report(serv_entry);
                 break;
             default:
-	            lgw_log(LOG_INFO, "#####[%s] empty report #####\n", serv_entry->info.name);
+	            lgw_log(LOG_INFO, "\n################[%s] no report of this service ###############\n", serv_entry->info.name);
                 break;
         }
     }

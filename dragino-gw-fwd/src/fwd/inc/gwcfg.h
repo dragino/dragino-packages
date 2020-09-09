@@ -89,9 +89,10 @@ typedef struct _thread_info {
 
 typedef struct _rxpkts {   /* rx packages receive from radio or socke */
     LGW_LIST_ENTRY(_rxpkts) list;
-    bool deal;
+    //bool deal;
+    uint8_t stamps;        //这个指示当前有什么服务对这个包打上了印记
     uint8_t nb_pkt;
-    uint8_t bind;
+    uint8_t bind;          //当前还剩多少连接，当连接为0时，将会移除这个包
     struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];
 } rxpkts_s;
 
@@ -131,13 +132,13 @@ typedef struct {
  */
 typedef struct _server {
     LGW_LIST_ENTRY(_server) list;
-    rxpkts_s* rxpkt_serv;           // rxpkts array
 
     struct {
 	    serv_type type;		        // type of server
+        uint8_t stamp;              // 用来标记service，当有服务印上这个标记时，代表和当前的service有关联
         bool enabled;
         char name[32];              // identify of server
-        char *key;			    // gateway key to connect to service
+        char *key;			        // gateway key to connect to service
     } info;
 
     struct {
@@ -172,7 +173,7 @@ typedef struct _server {
 
 LGW_LIST_HEAD_NOLOCK(serv_list, _server);  // pkts list head of rxpkts for server 
 
-LGW_LIST_HEAD(rxpkts_list, _rxpkts);     //定义一个数据链，用来保存接收到的数据包         
+LGW_LIST_HEAD(rxpkts_list, _rxpkts);     //定义一个数据链头，用来保存接收到的数据包         
 
 
 typedef struct {

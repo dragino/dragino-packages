@@ -68,7 +68,7 @@
 
 #define DEFAULT_BEACON_POLL_MS              50	        /* time in ms between polling of beacon TX status */
 
-#define DEFAULT_RXPKTS_LIST_SIZE            8           
+#define DEFAULT_RXPKTS_LIST_SIZE            2           
 
 #define PKT_PUSH_DATA                       0
 #define PKT_PUSH_ACK                        1

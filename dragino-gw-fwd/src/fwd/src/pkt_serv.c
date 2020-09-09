@@ -248,11 +248,14 @@ void pkt_stop(serv_s* serv) {
 static void pkt_deal_up(void* arg) {
     serv_s* serv = (serv_s*) arg;
     lgw_log(LOG_INFO, "INFO~ [%s] Staring pkt_deal_up thread\n", serv->info.name);
+
 	int i;					/* loop variables */
     int fsize = 0;
     int index = 0;
 
 	struct lgw_pkt_rx_s *p;	/* pointer on a RX packet */
+
+    rxpkts_s* rxpkt_entry = NULL;
 
 	int buff_index;
 
@@ -267,112 +270,117 @@ static void pkt_deal_up(void* arg) {
 		// wait for data to arrive
 		sem_wait(&serv->thread.sema);
 
-        if (serv->rxpkt_serv == NULL)
-            continue;
-
-		/* serialize one Lora packet metadata and payload */
-		for (i = 0; i < serv->rxpkt_serv->nb_pkt; ++i) {
-			p = &serv->rxpkt_serv->rxpkt[i];
-
-            if (p->size < 13) /* offset of frmpayload */
+        LGW_LIST_TRAVERSE(&GW.rxpkts_list, rxpkt_entry, list) {  
+            if (NULL == rxpkt_entry)
                 continue;
 
-            macmsg.Buffer = p->payload;
-            macmsg.BufSize = p->size;
-
-            if (LoRaMacParserData(&macmsg) != LORAMAC_PARSER_SUCCESS)
+            if (serv->info.stamp == (serv->info.stamp & rxpkt_entry->stamps)) {
                 continue;
+            }
+            /* serialize one Lora packet metadata and payload */
+            for (i = 0; i < rxpkt_entry->nb_pkt; ++i) {
+                p = &rxpkt_entry->rxpkt[i];
 
-            printf_mac_header(&macmsg);
-
-			if (GW.cfg.mac_decoded || GW.cfg.custom_downlink) {
-                devinfo_s devinfo = { .devaddr = macmsg.FHDR.DevAddr, 
-                                      .devaddr_str = {0},
-                                      .appskey_str = {0},
-                                      .nwkskey_str = {0}
-                                    };
-                sprintf(db_family, "devinfo/%08X", devinfo.devaddr);
-                if ((lgw_db_get(db_family, "appskey", devinfo.appskey_str, sizeof(devinfo.appskey_str)) == -1) || 
-                    (lgw_db_get(db_family, "nwkskey", devinfo.nwkskey_str, sizeof(devinfo.nwkskey_str)) == -1)) {
+                if (p->size < 13) /* offset of frmpayload */
                     continue;
-                }
 
-                str2hex(devinfo.appskey, devinfo.appskey_str, sizeof(devinfo.appskey));
-                str2hex(devinfo.nwkskey, devinfo.nwkskey_str, sizeof(devinfo.nwkskey));
+                macmsg.Buffer = p->payload;
+                macmsg.BufSize = p->size;
 
-                /* Debug message of appskey */
-                lgw_log(LOG_DEBUG, "\nDEBUG~ [MAC-Decode]appskey:");
-                for (i = 0; i < (int)sizeof(devinfo.appskey); ++i) {
-                    lgw_log(LOG_DEBUG, "%02X", devinfo.appskey[i]);
-                }
-                lgw_log(LOG_DEBUG, "\n");
+                if (LoRaMacParserData(&macmsg) != LORAMAC_PARSER_SUCCESS)
+                    continue;
 
-                if (GW.cfg.mac_decoded) {
-                    fsize = p->size - 13 - macmsg.FHDR.FCtrl.Bits.FOptsLen; 
-                    memcpy(payload_encrypt, p->payload + 9 + macmsg.FHDR.FCtrl.Bits.FOptsLen, fsize);
-                    LoRaMacPayloadDecrypt(payload_encrypt, fsize, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)macmsg.FHDR.FCnt, payload_txt);
+                printf_mac_header(&macmsg);
 
-                    /* Debug message of decoded payload */
-                    lgw_log(LOG_DEBUG, "\nDEBUG~ [MAC-Decode] RX(%d):", fsize);
-                    for (i = 0; i < fsize; ++i) {
-                        lgw_log(LOG_DEBUG, "%02X", payload_txt[i]);
+                if (GW.cfg.mac_decoded || GW.cfg.custom_downlink) {
+                    devinfo_s devinfo = { .devaddr = macmsg.FHDR.DevAddr, 
+                                          .devaddr_str = {0},
+                                          .appskey_str = {0},
+                                          .nwkskey_str = {0}
+                                        };
+                    sprintf(db_family, "devinfo/%08X", devinfo.devaddr);
+                    if ((lgw_db_get(db_family, "appskey", devinfo.appskey_str, sizeof(devinfo.appskey_str)) == -1) || 
+                        (lgw_db_get(db_family, "nwkskey", devinfo.nwkskey_str, sizeof(devinfo.nwkskey_str)) == -1)) {
+                        continue;
+                    }
+
+                    str2hex(devinfo.appskey, devinfo.appskey_str, sizeof(devinfo.appskey));
+                    str2hex(devinfo.nwkskey, devinfo.nwkskey_str, sizeof(devinfo.nwkskey));
+
+                    /* Debug message of appskey */
+                    lgw_log(LOG_DEBUG, "\nDEBUG~ [MAC-Decode]appskey:");
+                    for (i = 0; i < (int)sizeof(devinfo.appskey); ++i) {
+                        lgw_log(LOG_DEBUG, "%02X", devinfo.appskey[i]);
                     }
                     lgw_log(LOG_DEBUG, "\n");
 
-                    if (GW.cfg.mac2file) {
-                        FILE *fp;
-                        char pushpath[128];
-                        snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
-                        fp = fopen(pushpath, "w+");
-                        if (NULL == fp)
-                            lgw_log(LOG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
-                        else { 
-                            fwrite(payload_txt, sizeof(uint8_t), fsize + 1, fp);
-                            fflush(fp); 
-                            fclose(fp);
+                    if (GW.cfg.mac_decoded) {
+                        fsize = p->size - 13 - macmsg.FHDR.FCtrl.Bits.FOptsLen; 
+                        memcpy(payload_encrypt, p->payload + 9 + macmsg.FHDR.FCtrl.Bits.FOptsLen, fsize);
+                        LoRaMacPayloadDecrypt(payload_encrypt, fsize, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)macmsg.FHDR.FCnt, payload_txt);
+
+                        /* Debug message of decoded payload */
+                        lgw_log(LOG_DEBUG, "\nDEBUG~ [MAC-Decode] RX(%d):", fsize);
+                        for (i = 0; i < fsize; ++i) {
+                            lgw_log(LOG_DEBUG, "%02X", payload_txt[i]);
                         }
-                    
-                    }
+                        lgw_log(LOG_DEBUG, "\n");
 
-                    if (GW.cfg.mac2db) { /* 每个devaddr最多保存10个payload */
-                        sprintf(db_family, "/payload/%08X", devinfo.devaddr);
-                        if (lgw_db_get(db_family, "index", tmpstr, sizeof(tmpstr)) == -1) {
-                            lgw_db_put(db_family, "index", "0");
-                        } else 
-                            index = atoi(tmpstr) % 9;
-                        sprintf(db_family, "/payload/%08X/%d", devinfo.devaddr, index);
-                        sprintf(db_key, "%u", p->count_us);
-                        lgw_db_put(db_family, db_key, (char*)payload_txt);
-                    }
-                }
-
-                if (GW.cfg.custom_downlink) {
-                    /* Customer downlink process */
-                    dn_pkt_s* dnelem = NULL;
-                    sprintf(tmpstr, "%08X", devinfo.devaddr);
-                    dnelem = search_dn_list(tmpstr);
-                    if (dnelem != NULL) {
-                        lgw_log(LOG_INFO, "INFO~ [cus-dwn]Found a match devaddr: %s, prepare a downlink!\n", tmpstr);
-                        jit_result = custom_rx2dn(dnelem, &devinfo, p->count_us, TIMESTAMPED);
-                        if (jit_result == JIT_ERROR_OK) { /* Next upmsg willbe indicate if received by note */
-                            LGW_LIST_LOCK(&dn_list);
-                            LGW_LIST_REMOVE(&dn_list, dnelem, list);
-                            lgw_free(dnelem);
-                            LGW_LIST_UNLOCK(&dn_list);
-                        } else {
-                            lgw_log(LOG_ERROR, "ERROR~ [cus-dwn]Packet REJECTED (jit error=%d)\n", jit_result);
+                        if (GW.cfg.mac2file) {
+                            FILE *fp;
+                            char pushpath[128];
+                            snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
+                            fp = fopen(pushpath, "w+");
+                            if (NULL == fp)
+                                lgw_log(LOG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
+                            else { 
+                                fwrite(payload_txt, sizeof(uint8_t), fsize + 1, fp);
+                                fflush(fp); 
+                                fclose(fp);
+                            }
+                        
                         }
 
-                    } else
-                        lgw_log(LOG_INFO, "INFO~ [cus-dwn] Can't find SessionKeys for Dev %08X\n", devinfo.devaddr);
+                        if (GW.cfg.mac2db) { /* 每个devaddr最多保存10个payload */
+                            sprintf(db_family, "/payload/%08X", devinfo.devaddr);
+                            if (lgw_db_get(db_family, "index", tmpstr, sizeof(tmpstr)) == -1) {
+                                lgw_db_put(db_family, "index", "0");
+                            } else 
+                                index = atoi(tmpstr) % 9;
+                            sprintf(db_family, "/payload/%08X/%d", devinfo.devaddr, index);
+                            sprintf(db_key, "%u", p->count_us);
+                            lgw_db_put(db_family, db_key, (char*)payload_txt);
+                        }
+                    }
+
+                    if (GW.cfg.custom_downlink) {
+                        /* Customer downlink process */
+                        dn_pkt_s* dnelem = NULL;
+                        sprintf(tmpstr, "%08X", devinfo.devaddr);
+                        dnelem = search_dn_list(tmpstr);
+                        if (dnelem != NULL) {
+                            lgw_log(LOG_INFO, "INFO~ [cus-dwn]Found a match devaddr: %s, prepare a downlink!\n", tmpstr);
+                            jit_result = custom_rx2dn(dnelem, &devinfo, p->count_us, TIMESTAMPED);
+                            if (jit_result == JIT_ERROR_OK) { /* Next upmsg willbe indicate if received by note */
+                                LGW_LIST_LOCK(&dn_list);
+                                LGW_LIST_REMOVE(&dn_list, dnelem, list);
+                                lgw_free(dnelem);
+                                LGW_LIST_UNLOCK(&dn_list);
+                            } else {
+                                lgw_log(LOG_ERROR, "ERROR~ [cus-dwn]Packet REJECTED (jit error=%d)\n", jit_result);
+                            }
+
+                        } else
+                            lgw_log(LOG_INFO, "INFO~ [cus-dwn] Can't find SessionKeys for Dev %08X\n", devinfo.devaddr);
+                    }
                 }
             }
-		}
 
-        pthread_mutex_unlock(&GW.mx_bind_lock);
-        serv->rxpkt_serv->bind -= 1;
-        pthread_mutex_unlock(&GW.mx_bind_lock);
-        serv->rxpkt_serv = NULL;
+            pthread_mutex_unlock(&GW.mx_bind_lock);
+            rxpkt_entry->stamps |= serv->info.stamp;
+            rxpkt_entry->bind -= 1;
+            pthread_mutex_unlock(&GW.mx_bind_lock);
+        }
 	}
 }
 

@@ -504,7 +504,6 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     serv_entry->list.next = NULL;
-    serv_entry->rxpkt_serv = NULL;
 
     serv_entry->net = NULL;
     serv_entry->report = NULL;
@@ -512,6 +511,7 @@ int main(int argc, char *argv[]) {
     serv_entry->state.live = false;
 
     serv_entry->info.type = pkt;
+    serv_entry->info.stamp = 1;     //将PKT服务标记为 1 
     strcpy(serv_entry->info.name, "PKT_SERV");;
     //serv_entry->gw = &GW;
 
@@ -638,24 +638,13 @@ int main(int argc, char *argv[]) {
 
 		/* Exit strategies. */
 		/* Server that are 'off-line may be a reason to exit */
-		/* move to semtech_transport in due time */
-
-		/* Code of gonzalocasas to catch transient hardware failures */
-		uint32_t trig_cnt_us;
-
-		pthread_mutex_lock(&GW.hal.mx_concent);
-		if (HAL.lgw_get_trigcnt(&trig_cnt_us) == LGW_HAL_SUCCESS && trig_cnt_us == 0x7E000000) {
-			lgw_log(LOG_ERROR, "ERROR~ [main] unintended SX1301 reset detected, terminating packet forwarder.\n");
-			exit(EXIT_FAILURE);
-		}
-		pthread_mutex_unlock(&GW.hal.mx_concent);
 
 	}
 
 	/* end of the loop ready to exit */
 
 	/* disable watchdog */
-	if (GW.cfg.wd_enabled == false)
+	if (GW.cfg.wd_enabled == true)
 		pthread_cancel(thrid_watchdog);
 
 	//TODO: Dit heeft nawerk nodig / This needs some more work
@@ -676,11 +665,11 @@ int main(int argc, char *argv[]) {
 			i = HAL.lgw_stop();
 			if (i == LGW_HAL_SUCCESS) {
                 if (system("/usr/bin/reset_lGW.sh stop") != 0) {
-                    lgw_log(LOG_ERROR, "ERROR~ failed to stop SX1302\n");
+                    lgw_log(LOG_ERROR, "ERROR~ [main] failed to stop SX1302\n");
                 } else 
-				    lgw_log(LOG_ERROR, "INFO~ concentrator stopped successfully\n");
+				    lgw_log(LOG_ERROR, "INFO~ [main] concentrator stopped successfully\n");
 			} else {
-				lgw_log(LOG_WARNING, "WARNING~ failed to stop concentrator successfully\n");
+				lgw_log(LOG_WARNING, "WARNING~ [main] failed to stop concentrator successfully\n");
 			}
 		}
 	}
@@ -698,7 +687,10 @@ static void thread_up(void) {
 	struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];	/* array containing inbound packets + metadata */
 	int nb_pkt;
 
+	pthread_t thrid_recycle;
+
     rxpkts_s *rxpkt_entry = NULL;
+    serv_s* serv_entry = NULL;
 
 	lgw_log(LOG_INFO, "INFO~ [main-up] Thread activated for all servers.\n");
 
@@ -729,25 +721,30 @@ static void thread_up(void) {
 			continue;
 		}
 
-        rxpkt_entry = lgw_malloc(sizeof(rxpkts_s)); // rxpkts结构体包含有一个lora_pkt_rx_s结构数组
+        rxpkt_entry = lgw_malloc(sizeof(rxpkts_s));     //rxpkts结构体包含有一个lora_pkt_rx_s结构数组
 
         if (NULL == rxpkt_entry) {
             continue;
         }
 
         rxpkt_entry->list.next = NULL;
+        rxpkt_entry->stamps = 0;
         rxpkt_entry->nb_pkt = nb_pkt;
         rxpkt_entry->bind = GW.serv_list.size;
         memcpy(rxpkt_entry->rxpkt, rxpkt, sizeof(struct lgw_pkt_rx_s) * nb_pkt);
 
         LGW_LIST_LOCK(&GW.rxpkts_list);
         LGW_LIST_INSERT_HEAD(&GW.rxpkts_list, rxpkt_entry, list);
+	    lgw_log(LOG_INFO, "INFO~ [main-up] Size of package list is %d\n", GW.rxpkts_list.size);
         LGW_LIST_UNLOCK(&GW.rxpkts_list);
 
-        service_handle_rxpkt(&GW, rxpkt_entry);
+        LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) {  //通知servicer接收到新的包了
+            sem_post(&serv_entry->thread.sema);
+        }
 
-        if (GW.rxpkts_list.size > DEFAULT_RXPKTS_LIST_SIZE)  
-            lgw_pthread_create_background(NULL, NULL, (void *(*)(void *))thread_rxpkt_recycle, NULL); 
+        if (GW.rxpkts_list.size > DEFAULT_RXPKTS_LIST_SIZE)    // if number of head list greater than LIST_SIZE  
+        //if (GW.rxpkts_list.size > 0)    //debug 
+            lgw_pthread_create_background(&thrid_recycle, NULL, (void *(*)(void *))thread_rxpkt_recycle, NULL); 
 	}
 
 	lgw_log(LOG_INFO, "INFO~ [main-up] End of upstream thread\n");
@@ -757,22 +754,24 @@ static void thread_up(void) {
 /* --- THREAD : recycle rxpkts --------------------- */
 
 static void thread_rxpkt_recycle(void) {
-    rxpkts_s* rxpkts_entry = NULL;
+    rxpkts_s* rxpkt_entry = NULL;
 
-	lgw_log(LOG_INFO, "INFO~ [MAIN] Runing pkts recycle thread\n");
+	lgw_log(LOG_INFO, "\nINFO~ [MAIN] Runing packages recycle thread\n");
 
     LGW_LIST_LOCK(&GW.rxpkts_list);
-    LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.rxpkts_list, rxpkts_entry, list) {
-        if (rxpkts_entry->bind < 1) {
+    LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.rxpkts_list, rxpkt_entry, list) {
+	    lgw_log(LOG_INFO, "\nINFO~ [MAIN] recycle thread start traverse, bind=%d\n", rxpkt_entry->bind);
+        if (rxpkt_entry->bind < 1) {
             LGW_LIST_REMOVE_CURRENT(list);
-            lgw_free(rxpkts_entry);
+            lgw_free(rxpkt_entry);
             GW.rxpkts_list.size--;
         }
     }
     LGW_LIST_TRAVERSE_SAFE_END;
     LGW_LIST_UNLOCK(&GW.rxpkts_list);
-    
+    return;
 }
+
 /* -------------------------------------------------------------------------- */
 /* --- THREAD 3: CHECKING PACKETS TO BE SENT FROM JIT QUEUE AND SEND THEM --- */
 static void thread_jit(void) {
@@ -1091,7 +1090,7 @@ static void thread_valid(void) {
 
 static void thread_watchdog(void) {
 	/* main loop task */
-	lgw_log(LOG_INFO, "INFO~ [wd] Watchdog starting...\n");
+	lgw_log(LOG_INFO, "INFO~ [watchdog] Watchdog starting...\n");
 	while (!exit_sig && !quit_sig) {
 		wait_ms(30000);
 		// timestamp updated within the last 3 stat intervals? If not assume something is wrong and exit

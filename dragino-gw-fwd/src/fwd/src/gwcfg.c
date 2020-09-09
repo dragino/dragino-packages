@@ -776,14 +776,15 @@ static int parse_gateway_configuration(const char* conf_file) {
 	if ( NULL != serv_arry) {
 		/* serv_count represents the maximal number of servers to be read. */
         int count = 0, i = 0, try = 0;
-		count = json_array_get_count(serv_arry);
+		count = json_array_get_count(serv_arry);  //number of services should be less than 8
 		lgw_log(LOG_INFO, "INFO: Found %i servers in array.\n", count);
 		for (i = 0; i < count; i++) {
             serv_entry = (serv_s*)lgw_malloc(sizeof(serv_s));
 
             /* 在这里初始化service */
             serv_entry->list.next = NULL;
-            serv_entry->rxpkt_serv = NULL;
+
+            serv_entry->info.stamp = 1 << (i + 1);
 
             /* service network information */
             serv_entry->net = (serv_net_s*)lgw_malloc(sizeof(serv_net_s));
@@ -820,7 +821,6 @@ static int parse_gateway_configuration(const char* conf_file) {
             if (try == 3) { /* 等于3时，sem的初始化已经失败了3次 */
                 lgw_log(LOG_INFO, "WARNING, Can't initializes the unnamed semaphore of service, ignore this element.\n");
                 lgw_free(serv_entry->net);
-                lgw_free(serv_entry->report);
                 lgw_free(serv_entry);
                 continue;
             }
@@ -852,11 +852,6 @@ static int parse_gateway_configuration(const char* conf_file) {
             if (str != NULL) {
 				if (!strncmp(str, "semtech", 7)) {
 					serv_entry->info.type = semtech;
-                    /* 如果是semtech类型，则需要初始化report相关的数据 */
-                    serv_entry->report = (report_s*)lgw_malloc(sizeof(report_s));
-                    serv_entry->report->report_ready = false;
-                    serv_entry->report->stat_interval = DEFAULT_STAT_INTERVAL;
-                    pthread_mutex_init(&serv_entry->report->mx_report, NULL);
 				} else if (!strncmp(str, "ttn", 3)) {
 					serv_entry->info.type = ttn;
 				} else if (!strncmp(str, "mqtt", 4)) {
@@ -887,6 +882,15 @@ static int parse_gateway_configuration(const char* conf_file) {
             } else {
 					serv_entry->info.type = semtech;  // 默认的服务是semtech
             }
+
+			if (serv_entry->info.type == semtech) {
+                /* 如果是semtech类型，则需要初始化report相关的数据 */
+                serv_entry->report = (report_s*)lgw_malloc(sizeof(report_s));
+                serv_entry->report->report_ready = false;
+                strcpy(serv_entry->report->stat_format, "semtech");;
+                serv_entry->report->stat_interval = DEFAULT_STAT_INTERVAL;
+                pthread_mutex_init(&serv_entry->report->mx_report, NULL);
+            }
             
 			val = json_object_get_value(serv_obj, "enabled");
             if (json_value_get_type(val) == JSONBoolean) 
@@ -909,13 +913,20 @@ static int parse_gateway_configuration(const char* conf_file) {
             if (str != NULL) {
                 strncpy(serv_entry->net->port_up, str, sizeof serv_entry->net->port_up);
                 serv_entry->net->port_up[sizeof serv_entry->net->port_up - 1] = '\0'; /* ensure string termination */
-                lgw_log(LOG_INFO, "INFO: Found a serv_port_up is \"%s\"\n", serv_entry->net->port_up);
+                lgw_log(LOG_INFO, "INFO: [%s] Found a serv_port_up is \"%s\"\n", serv_entry->info.name, serv_entry->net->port_up);
+            } else {
+                strcpy(serv_entry->net->port_up, "1700");
+                lgw_log(LOG_INFO, "INFO: [%s] Set serv_port_up to \"%s\"\n", serv_entry->info.name, serv_entry->net->port_up);
             }
+
 			str = json_object_get_string(serv_obj, "serv_port_down");
             if (str != NULL) {
                 strncpy(serv_entry->net->port_down, str, sizeof serv_entry->net->port_down);
                 serv_entry->net->port_down[sizeof serv_entry->net->port_down - 1] = '\0'; /* ensure string termination */
                 lgw_log(LOG_INFO, "INFO: Found a serv_port_down \"%s\"\n", serv_entry->net->port_down);
+            } else {
+                strcpy(serv_entry->net->port_down, "1700");
+                lgw_log(LOG_INFO, "INFO: [%s] Set serv_port_down to \"%s\"\n", serv_entry->info.name, serv_entry->net->port_down);
             }
 
             val = json_object_get_value(serv_obj, "push_timeout_ms");

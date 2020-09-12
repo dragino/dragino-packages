@@ -126,6 +126,8 @@ typedef struct {
     mqttinfo_s *mqtt;
 } serv_net_s;
 
+LGW_LIST_HEAD(rxpkts_list, _rxpkts);     //定义一个数据链头，用来保存接收到的数据包         
+
 /*!
  * \brief server是一个描述什么样服务的数据结构
  * 
@@ -133,6 +135,8 @@ typedef struct {
 typedef struct _server {
     LGW_LIST_ENTRY(_server) list;
 
+    struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];
+    //struct rxpkts_list rxpkts_list;
     struct {
 	    serv_type type;		        // type of server
         uint8_t stamp;              // 用来标记service，当有服务印上这个标记时，代表和当前的service有关联
@@ -172,9 +176,6 @@ typedef struct _server {
 } serv_s;
 
 LGW_LIST_HEAD_NOLOCK(serv_list, _server);  // pkts list head of rxpkts for server 
-
-LGW_LIST_HEAD(rxpkts_list, _rxpkts);     //定义一个数据链头，用来保存接收到的数据包         
-
 
 typedef struct {
     struct {

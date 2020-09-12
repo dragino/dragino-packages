@@ -1,26 +1,49 @@
 	Session.vim	/^cnoremap  <Home>$/;"	m
+	fwd/Session.vim	/^cnoremap  <Home>$/;"	m
 	Session.vim	/^inoremap  $/;"	m
+	fwd/Session.vim	/^inoremap  $/;"	m
 	Session.vim	/^cnoremap  <End>$/;"	m
+	fwd/Session.vim	/^cnoremap  <End>$/;"	m
 	Session.vim	/^inoremap  $/;"	m
+	fwd/Session.vim	/^inoremap  $/;"	m
 S	Session.vim	/^imap S <Plug>ISurround$/;"	m
+S	fwd/Session.vim	/^imap S <Plug>ISurround$/;"	m
 s	Session.vim	/^imap s <Plug>Isurround$/;"	m
+s	fwd/Session.vim	/^imap s <Plug>Isurround$/;"	m
 	Session.vim	/^nmap  h$/;"	m
+	fwd/Session.vim	/^nmap  h$/;"	m
 		Session.vim	/^inoremap <silent> 	 =TriggerSnippet()$/;"	m
+		fwd/Session.vim	/^inoremap <silent> 	 =TriggerSnippet()$/;"	m
 	Session.vim	/^cnoremap  $/;"	m
 	Session.vim	/^inoremap <expr>  pumvisible()?"\\<PageUp>\\\\":"\\"$/;"	m
 	Session.vim	/^nmap  k$/;"	m
+	fwd/Session.vim	/^cnoremap  $/;"	m
+	fwd/Session.vim	/^inoremap <expr>  pumvisible()?"\\<PageUp>\\\\":"\\"$/;"	m
+	fwd/Session.vim	/^nmap  k$/;"	m
 	Session.vim	/^inoremap  $/;"	m
 	Session.vim	/^nmap  l$/;"	m
+	fwd/Session.vim	/^inoremap  $/;"	m
+	fwd/Session.vim	/^nmap  l$/;"	m
 	Session.vim	/^inoremap <expr> $/;"	m
+	fwd/Session.vim	/^inoremap <expr> $/;"	m
 	Session.vim	/^cnoremap  <Down>$/;"	m
+	fwd/Session.vim	/^cnoremap  <Down>$/;"	m
 	Session.vim	/^cnoremap  <Up>$/;"	m
+	fwd/Session.vim	/^cnoremap  <Up>$/;"	m
 		Session.vim	/^inoremap <silent> 	 =ShowAvailableSnips()$/;"	m
+		fwd/Session.vim	/^inoremap <silent> 	 =ShowAvailableSnips()$/;"	m
 	Session.vim	/^imap  <Plug>Isurround$/;"	m
+	fwd/Session.vim	/^imap  <Plug>Isurround$/;"	m
 	Session.vim	/^inoremap <expr>  pumvisible()?"\\":"\\"$/;"	m
+	fwd/Session.vim	/^inoremap <expr>  pumvisible()?"\\":"\\"$/;"	m
 	Session.vim	/^nmap  :BottomExplorerWindow$/;"	m
+	fwd/Session.vim	/^nmap  :BottomExplorerWindow$/;"	m
 	Session.vim	/^nmap  :FirstExplorerWindow$/;"	m
+	fwd/Session.vim	/^nmap  :FirstExplorerWindow$/;"	m
 	Session.vim	/^inoremap <expr>  omni#cpp#maycomplete#Complete()$/;"	m
+	fwd/Session.vim	/^inoremap <expr>  omni#cpp#maycomplete#Complete()$/;"	m
 	Session.vim	/^inoremap  $/;"	m
+	fwd/Session.vim	/^inoremap  $/;"	m
 !_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
 !_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
@@ -28,173 +51,340 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 #	Session.vim	/^vnoremap <silent> # :call VisualSearch('b')$/;"	m
+#	fwd/Session.vim	/^vnoremap <silent> # :call VisualSearch('b')$/;"	m
 &	Session.vim	/^nnoremap & :&&$/;"	m
+&	fwd/Session.vim	/^nnoremap & :&&$/;"	m
 *	Session.vim	/^vnoremap <silent> * :call VisualSearch('f')$/;"	m
+*	fwd/Session.vim	/^vnoremap <silent> * :call VisualSearch('f')$/;"	m
 ,	Session.vim	/^map <buffer> ,  :make$/;"	m
+,	fwd/Session.vim	/^map <buffer> ,  :make$/;"	m
 ,	Session.vim	/^nmap <silent> ,$/;"	m
+,	fwd/Session.vim	/^nmap <silent> ,$/;"	m
 ,$	Session.vim	/^map ,$ :syntax sync fromstart$/;"	m
+,$	fwd/Session.vim	/^map ,$ :syntax sync fromstart$/;"	m
 ,1	Session.vim	/^map ,1 :set syntax=c$/;"	m
+,1	fwd/Session.vim	/^map ,1 :set syntax=c$/;"	m
 ,2	Session.vim	/^map ,2 :set syntax=xhtml$/;"	m
+,2	fwd/Session.vim	/^map ,2 :set syntax=xhtml$/;"	m
 ,3	Session.vim	/^map ,3 :set syntax=python$/;"	m
+,3	fwd/Session.vim	/^map ,3 :set syntax=python$/;"	m
 ,4	Session.vim	/^map ,4 :set ft=javascript$/;"	m
+,4	fwd/Session.vim	/^map ,4 :set ft=javascript$/;"	m
 ,bb	Session.vim	/^nmap <silent> ,bb :TagbarToggle$/;"	m
+,bb	fwd/Session.vim	/^nmap <silent> ,bb :TagbarToggle$/;"	m
 ,bd	Session.vim	/^map ,bd :Bclose$/;"	m
+,bd	fwd/Session.vim	/^map ,bd :Bclose$/;"	m
 ,be	Session.vim	/^map <silent> ,be :BufExplorer$/;"	m
+,be	fwd/Session.vim	/^map <silent> ,be :BufExplorer$/;"	m
 ,bs	Session.vim	/^map <silent> ,bs :SBufExplorer$/;"	m
+,bs	fwd/Session.vim	/^map <silent> ,bs :SBufExplorer$/;"	m
 ,bv	Session.vim	/^map <silent> ,bv :VSBufExplorer$/;"	m
+,bv	fwd/Session.vim	/^map <silent> ,bv :VSBufExplorer$/;"	m
 ,c	Session.vim	/^nmap ,c  <Plug>NERDCommenterToggle$/;"	m
 ,c	Session.vim	/^vmap ,c  <Plug>NERDCommenterToggle$/;"	m
+,c	fwd/Session.vim	/^nmap ,c  <Plug>NERDCommenterToggle$/;"	m
+,c	fwd/Session.vim	/^vmap ,c  <Plug>NERDCommenterToggle$/;"	m
 ,c$	Session.vim	/^nmap ,c$ <Plug>NERDCommenterToEOL$/;"	m
 ,c$	Session.vim	/^vmap ,c$ <Plug>NERDCommenterToEOL$/;"	m
+,c$	fwd/Session.vim	/^nmap ,c$ <Plug>NERDCommenterToEOL$/;"	m
+,c$	fwd/Session.vim	/^vmap ,c$ <Plug>NERDCommenterToEOL$/;"	m
 ,cA	Session.vim	/^nmap ,cA <Plug>NERDCommenterAppend$/;"	m
 ,cA	Session.vim	/^vmap ,cA <Plug>NERDCommenterAppend$/;"	m
+,cA	fwd/Session.vim	/^nmap ,cA <Plug>NERDCommenterAppend$/;"	m
+,cA	fwd/Session.vim	/^vmap ,cA <Plug>NERDCommenterAppend$/;"	m
 ,ca	Session.vim	/^nmap ,ca <Plug>NERDCommenterAltDelims$/;"	m
+,ca	fwd/Session.vim	/^nmap ,ca <Plug>NERDCommenterAltDelims$/;"	m
 ,cb	Session.vim	/^nmap ,cb <Plug>NERDCommenterAlignBoth$/;"	m
 ,cb	Session.vim	/^vmap ,cb <Plug>NERDCommenterAlignBoth$/;"	m
+,cb	fwd/Session.vim	/^nmap ,cb <Plug>NERDCommenterAlignBoth$/;"	m
+,cb	fwd/Session.vim	/^vmap ,cb <Plug>NERDCommenterAlignBoth$/;"	m
 ,cc	Session.vim	/^nmap ,cc <Plug>NERDCommenterComment$/;"	m
 ,cc	Session.vim	/^vmap ,cc <Plug>NERDCommenterComment$/;"	m
+,cc	fwd/Session.vim	/^nmap ,cc <Plug>NERDCommenterComment$/;"	m
+,cc	fwd/Session.vim	/^vmap ,cc <Plug>NERDCommenterComment$/;"	m
 ,cd	Session.vim	/^map <silent> ,cd :cd %:p:h$/;"	m
+,cd	fwd/Session.vim	/^map <silent> ,cd :cd %:p:h$/;"	m
 ,ci	Session.vim	/^nmap ,ci <Plug>NERDCommenterInvert$/;"	m
 ,ci	Session.vim	/^vmap ,ci <Plug>NERDCommenterInvert$/;"	m
+,ci	fwd/Session.vim	/^nmap ,ci <Plug>NERDCommenterInvert$/;"	m
+,ci	fwd/Session.vim	/^vmap ,ci <Plug>NERDCommenterInvert$/;"	m
 ,cl	Session.vim	/^nmap ,cl <Plug>NERDCommenterAlignLeft$/;"	m
 ,cl	Session.vim	/^vmap ,cl <Plug>NERDCommenterAlignLeft$/;"	m
+,cl	fwd/Session.vim	/^nmap ,cl <Plug>NERDCommenterAlignLeft$/;"	m
+,cl	fwd/Session.vim	/^vmap ,cl <Plug>NERDCommenterAlignLeft$/;"	m
 ,cm	Session.vim	/^nmap ,cm <Plug>NERDCommenterMinimal$/;"	m
 ,cm	Session.vim	/^vmap ,cm <Plug>NERDCommenterMinimal$/;"	m
+,cm	fwd/Session.vim	/^nmap ,cm <Plug>NERDCommenterMinimal$/;"	m
+,cm	fwd/Session.vim	/^vmap ,cm <Plug>NERDCommenterMinimal$/;"	m
 ,cn	Session.vim	/^nmap ,cn <Plug>NERDCommenterNest$/;"	m
 ,cn	Session.vim	/^vmap ,cn <Plug>NERDCommenterNest$/;"	m
+,cn	fwd/Session.vim	/^nmap ,cn <Plug>NERDCommenterNest$/;"	m
+,cn	fwd/Session.vim	/^vmap ,cn <Plug>NERDCommenterNest$/;"	m
 ,cp	Session.vim	/^nmap ,cp :cp$/;"	m
+,cp	fwd/Session.vim	/^nmap ,cp :cp$/;"	m
 ,cr	Session.vim	/^nnoremap <buffer> ,cr :cs kill 0$/;"	m
+,cr	fwd/Session.vim	/^nnoremap <buffer> ,cr :cs kill 0$/;"	m
 ,cs	Session.vim	/^nmap ,cs <Plug>NERDCommenterSexy$/;"	m
 ,cs	Session.vim	/^vmap ,cs <Plug>NERDCommenterSexy$/;"	m
+,cs	fwd/Session.vim	/^nmap ,cs <Plug>NERDCommenterSexy$/;"	m
+,cs	fwd/Session.vim	/^vmap ,cs <Plug>NERDCommenterSexy$/;"	m
 ,cu	Session.vim	/^nmap ,cu <Plug>NERDCommenterUncomment$/;"	m
 ,cu	Session.vim	/^vmap ,cu <Plug>NERDCommenterUncomment$/;"	m
+,cu	fwd/Session.vim	/^nmap ,cu <Plug>NERDCommenterUncomment$/;"	m
+,cu	fwd/Session.vim	/^vmap ,cu <Plug>NERDCommenterUncomment$/;"	m
 ,cw	Session.vim	/^nmap ,cw :cw 10$/;"	m
+,cw	fwd/Session.vim	/^nmap ,cw :cw 10$/;"	m
 ,cy	Session.vim	/^nmap ,cy <Plug>NERDCommenterYank$/;"	m
 ,cy	Session.vim	/^vmap ,cy <Plug>NERDCommenterYank$/;"	m
+,cy	fwd/Session.vim	/^nmap ,cy <Plug>NERDCommenterYank$/;"	m
+,cy	fwd/Session.vim	/^vmap ,cy <Plug>NERDCommenterYank$/;"	m
 ,dm	Session.vim	/^noremap ,dm mzHmx:%s\/$/;"	m
+,dm	fwd/Session.vim	/^noremap ,dm mzHmx:%s\/$/;"	m
 ,e.	Session.vim	/^nmap <silent> ,e. :e %:p:h$/;"	m
+,e.	fwd/Session.vim	/^nmap <silent> ,e. :e %:p:h$/;"	m
 ,ec	Session.vim	/^map ,ec :tabnew ~\/tmp\/scratch.txt$/;"	m
+,ec	fwd/Session.vim	/^map ,ec :tabnew ~\/tmp\/scratch.txt$/;"	m
 ,ee	Session.vim	/^map <silent> ,ee :call SwitchToBuf("~\/.vimrc")$/;"	m
+,ee	fwd/Session.vim	/^map <silent> ,ee :call SwitchToBuf("~\/.vimrc")$/;"	m
 ,es	Session.vim	/^map ,es :tabnew$/;"	m
+,es	fwd/Session.vim	/^map ,es :tabnew$/;"	m
 ,fd	Session.vim	/^nmap ,fd :se ff=dos$/;"	m
+,fd	fwd/Session.vim	/^nmap ,fd :se ff=dos$/;"	m
 ,fu	Session.vim	/^nmap ,fu :se ff=unix$/;"	m
+,fu	fwd/Session.vim	/^nmap ,fu :se ff=unix$/;"	m
 ,hh	Session.vim	/^nmap <silent> ,hh <Plug>MarkClear$/;"	m
 ,hh	Session.vim	/^vmap <silent> ,hh <Plug>MarkClear$/;"	m
+,hh	fwd/Session.vim	/^nmap <silent> ,hh <Plug>MarkClear$/;"	m
+,hh	fwd/Session.vim	/^vmap <silent> ,hh <Plug>MarkClear$/;"	m
 ,hl	Session.vim	/^nmap <silent> ,hl <Plug>MarkSet$/;"	m
 ,hl	Session.vim	/^vmap <silent> ,hl <Plug>MarkSet$/;"	m
+,hl	fwd/Session.vim	/^nmap <silent> ,hl <Plug>MarkSet$/;"	m
+,hl	fwd/Session.vim	/^vmap <silent> ,hl <Plug>MarkSet$/;"	m
 ,hr	Session.vim	/^nmap <silent> ,hr <Plug>MarkRegex$/;"	m
 ,hr	Session.vim	/^vmap <silent> ,hr <Plug>MarkRegex$/;"	m
+,hr	fwd/Session.vim	/^nmap <silent> ,hr <Plug>MarkRegex$/;"	m
+,hr	fwd/Session.vim	/^vmap <silent> ,hr <Plug>MarkRegex$/;"	m
 ,lk	Session.vim	/^nmap <silent> ,lk :LUTags$/;"	m
+,lk	fwd/Session.vim	/^nmap <silent> ,lk :LUTags$/;"	m
 ,ll	Session.vim	/^nmap <silent> ,ll :LUBufs$/;"	m
+,ll	fwd/Session.vim	/^nmap <silent> ,ll :LUBufs$/;"	m
 ,lv	Session.vim	/^nmap <silent> ,lv :lv \/=expand("<cword>")$/;"	m
+,lv	fwd/Session.vim	/^nmap <silent> ,lv :lv \/=expand("<cword>")$/;"	m
 ,lw	Session.vim	/^nmap <silent> ,lw :LUWalk$/;"	m
+,lw	fwd/Session.vim	/^nmap <silent> ,lw :LUWalk$/;"	m
 ,ma	Session.vim	/^map <silent> ,ma :ShowMarksClearAll$/;"	m
+,ma	fwd/Session.vim	/^map <silent> ,ma :ShowMarksClearAll$/;"	m
 ,mb	Session.vim	/^nmap <silent> ,mb :MarksBrowser$/;"	m
+,mb	fwd/Session.vim	/^nmap <silent> ,mb :MarksBrowser$/;"	m
 ,mh	Session.vim	/^map <silent> ,mh :ShowMarksClearMark$/;"	m
+,mh	fwd/Session.vim	/^map <silent> ,mh :ShowMarksClearMark$/;"	m
 ,mm	Session.vim	/^map <silent> ,mm :ShowMarksPlaceMark$/;"	m
+,mm	fwd/Session.vim	/^map <silent> ,mm :ShowMarksPlaceMark$/;"	m
 ,mo	Session.vim	/^map <silent> ,mo :ShowMarksOn$/;"	m
+,mo	fwd/Session.vim	/^map <silent> ,mo :ShowMarksOn$/;"	m
 ,mt	Session.vim	/^map <silent> ,mt :ShowMarksToggle$/;"	m
+,mt	fwd/Session.vim	/^map <silent> ,mt :ShowMarksToggle$/;"	m
 ,mu	Session.vim	/^map ,mu :MRU$/;"	m
+,mu	fwd/Session.vim	/^map ,mu :MRU$/;"	m
 ,o	Session.vim	/^map ,o :BufExplorer$/;"	m
+,o	fwd/Session.vim	/^map ,o :BufExplorer$/;"	m
 ,of	Session.vim	/^nmap <silent> ,of :FSHere$/;"	m
+,of	fwd/Session.vim	/^nmap <silent> ,of :FSHere$/;"	m
 ,qa	Session.vim	/^nmap <silent> ,qa :qa$/;"	m
+,qa	fwd/Session.vim	/^nmap <silent> ,qa :qa$/;"	m
 ,qf	Session.vim	/^nmap <silent> ,qf :q!$/;"	m
+,qf	fwd/Session.vim	/^nmap <silent> ,qf :q!$/;"	m
 ,qq	Session.vim	/^nmap <silent> ,qq :q$/;"	m
+,qq	fwd/Session.vim	/^nmap <silent> ,qq :q$/;"	m
 ,qw	Session.vim	/^nmap <silent> ,qw :wq$/;"	m
+,qw	fwd/Session.vim	/^nmap <silent> ,qw :wq$/;"	m
 ,rr	Session.vim	/^nmap <silent> ,rr :redraw!$/;"	m
+,rr	fwd/Session.vim	/^nmap <silent> ,rr :redraw!$/;"	m
 ,s?	Session.vim	/^map ,s? z=$/;"	m
+,s?	fwd/Session.vim	/^map ,s? z=$/;"	m
 ,sa	Session.vim	/^map ,sa zg$/;"	m
+,sa	fwd/Session.vim	/^map ,sa zg$/;"	m
 ,sn	Session.vim	/^map ,sn ]s$/;"	m
+,sn	fwd/Session.vim	/^map ,sn ]s$/;"	m
 ,sp	Session.vim	/^map ,sp [s$/;"	m
+,sp	fwd/Session.vim	/^map ,sp [s$/;"	m
 ,ss	Session.vim	/^map <silent> ,ss :source ~\/.vimrc$/;"	m
+,ss	fwd/Session.vim	/^map <silent> ,ss :source ~\/.vimrc$/;"	m
 ,tc	Session.vim	/^map ,tc :tabclose$/;"	m
+,tc	fwd/Session.vim	/^map ,tc :tabclose$/;"	m
 ,te	Session.vim	/^map ,te :tabedit$/;"	m
+,te	fwd/Session.vim	/^map ,te :tabedit$/;"	m
 ,tl	Session.vim	/^nmap <silent> ,tl :Tlist$/;"	m
+,tl	fwd/Session.vim	/^nmap <silent> ,tl :Tlist$/;"	m
 ,tm	Session.vim	/^map ,tm :tabmove$/;"	m
+,tm	fwd/Session.vim	/^map ,tm :tabmove$/;"	m
 ,tn	Session.vim	/^map ,tn :tabnew$/;"	m
+,tn	fwd/Session.vim	/^map ,tn :tabnew$/;"	m
 ,tt	Session.vim	/^nmap <silent> ,tt :NERDTreeToggle$/;"	m
+,tt	fwd/Session.vim	/^nmap <silent> ,tt :NERDTreeToggle$/;"	m
 ,wf	Session.vim	/^nmap <silent> ,wf :w!$/;"	m
+,wf	fwd/Session.vim	/^nmap <silent> ,wf :w!$/;"	m
 ,wm	Session.vim	/^nmap <silent> ,wm :WMToggle$/;"	m
+,wm	fwd/Session.vim	/^nmap <silent> ,wm :WMToggle$/;"	m
 ,ws	Session.vim	/^nmap <silent> ,ws :call DeleteTrailingWS()$/;"	m
+,ws	fwd/Session.vim	/^nmap <silent> ,ws :call DeleteTrailingWS()$/;"	m
 ,ww	Session.vim	/^nmap <silent> ,ww :w$/;"	m
+,ww	fwd/Session.vim	/^nmap <silent> ,ww :w$/;"	m
 ,yr	Session.vim	/^map ,yr :YRShow$/;"	m
+,yr	fwd/Session.vim	/^map ,yr :YRShow$/;"	m
 ,zo	Session.vim	/^nmap <silent> ,zo zO$/;"	m
 ,zo	Session.vim	/^vmap <silent> ,zo zO$/;"	m
+,zo	fwd/Session.vim	/^nmap <silent> ,zo zO$/;"	m
+,zo	fwd/Session.vim	/^vmap <silent> ,zo zO$/;"	m
 .	Session.vim	/^inoremap <expr> . omni#cpp#maycomplete#Dot()$/;"	m
+.	fwd/Session.vim	/^inoremap <expr> . omni#cpp#maycomplete#Dot()$/;"	m
 0	Session.vim	/^normal! 0$/;"	m
 010|	Session.vim	/^normal! 010|$/;"	m
 013|	Session.vim	/^normal! 013|$/;"	m
+021|	fwd/Session.vim	/^normal! 021|$/;"	m
+055|	fwd/Session.vim	/^normal! 055|$/;"	m
 :	Session.vim	/^inoremap <expr> : omni#cpp#maycomplete#Scope()$/;"	m
+:	fwd/Session.vim	/^inoremap <expr> : omni#cpp#maycomplete#Scope()$/;"	m
 <F1>	Session.vim	/^cmap <F1> $/;"	m
 <F1>	Session.vim	/^imap <F1> $/;"	m
 <F1>	Session.vim	/^nmap <F1> $/;"	m
 <F1>	Session.vim	/^vmap <F1> $/;"	m
+<F1>	fwd/Session.vim	/^cmap <F1> $/;"	m
+<F1>	fwd/Session.vim	/^imap <F1> $/;"	m
+<F1>	fwd/Session.vim	/^nmap <F1> $/;"	m
+<F1>	fwd/Session.vim	/^vmap <F1> $/;"	m
 <F5>	Session.vim	/^imap <silent> <expr> <F5> (pumvisible() ? "\\<Plug>LookupFileCE" : "")."\\\\<Plug>LookupFile"$/;"	m
 <F5>	Session.vim	/^nmap <silent> <F5> <Plug>LookupFile$/;"	m
+<F5>	fwd/Session.vim	/^imap <silent> <expr> <F5> (pumvisible() ? "\\<Plug>LookupFileCE" : "")."\\\\<Plug>LookupFile"$/;"	m
+<F5>	fwd/Session.vim	/^nmap <silent> <F5> <Plug>LookupFile$/;"	m
 <NL>	Session.vim	/^inoremap <expr> <NL> pumvisible()?"\\<PageDown>\\\\":"\\"$/;"	m
 <NL>	Session.vim	/^nmap <NL> j$/;"	m
+<NL>	fwd/Session.vim	/^inoremap <expr> <NL> pumvisible()?"\\<PageDown>\\\\":"\\"$/;"	m
+<NL>	fwd/Session.vim	/^nmap <NL> j$/;"	m
 <Nul>c	Session.vim	/^nmap <Nul>c :cs find c =expand("<cword>")$/;"	m
+<Nul>c	fwd/Session.vim	/^nmap <Nul>c :cs find c =expand("<cword>")$/;"	m
 <Nul>d	Session.vim	/^nmap <Nul>d :cs find d =expand("<cword>")$/;"	m
+<Nul>d	fwd/Session.vim	/^nmap <Nul>d :cs find d =expand("<cword>")$/;"	m
 <Nul>e	Session.vim	/^nmap <Nul>e :cs find e =expand("<cword>")$/;"	m
+<Nul>e	fwd/Session.vim	/^nmap <Nul>e :cs find e =expand("<cword>")$/;"	m
 <Nul>f	Session.vim	/^nmap <Nul>f :cs find f =expand("<cfile>")$/;"	m
+<Nul>f	fwd/Session.vim	/^nmap <Nul>f :cs find f =expand("<cfile>")$/;"	m
 <Nul>g	Session.vim	/^nmap <Nul>g :cs find g =expand("<cword>")$/;"	m
+<Nul>g	fwd/Session.vim	/^nmap <Nul>g :cs find g =expand("<cword>")$/;"	m
 <Nul>i	Session.vim	/^nmap <Nul>i :cs find i ^=expand("<cfile>")$/;"	m
+<Nul>i	fwd/Session.vim	/^nmap <Nul>i :cs find i ^=expand("<cfile>")$/;"	m
 <Nul>s	Session.vim	/^nmap <Nul>s :cs find s =expand("<cword>")$/;"	m
+<Nul>s	fwd/Session.vim	/^nmap <Nul>s :cs find s =expand("<cword>")$/;"	m
 <Nul>t	Session.vim	/^nmap <Nul>t :cs find t =expand("<cword>")$/;"	m
+<Nul>t	fwd/Session.vim	/^nmap <Nul>t :cs find t =expand("<cword>")$/;"	m
 <Plug>LookupFileCE	Session.vim	/^inoremap <Plug>LookupFileCE $/;"	m
+<Plug>LookupFileCE	fwd/Session.vim	/^inoremap <Plug>LookupFileCE $/;"	m
 <Plug>NERDCommenterAlignBoth	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterAlignBoth :call NERDComment(0, "alignBoth")$/;"	m
 <Plug>NERDCommenterAlignBoth	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterAlignBoth :call NERDComment(1, "alignBoth")$/;"	m
+<Plug>NERDCommenterAlignBoth	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterAlignBoth :call NERDComment(0, "alignBoth")$/;"	m
+<Plug>NERDCommenterAlignBoth	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterAlignBoth :call NERDComment(1, "alignBoth")$/;"	m
 <Plug>NERDCommenterAlignLeft	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterAlignLeft :call NERDComment(0, "alignLeft")$/;"	m
 <Plug>NERDCommenterAlignLeft	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterAlignLeft :call NERDComment(1, "alignLeft")$/;"	m
+<Plug>NERDCommenterAlignLeft	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterAlignLeft :call NERDComment(0, "alignLeft")$/;"	m
+<Plug>NERDCommenterAlignLeft	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterAlignLeft :call NERDComment(1, "alignLeft")$/;"	m
 <Plug>NERDCommenterAppend	Session.vim	/^nmap <silent> <Plug>NERDCommenterAppend :call NERDComment(0, "append")$/;"	m
+<Plug>NERDCommenterAppend	fwd/Session.vim	/^nmap <silent> <Plug>NERDCommenterAppend :call NERDComment(0, "append")$/;"	m
 <Plug>NERDCommenterComment	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterComment :call NERDComment(0, "norm")$/;"	m
 <Plug>NERDCommenterComment	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterComment :call NERDComment(1, "norm")$/;"	m
+<Plug>NERDCommenterComment	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterComment :call NERDComment(0, "norm")$/;"	m
+<Plug>NERDCommenterComment	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterComment :call NERDComment(1, "norm")$/;"	m
 <Plug>NERDCommenterInInsert	Session.vim	/^inoremap <silent> <Plug>NERDCommenterInInsert  <BS>:call NERDComment(0, "insert")$/;"	m
+<Plug>NERDCommenterInInsert	fwd/Session.vim	/^inoremap <silent> <Plug>NERDCommenterInInsert  <BS>:call NERDComment(0, "insert")$/;"	m
 <Plug>NERDCommenterInvert	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterInvert :call NERDComment(0, "invert")$/;"	m
 <Plug>NERDCommenterInvert	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterInvert :call NERDComment(1, "invert")$/;"	m
+<Plug>NERDCommenterInvert	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterInvert :call NERDComment(0, "invert")$/;"	m
+<Plug>NERDCommenterInvert	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterInvert :call NERDComment(1, "invert")$/;"	m
 <Plug>NERDCommenterMinimal	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterMinimal :call NERDComment(0, "minimal")$/;"	m
 <Plug>NERDCommenterMinimal	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterMinimal :call NERDComment(1, "minimal")$/;"	m
+<Plug>NERDCommenterMinimal	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterMinimal :call NERDComment(0, "minimal")$/;"	m
+<Plug>NERDCommenterMinimal	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterMinimal :call NERDComment(1, "minimal")$/;"	m
 <Plug>NERDCommenterNest	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterNest :call NERDComment(0, "nested")$/;"	m
 <Plug>NERDCommenterNest	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterNest :call NERDComment(1, "nested")$/;"	m
+<Plug>NERDCommenterNest	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterNest :call NERDComment(0, "nested")$/;"	m
+<Plug>NERDCommenterNest	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterNest :call NERDComment(1, "nested")$/;"	m
 <Plug>NERDCommenterSexy	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterSexy :call NERDComment(0, "sexy")$/;"	m
 <Plug>NERDCommenterSexy	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterSexy :call NERDComment(1, "sexy")$/;"	m
+<Plug>NERDCommenterSexy	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterSexy :call NERDComment(0, "sexy")$/;"	m
+<Plug>NERDCommenterSexy	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterSexy :call NERDComment(1, "sexy")$/;"	m
 <Plug>NERDCommenterToEOL	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterToEOL :call NERDComment(0, "toEOL")$/;"	m
+<Plug>NERDCommenterToEOL	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterToEOL :call NERDComment(0, "toEOL")$/;"	m
 <Plug>NERDCommenterToggle	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterToggle :call NERDComment(0, "toggle")$/;"	m
 <Plug>NERDCommenterToggle	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterToggle :call NERDComment(1, "toggle")$/;"	m
+<Plug>NERDCommenterToggle	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterToggle :call NERDComment(0, "toggle")$/;"	m
+<Plug>NERDCommenterToggle	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterToggle :call NERDComment(1, "toggle")$/;"	m
 <Plug>NERDCommenterUncomment	Session.vim	/^nnoremap <silent> <Plug>NERDCommenterUncomment :call NERDComment(0, "uncomment")$/;"	m
 <Plug>NERDCommenterUncomment	Session.vim	/^vnoremap <silent> <Plug>NERDCommenterUncomment :call NERDComment(1, "uncomment")$/;"	m
+<Plug>NERDCommenterUncomment	fwd/Session.vim	/^nnoremap <silent> <Plug>NERDCommenterUncomment :call NERDComment(0, "uncomment")$/;"	m
+<Plug>NERDCommenterUncomment	fwd/Session.vim	/^vnoremap <silent> <Plug>NERDCommenterUncomment :call NERDComment(1, "uncomment")$/;"	m
 <Plug>NERDCommenterYank	Session.vim	/^nmap <silent> <Plug>NERDCommenterYank :call NERDComment(0, "yank")$/;"	m
 <Plug>NERDCommenterYank	Session.vim	/^vmap <silent> <Plug>NERDCommenterYank :call NERDComment(1, "yank")$/;"	m
+<Plug>NERDCommenterYank	fwd/Session.vim	/^nmap <silent> <Plug>NERDCommenterYank :call NERDComment(0, "yank")$/;"	m
+<Plug>NERDCommenterYank	fwd/Session.vim	/^vmap <silent> <Plug>NERDCommenterYank :call NERDComment(1, "yank")$/;"	m
 <Plug>NetrwBrowseX	Session.vim	/^nnoremap <silent> <Plug>NetrwBrowseX :call netrw#BrowseX(expand((exists("g:netrw_gx")? g:netrw_gx : '<cfile>')),netrw#CheckIfRemote())$/;"	m
+<Plug>NetrwBrowseX	fwd/Session.vim	/^nnoremap <silent> <Plug>NetrwBrowseX :call netrw#BrowseX(expand((exists("g:netrw_gx")? g:netrw_gx : '<cfile>')),netrw#CheckIfRemote())$/;"	m
 <Plug>NetrwBrowseXVis	Session.vim	/^vnoremap <silent> <Plug>NetrwBrowseXVis :call netrw#BrowseXVis()$/;"	m
+<Plug>NetrwBrowseXVis	fwd/Session.vim	/^vnoremap <silent> <Plug>NetrwBrowseXVis :call netrw#BrowseXVis()$/;"	m
 <Plug>unimpairedAFirst	Session.vim	/^nnoremap <silent> <Plug>unimpairedAFirst :exe "first ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedAFirst	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedAFirst :exe "first ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedALast	Session.vim	/^nnoremap <silent> <Plug>unimpairedALast :exe "last ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedALast	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedALast :exe "last ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedANext	Session.vim	/^nnoremap <silent> <Plug>unimpairedANext :exe "next ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedANext	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedANext :exe "next ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedAPrevious	Session.vim	/^nnoremap <silent> <Plug>unimpairedAPrevious :exe "previous ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedAPrevious	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedAPrevious :exe "previous ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedBFirst	Session.vim	/^nnoremap <silent> <Plug>unimpairedBFirst :exe "bfirst ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedBFirst	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedBFirst :exe "bfirst ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedBLast	Session.vim	/^nnoremap <silent> <Plug>unimpairedBLast :exe "blast ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedBLast	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedBLast :exe "blast ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedBNext	Session.vim	/^nnoremap <silent> <Plug>unimpairedBNext :exe "bnext ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedBNext	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedBNext :exe "bnext ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedBPrevious	Session.vim	/^nnoremap <silent> <Plug>unimpairedBPrevious :exe "bprevious ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedBPrevious	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedBPrevious :exe "bprevious ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedLFirst	Session.vim	/^nnoremap <silent> <Plug>unimpairedLFirst :exe "lfirst ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedLFirst	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedLFirst :exe "lfirst ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedLLast	Session.vim	/^nnoremap <silent> <Plug>unimpairedLLast :exe "llast ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedLLast	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedLLast :exe "llast ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedLNFile	Session.vim	/^nnoremap <silent> <Plug>unimpairedLNFile :exe "lnfile ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedLNFile	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedLNFile :exe "lnfile ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedLNext	Session.vim	/^nnoremap <silent> <Plug>unimpairedLNext :exe "lnext ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedLNext	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedLNext :exe "lnext ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedLPFile	Session.vim	/^nnoremap <silent> <Plug>unimpairedLPFile :exe "lpfile ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedLPFile	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedLPFile :exe "lpfile ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedLPrevious	Session.vim	/^nnoremap <silent> <Plug>unimpairedLPrevious :exe "lprevious ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedLPrevious	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedLPrevious :exe "lprevious ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedONext	Session.vim	/^nmap <silent> <Plug>unimpairedONext <Plug>unimpairedDirectoryNext:echohl WarningMSG|echo "]o is deprecated. Use ]f"|echohl NONE$/;"	m
+<Plug>unimpairedONext	fwd/Session.vim	/^nmap <silent> <Plug>unimpairedONext <Plug>unimpairedDirectoryNext:echohl WarningMSG|echo "]o is deprecated. Use ]f"|echohl NONE$/;"	m
 <Plug>unimpairedOPrevious	Session.vim	/^nmap <silent> <Plug>unimpairedOPrevious <Plug>unimpairedDirectoryPrevious:echohl WarningMSG|echo "[o is deprecated. Use [f"|echohl NONE$/;"	m
+<Plug>unimpairedOPrevious	fwd/Session.vim	/^nmap <silent> <Plug>unimpairedOPrevious <Plug>unimpairedDirectoryPrevious:echohl WarningMSG|echo "[o is deprecated. Use [f"|echohl NONE$/;"	m
 <Plug>unimpairedQFirst	Session.vim	/^nnoremap <silent> <Plug>unimpairedQFirst :exe "cfirst ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedQFirst	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedQFirst :exe "cfirst ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedQLast	Session.vim	/^nnoremap <silent> <Plug>unimpairedQLast :exe "clast ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedQLast	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedQLast :exe "clast ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedQNFile	Session.vim	/^nnoremap <silent> <Plug>unimpairedQNFile :exe "cnfile ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedQNFile	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedQNFile :exe "cnfile ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedQNext	Session.vim	/^nnoremap <silent> <Plug>unimpairedQNext :exe "cnext ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedQNext	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedQNext :exe "cnext ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedQPFile	Session.vim	/^nnoremap <silent> <Plug>unimpairedQPFile :exe "cpfile ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedQPFile	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedQPFile :exe "cpfile ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedQPrevious	Session.vim	/^nnoremap <silent> <Plug>unimpairedQPrevious :exe "cprevious ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedQPrevious	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedQPrevious :exe "cprevious ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedTFirst	Session.vim	/^nnoremap <silent> <Plug>unimpairedTFirst :exe "tfirst ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedTFirst	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedTFirst :exe "tfirst ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedTLast	Session.vim	/^nnoremap <silent> <Plug>unimpairedTLast :exe "tlast ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedTLast	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedTLast :exe "tlast ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedTNext	Session.vim	/^nnoremap <silent> <Plug>unimpairedTNext :exe "tnext ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedTNext	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedTNext :exe "tnext ".(v:count ? v:count : "")$/;"	m
 <Plug>unimpairedTPrevious	Session.vim	/^nnoremap <silent> <Plug>unimpairedTPrevious :exe "tprevious ".(v:count ? v:count : "")$/;"	m
+<Plug>unimpairedTPrevious	fwd/Session.vim	/^nnoremap <silent> <Plug>unimpairedTPrevious :exe "tprevious ".(v:count ? v:count : "")$/;"	m
 <S-Tab>	Session.vim	/^inoremap <silent> <S-Tab> =BackwardsSnippet()$/;"	m
+<S-Tab>	fwd/Session.vim	/^inoremap <silent> <S-Tab> =BackwardsSnippet()$/;"	m
 >	Session.vim	/^inoremap <expr> > omni#cpp#maycomplete#Arrow()$/;"	m
+>	fwd/Session.vim	/^inoremap <expr> > omni#cpp#maycomplete#Arrow()$/;"	m
 ACK_BUFF_SIZE	fwd/inc/fwd.h	81;"	d
 AES_CMAC_CTX	fwd/inc/cmac.h	/^    } AES_CMAC_CTX;$/;"	t	typeref:struct:_AES_CMAC_CTX
 AES_CMAC_DIGEST_LENGTH	fwd/inc/cmac.h	9;"	d
@@ -521,7 +711,7 @@ DEBUG_RAD	hal/config.h	11;"	d
 DEBUG_REG	hal/config.h	7;"	d
 DEBUG_SPI	hal/config.h	5;"	d
 DEBUG_SX1302	hal/config.h	13;"	d
-DECLARE_GW	fwd/inc/gwcfg.h	313;"	d
+DECLARE_GW	fwd/inc/gwcfg.h	315;"	d
 DECLARE_HAL	hal/loragw_hal.h	582;"	d
 DEFAULT_BAUDRATE	hal/loragw_gps.c	59;"	d	file:
 DEFAULT_BEACON_BW_HZ	fwd/inc/gwcfg.h	45;"	d
@@ -839,7 +1029,7 @@ INCLUDE	fwd/inc/gwcfg.h	/^    INCLUDE$/;"	e	enum:__anon15
 INCLUDES	fwd/Makefile	/^INCLUDES = $(wildcard inc\/*.h)$/;"	m
 INCLUDES	hal/Makefile	/^INCLUDES = $(wildcard *.h lg02hal\/*.h sx1301hal\/*.h sx1302hal\/*.h)$/;"	m
 INCOMPLETE	hal/loragw_gps.h	/^    INCOMPLETE,      \/*!> frame parsed was missing bytes *\/$/;"	e	enum:gps_msg
-INIT_GW	fwd/inc/gwcfg.h	272;"	d
+INIT_GW	fwd/inc/gwcfg.h	274;"	d
 INVALID	hal/loragw_gps.h	/^    INVALID,         \/*!> system try to parse frame but failed *\/$/;"	e	enum:gps_msg
 INVERTIQ2_OFF	hal/lg02hal/loragw_hal_lg02.h	90;"	d
 INVERTIQ2_ON	hal/lg02hal/loragw_hal_lg02.h	89;"	d
@@ -1377,7 +1567,7 @@ LOG_INFO	fwd/src/fwd.c	/^uint8_t LOG_INFO = 1;$/;"	v
 LOG_JIT	fwd/src/fwd.c	/^uint8_t LOG_JIT = 0;$/;"	v
 LOG_JIT_ERROR	fwd/src/fwd.c	/^uint8_t LOG_JIT_ERROR = 0;$/;"	v
 LOG_MEM	fwd/src/fwd.c	/^uint8_t LOG_MEM = 0;$/;"	v
-LOG_PKT	fwd/src/fwd.c	/^uint8_t LOG_PKT = 0;$/;"	v
+LOG_PKT	fwd/src/fwd.c	/^uint8_t LOG_PKT = 1;$/;"	v
 LOG_REPORT	fwd/src/fwd.c	/^uint8_t LOG_REPORT = 1;$/;"	v
 LOG_TIMERSYNC	fwd/src/fwd.c	/^uint8_t LOG_TIMERSYNC = 0;$/;"	v
 LOG_WARNING	fwd/src/fwd.c	/^uint8_t LOG_WARNING = 1;$/;"	v
@@ -3529,6 +3719,7 @@ SemaphoreTimedWait	libmqtt/MQTTLinux.c	/^int SemaphoreTimedWait(Semaphore *sem, 
 SemaphoreWait	libmqtt/MQTTLinux.c	/^int SemaphoreWait(Semaphore *sem)$/;"	f
 Session	libttn/session.h	/^struct Session {$/;"	s
 SessionLoad	Session.vim	/^let SessionLoad = 1$/;"	v
+SessionLoad	fwd/Session.vim	/^let SessionLoad = 1$/;"	v
 TAKE_N_BITS_FROM	hal/loragw_aux.h	34;"	d
 TAKE_N_BITS_FROM	tools/payload_tools/payload_diff.c	9;"	d	file:
 TARGET_LIB	libttn/Makefile	/^TARGET_LIB = lib$(NAME).so$/;"	m
@@ -3630,57 +3821,109 @@ XERR_FILT_COEF	fwd/inc/fwd.h	88;"	d
 XERR_INIT_AVG	fwd/inc/fwd.h	87;"	d
 XOR	fwd/src/cmac.c	13;"	d	file:
 [	Session.vim	/^nmap [  <Plug>unimpairedBlankUp$/;"	m
+[	fwd/Session.vim	/^nmap [  <Plug>unimpairedBlankUp$/;"	m
 [	Session.vim	/^nmap <silent> [ <Plug>unimpairedLPFile$/;"	m
+[	fwd/Session.vim	/^nmap <silent> [ <Plug>unimpairedLPFile$/;"	m
 [	Session.vim	/^nmap <silent> [ <Plug>unimpairedQPFile$/;"	m
+[	fwd/Session.vim	/^nmap <silent> [ <Plug>unimpairedQPFile$/;"	m
 [%	Session.vim	/^vmap [% [%m'gv``$/;"	m
+[%	fwd/Session.vim	/^vmap [% [%m'gv``$/;"	m
 [A	Session.vim	/^nmap <silent> [A <Plug>unimpairedAFirst$/;"	m
+[A	fwd/Session.vim	/^nmap <silent> [A <Plug>unimpairedAFirst$/;"	m
 [B	Session.vim	/^nmap <silent> [B <Plug>unimpairedBFirst$/;"	m
+[B	fwd/Session.vim	/^nmap <silent> [B <Plug>unimpairedBFirst$/;"	m
 [L	Session.vim	/^nmap <silent> [L <Plug>unimpairedLFirst$/;"	m
+[L	fwd/Session.vim	/^nmap <silent> [L <Plug>unimpairedLFirst$/;"	m
 [Q	Session.vim	/^nmap <silent> [Q <Plug>unimpairedQFirst$/;"	m
+[Q	fwd/Session.vim	/^nmap <silent> [Q <Plug>unimpairedQFirst$/;"	m
 [T	Session.vim	/^nmap <silent> [T <Plug>unimpairedTFirst$/;"	m
+[T	fwd/Session.vim	/^nmap <silent> [T <Plug>unimpairedTFirst$/;"	m
 [a	Session.vim	/^nmap <silent> [a <Plug>unimpairedAPrevious$/;"	m
+[a	fwd/Session.vim	/^nmap <silent> [a <Plug>unimpairedAPrevious$/;"	m
 [b	Session.vim	/^nmap <silent> [b <Plug>unimpairedBPrevious$/;"	m
+[b	fwd/Session.vim	/^nmap <silent> [b <Plug>unimpairedBPrevious$/;"	m
 [e	Session.vim	/^nmap [e <Plug>unimpairedMoveUp$/;"	m
+[e	fwd/Session.vim	/^nmap [e <Plug>unimpairedMoveUp$/;"	m
 [f	Session.vim	/^nmap [f <Plug>unimpairedDirectoryPrevious$/;"	m
+[f	fwd/Session.vim	/^nmap [f <Plug>unimpairedDirectoryPrevious$/;"	m
 [l	Session.vim	/^nmap <silent> [l <Plug>unimpairedLPrevious$/;"	m
+[l	fwd/Session.vim	/^nmap <silent> [l <Plug>unimpairedLPrevious$/;"	m
 [n	Session.vim	/^nmap [n <Plug>unimpairedContextPrevious$/;"	m
 [n	Session.vim	/^omap [n <Plug>unimpairedContextPrevious$/;"	m
+[n	fwd/Session.vim	/^nmap [n <Plug>unimpairedContextPrevious$/;"	m
+[n	fwd/Session.vim	/^omap [n <Plug>unimpairedContextPrevious$/;"	m
 [o	Session.vim	/^nmap [o <Plug>unimpairedOPrevious$/;"	m
+[o	fwd/Session.vim	/^nmap [o <Plug>unimpairedOPrevious$/;"	m
 [q	Session.vim	/^nmap <silent> [q <Plug>unimpairedQPrevious$/;"	m
+[q	fwd/Session.vim	/^nmap <silent> [q <Plug>unimpairedQPrevious$/;"	m
 [t	Session.vim	/^nmap <silent> [t <Plug>unimpairedTPrevious$/;"	m
+[t	fwd/Session.vim	/^nmap <silent> [t <Plug>unimpairedTPrevious$/;"	m
 [u	Session.vim	/^nmap [u <Plug>unimpaired_url_encode$/;"	m
+[u	fwd/Session.vim	/^nmap [u <Plug>unimpaired_url_encode$/;"	m
 [uu	Session.vim	/^nmap [uu <Plug>unimpaired_line_url_encode$/;"	m
+[uu	fwd/Session.vim	/^nmap [uu <Plug>unimpaired_line_url_encode$/;"	m
 [x	Session.vim	/^nmap [x <Plug>unimpaired_xml_encode$/;"	m
+[x	fwd/Session.vim	/^nmap [x <Plug>unimpaired_xml_encode$/;"	m
 [xx	Session.vim	/^nmap [xx <Plug>unimpaired_line_xml_encode$/;"	m
+[xx	fwd/Session.vim	/^nmap [xx <Plug>unimpaired_line_xml_encode$/;"	m
 [y	Session.vim	/^nmap [y <Plug>unimpaired_string_encode$/;"	m
+[y	fwd/Session.vim	/^nmap [y <Plug>unimpaired_string_encode$/;"	m
 [yy	Session.vim	/^nmap [yy <Plug>unimpaired_line_string_encode$/;"	m
+[yy	fwd/Session.vim	/^nmap [yy <Plug>unimpaired_line_string_encode$/;"	m
 \	Session.vim	/^nnoremap \\ ,$/;"	m
 \	Session.vim	/^onoremap \\ ,$/;"	m
+\	fwd/Session.vim	/^nnoremap \\ ,$/;"	m
+\	fwd/Session.vim	/^onoremap \\ ,$/;"	m
 ]	Session.vim	/^nmap ]  <Plug>unimpairedBlankDown$/;"	m
+]	fwd/Session.vim	/^nmap ]  <Plug>unimpairedBlankDown$/;"	m
 ]	Session.vim	/^nmap <silent> ] <Plug>unimpairedLNFile$/;"	m
+]	fwd/Session.vim	/^nmap <silent> ] <Plug>unimpairedLNFile$/;"	m
 ]	Session.vim	/^nmap <silent> ] <Plug>unimpairedQNFile$/;"	m
+]	fwd/Session.vim	/^nmap <silent> ] <Plug>unimpairedQNFile$/;"	m
 ]%	Session.vim	/^vmap ]% ]%m'gv``$/;"	m
+]%	fwd/Session.vim	/^vmap ]% ]%m'gv``$/;"	m
 ]A	Session.vim	/^nmap <silent> ]A <Plug>unimpairedALast$/;"	m
+]A	fwd/Session.vim	/^nmap <silent> ]A <Plug>unimpairedALast$/;"	m
 ]B	Session.vim	/^nmap <silent> ]B <Plug>unimpairedBLast$/;"	m
+]B	fwd/Session.vim	/^nmap <silent> ]B <Plug>unimpairedBLast$/;"	m
 ]L	Session.vim	/^nmap <silent> ]L <Plug>unimpairedLLast$/;"	m
+]L	fwd/Session.vim	/^nmap <silent> ]L <Plug>unimpairedLLast$/;"	m
 ]Q	Session.vim	/^nmap <silent> ]Q <Plug>unimpairedQLast$/;"	m
+]Q	fwd/Session.vim	/^nmap <silent> ]Q <Plug>unimpairedQLast$/;"	m
 ]T	Session.vim	/^nmap <silent> ]T <Plug>unimpairedTLast$/;"	m
+]T	fwd/Session.vim	/^nmap <silent> ]T <Plug>unimpairedTLast$/;"	m
 ]a	Session.vim	/^nmap <silent> ]a <Plug>unimpairedANext$/;"	m
+]a	fwd/Session.vim	/^nmap <silent> ]a <Plug>unimpairedANext$/;"	m
 ]b	Session.vim	/^nmap <silent> ]b <Plug>unimpairedBNext$/;"	m
+]b	fwd/Session.vim	/^nmap <silent> ]b <Plug>unimpairedBNext$/;"	m
 ]e	Session.vim	/^nmap ]e <Plug>unimpairedMoveDown$/;"	m
+]e	fwd/Session.vim	/^nmap ]e <Plug>unimpairedMoveDown$/;"	m
 ]f	Session.vim	/^nmap ]f <Plug>unimpairedDirectoryNext$/;"	m
+]f	fwd/Session.vim	/^nmap ]f <Plug>unimpairedDirectoryNext$/;"	m
 ]l	Session.vim	/^nmap <silent> ]l <Plug>unimpairedLNext$/;"	m
+]l	fwd/Session.vim	/^nmap <silent> ]l <Plug>unimpairedLNext$/;"	m
 ]n	Session.vim	/^nmap ]n <Plug>unimpairedContextNext$/;"	m
 ]n	Session.vim	/^omap ]n <Plug>unimpairedContextNext$/;"	m
+]n	fwd/Session.vim	/^nmap ]n <Plug>unimpairedContextNext$/;"	m
+]n	fwd/Session.vim	/^omap ]n <Plug>unimpairedContextNext$/;"	m
 ]o	Session.vim	/^nmap ]o <Plug>unimpairedONext$/;"	m
+]o	fwd/Session.vim	/^nmap ]o <Plug>unimpairedONext$/;"	m
 ]q	Session.vim	/^nmap <silent> ]q <Plug>unimpairedQNext$/;"	m
+]q	fwd/Session.vim	/^nmap <silent> ]q <Plug>unimpairedQNext$/;"	m
 ]t	Session.vim	/^nmap <silent> ]t <Plug>unimpairedTNext$/;"	m
+]t	fwd/Session.vim	/^nmap <silent> ]t <Plug>unimpairedTNext$/;"	m
 ]u	Session.vim	/^nmap ]u <Plug>unimpaired_url_decode$/;"	m
+]u	fwd/Session.vim	/^nmap ]u <Plug>unimpaired_url_decode$/;"	m
 ]uu	Session.vim	/^nmap ]uu <Plug>unimpaired_line_url_decode$/;"	m
+]uu	fwd/Session.vim	/^nmap ]uu <Plug>unimpaired_line_url_decode$/;"	m
 ]x	Session.vim	/^nmap ]x <Plug>unimpaired_xml_decode$/;"	m
+]x	fwd/Session.vim	/^nmap ]x <Plug>unimpaired_xml_decode$/;"	m
 ]xx	Session.vim	/^nmap ]xx <Plug>unimpaired_line_xml_decode$/;"	m
+]xx	fwd/Session.vim	/^nmap ]xx <Plug>unimpaired_line_xml_decode$/;"	m
 ]y	Session.vim	/^nmap ]y <Plug>unimpaired_string_decode$/;"	m
+]y	fwd/Session.vim	/^nmap ]y <Plug>unimpaired_string_decode$/;"	m
 ]yy	Session.vim	/^nmap ]yy <Plug>unimpaired_line_string_decode$/;"	m
+]yy	fwd/Session.vim	/^nmap ]yy <Plug>unimpaired_line_string_decode$/;"	m
 _AES_CMAC_CTX	fwd/inc/cmac.h	/^typedef struct _AES_CMAC_CTX {$/;"	s
 _Api__ComponentStats	libttn/api.pb-c.h	/^struct  _Api__ComponentStats$/;"	s
 _Api__ComponentStats__CPUStats	libttn/api.pb-c.h	/^struct  _Api__ComponentStats__CPUStats$/;"	s
@@ -3881,8 +4124,11 @@ _rxpkts	fwd/inc/gwcfg.h	/^typedef struct _rxpkts {   \/* rx packages receive fro
 _server	fwd/inc/gwcfg.h	/^typedef struct _server {$/;"	s
 _thread_info	fwd/inc/gwcfg.h	/^typedef struct _thread_info {$/;"	s
 a%	Session.vim	/^vmap a% [%v]%$/;"	m
+a%	fwd/Session.vim	/^vmap a% [%v]%$/;"	m
 a/	Session.vim	/^omap a\/ <Plug>(textobj-lastpat-n)$/;"	m
+a/	fwd/Session.vim	/^omap a\/ <Plug>(textobj-lastpat-n)$/;"	m
 a?	Session.vim	/^omap a? <Plug>(textobj-lastpat-N)$/;"	m
+a?	fwd/Session.vim	/^omap a? <Plug>(textobj-lastpat-N)$/;"	m
 aBlock	fwd/src/loramac-crypto.c	/^static uint8_t aBlock[] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
 ack	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean ack;$/;"	m	struct:_Lorawan__FCtrl
 activate	libttn/router.pb-c.h	/^  void (*activate)(Router__Router_Service *service,$/;"	m	struct:_Router__Router_Service
@@ -4110,7 +4356,7 @@ beacon_power	fwd/inc/gwcfg.h	/^        int8_t   beacon_power;     \/* set beacon
 begin	libttn/descriptor.pb-c.h	/^  int32_t begin;$/;"	m	struct:_Google__Protobuf__GeneratedCodeInfo__Annotation
 bin_to_b64	fwd/src/base64.c	/^int bin_to_b64(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
 bin_to_b64_nopad	fwd/src/base64.c	/^int bin_to_b64_nopad(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
-bind	fwd/inc/gwcfg.h	/^    uint8_t bind;$/;"	m	struct:_rxpkts
+bind	fwd/inc/gwcfg.h	/^    uint8_t bind;          \/\/当前还剩多少连接，当连接为0时，将会移除这个包$/;"	m	struct:_rxpkts
 bit_rate	libttn/lorawan.pb-c.h	/^  uint32_t bit_rate;$/;"	m	struct:_Lorawan__Metadata
 bit_rate	libttn/lorawan.pb-c.h	/^  uint32_t bit_rate;$/;"	m	struct:_Lorawan__TxConfiguration
 bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon38	typeref:struct:__anon38::__anon39
@@ -4231,6 +4477,7 @@ crc	hal/loragw_hal.h	/^    uint16_t    crc;            \/*!> CRC that was receiv
 crc16	fwd/src/service.c	/^uint16_t crc16(const uint8_t * data, unsigned size) {$/;"	f
 crc_en	hal/sx1302hal/loragw_sx1302_rx.h	/^    bool        crc_en;$/;"	m	struct:rx_packet_s
 cs	Session.vim	/^nmap cs <Plug>Csurround$/;"	m
+cs	fwd/Session.vim	/^nmap cs <Plug>Csurround$/;"	m
 csharp_namespace	libttn/descriptor.pb-c.h	/^  char *csharp_namespace;$/;"	m	struct:_Google__Protobuf__FileOptions
 cstring	libmqtt/MQTTPacket.h	/^	char* cstring;$/;"	m	struct:__anon50
 ctype	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldOptions__CType ctype;$/;"	m	struct:_Google__Protobuf__FieldOptions
@@ -4266,7 +4513,6 @@ dbg_init_random	hal/loragw_debug.c	/^void dbg_init_random(void) {$/;"	f
 dbg_log_buffer_to_file	hal/loragw_debug.c	/^void dbg_log_buffer_to_file(FILE * file, uint8_t * buffer, uint16_t size) {$/;"	f
 dbg_log_payload_diff_to_file	hal/loragw_debug.c	/^void dbg_log_payload_diff_to_file(FILE * file, uint8_t * buffer1, uint8_t * buffer2, uint16_t size) {$/;"	f
 dbg_toggle_gpio	hal/sx1302hal/loragw_hal_sx1302.c	/^void dbg_toggle_gpio(void) {$/;"	f
-deal	fwd/inc/gwcfg.h	/^    bool deal;$/;"	m	struct:_rxpkts
 debug	hal/tst/test_loragw_cal.c	/^    uint8_t debug [8];$/;"	m	struct:cal_res_s	file:
 debug_cfg	hal/loragw_hal.h	/^    struct lgw_conf_debug_s     debug_cfg;$/;"	m	struct:lgw_context_s	typeref:struct:lgw_context_s::lgw_conf_debug_s
 debug_mask	fwd/inc/gwcfg.h	/^        int  debug_mask;           \/* enabled debugging options *\/$/;"	m	struct:__anon23::__anon30
@@ -4326,6 +4572,7 @@ downlink	libttn/router.pb-c.h	/^  Api__Rates *downlink;$/;"	m	struct:_Router__St
 downlink_handler	libttn/session.h	/^  TTNDownlinkHandler downlink_handler;$/;"	m	struct:Session
 downlink_topic	libttn/session.h	/^  char *downlink_topic;$/;"	m	struct:Session
 ds	Session.vim	/^nmap ds <Plug>Dsurround$/;"	m
+ds	fwd/Session.vim	/^nmap ds <Plug>Dsurround$/;"	m
 dsp	libttn/gateway.pb-c.h	/^  uint32_t dsp;$/;"	m	struct:_Gateway__Status
 dup	libmqtt/MQTTClient.h	/^   unsigned char dup;$/;"	m	struct:MQTTMessage
 dup	libmqtt/MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon46::__anon47
@@ -4502,6 +4749,7 @@ get_concentrator_time	fwd/src/timersync.c	/^int get_concentrator_time(struct tim
 get_img_rej	hal/tst/test_loragw_cal.c	/^uint8_t get_img_rej(int16_t *sig_i, int16_t *sig_q, int nb_samp, double f_sig_norm) {$/;"	f
 get_quoted_string	fwd/src/parson.c	/^static char * get_quoted_string(const char **string) {$/;"	f	file:
 get_rxbw_index	hal/loragw_lbt.c	/^enum lgw_sx127x_rxbw_e get_rxbw_index(uint32_t hz) {$/;"	f
+get_rxpkt	fwd/src/fwd.c	/^int get_rxpkt(serv_s* serv) {$/;"	f
 get_status	libttn/router.pb-c.h	/^  void (*get_status)(Router__RouterManager_Service *service,$/;"	m	struct:_Router__RouterManager_Service
 get_tx_gain_lut_index	fwd/src/fwd.c	/^int get_tx_gain_lut_index(uint8_t rf_chain, int8_t rf_power, uint8_t * lut_index) {$/;"	f
 getfn	libmqtt/MQTTPacket.h	/^	int (*getfn)(void *, unsigned char*, int); \/* must return -1 for error, 0 for call again, or the number of bytes read *\/$/;"	m	struct:__anon51
@@ -4873,6 +5121,8 @@ gwtraf_start	fwd/src/gwtraf_serv.c	/^int gwtraf_start(serv_s* serv) {$/;"	f
 gwtraf_stop	fwd/src/gwtraf_serv.c	/^void gwtraf_stop(serv_s* serv) {$/;"	f
 gx	Session.vim	/^nmap gx <Plug>NetrwBrowseX$/;"	m
 gx	Session.vim	/^vmap gx <Plug>NetrwBrowseXVis$/;"	m
+gx	fwd/Session.vim	/^nmap gx <Plug>NetrwBrowseX$/;"	m
+gx	fwd/Session.vim	/^vmap gx <Plug>NetrwBrowseXVis$/;"	m
 hal	fwd/inc/gwcfg.h	/^    } hal;$/;"	m	struct:__anon23	typeref:struct:__anon23::__anon25
 hal	libttn/gateway.pb-c.h	/^  char *hal;$/;"	m	struct:_Gateway__Status
 has_ack	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean has_ack;$/;"	m	struct:_Lorawan__FCtrl
@@ -5049,12 +5299,14 @@ hibit	fwd/src/aes.c	/^static uint_8t hibit(const uint_8t x)$/;"	f	file:
 host	libmqtt/test/stdoutsub.c	/^   char *host;$/;"	m	struct:opts_struct	file:
 hpMax	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t hpMax;          \/* sx1250 only *\/$/;"	m	struct:agc_gain_params_s
 i/	Session.vim	/^omap i\/ <Plug>(textobj-lastpat-n)$/;"	m
+i/	fwd/Session.vim	/^omap i\/ <Plug>(textobj-lastpat-n)$/;"	m
 i2c_dev	hal/test/test_loragw_i2c.c	/^static int i2c_dev = -1;$/;"	v	file:
 i2c_linuxdev_close	hal/loragw_i2c.c	/^int i2c_linuxdev_close(int i2c_fd) {$/;"	f
 i2c_linuxdev_open	hal/loragw_i2c.c	/^int i2c_linuxdev_open(const char *path, uint8_t device_addr, int *i2c_fd) {$/;"	f
 i2c_linuxdev_read	hal/loragw_i2c.c	/^int i2c_linuxdev_read(int i2c_fd, uint8_t device_addr, uint8_t reg_addr, uint8_t *data) {$/;"	f
 i2c_linuxdev_write	hal/loragw_i2c.c	/^int i2c_linuxdev_write(int i2c_fd, uint8_t device_addr, uint8_t reg_addr, uint8_t data) {$/;"	f
 i?	Session.vim	/^omap i? <Plug>(textobj-lastpat-N)$/;"	m
+i?	fwd/Session.vim	/^omap i? <Plug>(textobj-lastpat-N)$/;"	m
 i_offset	hal/test/test_loragw_cal.c	/^    int32_t i_offset;$/;"	m	struct:cal_tx_log	file:
 id	fwd/inc/gwcfg.h	/^    pthread_t*  id;$/;"	m	struct:_thread_info
 id	fwd/inc/mqtt_service.h	/^	char *id;      $/;"	m	struct:_mqttsession_s
@@ -5250,7 +5502,7 @@ keepAliveInterval	libmqtt/MQTTConnect.h	/^	unsigned short keepAliveInterval;$/;"
 keep_alive_interval	libmqtt/MQTTClient.h	/^   unsigned int keep_alive_interval;$/;"	m	struct:MQTTClient
 keepalive	libmqtt/MQTTClient.c	/^int keepalive(MQTTClient *c)$/;"	f
 key	fwd/inc/db.h	/^	char *key;$/;"	m	struct:lgw_db_entry
-key	fwd/inc/gwcfg.h	/^        char *key;			    \/\/ gateway key to connect to service$/;"	m	struct:_server::__anon19
+key	fwd/inc/gwcfg.h	/^        char *key;			        \/\/ gateway key to connect to service$/;"	m	struct:_server::__anon19
 key	fwd/inc/mqtt_service.h	/^	char *key;     $/;"	m	struct:_mqttsession_s
 key	libttn/session.h	/^  char *key;$/;"	m	struct:Session
 key	libttn/trace.pb-c.h	/^  char *key;$/;"	m	struct:_Trace__Trace__MetadataEntry
@@ -6340,19 +6592,25 @@ rx_rate_sf	hal/sx1302hal/loragw_sx1302_rx.h	/^    uint8_t     rx_rate_sf;       
 rxbytenb_modem	hal/sx1302hal/loragw_sx1302_rx.h	/^    uint8_t     rxbytenb_modem;$/;"	m	struct:rx_packet_s
 rxlorairqmask	hal/lg02hal/loragw_hal_lg02.c	/^static const uint8_t rxlorairqmask[] = {$/;"	v	file:
 rxpkt	fwd/inc/gwcfg.h	/^    struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];$/;"	m	struct:_rxpkts	typeref:struct:_rxpkts::lgw_pkt_rx_s
-rxpkt_serv	fwd/inc/gwcfg.h	/^    rxpkts_s* rxpkt_serv;           \/\/ rxpkts array$/;"	m	struct:_server
+rxpkt	fwd/inc/gwcfg.h	/^    struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];$/;"	m	struct:_server	typeref:struct:_server::lgw_pkt_rx_s
 rxpkts	fwd/inc/gwcfg.h	/^    rxpkts,$/;"	e	enum:__anon14
 rxpkts_list	fwd/inc/gwcfg.h	/^    struct rxpkts_list rxpkts_list;$/;"	m	struct:__anon23	typeref:struct:__anon23::rxpkts_list
 rxpkts_s	fwd/inc/gwcfg.h	/^} rxpkts_s;$/;"	t	typeref:struct:_rxpkts
 s	libmqtt/MQTTLinux.h	/^   Semaphore s;$/;"	m	struct:Queue
 s	libmqtt/MQTTLinux.h	/^   sem_t s;$/;"	m	struct:Semaphore
 s:cpo_save	Session.vim	/^let s:cpo_save=&cpo$/;"	v
+s:cpo_save	fwd/Session.vim	/^let s:cpo_save=&cpo$/;"	v
 s:l	Session.vim	/^let s:l = 172 - ((0 * winheight(0) + 6) \/ 12)$/;"	v
 s:l	Session.vim	/^let s:l = 232 - ((11 * winheight(0) + 6) \/ 12)$/;"	v
 s:l	Session.vim	/^let s:l = 47 - ((5 * winheight(0) + 6) \/ 12)$/;"	v
+s:l	fwd/Session.vim	/^let s:l = 138 - ((18 * winheight(0) + 9) \/ 19)$/;"	v
+s:l	fwd/Session.vim	/^let s:l = 284 - ((0 * winheight(0) + 9) \/ 19)$/;"	v
 s:so_save	Session.vim	/^let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0$/;"	v
+s:so_save	fwd/Session.vim	/^let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0$/;"	v
 s:sx	Session.vim	/^let s:sx = expand("<sfile>:p:r")."x.vim"$/;"	v
+s:sx	fwd/Session.vim	/^let s:sx = expand("<sfile>:p:r")."x.vim"$/;"	v
 s:wipebuf	Session.vim	/^  let s:wipebuf = bufnr('%')$/;"	v
+s:wipebuf	fwd/Session.vim	/^  let s:wipebuf = bufnr('%')$/;"	v
 sBlock	fwd/src/loramac-crypto.c	/^static uint8_t sBlock[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,$/;"	v	file:
 sCtrlBits	fwd/inc/mac-header-decode.h	/^    struct sCtrlBits$/;"	s	union:uLoRaMacFrameCtrl
 sDLSettingsBits	fwd/inc/mac-header-decode.h	/^    struct sDLSettingsBits$/;"	s	union:uLoRaMacDLSettings
@@ -6387,11 +6645,10 @@ serv_s	fwd/inc/gwcfg.h	/^} serv_s;$/;"	t	typeref:struct:_server
 serv_type	fwd/inc/gwcfg.h	/^} serv_type;$/;"	t	typeref:enum:__anon12
 server_streaming	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean server_streaming;$/;"	m	struct:_Google__Protobuf__MethodDescriptorProto
 service	libttn/descriptor.pb-c.h	/^  Google__Protobuf__ServiceDescriptorProto **service;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
-service_handle_rxpkt	fwd/src/service.c	/^void service_handle_rxpkt(gw_s* gw, rxpkts_s* rxpkt) {$/;"	f
 service_id	libttn/trace.pb-c.h	/^  char *service_id;$/;"	m	struct:_Trace__Trace
 service_name	libttn/trace.pb-c.h	/^  char *service_name;$/;"	m	struct:_Trace__Trace
-service_start	fwd/src/service.c	/^void service_start(gw_s* gw) {$/;"	f
-service_stop	fwd/src/service.c	/^void service_stop(gw_s* gw) {$/;"	f
+service_start	fwd/src/service.c	/^void service_start() {$/;"	f
+service_stop	fwd/src/service.c	/^void service_stop() {$/;"	f
 session	fwd/inc/gwcfg.h	/^    void* session;$/;"	m	struct:__anon17
 sessionpresent	libmqtt/MQTTConnect.h	/^		unsigned int sessionpresent : 1;    \/**< session present flag *\/$/;"	m	struct:__anon43::__anon44
 sessionpresent	libmqtt/MQTTConnect.h	/^		unsigned int sessionpresent : 1;    \/**< session present flag *\/$/;"	m	struct:__anon43::__anon45
@@ -6441,6 +6698,8 @@ spipath	hal/lg02hal/loragw_hal_lg02.h	/^    char spipath[32];$/;"	m	struct:__ano
 spiport	hal/lg02hal/loragw_hal_lg02.h	/^    void* spiport;$/;"	m	struct:__anon2
 stack	libttn/api.pb-c.h	/^  uint64_t stack;$/;"	m	struct:_Api__ComponentStats__MemoryStats
 stall_time	fwd/inc/gwcfg.h	/^        int  stall_time;$/;"	m	struct:_server::__anon21
+stamp	fwd/inc/gwcfg.h	/^        uint8_t stamp;              \/\/ 用来标记service，当有服务印上这个标记时，代表和当前的service有关联$/;"	m	struct:_server::__anon19
+stamps	fwd/inc/gwcfg.h	/^    uint8_t stamps;        \/\/这个指示当前有什么服务对这个包打上了印记$/;"	m	struct:_rxpkts
 start	libttn/descriptor.pb-c.h	/^  int32_t start;$/;"	m	struct:_Google__Protobuf__DescriptorProto__ExtensionRange
 start	libttn/descriptor.pb-c.h	/^  int32_t start;$/;"	m	struct:_Google__Protobuf__DescriptorProto__ReservedRange
 start_routine	fwd/src/utilities.c	/^	void *(*start_routine)(void *);$/;"	m	struct:thr_arg	file:
@@ -6800,10 +7059,18 @@ xtal_correct	fwd/inc/gwcfg.h	/^        double xtal_correct;$/;"	m	struct:__anon2
 xtal_correct_ok	fwd/inc/gwcfg.h	/^        bool xtal_correct_ok;$/;"	m	struct:__anon23::__anon25
 xtal_err	hal/loragw_gps.h	/^    double          xtal_err;   \/*!> raw clock error (eg. <1 'slow' XTAL) *\/$/;"	m	struct:tref
 yS	Session.vim	/^nmap yS <Plug>YSurround$/;"	m
+yS	fwd/Session.vim	/^nmap yS <Plug>YSurround$/;"	m
 ySS	Session.vim	/^nmap ySS <Plug>YSsurround$/;"	m
+ySS	fwd/Session.vim	/^nmap ySS <Plug>YSsurround$/;"	m
 ySs	Session.vim	/^nmap ySs <Plug>YSsurround$/;"	m
+ySs	fwd/Session.vim	/^nmap ySs <Plug>YSsurround$/;"	m
 ys	Session.vim	/^nmap ys <Plug>Ysurround$/;"	m
+ys	fwd/Session.vim	/^nmap ys <Plug>Ysurround$/;"	m
 yss	Session.vim	/^nmap yss <Plug>Yssurround$/;"	m
+yss	fwd/Session.vim	/^nmap yss <Plug>Yssurround$/;"	m
 zt	Session.vim	/^normal! zt$/;"	m
+zt	fwd/Session.vim	/^normal! zt$/;"	m
 ¤	Session.vim	/^imap ¤ $a$/;"	m
+¤	fwd/Session.vim	/^imap ¤ $a$/;"	m
 °	Session.vim	/^imap ° 0i$/;"	m
+°	fwd/Session.vim	/^imap ° 0i$/;"	m

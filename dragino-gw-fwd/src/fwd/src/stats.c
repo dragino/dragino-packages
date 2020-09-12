@@ -293,7 +293,7 @@ static void semtech_report(serv_s *serv) {
 	//JSON_Value *root_value_concise = NULL;
 	//JSON_Object *root_object_concise = NULL;
 
-	if (serv->report->statusstream && other_format) {
+	if (other_format) {
 		root_value_verbose = json_value_init_object();
 		root_object_verbose = json_value_get_object(root_value_verbose);
 		JSON_Value *servers_array_value = json_value_init_array();
@@ -344,7 +344,7 @@ static void semtech_report(serv_s *serv) {
 		json_object_dotset_number(root_object_verbose, "current.down_beacon_packets_rejected", cp_nb_beacon_rejected);
     }
 
-	if (serv->report->statusstream && semtech_format) {
+	if (semtech_format) {
 		pthread_mutex_lock(&serv->report->mx_report);
 
         memset(serv->report->status_report, 0, sizeof(serv->report->status_report));
@@ -369,6 +369,7 @@ static void semtech_report(serv_s *serv) {
 
 		serv->report->report_ready = true;
 		pthread_mutex_unlock(&serv->report->mx_report);
+        sem_post(&serv->thread.sema);
 	}
 
 	if (other_format) 

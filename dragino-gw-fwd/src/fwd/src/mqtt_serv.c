@@ -189,7 +189,7 @@ int mqtt_start(serv_s* serv) {
         lgw_log(LOG_WARNING, "WARNING~ [%s] Can't connet mqtt server.\n", serv->info.name);
         return FAILURE;
     }
-    if (lgw_pthread_create_detached(&serv->thread.t_up, NULL, (void *(*)(void *))mqtt_push_up, serv)) {
+    if (lgw_pthread_create_background(&serv->thread.t_up, NULL, (void *(*)(void *))mqtt_push_up, serv)) {
         lgw_log(LOG_WARNING, "WARNING~ [%s] Can't create push up pthread.\n", serv->info.name);
         return -1;
     }
@@ -212,6 +212,7 @@ static void mqtt_push_up(void* arg) {
 
 	int i, j;					/* loop variables */
     int err;
+    int nb_pkt = 0;
 	struct lgw_pkt_rx_s *p;	/* pointer on a RX packet */
 
     rxpkts_s* rxpkt_entry = NULL;
@@ -226,49 +227,41 @@ static void mqtt_push_up(void* arg) {
 		// wait for data to arrive
 		sem_wait(&serv->thread.sema);
 
-        LGW_LIST_TRAVERSE(&GW.rxpkts_list, rxpkt_entry, list) {  
-            if (NULL == rxpkt_entry)
-                continue;
+        nb_pkt = get_rxpkt(serv);     //only get the first rxpkt of list
+        if (nb_pkt == 0)
+            continue;
 
-            if (serv->info.stamp == (serv->info.stamp & rxpkt_entry->stamps)) {
-                continue;
-            }
+        lgw_log(LOG_DEBUG, "DEBUG~ [%s] mqtt_push_up fetch %d pachages.\n", serv->info.name, nb_pkt);
 
-            for (i = 0; i < rxpkt_entry->nb_pkt; ++i) {
-                p = &rxpkt_entry->rxpkt[i];
-                /* basic packet filtering */
-                switch (p->status) {
-                case STAT_CRC_OK:
-                    if (!serv->filter.fwd_valid_pkt) {
-                        continue;	/* skip that packet */
-                    }
-                    break;
-                case STAT_CRC_BAD:
-                    if (!serv->filter.fwd_error_pkt) {
-                        continue;	/* skip that packet */
-                    }
-                    break;
-                case STAT_NO_CRC:
-                    if (!serv->filter.fwd_nocrc_pkt) {
-                        continue;	/* skip that packet */
-                    }
-                    break;
-                default:
-                    continue;		/* skip that packet */
+        for (i = 0; i < nb_pkt; i++) {
+            p = &serv->rxpkt[i];
+            /* basic packet filtering */
+            switch (p->status) {
+            case STAT_CRC_OK:
+                if (!serv->filter.fwd_valid_pkt) {
+                    continue;	/* skip that packet */
                 }
-                err = payload_deal((mqttsession_s*)serv->net->mqtt->session, p);
-                if (err) {
-                    lgw_log(LOG_WARNING, "WARNING~ [%s] send data to mqtt server error, try to reconnect.\n", serv->info.name);
-                    mqtt_reconnect(serv);
-                } else {
-                    lgw_log(LOG_INFO, "INFO~ [%s] send data to mqtt server succeed.\n", serv->info.name);
+                break;
+            case STAT_CRC_BAD:
+                if (!serv->filter.fwd_error_pkt) {
+                    continue;	/* skip that packet */
                 }
+                break;
+            case STAT_NO_CRC:
+                if (!serv->filter.fwd_nocrc_pkt) {
+                    continue;	/* skip that packet */
+                }
+                break;
+            default:
+                continue;		/* skip that packet */
             }
-
-            pthread_mutex_lock(&GW.mx_bind_lock);
-            rxpkt_entry->stamps |= serv->info.stamp;
-            rxpkt_entry->bind--;
-            pthread_mutex_unlock(&GW.mx_bind_lock);
+            err = payload_deal((mqttsession_s*)serv->net->mqtt->session, p);
+            if (err) {
+                lgw_log(LOG_WARNING, "WARNING~ [%s] send data to mqtt server error, try to reconnect.\n", serv->info.name);
+                mqtt_reconnect(serv);
+            } else {
+                lgw_log(LOG_INFO, "INFO~ [%s] send data to mqtt server succeed.\n", serv->info.name);
+            }
         }
     }
 }

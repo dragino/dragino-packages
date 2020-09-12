@@ -207,7 +207,7 @@ static void sig_handler(int sigio) {
 
 void stop_clean_service(void) {
     serv_s* serv_entry = NULL;  
-    service_stop(&GW);
+    service_stop();
 
     LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.serv_list, serv_entry, list) {
         LGW_LIST_REMOVE_CURRENT(list);
@@ -402,6 +402,30 @@ void print_tx_status(uint8_t tx_status) {
 	}
 }
 
+int get_rxpkt(serv_s* serv) {
+    int ret = 0;
+    rxpkts_s* rxpkt_entry;
+
+    //LGW_LIST_LOCK(&GW.rxpkts_list);
+    LGW_LIST_TRAVERSE(&GW.rxpkts_list, rxpkt_entry, list) {
+        ret = 0;
+        if (NULL == rxpkt_entry)
+            continue;
+        if (serv->info.stamp == (serv->info.stamp & rxpkt_entry->stamps))
+            continue;
+        
+        memset(serv->rxpkt, 0, sizeof(serv->rxpkt));
+        memcpy(serv->rxpkt, rxpkt_entry->rxpkt, sizeof(struct lgw_pkt_rx_s) * rxpkt_entry->nb_pkt);
+        ret = rxpkt_entry->nb_pkt;
+        pthread_mutex_lock(&GW.mx_bind_lock);
+        rxpkt_entry->stamps |= serv->info.stamp;
+        rxpkt_entry->bind--;
+        pthread_mutex_unlock(&GW.mx_bind_lock);
+        break;
+    }
+    //LGW_LIST_UNLOCK(&GW.rxpkts_list);
+    return ret;
+}
 
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
@@ -513,7 +537,10 @@ int main(int argc, char *argv[]) {
     serv_entry->info.type = pkt;
     serv_entry->info.stamp = 1;     //将PKT服务标记为 1 
     strcpy(serv_entry->info.name, "PKT_SERV");;
-    //serv_entry->gw = &GW;
+    //serv_entry->rxpkts_list->first = NULL;
+    //serv_entry->rxpkts_list->last = NULL;
+    //serv_entry->rxpkts_list->size = 0;
+    //pthread_mutex_init(&serv_entry->rxpkts_list->lock, NULL);
 
     if (sem_init(&serv_entry->thread.sema, 0, 0) != 0) {
         lgw_log(LOG_ERROR, "[main] ERROR~ initializes the unnamed semaphore, EXIT!\n");
@@ -555,7 +582,7 @@ int main(int argc, char *argv[]) {
     /* starting ghost service */
 	if (GW.cfg.ghoststream_enabled == true) {
         ghost_start(GW.cfg.ghost_host, GW.cfg.ghost_port, GW.gps.reference_coord, GW.info.gateway_id);
-        lgw_register_atexit(ghost_stop);
+        //lgw_register_atexit(ghost_stop);
         lgw_log(LOG_INFO, "INFO~ [main] Ghost listener started, ghost packets can now be received.\n");
     }
 
@@ -616,12 +643,12 @@ int main(int argc, char *argv[]) {
     */
 
 	/* initialize protocol stacks */
-	service_start(&GW);
+	service_start();
     //LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) {
 	//    service_start(serv_entry);
     //}
 
-    lgw_register_atexit(stop_clean_service);
+    //lgw_register_atexit(stop_clean_service);
 
 	/* main loop task : statistics transmission */
 	while (!exit_sig && !quit_sig) {
@@ -656,7 +683,13 @@ int main(int argc, char *argv[]) {
 		pthread_cancel(thrid_valid);	    /* don't wait for validation thread */
 	}
 
-    lgw_run_atexits(1);
+	if (GW.cfg.ghoststream_enabled == true) {
+        ghost_stop();
+    }
+
+    //lgw_run_atexits(1);
+
+    stop_clean_service();
 
 	/* if an exit signal was received, try to quit properly */
 	if (exit_sig) {
@@ -687,10 +720,10 @@ static void thread_up(void) {
 	struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];	/* array containing inbound packets + metadata */
 	int nb_pkt;
 
-	pthread_t thrid_recycle;
-
     rxpkts_s *rxpkt_entry = NULL;
     serv_s* serv_entry = NULL;
+
+	pthread_t thrid_recycle;
 
 	lgw_log(LOG_INFO, "INFO~ [main-up] Thread activated for all servers.\n");
 
@@ -735,16 +768,22 @@ static void thread_up(void) {
 
         LGW_LIST_LOCK(&GW.rxpkts_list);
         LGW_LIST_INSERT_HEAD(&GW.rxpkts_list, rxpkt_entry, list);
-	    lgw_log(LOG_INFO, "INFO~ [main-up] Size of package list is %d\n", GW.rxpkts_list.size);
         LGW_LIST_UNLOCK(&GW.rxpkts_list);
 
-        LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) {  //通知servicer接收到新的包了
-            sem_post(&serv_entry->thread.sema);
+	    lgw_log(LOG_DEBUG, "DEBUG~ [main-up] Size of package list is %d\n", GW.rxpkts_list.size);
+        
+        LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) {
+            if (sem_post(&serv_entry->thread.sema))
+	            lgw_log(LOG_DEBUG, "DEBUG~ [%s-up] %s\n", serv_entry->info.name, strerror(errno));
         }
+
+        //service_handle_rxpkt(rxpkt_entry);
+        //lgw_free(rxpkt_entry);
 
         if (GW.rxpkts_list.size > DEFAULT_RXPKTS_LIST_SIZE)    // if number of head list greater than LIST_SIZE  
         //if (GW.rxpkts_list.size > 0)    //debug 
-            lgw_pthread_create_background(&thrid_recycle, NULL, (void *(*)(void *))thread_rxpkt_recycle, NULL); 
+           lgw_pthread_create_detached_background(&thrid_recycle, NULL, (void *(*)(void *))thread_rxpkt_recycle, NULL); 
+           //thread_rxpkt_recycle();
 	}
 
 	lgw_log(LOG_INFO, "INFO~ [main-up] End of upstream thread\n");
@@ -756,11 +795,11 @@ static void thread_up(void) {
 static void thread_rxpkt_recycle(void) {
     rxpkts_s* rxpkt_entry = NULL;
 
-	lgw_log(LOG_INFO, "\nINFO~ [MAIN] Runing packages recycle thread\n");
+	lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] Runing packages recycle thread\n");
 
     LGW_LIST_LOCK(&GW.rxpkts_list);
     LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.rxpkts_list, rxpkt_entry, list) {
-	    lgw_log(LOG_INFO, "\nINFO~ [MAIN] recycle thread start traverse, bind=%d\n", rxpkt_entry->bind);
+	    lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] recycle thread start traverse, bind=%d\n", rxpkt_entry->bind);
         if (rxpkt_entry->bind < 1) {
             LGW_LIST_REMOVE_CURRENT(list);
             lgw_free(rxpkt_entry);
@@ -769,6 +808,7 @@ static void thread_rxpkt_recycle(void) {
     }
     LGW_LIST_TRAVERSE_SAFE_END;
     LGW_LIST_UNLOCK(&GW.rxpkts_list);
+	lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] End of recycle \n");
     return;
 }
 

@@ -42,6 +42,8 @@
 #include "pkt_service.h"
 #include "mqtt_service.h"
 
+DECLARE_GW;
+
 int init_sock(const char *addr, const char *port, const void *timeout, int size) {
 	int i;
     int sockfd;
@@ -139,17 +141,25 @@ bool pkt_basic_filter(serv_s* serv, const uint32_t addr, const uint8_t fport) {
     return false;
 }
 
-void service_handle_rxpkt(gw_s* gw, rxpkts_s* rxpkt) {
-    serv_s* serv_entry;
-    LGW_LIST_TRAVERSE(&gw->serv_list, serv_entry, list) { 
-        //serv_entry->rxpkt_serv = rxpkt;
+/*
+void service_handle_rxpkt(rxpkts_s* rxpkt) {
+    serv_s* serv_entry = NULL;
+    rxpkts_s* rxpkt_entry = NULL;
+    LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) { 
+        rxpkt_entry = (rxpkts_s*)lgw_malloc(sizeof(rxpkts_s));
+        if (NULL == rxpkt_entry) continue;
+        memcpy(rxpkt_entry, rxpkt, sizeof(rxpkts_s));
+        LGW_LIST_LOCK(&serv_entry->rxpkts_list);
+        LGW_LIST_INSERT_HEAD(&serv_entry->rxpkts_list, rxpkt_entry, list);
+        LGW_LIST_UNLOCK(&GW.rxpkts_list);
         sem_post(&serv_entry->thread.sema);
     }
 }
+*/
 
-void service_start(gw_s* gw) {
+void service_start() {
     serv_s* serv_entry;
-    LGW_LIST_TRAVERSE(&gw->serv_list, serv_entry, list) { 
+    LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) { 
         switch (serv_entry->info.type) {
             case semtech:
                 semtech_start(serv_entry);
@@ -167,9 +177,9 @@ void service_start(gw_s* gw) {
     }
 }
 
-void service_stop(gw_s* gw) {
+void service_stop() {
     serv_s* serv_entry;
-    LGW_LIST_TRAVERSE(&gw->serv_list, serv_entry, list) { 
+    LGW_LIST_TRAVERSE(&GW.serv_list, serv_entry, list) { 
         switch (serv_entry->info.type) {
             case semtech:
                 semtech_stop(serv_entry);
@@ -206,5 +216,4 @@ uint16_t crc16(const uint8_t * data, unsigned size) {
 
     return x;
 }
-
 

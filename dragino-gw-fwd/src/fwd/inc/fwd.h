@@ -68,7 +68,7 @@
 
 #define DEFAULT_BEACON_POLL_MS              50	        /* time in ms between polling of beacon TX status */
 
-#define DEFAULT_RXPKTS_LIST_SIZE            2           
+#define DEFAULT_RXPKTS_LIST_SIZE            4           
 
 #define PKT_PUSH_DATA                       0
 #define PKT_PUSH_ACK                        1
@@ -145,5 +145,10 @@ double difftimespec(struct timespec end, struct timespec beginning);
  * \brief 
  */
 int get_tx_gain_lut_index(uint8_t rf_chain, int8_t rf_power, uint8_t * lut_index);
+
+/*!
+ * \brief 
+ */
+int get_rxpkt(serv_s* serv);
 
 #endif							/* _DR_PKT_FWD_H_ */

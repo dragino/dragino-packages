@@ -33,19 +33,19 @@
  * \brief rxpkt分发处理
  * 
  */
-void service_handle_rxpkt(gw_s* gw, rxpkts_s* rxpkt);
+//void service_handle_rxpkt(rxpkts_s* rxpkt);
 
 /*!
  * \brief rxpkt分发处理
  * 
  */
-void service_start(gw_s* gw);
+void service_start();
 
 /*!
  * \brief rxpkt分发处理
  * 
  */
-void service_stop(gw_s* gw);
+void service_stop();
 
 /*!
  * \brief 准备一个网络文件描述符，用于后续的连接
@@ -63,7 +63,7 @@ bool pkt_basic_filter(serv_s* serv, const uint32_t addr, const uint8_t fport);
 
 /*!
  */
-int parse_cfg(const char* cfgfile, gw_s* gw);
+int parse_cfg(const char* cfgfile);
 
 /*!
  */

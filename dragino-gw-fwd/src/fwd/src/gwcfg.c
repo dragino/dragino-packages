@@ -784,7 +784,14 @@ static int parse_gateway_configuration(const char* conf_file) {
             /* 在这里初始化service */
             serv_entry->list.next = NULL;
 
-            serv_entry->info.stamp = 1 << (i + 1);
+            /* 在这里初始化service 的 pkts head */
+            /*
+            serv_entry->rxpkts_list->first = NULL;
+            serv_entry->rxpkts_list->last = NULL;
+            serv_entry->rxpkts_list->size = 0;
+            pthread_mutex_init(&serv_entry->rxpkts_list->lock, NULL);
+            */
+            serv_entry->info.stamp = 1 << (i+1);  //PKT is the first service
 
             /* service network information */
             serv_entry->net = (serv_net_s*)lgw_malloc(sizeof(serv_net_s));

@@ -1495,14 +1495,26 @@ int main(void)
         rx2dr = DR_LORA_SF12;
         rx2bw = BW_125KHZ;
         rx2freq = 505300000UL;
-    } else if ((strstr(gwcfg, "AU") != NULL) || (strstr(gwcfg, "KR") != NULL)) {
+    } else if (strstr(gwcfg, "CN780") != NULL) {
+        rx2dr = DR_LORA_SF12;
+        rx2bw = BW_125KHZ;
+        rx2freq = 786000000UL;
+    } else if (strstr(gwcfg, "AU") != NULL) {
         rx2dr = DR_LORA_SF12;
         rx2bw = BW_500KHZ;
         rx2freq = 923300000UL;
-    } else { /* AS923MHz ISM Band: Brnei, cambodia, HK, Indonesia, Japan, Taiwan, Thailand, Singapore ...*/
+    } else if ((strstr(gwcfg, "AS1") != NULL) || (strstr(gwcfg, "AS2") != NULL)) {
+        rx2dr = DR_LORA_SF10;
+        rx2bw = BW_125KHZ;
+        rx2freq = 923200000UL;
+    } else if (strstr(gwcfg, "KR")) { 
         rx2dr = DR_LORA_SF12;
         rx2bw = BW_125KHZ;
         rx2freq = 921900000UL;
+    } else { /* IN,RU ...*/
+        rx2dr = DR_LORA_SF12;
+        rx2bw = BW_125KHZ;
+        rx2freq = 869525000UL;
     }
 
     /* init transifer radio device */

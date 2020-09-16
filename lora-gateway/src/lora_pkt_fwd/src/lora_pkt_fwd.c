@@ -1511,7 +1511,15 @@ int main(void)
         rx2dr = DR_LORA_SF12;
         rx2bw = BW_125KHZ;
         rx2freq = 921900000UL;
-    } else { /* IN,RU ...*/
+    } else if (strstr(gwcfg, "IN")) { 
+        rx2dr = DR_LORA_SF10;
+        rx2bw = BW_125KHZ;
+        rx2freq = 866550000UL;
+    } else if (strstr(gwcfg, "RU")) { 
+        rx2dr = DR_LORA_SF12;
+        rx2bw = BW_125KHZ;
+        rx2freq = 869100000UL;
+    } else { 
         rx2dr = DR_LORA_SF12;
         rx2bw = BW_125KHZ;
         rx2freq = 869525000UL;

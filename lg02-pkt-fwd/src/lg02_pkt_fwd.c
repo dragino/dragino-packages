@@ -990,6 +990,19 @@ int main(int argc, char *argv[])
                  meas_up_dgram_sent += 1;
                  meas_up_network_byte += buff_index;
                  pthread_mutex_unlock(&mx_meas_up);
+            } else if (!strcmp(server_type, "relay")) {
+                for (i = 0; i < 4; i++) {  /* payload MIC */
+                    this_mic[i] = pktrx.payload[pktrx.size - i - 1];
+                }
+                    this_mic[4] = '\0';
+                    if (!strlen(last_mic)) {
+                    strcpy(last_mic, this_mic);
+                }
+
+                if (strcmp(last_mic, this_mic)) {  /* MIC not equal */
+                    single_tx(txdev, pktrx.payload, pktrx.size); 
+                    strcpy(last_mic, this_mic);
+                }
             } else {
                  push_mqtt(&pktrx);
             }

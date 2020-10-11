@@ -590,7 +590,7 @@ bool get_radio_version(radiodev *dev)
         fprintf(stderr, "INFO~ %s: SX1276 detected, starting.\n", dev->desc);
         return true;
     } else {
-        fprintf(stderr, "ERROR~ %s: SX1276 Not Detected.\n", dev->desc);
+        //fprintf(stderr, "ERROR~ %s: SX1276 Not Detected.\n", dev->desc);
         return false;
     }
 

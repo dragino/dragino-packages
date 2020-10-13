@@ -1,0 +1,23 @@
+# if a new block device is connected
+if [ "${ACTION}" = "add" ]; then
+        if [ "${DEVICENAME}" != "sda" ]; then
+                mountpoint="/mnt/${DEVICENAME}"
+                [ ! -d ${mountpoint} ] && mkdir ${mountpoint}
+                logger -t sda_automount "mount a block device(${DEVICENAME}) on ${mountpoint}"
+                mount /dev/${DEVICENAME} ${mountpoint}
+				uci set system.@system[0].mountpoint="${mountpoint}"
+				uci commit system
+                logger -t sda_automout "run auto_update script"
+                auto_update.sh
+        fi
+fi
+if [ "${ACTION}" = "remove" ]; then
+        if [ "${DEVICENAME}" != "sda" ]; then
+                mountpoint="/mnt/${DEVICENAME}"
+                [ -d ${mountpoint} ] && rm -rf ${mountpoint}
+                logger "hotplug remove a block device(${DEVICENAME}) from ${mountpoint}"
+				uci delete system.@system[0].mountpoint
+				uci commit system
+        fi
+fi
+

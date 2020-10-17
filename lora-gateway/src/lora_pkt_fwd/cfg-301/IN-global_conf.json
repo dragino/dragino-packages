@@ -1,5 +1,7 @@
 {
 	"SX130x_conf": {
+		"spidev_path": "/dev/spidev0.0",
+		"full_duplex": false,
 		"lorawan_public": true,
 		"clksrc": 1,
 		"clksrc_desc": "radio_1 provides clock to concentrator for most devices except MultiTech. For MultiTech set to 0.",
@@ -71,7 +73,7 @@
 			"if": 400000
 		},
 		"chan_Lora_std": {
-			"desc": "Lora MAC, 250kHz, SF7, 865.7 MHz",
+			"desc": "Lora MAC, 250kHz, SF7, 865.2 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": -100000,
@@ -79,7 +81,7 @@
 			"spread_factor": 7
 		},
 		"chan_FSK": {
-			"desc": "FSK 50kbps, 865.7 MHz",
+			"desc": "FSK 50kbps, 865.2 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": -100000,

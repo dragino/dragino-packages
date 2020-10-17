@@ -20,8 +20,8 @@ _G[modname] = M
 
 local type,assert,print,pairs,string,io,os,table,tonumber = type,assert,print,pairs,string,io,os,table,tonumber
 
-local uci = require("luci.model.uci")
-local util = require("luci.util")
+local uci = require("dragino.luci_uci")
+local util = require("dragino.luci_util")
 local luci_fs = require("nixio.fs")
 
 setfenv(1,M)

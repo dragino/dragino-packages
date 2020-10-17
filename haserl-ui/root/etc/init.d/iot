@@ -3,10 +3,13 @@
 START=58
 USE_PROCD=1
 
+
+
 init_board() {
     echo 15 > /sys/class/gpio/export
 	echo low > /sys/class/gpio/gpio15/direction
 	service=`uci get gateway.general.server_type`
+	ps | grep "loriot_dragino_lg308_spi" | grep -v grep | awk '{print $1}' | xargs kill -s 9
 
 	if [[ "$service" = "tcpudp" ]]; then
 		process="tcp_client.lua"
@@ -16,6 +19,12 @@ init_board() {
 		process=`uci get customized_script.general.script_name`
 		chmod +x /etc/lora/customized_scripts/$process
 		ln -f /etc/lora/customized_scripts/$process /usr/bin/$process
+	elif [[ "$service" = "loriot" ]]; then
+		LORIOT_URL=`uci -q get loriot.loriot.url`
+		process="loriot_dragino_lg308_spi"
+		option="-f -s ${LORIOT_URL}"
+		/usr/bin/${process} ${option}  > /dev/null &
+		exit
 	fi
 }
 
@@ -36,5 +45,5 @@ reload_service() {
 
 service_triggers()
 {
-    procd_add_reload_trigger "network" "wireless" "gateway" "mqtt" "tcp_client" "customized_script"
+    procd_add_reload_trigger "network" "wireless" "gateway" "mqtt" "tcp_client" "customized_script" "loriot_dragino_lg308_spi"
 }

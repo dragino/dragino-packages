@@ -49,15 +49,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/
 	$(INSTALL_DIR) $(1)/usr/
 	$(CP) $(PKG_BUILD_DIR)/etc/* $(1)/etc/
-	$(CP) $(PKG_BUILD_DIR)/usr/* $(1)/usr/
-
-	#$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller/admin
-	#$(INSTALL_DIR) $(1)/usr/lib/lua/luci/view/dragino
-	
-	#find $(PKG_BUILD_DIR)/usr/ -name '*.lua' -exec luac -s -o {} {} \;
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/
-	$(CP) $(PKG_BUILD_DIR)/usr/lib/lua/luci/* $(1)/usr/lib/lua/luci/
-
+	$(CP) $(PKG_BUILD_DIR)/usr/* $(1)/usr/	
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

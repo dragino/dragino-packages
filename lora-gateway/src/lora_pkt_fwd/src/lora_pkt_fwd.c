@@ -2053,7 +2053,7 @@ void thread_up(void) {
             if (LORAMAC_PARSER_SUCCESS != LoRaMacParserData(&macmsg))  
                 continue;
 
-            if ((macmsg.MHDR.Bits.MType != FRAME_TYPE_JOIN_REQ) || (macmsg.MHDR.Bits.MType != FRAME_TYPE_JOIN_ACCEPT)) {
+            if ((macmsg.MHDR.Bits.MType == FRAME_TYPE_DATA_UNCONFIRMED_UP) || (macmsg.MHDR.Bits.MType == FRAME_TYPE_DATA_CONFIRMED_UP)) {
                 sprintf(devchar, "%08X", macmsg.FHDR.DevAddr);
 
                 /* basic packet filtering */

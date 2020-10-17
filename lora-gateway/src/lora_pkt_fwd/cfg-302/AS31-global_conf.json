@@ -13,16 +13,16 @@
         },
 
 		"lbt_cfg": {
-
 					"rssi_target": -80,
 					"chan_cfg":[
-						{ "freq_hz": 922100000, "scan_time_us": 128 },
-						{ "freq_hz": 922300000, "scan_time_us": 128 },
-						{ "freq_hz": 922500000, "scan_time_us": 128 },
-						{ "freq_hz": 922700000, "scan_time_us": 128 },
-						{ "freq_hz": 922900000, "scan_time_us": 128 },
-						{ "freq_hz": 923100000, "scan_time_us": 128 },
-						{ "freq_hz": 923300000, "scan_time_us": 128 }
+							{ "freq_hz": 923200000, "scan_time_us": 128 },
+							{ "freq_hz": 923400000, "scan_time_us": 128 },
+							{ "freq_hz": 922200000, "scan_time_us": 128 },
+							{ "freq_hz": 922400000, "scan_time_us": 128 },
+							{ "freq_hz": 922600000, "scan_time_us": 128 },
+							{ "freq_hz": 922800000, "scan_time_us": 128 },
+							{ "freq_hz": 923000000, "scan_time_us": 128 },
+							{ "freq_hz": 922000000, "scan_time_us": 128 }
 					],
 					"sx127x_rssi_offset": -4
 		},
@@ -30,14 +30,14 @@
         "radio_0": {
             "enable": true,
             "type": "SX1250",
-            "freq": 486600000,
+            "freq": 916800000,
             "rssi_offset": -215.4,
 			
             "rssi_tcomp": {"coeff_a": 0, "coeff_b": 0, "coeff_c": 20.41, "coeff_d": 2162.56, "coeff_e": 0},
 
             "tx_enable": true,
-            "tx_freq_min": 470000000,
-            "tx_freq_max": 510000000,
+            "tx_freq_min": 920000000,
+            "tx_freq_max": 925000000,
             "tx_gain_lut":[
                 {"rf_power": 12, "pa_gain": 0, "pwr_idx": 15},
                 {"rf_power": 13, "pa_gain": 0, "pwr_idx": 16},
@@ -60,22 +60,23 @@
         "radio_1": {
             "enable": true,
             "type": "SX1250",
-            "freq": 487400000,
+            "freq": 917800000,
             "rssi_offset": -215.4,
             "rssi_tcomp": {"coeff_a": 0, "coeff_b": 0, "coeff_c": 20.41, "coeff_d": 2162.56, "coeff_e": 0},
             "tx_enable": false
         },
-        "chan_multiSF_0": {"enable": true, "radio": 1, "if": -300000},
-        "chan_multiSF_1": {"enable": true, "radio": 1, "if": -100000},
-        "chan_multiSF_2": {"enable": true, "radio": 1, "if":  100000},
-        "chan_multiSF_3": {"enable": true, "radio": 1, "if":  300000},
-        "chan_multiSF_4": {"enable": true, "radio": 0, "if": -300000},
-        "chan_multiSF_5": {"enable": true, "radio": 0, "if": -100000},
-        "chan_multiSF_6": {"enable": true, "radio": 0, "if":  100000},
-        "chan_multiSF_7": {"enable": true, "radio": 0, "if":  300000},
+        "chan_multiSF_0": {"enable": true, "radio": 0, "if": -400000, "desc": "Lora MAC, 125kHz, all SF, 916.4 MHz"},
+        "chan_multiSF_1": {"enable": true, "radio": 0, "if": -200000, "desc": "Lora MAC, 125kHz, all SF, 916.6 MHz"},
+        "chan_multiSF_2": {"enable": true, "radio": 0, "if":  0, "desc": "Lora MAC, 125kHz, all SF, 916.8 MHz"},
+        "chan_multiSF_3": {"enable": true, "radio": 0, "if":  200000, "desc": "Lora MAC, 125kHz, all SF, 917.0 MHz"},
+        "chan_multiSF_4": {"enable": true, "radio": 0, "if":  400000, "desc": "Lora MAC, 125kHz, all SF, 917.2 MHz"},
+        "chan_multiSF_5": {"enable": true, "radio": 1, "if": -400000, "desc": "Lora MAC, 125kHz, all SF, 917.4 MHz"},
+        "chan_multiSF_6": {"enable": true, "radio": 1, "if": -200000, "desc": "Lora MAC, 125kHz, all SF, 917.6 MHz"},
+        "chan_multiSF_7": {"enable": true, "radio": 1, "if":  0, "desc": "Lora MAC, 125kHz, all SF, 924.6 MHz"},
 
-        "chan_Lora_std":  {"enable": false},
+        "chan_Lora_std":  {"enable": true, "radio": 1, "if": -100000, "bandwidth": 250000, "spread_factor": 7,
+                           "implicit_hdr": false, "implicit_payload_length": 17, "implicit_crc_en": false, "implicit_coderate": 1, "desc": "Lora MAC, 250kHz, SF7, 924.5 MHz"},
         
-        "chan_FSK":       {"enable": false}
+        "chan_FSK":       {"enable": true, "radio": 1, "if":  200000, "bandwidth": 125000, "datarate": 50000, "desc": "FSK 50kbps, 924.8 MHz"}
     }
-}s
+}

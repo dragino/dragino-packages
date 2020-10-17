@@ -146,6 +146,127 @@ gen_gw_cfg() {
     json_dump  > /etc/lora/local_conf.json
 }
 
+gen_cus_cfg() {
+	json_init
+	json_add_object SX130x_conf
+		json_add_string "spidev_path" "/dev/spidev0.0"
+		json_add_boolean "full_duplex" 0
+		json_add_boolean "lorawan_public" 1
+		json_add_int "clksrc" "1"
+		json_add_string "clksrc_desc" "radio_1 provides clock to concentrator"
+		json_add_int "antenna_gain" "0"
+		json_add_string "antenna_gain_desc" "antenna gain, in dBi"
+		
+		json_add_object radio_0
+			json_add_boolean "enable" "`uci get gateway.general.radio0_enable`"
+			json_add_string "type" "SX1257"
+			radio0_freq="`uci get gateway.general.radio0_freq`"
+			json_add_int "freq" "$radio0_freq"
+			json_add_int "rssi_offset" "-166.0"
+			json_add_boolean "tx_enable" "`uci get gateway.general.radio0_tx`"
+			json_add_int "tx_freq_min" "`uci get gateway.general.radio0_txfreq_min`"
+			json_add_int "tx_freq_max" "`uci get gateway.general.radio0_txfreq_max`"
+		json_close_object
+
+		json_add_object radio_1
+			json_add_boolean "enable" "`uci get gateway.general.radio1_enable`"
+			json_add_string "type" "SX1257"
+			radio1_freq="`uci get gateway.general.radio1_freq`"
+			json_add_int "freq" "$radio1_freq"
+			json_add_int "rssi_offset" "-166.0"
+			json_add_boolean "tx_enable" "`uci get gateway.general.radio1_tx`"
+			json_add_int "tx_freq_min" "`uci get gateway.general.radio1_txfreq_min`"
+			json_add_int "tx_freq_max" "`uci get gateway.general.radio1_txfreq_max`"
+		json_close_object
+
+
+		for i in `seq 0 7`
+		do
+			json_add_object chan_multiSF_$i
+				json_add_boolean "enable" "`uci get gateway.general.chan${i}_enable`"
+				chan_radio="`uci get gateway.general.chan${i}_radio`"
+				json_add_int "radio" "$chan_radio"
+				chan_if="`uci get gateway.general.chan$i`"
+				json_add_int "if" "$chan_if"
+				if [ "${chan_radio}" = "0" ]; then
+					json_add_string "desc" "Lora MAC, 125kHz, all SF, ${radio0_freq}, if: ${chan_if}"
+				elif [ "${chan_radio}" = "1" ]; then
+					json_add_string "desc" "Lora MAC, 125kHz, all SF, ${radio1_freq}, if: ${chan_if}"
+				fi
+			json_close_object
+		done
+		
+		json_add_object chan_Lora_std
+			json_add_boolean "enable" "`uci get gateway.general.lorachan_enable`"
+			chan_radio="`uci get gateway.general.lorachan_radio`"
+			json_add_int "radio" "$chan_radio"
+			chan_if="`uci get gateway.general.lorachan`"
+			json_add_int "if" "$chan_if"
+			chan_band="`uci get gateway.general.lorachan_bw`"
+			json_add_int "bandwidth" "$chan_band"
+			chan_sf="`uci get gateway.general.lorachan_sf`"
+			json_add_int "spread_factor" "$chan_sf"
+			if [ "$chan_radio" = "0" ]; then
+				json_add_string "desc" "Lora MAC, SF=$chan_sf, bandwidth=$chan_band, $radio0_freq, if: $chan_if"
+			elif [ "$chan_radio" = "1" ]; then
+				json_add_string "desc" "Lora MAC, SF=$chan_sf, bandwidth=$chan_band, $radio1_freq, if: $chan_if"
+			fi
+		json_close_object
+		
+		json_add_object chan_FSK
+			json_add_boolean "enable" 0
+			json_add_string "desc" "Disabled"
+		json_close_object
+
+		json_add_object tx_lut_0
+			json_add_string "desc" "TX gain table, index 0"
+			json_add_int "pa_gain" "2"
+			json_add_int "mix_gain" "11"
+			json_add_int "rf_power" "12"
+			json_add_int "dig_gain" "2"
+		json_close_object
+
+		json_add_object tx_lut_1
+			json_add_string "desc" "TX gain table, index 1"
+			json_add_int "pa_gain" "2"
+			json_add_int "mix_gain" "14"
+			json_add_int "rf_power" "17"
+			json_add_int "dig_gain" "1"
+		json_close_object	
+
+		json_add_object tx_lut_2
+			json_add_string "desc" "TX gain table, index 2"
+			json_add_int "pa_gain" "2"
+			json_add_int "mix_gain" "15"
+			json_add_int "rf_power" "20"
+			json_add_int "dig_gain" "1"
+		json_close_object	
+		
+		json_add_object tx_lut_3
+			json_add_string "desc" "TX gain table, index 3"
+			json_add_int "pa_gain" "3"
+			json_add_int "mix_gain" "14"
+			json_add_int "rf_power" "27"
+			json_add_int "dig_gain" "0"
+		json_close_object
+	json_close_object
+	
+	json_add_object gateway_conf
+		json_add_string "server_address" "router.eu.thethings.network"
+		json_add_int "serv_port_up" "1700"
+		json_add_int "serv_port_down" "1700"
+		json_add_array "servers"
+			json_add_object "server1"
+				json_add_string "server_address" "router.eu.thethings.network"
+				json_add_int "serv_port_up" "1700"
+				json_add_int "serv_port_down" "1700"
+				json_add_boolean "serv_enabled" 1
+			json_close_object
+		json_close_array
+	json_close_object 
+	json_dump  > /etc/lora/global_conf.json	
+}
+
 echo_chan_if() {
     echo "Gateway Channels frequency" > /etc/lora/desc
     echo "---------------------------------------" >> /etc/lora/desc
@@ -180,7 +301,7 @@ echo_chan_if() {
 
 }
 
-if [ "$def_cfg" = "AU" ] || [ "$def_cfg" = "US" ] ;then
+if [ "$def_cfg" = "AU" ] || [ "$def_cfg" = "US" ] || [ "$def_cfg" = "CN" ];then
 	def_cfg="$def_cfg-$subband"
 fi
 
@@ -201,7 +322,10 @@ gen_gw_cfg # Generate local_conf.json
 if [ -f /etc/lora/cfg-$chip/"$def_cfg"-global_conf.json ] 
 then 
     cp -rf /etc/lora/cfg-$chip/"$def_cfg"-global_conf.json /etc/lora/global_conf.json
-else
+elif [ "$def_cfg" = "CUS" ];then
+logger "Customized Freq"
+	gen_cus_cfg
+else 
     cp -rf /etc/lora/cfg-$chip/EU-global_conf.json /etc/lora/global_conf.json
 fi
 

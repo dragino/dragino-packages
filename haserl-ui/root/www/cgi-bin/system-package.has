@@ -30,14 +30,14 @@
 
 <%# --- Process the form submission --- %>
 <%
-	if [ "$FORM_BUTTON" == "Install" ]; then
+	if [ $FORM_BUTTON == "Install" ]; then
 		if [ -n "$FORM_PACKAGE" ]; then
 			installing="1"
 			package=$FORM_PACKAGE
 		fi
 	fi
 
-	if [ "$FORM_BUTTON" == "Reload" ]; then
+	if [ $FORM_BUTTON == "Reload" ]; then
 		echo "<pre>" > /tmp/opkglist.html
 		echo "<span class="impact-light">Package data is being loaded. Click on Refresh to display data when loaded. \
 		<br><br>This may take several minutes.</span>" >> /tmp/opkglist.html
@@ -51,9 +51,9 @@
 	fi
 	
 	# Process core package upgrades
-	CORE_PKG="lg02_pkt_fwd lora-gateway"
+	CORE_PKG="lg02_pkt_fwd lora-gateway haserl-ui"
 	for PKG in $CORE_PKG;do
-		if [ "$FORM_BUTTON" == "Upgrade_$PKG" ]; then
+		if [ $FORM_BUTTON == "Upgrade_$PKG" ]; then
 			upgrading="1"
 			package=$PKG
 		fi
@@ -106,7 +106,7 @@
 
 		<tr> <td colspan="10"><h3> Install Package </h3></td></tr>
 	
-<% 	if [ "$installing" == "1" ]; then %>
+<% 	if [ $installing == "1" ]; then %>
 		<tr><td colspan="10"><p class="impact-light" id="installing">Installing package. Please wait...</p></td></tr>
 <% fi %>
 		<tr>
@@ -119,7 +119,7 @@
 	<table class="configTable">
 		<tr> <td colspan="10"><h3> Core Packages  </h3></td></tr>
 
-<% 	if [ "$upgrading" == "1" ]; then %>
+<% 	if [ $upgrading == "1" ]; then %>
 		<tr><td colspan="10"><p class="impact-light" id="upgrading">Upgrading package. Please wait...</p></td></tr>
 <% fi %>
 		<tr style="font-weight: bold">
@@ -147,7 +147,7 @@
 	</table>
 
 <%
-	if [ "$installing" == "1" ]; then 
+	if [ $installing == "1" ]; then 
 		installing="0"
    	echo "<pre>" > /tmp/install-info.html
 		opkg install $FORM_PACKAGE > /tmp/install-info.html
@@ -161,12 +161,13 @@
 <script>	document.getElementById("installing").style.display = "none"; 	</script>
 
 <%
-	if [ "$upgrading" == "1" ]; then 
-			upgrading="0"
+	if [ $upgrading == "1" ]; then 
+		upgrading="0"
   	 	echo "<pre>" > /tmp/install-info.html
-			echo "Upgrading $package <br>" >> /tmp/install-info.html
-			opkg upgrade $package -V >> /tmp/install-info.html
-			echo "</pre>" >> /tmp/install-info.html
+		echo "Upgrading $package <br>" >> /tmp/install-info.html
+		opkg upgrade $package -V >> /tmp/install-info.html
+		echo "</pre>" >> /tmp/install-info.html
+		rm /tmp/opkglist-installed.html
 	fi
 %>
 <script>	document.getElementById("upgrading").style.display = "none"; 	</script>

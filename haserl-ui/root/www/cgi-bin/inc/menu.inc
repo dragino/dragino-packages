@@ -3,7 +3,10 @@
   <div class="loaderSpinner"><span class="fas fa-spinner fa-spin"></span></div>
 </div>
 
-<% vendor_url=$(uci get system.vendor.company_url) %>
+<% 
+	vendor_url=$(uci get system.vendor.company_url) 
+	model=$(cat /tmp/iot/model.txt)
+%>
 
 <div class="logo-container">
   <a href="<% echo $vendor_url %>">  <!-- Set the URL link for the logo -->
@@ -33,7 +36,6 @@
   
   
 	<% # Set up LoRaWAN menu for board type
-	model=$(cat /tmp/iot/model.txt)
 	if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ]; then
 	%>
   <div class="dropdown"> <!-- LoRa Parameter -->
@@ -69,16 +71,23 @@
 	</div> 
   
   <a href="/cgi-bin/custom.has">Custom</a>
-  
+ 
+ <div class="dropdown"> <!-- Network -->
+    <button class="dropbtn">Network <span class="fas fa-caret-down"></span></button>
+    <div class="dropdown-content">
+		<a href="/cgi-bin/system-status.has">Network Status</a>
+		<a href="/cgi-bin/system-network.has">Network</a>
+		<a href="/cgi-bin/system-wifi.has">WiFi</a>
+		<a href="/cgi-bin/system-cellular.has">Cellular</a>
+    </div>
+  </div> 
+ 
  <div class="dropdown"> <!-- System -->
     <button class="dropbtn">System <span class="fas fa-caret-down"></span></button>
     <div class="dropdown-content">
 		<a href="/cgi-bin/system-overview.has">System Overview</a>
 		<a href="/cgi-bin/system-general.has">General</a>
-		<a href="/cgi-bin/system-network.has">Network</a>
-		<a href="/cgi-bin/system-wifi.has">WiFi</a>
-		<a href="/cgi-bin/system-cellular.has">Cellular</a>
-		<a href="/cgi-bin/system-status.has">Network Status</a>
+		<a href="/cgi-bin/system-config.has">Back Up / Restore Config</a>
 		<a href="/cgi-bin/system-rssh.has">Remote Mgmt</a>
 		<a href="/cgi-bin/system-firmware.has">Firmware Upgrade</a>
 		<a href="/cgi-bin/system-reboot.has">Reboot / Reset</a>

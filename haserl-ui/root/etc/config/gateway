@@ -98,7 +98,7 @@ config settings 'server1'
 	option forward_crc_error '0'
 	option forward_crc_disabled '0'
 	option provider 'ttn'
-	option server_address 'router.au.thethings.network'
+	option server_address 'router.eu.thethings.network'
 	option fport_filter '0'
 	option devaddr_filter '0'
 

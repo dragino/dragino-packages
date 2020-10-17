@@ -9,15 +9,15 @@
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
   
 		uci set loriot.loriot.url="$FORM_URL"
-    uci set loriot.loriot.port="$FORM_PORT"
+		uci set loriot.loriot.port="$FORM_PORT"
 		uci set loriot.loriot.cert="$FORM_CERT"
-    uci set loriot.loriot.key="$FORM_KEY"
+		uci set loriot.loriot.key="$FORM_KEY"
 		uci set loriot.loriot.cafile="$FORM_CAFILE"
 
 		uci commit loriot 
 	fi
 
-  if [ "$FORM_BUTTON" == "Save&Apply" ]; then
+	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set gateway.general.server_type="loriot"
 		uci commit gateway
 		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
@@ -28,12 +28,12 @@
 		uci set loriot.loriot.version="$version"
 		uci commit loriot 
 		
-    /etc/init.d/lora_gw restart > /dev/null
-    sleep 2
-    /etc/init.d/iot reload > /dev/null
+		/etc/init.d/lora_gw restart > /dev/null
+		sleep 2
+		/etc/init.d/iot reload > /dev/null
 		rm /var/iot/status
-		$loriot_sw  -s $FORM_URL -c $FORM_CAFILE  -a $FORM_CERT -k $FORM_KEY > /dev/null
-  fi
+		#$loriot_sw  -s $FORM_URL -c $FORM_CAFILE  -a $FORM_CERT -k $FORM_KEY > /dev/null
+	fi
 
 	# Check if LORIOT software is installed
 	if [ -e "/usr/bin/loriot_dragino_lg308_spi" ]; then
@@ -42,11 +42,11 @@
 		installed="0"
 	fi
 
-  if [ "$FORM_BUTTON" == "Install" ]; then
-  URL="http://www.dragino.com/downloads/downloads/LoRa_Gateway/LPS8/Firmware/customized_script/loriot_dragino_lg308_spi"
-  installed="2"
-  rm /usr/bin/loriot_dragino_lg308_spi
-  (wget -P /usr/bin $URL > /dev/null; chmod +x /usr/bin/loriot_dragino_lg308_spi) &
+	if [ "$FORM_BUTTON" == "Install" ]; then
+		URL="http://www.dragino.com/downloads/downloads/LoRa_Gateway/LPS8/Firmware/customized_script/loriot_dragino_lg308_spi"
+		installed="2"
+		rm /usr/bin/loriot_dragino_lg308_spi
+		(wget -P /usr/bin $URL > /dev/null; chmod +x /usr/bin/loriot_dragino_lg308_spi) &
 	fi  
 %>
 
@@ -58,17 +58,17 @@
 	port="$(uci -q get loriot.loriot.port)"
 
 	cert="$(uci -q get loriot.loriot.cert)"
-  key="$(uci -q get loriot.loriot.key)"
+	key="$(uci -q get loriot.loriot.key)"
 	cafile="$(uci -q get loriot.loriot.cafile)"
 
   # Prepare script select list
-  certdir="/etc/iot/cert"
-  rm /tmp/certs.txt
-  touch /tmp/certs.txt
-  cert_list=$(ls -1 $certdir)
-  for x in $cert_list; do
-  	echo "<option value=\"$x\">$x</option>" >> /tmp/certs.txt
-  done
+	certdir="/etc/iot/cert"
+	rm /tmp/certs.txt
+	touch /tmp/certs.txt
+	cert_list=$(ls -1 $certdir)
+	for x in $cert_list; do
+		echo "<option value=\"$x\">$x</option>" >> /tmp/certs.txt
+	done
 	
 	eui=$(ifconfig eth0|grep "HWaddr" | awk '{print $5}')
 %>

@@ -35,9 +35,10 @@
 		uci set gateway.general.gwcfg="$FORM_GWCFG"
 		if [ "$FORM_GWCFG" == "AU" ]; then
 			uci set gateway.general.subband="$FORM_SUBBAND_AU"
-		fi
-		if [ "$FORM_GWCFG" == "US" ]; then
+		elif [ "$FORM_GWCFG" == "US" ]; then
 			uci set gateway.general.subband="$FORM_SUBBAND_US"
+		elif [ "$FORM_GWCFG" == "CN" ]; then
+			uci set gateway.general.subband="$FORM_SUBBAND_CN"
 		fi
 
 		# Static GPS 
@@ -542,12 +543,17 @@
 			<select id="subband-au" name="SUBBAND_AU" style="visibility:hidden; display:none;">
 				<%inc /www/cgi-bin/inc/subband-au.inc %>
 			</select> 
+			
+			<select id="subband-cn" name="SUBBAND_CN" style="visibility:hidden; display:none;">
+				<%inc /www/cgi-bin/inc/subband-cn.inc %>
+			</select> 
 			</td>
 			
 			<td colspan="6"></td>
 		</tr>
 		<script>document.getElementById("subband-us").value="<% echo -n $subband %>";</script>	
 		<script>document.getElementById("subband-au").value="<% echo -n $subband %>";</script>	
+		<script>document.getElementById("subband-cn").value="<% echo -n $subband %>";</script>	
 	</table>
 	
   <div id="custom" style="visibility:hidden; display:none">
@@ -764,6 +770,13 @@
 	document.getElementById("subband-us").style.display = "inline";
 	document.getElementById("subband_label").style.visibility = "visible";
 	}
+	
+	if (x == "CN") {
+	document.getElementById("subband-cn").style.visibility = "visible";
+	document.getElementById("subband-cn").style.display = "inline";
+	document.getElementById("subband_label").style.visibility = "visible";
+	}
+	
 	if (x == "CUS") {
 	document.getElementById("custom").style.visibility = "visible";
 	document.getElementById("custom").style.display = "inline";
@@ -773,8 +786,10 @@ function displaySubband(){
 	document.getElementById("subband_label").style.visibility = "hidden";
 	document.getElementById("subband-au").style.visibility = "hidden";
 	document.getElementById("subband-us").style.visibility = "hidden";
+	document.getElementById("subband-cn").style.visibility = "hidden";
 	document.getElementById("subband-au").style.display = "none";
 	document.getElementById("subband-us").style.display = "none";
+	document.getElementById("subband-cn").style.display = "none";
 	document.getElementById("custom").style.visibility = "hidden";
 	document.getElementById("custom").style.display = "none";
 	
@@ -787,6 +802,11 @@ function displaySubband(){
 	if (x == "US") {
 	document.getElementById("subband-us").style.visibility = "visible";
 	document.getElementById("subband-us").style.display = "inline";
+	document.getElementById("subband_label").style.visibility = "visible";
+	}
+	if (x == "CN") {
+	document.getElementById("subband-cn").style.visibility = "visible";
+	document.getElementById("subband-cn").style.display = "inline";
 	document.getElementById("subband_label").style.visibility = "visible";
 	}
 	if (x == "CUS") {

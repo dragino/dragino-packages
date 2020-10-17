@@ -20,6 +20,9 @@
 		elif [ $primary_provider == "ttn" ];then
 			server_address="$FORM_SERVER_ADDRESS_TTN"
 			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS_TTN"
+		elif [ $primary_provider == "mydevice" ];then
+			server_address="$FORM_SERVER_ADDRESS_MYDEVICE"
+			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS_MYDEVICE"
 		else
 			uci set gateway.server1.server_address="$primary_provider"
 		fi
@@ -140,6 +143,7 @@
 		<td colspan="5"><label for="PLATFORM">Service Provider</label></td>
 		<td colspan="6"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
 		  <option value="ttn" >The Things Network</option>
+		  <option value="mydevice" >IoT In A Box</option>
 		  <option value="router.cn.thethings.network" >Tencent</option>		
 		  <option value="127.0.0.1" >Built-in for ABP Decode to MQTT</option>
 		  <option value="custom" >Custom / Private LoRaWAN</option>
@@ -149,23 +153,16 @@
 		<td colspan="2"></td>
 		<td colspan="5"><label id="server_address_label" style="display:none;">Server Address</label></td>	
 			
-		<td colspan="9">
+		<td colspan="12">
 			<input type="text" id="server_address" name="SERVER_ADDRESS" style="display:none;" 
 		    VALUE="<% echo -n $primary_server %>">
 			
 			<select id='server_address_ttn' name='SERVER_ADDRESS_TTN' style="display:none;">
-				<option value="router.eu.thethings.network" >TTN-router-EU</option>
-				<option value="router.us.thethings.network" >TTN-router-US-West</option>
-				<option value="router.as.thethings.network" >TTN-router-Asia-SE</option>
-				<option value="router.as1.thethings.network" >TTN-router-Asia-SE1</option>
-				<option value="router.as2.thethings.network" >TTN-router-Asia-SE2</option>
-				<option value="router.cn.thethings.network" >TTN-router-CN</option>
-				<option value="router.kr.thethings.network" >TTN-router-KR</option>
-				<option value="router.jp.thethings.network" >TTN-router-JP</option>
-				<option value="as923.thethings.meshed.com.au" >TTN-router-AU-AS923-UDP</option>
-				<option value="au915.thethings.meshed.com.au" >TTN-router-AU-AU915-UDP</option>
-				<option value="router.au.thethings.network" >TTN-router-AU-AU915/AS923-MQTT</option>
-				<option value="ttn.opennetworkinfrastructure.org" >TTN-switched-router</option>
+				<%inc /www/cgi-bin/inc/ttn-server.inc %>
+			</select>
+			
+			<select id='server_address_mydevice' name='SERVER_ADDRESS_MYDEVICE' style="display:none;">
+				<%inc /www/cgi-bin/inc/iot-in-a-box-server.inc %>
 			</select>
 		</td>
 		<script>document.getElementById("server_address_ttn").value="<% echo -n $primary_server %>";</script>
@@ -237,11 +234,17 @@
 	document.getElementById("server_address_ttn").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
 	}
+	if (x == "mydevice") {
+	document.getElementById("server_address_mydevice").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
 
 function displayServerURL(){
 	document.getElementById("server_address_label").style.display = "none";
 	document.getElementById("server_address").style.display = "none";
 	document.getElementById("server_address_ttn").style.display = "none";
+	document.getElementById("server_address_mydevice").style.display = "none";	
+	
 	var x = document.getElementById("primary_provider").value;
 	if (x == "custom") {
 	document.getElementById("server_address").style.display = "inline";
@@ -249,6 +252,10 @@ function displayServerURL(){
 	}
 	if (x == "ttn") {
 	document.getElementById("server_address_ttn").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
+	if (x == "mydevice") {
+	document.getElementById("server_address_mydevice").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
 	}
 }

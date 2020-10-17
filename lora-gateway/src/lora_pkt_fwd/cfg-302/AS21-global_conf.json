@@ -7,12 +7,14 @@
 		"full_duplex": false,              
 
 		"precision_timestamp": {
-            "enable": false,        
-            "max_ts_metrics": 255,
-            "nb_symbols": 1
+                "enable": false,        
+                "max_ts_metrics": 255,
+                "nb_symbols": 1
         },
 
 		"lbt_cfg": {
+                                        "enable": false,
+                                        "isftdi": false,
 					"rssi_target": -80,
 					"chan_cfg":[
 							{ "freq_hz": 923200000, "scan_time_us": 128 },

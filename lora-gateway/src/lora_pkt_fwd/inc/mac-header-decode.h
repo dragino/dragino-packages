@@ -22,10 +22,26 @@
 #define LORAMAC_FHDR_F_CNT_FIELD_SIZE           2
 
 /*! FOpts maximum field size */
-#define LORAMAC_FHDR_F_OPTS_MAX_FIELD_SIZE          15
+#define LORAMAC_FHDR_F_OPTS_MAX_FIELD_SIZE      15
 
 /*! MIC field size */
-#define LORAMAC_MIC_FIELD_SIZE              4
+#define LORAMAC_MIC_FIELD_SIZE                  4
+
+/*! Join EUI field size */
+#define LORAMAC_JOIN_EUI_FIELD_SIZE             8
+
+/*! Device EUI field size */
+#define LORAMAC_DEV_EUI_FIELD_SIZE              8
+
+/*! Join-server nonce field size */
+#define LORAMAC_JOIN_NONCE_FIELD_SIZE           3
+
+/*! Network ID field size */
+#define LORAMAC_NET_ID_FIELD_SIZE               3
+
+/*! CFList field size */
+#define LORAMAC_CF_LIST_FIELD_SIZE          16
+
 
 /*!
  * LoRaMAC field definition of DLSettings

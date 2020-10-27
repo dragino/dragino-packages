@@ -127,6 +127,12 @@ LoRaMacParserStatus_t LoRaMacParserJoinReques( LoRaMacMessageJoinRequest_t* macM
 
 void printf_mac_header( LoRaMacMessageData_t* macMsg )
 {
+    int idx = 1;
+    uint8_t appeui[9] = {'\0'};
+    uint8_t deveui[9] = {'\0'};
+    uint8_t netid[4] = {'\0'};
+    uint32_t devaddr;
+
     if( ( macMsg == 0 ) || ( macMsg->Buffer == 0 ) )
     {
         return;
@@ -178,24 +184,21 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_JOIN_ACCEPT: 
-            LoRaMacMessageJoinAccept_t joinMsg;
-            joinMsg.Buffer = macMsg->Buffer;
-            joinMsg.BufSize = macMsg->BufSize;
-            LoRaMacParserJoinAccept(joinMsg);
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_ACCEPT:{\"NetID\": \"%c%c%c\", \"DevAddr\": \"%08X\"}\n", 
-                    joinMsg.NetID[0], 
-                    joinMsg.NetID[1], 
-                    joinMsg.NetID[2], 
-                    joinMsg.DevAddr);
+            idx = 4;
+            memcpy1(netid, &macMsg->Buffer[idx], 3 );
+            idx = idx + 3;
+            devaddr = ( uint32_t ) macMsg->Buffer[idx++];
+            devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 8 );
+            devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 16 );
+            devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 24 );
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_ACCEPT:{\"NetID\": \"%s\", \"DevAddr\": \"%08X\"}\n", netid, devaddr);
             break;
         case FRAME_TYPE_JOIN_REQ: 
-            uint8_t appeui[9] = {'\0'};
-            uint8_t deveui[9] = {'\0'};
-            int inx = 1;
-            memcpy1(appeui, macMsg->Buffer[inx], 8);
-            inx = inx + 8;
-            memcpy1(appeui, macMsg->Buffer[inx], 8);
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_REQ:{\"AppEUI\":, "%s", \"DevEUI\":, "%s"}\n", appeui, deveui);
+            idx = 1;
+            memcpy1(appeui, &macMsg->Buffer[idx], 8);
+            idx = idx + 8;
+            memcpy1(deveui, &macMsg->Buffer[idx], 8);
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_REQ:{\"AppEUI\":, \"%s\", \"DevEUI\":, \"%s\"}\n", appeui, deveui);
             break;
         default:
             break;

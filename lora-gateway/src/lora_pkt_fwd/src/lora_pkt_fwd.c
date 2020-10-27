@@ -1932,7 +1932,7 @@ int main(void)
 	 /* Board reset */          
     lgw_exit_fail();
 
-    db_destroy(cntx);
+    db_destroy(&cntx);
 
     MSG_DEBUG(DEBUG_INFO, "INFO~ Exiting packet forwarder program\n");
     if (sxradio)
@@ -2105,7 +2105,7 @@ void thread_up(void) {
             meas_up_payload_byte += p->size;
             pthread_mutex_unlock(&mx_meas_up);
 
-            db_incpkt(cntx->totalup_stmt, total_pkt_up);
+            db_incpkt(cntx.totalup_stmt, total_pkt_up);
 
             /* Start of packet, add inter-packet separator if necessary */
             if (pkt_in_dgram == 0) {
@@ -3133,7 +3133,7 @@ void thread_down(void) {
             meas_dw_payload_byte += txpkt.size;
             pthread_mutex_unlock(&mx_meas_dw);
 
-            db_incpkt(cntx->totaldw_stmt, total_pkt_dw);
+            db_incpkt(cntx.totaldw_stmt, total_pkt_dw);
 
             /* check TX parameter before trying to queue packet */
             jit_result = JIT_ERROR_OK;

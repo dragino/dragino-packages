@@ -45,6 +45,7 @@ static bool db_createtb(struct context* cntx) {
 
     sqlite3_finalize(createtotalpkt);
 
+out:
     return ret;
 }
 

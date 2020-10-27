@@ -30,49 +30,78 @@ static bool db_createtb(struct context* cntx);
 static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, void* data), void* data);
 
 static bool db_createtb(struct context* cntx) {
+    bool ret;
     sqlite3_stmt* createabpdevs = NULL;
+    sqlite3_stmt* createtotalpkt = NULL;
 
     INITSTMT(CREATEABPDEVS, createabpdevs);
+    INITSTMT(CREATETOTALPKT, createtotalpkt);
     
-    if (!db_step(createabpdevs, NULL, NULL)) {
-        printf("error running table create statement");
-        sqlite3_finalize(createabpdevs);
-        goto out;
-    }
+    ret = db_step(createabpdevs, NULL, NULL);
+
     sqlite3_finalize(createabpdevs);
 
-    return true;
-out:
-    return false;
+    ret |= db_step(createtotalpkt, NULL, NULL);
+
+    sqlite3_finalize(createtotalpkt);
+
+    return ret;
 }
 
 bool db_init(const char* dbpath, struct context* cntx) {
     int ret;
+    sqlite3_stmt* initpkt_stmt;
+    sqlite3_stmt* delpkt_stmt;
+
     ret = sqlite3_open(dbpath, &cntx->db);
     if (ret) {
-    printf("ERROR: Can't open database: %s\n", sqlite3_errmsg(cntx->db));
-	sqlite3_close(cntx->db);
-	return false;
+        printf("DBDEBUG~ Can't open database: %s\n", sqlite3_errmsg(cntx->db));
+        sqlite3_close(cntx->db);
+        return false;
     }
 
     if (!db_createtb(cntx))
         goto out;
 
     INITSTMT(LOOKUPSKEY, cntx->lookupskey);
+    INITSTMT(INCTATOLUP, cntx->totalup_stmt);
+    INITSTMT(INCTATOLDW, cntx->totaldw_stmt);
+
+    INITSTMT("delete from totalpkt;", delpkt_stmt);
+    INITSTMT("insert into totalpkt values (time('now', 'localtime'), 0, 0);", initpkt_stmt);
+
+    ret = sqlite3_step(delpkt_stmt);
+    if (ret != SQLITE_DONE) 
+        printf("DBDEBUG~ delete from tatalpkt: %s \n", sqlite3_errstr(ret));
+    sqlite3_finalize(delpkt_stmt);
+
+    ret = sqlite3_step(initpkt_stmt);  // insert the first row of totalpkt table
+    if (ret != SQLITE_DONE) 
+        printf("DBDEBUG~ delete from tatalpkt: %s \n", sqlite3_errstr(ret));
+    sqlite3_finalize(initpkt_stmt);
 
     return true;
 
 out:    
-    printf("GOTO out!\n");
-    sqlite3_finalize(cntx->lookupskey);
+    printf("DBDEBUG~ EXIT sqlite!\n");
     sqlite3_close(cntx->db);
     return false;
-
 }
 
 void db_destroy(struct context* cntx) {
     sqlite3_finalize(cntx->lookupskey);
+    sqlite3_finalize(cntx->totalup_stmt);
+    sqlite3_finalize(cntx->totaldw_stmt);
     sqlite3_close(cntx->db);
+}
+
+bool db_incpkt(sqlite3_stmt* stmt, int data) {
+    bool ret;
+    sqlite3_bind_int(stmt, 1, data);
+    DEBUG_STMT(stmt);
+    ret = db_step(stmt, NULL, NULL);
+    sqlite3_reset(stmt);
+    return ret;
 }
 
 bool db_lookup_skey(sqlite3_stmt* stmt, void* data) {
@@ -97,23 +126,23 @@ static bool db_step(sqlite3_stmt* stmt, void (*rowcallback)(sqlite3_stmt* stmt, 
     int ret;
     DEBUG_STMT(stmt);
     while (1) {
-	ret = sqlite3_step(stmt);
-	if (ret == SQLITE_DONE) {
-	    return true;
-    } else if (ret == SQLITE_ROW) {
-	if (rowcallback != NULL)
-	    rowcallback(stmt, data);
-	} else {
-	    printf("ERROR~ %s\n", sqlite3_errstr(ret));
-	    return false;
-	}
+        ret = sqlite3_step(stmt);
+        if (ret == SQLITE_DONE) {
+            return true;
+        } else if (ret == SQLITE_ROW) {
+        if (rowcallback != NULL)
+            rowcallback(stmt, data);
+        } else {
+            printf("DBDEBUG~ %s\n", sqlite3_errstr(ret));
+            return false;
+        }
     }
 }
 
 static void sql_debug(sqlite3_stmt* stmt) { 
     char *sql;
     sql = sqlite3_expanded_sql(stmt);
-    printf("\nDEBUG-DB~ SQL=(%s)\n", sql);
+    printf("\nDBDEBUG~ SQL=(%s)\n", sql);
     sqlite3_free(sql);
 }
 

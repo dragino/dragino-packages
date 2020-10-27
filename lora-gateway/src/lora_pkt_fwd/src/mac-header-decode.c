@@ -53,6 +53,78 @@ LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg )
     return LORAMAC_PARSER_SUCCESS;
 }
 
+LoRaMacParserStatus_t LoRaMacParserJoinAccept( LoRaMacMessageJoinAccept_t* macMsg )
+{
+    if( ( macMsg == 0 ) || ( macMsg->Buffer == 0 ) )
+    {
+        return LORAMAC_PARSER_ERROR_NPE;
+    }
+
+    uint16_t bufItr = 0;
+
+    macMsg->MHDR.Value = macMsg->Buffer[bufItr++];
+
+    memcpy1( macMsg->JoinNonce, &macMsg->Buffer[bufItr], 3 );
+    bufItr = bufItr + 3;
+
+    memcpy1( macMsg->NetID, &macMsg->Buffer[bufItr], 3 );
+    bufItr = bufItr + 3;
+
+    macMsg->DevAddr = ( uint32_t ) macMsg->Buffer[bufItr++];
+    macMsg->DevAddr |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 8 );
+    macMsg->DevAddr |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 16 );
+    macMsg->DevAddr |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 24 );
+
+    macMsg->DLSettings.Value = macMsg->Buffer[bufItr++];
+
+    macMsg->RxDelay = macMsg->Buffer[bufItr++];
+
+    if( ( macMsg->BufSize - LORAMAC_MIC_FIELD_SIZE - bufItr ) == LORAMAC_CF_LIST_FIELD_SIZE )
+    {
+        memcpy1( macMsg->CFList, &macMsg->Buffer[bufItr], LORAMAC_CF_LIST_FIELD_SIZE );
+        bufItr = bufItr + LORAMAC_CF_LIST_FIELD_SIZE;
+    }
+    else if( ( macMsg->BufSize - LORAMAC_MIC_FIELD_SIZE - bufItr ) > 0 )
+    {
+        return LORAMAC_PARSER_FAIL;
+    }
+
+    macMsg->MIC = ( uint32_t ) macMsg->Buffer[bufItr++];
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 8 );
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 16 );
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 24 );
+
+    return LORAMAC_PARSER_SUCCESS;
+}
+
+LoRaMacParserStatus_t LoRaMacParserJoinReques( LoRaMacMessageJoinRequest_t* macMsg )
+{
+    if( ( macMsg == 0 ) || ( macMsg->Buffer == 0 ) )
+    {
+        return LORAMAC_PARSER_ERROR_NPE;
+    }
+
+    uint16_t bufItr = 0;
+
+    macMsg->MHDR.Value = macMsg->Buffer[bufItr++];
+
+    memcpy1( macMsg->JoinEUI, &macMsg->Buffer[bufItr], 8 );
+    bufItr = bufItr + 8;
+
+    memcpy1( macMsg->DevEUI, &macMsg->Buffer[bufItr], 8 );
+    bufItr = bufItr + 8;
+
+    macMsg->DevNonce = ( uint16_t ) macMsg->Buffer[bufItr++];
+    macMsg->DevNonce |= ( ( uint16_t ) macMsg->Buffer[bufItr++] << 8 );
+
+    macMsg->MIC = ( uint32_t ) macMsg->Buffer[bufItr++];
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 8 );
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 16 );
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 24 );
+
+    return LORAMAC_PARSER_SUCCESS;
+}
+
 void printf_mac_header( LoRaMacMessageData_t* macMsg )
 {
     if( ( macMsg == 0 ) || ( macMsg->Buffer == 0 ) )
@@ -62,7 +134,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
     
     switch (macMsg->MHDR.Bits.MType) {
         case FRAME_TYPE_DATA_CONFIRMED_UP:
-            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_CONF_UP: {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_CONF_UP: {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.AdrAckReq,
@@ -73,7 +145,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_UP: 
-            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_UNCONF_UP:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_UNCONF_UP:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.AdrAckReq,
@@ -84,7 +156,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_CONFIRMED_DOWN:
-            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_CONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_CONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.Ack,
@@ -95,7 +167,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_DOWN:
-            MSG_DEBUG(DEBUG_PKT_FWD, "DATA_UNCONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_UNCONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.Ack,
@@ -106,10 +178,24 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_JOIN_ACCEPT: 
-            MSG_DEBUG(DEBUG_PKT_FWD, "JOIN_ACCEPT:{Message ...}\n");
+            LoRaMacMessageJoinAccept_t joinMsg;
+            joinMsg.Buffer = macMsg->Buffer;
+            joinMsg.BufSize = macMsg->BufSize;
+            LoRaMacParserJoinAccept(joinMsg);
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_ACCEPT:{\"NetID\": \"%c%c%c\", \"DevAddr\": \"%08X\"}\n", 
+                    joinMsg.NetID[0], 
+                    joinMsg.NetID[1], 
+                    joinMsg.NetID[2], 
+                    joinMsg.DevAddr);
             break;
         case FRAME_TYPE_JOIN_REQ: 
-            MSG_DEBUG(DEBUG_PKT_FWD, "JOIN_REQ:{Message ...}\n");
+            uint8_t appeui[9] = {'\0'};
+            uint8_t deveui[9] = {'\0'};
+            int inx = 1;
+            memcpy1(appeui, macMsg->Buffer[inx], 8);
+            inx = inx + 8;
+            memcpy1(appeui, macMsg->Buffer[inx], 8);
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_REQ:{\"AppEUI\":, "%s", \"DevEUI\":, "%s"}\n", appeui, deveui);
             break;
         default:
             break;

@@ -260,6 +260,88 @@ typedef enum eLoRaMacMessageType
 }LoRaMacMessageType_t;
 
 /*!
+ * LoRaMac type for Join-request message
+ */
+typedef struct sLoRaMacMessageJoinRequest
+{   
+    /*!
+     * Serialized message buffer
+     */
+    uint8_t* Buffer;
+    /*!
+     * Size of serialized message buffer
+     */
+    uint8_t BufSize;
+    /*!
+     * MAC header
+     */
+    LoRaMacHeader_t MHDR;
+    /*!
+     *  Join EUI
+     */
+    uint8_t JoinEUI[LORAMAC_JOIN_EUI_FIELD_SIZE];
+    /*!
+     * Device EUI
+     */
+    uint8_t DevEUI[LORAMAC_DEV_EUI_FIELD_SIZE];
+    /*!
+     * Device Nonce
+     */
+    uint16_t DevNonce;
+    /*!
+     * Message integrity code (MIC)
+     */
+    uint32_t MIC;
+}LoRaMacMessageJoinRequest_t;
+
+/*!
+ * LoRaMac type for Join-accept message
+ */
+typedef struct sLoRaMacMessageJoinAccept
+{
+    /*!
+     * Serialized message buffer
+     */
+    uint8_t* Buffer;
+    /*!
+     * Size of serialized message buffer
+     */
+    uint8_t BufSize;
+    /*!
+     * MAC header
+     */
+    LoRaMacHeader_t MHDR;
+    /*!
+     *  Server Nonce ( 3 bytes )
+     */
+    uint8_t JoinNonce[LORAMAC_JOIN_NONCE_FIELD_SIZE];
+    /*!
+     * Network ID ( 3 bytes )
+     */
+    uint8_t NetID[LORAMAC_NET_ID_FIELD_SIZE];
+    /*!
+     * Device address
+     */
+    uint32_t DevAddr;
+    /*!
+     * Device address
+     */
+    LoRaMacDLSettings_t DLSettings;
+    /*!
+     * Delay between TX and RX
+     */
+    uint8_t RxDelay;
+    /*!
+     * List of channel frequencies (opt.)
+     */
+    uint8_t CFList[16];
+    /*!
+     * Message integrity code (MIC)
+     */
+    uint32_t MIC;
+}LoRaMacMessageJoinAccept_t;
+
+/*!
  * LoRaMac Parser Status
  */
 typedef enum eLoRaMacParserStatus
@@ -281,6 +363,21 @@ typedef enum eLoRaMacParserStatus
      */
     LORAMAC_PARSER_ERROR,
 }LoRaMacParserStatus_t;
+
+/*!
+ * LoRaMac general message type
+ */
+typedef struct sLoRaMacMessage
+{
+    LoRaMacMessageType_t Type;
+    union uMessage
+    {
+        LoRaMacMessageJoinRequest_t JoinReq;
+        LoRaMacMessageJoinAccept_t JoinAccept;
+        LoRaMacMessageData_t Data;
+    }Message;
+}LoRaMacMessage_t;
+
 
 LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg );
 

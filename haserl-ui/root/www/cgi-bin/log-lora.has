@@ -7,6 +7,8 @@
 MEMFREE=`cat /proc/meminfo | grep MemFree |cut -d : -f2 | tr -d ' '|tr -d 'kB'`
 MEMTOT=`cat /proc/meminfo | grep MemTotal |cut -d : -f2 | tr -d ' '`
 MEMSTR="Free Memory: "$MEMFREE" / Total Memory: "$MEMTOT
+FM="<br><br>"
+LINE="<hr style=\"height:2px;border:none;border-top:2px ridge green;\" width=\"100%\"/>"
 %>
 
 <!DOCTYPE html>
@@ -24,31 +26,36 @@ MEMSTR="Free Memory: "$MEMFREE" / Total Memory: "$MEMTOT
 <table class="configTable"> <!--This is a one column table-->
 	<tr><td>
 		<h4>	<% echo "FreqINFO:  " %> 	</h4>
+        <%= $LINE %>
 		<% cat /etc/lora/desc | sed  's/$/ <br>/' %>
 	</td></tr>
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
 		<h4>	<% echo "Logread Error:  " %> 	</h4>
-		<% logread -e "ERROR~" | sed  's/$/ <br>/' %>
+        <%= $LINE %>
+		<% logread -e "ERROR~" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"' %>
 	</td></tr>
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
 		<h4>	<% echo "Logread RxTxJson:  " %> 	</h4>
-		<% logread -l 50 -e "RXTX~" | sed  's/$/ <br>/' %>
+        <%= $LINE %>
+		<% logread -l 50 -e "RXTX~" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"' %>
 	</td></tr>
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
 		<h4>	<% echo "Logread REPORT:  " %> 	</h4>
-		<% logread -e REPORT | sed  's/$/ <br>/' %>
+        <%= $LINE %>
+		<% logread -e REPORT | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"' %>
 	</td></tr>
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
 		<h4>	<% echo "Logread INFO (json):  " %> 	</h4>
-		<% logread -e "INFO~ (json):" | cut -d "~" -f 2 | sed  's/$/ <br>/' %>
+        <%= $LINE %>
+		<% logread -e "INFO~ (json):" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"' %>
 	</td></tr>
 
 </table>

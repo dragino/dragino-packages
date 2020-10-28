@@ -1,4 +1,5 @@
-<% vendor_name=$(uci get system.vendor.name) %>
+  <% vendor_name=$(uci get system.vendor.name) %>
+  <% killall logread %>
   <title><% echo $vendor_name %> LoRa Gateway</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">

@@ -98,8 +98,9 @@
  <div class="dropdown"> <!-- LogRead -->
     <button class="dropbtn">LogRead<span class="fas fa-caret-down"></span></button>
     <div class="dropdown-content">
-      <a href="/cgi-bin/log-lora.has">LoRa Log</a>
       <a href="/cgi-bin/log-sys.has">System Log</a>
+      <a href="/cgi-bin/log-pkt.has">LoRa FWD</a>
+      <a href="/cgi-bin/log-lora.has">LoRa Log</a>
       <a href="/cgi-bin/log-record.has">Record Log</a>
     </div>
   </div> 

@@ -36,6 +36,7 @@ LINE2="<hr style=\"height:1px;border:none;border-top:1px ridge black;\" width=\"
 </table>
 </div>
 
+<!--
 <script type="text/javascript">
 	$(document).ready(function () {
 		fresh();
@@ -46,6 +47,7 @@ LINE2="<hr style=\"height:1px;border:none;border-top:1px ridge black;\" width=\"
 		setTimeout("fresh()", 1000 * 5);
 	}        
 </script>
+-->
 
 </body>
 </html>

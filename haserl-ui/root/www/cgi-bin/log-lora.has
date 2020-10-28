@@ -34,28 +34,28 @@ LINE="<hr style=\"height:2px;border:none;border-top:2px ridge green;\" width=\"1
 	<tr><td>
 		<h4>	<% echo "Logread Error:  " %> 	</h4>
         <%= $LINE %>
-		<% logread -e "ERROR~" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"' %>
+		<% logread -e "ERROR~" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
 	</td></tr>
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
 		<h4>	<% echo "Logread RxTxJson:  " %> 	</h4>
         <%= $LINE %>
-		<% logread -l 50 -e "RXTX~" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"' %>
+		<% logread -l 50 -e "RXTX~" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
 	</td></tr>
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
 		<h4>	<% echo "Logread REPORT:  " %> 	</h4>
         <%= $LINE %>
-		<% logread -e REPORT | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"' %>
+		<% logread -e REPORT | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
 	</td></tr>
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
 		<h4>	<% echo "Logread INFO (json):  " %> 	</h4>
         <%= $LINE %>
-		<% logread -e "INFO~ (json):" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"' %>
+		<% logread -e "INFO~ (json):" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
 	</td></tr>
 
 </table>

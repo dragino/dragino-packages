@@ -37,8 +37,15 @@ LINE2="<hr style=\"height:1px;border:none;border-top:1px ridge black;\" width=\"
 		<h4>	<% echo "Packages:  " %> 	</h4>
         <%= $LINE1 %>
 	<h5>
-	<% logread  -e "PKT_FWD~" | awk 'BEGIN{FS="~"; IDX=0} {IDX+=1; printf "<font color=\"red\">%d)</font> %s %s", IDX, $2, "'$FM'"}' %>
+	<% logread  -e "PKT_FWD~" | tail -n 9 | awk 'BEGIN{FS="~"; IDX=0} {IDX+=1; printf "<font color=\"red\">%d)</font> %s %s", IDX, $2, "'$FM'"}'%>
 	</h5>
+	</td></tr>
+
+	<tr class="rowSpacer"></tr>
+    <tr><td>
+		<h4> GATEWAY REPORT: </h4>
+        <%= $LINE1 %>
+		<% logread -e REPORT | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
 	</td></tr>
 
 </table>
@@ -52,7 +59,7 @@ LINE2="<hr style=\"height:1px;border:none;border-top:1px ridge black;\" width=\"
 
 	function fresh() {
 		$("#stat").load(location.href + " #stat");
-		setTimeout("fresh()", 1000 * 1);
+		setTimeout("fresh()", 1000 * 2);
 	}        
 </script>
 

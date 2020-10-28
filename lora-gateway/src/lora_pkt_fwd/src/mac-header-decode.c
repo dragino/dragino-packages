@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "trace.h"
 #include "utilities.h"
@@ -128,9 +129,10 @@ LoRaMacParserStatus_t LoRaMacParserJoinReques( LoRaMacMessageJoinRequest_t* macM
 void printf_mac_header( LoRaMacMessageData_t* macMsg )
 {
     int idx = 1;
-    uint8_t appeui[9] = {'\0'};
-    uint8_t deveui[9] = {'\0'};
-    uint8_t netid[4] = {'\0'};
+    char appeui[17] = {'\0'};
+    char deveui[17] = {'\0'};
+    char netid[8] = {'\0'};
+    char cat[3] = {'\0'};
     uint32_t devaddr;
 
     if( ( macMsg == 0 ) || ( macMsg->Buffer == 0 ) )
@@ -140,7 +142,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
     
     switch (macMsg->MHDR.Bits.MType) {
         case FRAME_TYPE_DATA_CONFIRMED_UP:
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_CONF_UP: {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_CONF_UP-> {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.AdrAckReq,
@@ -151,7 +153,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_UP: 
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_UNCONF_UP:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_UNCONF_UP-> {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"ADRACKReq\": %u, \"ACK\": %u, \"RFU\" : \"RFU\", \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.AdrAckReq,
@@ -162,7 +164,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_CONFIRMED_DOWN:
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_CONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_CONF_DOWN<- {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.Ack,
@@ -173,7 +175,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_DOWN:
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_UNCONF_DOWN:{\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ DATA_UNCONF_DOWN<- {\"DevAddr\": \"%08X\", \"FCtrl\": [\"ADR\": %u, \"RFU\": \"RFU\", \"ACK\": %u, \"FPending\" : %u, \"FOptsLen\": %u], \"FCnt\": %u, \"FPort\": %u, \"MIC\": \"%08X\"}\n", 
                     macMsg->FHDR.DevAddr, 
                     macMsg->FHDR.FCtrl.Bits.Adr,
                     macMsg->FHDR.FCtrl.Bits.Ack,
@@ -184,21 +186,26 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                     macMsg->MIC);
             break;
         case FRAME_TYPE_JOIN_ACCEPT: 
-            idx = 4;
-            memcpy1(netid, &macMsg->Buffer[idx], 3 );
-            idx = idx + 3;
+            for (idx = 4; idx < 4 + 3; idx++) {
+                sprintf(cat, "%02X", macMsg->Buffer[idx]);
+                strcat(netid, cat);
+            }
             devaddr = ( uint32_t ) macMsg->Buffer[idx++];
             devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 8 );
             devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 16 );
             devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 24 );
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_ACCEPT:{\"NetID\": \"%s\", \"DevAddr\": \"%08X\"}\n", netid, devaddr);
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_ACCEPT+ {\"NetID\": \"%s\", \"DevAddr\": \"%08X\"}\n", netid, devaddr);
             break;
         case FRAME_TYPE_JOIN_REQ: 
-            idx = 1;
-            memcpy1(appeui, &macMsg->Buffer[idx], 8);
-            idx = idx + 8;
-            memcpy1(deveui, &macMsg->Buffer[idx], 8);
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_REQ:{\"AppEUI\":, \"%s\", \"DevEUI\":, \"%s\"}\n", appeui, deveui);
+            for (idx = 1; idx < 1 + 8; idx++) {
+                sprintf(cat, "%02X", macMsg->Buffer[idx]);
+                strcat(appeui, cat);
+            }
+            for (idx = 9; idx < 9 + 8; idx++) {
+                sprintf(cat, "%02X", macMsg->Buffer[idx]);
+                strcat(deveui, cat);
+            }
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_REQ+ {\"AppEUI\":, \"%s\", \"DevEUI\":, \"%s\"}\n", appeui, deveui);
             break;
         default:
             break;

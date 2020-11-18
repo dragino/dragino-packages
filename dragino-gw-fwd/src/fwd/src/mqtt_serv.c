@@ -197,8 +197,8 @@ int mqtt_start(serv_s* serv) {
 }
 
 void mqtt_stop(serv_s* serv) {
-	sem_post(&serv->thread.sema);
     serv->thread.stop_sig = true;
+	sem_post(&serv->thread.sema);
 	pthread_join(serv->thread.t_up, NULL);
     if (serv->state.connecting) 
         mqtt_disconnect((mqttsession_s*)serv->net->mqtt->session);

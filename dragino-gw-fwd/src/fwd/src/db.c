@@ -37,7 +37,7 @@
 #include "fwd.h"
 #include "db.h"
 
-#define MAX_DB_FIELD 256
+#define MAX_DB_FIELD       256
 
 pthread_mutex_t mx_dblock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t dbcond;
@@ -59,7 +59,7 @@ DEFINE_SQL_STATEMENT(deltree_all_stmt, "DELETE FROM gwdb")
 DEFINE_SQL_STATEMENT(gettree_stmt, "SELECT key, value FROM gwdb WHERE key || '/' LIKE ? || '/' || '%' ORDER BY key")
 DEFINE_SQL_STATEMENT(gettree_all_stmt, "SELECT key, value FROM gwdb ORDER BY key")
 DEFINE_SQL_STATEMENT(showkey_stmt, "SELECT key, value FROM gwdb WHERE key LIKE '%' || '/' || ? ORDER BY key")
-DEFINE_SQL_STATEMENT(create_gwdb_stmt, "CREATE TABLE IF NOT EXISTS gwdb(key VARCHAR(256), value VARCHAR(256), PRIMARY KEY(key))")
+DEFINE_SQL_STATEMENT(create_gwdb_stmt, "CREATE TEMPORARY TABLE IF NOT EXISTS gwdb(key VARCHAR(256), value VARCHAR(256), PRIMARY KEY(key))")
 DEFINE_SQL_STATEMENT(gettree_prefix_stmt, "SELECT key, value FROM gwdb WHERE key > ?1 AND key <= ?1 || X'ffff'")
 
 static int init_stmt(sqlite3_stmt **stmt, const char *sql, size_t len)
@@ -146,8 +146,8 @@ static int db_create_gwdb(void)
 static int db_open(void)
 {
 	pthread_mutex_lock(&mx_dblock);
-	if (sqlite3_open(LGW_DB_PATH, &GWDB) != SQLITE_OK) {
-		lgw_log(LOG_WARNING, "WARNING~ [db] Unable to open LGW database '%s': %s\n", LGW_DB_PATH, sqlite3_errmsg(GWDB));
+	if (sqlite3_open(LGW_DB_FILE, &GWDB) != SQLITE_OK) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Unable to open LGW database '%s': %s\n", LGW_DB_FILE, sqlite3_errmsg(GWDB));
 		sqlite3_close(GWDB);
 		pthread_mutex_unlock(&mx_dblock);
 		return -1;
@@ -274,7 +274,7 @@ static int db_get_common(const char *family, const char *key, char **buffer, int
 		const char *value = (const char *) result;
 
 		if (bufferlen == -1) {
-			*buffer = strdup(value);
+			*buffer = lgw_strdup(value);
 		} else {
 			strncpy(*buffer, value, bufferlen);
 		}
@@ -288,7 +288,7 @@ static int db_get_common(const char *family, const char *key, char **buffer, int
 bool lgw_db_key_exist(const char *key) {
 	pthread_mutex_lock(&mx_dblock);
     if (!lgw_strlen_zero(key) && (sqlite3_bind_text(showkey_stmt, 1, key, -1, SQLITE_STATIC) != SQLITE_OK)) {
-        lgw_log(LOG_WARNING, "WARNING~ [db] Could bind %s to stmt: %s\n", LGW_DB_PATH, sqlite3_errmsg(GWDB));
+        lgw_log(LOG_WARNING, "WARNING~ [db] Could bind %s to stmt: %s\n", LGW_DB_FILE, sqlite3_errmsg(GWDB));
         sqlite3_reset(showkey_stmt);
         pthread_mutex_unlock(&mx_dblock);
         return false;
@@ -523,7 +523,7 @@ static void db_sync(void)
  * If changes happen rapidly, this thread will also ensure that the sync
  * operations are rate limited.
  */
-static void *db_sync_thread(void *data)
+static void *db_sync_thread()
 {
 	pthread_mutex_lock(&mx_dblock);
 	lgw_db_begin_transaction();

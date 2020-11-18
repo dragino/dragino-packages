@@ -72,8 +72,8 @@ int semtech_start(serv_s* serv) {
 }
 
 int semtech_stop(serv_s* serv) {
-	sem_post(&serv->thread.sema);
     serv->thread.stop_sig = true;
+	sem_post(&serv->thread.sema);
     pthread_join(serv->thread.t_up, NULL);
     pthread_cancel(serv->thread.t_down);
     close(serv->net->sock_up);

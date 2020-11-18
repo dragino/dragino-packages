@@ -207,6 +207,7 @@ static void sig_handler(int sigio) {
 
 void stop_clean_service(void) {
     serv_s* serv_entry = NULL;  
+
     service_stop();
 
     LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.serv_list, serv_entry, list) {
@@ -692,7 +693,7 @@ int main(int argc, char *argv[]) {
     stop_clean_service();
 
 	/* if an exit signal was received, try to quit properly */
-	if (exit_sig) {
+	if (exit_sig || quit_sig) {
 		/* stop the hardware */
 		if (GW.cfg.radiostream_enabled == true) {
 			i = HAL.lgw_stop();
@@ -705,6 +706,7 @@ int main(int argc, char *argv[]) {
 				lgw_log(LOG_WARNING, "WARNING~ [main] failed to stop concentrator successfully\n");
 			}
 		}
+
 	}
 
 	printf("INFO~ Exiting packet forwarder program\n");

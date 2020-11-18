@@ -80,8 +80,6 @@
 #define TX_BUFF_SIZE                        ((540 * NB_PKT_MAX) + 30 + STATUS_SIZE)
 #define ACK_BUFF_SIZE                       64
 
-#define LGW_DB_PATH                         "/etc/config/lgwdb.sqlite"
-
 #define UNIX_GPS_EPOCH_OFFSET               315964800 
 
 #define XERR_INIT_AVG       128	/* number of measurements the XTAL correction is averaged on as initial value */

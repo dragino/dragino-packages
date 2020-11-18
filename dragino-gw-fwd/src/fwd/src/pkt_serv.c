@@ -241,6 +241,7 @@ int pkt_start(serv_s* serv) {
 
 void pkt_stop(serv_s* serv) {
     serv->thread.stop_sig = true;
+	sem_post(&serv->thread.sema);
 	pthread_join(serv->thread.t_up, NULL);
 	pthread_join(serv->thread.t_down, NULL);
 }

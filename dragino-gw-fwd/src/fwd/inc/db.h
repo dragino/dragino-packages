@@ -33,6 +33,8 @@
 extern "C" {
 #endif
 
+#define LGW_DB_FILE        "/tmp/lgwdb.sqlite"
+
 struct lgw_db_entry {
 	struct lgw_db_entry *next;
 	char *key;

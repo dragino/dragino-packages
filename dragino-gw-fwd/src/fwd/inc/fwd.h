@@ -35,6 +35,7 @@
 #include "utilities.h"
 #include "lgwmm.h"
 #include "gwcfg.h"
+#include "db.h"
 
 #define PROTOCOL_VERSION                    2	        /* v1.3 */
 #define PROTOCOL_JSON_RXPK_FRAME_FORMAT     1

@@ -293,8 +293,7 @@ typedef enum eLoRaMacParserStatus
 
 LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg );
 
-void printf_mac_header( LoRaMacMessageData_t* macMsg ); 
-
-int filter_by_mac(LoRaMacMessageData_t* macMsg, uint8_t fport,uint32_t devaddr, uint8_t len);
+void decode_mac_pkt_up(LoRaMacMessageData_t* macMsg, void* pkt);
+void decode_mac_pkt_down(LoRaMacMessageData_t* macMsg, void* pkt);
 
 #endif // __LORAMAC_HEADER_DECODE_H_

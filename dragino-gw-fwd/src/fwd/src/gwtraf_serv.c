@@ -52,6 +52,8 @@ int gwtraf_start(serv_s* serv) {
     }
     serv->state.live = true;
     serv->state.stall_time = 0;
+    lgw_db_put("service/traffic", serv->info.name, "running");
+    lgw_db_put("thread", serv->info.name, "running");
 
     return 0;
 }
@@ -63,6 +65,8 @@ void gwtraf_stop(serv_s* serv) {
     serv->state.live = false;
     serv->net->sock_up = -1;
     serv->net->sock_down = -1;
+    lgw_db_del("service/traffic", serv->info.name);
+    lgw_db_del("thread", serv->info.name);
 }
 
 static void gwtraf_push_up(void* arg) {

@@ -236,6 +236,9 @@ int pkt_start(serv_s* serv) {
         }
     }
 
+    lgw_db_put("service/pkt", serv->info.name, "runing");
+    lgw_db_put("thread", serv->info.name, "runing");
+
     return 0;
 }
 
@@ -244,6 +247,8 @@ void pkt_stop(serv_s* serv) {
 	sem_post(&serv->thread.sema);
 	pthread_join(serv->thread.t_up, NULL);
 	pthread_join(serv->thread.t_down, NULL);
+    lgw_db_del("service/pkt", serv->info.name);
+    lgw_db_del("thread", serv->info.name);
 }
 
 static void pkt_deal_up(void* arg) {
@@ -292,7 +297,7 @@ static void pkt_deal_up(void* arg) {
             if (LoRaMacParserData(&macmsg) != LORAMAC_PARSER_SUCCESS)
                 continue;
 
-            printf_mac_header(&macmsg);
+            decode_mac_pkt_up(&macmsg, p);
 
             if (GW.cfg.mac_decoded || GW.cfg.custom_downlink) {
                 devinfo_s devinfo = { .devaddr = macmsg.FHDR.DevAddr, 
@@ -336,7 +341,7 @@ static void pkt_deal_up(void* arg) {
                         if (NULL == fp)
                             lgw_log(LOG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
                         else { 
-                            fwrite(payload_txt, sizeof(uint8_t), fsize + 1, fp);
+                            fwrite(payload_txt, sizeof(uint8_t), fsize, fp);
                             fflush(fp); 
                             fclose(fp);
                         }

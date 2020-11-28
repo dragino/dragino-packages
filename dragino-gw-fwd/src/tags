@@ -457,7 +457,7 @@ ARRAY_SIZE	hal/tst/test_loragw_cal.c	43;"	d	file:
 ARRAY_SIZE	hal/tst/test_loragw_hal.c	41;"	d	file:
 ARRAY_SIZE	hal/tst/test_loragw_spi.c	29;"	d	file:
 ASSERT	hal/lg02hal/loragw_hal_lg02.h	37;"	d
-AU	fwd/inc/gwcfg.h	/^    AU$/;"	e	enum:__anon13
+AU	fwd/inc/gwcfg.h	/^    AU$/;"	e	enum:__anon37
 Ack	fwd/inc/mac-header-decode.h	/^        uint8_t Ack             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits
 Adr	fwd/inc/mac-header-decode.h	/^        uint8_t Adr             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits
 AdrAckReq	fwd/inc/mac-header-decode.h	/^        uint8_t AdrAckReq       : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits
@@ -482,10 +482,10 @@ Api__SystemStats__Loadstats_Closure	libttn/api.pb-c.h	/^typedef void (*Api__Syst
 Api__SystemStats__MemoryStats	libttn/api.pb-c.h	/^typedef struct _Api__SystemStats__MemoryStats Api__SystemStats__MemoryStats;$/;"	t	typeref:struct:_Api__SystemStats__MemoryStats
 Api__SystemStats__MemoryStats_Closure	libttn/api.pb-c.h	/^typedef void (*Api__SystemStats__MemoryStats_Closure)$/;"	t
 BEACON_GUARD	fwd/src/jitqueue.c	42;"	d	file:
-BEACON_QUEUED	fwd/inc/stats.h	/^	BEACON_QUEUED,$/;"	e	enum:__anon33
-BEACON_REJECTED	fwd/inc/stats.h	/^	BEACON_REJECTED$/;"	e	enum:__anon33
+BEACON_QUEUED	fwd/inc/stats.h	/^	BEACON_QUEUED,$/;"	e	enum:__anon56
+BEACON_REJECTED	fwd/inc/stats.h	/^	BEACON_REJECTED$/;"	e	enum:__anon56
 BEACON_RESERVED	fwd/src/jitqueue.c	44;"	d	file:
-BEACON_SENT	fwd/inc/stats.h	/^	BEACON_SENT,$/;"	e	enum:__anon33
+BEACON_SENT	fwd/inc/stats.h	/^	BEACON_SENT,$/;"	e	enum:__anon56
 BPOLY	fwd/src/aes.c	76;"	d	file:
 BUFFER_OVERFLOW	libmqtt/MQTTErrors.h	/^    BUFFER_OVERFLOW = -2,$/;"	e	enum:returnCode
 BUFF_SIZE	hal/test/test_loragw_spi.c	44;"	d	file:
@@ -506,8 +506,8 @@ Bits	fwd/inc/mac-header-decode.h	/^    }Bits;$/;"	m	union:uLoRaMacFrameCtrl	type
 Bits	fwd/inc/mac-header-decode.h	/^    }Bits;$/;"	m	union:uLoRaMacHeader	typeref:struct:uLoRaMacHeader::sMacHeaderBits
 BufSize	fwd/inc/mac-header-decode.h	/^    uint8_t BufSize;$/;"	m	struct:sLoRaMacMessageData
 Buffer	fwd/inc/mac-header-decode.h	/^    uint8_t* Buffer;$/;"	m	struct:sLoRaMacMessageData
-CALIBRATE	hal/sx1302hal/loragw_sx1250.h	/^    CALIBRATE               = 0x89,$/;"	e	enum:__anon6
-CALIBRATE_IMAGE	hal/sx1302hal/loragw_sx1250.h	/^    CALIBRATE_IMAGE         = 0x98,$/;"	e	enum:__anon6
+CALIBRATE	hal/sx1302hal/loragw_sx1250.h	/^    CALIBRATE               = 0x89,$/;"	e	enum:__anon15
+CALIBRATE_IMAGE	hal/sx1302hal/loragw_sx1250.h	/^    CALIBRATE_IMAGE         = 0x98,$/;"	e	enum:__anon15
 CAL_DEC_GAIN	hal/test/test_loragw_cal.c	63;"	d	file:
 CAL_ITER	hal/sx1302hal/loragw_cal.c	61;"	d	file:
 CAL_SIG_ANA_DURATION	hal/test/test_loragw_cal.c	64;"	d	file:
@@ -567,8 +567,8 @@ CHECK_NULL	hal/sx1302hal/loragw_sx1302_rx.c	37;"	d	file:
 CHECK_NULL	hal/sx1302hal/loragw_sx1302_rx.c	41;"	d	file:
 CHECK_NULL	hal/sx1302hal/loragw_sx1302_timestamp.c	41;"	d	file:
 CHECK_NULL	hal/sx1302hal/loragw_sx1302_timestamp.c	45;"	d	file:
-CLR_IRQ_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    CLR_IRQ_STATUS          = 0x02,$/;"	e	enum:__anon6
-CN	fwd/inc/gwcfg.h	/^    CN,$/;"	e	enum:__anon13
+CLR_IRQ_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    CLR_IRQ_STATUS          = 0x02,$/;"	e	enum:__anon15
+CN	fwd/inc/gwcfg.h	/^    CN,$/;"	e	enum:__anon37
 COMMAND_TIMEOUT	fwd/inc/mqtt_service.h	33;"	d
 COMMAND_TIMEOUT	libttn/network.h	15;"	d
 CONNACK	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
@@ -782,9 +782,9 @@ Dequeue	libmqtt/MQTTLinux.c	/^int Dequeue(Queue *queue, unsigned short *item, Ti
 DevAddr	fwd/inc/mac-header-decode.h	/^    uint32_t DevAddr;$/;"	m	struct:sLoRaMacFrameHeader
 EMBED_MQTTLIB_C_TARGET	libmqtt/Makefile	/^EMBED_MQTTLIB_C_TARGET = lib${MQTT_EMBED_LIB_C}.so$/;"	m
 ENDIANEXT_H_	fwd/inc/endianext.h	12;"	d
-EU	fwd/inc/gwcfg.h	/^    EU,$/;"	e	enum:__anon13
+EU	fwd/inc/gwcfg.h	/^    EU,$/;"	e	enum:__anon37
 EVENT_DELAYED	hal/loragw_hal.h	161;"	d
-EXCLUDE	fwd/inc/gwcfg.h	/^    EXCLUDE,$/;"	e	enum:__anon15
+EXCLUDE	fwd/inc/gwcfg.h	/^    EXCLUDE,$/;"	e	enum:__anon39
 Enqueue	libmqtt/MQTTLinux.c	/^int Enqueue(Queue *queue, unsigned short item)$/;"	f
 FAILURE	libmqtt/MQTTErrors.h	/^    FAILURE = -1,$/;"	e	enum:returnCode
 FCnt	fwd/inc/mac-header-decode.h	/^    uint16_t FCnt;$/;"	m	struct:sLoRaMacFrameHeader
@@ -860,11 +860,11 @@ GATEWAY__RX_METADATA__INIT	libttn/gateway.pb-c.h	127;"	d
 GATEWAY__STATUS__INIT	libttn/gateway.pb-c.h	302;"	d
 GATEWAY__STATUS__OSMETRICS__INIT	libttn/gateway.pb-c.h	187;"	d
 GATEWAY__TX_CONFIGURATION__INIT	libttn/gateway.pb-c.h	163;"	d
-GET_DEVICE_ERRORS	hal/sx1302hal/loragw_sx1250.h	/^    GET_DEVICE_ERRORS       = 0x17$/;"	e	enum:__anon6
-GET_IRQ_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    GET_IRQ_STATUS          = 0x12,$/;"	e	enum:__anon6
-GET_PACKET_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    GET_PACKET_STATUS       = 0x14,$/;"	e	enum:__anon6
-GET_RX_BUFFER_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    GET_RX_BUFFER_STATUS    = 0x13,$/;"	e	enum:__anon6
-GET_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    GET_STATUS              = 0xC0,$/;"	e	enum:__anon6
+GET_DEVICE_ERRORS	hal/sx1302hal/loragw_sx1250.h	/^    GET_DEVICE_ERRORS       = 0x17$/;"	e	enum:__anon15
+GET_IRQ_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    GET_IRQ_STATUS          = 0x12,$/;"	e	enum:__anon15
+GET_PACKET_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    GET_PACKET_STATUS       = 0x14,$/;"	e	enum:__anon15
+GET_RX_BUFFER_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    GET_RX_BUFFER_STATUS    = 0x13,$/;"	e	enum:__anon15
+GET_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    GET_STATUS              = 0xC0,$/;"	e	enum:__anon15
 GHOST_DATA	fwd/src/ghost.c	47;"	d	file:
 GHST_MIN_PACKETSIZE	fwd/inc/ghost.h	30;"	d
 GHST_NM_RCV	fwd/inc/ghost.h	34;"	d
@@ -933,7 +933,7 @@ GOOGLE__PROTOBUF__UNINTERPRETED_OPTION__NAME_PART__INIT	libttn/descriptor.pb-c.h
 GPIO_IN	hal/gpio.h	38;"	d
 GPIO_OUT	hal/gpio.h	37;"	d
 GPS_DELAYED	hal/loragw_hal.h	160;"	d
-GPS_REF_MAX_AGE	fwd/inc/fwd.h	90;"	d
+GPS_REF_MAX_AGE	fwd/inc/fwd.h	88;"	d
 GWDB	fwd/src/db.c	/^static sqlite3 *GWDB;$/;"	v	file:
 Gateway__GPSMetadata	libttn/gateway.pb-c.h	/^typedef struct _Gateway__GPSMetadata Gateway__GPSMetadata;$/;"	t	typeref:struct:_Gateway__GPSMetadata
 Gateway__GPSMetadata_Closure	libttn/gateway.pb-c.h	/^typedef void (*Gateway__GPSMetadata_Closure)$/;"	t
@@ -1025,7 +1025,7 @@ IF_UNDEFINED	hal/loragw_hal.h	71;"	d
 IF_UNDEFINED	hal/sx1302hal/loragw_sx1302.h	35;"	d
 IGNORED	hal/loragw_gps.h	/^    IGNORED,         \/*!> frame was not parsed by the system *\/$/;"	e	enum:gps_msg
 IMMEDIATE	hal/loragw_hal.h	156;"	d
-INCLUDE	fwd/inc/gwcfg.h	/^    INCLUDE$/;"	e	enum:__anon15
+INCLUDE	fwd/inc/gwcfg.h	/^    INCLUDE$/;"	e	enum:__anon39
 INCLUDES	fwd/Makefile	/^INCLUDES = $(wildcard inc\/*.h)$/;"	m
 INCLUDES	hal/Makefile	/^INCLUDES = $(wildcard *.h lg02hal\/*.h sx1301hal\/*.h sx1302hal\/*.h)$/;"	m
 INCOMPLETE	hal/loragw_gps.h	/^    INCOMPLETE,      \/*!> frame parsed was missing bytes *\/$/;"	e	enum:gps_msg
@@ -1186,7 +1186,7 @@ LGW_DBG_DEC_FILT_GAIN	hal/sx1301hal/loragw_reg_sx1301.h	345;"	d
 LGW_DBG_DETECT_CPT	hal/sx1301hal/loragw_reg_sx1301.h	179;"	d
 LGW_DBG_MCU_DATA	hal/sx1301hal/loragw_reg_sx1301.h	331;"	d
 LGW_DBG_SYMB_CPT	hal/sx1301hal/loragw_reg_sx1301.h	180;"	d
-LGW_DB_PATH	fwd/inc/fwd.h	83;"	d
+LGW_DB_FILE	fwd/inc/db.h	36;"	d
 LGW_DC_NOTCH_EN	hal/sx1301hal/loragw_reg_sx1301.h	182;"	d
 LGW_DEC_GAIN_OFFSET	hal/sx1301hal/loragw_reg_sx1301.h	202;"	d
 LGW_DEC_RSSI	hal/sx1301hal/loragw_reg_sx1301.h	330;"	d
@@ -1609,10 +1609,10 @@ LORAWAN__MACCOMMAND__INIT	libttn/lorawan.pb-c.h	249;"	d
 LORAWAN__MACPAYLOAD__INIT	libttn/lorawan.pb-c.h	203;"	d
 LORAWAN__MAJOR__LORAWAN_R1	libttn/lorawan.pb-c.h	/^  LORAWAN__MAJOR__LORAWAN_R1 = 0$/;"	e	enum:_Lorawan__Major
 LORAWAN__MESSAGE__INIT	libttn/lorawan.pb-c.h	176;"	d
-LORAWAN__MESSAGE__PAYLOAD_JOIN_ACCEPT_PAYLOAD	libttn/lorawan.pb-c.h	/^  LORAWAN__MESSAGE__PAYLOAD_JOIN_ACCEPT_PAYLOAD = 5,$/;"	e	enum:__anon60
-LORAWAN__MESSAGE__PAYLOAD_JOIN_REQUEST_PAYLOAD	libttn/lorawan.pb-c.h	/^  LORAWAN__MESSAGE__PAYLOAD_JOIN_REQUEST_PAYLOAD = 4,$/;"	e	enum:__anon60
-LORAWAN__MESSAGE__PAYLOAD_MAC_PAYLOAD	libttn/lorawan.pb-c.h	/^  LORAWAN__MESSAGE__PAYLOAD_MAC_PAYLOAD = 3,$/;"	e	enum:__anon60
-LORAWAN__MESSAGE__PAYLOAD__NOT_SET	libttn/lorawan.pb-c.h	/^  LORAWAN__MESSAGE__PAYLOAD__NOT_SET = 0,$/;"	e	enum:__anon60
+LORAWAN__MESSAGE__PAYLOAD_JOIN_ACCEPT_PAYLOAD	libttn/lorawan.pb-c.h	/^  LORAWAN__MESSAGE__PAYLOAD_JOIN_ACCEPT_PAYLOAD = 5,$/;"	e	enum:__anon1
+LORAWAN__MESSAGE__PAYLOAD_JOIN_REQUEST_PAYLOAD	libttn/lorawan.pb-c.h	/^  LORAWAN__MESSAGE__PAYLOAD_JOIN_REQUEST_PAYLOAD = 4,$/;"	e	enum:__anon1
+LORAWAN__MESSAGE__PAYLOAD_MAC_PAYLOAD	libttn/lorawan.pb-c.h	/^  LORAWAN__MESSAGE__PAYLOAD_MAC_PAYLOAD = 3,$/;"	e	enum:__anon1
+LORAWAN__MESSAGE__PAYLOAD__NOT_SET	libttn/lorawan.pb-c.h	/^  LORAWAN__MESSAGE__PAYLOAD__NOT_SET = 0,$/;"	e	enum:__anon1
 LORAWAN__METADATA__INIT	libttn/lorawan.pb-c.h	96;"	d
 LORAWAN__MHDR__INIT	libttn/lorawan.pb-c.h	189;"	d
 LORAWAN__MODULATION__FSK	libttn/lorawan.pb-c.h	/^  LORAWAN__MODULATION__FSK = 1$/;"	e	enum:_Lorawan__Modulation
@@ -1667,7 +1667,7 @@ Lorawan__MType	libttn/lorawan.pb-c.h	/^} Lorawan__MType;$/;"	t	typeref:enum:_Lor
 Lorawan__Major	libttn/lorawan.pb-c.h	/^} Lorawan__Major;$/;"	t	typeref:enum:_Lorawan__Major
 Lorawan__Message	libttn/lorawan.pb-c.h	/^typedef struct _Lorawan__Message Lorawan__Message;$/;"	t	typeref:struct:_Lorawan__Message
 Lorawan__Message_Closure	libttn/lorawan.pb-c.h	/^typedef void (*Lorawan__Message_Closure)$/;"	t
-Lorawan__Message__PayloadCase	libttn/lorawan.pb-c.h	/^} Lorawan__Message__PayloadCase;$/;"	t	typeref:enum:__anon60
+Lorawan__Message__PayloadCase	libttn/lorawan.pb-c.h	/^} Lorawan__Message__PayloadCase;$/;"	t	typeref:enum:__anon1
 Lorawan__Metadata	libttn/lorawan.pb-c.h	/^typedef struct _Lorawan__Metadata Lorawan__Metadata;$/;"	t	typeref:struct:_Lorawan__Metadata
 Lorawan__Metadata_Closure	libttn/lorawan.pb-c.h	/^typedef void (*Lorawan__Metadata_Closure)$/;"	t
 Lorawan__Modulation	libttn/lorawan.pb-c.h	/^} Lorawan__Modulation;$/;"	t	typeref:enum:_Lorawan__Modulation
@@ -1718,9 +1718,9 @@ MQTTClient	libmqtt/MQTTClient.h	/^typedef struct MQTTClient$/;"	s
 MQTTClient	libmqtt/MQTTClient.h	/^} MQTTClient;$/;"	t	typeref:struct:MQTTClient
 MQTTClientDestroy	libmqtt/MQTTClient.c	/^void MQTTClientDestroy(MQTTClient *c)$/;"	f
 MQTTClientInit	libmqtt/MQTTClient.c	/^void MQTTClientInit(MQTTClient *c, Network *network, unsigned int command_timeout_ms,$/;"	f
-MQTTConnackFlags	libmqtt/MQTTConnect.h	/^} MQTTConnackFlags;	\/**< connack flags byte *\/$/;"	t	typeref:union:__anon43
+MQTTConnackFlags	libmqtt/MQTTConnect.h	/^} MQTTConnackFlags;	\/**< connack flags byte *\/$/;"	t	typeref:union:__anon26
 MQTTConnect	libmqtt/MQTTClient.c	/^int MQTTConnect(MQTTClient *c, MQTTPacket_connectData *options)$/;"	f
-MQTTConnectFlags	libmqtt/MQTTConnect.h	/^} MQTTConnectFlags;	\/**< connect flags byte *\/$/;"	t	typeref:union:__anon38
+MQTTConnectFlags	libmqtt/MQTTConnect.h	/^} MQTTConnectFlags;	\/**< connect flags byte *\/$/;"	t	typeref:union:__anon21
 MQTTDeserialize_ack	libmqtt/MQTTDeserializePublish.c	/^int MQTTDeserialize_ack(unsigned char* packettype, unsigned char* dup, unsigned short* packetid, unsigned char* buf, int buflen)$/;"	f
 MQTTDeserialize_connack	libmqtt/MQTTConnectClient.c	/^int MQTTDeserialize_connack(unsigned char* sessionPresent, unsigned char* connack_rc, unsigned char* buf, int buflen)$/;"	f
 MQTTDeserialize_connect	libmqtt/MQTTConnectServer.c	/^int MQTTDeserialize_connect(MQTTPacket_connectData* data, unsigned char* buf, int len)$/;"	f
@@ -1734,8 +1734,8 @@ MQTTFORMAT_H	libmqtt/MQTTFormat.h	18;"	d
 MQTTFormat_toClientString	libmqtt/MQTTFormat.c	/^char* MQTTFormat_toClientString(char* strbuf, int strbuflen, unsigned char* buf, int buflen)$/;"	f
 MQTTFormat_toServerString	libmqtt/MQTTFormat.c	/^char* MQTTFormat_toServerString(char* strbuf, int strbuflen, unsigned char* buf, int buflen)$/;"	f
 MQTTGetPingTime	libmqtt/MQTTClient.c	/^long MQTTGetPingTime(MQTTClient *c)$/;"	f
-MQTTHeader	libmqtt/MQTTPacket.h	/^} MQTTHeader;$/;"	t	typeref:union:__anon46
-MQTTLenString	libmqtt/MQTTPacket.h	/^} MQTTLenString;$/;"	t	typeref:struct:__anon49
+MQTTHeader	libmqtt/MQTTPacket.h	/^} MQTTHeader;$/;"	t	typeref:union:__anon29
+MQTTLenString	libmqtt/MQTTPacket.h	/^} MQTTLenString;$/;"	t	typeref:struct:__anon32
 MQTTMessage	libmqtt/MQTTClient.h	/^typedef struct MQTTMessage$/;"	s
 MQTTMessage	libmqtt/MQTTClient.h	/^} MQTTMessage;$/;"	t	typeref:struct:MQTTMessage
 MQTTPACKET_BUFFER_TOO_SHORT	libmqtt/MQTTPacket.h	/^	MQTTPACKET_BUFFER_TOO_SHORT = -2,$/;"	e	enum:errors
@@ -1744,7 +1744,7 @@ MQTTPACKET_READ_COMPLETE	libmqtt/MQTTPacket.h	/^	MQTTPACKET_READ_COMPLETE$/;"	e	
 MQTTPACKET_READ_ERROR	libmqtt/MQTTPacket.h	/^	MQTTPACKET_READ_ERROR = -1,$/;"	e	enum:errors
 MQTTPUBLISH_H_	libmqtt/MQTTPublish.h	19;"	d
 MQTTPacket_checkVersion	libmqtt/MQTTConnectServer.c	/^int MQTTPacket_checkVersion(MQTTString* protocol, int version)$/;"	f
-MQTTPacket_connectData	libmqtt/MQTTConnect.h	/^} MQTTPacket_connectData;$/;"	t	typeref:struct:__anon42
+MQTTPacket_connectData	libmqtt/MQTTConnect.h	/^} MQTTPacket_connectData;$/;"	t	typeref:struct:__anon25
 MQTTPacket_connectData_initializer	libmqtt/MQTTConnect.h	116;"	d
 MQTTPacket_decode	libmqtt/MQTTPacket.c	/^int MQTTPacket_decode(int (*getcharfn)(unsigned char*, int), int* value)$/;"	f
 MQTTPacket_decodeBuf	libmqtt/MQTTPacket.c	/^int MQTTPacket_decodeBuf(unsigned char* buf, int* value)$/;"	f
@@ -1756,7 +1756,7 @@ MQTTPacket_len	libmqtt/MQTTPacket.c	/^int MQTTPacket_len(int rem_len)$/;"	f
 MQTTPacket_names	libmqtt/MQTTFormat.c	/^const char* MQTTPacket_names[] =$/;"	v
 MQTTPacket_read	libmqtt/MQTTPacket.c	/^int MQTTPacket_read(unsigned char* buf, int buflen, int (*getfn)(unsigned char*, int))$/;"	f
 MQTTPacket_readnb	libmqtt/MQTTPacket.c	/^int MQTTPacket_readnb(unsigned char* buf, int buflen, MQTTTransport *trp)$/;"	f
-MQTTPacket_willOptions	libmqtt/MQTTConnect.h	/^} MQTTPacket_willOptions;$/;"	t	typeref:struct:__anon41
+MQTTPacket_willOptions	libmqtt/MQTTConnect.h	/^} MQTTPacket_willOptions;$/;"	t	typeref:struct:__anon24
 MQTTPacket_willOptions_initializer	libmqtt/MQTTConnect.h	77;"	d
 MQTTPublish	libmqtt/MQTTClient.c	/^int MQTTPublish(MQTTClient *c, const char *topicName, MQTTMessage *message)$/;"	f
 MQTTRead	libmqtt/MQTTClient.c	/^void MQTTRead(void *arg)$/;"	f
@@ -1780,7 +1780,7 @@ MQTTSerialize_unsuback	libmqtt/MQTTUnsubscribeServer.c	/^int MQTTSerialize_unsub
 MQTTSerialize_unsubscribe	libmqtt/MQTTUnsubscribeClient.c	/^int MQTTSerialize_unsubscribe(unsigned char* buf, int buflen, unsigned char dup, unsigned short packetid,$/;"	f
 MQTTSerialize_unsubscribeLength	libmqtt/MQTTUnsubscribeClient.c	/^int MQTTSerialize_unsubscribeLength(int count, MQTTString topicFilters[])$/;"	f
 MQTTSerialize_zero	libmqtt/MQTTConnectClient.c	/^int MQTTSerialize_zero(unsigned char* buf, int buflen, unsigned char packettype)$/;"	f
-MQTTString	libmqtt/MQTTPacket.h	/^} MQTTString;$/;"	t	typeref:struct:__anon50
+MQTTString	libmqtt/MQTTPacket.h	/^} MQTTString;$/;"	t	typeref:struct:__anon33
 MQTTStringFormat_ack	libmqtt/MQTTFormat.c	/^int MQTTStringFormat_ack(char* strbuf, int strbuflen, unsigned char packettype, unsigned char dup, unsigned short packetid)$/;"	f
 MQTTStringFormat_connack	libmqtt/MQTTFormat.c	/^int MQTTStringFormat_connack(char* strbuf, int strbuflen, unsigned char connack_rc, unsigned char sessionPresent)$/;"	f
 MQTTStringFormat_connect	libmqtt/MQTTFormat.c	/^int MQTTStringFormat_connect(char* strbuf, int strbuflen, MQTTPacket_connectData* data)$/;"	f
@@ -1790,10 +1790,10 @@ MQTTStringFormat_subscribe	libmqtt/MQTTFormat.c	/^int MQTTStringFormat_subscribe
 MQTTStringFormat_unsubscribe	libmqtt/MQTTFormat.c	/^int MQTTStringFormat_unsubscribe(char* strbuf, int strbuflen, unsigned char dup, unsigned short packetid,$/;"	f
 MQTTString_initializer	libmqtt/MQTTPacket.h	76;"	d
 MQTTSubscribe	libmqtt/MQTTClient.c	/^int MQTTSubscribe(MQTTClient *c, const char *topicFilter, enum QoS qos, messageHandler messageHandler, void *arg)$/;"	f
-MQTTTransport	libmqtt/MQTTPacket.h	/^}MQTTTransport;$/;"	t	typeref:struct:__anon51
+MQTTTransport	libmqtt/MQTTPacket.h	/^}MQTTTransport;$/;"	t	typeref:struct:__anon34
 MQTTUNSUBSCRIBE_H_	libmqtt/MQTTUnsubscribe.h	19;"	d
 MQTTUnsubscribe	libmqtt/MQTTClient.c	/^int MQTTUnsubscribe(MQTTClient *c, const char *topicFilter)$/;"	f
-MQTTVersion	libmqtt/MQTTConnect.h	/^	unsigned char MQTTVersion;$/;"	m	struct:__anon42
+MQTTVersion	libmqtt/MQTTConnect.h	/^	unsigned char MQTTVersion;$/;"	m	struct:__anon25
 MQTTYield	libmqtt/MQTTClient.c	/^int MQTTYield(MQTTClient *c, int timeout_ms)$/;"	f
 MQTT_EMBED_LIB_C	libmqtt/Makefile	/^MQTT_EMBED_LIB_C = pahomqtt3c$/;"	m
 MQTT_PATH	fwd/Makefile	/^MQTT_PATH ?= ..\/libmqtt$/;"	m
@@ -1831,7 +1831,7 @@ NMEA_VTG	hal/loragw_gps.h	/^    NMEA_VTG,        \/*!> Course over ground and Gr
 NMEA_ZDA	hal/loragw_gps.h	/^    NMEA_ZDA,        \/*!> Time and Date *\/$/;"	e	enum:gps_msg
 NODE_CALL_SECS	fwd/inc/ghost.h	35;"	d
 NOSTACKTRACE	libmqtt/StackTrace.h	22;"	d
-NOTHING	fwd/inc/gwcfg.h	/^    NOTHING,$/;"	e	enum:__anon15
+NOTHING	fwd/inc/gwcfg.h	/^    NOTHING,$/;"	e	enum:__anon39
 N_BLOCK	fwd/inc/aes.h	59;"	d
 N_COL	fwd/inc/aes.h	58;"	d
 N_MAX_ROUNDS	fwd/inc/aes.h	60;"	d
@@ -1866,8 +1866,8 @@ OPT_CFLAGS	util_chip_id/Makefile	/^  OPT_CFLAGS    := -O0$/;"	m
 OPT_CFLAGS	util_chip_id/Makefile	/^  OPT_CFLAGS    := -O2 -ffunction-sections -fdata-sections$/;"	m
 OPT_CFLAGS	util_chip_id/Makefile	/^  OPT_CFLAGS    := -O2$/;"	m
 OptNeg	fwd/inc/mac-header-decode.h	/^        uint8_t OptNeg          : 1;$/;"	m	struct:uLoRaMacDLSettings::sDLSettingsBits
-PACKET_TYPE_GFSK	hal/sx1302hal/loragw_sx1250.h	/^    PACKET_TYPE_GFSK        = 0x00,$/;"	e	enum:__anon8
-PACKET_TYPE_LORA	hal/sx1302hal/loragw_sx1250.h	/^    PACKET_TYPE_LORA        = 0x01$/;"	e	enum:__anon8
+PACKET_TYPE_GFSK	hal/sx1302hal/loragw_sx1250.h	/^    PACKET_TYPE_GFSK        = 0x00,$/;"	e	enum:__anon17
+PACKET_TYPE_LORA	hal/sx1302hal/loragw_sx1250.h	/^    PACKET_TYPE_LORA        = 0x01$/;"	e	enum:__anon17
 PAGE_ADDR	hal/sx1301hal/loragw_reg_sx1301.c	47;"	d	file:
 PAGE_MASK	hal/sx1301hal/loragw_reg_sx1301.c	48;"	d	file:
 PAHO_SRC	libttn/Makefile	/^PAHO_SRC = ..\/libmqtt$/;"	m
@@ -1875,7 +1875,7 @@ PATH_LEN	fwd/inc/fwd.h	49;"	d
 PID	hal/loragw_spi.ftdi.c	35;"	d	file:
 PINGREQ	libmqtt/MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
 PINGRESP	libmqtt/MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
-PKT_FWD	fwd/inc/stats.h	/^	PKT_FWD$/;"	e	enum:__anon34
+PKT_FWD	fwd/inc/stats.h	/^	PKT_FWD$/;"	e	enum:__anon57
 PKT_PULL_ACK	fwd/inc/fwd.h	77;"	d
 PKT_PULL_DATA	fwd/inc/fwd.h	75;"	d
 PKT_PULL_RESP	fwd/inc/fwd.h	76;"	d
@@ -1913,17 +1913,17 @@ PROTOCOL_JSON_RXPK_FRAME_FORMAT	fwd/inc/fwd.h	40;"	d
 PROTOCOL_VERSION	fwd/inc/fwd.h	39;"	d
 PROTOCOL_VERSION	fwd/src/ghost.c	46;"	d	file:
 PROTOCOL__ACTIVATION_METADATA__INIT	libttn/protocol.pb-c.h	97;"	d
-PROTOCOL__ACTIVATION_METADATA__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__ACTIVATION_METADATA__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon58
-PROTOCOL__ACTIVATION_METADATA__PROTOCOL__NOT_SET	libttn/protocol.pb-c.h	/^  PROTOCOL__ACTIVATION_METADATA__PROTOCOL__NOT_SET = 0,$/;"	e	enum:__anon58
+PROTOCOL__ACTIVATION_METADATA__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__ACTIVATION_METADATA__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon9
+PROTOCOL__ACTIVATION_METADATA__PROTOCOL__NOT_SET	libttn/protocol.pb-c.h	/^  PROTOCOL__ACTIVATION_METADATA__PROTOCOL__NOT_SET = 0,$/;"	e	enum:__anon9
 PROTOCOL__MESSAGE__INIT	libttn/protocol.pb-c.h	43;"	d
-PROTOCOL__MESSAGE__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__MESSAGE__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon52
-PROTOCOL__MESSAGE__PROTOCOL__NOT_SET	libttn/protocol.pb-c.h	/^  PROTOCOL__MESSAGE__PROTOCOL__NOT_SET = 0,$/;"	e	enum:__anon52
+PROTOCOL__MESSAGE__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__MESSAGE__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon3
+PROTOCOL__MESSAGE__PROTOCOL__NOT_SET	libttn/protocol.pb-c.h	/^  PROTOCOL__MESSAGE__PROTOCOL__NOT_SET = 0,$/;"	e	enum:__anon3
 PROTOCOL__RX_METADATA__INIT	libttn/protocol.pb-c.h	61;"	d
-PROTOCOL__RX_METADATA__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__RX_METADATA__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon54
-PROTOCOL__RX_METADATA__PROTOCOL__NOT_SET	libttn/protocol.pb-c.h	/^  PROTOCOL__RX_METADATA__PROTOCOL__NOT_SET = 0,$/;"	e	enum:__anon54
+PROTOCOL__RX_METADATA__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__RX_METADATA__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon5
+PROTOCOL__RX_METADATA__PROTOCOL__NOT_SET	libttn/protocol.pb-c.h	/^  PROTOCOL__RX_METADATA__PROTOCOL__NOT_SET = 0,$/;"	e	enum:__anon5
 PROTOCOL__TX_CONFIGURATION__INIT	libttn/protocol.pb-c.h	79;"	d
-PROTOCOL__TX_CONFIGURATION__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__TX_CONFIGURATION__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon56
-PROTOCOL__TX_CONFIGURATION__PROTOCOL__NOT_SET	libttn/protocol.pb-c.h	/^  PROTOCOL__TX_CONFIGURATION__PROTOCOL__NOT_SET = 0,$/;"	e	enum:__anon56
+PROTOCOL__TX_CONFIGURATION__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__TX_CONFIGURATION__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon7
+PROTOCOL__TX_CONFIGURATION__PROTOCOL__NOT_SET	libttn/protocol.pb-c.h	/^  PROTOCOL__TX_CONFIGURATION__PROTOCOL__NOT_SET = 0,$/;"	e	enum:__anon7
 PUBACK	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
 PUBCOMP	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
 PUBLISH	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
@@ -1931,16 +1931,16 @@ PUBREC	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PU
 PUBREL	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
 Protocol__ActivationMetadata	libttn/protocol.pb-c.h	/^typedef struct _Protocol__ActivationMetadata Protocol__ActivationMetadata;$/;"	t	typeref:struct:_Protocol__ActivationMetadata
 Protocol__ActivationMetadata_Closure	libttn/protocol.pb-c.h	/^typedef void (*Protocol__ActivationMetadata_Closure)$/;"	t
-Protocol__ActivationMetadata__ProtocolCase	libttn/protocol.pb-c.h	/^} Protocol__ActivationMetadata__ProtocolCase;$/;"	t	typeref:enum:__anon58
+Protocol__ActivationMetadata__ProtocolCase	libttn/protocol.pb-c.h	/^} Protocol__ActivationMetadata__ProtocolCase;$/;"	t	typeref:enum:__anon9
 Protocol__Message	libttn/protocol.pb-c.h	/^typedef struct _Protocol__Message Protocol__Message;$/;"	t	typeref:struct:_Protocol__Message
 Protocol__Message_Closure	libttn/protocol.pb-c.h	/^typedef void (*Protocol__Message_Closure)$/;"	t
-Protocol__Message__ProtocolCase	libttn/protocol.pb-c.h	/^} Protocol__Message__ProtocolCase;$/;"	t	typeref:enum:__anon52
+Protocol__Message__ProtocolCase	libttn/protocol.pb-c.h	/^} Protocol__Message__ProtocolCase;$/;"	t	typeref:enum:__anon3
 Protocol__RxMetadata	libttn/protocol.pb-c.h	/^typedef struct _Protocol__RxMetadata Protocol__RxMetadata;$/;"	t	typeref:struct:_Protocol__RxMetadata
 Protocol__RxMetadata_Closure	libttn/protocol.pb-c.h	/^typedef void (*Protocol__RxMetadata_Closure)$/;"	t
-Protocol__RxMetadata__ProtocolCase	libttn/protocol.pb-c.h	/^} Protocol__RxMetadata__ProtocolCase;$/;"	t	typeref:enum:__anon54
+Protocol__RxMetadata__ProtocolCase	libttn/protocol.pb-c.h	/^} Protocol__RxMetadata__ProtocolCase;$/;"	t	typeref:enum:__anon5
 Protocol__TxConfiguration	libttn/protocol.pb-c.h	/^typedef struct _Protocol__TxConfiguration Protocol__TxConfiguration;$/;"	t	typeref:struct:_Protocol__TxConfiguration
 Protocol__TxConfiguration_Closure	libttn/protocol.pb-c.h	/^typedef void (*Protocol__TxConfiguration_Closure)$/;"	t
-Protocol__TxConfiguration__ProtocolCase	libttn/protocol.pb-c.h	/^} Protocol__TxConfiguration__ProtocolCase;$/;"	t	typeref:enum:__anon56
+Protocol__TxConfiguration__ProtocolCase	libttn/protocol.pb-c.h	/^} Protocol__TxConfiguration__ProtocolCase;$/;"	t	typeref:enum:__anon7
 QOS0	libmqtt/MQTTClient.h	/^   QOS0,$/;"	e	enum:QoS
 QOS1	libmqtt/MQTTClient.h	/^   QOS1,$/;"	e	enum:QoS
 QOS2	libmqtt/MQTTClient.h	/^   QOS2$/;"	e	enum:QoS
@@ -1969,10 +1969,10 @@ RAND_RANGE	hal/test/test_loragw_hal_tx.c	42;"	d	file:
 RAND_RANGE	util_chip_id/src/chip_id.c	44;"	d	file:
 READ_ACCESS	hal/loragw_spi.h	36;"	d
 READ_ACCESS	hal/sx1302hal/loragw_sx125x.c	53;"	d	file:
-READ_BUFFER	hal/sx1302hal/loragw_sx1250.h	/^    READ_BUFFER             = 0x1E,$/;"	e	enum:__anon6
+READ_BUFFER	hal/sx1302hal/loragw_sx1250.h	/^    READ_BUFFER             = 0x1E,$/;"	e	enum:__anon15
 READ_BUFFER_SIZE	fwd/inc/mqtt_service.h	34;"	d
 READ_BUFFER_SIZE	libttn/network.h	16;"	d
-READ_REGISTER	hal/sx1302hal/loragw_sx1250.h	/^    READ_REGISTER           = 0x1D,$/;"	e	enum:__anon6
+READ_REGISTER	hal/sx1302hal/loragw_sx1250.h	/^    READ_REGISTER           = 0x1D,$/;"	e	enum:__anon15
 REG_LNA	hal/lg02hal/loragw_hal_lg02.h	40;"	d
 REG_SELECT	hal/sx1302hal/loragw_sx1302.h	43;"	d
 RFU	fwd/inc/mac-header-decode.h	/^        uint8_t RFU             : 3;$/;"	m	struct:uLoRaMacHeader::sMacHeaderBits
@@ -1999,16 +1999,16 @@ RSSI_FSK_POLY_2	hal/sx1302hal/loragw_sx1302.c	82;"	d	file:
 RSSI_MULTI_BIAS	hal/sx1301hal/loragw_hal_sx1301.c	74;"	d	file:
 RX1DRoffset	fwd/inc/mac-header-decode.h	/^        uint8_t RX1DRoffset     : 3;$/;"	m	struct:uLoRaMacDLSettings::sDLSettingsBits
 RX2DataRate	fwd/inc/mac-header-decode.h	/^        uint8_t RX2DataRate     : 4;$/;"	m	struct:uLoRaMacDLSettings::sDLSettingsBits
-RXMODE_RSSI	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
-RXMODE_SCAN	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
-RXMODE_SINGLE	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon1
-RX_BAD	fwd/inc/stats.h	/^	RX_BAD,$/;"	e	enum:__anon34
+RXMODE_RSSI	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon19
+RXMODE_SCAN	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon19
+RXMODE_SINGLE	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon19
+RX_BAD	fwd/inc/stats.h	/^	RX_BAD,$/;"	e	enum:__anon57
 RX_METADATA_NB	hal/sx1301hal/loragw_hal_sx1301.c	64;"	d	file:
-RX_NOCRC	fwd/inc/stats.h	/^	RX_NOCRC,$/;"	e	enum:__anon34
+RX_NOCRC	fwd/inc/stats.h	/^	RX_NOCRC,$/;"	e	enum:__anon57
 RX_OFF	hal/loragw_hal.h	178;"	d
-RX_OK	fwd/inc/stats.h	/^	RX_OK,$/;"	e	enum:__anon34
+RX_OK	fwd/inc/stats.h	/^	RX_OK,$/;"	e	enum:__anon57
 RX_ON	hal/loragw_hal.h	179;"	d
-RX_RCV	fwd/inc/stats.h	/^	RX_RCV,$/;"	e	enum:__anon34
+RX_RCV	fwd/inc/stats.h	/^	RX_RCV,$/;"	e	enum:__anon57
 RX_STATUS	hal/loragw_hal.h	165;"	d
 RX_STATUS_UNKNOWN	hal/loragw_hal.h	177;"	d
 RX_SUSPENDED	hal/loragw_hal.h	180;"	d
@@ -2041,33 +2041,33 @@ SEND_BUFFER_SIZE	fwd/inc/mqtt_service.h	35;"	d
 SEND_BUFFER_SIZE	libttn/network.h	17;"	d
 SEND_CONNECT	libttn/connector.h	11;"	d
 SEND_DISCONNECT_WILL	libttn/connector.h	10;"	d
-SET_BUFFER_BASE_ADDRESS	hal/sx1302hal/loragw_sx1250.h	/^    SET_BUFFER_BASE_ADDRESS = 0x8F,$/;"	e	enum:__anon6
-SET_DIO_IRQ_PARAMS	hal/sx1302hal/loragw_sx1250.h	/^    SET_DIO_IRQ_PARAMS      = 0x08,$/;"	e	enum:__anon6
-SET_FS	hal/sx1302hal/loragw_sx1250.h	/^    SET_FS                  = 0xC1,$/;"	e	enum:__anon6
-SET_MODULATION_PARAMS	hal/sx1302hal/loragw_sx1250.h	/^    SET_MODULATION_PARAMS   = 0x8B,$/;"	e	enum:__anon6
-SET_PACKET_PARAMS	hal/sx1302hal/loragw_sx1250.h	/^    SET_PACKET_PARAMS       = 0x8C,$/;"	e	enum:__anon6
-SET_PACKET_TYPE	hal/sx1302hal/loragw_sx1250.h	/^    SET_PACKET_TYPE         = 0x8A,$/;"	e	enum:__anon6
-SET_PA_CONFIG	hal/sx1302hal/loragw_sx1250.h	/^    SET_PA_CONFIG           = 0x95,$/;"	e	enum:__anon6
+SET_BUFFER_BASE_ADDRESS	hal/sx1302hal/loragw_sx1250.h	/^    SET_BUFFER_BASE_ADDRESS = 0x8F,$/;"	e	enum:__anon15
+SET_DIO_IRQ_PARAMS	hal/sx1302hal/loragw_sx1250.h	/^    SET_DIO_IRQ_PARAMS      = 0x08,$/;"	e	enum:__anon15
+SET_FS	hal/sx1302hal/loragw_sx1250.h	/^    SET_FS                  = 0xC1,$/;"	e	enum:__anon15
+SET_MODULATION_PARAMS	hal/sx1302hal/loragw_sx1250.h	/^    SET_MODULATION_PARAMS   = 0x8B,$/;"	e	enum:__anon15
+SET_PACKET_PARAMS	hal/sx1302hal/loragw_sx1250.h	/^    SET_PACKET_PARAMS       = 0x8C,$/;"	e	enum:__anon15
+SET_PACKET_TYPE	hal/sx1302hal/loragw_sx1250.h	/^    SET_PACKET_TYPE         = 0x8A,$/;"	e	enum:__anon15
+SET_PA_CONFIG	hal/sx1302hal/loragw_sx1250.h	/^    SET_PA_CONFIG           = 0x95,$/;"	e	enum:__anon15
 SET_PPM_ON	hal/loragw_hal.h	42;"	d
 SET_PPM_ON	hal/sx1302hal/loragw_sx1302.h	45;"	d
-SET_RAMP_10U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_10U            = 0x00,$/;"	e	enum:__anon9
-SET_RAMP_1700U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_1700U          = 0x06,$/;"	e	enum:__anon9
-SET_RAMP_200U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_200U           = 0x04,$/;"	e	enum:__anon9
-SET_RAMP_20U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_20U            = 0x01,$/;"	e	enum:__anon9
-SET_RAMP_3400U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_3400U          = 0x07$/;"	e	enum:__anon9
-SET_RAMP_40U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_40U            = 0x02,$/;"	e	enum:__anon9
-SET_RAMP_800U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_800U           = 0x05,$/;"	e	enum:__anon9
-SET_RAMP_80U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_80U            = 0x03,$/;"	e	enum:__anon9
-SET_REGULATORMODE	hal/sx1302hal/loragw_sx1250.h	/^    SET_REGULATORMODE       = 0x96,$/;"	e	enum:__anon6
-SET_RFSWITCHMODE	hal/sx1302hal/loragw_sx1250.h	/^    SET_RFSWITCHMODE        = 0x9D,$/;"	e	enum:__anon6
-SET_RF_FREQUENCY	hal/sx1302hal/loragw_sx1250.h	/^    SET_RF_FREQUENCY        = 0x86,$/;"	e	enum:__anon6
-SET_RX	hal/sx1302hal/loragw_sx1250.h	/^    SET_RX                  = 0x82,$/;"	e	enum:__anon6
-SET_SLEEP	hal/sx1302hal/loragw_sx1250.h	/^    SET_SLEEP               = 0x84,$/;"	e	enum:__anon6
-SET_STANDBY	hal/sx1302hal/loragw_sx1250.h	/^    SET_STANDBY             = 0x80,$/;"	e	enum:__anon6
-SET_TX	hal/sx1302hal/loragw_sx1250.h	/^    SET_TX                  = 0x83,$/;"	e	enum:__anon6
-SET_TXCONTINUOUSPREAMBLE	hal/sx1302hal/loragw_sx1250.h	/^    SET_TXCONTINUOUSPREAMBLE= 0xD2,$/;"	e	enum:__anon6
-SET_TXCONTINUOUSWAVE	hal/sx1302hal/loragw_sx1250.h	/^    SET_TXCONTINUOUSWAVE    = 0xD1,$/;"	e	enum:__anon6
-SET_TX_PARAMS	hal/sx1302hal/loragw_sx1250.h	/^    SET_TX_PARAMS           = 0x8E,$/;"	e	enum:__anon6
+SET_RAMP_10U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_10U            = 0x00,$/;"	e	enum:__anon18
+SET_RAMP_1700U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_1700U          = 0x06,$/;"	e	enum:__anon18
+SET_RAMP_200U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_200U           = 0x04,$/;"	e	enum:__anon18
+SET_RAMP_20U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_20U            = 0x01,$/;"	e	enum:__anon18
+SET_RAMP_3400U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_3400U          = 0x07$/;"	e	enum:__anon18
+SET_RAMP_40U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_40U            = 0x02,$/;"	e	enum:__anon18
+SET_RAMP_800U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_800U           = 0x05,$/;"	e	enum:__anon18
+SET_RAMP_80U	hal/sx1302hal/loragw_sx1250.h	/^    SET_RAMP_80U            = 0x03,$/;"	e	enum:__anon18
+SET_REGULATORMODE	hal/sx1302hal/loragw_sx1250.h	/^    SET_REGULATORMODE       = 0x96,$/;"	e	enum:__anon15
+SET_RFSWITCHMODE	hal/sx1302hal/loragw_sx1250.h	/^    SET_RFSWITCHMODE        = 0x9D,$/;"	e	enum:__anon15
+SET_RF_FREQUENCY	hal/sx1302hal/loragw_sx1250.h	/^    SET_RF_FREQUENCY        = 0x86,$/;"	e	enum:__anon15
+SET_RX	hal/sx1302hal/loragw_sx1250.h	/^    SET_RX                  = 0x82,$/;"	e	enum:__anon15
+SET_SLEEP	hal/sx1302hal/loragw_sx1250.h	/^    SET_SLEEP               = 0x84,$/;"	e	enum:__anon15
+SET_STANDBY	hal/sx1302hal/loragw_sx1250.h	/^    SET_STANDBY             = 0x80,$/;"	e	enum:__anon15
+SET_TX	hal/sx1302hal/loragw_sx1250.h	/^    SET_TX                  = 0x83,$/;"	e	enum:__anon15
+SET_TXCONTINUOUSPREAMBLE	hal/sx1302hal/loragw_sx1250.h	/^    SET_TXCONTINUOUSPREAMBLE= 0xD2,$/;"	e	enum:__anon15
+SET_TXCONTINUOUSWAVE	hal/sx1302hal/loragw_sx1250.h	/^    SET_TXCONTINUOUSWAVE    = 0xD1,$/;"	e	enum:__anon15
+SET_TX_PARAMS	hal/sx1302hal/loragw_sx1250.h	/^    SET_TX_PARAMS           = 0x8E,$/;"	e	enum:__anon15
 SF10	hal/lg02hal/loragw_hal_lg02.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
 SF11	hal/lg02hal/loragw_hal_lg02.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
 SF12	hal/lg02hal/loragw_hal_lg02.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	e	enum:sf_t
@@ -2088,15 +2088,15 @@ STAT_CRC_BAD	hal/loragw_hal.h	152;"	d
 STAT_CRC_OK	hal/loragw_hal.h	153;"	d
 STAT_NO_CRC	hal/loragw_hal.h	151;"	d
 STAT_UNDEFINED	hal/loragw_hal.h	150;"	d
-STDBY_RC	hal/sx1302hal/loragw_sx1250.h	/^    STDBY_RC                = 0x00,$/;"	e	enum:__anon7
-STDBY_XOSC	hal/sx1302hal/loragw_sx1250.h	/^    STDBY_XOSC              = 0x01$/;"	e	enum:__anon7
+STDBY_RC	hal/sx1302hal/loragw_sx1250.h	/^    STDBY_RC                = 0x00,$/;"	e	enum:__anon16
+STDBY_XOSC	hal/sx1302hal/loragw_sx1250.h	/^    STDBY_XOSC              = 0x01$/;"	e	enum:__anon16
 STD_FSK_PREAMB	fwd/inc/fwd.h	45;"	d
 STD_FSK_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	72;"	d	file:
 STD_FSK_PREAMBLE	hal/sx1302hal/loragw_sx1302.c	107;"	d	file:
 STD_LORA_PREAMB	fwd/inc/fwd.h	43;"	d
 STD_LORA_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	70;"	d	file:
 STD_LORA_PREAMBLE	hal/sx1302hal/loragw_sx1302.c	105;"	d	file:
-STOP_TIMER_ON_PREAMBLE	hal/sx1302hal/loragw_sx1250.h	/^    STOP_TIMER_ON_PREAMBLE  = 0x9F,$/;"	e	enum:__anon6
+STOP_TIMER_ON_PREAMBLE	hal/sx1302hal/loragw_sx1250.h	/^    STOP_TIMER_ON_PREAMBLE  = 0x9F,$/;"	e	enum:__anon15
 STTS751_0_PROD_ID	hal/sx1302hal/loragw_stts751.c	67;"	d	file:
 STTS751_0_PROD_ID	hal/test/test_loragw_i2c.c	54;"	d	file:
 STTS751_1_PROD_ID	hal/sx1302hal/loragw_stts751.c	68;"	d	file:
@@ -2146,57 +2146,57 @@ SX125x_ADC_TEMP	hal/sx1301hal/loragw_sx125x.h	45;"	d
 SX125x_ADC_TEMP	hal/sx1302hal/loragw_sx125x.h	61;"	d
 SX125x_LNA_ZIN	hal/sx1301hal/loragw_sx125x.h	40;"	d
 SX125x_LNA_ZIN	hal/sx1302hal/loragw_sx125x.h	56;"	d
-SX125x_REG_CLK_SELECT	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT = 35,$/;"	e	enum:__anon10
-SX125x_REG_CLK_SELECT__CLK_OUT	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT__CLK_OUT = 38,$/;"	e	enum:__anon10
-SX125x_REG_CLK_SELECT__DAC_CLK_SELECT	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT__DAC_CLK_SELECT = 39,$/;"	e	enum:__anon10
-SX125x_REG_CLK_SELECT__DIG_LOOPBACK_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT__DIG_LOOPBACK_EN = 36,$/;"	e	enum:__anon10
-SX125x_REG_CLK_SELECT__RF_LOOPBACK_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT__RF_LOOPBACK_EN = 37,$/;"	e	enum:__anon10
-SX125x_REG_DIO_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING = 30,$/;"	e	enum:__anon10
-SX125x_REG_DIO_MAPPING__DIO_0_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING__DIO_0_MAPPING = 31,$/;"	e	enum:__anon10
-SX125x_REG_DIO_MAPPING__DIO_1_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING__DIO_1_MAPPING = 32,$/;"	e	enum:__anon10
-SX125x_REG_DIO_MAPPING__DIO_2_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING__DIO_2_MAPPING = 33,$/;"	e	enum:__anon10
-SX125x_REG_DIO_MAPPING__DIO_3_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING__DIO_3_MAPPING = 34,$/;"	e	enum:__anon10
-SX125x_REG_FRF_RX_LSB	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_RX_LSB = 7,$/;"	e	enum:__anon10
-SX125x_REG_FRF_RX_MID	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_RX_MID = 6,$/;"	e	enum:__anon10
-SX125x_REG_FRF_RX_MSB	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_RX_MSB = 5,$/;"	e	enum:__anon10
-SX125x_REG_FRF_TX_LSB	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_TX_LSB = 10,$/;"	e	enum:__anon10
-SX125x_REG_FRF_TX_MID	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_TX_MID = 9,$/;"	e	enum:__anon10
-SX125x_REG_FRF_TX_MSB	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_TX_MSB = 8,$/;"	e	enum:__anon10
-SX125x_REG_LOW_BAT_THRESH	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_LOW_BAT_THRESH = 44,$/;"	e	enum:__anon10
-SX125x_REG_MODE	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE = 0,$/;"	e	enum:__anon10
-SX125x_REG_MODE_STATUS	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE_STATUS = 40,$/;"	e	enum:__anon10
-SX125x_REG_MODE_STATUS__LOW_BAT_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE_STATUS__LOW_BAT_EN = 41,$/;"	e	enum:__anon10
-SX125x_REG_MODE_STATUS__RX_PLL_LOCKED	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE_STATUS__RX_PLL_LOCKED = 42,$/;"	e	enum:__anon10
-SX125x_REG_MODE_STATUS__TX_PLL_LOCKED	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE_STATUS__TX_PLL_LOCKED = 43,$/;"	e	enum:__anon10
-SX125x_REG_MODE__PA_DRIVER_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE__PA_DRIVER_EN = 1,$/;"	e	enum:__anon10
-SX125x_REG_MODE__RX_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE__RX_EN = 3,$/;"	e	enum:__anon10
-SX125x_REG_MODE__STANDBY_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE__STANDBY_EN = 4,$/;"	e	enum:__anon10
-SX125x_REG_MODE__TX_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE__TX_EN = 2,$/;"	e	enum:__anon10
-SX125x_REG_RX_ANA_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_ANA_GAIN = 19,$/;"	e	enum:__anon10
-SX125x_REG_RX_ANA_GAIN__BB_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_ANA_GAIN__BB_GAIN = 21,$/;"	e	enum:__anon10
-SX125x_REG_RX_ANA_GAIN__LNA_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_ANA_GAIN__LNA_GAIN = 20,$/;"	e	enum:__anon10
-SX125x_REG_RX_ANA_GAIN__LNA_ZIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_ANA_GAIN__LNA_ZIN = 22,$/;"	e	enum:__anon10
-SX125x_REG_RX_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_BW = 23,$/;"	e	enum:__anon10
-SX125x_REG_RX_BW__ADC_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_BW__ADC_BW = 24,$/;"	e	enum:__anon10
-SX125x_REG_RX_BW__ADC_TRIM	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_BW__ADC_TRIM = 25,$/;"	e	enum:__anon10
-SX125x_REG_RX_BW__BB_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_BW__BB_BW = 26,$/;"	e	enum:__anon10
-SX125x_REG_RX_PLL_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_PLL_BW = 27,$/;"	e	enum:__anon10
-SX125x_REG_RX_PLL_BW__ADC_TEMP_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_PLL_BW__ADC_TEMP_EN = 29,$/;"	e	enum:__anon10
-SX125x_REG_RX_PLL_BW__PLL_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_PLL_BW__PLL_BW = 28,$/;"	e	enum:__anon10
-SX125x_REG_SX1255_XOSC_TEST	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1255_XOSC_TEST = 48,$/;"	e	enum:__anon10
-SX125x_REG_SX1255_XOSC_TEST__DISABLE	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1255_XOSC_TEST__DISABLE = 49,$/;"	e	enum:__anon10
-SX125x_REG_SX1255_XOSC_TEST__GM_STARTUP	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1255_XOSC_TEST__GM_STARTUP = 50$/;"	e	enum:__anon10
-SX125x_REG_SX1257_XOSC_TEST	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1257_XOSC_TEST = 45,$/;"	e	enum:__anon10
-SX125x_REG_SX1257_XOSC_TEST__DISABLE	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1257_XOSC_TEST__DISABLE = 46,$/;"	e	enum:__anon10
-SX125x_REG_SX1257_XOSC_TEST__GM_STARTUP	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1257_XOSC_TEST__GM_STARTUP = 47,$/;"	e	enum:__anon10
-SX125x_REG_TX_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_BW = 15,$/;"	e	enum:__anon10
-SX125x_REG_TX_BW__ANA_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_BW__ANA_BW = 17,$/;"	e	enum:__anon10
-SX125x_REG_TX_BW__PLL_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_BW__PLL_BW = 16,$/;"	e	enum:__anon10
-SX125x_REG_TX_DAC_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_DAC_BW = 18,$/;"	e	enum:__anon10
-SX125x_REG_TX_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_GAIN = 12,$/;"	e	enum:__anon10
-SX125x_REG_TX_GAIN__DAC_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_GAIN__DAC_GAIN = 13,$/;"	e	enum:__anon10
-SX125x_REG_TX_GAIN__MIX_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_GAIN__MIX_GAIN = 14,$/;"	e	enum:__anon10
-SX125x_REG_VERSION	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_VERSION = 11,$/;"	e	enum:__anon10
+SX125x_REG_CLK_SELECT	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT = 35,$/;"	e	enum:__anon14
+SX125x_REG_CLK_SELECT__CLK_OUT	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT__CLK_OUT = 38,$/;"	e	enum:__anon14
+SX125x_REG_CLK_SELECT__DAC_CLK_SELECT	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT__DAC_CLK_SELECT = 39,$/;"	e	enum:__anon14
+SX125x_REG_CLK_SELECT__DIG_LOOPBACK_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT__DIG_LOOPBACK_EN = 36,$/;"	e	enum:__anon14
+SX125x_REG_CLK_SELECT__RF_LOOPBACK_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_CLK_SELECT__RF_LOOPBACK_EN = 37,$/;"	e	enum:__anon14
+SX125x_REG_DIO_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING = 30,$/;"	e	enum:__anon14
+SX125x_REG_DIO_MAPPING__DIO_0_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING__DIO_0_MAPPING = 31,$/;"	e	enum:__anon14
+SX125x_REG_DIO_MAPPING__DIO_1_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING__DIO_1_MAPPING = 32,$/;"	e	enum:__anon14
+SX125x_REG_DIO_MAPPING__DIO_2_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING__DIO_2_MAPPING = 33,$/;"	e	enum:__anon14
+SX125x_REG_DIO_MAPPING__DIO_3_MAPPING	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_DIO_MAPPING__DIO_3_MAPPING = 34,$/;"	e	enum:__anon14
+SX125x_REG_FRF_RX_LSB	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_RX_LSB = 7,$/;"	e	enum:__anon14
+SX125x_REG_FRF_RX_MID	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_RX_MID = 6,$/;"	e	enum:__anon14
+SX125x_REG_FRF_RX_MSB	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_RX_MSB = 5,$/;"	e	enum:__anon14
+SX125x_REG_FRF_TX_LSB	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_TX_LSB = 10,$/;"	e	enum:__anon14
+SX125x_REG_FRF_TX_MID	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_TX_MID = 9,$/;"	e	enum:__anon14
+SX125x_REG_FRF_TX_MSB	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_FRF_TX_MSB = 8,$/;"	e	enum:__anon14
+SX125x_REG_LOW_BAT_THRESH	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_LOW_BAT_THRESH = 44,$/;"	e	enum:__anon14
+SX125x_REG_MODE	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE = 0,$/;"	e	enum:__anon14
+SX125x_REG_MODE_STATUS	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE_STATUS = 40,$/;"	e	enum:__anon14
+SX125x_REG_MODE_STATUS__LOW_BAT_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE_STATUS__LOW_BAT_EN = 41,$/;"	e	enum:__anon14
+SX125x_REG_MODE_STATUS__RX_PLL_LOCKED	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE_STATUS__RX_PLL_LOCKED = 42,$/;"	e	enum:__anon14
+SX125x_REG_MODE_STATUS__TX_PLL_LOCKED	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE_STATUS__TX_PLL_LOCKED = 43,$/;"	e	enum:__anon14
+SX125x_REG_MODE__PA_DRIVER_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE__PA_DRIVER_EN = 1,$/;"	e	enum:__anon14
+SX125x_REG_MODE__RX_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE__RX_EN = 3,$/;"	e	enum:__anon14
+SX125x_REG_MODE__STANDBY_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE__STANDBY_EN = 4,$/;"	e	enum:__anon14
+SX125x_REG_MODE__TX_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_MODE__TX_EN = 2,$/;"	e	enum:__anon14
+SX125x_REG_RX_ANA_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_ANA_GAIN = 19,$/;"	e	enum:__anon14
+SX125x_REG_RX_ANA_GAIN__BB_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_ANA_GAIN__BB_GAIN = 21,$/;"	e	enum:__anon14
+SX125x_REG_RX_ANA_GAIN__LNA_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_ANA_GAIN__LNA_GAIN = 20,$/;"	e	enum:__anon14
+SX125x_REG_RX_ANA_GAIN__LNA_ZIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_ANA_GAIN__LNA_ZIN = 22,$/;"	e	enum:__anon14
+SX125x_REG_RX_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_BW = 23,$/;"	e	enum:__anon14
+SX125x_REG_RX_BW__ADC_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_BW__ADC_BW = 24,$/;"	e	enum:__anon14
+SX125x_REG_RX_BW__ADC_TRIM	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_BW__ADC_TRIM = 25,$/;"	e	enum:__anon14
+SX125x_REG_RX_BW__BB_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_BW__BB_BW = 26,$/;"	e	enum:__anon14
+SX125x_REG_RX_PLL_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_PLL_BW = 27,$/;"	e	enum:__anon14
+SX125x_REG_RX_PLL_BW__ADC_TEMP_EN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_PLL_BW__ADC_TEMP_EN = 29,$/;"	e	enum:__anon14
+SX125x_REG_RX_PLL_BW__PLL_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_RX_PLL_BW__PLL_BW = 28,$/;"	e	enum:__anon14
+SX125x_REG_SX1255_XOSC_TEST	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1255_XOSC_TEST = 48,$/;"	e	enum:__anon14
+SX125x_REG_SX1255_XOSC_TEST__DISABLE	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1255_XOSC_TEST__DISABLE = 49,$/;"	e	enum:__anon14
+SX125x_REG_SX1255_XOSC_TEST__GM_STARTUP	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1255_XOSC_TEST__GM_STARTUP = 50$/;"	e	enum:__anon14
+SX125x_REG_SX1257_XOSC_TEST	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1257_XOSC_TEST = 45,$/;"	e	enum:__anon14
+SX125x_REG_SX1257_XOSC_TEST__DISABLE	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1257_XOSC_TEST__DISABLE = 46,$/;"	e	enum:__anon14
+SX125x_REG_SX1257_XOSC_TEST__GM_STARTUP	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_SX1257_XOSC_TEST__GM_STARTUP = 47,$/;"	e	enum:__anon14
+SX125x_REG_TX_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_BW = 15,$/;"	e	enum:__anon14
+SX125x_REG_TX_BW__ANA_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_BW__ANA_BW = 17,$/;"	e	enum:__anon14
+SX125x_REG_TX_BW__PLL_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_BW__PLL_BW = 16,$/;"	e	enum:__anon14
+SX125x_REG_TX_DAC_BW	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_DAC_BW = 18,$/;"	e	enum:__anon14
+SX125x_REG_TX_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_GAIN = 12,$/;"	e	enum:__anon14
+SX125x_REG_TX_GAIN__DAC_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_GAIN__DAC_GAIN = 13,$/;"	e	enum:__anon14
+SX125x_REG_TX_GAIN__MIX_GAIN	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_TX_GAIN__MIX_GAIN = 14,$/;"	e	enum:__anon14
+SX125x_REG_VERSION	hal/sx1302hal/loragw_sx125x.h	/^    SX125x_REG_VERSION = 11,$/;"	e	enum:__anon14
 SX125x_RX_ADC_BW	hal/sx1301hal/loragw_sx125x.h	41;"	d
 SX125x_RX_ADC_BW	hal/sx1302hal/loragw_sx125x.h	57;"	d
 SX125x_RX_ADC_TRIM	hal/sx1301hal/loragw_sx125x.h	42;"	d
@@ -3749,7 +3749,7 @@ TTNDownlinkHandler	libttn/connector.h	/^typedef void (*TTNDownlinkHandler)(Route
 TX_BUFF_SIZE	fwd/inc/fwd.h	80;"	d
 TX_CALIB_DONE_BY_HAL	hal/sx1302hal/loragw_cal.c	41;"	d	file:
 TX_EMITTING	hal/loragw_hal.h	173;"	d
-TX_FAIL	fwd/inc/stats.h	/^	TX_FAIL,$/;"	e	enum:__anon33
+TX_FAIL	fwd/inc/stats.h	/^	TX_FAIL,$/;"	e	enum:__anon56
 TX_FREE	hal/loragw_hal.h	171;"	d
 TX_GAIN_LUT_SIZE_MAX	hal/loragw_hal.h	183;"	d
 TX_JIT_DELAY	fwd/src/jitqueue.c	39;"	d	file:
@@ -3757,12 +3757,12 @@ TX_MARGIN_DELAY	fwd/src/jitqueue.c	37;"	d	file:
 TX_MAX_ADVANCE_DELAY	fwd/src/jitqueue.c	40;"	d	file:
 TX_METADATA_NB	hal/sx1301hal/loragw_hal_sx1301.c	63;"	d	file:
 TX_OFF	hal/loragw_hal.h	170;"	d
-TX_OK	fwd/inc/stats.h	/^	TX_OK,$/;"	e	enum:__anon33
-TX_REJ_COLL_BEACON	fwd/inc/stats.h	/^	TX_REJ_COLL_BEACON,$/;"	e	enum:__anon33
-TX_REJ_COLL_PACKET	fwd/inc/stats.h	/^	TX_REJ_COLL_PACKET,$/;"	e	enum:__anon33
-TX_REJ_TOO_EARLY	fwd/inc/stats.h	/^	TX_REJ_TOO_EARLY,$/;"	e	enum:__anon33
-TX_REJ_TOO_LATE	fwd/inc/stats.h	/^	TX_REJ_TOO_LATE,$/;"	e	enum:__anon33
-TX_REQUESTED	fwd/inc/stats.h	/^	TX_REQUESTED,$/;"	e	enum:__anon33
+TX_OK	fwd/inc/stats.h	/^	TX_OK,$/;"	e	enum:__anon56
+TX_REJ_COLL_BEACON	fwd/inc/stats.h	/^	TX_REJ_COLL_BEACON,$/;"	e	enum:__anon56
+TX_REJ_COLL_PACKET	fwd/inc/stats.h	/^	TX_REJ_COLL_PACKET,$/;"	e	enum:__anon56
+TX_REJ_TOO_EARLY	fwd/inc/stats.h	/^	TX_REJ_TOO_EARLY,$/;"	e	enum:__anon56
+TX_REJ_TOO_LATE	fwd/inc/stats.h	/^	TX_REJ_TOO_LATE,$/;"	e	enum:__anon56
+TX_REQUESTED	fwd/inc/stats.h	/^	TX_REQUESTED,$/;"	e	enum:__anon56
 TX_SCHEDULED	hal/loragw_hal.h	172;"	d
 TX_START_DELAY	fwd/src/jitqueue.c	35;"	d	file:
 TX_START_DELAY_DEFAULT	hal/loragw_hal.h	122;"	d
@@ -3794,12 +3794,12 @@ Types__DisconnectMessage_Closure	libttn/types.pb-c.h	/^typedef void (*Types__Dis
 UBX_MSG_NAVTIMEGPS_LEN	hal/loragw_gps.c	61;"	d	file:
 UBX_NAV_TIMEGPS	hal/loragw_gps.h	/^    UBX_NAV_TIMEGPS, \/*!> GPS Time Solution *\/$/;"	e	enum:gps_msg
 UBX_NAV_TIMEUTC	hal/loragw_gps.h	/^    UBX_NAV_TIMEUTC  \/*!> UTC Time Solution *\/$/;"	e	enum:gps_msg
-UNIX_GPS_EPOCH_OFFSET	fwd/inc/fwd.h	85;"	d
+UNIX_GPS_EPOCH_OFFSET	fwd/inc/fwd.h	83;"	d
 UNKNOWN	hal/loragw_gps.h	/^    UNKNOWN,         \/*!> neutral value *\/$/;"	e	enum:gps_msg
 UNSUBACK	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
 UNSUBSCRIBE	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
 UP	fwd/inc/pkt_service.h	41;"	d
-US	fwd/inc/gwcfg.h	/^    US,$/;"	e	enum:__anon13
+US	fwd/inc/gwcfg.h	/^    US,$/;"	e	enum:__anon37
 USE_TABLES	fwd/src/aes.c	57;"	d	file:
 VERSION_1	fwd/src/aes.c	64;"	d	file:
 VID	hal/loragw_spi.ftdi.c	34;"	d	file:
@@ -3814,11 +3814,11 @@ WARN_CFLAGS	util_chip_id/Makefile	/^  WARN_CFLAGS   :=$/;"	m
 WPOLY	fwd/src/aes.c	75;"	d	file:
 WRITE_ACCESS	hal/loragw_spi.h	37;"	d
 WRITE_ACCESS	hal/sx1302hal/loragw_sx125x.c	54;"	d	file:
-WRITE_BUFFER	hal/sx1302hal/loragw_sx1250.h	/^    WRITE_BUFFER            = 0x0E,$/;"	e	enum:__anon6
-WRITE_REGISTER	hal/sx1302hal/loragw_sx1250.h	/^    WRITE_REGISTER          = 0x0D,$/;"	e	enum:__anon6
+WRITE_BUFFER	hal/sx1302hal/loragw_sx1250.h	/^    WRITE_BUFFER            = 0x0E,$/;"	e	enum:__anon15
+WRITE_REGISTER	hal/sx1302hal/loragw_sx1250.h	/^    WRITE_REGISTER          = 0x0D,$/;"	e	enum:__anon15
 X	fwd/inc/cmac.h	/^            uint8_t        X[16];$/;"	m	struct:_AES_CMAC_CTX
-XERR_FILT_COEF	fwd/inc/fwd.h	88;"	d
-XERR_INIT_AVG	fwd/inc/fwd.h	87;"	d
+XERR_FILT_COEF	fwd/inc/fwd.h	86;"	d
+XERR_INIT_AVG	fwd/inc/fwd.h	85;"	d
 XOR	fwd/src/cmac.c	13;"	d	file:
 [	Session.vim	/^nmap [  <Plug>unimpairedBlankUp$/;"	m
 [	fwd/Session.vim	/^nmap [  <Plug>unimpairedBlankUp$/;"	m
@@ -4135,14 +4135,14 @@ activate	libttn/router.pb-c.h	/^  void (*activate)(Router__Router_Service *servi
 activation_metadata	libttn/router.pb-c.h	/^  Protocol__ActivationMetadata *activation_metadata;$/;"	m	struct:_Router__DeviceActivationRequest
 activations	libttn/router.pb-c.h	/^  Api__Rates *activations;$/;"	m	struct:_Router__Status
 add_round_key	fwd/src/aes.c	/^static void add_round_key( uint_8t d[N_BLOCK], const uint_8t k[N_BLOCK] )$/;"	f	file:
-addr	fwd/inc/gwcfg.h	/^    char addr[64];				\/\/ server address$/;"	m	struct:__anon18
+addr	fwd/inc/gwcfg.h	/^    char addr[64];				\/\/ server address$/;"	m	struct:__anon42
 addr	hal/loragw_reg.h	/^    uint16_t addr;        \/*!< base address of the register (7 bit) *\/$/;"	m	struct:lgw_reg_s
 addr	hal/sx1302hal/loragw_sx125x.h	/^	uint8_t addr; \/* base address of the register *\/$/;"	m	struct:radio_reg_s
 adr	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean adr;$/;"	m	struct:_Lorawan__FCtrl
 adr_ack_req	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean adr_ack_req;$/;"	m	struct:_Lorawan__FCtrl
 aes_cbc_decrypt	fwd/src/aes.c	/^return_type aes_cbc_decrypt( const unsigned char *in, unsigned char *out,$/;"	f
 aes_cbc_encrypt	fwd/src/aes.c	/^return_type aes_cbc_encrypt( const unsigned char *in, unsigned char *out,$/;"	f
-aes_context	fwd/inc/aes.h	/^} aes_context;$/;"	t	typeref:struct:__anon32
+aes_context	fwd/inc/aes.h	/^} aes_context;$/;"	t	typeref:struct:__anon55
 aes_decrypt	fwd/src/aes.c	/^return_type aes_decrypt( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK], const aes_context ctx[1] )$/;"	f
 aes_decrypt_128	fwd/src/aes.c	/^void aes_decrypt_128( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
 aes_decrypt_256	fwd/src/aes.c	/^void aes_decrypt_256( const unsigned char in[N_BLOCK], unsigned char out[N_BLOCK],$/;"	f
@@ -4155,8 +4155,8 @@ agc_gain_params_s	hal/sx1302hal/loragw_agc_params.h	/^struct agc_gain_params_s {
 agc_params_sx1250	hal/sx1302hal/loragw_agc_params.h	/^const struct agc_gain_params_s agc_params_sx1250 = {$/;"	v	typeref:struct:agc_gain_params_s
 agc_params_sx125x	hal/sx1302hal/loragw_agc_params.h	/^const struct agc_gain_params_s agc_params_sx125x = {$/;"	v	typeref:struct:agc_gain_params_s
 aggregate_value	libttn/descriptor.pb-c.h	/^  char *aggregate_value;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
-all	libmqtt/MQTTConnect.h	/^	unsigned char all;	\/**< all connack flags *\/$/;"	m	union:__anon43
-all	libmqtt/MQTTConnect.h	/^	unsigned char all;	\/**< all connect flags *\/$/;"	m	union:__anon38
+all	libmqtt/MQTTConnect.h	/^	unsigned char all;	\/**< all connack flags *\/$/;"	m	union:__anon26
+all	libmqtt/MQTTConnect.h	/^	unsigned char all;	\/**< all connect flags *\/$/;"	m	union:__anon21
 allow_alias	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean allow_alias;$/;"	m	struct:_Google__Protobuf__EnumOptions
 alt	hal/loragw_gps.h	/^    short   alt;    \/*!> altitude in meters (WGS 84 geoid ref.) *\/$/;"	m	struct:coord_s
 altitude	libttn/gateway.pb-c.h	/^  int32_t altitude;$/;"	m	struct:_Gateway__GPSMetadata
@@ -4169,7 +4169,7 @@ ana_thresh_h	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t ana_thresh_h;$/;"	m
 ana_thresh_l	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t ana_thresh_l;$/;"	m	struct:agc_gain_params_s
 annotation	libttn/descriptor.pb-c.h	/^  Google__Protobuf__GeneratedCodeInfo__Annotation **annotation;$/;"	m	struct:_Google__Protobuf__GeneratedCodeInfo
 antenna	libttn/gateway.pb-c.h	/^  uint32_t antenna;$/;"	m	struct:_Gateway__RxMetadata__Antenna
-antenna_gain	fwd/inc/gwcfg.h	/^        uint8_t antenna_gain;$/;"	m	struct:__anon23::__anon25
+antenna_gain	fwd/inc/gwcfg.h	/^        uint8_t antenna_gain;$/;"	m	struct:__anon47::__anon49
 antennas	libttn/gateway.pb-c.h	/^  Gateway__RxMetadata__Antenna **antennas;$/;"	m	struct:_Gateway__RxMetadata
 api__component_stats__cpustats__descriptor	libttn/api.pb-c.c	/^const ProtobufCMessageDescriptor api__component_stats__cpustats__descriptor =$/;"	v
 api__component_stats__cpustats__field_descriptors	libttn/api.pb-c.c	/^static const ProtobufCFieldDescriptor api__component_stats__cpustats__field_descriptors[4] =$/;"	v	file:
@@ -4242,8 +4242,8 @@ app_eui	libttn/router.pb-c.h	/^  ProtobufCBinaryData app_eui;$/;"	m	struct:_Rout
 app_nonce	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData app_nonce;$/;"	m	struct:_Lorawan__JoinAcceptPayload
 append_indent	fwd/src/parson.c	/^static int append_indent(char *buf, int level) {$/;"	f	file:
 append_string	fwd/src/parson.c	/^static int append_string(char *buf, const char *string) {$/;"	f	file:
-appskey	fwd/inc/mac-header-decode.h	/^    uint8_t appskey[16];$/;"	m	struct:__anon31
-appskey_str	fwd/inc/mac-header-decode.h	/^    char appskey_str[33];$/;"	m	struct:__anon31
+appskey	fwd/inc/mac-header-decode.h	/^    uint8_t appskey[16];$/;"	m	struct:__anon35
+appskey_str	fwd/inc/mac-header-decode.h	/^    char appskey_str[33];$/;"	m	struct:__anon35
 arg	libmqtt/MQTTClient.h	/^      void *arg;$/;"	m	struct:MQTTClient::MessageHandlers
 array	fwd/src/parson.c	/^    JSON_Array  *array;$/;"	m	union:json_value_value	file:
 attribute_const	fwd/inc/compiler.h	42;"	d
@@ -4264,7 +4264,7 @@ attribute_unused	fwd/inc/compiler.h	54;"	d
 attribute_unused	fwd/inc/compiler.h	56;"	d
 attribute_warn_unused_result	fwd/inc/compiler.h	72;"	d
 attribute_warn_unused_result	fwd/inc/compiler.h	74;"	d
-autoquit_threshold	fwd/inc/gwcfg.h	/^        uint32_t autoquit_threshold;\/* enable auto-quit after a number of non-acknowledged PULL_DATA (0 = disabled) *\/$/;"	m	struct:__anon23::__anon26
+autoquit_threshold	fwd/inc/gwcfg.h	/^        uint32_t autoquit_threshold;\/* enable auto-quit after a number of non-acknowledged PULL_DATA (0 = disabled) *\/$/;"	m	struct:__anon47::__anon50
 available	libttn/api.pb-c.h	/^  uint64_t available;$/;"	m	struct:_Api__SystemStats__MemoryStats
 b64_to_bin	fwd/src/base64.c	/^int b64_to_bin(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
 b64_to_bin_nopad	fwd/src/base64.c	/^int b64_to_bin_nopad(const char * in, int size, uint8_t * out, int max_len) {$/;"	f
@@ -4344,32 +4344,32 @@ base	libttn/trace.pb-c.h	/^  ProtobufCMessage base;$/;"	m	struct:_Trace__Trace
 base	libttn/trace.pb-c.h	/^  ProtobufCMessage base;$/;"	m	struct:_Trace__Trace__MetadataEntry
 base	libttn/types.pb-c.h	/^  ProtobufCMessage base;$/;"	m	struct:_Types__ConnectMessage
 base	libttn/types.pb-c.h	/^  ProtobufCMessage base;$/;"	m	struct:_Types__DisconnectMessage
-beacon	fwd/inc/gwcfg.h	/^    } beacon;$/;"	m	struct:__anon23	typeref:struct:__anon23::__anon29
-beacon_bw_hz	fwd/inc/gwcfg.h	/^        uint32_t beacon_bw_hz;     \/* set beacon bandwidth, in Hz *\/$/;"	m	struct:__anon23::__anon29
-beacon_datarate	fwd/inc/gwcfg.h	/^        uint8_t  beacon_datarate;  \/* set beacon datarate (SF) *\/$/;"	m	struct:__anon23::__anon29
-beacon_freq_hz	fwd/inc/gwcfg.h	/^        uint32_t beacon_freq_hz;   \/* set beacon TX frequency, in Hz *\/$/;"	m	struct:__anon23::__anon29
-beacon_freq_nb	fwd/inc/gwcfg.h	/^        uint8_t  beacon_freq_nb;   \/* set number of beaconing channels beacon *\/$/;"	m	struct:__anon23::__anon29
-beacon_freq_step	fwd/inc/gwcfg.h	/^        uint32_t beacon_freq_step; \/* set frequency step between beacon channels, in Hz *\/$/;"	m	struct:__anon23::__anon29
-beacon_infodesc	fwd/inc/gwcfg.h	/^        uint8_t  beacon_infodesc;  \/* set beacon information descriptor *\/$/;"	m	struct:__anon23::__anon29
-beacon_period	fwd/inc/gwcfg.h	/^        uint32_t beacon_period;    \/* set beaconing period, must be a sub-multiple of 86400, the nb of sec in a day *\/$/;"	m	struct:__anon23::__anon29
-beacon_power	fwd/inc/gwcfg.h	/^        int8_t   beacon_power;     \/* set beacon TX power, in dBm *\/$/;"	m	struct:__anon23::__anon29
+beacon	fwd/inc/gwcfg.h	/^    } beacon;$/;"	m	struct:__anon47	typeref:struct:__anon47::__anon53
+beacon_bw_hz	fwd/inc/gwcfg.h	/^        uint32_t beacon_bw_hz;     \/* set beacon bandwidth, in Hz *\/$/;"	m	struct:__anon47::__anon53
+beacon_datarate	fwd/inc/gwcfg.h	/^        uint8_t  beacon_datarate;  \/* set beacon datarate (SF) *\/$/;"	m	struct:__anon47::__anon53
+beacon_freq_hz	fwd/inc/gwcfg.h	/^        uint32_t beacon_freq_hz;   \/* set beacon TX frequency, in Hz *\/$/;"	m	struct:__anon47::__anon53
+beacon_freq_nb	fwd/inc/gwcfg.h	/^        uint8_t  beacon_freq_nb;   \/* set number of beaconing channels beacon *\/$/;"	m	struct:__anon47::__anon53
+beacon_freq_step	fwd/inc/gwcfg.h	/^        uint32_t beacon_freq_step; \/* set frequency step between beacon channels, in Hz *\/$/;"	m	struct:__anon47::__anon53
+beacon_infodesc	fwd/inc/gwcfg.h	/^        uint8_t  beacon_infodesc;  \/* set beacon information descriptor *\/$/;"	m	struct:__anon47::__anon53
+beacon_period	fwd/inc/gwcfg.h	/^        uint32_t beacon_period;    \/* set beaconing period, must be a sub-multiple of 86400, the nb of sec in a day *\/$/;"	m	struct:__anon47::__anon53
+beacon_power	fwd/inc/gwcfg.h	/^        int8_t   beacon_power;     \/* set beacon TX power, in dBm *\/$/;"	m	struct:__anon47::__anon53
 begin	libttn/descriptor.pb-c.h	/^  int32_t begin;$/;"	m	struct:_Google__Protobuf__GeneratedCodeInfo__Annotation
 bin_to_b64	fwd/src/base64.c	/^int bin_to_b64(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
 bin_to_b64_nopad	fwd/src/base64.c	/^int bin_to_b64_nopad(const uint8_t * in, int size, char * out, int max_len) {$/;"	f
 bind	fwd/inc/gwcfg.h	/^    uint8_t bind;          \/\/当前还剩多少连接，当连接为0时，将会移除这个包$/;"	m	struct:_rxpkts
 bit_rate	libttn/lorawan.pb-c.h	/^  uint32_t bit_rate;$/;"	m	struct:_Lorawan__Metadata
 bit_rate	libttn/lorawan.pb-c.h	/^  uint32_t bit_rate;$/;"	m	struct:_Lorawan__TxConfiguration
-bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon38	typeref:struct:__anon38::__anon39
-bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon38	typeref:struct:__anon38::__anon40
-bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon43	typeref:struct:__anon43::__anon44
-bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon43	typeref:struct:__anon43::__anon45
-bits	libmqtt/MQTTPacket.h	/^	} bits;$/;"	m	union:__anon46	typeref:struct:__anon46::__anon47
-bits	libmqtt/MQTTPacket.h	/^	} bits;$/;"	m	union:__anon46	typeref:struct:__anon46::__anon48
+bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon21	typeref:struct:__anon21::__anon22
+bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon21	typeref:struct:__anon21::__anon23
+bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon26	typeref:struct:__anon26::__anon27
+bits	libmqtt/MQTTConnect.h	/^	} bits;$/;"	m	union:__anon26	typeref:struct:__anon26::__anon28
+bits	libmqtt/MQTTPacket.h	/^	} bits;$/;"	m	union:__anon29	typeref:struct:__anon29::__anon30
+bits	libmqtt/MQTTPacket.h	/^	} bits;$/;"	m	union:__anon29	typeref:struct:__anon29::__anon31
 block_copy	fwd/src/aes.c	303;"	d	file:
 block_copy	fwd/src/aes.c	306;"	d	file:
 block_copy_nn	fwd/src/aes.c	302;"	d	file:
 block_copy_nn	fwd/src/aes.c	305;"	d	file:
-board	fwd/inc/gwcfg.h	/^        char board[16];         \/\/ SX1301(LG301) \/ SX1308(LG308) \/ SX1302(LG302) \/ SX1276 (LG02)$/;"	m	struct:__anon23::__anon25
+board	fwd/inc/gwcfg.h	/^        char board[16];         \/\/ SX1301(LG301) \/ SX1308(LG308) \/ SX1302(LG302) \/ SX1276 (LG02)$/;"	m	struct:__anon47::__anon49
 board_cfg	hal/loragw_hal.h	/^    struct lgw_conf_board_s     board_cfg;$/;"	m	struct:lgw_context_s	typeref:struct:lgw_context_s::lgw_conf_board_s
 boolean	fwd/src/parson.c	/^    int          boolean;$/;"	m	union:json_value_value	file:
 boot_time	libttn/gateway.pb-c.h	/^  int64_t boot_time;$/;"	m	struct:_Gateway__Status
@@ -4383,8 +4383,8 @@ buffer_index	hal/sx1302hal/loragw_sx1302_rx.h	/^    int buffer_index;       \/*!
 buffer_pkt_nb	hal/sx1302hal/loragw_sx1302_rx.h	/^    uint8_t buffer_pkt_nb;$/;"	m	struct:rx_buffer_s
 buffer_size	hal/sx1302hal/loragw_sx1302_rx.h	/^    uint16_t buffer_size;   \/*!> The number of bytes currently stored in the buffer *\/$/;"	m	struct:rx_buffer_s
 bufptr	libmqtt/MQTTPacket.c	/^static unsigned char* bufptr;$/;"	v	file:
-bw	hal/lg02hal/loragw_hal_lg02.h	/^    uint32_t bw;$/;"	m	struct:__anon2
-byte	libmqtt/MQTTPacket.h	/^	unsigned char byte;	                \/**< the whole byte *\/$/;"	m	union:__anon46
+bw	hal/lg02hal/loragw_hal_lg02.h	/^    uint32_t bw;$/;"	m	struct:__anon20
+byte	libmqtt/MQTTPacket.h	/^	unsigned char byte;	                \/**< the whole byte *\/$/;"	m	union:__anon29
 cal_offset_a_i	hal/sx1301hal/loragw_hal_sx1301.c	/^static int8_t cal_offset_a_i[8]; \/* TX I offset for radio A *\/$/;"	v	file:
 cal_offset_a_q	hal/sx1301hal/loragw_hal_sx1301.c	/^static int8_t cal_offset_a_q[8]; \/* TX Q offset for radio A *\/$/;"	v	file:
 cal_offset_b_i	hal/sx1301hal/loragw_hal_sx1301.c	/^static int8_t cal_offset_b_i[8]; \/* TX I offset for radio B *\/$/;"	v	file:
@@ -4408,7 +4408,7 @@ cc_enable_arenas	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean cc_enable_arena
 cc_generic_services	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean cc_generic_services;$/;"	m	struct:_Google__Protobuf__FileOptions
 cf_list	libttn/lorawan.pb-c.h	/^  Lorawan__CFList *cf_list;$/;"	m	struct:_Lorawan__ActivationMetadata
 cf_list	libttn/lorawan.pb-c.h	/^  Lorawan__CFList *cf_list;$/;"	m	struct:_Lorawan__JoinAcceptPayload
-cfg	fwd/inc/gwcfg.h	/^    } cfg;$/;"	m	struct:__anon23	typeref:struct:__anon23::__anon26
+cfg	fwd/inc/gwcfg.h	/^    } cfg;$/;"	m	struct:__anon47	typeref:struct:__anon47::__anon50
 cfinish	libmqtt/test/stdoutsub.c	/^void cfinish(int sig)$/;"	f
 chan_attn_max	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t chan_attn_max;$/;"	m	struct:agc_gain_params_s
 chan_attn_min	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t chan_attn_min;$/;"	m	struct:agc_gain_params_s
@@ -4422,12 +4422,12 @@ chck	hal/loragw_reg.h	/^    bool    chck;        \/*!< register can be checked o
 cid	libttn/lorawan.pb-c.h	/^  uint32_t cid;$/;"	m	struct:_Lorawan__MACCommand
 clean_statements	fwd/src/db.c	/^static void clean_statements(void)$/;"	f	file:
 clean_stmt	fwd/src/db.c	/^static int clean_stmt(sqlite3_stmt **stmt, const char *sql)$/;"	f	file:
-cleansession	libmqtt/MQTTConnect.h	/^		unsigned int cleansession : 1;	  \/**< clean session flag *\/$/;"	m	struct:__anon38::__anon39
-cleansession	libmqtt/MQTTConnect.h	/^		unsigned int cleansession : 1;	  \/**< cleansession flag *\/$/;"	m	struct:__anon38::__anon40
-cleansession	libmqtt/MQTTConnect.h	/^	unsigned char cleansession;$/;"	m	struct:__anon42
+cleansession	libmqtt/MQTTConnect.h	/^		unsigned int cleansession : 1;	  \/**< clean session flag *\/$/;"	m	struct:__anon21::__anon22
+cleansession	libmqtt/MQTTConnect.h	/^		unsigned int cleansession : 1;	  \/**< cleansession flag *\/$/;"	m	struct:__anon21::__anon23
+cleansession	libmqtt/MQTTConnect.h	/^	unsigned char cleansession;$/;"	m	struct:__anon25
 client	fwd/inc/mqtt_service.h	/^	MQTTClient client;$/;"	m	struct:_mqttsession_s
 client	libttn/session.h	/^  MQTTClient client;$/;"	m	struct:Session
-clientID	libmqtt/MQTTConnect.h	/^	MQTTString clientID;$/;"	m	struct:__anon42
+clientID	libmqtt/MQTTConnect.h	/^	MQTTString clientID;$/;"	m	struct:__anon25
 client_streaming	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean client_streaming;$/;"	m	struct:_Google__Protobuf__MethodDescriptorProto
 clientid	libmqtt/test/stdoutsub.c	/^   char *clientid;$/;"	m	struct:opts_struct	file:
 clip_8b	hal/sx1302hal/loragw_cal.c	/^int8_t clip_8b(int8_t val1, int8_t val2) {$/;"	f
@@ -4450,12 +4450,12 @@ command_timeout_ms	libmqtt/MQTTClient.h	/^       command_timeout_ms;$/;"	m	struc
 compare	fwd/src/jitqueue.c	/^int compare(const void *a, const void *b, void *arg)$/;"	f
 component	libttn/router.pb-c.h	/^  Api__ComponentStats *component;$/;"	m	struct:_Router__Status
 conf_ref_payload_s	hal/loragw_hal.h	/^struct conf_ref_payload_s {$/;"	s
-confs	fwd/inc/gwcfg.h	/^        confs_s confs;$/;"	m	struct:__anon23::__anon25
-confs_s	fwd/inc/gwcfg.h	/^} confs_s;$/;"	t	typeref:struct:__anon16
+confs	fwd/inc/gwcfg.h	/^        confs_s confs;$/;"	m	struct:__anon47::__anon49
+confs_s	fwd/inc/gwcfg.h	/^} confs_s;$/;"	t	typeref:struct:__anon40
 connected_brokers	libttn/router.pb-c.h	/^  uint32_t connected_brokers;$/;"	m	struct:_Router__Status
 connected_gateways	libttn/router.pb-c.h	/^  uint32_t connected_gateways;$/;"	m	struct:_Router__Status
-connecting	fwd/inc/gwcfg.h	/^        bool connecting;			\/\/ Connection setup in progress$/;"	m	struct:_server::__anon21
-contact	fwd/inc/gwcfg.h	/^        time_t contact;				\/\/ time of last contact$/;"	m	struct:_server::__anon21
+connecting	fwd/inc/gwcfg.h	/^        bool connecting;			\/\/ Connection setup in progress$/;"	m	struct:_server::__anon45
+contact	fwd/inc/gwcfg.h	/^        time_t contact;				\/\/ time of last contact$/;"	m	struct:_server::__anon45
 contact_email	libttn/gateway.pb-c.h	/^  char *contact_email;$/;"	m	struct:_Gateway__Status
 coord_s	hal/loragw_gps.h	/^struct coord_s {$/;"	s
 copy_and_key	fwd/src/aes.c	/^static void copy_and_key( void *d, const void *s, const void *k )$/;"	f	file:
@@ -4472,16 +4472,16 @@ counter_us_27bits_wrap	hal/sx1302hal/loragw_sx1302_timestamp.h	/^    uint8_t  co
 cpu	libttn/api.pb-c.h	/^  Api__ComponentStats__CPUStats *cpu;$/;"	m	struct:_Api__ComponentStats
 cpu	libttn/api.pb-c.h	/^  Api__SystemStats__CPUStats *cpu;$/;"	m	struct:_Api__SystemStats
 cpu_percentage	libttn/gateway.pb-c.h	/^  float cpu_percentage;$/;"	m	struct:_Gateway__Status__OSMetrics
-cr	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t cr;$/;"	m	struct:__anon2
+cr	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t cr;$/;"	m	struct:__anon20
 crc	hal/loragw_hal.h	/^    uint16_t    crc;            \/*!> CRC that was received in the payload *\/$/;"	m	struct:lgw_pkt_rx_s
 crc16	fwd/src/service.c	/^uint16_t crc16(const uint8_t * data, unsigned size) {$/;"	f
 crc_en	hal/sx1302hal/loragw_sx1302_rx.h	/^    bool        crc_en;$/;"	m	struct:rx_packet_s
 cs	Session.vim	/^nmap cs <Plug>Csurround$/;"	m
 cs	fwd/Session.vim	/^nmap cs <Plug>Csurround$/;"	m
 csharp_namespace	libttn/descriptor.pb-c.h	/^  char *csharp_namespace;$/;"	m	struct:_Google__Protobuf__FileOptions
-cstring	libmqtt/MQTTPacket.h	/^	char* cstring;$/;"	m	struct:__anon50
+cstring	libmqtt/MQTTPacket.h	/^	char* cstring;$/;"	m	struct:__anon33
 ctype	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldOptions__CType ctype;$/;"	m	struct:_Google__Protobuf__FieldOptions
-custom_downlink	fwd/inc/gwcfg.h	/^        bool     custom_downlink;         \/* if make a custome downlink to node *\/$/;"	m	struct:__anon23::__anon26
+custom_downlink	fwd/inc/gwcfg.h	/^        bool     custom_downlink;         \/* if make a custome downlink to node *\/$/;"	m	struct:__anon47::__anon50
 custom_rx2dn	fwd/src/pkt_serv.c	/^static enum jit_error_e custom_rx2dn(dn_pkt_s* dnelem, devinfo_s *devinfo, uint32_t us, uint8_t txmode) {$/;"	f	file:
 cycle	libmqtt/MQTTClient.c	/^int cycle(MQTTClient *c, Timer *timer)$/;"	f
 d2	fwd/src/aes.c	84;"	d	file:
@@ -4489,7 +4489,7 @@ dac_gain	hal/loragw_hal.h	/^    uint8_t dac_gain;   \/*!> 2 bits, control of the
 dac_gain	hal/sx1302hal/loragw_cal.h	/^    uint8_t dac_gain;$/;"	m	struct:lgw_sx125x_cal_tx_result_s
 data	fwd/inc/db.h	/^	char data[0];$/;"	m	struct:lgw_db_entry
 data	fwd/src/utilities.c	/^	void *data;$/;"	m	struct:thr_arg	file:
-data	libmqtt/MQTTPacket.h	/^	char* data;$/;"	m	struct:__anon49
+data	libmqtt/MQTTPacket.h	/^	char* data;$/;"	m	struct:__anon32
 data_rate	libttn/lorawan.pb-c.h	/^  char *data_rate;$/;"	m	struct:_Lorawan__Metadata
 data_rate	libttn/lorawan.pb-c.h	/^  char *data_rate;$/;"	m	struct:_Lorawan__TxConfiguration
 datarate	hal/loragw_hal.h	/^    uint32_t    datarate;       \/*!> RX datarate of the packet (SF for LoRa) *\/$/;"	m	struct:lgw_pkt_rx_s
@@ -4504,7 +4504,7 @@ db_init	fwd/src/db.c	/^static int db_init(void)$/;"	f	file:
 db_key	fwd/src/pkt_serv.c	/^static char db_key[32] = {'\\0'};$/;"	v	file:
 db_open	fwd/src/db.c	/^static int db_open(void)$/;"	f	file:
 db_sync	fwd/src/db.c	/^static void db_sync(void)$/;"	f	file:
-db_sync_thread	fwd/src/db.c	/^static void *db_sync_thread(void *data)$/;"	f	file:
+db_sync_thread	fwd/src/db.c	/^static void *db_sync_thread()$/;"	f	file:
 dbcond	fwd/src/db.c	/^static pthread_cond_t dbcond;$/;"	v	file:
 dbg_check_payload	hal/loragw_debug.c	/^int dbg_check_payload(struct lgw_conf_debug_s * context, FILE * file, uint8_t * payload_received, uint8_t size, uint8_t ref_payload_idx, uint8_t sf) {$/;"	f
 dbg_generate_random_payload	hal/loragw_debug.c	/^void dbg_generate_random_payload(uint32_t pkt_cnt, uint8_t * buffer_expected, uint8_t size) {$/;"	f
@@ -4515,7 +4515,7 @@ dbg_log_payload_diff_to_file	hal/loragw_debug.c	/^void dbg_log_payload_diff_to_f
 dbg_toggle_gpio	hal/sx1302hal/loragw_hal_sx1302.c	/^void dbg_toggle_gpio(void) {$/;"	f
 debug	hal/tst/test_loragw_cal.c	/^    uint8_t debug [8];$/;"	m	struct:cal_res_s	file:
 debug_cfg	hal/loragw_hal.h	/^    struct lgw_conf_debug_s     debug_cfg;$/;"	m	struct:lgw_context_s	typeref:struct:lgw_context_s::lgw_conf_debug_s
-debug_mask	fwd/inc/gwcfg.h	/^        int  debug_mask;           \/* enabled debugging options *\/$/;"	m	struct:__anon23::__anon30
+debug_mask	fwd/inc/gwcfg.h	/^        int  debug_mask;           \/* enabled debugging options *\/$/;"	m	struct:__anon47::__anon54
 dec_attn_max	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t dec_attn_max;$/;"	m	struct:agc_gain_params_s
 dec_attn_min	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t dec_attn_min;$/;"	m	struct:agc_gain_params_s
 dec_thresh_h1	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t dec_thresh_h1;$/;"	m	struct:agc_gain_params_s
@@ -4534,8 +4534,8 @@ deprecated	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean deprecated;$/;"	m	str
 deprecated	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean deprecated;$/;"	m	struct:_Google__Protobuf__MessageOptions
 deprecated	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean deprecated;$/;"	m	struct:_Google__Protobuf__MethodOptions
 deprecated	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean deprecated;$/;"	m	struct:_Google__Protobuf__ServiceOptions
-desc	hal/lg02hal/loragw_hal_lg02.h	/^    char* desc;$/;"	m	struct:__anon2
-description	fwd/inc/gwcfg.h	/^        char description[64];	\/* used for free form description *\/$/;"	m	struct:__anon23::__anon24
+desc	hal/lg02hal/loragw_hal_lg02.h	/^    char* desc;$/;"	m	struct:__anon20
+description	fwd/inc/gwcfg.h	/^        char description[64];	\/* used for free form description *\/$/;"	m	struct:__anon47::__anon48
 description	libttn/gateway.pb-c.h	/^  char *description;$/;"	m	struct:_Gateway__Status
 dev_addr	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData dev_addr;$/;"	m	struct:_Lorawan__ActivationMetadata
 dev_addr	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData dev_addr;$/;"	m	struct:_Lorawan__FHDR
@@ -4544,26 +4544,26 @@ dev_eui	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData dev_eui;$/;"	m	struct:_Lor
 dev_eui	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData dev_eui;$/;"	m	struct:_Lorawan__JoinRequestPayload
 dev_eui	libttn/router.pb-c.h	/^  ProtobufCBinaryData dev_eui;$/;"	m	struct:_Router__DeviceActivationRequest
 dev_nonce	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData dev_nonce;$/;"	m	struct:_Lorawan__JoinRequestPayload
-devaddr	fwd/inc/gwcfg.h	/^        filter_e devaddr;           \/* 和fport相同 *\/$/;"	m	struct:_server::__anon20
-devaddr	fwd/inc/mac-header-decode.h	/^    uint32_t devaddr;$/;"	m	struct:__anon31
+devaddr	fwd/inc/gwcfg.h	/^        filter_e devaddr;           \/* 和fport相同 *\/$/;"	m	struct:_server::__anon44
+devaddr	fwd/inc/mac-header-decode.h	/^    uint32_t devaddr;$/;"	m	struct:__anon35
 devaddr	fwd/inc/pkt_service.h	/^    char devaddr[16];$/;"	m	struct:_dn_pkt
-devaddr_str	fwd/inc/mac-header-decode.h	/^    char devaddr_str[17];$/;"	m	struct:__anon31
+devaddr_str	fwd/inc/mac-header-decode.h	/^    char devaddr_str[17];$/;"	m	struct:__anon35
 deviceSel	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t deviceSel;      \/* sx1250 only *\/$/;"	m	struct:agc_gain_params_s
-devinfo_s	fwd/inc/mac-header-decode.h	/^} devinfo_s;$/;"	t	typeref:struct:__anon31
+devinfo_s	fwd/inc/mac-header-decode.h	/^} devinfo_s;$/;"	t	typeref:struct:__anon35
 dflt	hal/loragw_reg.h	/^    int32_t dflt;        \/*!< register default value *\/$/;"	m	struct:lgw_reg_s
 difftimespec	fwd/src/fwd.c	/^double difftimespec(struct timespec end, struct timespec beginning) {$/;"	f
 difftimespec	hal/loragw_lbt.c	/^static uint64_t difftimespec(struct timespec* end, struct timespec* begin) {$/;"	f	file:
 dig_gain	hal/loragw_hal.h	/^    uint8_t dig_gain;   \/*!> 2 bits, control of the digital gain of SX1301 *\/$/;"	m	struct:lgw_tx_gain_s
 digital_read	hal/gpio.c	/^int digital_read(int gpio) {$/;"	f
 digital_write	hal/gpio.c	/^void digital_write(int gpio, int state)$/;"	f
-dio	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t dio[3];$/;"	m	struct:__anon2
+dio	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t dio[3];$/;"	m	struct:__anon20
 dl_settings	libttn/lorawan.pb-c.h	/^  Lorawan__DLSettings *dl_settings;$/;"	m	struct:_Lorawan__JoinAcceptPayload
 dn_pkt_s	fwd/inc/pkt_service.h	/^} dn_pkt_s;$/;"	t	typeref:struct:_dn_pkt
 dnlink_handler	fwd/inc/mqtt_service.h	/^	dnlink_headler_f dnlink_handler;$/;"	m	struct:_mqttsession_s
 dnlink_handler	fwd/src/mqtt_serv.c	/^void dnlink_handler(MessageData* data) {$/;"	f
 dnlink_headler_f	fwd/inc/mqtt_service.h	/^typedef void (*dnlink_headler_f)(MessageData*);$/;"	t
 dnlink_topic	fwd/inc/mqtt_service.h	/^	char *dnlink_topic;$/;"	m	struct:_mqttsession_s
-dntopic	fwd/inc/gwcfg.h	/^    char dntopic[64];$/;"	m	struct:__anon17
+dntopic	fwd/inc/gwcfg.h	/^    char dntopic[64];$/;"	m	struct:__anon41
 doexit	fwd/src/db.c	/^static int doexit;$/;"	v	file:
 dog	fwd/inc/gwcfg.h	/^    time_t      dog;$/;"	m	struct:_thread_info
 dosync	fwd/src/db.c	/^static int dosync;$/;"	v	file:
@@ -4575,18 +4575,18 @@ ds	Session.vim	/^nmap ds <Plug>Dsurround$/;"	m
 ds	fwd/Session.vim	/^nmap ds <Plug>Dsurround$/;"	m
 dsp	libttn/gateway.pb-c.h	/^  uint32_t dsp;$/;"	m	struct:_Gateway__Status
 dup	libmqtt/MQTTClient.h	/^   unsigned char dup;$/;"	m	struct:MQTTMessage
-dup	libmqtt/MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon46::__anon47
-dup	libmqtt/MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon46::__anon48
+dup	libmqtt/MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon29::__anon30
+dup	libmqtt/MQTTPacket.h	/^		unsigned int dup : 1;				\/**< DUP flag bit *\/$/;"	m	struct:__anon29::__anon31
 eLoRaMacFrameType	fwd/inc/mac-header-decode.h	/^typedef enum eLoRaMacFrameType$/;"	g
 eLoRaMacMessageType	fwd/inc/mac-header-decode.h	/^typedef enum eLoRaMacMessageType$/;"	g
 eLoRaMacParserStatus	fwd/inc/mac-header-decode.h	/^typedef enum eLoRaMacParserStatus$/;"	g
 eflt	fwd/src/ghost.c	/^static float eflt(uint8_t * p, uint8_t i) {$/;"	f	file:
-email	fwd/inc/gwcfg.h	/^        char email[40];			\/* used for contact email *\/$/;"	m	struct:__anon23::__anon24
+email	fwd/inc/gwcfg.h	/^        char email[40];			\/* used for contact email *\/$/;"	m	struct:__anon47::__anon48
 enable	hal/loragw_hal.h	/^    bool                        enable;             \/*!> enable or disable LBT *\/$/;"	m	struct:lgw_conf_lbt_s
 enable	hal/loragw_hal.h	/^    bool                    enable;         \/*!> enable or disable that RF chain *\/$/;"	m	struct:lgw_conf_rxrf_s
 enable	hal/loragw_hal.h	/^    bool        enable;         \/*!> enable or disable that IF chain *\/$/;"	m	struct:lgw_conf_rxif_s
 enable_precision_ts	hal/loragw_hal.h	/^    bool enable_precision_ts;$/;"	m	struct:lgw_conf_timestamp_s
-enabled	fwd/inc/gwcfg.h	/^        bool enabled;$/;"	m	struct:_server::__anon19
+enabled	fwd/inc/gwcfg.h	/^        bool enabled;$/;"	m	struct:_server::__anon43
 encrypted	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData encrypted;$/;"	m	struct:_Lorawan__JoinAcceptPayload
 encrypted_time	libttn/gateway.pb-c.h	/^  ProtobufCBinaryData encrypted_time;$/;"	m	struct:_Gateway__RxMetadata
 encrypted_time	libttn/gateway.pb-c.h	/^  ProtobufCBinaryData encrypted_time;$/;"	m	struct:_Gateway__RxMetadata__Antenna
@@ -4614,7 +4614,7 @@ extendee	libttn/descriptor.pb-c.h	/^  char *extendee;$/;"	m	struct:_Google__Prot
 extension	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto **extension;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 extension	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto **extension;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
 extension_range	libttn/descriptor.pb-c.h	/^  Google__Protobuf__DescriptorProto__ExtensionRange **extension_range;$/;"	m	struct:_Google__Protobuf__DescriptorProto
-f	fwd/src/ghost.c	/^	float f;$/;"	m	union:__anon11	file:
+f	fwd/src/ghost.c	/^	float f;$/;"	m	union:__anon61	file:
 f1	fwd/src/aes.c	79;"	d	file:
 f2	fwd/src/aes.c	80;"	d	file:
 f3	fwd/src/aes.c	86;"	d	file:
@@ -4635,18 +4635,18 @@ fd	fwd/src/aes.c	89;"	d	file:
 fe	fwd/src/aes.c	90;"	d	file:
 field	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto **field;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 file	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FileDescriptorProto **file;$/;"	m	struct:_Google__Protobuf__FileDescriptorSet
-filter	fwd/inc/gwcfg.h	/^    } filter;$/;"	m	struct:_server	typeref:struct:_server::__anon20
+filter	fwd/inc/gwcfg.h	/^    } filter;$/;"	m	struct:_server	typeref:struct:_server::__anon44
 filter_by_mac	fwd/src/mac-header-decode.c	/^int filter_by_mac(LoRaMacMessageData_t* macMsg, uint8_t fport, uint32_t devaddr, uint8_t len) {$/;"	f
-filter_e	fwd/inc/gwcfg.h	/^} filter_e;$/;"	t	typeref:enum:__anon15
+filter_e	fwd/inc/gwcfg.h	/^} filter_e;$/;"	t	typeref:enum:__anon39
 fobjs	hal/Makefile	/^fobjs = $(OBJDIR)\/loragw_hal.o $(OBJDIR)\/loragw_gps.o $(OBJDIR)\/loragw_reg.o $(OBJDIR)\/loragw_spi.native.o $(OBJDIR)\/loragw_spi.ftdi.o $(OBJDIR)\/loragw_aux.o $(OBJDIR)\/loragw_lbt.o $(OBJDIR)\/gpio.o $(OBJDIR)\/loragw_i2c.o $(OBJDIR)\/loragw_debug.o $(OBJDIR)\/tinymt32.o$/;"	m
 force_inline	fwd/inc/compiler.h	30;"	d
 force_inline	fwd/inc/compiler.h	32;"	d
 fp	hal/test/test_loragw_cal.c	/^FILE * fp;$/;"	v
 fp	libmqtt/MQTTClient.h	/^      void (*fp)(MessageData *, void *);$/;"	m	struct:MQTTClient::MessageHandlers
 fpga	libttn/gateway.pb-c.h	/^  uint32_t fpga;$/;"	m	struct:_Gateway__Status
-fport	fwd/inc/gwcfg.h	/^        filter_e fport;             \/* 0\/1\/2, 0不处理，1如果过滤匹配数据库的，2转发匹配数据库的 *\/$/;"	m	struct:_server::__anon20
+fport	fwd/inc/gwcfg.h	/^        filter_e fport;             \/* 0\/1\/2, 0不处理，1如果过滤匹配数据库的，2转发匹配数据库的 *\/$/;"	m	struct:_server::__anon44
 free	fwd/src/parson.c	50;"	d	file:
-freq	hal/lg02hal/loragw_hal_lg02.h	/^    uint32_t freq;$/;"	m	struct:__anon2
+freq	hal/lg02hal/loragw_hal_lg02.h	/^    uint32_t freq;$/;"	m	struct:__anon20
 freq	libttn/lorawan.pb-c.h	/^  uint32_t *freq;$/;"	m	struct:_Lorawan__CFList
 freq_hz	hal/loragw_hal.h	/^    int32_t     freq_hz;        \/*!> center frequ of the IF chain, relative to RF chain frequency *\/$/;"	m	struct:lgw_conf_rxif_s
 freq_hz	hal/loragw_hal.h	/^    uint32_t                freq_hz;        \/*!> center frequency of the radio in Hz *\/$/;"	m	struct:lgw_conf_rxrf_s
@@ -4665,21 +4665,21 @@ frequency_plan	libttn/lorawan.pb-c.h	/^  Lorawan__FrequencyPlan frequency_plan;$
 frm_payload	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData frm_payload;$/;"	m	struct:_Lorawan__MACPayload
 fsk_cfg	hal/loragw_hal.h	/^    struct lgw_conf_rxif_s      fsk_cfg;                                \/* FSK channel config parameters *\/$/;"	m	struct:lgw_context_s	typeref:struct:lgw_context_s::lgw_conf_rxif_s
 fsk_rx_bw	hal/sx1301hal/loragw_hal_sx1301.c	/^static uint8_t fsk_rx_bw; \/* bandwidth setting of FSK modem *\/$/;"	v	file:
-fsk_rx_bw	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     fsk_rx_bw; \/* bandwidth setting of FSK modem *\/$/;"	m	struct:__anon5
+fsk_rx_bw	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     fsk_rx_bw; \/* bandwidth setting of FSK modem *\/$/;"	m	struct:__anon13
 fsk_rx_dr	hal/sx1301hal/loragw_hal_sx1301.c	/^static uint32_t fsk_rx_dr; \/* FSK modem datarate in bauds *\/$/;"	v	file:
-fsk_rx_dr	hal/sx1302hal/loragw_sx1302.h	/^    uint32_t    fsk_rx_dr; \/* FSK modem datarate in bauds *\/$/;"	m	struct:__anon5
+fsk_rx_dr	hal/sx1302hal/loragw_sx1302.h	/^    uint32_t    fsk_rx_dr; \/* FSK modem datarate in bauds *\/$/;"	m	struct:__anon13
 fsk_sync_word	hal/sx1301hal/loragw_hal_sx1301.c	/^static uint64_t fsk_sync_word= 0xC194C1; \/* default FSK sync word (ALIGNED RIGHT, MSbit first) *\/$/;"	v	file:
-fsk_sync_word	hal/sx1302hal/loragw_sx1302.h	/^    uint64_t    fsk_sync_word; \/* default FSK sync word (ALIGNED RIGHT, MSbit first) *\/$/;"	m	struct:__anon5
+fsk_sync_word	hal/sx1302hal/loragw_sx1302.h	/^    uint64_t    fsk_sync_word; \/* default FSK sync word (ALIGNED RIGHT, MSbit first) *\/$/;"	m	struct:__anon13
 fsk_sync_word_size	hal/loragw_hal.c	/^static uint8_t fsk_sync_word_size = 3; \/* default number of bytes for FSK sync word *\/$/;"	v	file:
 fsk_sync_word_size	hal/sx1301hal/loragw_hal_sx1301.c	/^static uint8_t fsk_sync_word_size = 3; \/* default number of bytes for FSK sync word *\/$/;"	v	file:
-fsk_sync_word_size	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     fsk_sync_word_size; \/* default number of bytes for FSK sync word *\/$/;"	m	struct:__anon5
+fsk_sync_word_size	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     fsk_sync_word_size; \/* default number of bytes for FSK sync word *\/$/;"	m	struct:__anon13
 ftdi_sx127x_reset	hal/loragw_spi.ftdi.c	/^int ftdi_sx127x_reset(void* spi_target, int invert) {$/;"	f
 full_duplex	hal/loragw_hal.h	/^    bool    full_duplex;    \/*!> Indicates if the gateway operates in full duplex mode or not *\/$/;"	m	struct:lgw_conf_board_s
 func	fwd/src/fwd.c	/^    void (*func)(void);$/;"	m	struct:lgw_atexit	file:
 fwd_affine	fwd/src/aes.c	/^uint_8t fwd_affine(const uint_8t x)$/;"	f
-fwd_error_pkt	fwd/inc/gwcfg.h	/^        bool fwd_error_pkt;         \/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	m	struct:_server::__anon20
-fwd_nocrc_pkt	fwd/inc/gwcfg.h	/^        bool fwd_nocrc_pkt;         \/* packets with NO PAYLOAD CRC are NOT forwarded *\/$/;"	m	struct:_server::__anon20
-fwd_valid_pkt	fwd/inc/gwcfg.h	/^        bool fwd_valid_pkt;         \/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	m	struct:_server::__anon20
+fwd_error_pkt	fwd/inc/gwcfg.h	/^        bool fwd_error_pkt;         \/* packets with PAYLOAD CRC ERROR are NOT forwarded *\/$/;"	m	struct:_server::__anon44
+fwd_nocrc_pkt	fwd/inc/gwcfg.h	/^        bool fwd_nocrc_pkt;         \/* packets with NO PAYLOAD CRC are NOT forwarded *\/$/;"	m	struct:_server::__anon44
+fwd_valid_pkt	fwd/inc/gwcfg.h	/^        bool fwd_valid_pkt;         \/* packets with PAYLOAD CRC OK are forwarded *\/$/;"	m	struct:_server::__anon44
 gateway__gpsmetadata__descriptor	libttn/gateway.pb-c.c	/^const ProtobufCMessageDescriptor gateway__gpsmetadata__descriptor =$/;"	v
 gateway__gpsmetadata__field_descriptors	libttn/gateway.pb-c.c	/^static const ProtobufCFieldDescriptor gateway__gpsmetadata__field_descriptors[4] =$/;"	v	file:
 gateway__gpsmetadata__field_indices_by_name	libttn/gateway.pb-c.c	/^static const unsigned gateway__gpsmetadata__field_indices_by_name[] = {$/;"	v	file:
@@ -4731,7 +4731,7 @@ gateway__tx_configuration__pack	libttn/gateway.pb-c.c	/^size_t gateway__tx_confi
 gateway__tx_configuration__pack_to_buffer	libttn/gateway.pb-c.c	/^size_t gateway__tx_configuration__pack_to_buffer$/;"	f
 gateway__tx_configuration__unpack	libttn/gateway.pb-c.c	/^       gateway__tx_configuration__unpack$/;"	f
 gateway_configuration	libttn/router.pb-c.h	/^  Gateway__TxConfiguration *gateway_configuration;$/;"	m	struct:_Router__DownlinkMessage
-gateway_id	fwd/inc/gwcfg.h	/^        char gateway_id[17];	\/* string form of gateway mac address *\/$/;"	m	struct:__anon23::__anon24
+gateway_id	fwd/inc/gwcfg.h	/^        char gateway_id[17];	\/* string form of gateway mac address *\/$/;"	m	struct:__anon47::__anon48
 gateway_id	fwd/src/ghost.c	/^static char gateway_id[16] = "";	\/* string form of gateway mac address *\/$/;"	v	file:
 gateway_id	libttn/gateway.pb-c.h	/^  char *gateway_id;$/;"	m	struct:_Gateway__RxMetadata
 gateway_id	libttn/router.pb-c.h	/^  char *gateway_id;$/;"	m	struct:_Router__GatewayStatusRequest
@@ -4752,7 +4752,7 @@ get_rxbw_index	hal/loragw_lbt.c	/^enum lgw_sx127x_rxbw_e get_rxbw_index(uint32_t
 get_rxpkt	fwd/src/fwd.c	/^int get_rxpkt(serv_s* serv) {$/;"	f
 get_status	libttn/router.pb-c.h	/^  void (*get_status)(Router__RouterManager_Service *service,$/;"	m	struct:_Router__RouterManager_Service
 get_tx_gain_lut_index	fwd/src/fwd.c	/^int get_tx_gain_lut_index(uint8_t rf_chain, int8_t rf_power, uint8_t * lut_index) {$/;"	f
-getfn	libmqtt/MQTTPacket.h	/^	int (*getfn)(void *, unsigned char*, int); \/* must return -1 for error, 0 for call again, or the number of bytes read *\/$/;"	m	struct:__anon51
+getfn	libmqtt/MQTTPacket.h	/^	int (*getfn)(void *, unsigned char*, int); \/* must return -1 for error, 0 for call again, or the number of bytes read *\/$/;"	m	struct:__anon34
 getopts	libmqtt/test/stdoutsub.c	/^void getopts(int argc, char **argv)$/;"	f
 gf_inv	fwd/src/aes.c	/^static uint_8t gf_inv(const uint_8t x)$/;"	f	file:
 gfm2_sb	fwd/src/aes.c	209;"	d	file:
@@ -4774,14 +4774,14 @@ gfmul_b	fwd/src/aes.c	/^static const uint_8t gfmul_b[256] = mm_data(fb);$/;"	v	f
 gfmul_d	fwd/src/aes.c	/^static const uint_8t gfmul_d[256] = mm_data(fd);$/;"	v	file:
 gfmul_e	fwd/src/aes.c	/^static const uint_8t gfmul_e[256] = mm_data(fe);$/;"	v	file:
 ghost_get	fwd/src/ghost.c	/^int ghost_get(int max_pkt, struct lgw_pkt_rx_s *pkt_data) {	\/* Calculate the number of available packets *\/$/;"	f
-ghost_host	fwd/inc/gwcfg.h	/^        char   ghost_host[32];$/;"	m	struct:__anon23::__anon26
-ghost_port	fwd/inc/gwcfg.h	/^        char   ghost_port[16];$/;"	m	struct:__anon23::__anon26
+ghost_host	fwd/inc/gwcfg.h	/^        char   ghost_host[32];$/;"	m	struct:__anon47::__anon50
+ghost_port	fwd/inc/gwcfg.h	/^        char   ghost_port[16];$/;"	m	struct:__anon47::__anon50
 ghost_put	fwd/src/ghost.c	/^int ghost_put() {				\/\/TODO: Implement this method.$/;"	f
 ghost_run	fwd/src/ghost.c	/^volatile bool ghost_run = false;	\/* false -> ghost thread terminates cleanly *\/$/;"	v
 ghost_start	fwd/src/ghost.c	/^void ghost_start(const char *ghost_addr, const char *ghost_port, const struct coord_s refcoor, const char *gwid) {$/;"	f
 ghost_stop	fwd/src/ghost.c	/^void ghost_stop(void) {$/;"	f
 ghost_timeout	fwd/src/ghost.c	/^struct timeval ghost_timeout = { 0, (200 * 1000) };	\/* non critical for throughput *\/$/;"	v	typeref:struct:timeval
-ghoststream_enabled	fwd/inc/gwcfg.h	/^        bool     ghoststream_enabled;	$/;"	m	struct:__anon23::__anon26
+ghoststream_enabled	fwd/inc/gwcfg.h	/^        bool     ghoststream_enabled;	$/;"	m	struct:__anon47::__anon50
 ghst_bgn	fwd/src/ghost.c	/^static uint8_t ghst_bgn;		\/* begin of circular packet buffer *\/$/;"	v	file:
 ghst_end	fwd/src/ghost.c	/^static uint8_t ghst_end;		\/* end of circular packet buffer  *\/$/;"	v	file:
 go_package	libttn/descriptor.pb-c.h	/^  char *go_package;$/;"	m	struct:_Google__Protobuf__FileOptions
@@ -5073,19 +5073,19 @@ gpio_release	hal/gpio.c	/^static bool gpio_release(int gpio) {$/;"	f	file:
 gpio_reserve	hal/gpio.c	/^static bool gpio_reserve(int gpio) {$/;"	f	file:
 gpio_set_direction	hal/gpio.c	/^static bool gpio_set_direction(int gpio, int direction) {$/;"	f	file:
 gpio_set_state	hal/gpio.c	/^static bool gpio_set_state(int gpio, int state) {$/;"	f	file:
-gps	fwd/inc/gwcfg.h	/^    gps,$/;"	e	enum:__anon14
-gps	fwd/inc/gwcfg.h	/^    } gps;$/;"	m	struct:__anon23	typeref:struct:__anon23::__anon27
+gps	fwd/inc/gwcfg.h	/^    gps,$/;"	e	enum:__anon38
+gps	fwd/inc/gwcfg.h	/^    } gps;$/;"	m	struct:__anon47	typeref:struct:__anon47::__anon51
 gps	hal/loragw_gps.h	/^    struct timespec gps;        \/*!> reference GPS time (since 01.Jan.1980) *\/$/;"	m	struct:tref	typeref:struct:tref::timespec
 gps	libttn/gateway.pb-c.h	/^  Gateway__GPSMetadata *gps;$/;"	m	struct:_Gateway__RxMetadata
 gps	libttn/gateway.pb-c.h	/^  Gateway__GPSMetadata *gps;$/;"	m	struct:_Gateway__Status
 gps_alt	hal/loragw_gps.c	/^static short gps_alt = 0; \/* altitude *\/$/;"	v	file:
-gps_coord_valid	fwd/inc/gwcfg.h	/^        bool   gps_coord_valid;         \/* could we get valid GPS coordinates? *\/$/;"	m	struct:__anon23::__anon27
+gps_coord_valid	fwd/inc/gwcfg.h	/^        bool   gps_coord_valid;         \/* could we get valid GPS coordinates? *\/$/;"	m	struct:__anon47::__anon51
 gps_day	hal/loragw_gps.c	/^static short gps_day = 0; \/* day of the month (1-31) *\/$/;"	v	file:
 gps_dla	hal/loragw_gps.c	/^static short gps_dla = 0; \/* degrees of latitude *\/$/;"	v	file:
 gps_dlo	hal/loragw_gps.c	/^static short gps_dlo = 0; \/* degrees of longitude *\/$/;"	v	file:
-gps_enabled	fwd/inc/gwcfg.h	/^        bool   gps_enabled;		        \/* controls the use of the GPS                      *\/$/;"	m	struct:__anon23::__anon27
+gps_enabled	fwd/inc/gwcfg.h	/^        bool   gps_enabled;		        \/* controls the use of the GPS                      *\/$/;"	m	struct:__anon47::__anon51
 gps_fTOW	hal/loragw_gps.c	/^static int32_t gps_fTOW = 0; \/* Fractional part of iTOW (+\/-500000) in nanosec *\/$/;"	v	file:
-gps_fake_enable	fwd/inc/gwcfg.h	/^        bool   gps_fake_enable;$/;"	m	struct:__anon23::__anon27
+gps_fake_enable	fwd/inc/gwcfg.h	/^        bool   gps_fake_enable;$/;"	m	struct:__anon47::__anon51
 gps_fra	hal/loragw_gps.c	/^static float gps_fra = 0.0; \/* fractions of seconds (<1) *\/$/;"	v	file:
 gps_hou	hal/loragw_gps.c	/^static short gps_hou = 0; \/* hours (0-23) *\/$/;"	v	file:
 gps_iTOW	hal/loragw_gps.c	/^static uint32_t gps_iTOW = 0; \/* GPS time of week in milliseconds *\/$/;"	v	file:
@@ -5104,18 +5104,18 @@ gps_process_coords	hal/tst/test_loragw_gps.c	/^static void gps_process_coords(vo
 gps_process_sync	fwd/src/fwd.c	/^static void gps_process_sync(void) {$/;"	f	file:
 gps_process_sync	hal/test/test_loragw_gps.c	/^static void gps_process_sync(void) {$/;"	f	file:
 gps_process_sync	hal/tst/test_loragw_gps.c	/^static void gps_process_sync(void) {$/;"	f	file:
-gps_ref_valid	fwd/inc/gwcfg.h	/^        bool   gps_ref_valid;           \/* is GPS reference acceptable (ie. not too old) *\/$/;"	m	struct:__anon23::__anon27
+gps_ref_valid	fwd/inc/gwcfg.h	/^        bool   gps_ref_valid;           \/* is GPS reference acceptable (ie. not too old) *\/$/;"	m	struct:__anon47::__anon51
 gps_sat	hal/loragw_gps.c	/^static short gps_sat = 0; \/* number of satellites used for fix *\/$/;"	v	file:
 gps_sec	hal/loragw_gps.c	/^static short gps_sec = 0; \/* seconds (0-60)(60 is for leap second) *\/$/;"	v	file:
 gps_time_ok	hal/loragw_gps.c	/^static bool gps_time_ok = false;$/;"	v	file:
-gps_tty_fd	fwd/inc/gwcfg.h	/^        int    gps_tty_fd;$/;"	m	struct:__anon23::__anon27
-gps_tty_path	fwd/inc/gwcfg.h	/^        char   gps_tty_path[64];        \/* path of the TTY port GPS is connected on *\/$/;"	m	struct:__anon23::__anon27
+gps_tty_fd	fwd/inc/gwcfg.h	/^        int    gps_tty_fd;$/;"	m	struct:__anon47::__anon51
+gps_tty_path	fwd/inc/gwcfg.h	/^        char   gps_tty_path[64];        \/* path of the TTY port GPS is connected on *\/$/;"	m	struct:__anon47::__anon51
 gps_week	hal/loragw_gps.c	/^static int16_t gps_week = 0; \/* GPS week number of the navigation epoch *\/$/;"	v	file:
 gps_yea	hal/loragw_gps.c	/^static short gps_yea = 0; \/* year (2 or 4 digits) *\/$/;"	v	file:
-gw_s	fwd/inc/gwcfg.h	/^} gw_s;$/;"	t	typeref:struct:__anon23
-gwcfg	fwd/inc/gwcfg.h	/^    char gwcfg[32];$/;"	m	struct:__anon16
+gw_s	fwd/inc/gwcfg.h	/^} gw_s;$/;"	t	typeref:struct:__anon47
+gwcfg	fwd/inc/gwcfg.h	/^    char gwcfg[32];$/;"	m	struct:__anon40
 gwdb_atexit	fwd/src/db.c	/^static void gwdb_atexit(void)$/;"	f	file:
-gwtraf	fwd/inc/gwcfg.h	/^	gwtraf$/;"	e	enum:__anon12
+gwtraf	fwd/inc/gwcfg.h	/^	gwtraf$/;"	e	enum:__anon36
 gwtraf_push_up	fwd/src/gwtraf_serv.c	/^static void gwtraf_push_up(void* arg) {$/;"	f	file:
 gwtraf_start	fwd/src/gwtraf_serv.c	/^int gwtraf_start(serv_s* serv) {$/;"	f
 gwtraf_stop	fwd/src/gwtraf_serv.c	/^void gwtraf_stop(serv_s* serv) {$/;"	f
@@ -5123,7 +5123,7 @@ gx	Session.vim	/^nmap gx <Plug>NetrwBrowseX$/;"	m
 gx	Session.vim	/^vmap gx <Plug>NetrwBrowseXVis$/;"	m
 gx	fwd/Session.vim	/^nmap gx <Plug>NetrwBrowseX$/;"	m
 gx	fwd/Session.vim	/^vmap gx <Plug>NetrwBrowseXVis$/;"	m
-hal	fwd/inc/gwcfg.h	/^    } hal;$/;"	m	struct:__anon23	typeref:struct:__anon23::__anon25
+hal	fwd/inc/gwcfg.h	/^    } hal;$/;"	m	struct:__anon47	typeref:struct:__anon47::__anon49
 hal	libttn/gateway.pb-c.h	/^  char *hal;$/;"	m	struct:_Gateway__Status
 has_ack	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean has_ack;$/;"	m	struct:_Lorawan__FCtrl
 has_adr	libttn/lorawan.pb-c.h	/^  protobuf_c_boolean has_adr;$/;"	m	struct:_Lorawan__FCtrl
@@ -5323,11 +5323,11 @@ idle	libttn/api.pb-c.h	/^  float idle;$/;"	m	struct:_Api__SystemStats__CPUStats
 if_chain	hal/loragw_hal.h	/^    uint8_t     if_chain;       \/*!> by which IF chain was packet received *\/$/;"	m	struct:lgw_pkt_rx_s
 if_chain_cfg	hal/loragw_hal.h	/^    struct lgw_conf_rxif_s      if_chain_cfg[LGW_IF_CHAIN_NB];$/;"	m	struct:lgw_context_s	typeref:struct:lgw_context_s::lgw_conf_rxif_s
 if_enable	hal/sx1301hal/loragw_hal_sx1301.c	/^static bool if_enable[LGW_IF_CHAIN_NB];$/;"	v	file:
-if_enable	hal/sx1302hal/loragw_sx1302.h	/^    bool        if_enable;$/;"	m	struct:__anon3
+if_enable	hal/sx1302hal/loragw_sx1302.h	/^    bool        if_enable;$/;"	m	struct:__anon11
 if_freq	hal/sx1301hal/loragw_hal_sx1301.c	/^static int32_t if_freq[LGW_IF_CHAIN_NB]; \/* relative to radio frequency, +\/- in Hz *\/$/;"	v	file:
-if_freq	hal/sx1302hal/loragw_sx1302.h	/^    int32_t     if_freq; \/* relative to radio frequency, +\/- in Hz *\/$/;"	m	struct:__anon3
+if_freq	hal/sx1302hal/loragw_sx1302.h	/^    int32_t     if_freq; \/* relative to radio frequency, +\/- in Hz *\/$/;"	m	struct:__anon11
 if_rf_chain	hal/sx1301hal/loragw_hal_sx1301.c	/^static bool if_rf_chain[LGW_IF_CHAIN_NB]; \/* for each IF, 0 -> radio A, 1 -> radio B *\/$/;"	v	file:
-if_rf_chain	hal/sx1302hal/loragw_sx1302.h	/^    bool        if_rf_chain; \/* for each IF, 0 -> radio A, 1 -> radio B *\/$/;"	m	struct:__anon3
+if_rf_chain	hal/sx1302hal/loragw_sx1302.h	/^    bool        if_rf_chain; \/* for each IF, 0 -> radio A, 1 -> radio B *\/$/;"	m	struct:__anon11
 ifmod_config	hal/sx1301hal/loragw_hal_sx1301.c	/^static const uint8_t ifmod_config[LGW_IF_CHAIN_NB] = LGW_IFMODEM_CONFIG;$/;"	v	file:
 ifmod_config	hal/sx1302hal/loragw_sx1302.c	/^const uint8_t ifmod_config[LGW_IF_CHAIN_NB] = LGW_IFMODEM_CONFIG;$/;"	v
 img_rej_a	hal/tst/test_loragw_cal.c	/^    uint8_t img_rej_a;$/;"	m	struct:cal_res_s	file:
@@ -5336,8 +5336,8 @@ implicit_coderate	hal/loragw_hal.h	/^    uint8_t     implicit_coderate;         
 implicit_crc_en	hal/loragw_hal.h	/^    bool        implicit_crc_en;            \/*!> LoRa Service implicit header CRC enable *\/$/;"	m	struct:lgw_conf_rxif_s
 implicit_hdr	hal/loragw_hal.h	/^    bool        implicit_hdr;               \/*!> LoRa Service implicit header *\/$/;"	m	struct:lgw_conf_rxif_s
 implicit_payload_length	hal/loragw_hal.h	/^    uint8_t     implicit_payload_length;    \/*!> LoRa Service implicit header payload length (number of bytes, 0 for default) *\/$/;"	m	struct:lgw_conf_rxif_s
-info	fwd/inc/gwcfg.h	/^    } info;$/;"	m	struct:__anon23	typeref:struct:__anon23::__anon24
-info	fwd/inc/gwcfg.h	/^    } info;$/;"	m	struct:_server	typeref:struct:_server::__anon19
+info	fwd/inc/gwcfg.h	/^    } info;$/;"	m	struct:__anon47	typeref:struct:__anon47::__anon48
+info	fwd/inc/gwcfg.h	/^    } info;$/;"	m	struct:_server	typeref:struct:_server::__anon43
 ini_func1	hal/tinymt32.c	/^static uint32_t ini_func1(uint32_t x) {$/;"	f	file:
 ini_func2	hal/tinymt32.c	/^static uint32_t ini_func2(uint32_t x) {$/;"	f	file:
 init	tools/reset_lgw.sh	/^init() {$/;"	f
@@ -5351,7 +5351,7 @@ inv_affine	fwd/src/aes.c	/^uint_8t inv_affine(const uint_8t x)$/;"	f
 inv_mix_sub_columns	fwd/src/aes.c	/^  static void inv_mix_sub_columns( uint_8t dt[N_BLOCK] )$/;"	f	file:
 inv_shift_sub_rows	fwd/src/aes.c	/^static void inv_shift_sub_rows( uint_8t st[N_BLOCK] )$/;"	f	file:
 invert_pol	hal/loragw_hal.h	/^    bool        invert_pol;     \/*!> invert signal polarity, for orthogonal downlinks (LoRa only) *\/$/;"	m	struct:lgw_pkt_tx_s
-invertio	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t invertio;$/;"	m	struct:__anon2
+invertio	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t invertio;$/;"	m	struct:__anon20
 ip	libttn/gateway.pb-c.h	/^  char **ip;$/;"	m	struct:_Gateway__Status
 ipstack	libmqtt/MQTTClient.h	/^   Network *ipstack;$/;"	m	struct:MQTTClient
 isBigEndian	fwd/src/endianext.c	/^bool isBigEndian() {$/;"	f
@@ -5370,7 +5370,7 @@ is_valid_utf8	fwd/src/parson.c	/^static int is_valid_utf8(const char *string, si
 isb_data	fwd/src/aes.c	128;"	d	file:
 isbox	fwd/src/aes.c	/^static const uint_8t isbox[256] = isb_data(f1);$/;"	v	file:
 isconnected	libmqtt/MQTTClient.h	/^   int isconnected;$/;"	m	struct:MQTTClient
-isftdi	hal/lg02hal/loragw_hal_lg02.h	/^    bool isftdi;$/;"	m	struct:__anon2
+isftdi	hal/lg02hal/loragw_hal_lg02.h	/^    bool isftdi;$/;"	m	struct:__anon20
 isftdi	hal/loragw_hal.h	/^    bool                        isftdi;             \/*!> use FTDI device or not *\/$/;"	m	struct:lgw_conf_lbt_s
 item	libmqtt/MQTTLinux.h	/^   unsigned short item;$/;"	m	struct:Queue
 items	fwd/src/parson.c	/^    JSON_Value **items;$/;"	m	struct:json_array_t	file:
@@ -5379,7 +5379,7 @@ java_multiple_files	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean java_multipl
 java_outer_classname	libttn/descriptor.pb-c.h	/^  char *java_outer_classname;$/;"	m	struct:_Google__Protobuf__FileOptions
 java_package	libttn/descriptor.pb-c.h	/^  char *java_package;$/;"	m	struct:_Google__Protobuf__FileOptions
 java_string_check_utf8	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean java_string_check_utf8;$/;"	m	struct:_Google__Protobuf__FileOptions
-jit	fwd/inc/gwcfg.h	/^    jit,$/;"	e	enum:__anon14
+jit	fwd/inc/gwcfg.h	/^    jit,$/;"	e	enum:__anon38
 jit_collision_test	fwd/src/jitqueue.c	/^bool jit_collision_test(uint32_t p1_count_us, uint32_t p1_pre_delay, uint32_t p1_post_delay, uint32_t p2_count_us, uint32_t p2_pre_delay, uint32_t p2_post_delay) {$/;"	f
 jit_dequeue	fwd/src/jitqueue.c	/^enum jit_error_e jit_dequeue(struct jit_queue_s *queue, int index, struct lgw_pkt_tx_s *packet, enum jit_pkt_type_e *pkt_type) {$/;"	f
 jit_enqueue	fwd/src/jitqueue.c	/^enum jit_error_e jit_enqueue(struct jit_queue_s *queue, uint32_t time_us, struct lgw_pkt_tx_s *packet, enum jit_pkt_type_e pkt_type) {$/;"	f
@@ -5388,14 +5388,14 @@ jit_node_s	fwd/inc/jitqueue.h	/^struct jit_node_s {$/;"	s
 jit_peek	fwd/src/jitqueue.c	/^enum jit_error_e jit_peek(struct jit_queue_s *queue, uint32_t time_us, int *pkt_idx) {$/;"	f
 jit_pkt_type_e	fwd/inc/jitqueue.h	/^enum jit_pkt_type_e {$/;"	g
 jit_print_queue	fwd/src/jitqueue.c	/^void jit_print_queue(struct jit_queue_s *queue, bool show_all, int debug_level) {$/;"	f
-jit_queue	fwd/inc/gwcfg.h	/^        struct jit_queue_s jit_queue[LGW_RF_CHAIN_NB];$/;"	m	struct:__anon23::__anon28	typeref:struct:__anon23::__anon28::jit_queue_s
+jit_queue	fwd/inc/gwcfg.h	/^        struct jit_queue_s jit_queue[LGW_RF_CHAIN_NB];$/;"	m	struct:__anon47::__anon52	typeref:struct:__anon47::__anon52::jit_queue_s
 jit_queue_init	fwd/src/jitqueue.c	/^void jit_queue_init(struct jit_queue_s *queue) {$/;"	f
 jit_queue_is_empty	fwd/src/jitqueue.c	/^bool jit_queue_is_empty(struct jit_queue_s *queue) {$/;"	f
 jit_queue_is_full	fwd/src/jitqueue.c	/^bool jit_queue_is_full(struct jit_queue_s *queue) {$/;"	f
 jit_queue_s	fwd/inc/jitqueue.h	/^struct jit_queue_s {$/;"	s
 jit_sort_queue	fwd/src/jitqueue.c	/^void jit_sort_queue(struct jit_queue_s *queue) {$/;"	f
-join_accept_payload	libttn/lorawan.pb-c.h	/^    Lorawan__JoinAcceptPayload *join_accept_payload;$/;"	m	union:_Lorawan__Message::__anon61
-join_request_payload	libttn/lorawan.pb-c.h	/^    Lorawan__JoinRequestPayload *join_request_payload;$/;"	m	union:_Lorawan__Message::__anon61
+join_accept_payload	libttn/lorawan.pb-c.h	/^    Lorawan__JoinAcceptPayload *join_accept_payload;$/;"	m	union:_Lorawan__Message::__anon2
+join_request_payload	libttn/lorawan.pb-c.h	/^    Lorawan__JoinRequestPayload *join_request_payload;$/;"	m	union:_Lorawan__Message::__anon2
 json_array	fwd/src/parson.c	/^JSON_Array * json_array  (const JSON_Value *value) {$/;"	f
 json_array_add	fwd/src/parson.c	/^static JSON_Status json_array_add(JSON_Array *array, JSON_Value *value) {$/;"	f	file:
 json_array_append_boolean	fwd/src/parson.c	/^JSON_Status json_array_append_boolean(JSON_Array *array, int boolean) {$/;"	f
@@ -5498,20 +5498,20 @@ json_value_t	fwd/src/parson.c	/^struct json_value_t {$/;"	s	file:
 json_value_type	fwd/inc/parson.h	/^enum json_value_type {$/;"	g
 json_value_value	fwd/src/parson.c	/^typedef union json_value_value {$/;"	u	file:
 jstype	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldOptions__JSType jstype;$/;"	m	struct:_Google__Protobuf__FieldOptions
-keepAliveInterval	libmqtt/MQTTConnect.h	/^	unsigned short keepAliveInterval;$/;"	m	struct:__anon42
+keepAliveInterval	libmqtt/MQTTConnect.h	/^	unsigned short keepAliveInterval;$/;"	m	struct:__anon25
 keep_alive_interval	libmqtt/MQTTClient.h	/^   unsigned int keep_alive_interval;$/;"	m	struct:MQTTClient
 keepalive	libmqtt/MQTTClient.c	/^int keepalive(MQTTClient *c)$/;"	f
 key	fwd/inc/db.h	/^	char *key;$/;"	m	struct:lgw_db_entry
-key	fwd/inc/gwcfg.h	/^        char *key;			        \/\/ gateway key to connect to service$/;"	m	struct:_server::__anon19
+key	fwd/inc/gwcfg.h	/^        char *key;			        \/\/ gateway key to connect to service$/;"	m	struct:_server::__anon43
 key	fwd/inc/mqtt_service.h	/^	char *key;     $/;"	m	struct:_mqttsession_s
 key	libttn/session.h	/^  char *key;$/;"	m	struct:Session
 key	libttn/trace.pb-c.h	/^  char *key;$/;"	m	struct:_Trace__Trace__MetadataEntry
 key	libttn/types.pb-c.h	/^  char *key;$/;"	m	struct:_Types__ConnectMessage
 key	libttn/types.pb-c.h	/^  char *key;$/;"	m	struct:_Types__DisconnectMessage
-ksch	fwd/inc/aes.h	/^{   uint_8t ksch[(N_MAX_ROUNDS + 1) * N_BLOCK];$/;"	m	struct:__anon32
+ksch	fwd/inc/aes.h	/^{   uint_8t ksch[(N_MAX_ROUNDS + 1) * N_BLOCK];$/;"	m	struct:__anon55
 l_pps	libttn/gateway.pb-c.h	/^  uint32_t l_pps;$/;"	m	struct:_Gateway__Status
 label	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto__Label label;$/;"	m	struct:_Google__Protobuf__FieldDescriptorProto
-last_loop	fwd/inc/gwcfg.h	/^        time_t   last_loop;               \/* timestamp for watchdog *\/$/;"	m	struct:__anon23::__anon26
+last_loop	fwd/inc/gwcfg.h	/^        time_t   last_loop;               \/* timestamp for watchdog *\/$/;"	m	struct:__anon47::__anon50
 last_seen	libttn/router.pb-c.h	/^  int64_t last_seen;$/;"	m	struct:_Router__GatewayStatusResponse
 lat	hal/loragw_gps.h	/^    double  lat;    \/*!> latitude [-90,90] (North +, South -) *\/$/;"	m	struct:coord_s
 latitude	libttn/gateway.pb-c.h	/^  float latitude;$/;"	m	struct:_Gateway__GPSMetadata
@@ -5534,12 +5534,12 @@ lbt_start	hal/loragw_lbt.c	/^int lbt_start(void) {$/;"	f
 lbt_start_freq	hal/loragw_lbt.c	/^static uint32_t lbt_start_freq;$/;"	v	file:
 leading_comments	libttn/descriptor.pb-c.h	/^  char *leading_comments;$/;"	m	struct:_Google__Protobuf__SourceCodeInfo__Location
 leading_detached_comments	libttn/descriptor.pb-c.h	/^  char **leading_detached_comments;$/;"	m	struct:_Google__Protobuf__SourceCodeInfo__Location
-len	libmqtt/MQTTPacket.h	/^	int len;$/;"	m	struct:__anon49
-len	libmqtt/MQTTPacket.h	/^	int len;$/;"	m	struct:__anon51
+len	libmqtt/MQTTPacket.h	/^	int len;$/;"	m	struct:__anon32
+len	libmqtt/MQTTPacket.h	/^	int len;$/;"	m	struct:__anon34
 leng	hal/loragw_reg.h	/^    uint8_t leng;        \/*!< number of bits in the register *\/$/;"	m	struct:lgw_reg_s
 leng	hal/sx1302hal/loragw_sx125x.h	/^	uint8_t leng; \/* number of bits in the register *\/$/;"	m	struct:radio_reg_s
 length_type	fwd/inc/aes.h	/^typedef uint_8t length_type;$/;"	t
-lenstring	libmqtt/MQTTPacket.h	/^	MQTTLenString lenstring;$/;"	m	struct:__anon50
+lenstring	libmqtt/MQTTPacket.h	/^	MQTTLenString lenstring;$/;"	m	struct:__anon33
 lg02_crccheck	hal/lg02hal/loragw_hal_lg02.c	/^int lg02_crccheck(void* spidev, bool isftdi, uint8_t nocrc)$/;"	f
 lg02_detect	hal/lg02hal/loragw_hal_lg02.c	/^bool lg02_detect(sx127x_dev *dev)$/;"	f
 lg02_receive	hal/lg02hal/loragw_hal_lg02.c	/^int lg02_receive(void* spidev, bool isftdi, struct lgw_pkt_rx_s* pkt_data) {$/;"	f
@@ -5739,14 +5739,14 @@ lgw_utc2cnt	hal/loragw_gps.c	/^int lgw_utc2cnt(struct tref ref, struct timespec 
 lgw_vasprintf	fwd/inc/lgwmm.h	152;"	d
 lgw_version_info	hal/loragw_hal.c	/^const char* lgw_version_info() {$/;"	f
 lgw_version_string	hal/loragw_hal.c	/^const char lgw_version_string[] = "Version: " LIBLORAGW_VERSION ";";$/;"	v
-lgwm	fwd/inc/gwcfg.h	/^        uint64_t  lgwm;			\/* Lora gateway MAC address *\/$/;"	m	struct:__anon23::__anon24
+lgwm	fwd/inc/gwcfg.h	/^        uint64_t  lgwm;			\/* Lora gateway MAC address *\/$/;"	m	struct:__anon47::__anon48
 linux_read	libmqtt/MQTTLinux.c	/^int linux_read(Network *n, unsigned char *buffer, int len, int timeout_ms)$/;"	f
 linux_write	libmqtt/MQTTLinux.c	/^int linux_write(Network *n, unsigned char *buffer, int len, int timeout_ms)$/;"	f
 list	fwd/inc/gwcfg.h	/^    LGW_LIST_ENTRY(_rxpkts) list;$/;"	m	struct:_rxpkts
 list	fwd/inc/gwcfg.h	/^    LGW_LIST_ENTRY(_server) list;$/;"	m	struct:_server
 list	fwd/inc/gwcfg.h	/^    LGW_LIST_ENTRY(_thread_info) list;$/;"	m	struct:_thread_info
 list	fwd/inc/pkt_service.h	/^	LGW_LIST_ENTRY(_dn_pkt) list;$/;"	m	struct:_dn_pkt
-live	fwd/inc/gwcfg.h	/^        bool live;					\/\/ Server is life?$/;"	m	struct:_server::__anon21
+live	fwd/inc/gwcfg.h	/^        bool live;					\/\/ Server is life?$/;"	m	struct:_server::__anon45
 lm_nw	libttn/gateway.pb-c.h	/^  uint32_t lm_nw;$/;"	m	struct:_Gateway__Status
 lm_ok	libttn/gateway.pb-c.h	/^  uint32_t lm_ok;$/;"	m	struct:_Gateway__Status
 lm_st	libttn/gateway.pb-c.h	/^  uint32_t lm_st;$/;"	m	struct:_Gateway__Status
@@ -5759,32 +5759,32 @@ load_15	libttn/gateway.pb-c.h	/^  float load_15;$/;"	m	struct:_Gateway__Status__
 load_5	libttn/gateway.pb-c.h	/^  float load_5;$/;"	m	struct:_Gateway__Status__OSMetrics
 load_firmware	hal/sx1301hal/loragw_hal_sx1301.c	/^static int load_firmware(uint8_t target, uint8_t *firmware, uint16_t size) {$/;"	f	file:
 location	libttn/descriptor.pb-c.h	/^  Google__Protobuf__SourceCodeInfo__Location **location;$/;"	m	struct:_Google__Protobuf__SourceCodeInfo
-log	fwd/inc/gwcfg.h	/^    } log;$/;"	m	struct:__anon23	typeref:struct:__anon23::__anon30
+log	fwd/inc/gwcfg.h	/^    } log;$/;"	m	struct:__anon47	typeref:struct:__anon47::__anon54
 log_file	hal/sx1302hal/loragw_hal_sx1302.c	/^FILE * log_file = NULL;$/;"	v
 log_file_name	hal/loragw_hal.h	/^    char log_file_name[128];$/;"	m	struct:lgw_conf_debug_s
-logfile	fwd/inc/gwcfg.h	/^        char *logfile;             \/* path to logfile *\/$/;"	m	struct:__anon23::__anon30
-logger_enabled	fwd/inc/gwcfg.h	/^        bool logger_enabled;       \/* controls the activation of more logging *\/$/;"	m	struct:__anon23::__anon30
+logfile	fwd/inc/gwcfg.h	/^        char *logfile;             \/* path to logfile *\/$/;"	m	struct:__anon47::__anon54
+logger_enabled	fwd/inc/gwcfg.h	/^        bool logger_enabled;       \/* controls the activation of more logging *\/$/;"	m	struct:__anon47::__anon54
 lon	hal/loragw_gps.h	/^    double  lon;    \/*!> longitude [-180,180] (East +, West -)*\/$/;"	m	struct:coord_s
 longitude	libttn/gateway.pb-c.h	/^  float longitude;$/;"	m	struct:_Gateway__GPSMetadata
 lora_crc16	hal/sx1302hal/loragw_sx1302.c	/^void lora_crc16(const char data, int *crc) {$/;"	f
 lora_crc16	tools/payload_tools/payload_crc.c	/^void lora_crc16(const char data, int *crc) {$/;"	f
 lora_multi_sfmask	hal/sx1301hal/loragw_hal_sx1301.c	/^static uint8_t lora_multi_sfmask[LGW_MULTI_NB]; \/* enables SF for LoRa 'multi' modems *\/$/;"	v	file:
 lora_rx_bw	hal/sx1301hal/loragw_hal_sx1301.c	/^static uint8_t lora_rx_bw; \/* bandwidth setting for LoRa standalone modem *\/$/;"	v	file:
-lora_rx_bw	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     lora_rx_bw; \/* bandwidth setting for LoRa standalone modem *\/$/;"	m	struct:__anon4
-lora_rx_implicit_coderate	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     lora_rx_implicit_coderate; \/* implicit header payload coderate setting for LoRa standalone modem *\/$/;"	m	struct:__anon4
-lora_rx_implicit_crc_en	hal/sx1302hal/loragw_sx1302.h	/^    bool        lora_rx_implicit_crc_en; \/* implicit header payload crc enable setting for LoRa standalone modem *\/$/;"	m	struct:__anon4
-lora_rx_implicit_hdr	hal/sx1302hal/loragw_sx1302.h	/^    bool        lora_rx_implicit_hdr; \/* implicit header setting for LoRa standalone modem *\/$/;"	m	struct:__anon4
-lora_rx_implicit_length	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     lora_rx_implicit_length; \/* implicit header payload length setting for LoRa standalone modem *\/$/;"	m	struct:__anon4
+lora_rx_bw	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     lora_rx_bw; \/* bandwidth setting for LoRa standalone modem *\/$/;"	m	struct:__anon12
+lora_rx_implicit_coderate	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     lora_rx_implicit_coderate; \/* implicit header payload coderate setting for LoRa standalone modem *\/$/;"	m	struct:__anon12
+lora_rx_implicit_crc_en	hal/sx1302hal/loragw_sx1302.h	/^    bool        lora_rx_implicit_crc_en; \/* implicit header payload crc enable setting for LoRa standalone modem *\/$/;"	m	struct:__anon12
+lora_rx_implicit_hdr	hal/sx1302hal/loragw_sx1302.h	/^    bool        lora_rx_implicit_hdr; \/* implicit header setting for LoRa standalone modem *\/$/;"	m	struct:__anon12
+lora_rx_implicit_length	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     lora_rx_implicit_length; \/* implicit header payload length setting for LoRa standalone modem *\/$/;"	m	struct:__anon12
 lora_rx_ppm_offset	hal/sx1301hal/loragw_hal_sx1301.c	/^static bool lora_rx_ppm_offset;$/;"	v	file:
 lora_rx_sf	hal/sx1301hal/loragw_hal_sx1301.c	/^static uint8_t lora_rx_sf; \/* spreading factor setting for LoRa standalone modem *\/$/;"	v	file:
-lora_rx_sf	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     lora_rx_sf; \/* spreading factor setting for LoRa standalone modem *\/$/;"	m	struct:__anon4
+lora_rx_sf	hal/sx1302hal/loragw_sx1302.h	/^    uint8_t     lora_rx_sf; \/* spreading factor setting for LoRa standalone modem *\/$/;"	m	struct:__anon12
 lora_service_cfg	hal/loragw_hal.h	/^    struct lgw_conf_rxif_s      lora_service_cfg;                       \/* LoRa service channel config parameters *\/$/;"	m	struct:lgw_context_s	typeref:struct:lgw_context_s::lgw_conf_rxif_s
 lorahal_s	hal/loragw_hal.h	/^struct lorahal_s {$/;"	s
 loramode	hal/lg02hal/loragw_hal_lg02.c	/^static int loramode(void* spidev, bool isftdi) {$/;"	f	file:
-lorawan	libttn/protocol.pb-c.h	/^    Lorawan__ActivationMetadata *lorawan;$/;"	m	union:_Protocol__ActivationMetadata::__anon59
-lorawan	libttn/protocol.pb-c.h	/^    Lorawan__Message *lorawan;$/;"	m	union:_Protocol__Message::__anon53
-lorawan	libttn/protocol.pb-c.h	/^    Lorawan__Metadata *lorawan;$/;"	m	union:_Protocol__RxMetadata::__anon55
-lorawan	libttn/protocol.pb-c.h	/^    Lorawan__TxConfiguration *lorawan;$/;"	m	union:_Protocol__TxConfiguration::__anon57
+lorawan	libttn/protocol.pb-c.h	/^    Lorawan__ActivationMetadata *lorawan;$/;"	m	union:_Protocol__ActivationMetadata::__anon10
+lorawan	libttn/protocol.pb-c.h	/^    Lorawan__Message *lorawan;$/;"	m	union:_Protocol__Message::__anon4
+lorawan	libttn/protocol.pb-c.h	/^    Lorawan__Metadata *lorawan;$/;"	m	union:_Protocol__RxMetadata::__anon6
+lorawan	libttn/protocol.pb-c.h	/^    Lorawan__TxConfiguration *lorawan;$/;"	m	union:_Protocol__TxConfiguration::__anon8
 lorawan__activation_metadata__descriptor	libttn/lorawan.pb-c.c	/^const ProtobufCMessageDescriptor lorawan__activation_metadata__descriptor =$/;"	v
 lorawan__activation_metadata__field_descriptors	libttn/lorawan.pb-c.c	/^static const ProtobufCFieldDescriptor lorawan__activation_metadata__field_descriptors[9] =$/;"	v	file:
 lorawan__activation_metadata__field_indices_by_name	libttn/lorawan.pb-c.c	/^static const unsigned lorawan__activation_metadata__field_indices_by_name[] = {$/;"	v	file:
@@ -5938,10 +5938,10 @@ m	libmqtt/MQTTLinux.h	/^   Mutex m;$/;"	m	struct:Queue
 m	libmqtt/MQTTLinux.h	/^   pthread_mutex_t m;$/;"	m	struct:Mutex
 m_hdr	libttn/lorawan.pb-c.h	/^  Lorawan__MHDR *m_hdr;$/;"	m	struct:_Lorawan__Message
 m_type	libttn/lorawan.pb-c.h	/^  Lorawan__MType m_type;$/;"	m	struct:_Lorawan__MHDR
-mac2db	fwd/inc/gwcfg.h	/^        bool     mac2db;                  \/* if payload text save to database *\/$/;"	m	struct:__anon23::__anon26
-mac2file	fwd/inc/gwcfg.h	/^        bool     mac2file;                \/* if payload text save to file *\/$/;"	m	struct:__anon23::__anon26
-mac_decoded	fwd/inc/gwcfg.h	/^        bool     mac_decoded;             \/* if mac header decode for abp *\/$/;"	m	struct:__anon23::__anon26
-mac_payload	libttn/lorawan.pb-c.h	/^    Lorawan__MACPayload *mac_payload;$/;"	m	union:_Lorawan__Message::__anon61
+mac2db	fwd/inc/gwcfg.h	/^        bool     mac2db;                  \/* if payload text save to database *\/$/;"	m	struct:__anon47::__anon50
+mac2file	fwd/inc/gwcfg.h	/^        bool     mac2file;                \/* if payload text save to file *\/$/;"	m	struct:__anon47::__anon50
+mac_decoded	fwd/inc/gwcfg.h	/^        bool     mac_decoded;             \/* if mac header decode for abp *\/$/;"	m	struct:__anon47::__anon50
+mac_payload	libttn/lorawan.pb-c.h	/^    Lorawan__MACPayload *mac_payload;$/;"	m	union:_Lorawan__Message::__anon2
 main	fwd/src/fwd.c	/^int main(int argc, char *argv[]) {$/;"	f
 main	hal/test/test_loragw_cal.c	/^int main(int argc, char **argv)$/;"	f
 main	hal/test/test_loragw_capture_ram.c	/^int main(int argc, char **argv)$/;"	f
@@ -5970,45 +5970,45 @@ map_entry	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean map_entry;$/;"	m	struc
 mat1	hal/tinymt32.h	/^    uint32_t mat1;$/;"	m	struct:TINYMT32_T
 mat2	hal/tinymt32.h	/^    uint32_t mat2;$/;"	m	struct:TINYMT32_T
 match_label	hal/loragw_gps.c	/^static bool match_label(const char *s, char *label, int size, char wildcard) {$/;"	f	file:
-max_stall	fwd/inc/gwcfg.h	/^        int  max_stall;				\/\/ max number of missed responses$/;"	m	struct:_server::__anon21
+max_stall	fwd/inc/gwcfg.h	/^        int  max_stall;				\/\/ max number of missed responses$/;"	m	struct:_server::__anon45
 max_ts_metrics	hal/loragw_hal.h	/^    uint8_t max_ts_metrics;$/;"	m	struct:lgw_conf_timestamp_s
 mean	hal/test/test_loragw_cal.c	/^    int32_t mean;$/;"	m	struct:cal_tx_log	file:
-meas_dw_ack_rcv	fwd/inc/stats.h	/^	uint32_t meas_dw_ack_rcv;$/;"	m	struct:__anon35
-meas_dw_dgram_acp	fwd/inc/stats.h	/^	uint32_t meas_dw_dgram_acp;$/;"	m	struct:__anon35
-meas_dw_dgram_rcv	fwd/inc/stats.h	/^	uint32_t meas_dw_dgram_rcv;$/;"	m	struct:__anon35
-meas_dw_network_byte	fwd/inc/stats.h	/^	uint32_t meas_dw_network_byte;$/;"	m	struct:__anon35
-meas_dw_payload_byte	fwd/inc/stats.h	/^	uint32_t meas_dw_payload_byte;$/;"	m	struct:__anon35
-meas_dw_pull_sent	fwd/inc/stats.h	/^	uint32_t meas_dw_pull_sent;$/;"	m	struct:__anon35
-meas_gps_coord	fwd/inc/gwcfg.h	/^        struct coord_s meas_gps_coord;  \/* GPS position of the gateway *\/$/;"	m	struct:__anon23::__anon27	typeref:struct:__anon23::__anon27::coord_s
-meas_gps_err	fwd/inc/gwcfg.h	/^        struct coord_s meas_gps_err;    \/* GPS position of the gateway *\/$/;"	m	struct:__anon23::__anon27	typeref:struct:__anon23::__anon27::coord_s
-meas_nb_beacon_queued	fwd/inc/gwcfg.h	/^        uint32_t meas_nb_beacon_queued;$/;"	m	struct:__anon23::__anon29
-meas_nb_beacon_queued	fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_queued;$/;"	m	struct:__anon37
-meas_nb_beacon_rejected	fwd/inc/gwcfg.h	/^        uint32_t meas_nb_beacon_rejected;$/;"	m	struct:__anon23::__anon29
-meas_nb_beacon_rejected	fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_rejected;$/;"	m	struct:__anon37
-meas_nb_beacon_sent	fwd/inc/gwcfg.h	/^        uint32_t meas_nb_beacon_sent;$/;"	m	struct:__anon23::__anon29
-meas_nb_beacon_sent	fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_sent;$/;"	m	struct:__anon37
-meas_nb_rx_bad	fwd/inc/stats.h	/^	uint32_t meas_nb_rx_bad;$/;"	m	struct:__anon36
-meas_nb_rx_nocrc	fwd/inc/stats.h	/^	uint32_t meas_nb_rx_nocrc;$/;"	m	struct:__anon36
-meas_nb_rx_ok	fwd/inc/stats.h	/^	uint32_t meas_nb_rx_ok;$/;"	m	struct:__anon36
-meas_nb_rx_rcv	fwd/inc/stats.h	/^	uint32_t meas_nb_rx_rcv;$/;"	m	struct:__anon36
-meas_nb_tx_fail	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_fail;$/;"	m	struct:__anon35
-meas_nb_tx_ok	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_ok;$/;"	m	struct:__anon35
-meas_nb_tx_rejected_collision_beacon	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_collision_beacon;$/;"	m	struct:__anon35
-meas_nb_tx_rejected_collision_packet	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_collision_packet;$/;"	m	struct:__anon35
-meas_nb_tx_rejected_too_early	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_too_early;$/;"	m	struct:__anon35
-meas_nb_tx_rejected_too_late	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_too_late;$/;"	m	struct:__anon35
-meas_nb_tx_requested	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_requested;$/;"	m	struct:__anon35
-meas_up_ack_rcv	fwd/inc/stats.h	/^    uint32_t meas_up_ack_rcv;$/;"	m	struct:__anon36
-meas_up_dgram_sent	fwd/inc/stats.h	/^    uint32_t meas_up_dgram_sent;$/;"	m	struct:__anon36
-meas_up_network_byte	fwd/inc/stats.h	/^    uint32_t meas_up_network_byte;$/;"	m	struct:__anon36
-meas_up_payload_byte	fwd/inc/stats.h	/^    uint32_t meas_up_payload_byte;$/;"	m	struct:__anon36
-meas_up_pkt_fwd	fwd/inc/stats.h	/^	uint32_t meas_up_pkt_fwd;$/;"	m	struct:__anon36
+meas_dw_ack_rcv	fwd/inc/stats.h	/^	uint32_t meas_dw_ack_rcv;$/;"	m	struct:__anon58
+meas_dw_dgram_acp	fwd/inc/stats.h	/^	uint32_t meas_dw_dgram_acp;$/;"	m	struct:__anon58
+meas_dw_dgram_rcv	fwd/inc/stats.h	/^	uint32_t meas_dw_dgram_rcv;$/;"	m	struct:__anon58
+meas_dw_network_byte	fwd/inc/stats.h	/^	uint32_t meas_dw_network_byte;$/;"	m	struct:__anon58
+meas_dw_payload_byte	fwd/inc/stats.h	/^	uint32_t meas_dw_payload_byte;$/;"	m	struct:__anon58
+meas_dw_pull_sent	fwd/inc/stats.h	/^	uint32_t meas_dw_pull_sent;$/;"	m	struct:__anon58
+meas_gps_coord	fwd/inc/gwcfg.h	/^        struct coord_s meas_gps_coord;  \/* GPS position of the gateway *\/$/;"	m	struct:__anon47::__anon51	typeref:struct:__anon47::__anon51::coord_s
+meas_gps_err	fwd/inc/gwcfg.h	/^        struct coord_s meas_gps_err;    \/* GPS position of the gateway *\/$/;"	m	struct:__anon47::__anon51	typeref:struct:__anon47::__anon51::coord_s
+meas_nb_beacon_queued	fwd/inc/gwcfg.h	/^        uint32_t meas_nb_beacon_queued;$/;"	m	struct:__anon47::__anon53
+meas_nb_beacon_queued	fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_queued;$/;"	m	struct:__anon60
+meas_nb_beacon_rejected	fwd/inc/gwcfg.h	/^        uint32_t meas_nb_beacon_rejected;$/;"	m	struct:__anon47::__anon53
+meas_nb_beacon_rejected	fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_rejected;$/;"	m	struct:__anon60
+meas_nb_beacon_sent	fwd/inc/gwcfg.h	/^        uint32_t meas_nb_beacon_sent;$/;"	m	struct:__anon47::__anon53
+meas_nb_beacon_sent	fwd/inc/stats.h	/^    uint32_t meas_nb_beacon_sent;$/;"	m	struct:__anon60
+meas_nb_rx_bad	fwd/inc/stats.h	/^	uint32_t meas_nb_rx_bad;$/;"	m	struct:__anon59
+meas_nb_rx_nocrc	fwd/inc/stats.h	/^	uint32_t meas_nb_rx_nocrc;$/;"	m	struct:__anon59
+meas_nb_rx_ok	fwd/inc/stats.h	/^	uint32_t meas_nb_rx_ok;$/;"	m	struct:__anon59
+meas_nb_rx_rcv	fwd/inc/stats.h	/^	uint32_t meas_nb_rx_rcv;$/;"	m	struct:__anon59
+meas_nb_tx_fail	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_fail;$/;"	m	struct:__anon58
+meas_nb_tx_ok	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_ok;$/;"	m	struct:__anon58
+meas_nb_tx_rejected_collision_beacon	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_collision_beacon;$/;"	m	struct:__anon58
+meas_nb_tx_rejected_collision_packet	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_collision_packet;$/;"	m	struct:__anon58
+meas_nb_tx_rejected_too_early	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_too_early;$/;"	m	struct:__anon58
+meas_nb_tx_rejected_too_late	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_rejected_too_late;$/;"	m	struct:__anon58
+meas_nb_tx_requested	fwd/inc/stats.h	/^	uint32_t meas_nb_tx_requested;$/;"	m	struct:__anon58
+meas_up_ack_rcv	fwd/inc/stats.h	/^    uint32_t meas_up_ack_rcv;$/;"	m	struct:__anon59
+meas_up_dgram_sent	fwd/inc/stats.h	/^    uint32_t meas_up_dgram_sent;$/;"	m	struct:__anon59
+meas_up_network_byte	fwd/inc/stats.h	/^    uint32_t meas_up_network_byte;$/;"	m	struct:__anon59
+meas_up_payload_byte	fwd/inc/stats.h	/^    uint32_t meas_up_payload_byte;$/;"	m	struct:__anon59
+meas_up_pkt_fwd	fwd/inc/stats.h	/^	uint32_t meas_up_pkt_fwd;$/;"	m	struct:__anon59
 memory	libttn/api.pb-c.h	/^  Api__ComponentStats__MemoryStats *memory;$/;"	m	struct:_Api__ComponentStats
 memory	libttn/api.pb-c.h	/^  Api__SystemStats__MemoryStats *memory;$/;"	m	struct:_Api__SystemStats
 memory	libttn/api.pb-c.h	/^  uint64_t memory;$/;"	m	struct:_Api__ComponentStats__MemoryStats
 memory_percentage	libttn/gateway.pb-c.h	/^  float memory_percentage;$/;"	m	struct:_Gateway__Status__OSMetrics
 message	libmqtt/MQTTClient.h	/^   MQTTMessage *message;$/;"	m	struct:MessageData
-message	libmqtt/MQTTConnect.h	/^	MQTTString message;$/;"	m	struct:__anon41
+message	libmqtt/MQTTConnect.h	/^	MQTTString message;$/;"	m	struct:__anon24
 message	libttn/router.pb-c.h	/^  Protocol__Message *message;$/;"	m	struct:_Router__DeviceActivationRequest
 message	libttn/router.pb-c.h	/^  Protocol__Message *message;$/;"	m	struct:_Router__DownlinkMessage
 message	libttn/router.pb-c.h	/^  Protocol__Message *message;$/;"	m	struct:_Router__UplinkMessage
@@ -6023,7 +6023,7 @@ method	libttn/descriptor.pb-c.h	/^  Google__Protobuf__MethodDescriptorProto **me
 mic	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData mic;$/;"	m	struct:_Lorawan__Message
 min	libmqtt/MQTTConnectServer.c	21;"	d	file:
 min	libmqtt/MQTTDeserializePublish.c	21;"	d	file:
-mix	fwd/src/ghost.c	/^} mix;$/;"	t	typeref:union:__anon11	file:
+mix	fwd/src/ghost.c	/^} mix;$/;"	t	typeref:union:__anon61	file:
 mix_gain	hal/loragw_hal.h	/^    uint8_t mix_gain;   \/*!> 4 bits, control of the radio mixer *\/$/;"	m	struct:lgw_tx_gain_s
 mix_gain	hal/sx1302hal/loragw_cal.h	/^    uint8_t mix_gain;$/;"	m	struct:lgw_sx125x_cal_tx_result_s
 mix_sub_columns	fwd/src/aes.c	/^  static void mix_sub_columns( uint_8t dt[N_BLOCK] )$/;"	f	file:
@@ -6034,8 +6034,8 @@ modulation	hal/loragw_hal.h	/^    uint8_t     modulation;     \/*!> modulation t
 modulation	hal/loragw_hal.h	/^    uint8_t     modulation;     \/*!> modulation used by the packet *\/$/;"	m	struct:lgw_pkt_rx_s
 modulation	libttn/lorawan.pb-c.h	/^  Lorawan__Modulation modulation;$/;"	m	struct:_Lorawan__Metadata
 modulation	libttn/lorawan.pb-c.h	/^  Lorawan__Modulation modulation;$/;"	m	struct:_Lorawan__TxConfiguration
-mqtt	fwd/inc/gwcfg.h	/^    mqtt,$/;"	e	enum:__anon12
-mqtt	fwd/inc/gwcfg.h	/^    mqttinfo_s *mqtt;$/;"	m	struct:__anon18
+mqtt	fwd/inc/gwcfg.h	/^    mqtt,$/;"	e	enum:__anon36
+mqtt	fwd/inc/gwcfg.h	/^    mqttinfo_s *mqtt;$/;"	m	struct:__anon42
 mqtt_checkconnected	fwd/src/mqtt_serv.c	/^static int mqtt_checkconnected(mqttsession_s *session) {$/;"	f	file:
 mqtt_cleanup	fwd/src/mqtt_serv.c	/^static void mqtt_cleanup(mqttsession_s* session) {$/;"	f	file:
 mqtt_connect	fwd/src/mqtt_serv.c	/^static int mqtt_connect(serv_s *serv) {$/;"	f	file:
@@ -6049,23 +6049,23 @@ mqtt_send_uplink	fwd/src/mqtt_serv.c	/^static int mqtt_send_uplink(mqttsession_s
 mqtt_sendping	fwd/src/mqtt_serv.c	/^static int mqtt_sendping(mqttsession_s *session) {$/;"	f	file:
 mqtt_start	fwd/src/mqtt_serv.c	/^int mqtt_start(serv_s* serv) {$/;"	f
 mqtt_stop	fwd/src/mqtt_serv.c	/^void mqtt_stop(serv_s* serv) {$/;"	f
-mqttinfo_s	fwd/inc/gwcfg.h	/^} mqttinfo_s;$/;"	t	typeref:struct:__anon17
+mqttinfo_s	fwd/inc/gwcfg.h	/^} mqttinfo_s;$/;"	t	typeref:struct:__anon41
 mqttread	libmqtt/MQTTLinux.h	/^   int (*mqttread)(struct Network *, unsigned char *, int, int);$/;"	m	struct:Network
 mqttsession_s	fwd/inc/mqtt_service.h	/^} mqttsession_s;$/;"	t	typeref:struct:_mqttsession_s
 mqttwrite	libmqtt/MQTTLinux.h	/^   int (*mqttwrite)(struct Network *, unsigned char *, int, int);$/;"	m	struct:Network
 msgTypes	libmqtt/MQTTPacket.h	/^enum msgTypes$/;"	g
-multiplier	libmqtt/MQTTPacket.h	/^	int multiplier;$/;"	m	struct:__anon51
-mx_bind_lock	fwd/inc/gwcfg.h	/^    pthread_mutex_t mx_bind_lock;	    \/\/ control access to the rxpkts bind$/;"	m	struct:__anon23
-mx_concent	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_concent;$/;"	m	struct:__anon23::__anon25
+multiplier	libmqtt/MQTTPacket.h	/^	int multiplier;$/;"	m	struct:__anon34
+mx_bind_lock	fwd/inc/gwcfg.h	/^    pthread_mutex_t mx_bind_lock;	    \/\/ control access to the rxpkts bind$/;"	m	struct:__anon47
+mx_concent	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_concent;$/;"	m	struct:__anon47::__anon49
 mx_dblock	fwd/src/db.c	/^pthread_mutex_t mx_dblock = PTHREAD_MUTEX_INITIALIZER;$/;"	v
 mx_jit_queue	fwd/src/jitqueue.c	/^static pthread_mutex_t mx_jit_queue = PTHREAD_MUTEX_INITIALIZER; \/* control access to JIT queue *\/$/;"	v	file:
-mx_meas_gps	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_meas_gps;	\/* control access to the GPS statistics *\/$/;"	m	struct:__anon23::__anon27
-mx_report	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_report;	 \/\/ control access to the queue for each server$/;"	m	struct:__anon23::__anon30
-mx_report	fwd/inc/stats.h	/^    pthread_mutex_t mx_report;	 \/\/ control access to the queue for each server$/;"	m	struct:__anon37
+mx_meas_gps	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_meas_gps;	\/* control access to the GPS statistics *\/$/;"	m	struct:__anon47::__anon51
+mx_report	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_report;	 \/\/ control access to the queue for each server$/;"	m	struct:__anon47::__anon54
+mx_report	fwd/inc/stats.h	/^    pthread_mutex_t mx_report;	 \/\/ control access to the queue for each server$/;"	m	struct:__anon60
 mx_spi	hal/loragw_spi.ftdi.c	/^static pthread_mutex_t mx_spi = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
-mx_timeref	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_timeref;	    \/* control access to GPS time reference *\/$/;"	m	struct:__anon23::__anon27
+mx_timeref	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_timeref;	    \/* control access to GPS time reference *\/$/;"	m	struct:__anon47::__anon51
 mx_timersync	fwd/src/timersync.c	/^static pthread_mutex_t mx_timersync = PTHREAD_MUTEX_INITIALIZER; \/* control access to timer sync offsets *\/$/;"	v	file:
-mx_xcorr	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_xcorr;$/;"	m	struct:__anon23::__anon25
+mx_xcorr	fwd/inc/gwcfg.h	/^        pthread_mutex_t mx_xcorr;$/;"	m	struct:__anon47::__anon49
 my_socket	libmqtt/MQTTLinux.h	/^   int my_socket;$/;"	m	struct:Network
 n_annotation	libttn/descriptor.pb-c.h	/^  size_t n_annotation;$/;"	m	struct:_Google__Protobuf__GeneratedCodeInfo
 n_antennas	libttn/gateway.pb-c.h	/^  size_t n_antennas;$/;"	m	struct:_Gateway__RxMetadata
@@ -6107,7 +6107,7 @@ n_uninterpreted_option	libttn/descriptor.pb-c.h	/^  size_t n_uninterpreted_optio
 n_uninterpreted_option	libttn/descriptor.pb-c.h	/^  size_t n_uninterpreted_option;$/;"	m	struct:_Google__Protobuf__ServiceOptions
 n_value	libttn/descriptor.pb-c.h	/^  size_t n_value;$/;"	m	struct:_Google__Protobuf__EnumDescriptorProto
 n_weak_dependency	libttn/descriptor.pb-c.h	/^  size_t n_weak_dependency;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
-name	fwd/inc/gwcfg.h	/^        char name[32];              \/\/ identify of server$/;"	m	struct:_server::__anon19
+name	fwd/inc/gwcfg.h	/^        char name[32];              \/\/ identify of server$/;"	m	struct:_server::__anon43
 name	fwd/inc/gwcfg.h	/^    char*       name;$/;"	m	struct:_thread_info
 name	fwd/src/utilities.c	/^	char *name;$/;"	m	struct:thr_arg	file:
 name	libttn/descriptor.pb-c.h	/^  Google__Protobuf__UninterpretedOption__NamePart **name;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
@@ -6123,18 +6123,18 @@ name_part	libttn/descriptor.pb-c.h	/^  char *name_part;$/;"	m	struct:_Google__Pr
 names	fwd/src/parson.c	/^    char       **names;$/;"	m	struct:json_object_t	file:
 nb_channel	hal/loragw_hal.h	/^    uint8_t                     nb_channel;         \/*!> number of LBT channels *\/$/;"	m	struct:lgw_conf_lbt_s
 nb_pkt	fwd/inc/gwcfg.h	/^    uint8_t nb_pkt;$/;"	m	struct:_rxpkts
-nb_pkt_log	fwd/inc/gwcfg.h	/^        uint32_t nb_pkt_log[LGW_IF_CHAIN_NB];  \/* [CH][SF] *\/$/;"	m	struct:__anon23::__anon30
-nb_pkt_received_fsk	fwd/inc/gwcfg.h	/^        uint32_t nb_pkt_received_fsk;$/;"	m	struct:__anon23::__anon30
-nb_pkt_received_lora	fwd/inc/gwcfg.h	/^        uint32_t nb_pkt_received_lora;$/;"	m	struct:__anon23::__anon30
-nb_pkt_received_ref	fwd/inc/gwcfg.h	/^        uint32_t nb_pkt_received_ref[16];$/;"	m	struct:__anon23::__anon30
+nb_pkt_log	fwd/inc/gwcfg.h	/^        uint32_t nb_pkt_log[LGW_IF_CHAIN_NB];  \/* [CH][SF] *\/$/;"	m	struct:__anon47::__anon54
+nb_pkt_received_fsk	fwd/inc/gwcfg.h	/^        uint32_t nb_pkt_received_fsk;$/;"	m	struct:__anon47::__anon54
+nb_pkt_received_lora	fwd/inc/gwcfg.h	/^        uint32_t nb_pkt_received_lora;$/;"	m	struct:__anon47::__anon54
+nb_pkt_received_ref	fwd/inc/gwcfg.h	/^        uint32_t nb_pkt_received_ref[16];$/;"	m	struct:__anon47::__anon54
 nb_ref_payload	hal/loragw_hal.h	/^    uint8_t                     nb_ref_payload;$/;"	m	struct:lgw_conf_debug_s
 nb_symbols	hal/loragw_hal.h	/^    uint8_t nb_symbols;$/;"	m	struct:lgw_conf_timestamp_s
 negative_int_value	libttn/descriptor.pb-c.h	/^  int64_t negative_int_value;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
 nested_type	libttn/descriptor.pb-c.h	/^  Google__Protobuf__DescriptorProto **nested_type;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 net	fwd/inc/gwcfg.h	/^    serv_net_s* net;$/;"	m	struct:_server
 net_id	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData net_id;$/;"	m	struct:_Lorawan__JoinAcceptPayload
-net_mac_h	fwd/inc/gwcfg.h	/^        uint32_t net_mac_h;$/;"	m	struct:__anon23::__anon24
-net_mac_l	fwd/inc/gwcfg.h	/^        uint32_t net_mac_l;$/;"	m	struct:__anon23::__anon24
+net_mac_h	fwd/inc/gwcfg.h	/^        uint32_t net_mac_h;$/;"	m	struct:__anon47::__anon48
+net_mac_l	fwd/inc/gwcfg.h	/^        uint32_t net_mac_l;$/;"	m	struct:__anon47::__anon48
 network	fwd/inc/mqtt_service.h	/^	Network network;$/;"	m	struct:_mqttsession_s
 network	libttn/session.h	/^  Network network;$/;"	m	struct:Session
 next	fwd/inc/db.h	/^	struct lgw_db_entry *next;$/;"	m	struct:lgw_db_entry	typeref:struct:lgw_db_entry::lgw_db_entry
@@ -6146,10 +6146,10 @@ nmea_checksum	hal/loragw_gps.c	/^static int nmea_checksum(const char *nmea_strin
 no_crc	hal/loragw_hal.h	/^    bool        no_crc;         \/*!> if true, do not send a CRC in the packet *\/$/;"	m	struct:lgw_pkt_tx_s
 no_header	hal/loragw_hal.h	/^    bool        no_header;      \/*!> if true, enable implicit header mode (LoRa), fixed length (FSK) *\/$/;"	m	struct:lgw_pkt_tx_s
 no_standard_descriptor_accessor	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean no_standard_descriptor_accessor;$/;"	m	struct:_Google__Protobuf__MessageOptions
-nocrc	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t nocrc;$/;"	m	struct:__anon2
+nocrc	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t nocrc;$/;"	m	struct:__anon20
 nodelimiter	libmqtt/test/stdoutsub.c	/^   int nodelimiter;$/;"	m	struct:opts_struct	file:
 nodes	fwd/inc/jitqueue.h	/^    struct jit_node_s nodes[JIT_QUEUE_MAX]; \/* Nodes\/packets array in the queue *\/$/;"	m	struct:jit_queue_s	typeref:struct:jit_queue_s::jit_node_s
-nss	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t nss;$/;"	m	struct:__anon2
+nss	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t nss;$/;"	m	struct:__anon20
 null	fwd/src/parson.c	/^    int          null;$/;"	m	union:json_value_value	file:
 num_beacon	fwd/inc/jitqueue.h	/^    uint8_t num_beacon;             \/* Number of beacons in the queue *\/$/;"	m	struct:jit_queue_s
 num_bytes_in_utf8_sequence	fwd/src/parson.c	/^static int num_bytes_in_utf8_sequence(unsigned char c) {$/;"	f	file:
@@ -6159,8 +6159,8 @@ number	fwd/src/parson.c	/^    double       number;$/;"	m	union:json_value_value	
 number	libttn/descriptor.pb-c.h	/^  int32_t number;$/;"	m	struct:_Google__Protobuf__EnumValueDescriptorProto
 number	libttn/descriptor.pb-c.h	/^  int32_t number;$/;"	m	struct:_Google__Protobuf__FieldDescriptorProto
 nwk_s_key	libttn/lorawan.pb-c.h	/^  ProtobufCBinaryData nwk_s_key;$/;"	m	struct:_Lorawan__ActivationMetadata
-nwkskey	fwd/inc/mac-header-decode.h	/^    uint8_t nwkskey[16];$/;"	m	struct:__anon31
-nwkskey_str	fwd/inc/mac-header-decode.h	/^    char nwkskey_str[33];$/;"	m	struct:__anon31
+nwkskey	fwd/inc/mac-header-decode.h	/^    uint8_t nwkskey[16];$/;"	m	struct:__anon35
+nwkskey_str	fwd/inc/mac-header-decode.h	/^    char nwkskey_str[33];$/;"	m	struct:__anon35
 objc_class_prefix	libttn/descriptor.pb-c.h	/^  char *objc_class_prefix;$/;"	m	struct:_Google__Protobuf__FileOptions
 object	fwd/src/parson.c	/^    JSON_Object *object;$/;"	m	union:json_value_value	file:
 objs	hal/Makefile	/^objs = $(fobjs) $(sx1302objs) $(sx1301objs) $(lg02objs)$/;"	m
@@ -6218,9 +6218,9 @@ parson_malloc	fwd/src/parson.c	/^static JSON_Malloc_Function parson_malloc = mal
 parson_parson_h	fwd/inc/parson.h	25;"	d
 parson_strdup	fwd/src/parson.c	/^static char * parson_strdup(const char *string) {$/;"	f	file:
 parson_strndup	fwd/src/parson.c	/^static char * parson_strndup(const char *string, size_t n) {$/;"	f	file:
-password	libmqtt/MQTTConnect.h	/^		unsigned int password : 1; 			\/**< 3.1 password *\/$/;"	m	struct:__anon38::__anon39
-password	libmqtt/MQTTConnect.h	/^		unsigned int password : 1; 			\/**< 3.1 password *\/$/;"	m	struct:__anon38::__anon40
-password	libmqtt/MQTTConnect.h	/^	MQTTString password;$/;"	m	struct:__anon42
+password	libmqtt/MQTTConnect.h	/^		unsigned int password : 1; 			\/**< 3.1 password *\/$/;"	m	struct:__anon21::__anon22
+password	libmqtt/MQTTConnect.h	/^		unsigned int password : 1; 			\/**< 3.1 password *\/$/;"	m	struct:__anon21::__anon23
+password	libmqtt/MQTTConnect.h	/^	MQTTString password;$/;"	m	struct:__anon25
 password	libmqtt/test/stdoutsub.c	/^   char *password;$/;"	m	struct:opts_struct	file:
 path	libttn/descriptor.pb-c.h	/^  int32_t *path;$/;"	m	struct:_Google__Protobuf__GeneratedCodeInfo__Annotation
 path	libttn/descriptor.pb-c.h	/^  int32_t *path;$/;"	m	struct:_Google__Protobuf__SourceCodeInfo__Location
@@ -6258,7 +6258,7 @@ ping_outstanding	libmqtt/MQTTClient.h	/^   char ping_outstanding;$/;"	m	struct:M
 ping_sent	libmqtt/MQTTClient.h	/^   struct timeval ping_sent;$/;"	m	struct:MQTTClient	typeref:struct:MQTTClient::timeval
 ping_time	libmqtt/MQTTClient.h	/^   long ping_time;$/;"	m	struct:MQTTClient
 ping_timer	libmqtt/MQTTClient.h	/^   Timer ping_timer;$/;"	m	struct:MQTTClient
-pkt	fwd/inc/gwcfg.h	/^    pkt,$/;"	e	enum:__anon12
+pkt	fwd/inc/gwcfg.h	/^    pkt,$/;"	e	enum:__anon36
 pkt	fwd/inc/jitqueue.h	/^    struct lgw_pkt_tx_s pkt;        \/* TX packet *\/$/;"	m	struct:jit_node_s	typeref:struct:jit_node_s::lgw_pkt_tx_s
 pkt_basic_filter	fwd/src/service.c	/^bool pkt_basic_filter(serv_s* serv, const uint32_t addr, const uint8_t fport) {$/;"	f
 pkt_deal_up	fwd/src/pkt_serv.c	/^static void pkt_deal_up(void* arg) {$/;"	f	file:
@@ -6266,16 +6266,16 @@ pkt_prepare_downlink	fwd/src/pkt_serv.c	/^static void pkt_prepare_downlink(void*
 pkt_start	fwd/src/pkt_serv.c	/^int pkt_start(serv_s* serv) {$/;"	f
 pkt_stop	fwd/src/pkt_serv.c	/^void pkt_stop(serv_s* serv) {$/;"	f
 pkt_type	fwd/inc/jitqueue.h	/^    enum jit_pkt_type_e pkt_type;   \/* Packet type: Downlink, Beacon... *\/$/;"	m	struct:jit_node_s	typeref:enum:jit_node_s::jit_pkt_type_e
-pkttraf	fwd/inc/gwcfg.h	/^    pkttraf,$/;"	e	enum:__anon14
-platform	fwd/inc/gwcfg.h	/^        char platform[24];	    \/* platform definition *\/$/;"	m	struct:__anon23::__anon24
+pkttraf	fwd/inc/gwcfg.h	/^    pkttraf,$/;"	e	enum:__anon38
+platform	fwd/inc/gwcfg.h	/^        char platform[24];	    \/* platform definition *\/$/;"	m	struct:__anon47::__anon48
 platform	libttn/gateway.pb-c.h	/^  char *platform;$/;"	m	struct:_Gateway__Status
 polarization_inversion	libttn/gateway.pb-c.h	/^  protobuf_c_boolean polarization_inversion;$/;"	m	struct:_Gateway__TxConfiguration
 port	libmqtt/test/stdoutsub.c	/^   int port;$/;"	m	struct:opts_struct	file:
-port_down	fwd/inc/gwcfg.h	/^    char port_down[8];			\/\/ downlink port $/;"	m	struct:__anon18
-port_up	fwd/inc/gwcfg.h	/^    char port_up[8];			\/\/ uplink port $/;"	m	struct:__anon18
+port_down	fwd/inc/gwcfg.h	/^    char port_down[8];			\/\/ downlink port $/;"	m	struct:__anon42
+port_up	fwd/inc/gwcfg.h	/^    char port_up[8];			\/\/ uplink port $/;"	m	struct:__anon42
 positive_int_value	libttn/descriptor.pb-c.h	/^  uint64_t positive_int_value;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
 post_delay	fwd/inc/jitqueue.h	/^    uint32_t post_delay;            \/* Amount of time after packet timestamp to be reserved (time on air) *\/$/;"	m	struct:jit_node_s
-power	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t power;$/;"	m	struct:__anon2
+power	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t power;$/;"	m	struct:__anon20
 power	libttn/gateway.pb-c.h	/^  int32_t power;$/;"	m	struct:_Gateway__TxConfiguration
 ppm_ref	hal/test/test_loragw_gps.c	/^struct tref ppm_ref;$/;"	v	typeref:struct:tref
 ppm_ref	hal/tst/test_loragw_gps.c	/^struct tref ppm_ref;$/;"	v	typeref:struct:tref
@@ -6289,7 +6289,7 @@ printRX	fwd/src/ghost.c	/^static void printRX(struct lgw_pkt_rx_s *p) {$/;"	f	fi
 print_downlink	libttn/test/test.c	/^void print_downlink(Router__DownlinkMessage *msg, void *arg) {$/;"	f
 print_tx_status	fwd/src/fwd.c	/^void print_tx_status(uint8_t tx_status) {$/;"	f
 printf_mac_header	fwd/src/mac-header-decode.c	/^void printf_mac_header( LoRaMacMessageData_t* macMsg )$/;"	f
-prlen	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t prlen;$/;"	m	struct:__anon2
+prlen	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t prlen;$/;"	m	struct:__anon20
 process_string	fwd/src/parson.c	/^static char* process_string(const char *input, size_t len) {$/;"	f	file:
 protocol__activation_metadata__descriptor	libttn/protocol.pb-c.c	/^const ProtobufCMessageDescriptor protocol__activation_metadata__descriptor =$/;"	v
 protocol__activation_metadata__field_descriptors	libttn/protocol.pb-c.c	/^static const ProtobufCFieldDescriptor protocol__activation_metadata__field_descriptors[1] =$/;"	v	file:
@@ -6340,16 +6340,16 @@ protocol_metadata	libttn/router.pb-c.h	/^  Protocol__RxMetadata *protocol_metada
 protocol_metadata	libttn/router.pb-c.h	/^  Protocol__RxMetadata *protocol_metadata;$/;"	m	struct:_Router__UplinkMessage
 psize	fwd/inc/pkt_service.h	/^    uint8_t psize;$/;"	m	struct:_dn_pkt
 public_dependency	libttn/descriptor.pb-c.h	/^  int32_t *public_dependency;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
-pull_interval	fwd/inc/gwcfg.h	/^    int  pull_interval;	        \/\/ send a PULL_DATA request every X seconds $/;"	m	struct:__anon18
-pull_timeout	fwd/inc/gwcfg.h	/^    struct timeval pull_timeout;$/;"	m	struct:__anon18	typeref:struct:__anon18::timeval
-push_timeout_half	fwd/inc/gwcfg.h	/^    struct timeval push_timeout_half;       \/* time-out value (in ms) for upstream datagrams *\/$/;"	m	struct:__anon18	typeref:struct:__anon18::timeval
+pull_interval	fwd/inc/gwcfg.h	/^    int  pull_interval;	        \/\/ send a PULL_DATA request every X seconds $/;"	m	struct:__anon42
+pull_timeout	fwd/inc/gwcfg.h	/^    struct timeval pull_timeout;$/;"	m	struct:__anon42	typeref:struct:__anon42::timeval
+push_timeout_half	fwd/inc/gwcfg.h	/^    struct timeval push_timeout_half;       \/* time-out value (in ms) for upstream datagrams *\/$/;"	m	struct:__anon42	typeref:struct:__anon42::timeval
 pwr_idx	hal/loragw_hal.h	/^    uint8_t pwr_idx;    \/*!> (sx1250) 6 bits: control the radio power index to be used for configuration *\/$/;"	m	struct:lgw_tx_gain_s
 py_generic_services	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean py_generic_services;$/;"	m	struct:_Google__Protobuf__FileOptions
 q_offset	hal/test/test_loragw_cal.c	/^    int32_t q_offset;$/;"	m	struct:cal_tx_log	file:
 qos	libmqtt/MQTTClient.h	/^   enum QoS qos;$/;"	m	struct:MQTTMessage	typeref:enum:MQTTMessage::QoS
-qos	libmqtt/MQTTConnect.h	/^	char qos;$/;"	m	struct:__anon41
-qos	libmqtt/MQTTPacket.h	/^		unsigned int qos : 2;				\/**< QoS value, 0, 1 or 2 *\/$/;"	m	struct:__anon46::__anon47
-qos	libmqtt/MQTTPacket.h	/^		unsigned int qos : 2;				\/**< QoS value, 0, 1 or 2 *\/$/;"	m	struct:__anon46::__anon48
+qos	libmqtt/MQTTConnect.h	/^	char qos;$/;"	m	struct:__anon24
+qos	libmqtt/MQTTPacket.h	/^		unsigned int qos : 2;				\/**< QoS value, 0, 1 or 2 *\/$/;"	m	struct:__anon29::__anon30
+qos	libmqtt/MQTTPacket.h	/^		unsigned int qos : 2;				\/**< QoS value, 0, 1 or 2 *\/$/;"	m	struct:__anon29::__anon31
 qos	libmqtt/test/stdoutsub.c	/^   enum QoS qos;$/;"	m	struct:opts_struct	typeref:enum:opts_struct::QoS	file:
 qsort_r	fwd/src/jitqueue.c	/^static void qsort_r(void *base, size_t nel, size_t width, __compar_d_fn_t comp, void *arg) {$/;"	f	file:
 quit_sig	fwd/src/fwd.c	/^volatile bool quit_sig = false;	\/* 1 -> application terminates without shutting down the hardware *\/$/;"	v
@@ -6365,8 +6365,8 @@ quit_sig	hal/test/test_loragw_spi_sx1250.c	/^static int quit_sig = 0; \/* 1 -> a
 quit_sig	hal/tst/test_loragw_gps.c	/^static int quit_sig = 0; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v	file:
 quit_sig	hal/tst/test_loragw_hal.c	/^static int quit_sig = 0; \/* 1 -> application terminates without shutting down the hardware *\/$/;"	v	file:
 radio_reg_s	hal/sx1302hal/loragw_sx125x.h	/^struct radio_reg_s$/;"	s
-radio_reg_t	hal/sx1302hal/loragw_sx125x.h	/^radio_reg_t;$/;"	t	typeref:enum:__anon10
-radiostream_enabled	fwd/inc/gwcfg.h	/^        bool     radiostream_enabled;	$/;"	m	struct:__anon23::__anon26
+radio_reg_t	hal/sx1302hal/loragw_sx125x.h	/^radio_reg_t;$/;"	t	typeref:enum:__anon14
+radiostream_enabled	fwd/inc/gwcfg.h	/^        bool     radiostream_enabled;	$/;"	m	struct:__anon47::__anon50
 rate1	libttn/api.pb-c.h	/^  float rate1;$/;"	m	struct:_Api__Rates
 rate15	libttn/api.pb-c.h	/^  float rate15;$/;"	m	struct:_Api__Rates
 rate5	libttn/api.pb-c.h	/^  float rate5;$/;"	m	struct:_Api__Rates
@@ -6384,35 +6384,35 @@ read_thread	libmqtt/MQTTClient.h	/^   Thread read_thread;$/;"	m	struct:MQTTClien
 readbuf	libmqtt/MQTTClient.h	/^       *readbuf;$/;"	m	struct:MQTTClient
 readbuf_size	libmqtt/MQTTClient.h	/^       readbuf_size;$/;"	m	struct:MQTTClient
 ref_payload	hal/loragw_hal.h	/^    struct conf_ref_payload_s   ref_payload[16];$/;"	m	struct:lgw_conf_debug_s	typeref:struct:lgw_conf_debug_s::conf_ref_payload_s
-reference_coord	fwd/inc/gwcfg.h	/^        struct coord_s reference_coord; \/* Reference coordinates, for broadcasting (beacon) *\/$/;"	m	struct:__anon23::__anon27	typeref:struct:__anon23::__anon27::coord_s
+reference_coord	fwd/inc/gwcfg.h	/^        struct coord_s reference_coord; \/* Reference coordinates, for broadcasting (beacon) *\/$/;"	m	struct:__anon47::__anon51	typeref:struct:__anon47::__anon51::coord_s
 reference_coord	fwd/src/ghost.c	/^static struct coord_s reference_coord;$/;"	v	typeref:struct:coord_s	file:
 reg_r_align32	hal/loragw_reg.c	/^int reg_r_align32(void *spi_target, uint8_t spi_mux_target, struct lgw_reg_s r, int32_t *reg_value) {$/;"	f
 reg_version	hal/lg02hal/loragw_sx127x_radio.c	/^    uint8_t reg_version;$/;"	m	struct:lgw_radio_type_version_s	file:
 reg_w_align32	hal/loragw_reg.c	/^int reg_w_align32(void *spi_target, uint8_t spi_mux_target, struct lgw_reg_s r, int32_t reg_value) {$/;"	f
-region	fwd/inc/gwcfg.h	/^        region_s   region;$/;"	m	struct:__anon23::__anon26
-region_s	fwd/inc/gwcfg.h	/^} region_s;$/;"	t	typeref:enum:__anon13
+region	fwd/inc/gwcfg.h	/^        region_s   region;$/;"	m	struct:__anon47::__anon50
+region_s	fwd/inc/gwcfg.h	/^} region_s;$/;"	t	typeref:enum:__anon37
 register_atexit	fwd/src/fwd.c	/^static int register_atexit(void (*func)(void), int is_cleanup)$/;"	f	file:
 rej	hal/sx1302hal/loragw_cal.h	/^    uint16_t rej;$/;"	m	struct:lgw_sx125x_cal_rx_result_s
 rej	hal/sx1302hal/loragw_cal.h	/^    uint16_t rej;$/;"	m	struct:lgw_sx125x_cal_tx_result_s
 rej_init	hal/sx1302hal/loragw_cal.h	/^    uint16_t rej_init;$/;"	m	struct:lgw_sx125x_cal_rx_result_s
-rem_len	libmqtt/MQTTPacket.h	/^	int rem_len;$/;"	m	struct:__anon51
+rem_len	libmqtt/MQTTPacket.h	/^	int rem_len;$/;"	m	struct:__anon34
 remove_comments	fwd/src/parson.c	/^static void remove_comments(char *string, const char *start_token, const char *end_token) {$/;"	f	file:
 remove_spaces	tools/payload_tools/payload_crc.c	/^void remove_spaces(char *str)$/;"	f
 remove_spaces	tools/payload_tools/payload_diff.c	/^void remove_spaces(char *str)$/;"	f
 remove_spaces	tools/payload_tools/payload_gen.c	/^void remove_spaces(char *str)$/;"	f
 reply	libmqtt/MQTTClient.h	/^   Queue reply;$/;"	m	struct:MQTTClient
 report	fwd/inc/gwcfg.h	/^    report_s* report;$/;"	m	struct:_server
-report_ready	fwd/inc/stats.h	/^    bool report_ready;$/;"	m	struct:__anon37
-report_s	fwd/inc/stats.h	/^} report_s;$/;"	t	typeref:struct:__anon37
+report_ready	fwd/inc/stats.h	/^    bool report_ready;$/;"	m	struct:__anon60
+report_s	fwd/inc/stats.h	/^} report_s;$/;"	t	typeref:struct:__anon60
 report_start	fwd/src/stats.c	/^void report_start() {$/;"	f
 reserved_name	libttn/descriptor.pb-c.h	/^  char **reserved_name;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 reserved_range	libttn/descriptor.pb-c.h	/^  Google__Protobuf__DescriptorProto__ReservedRange **reserved_range;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 reset	tools/reset_lgw.sh	/^reset() {$/;"	f
 reset_sx127x	hal/lg02hal/loragw_sx127x_radio.c	/^int reset_sx127x(bool isftdi, int invert) {$/;"	f
-retain	libmqtt/MQTTPacket.h	/^		unsigned int retain : 1;		\/**< retained flag bit *\/$/;"	m	struct:__anon46::__anon47
-retain	libmqtt/MQTTPacket.h	/^		unsigned int retain : 1;		\/**< retained flag bit *\/$/;"	m	struct:__anon46::__anon48
+retain	libmqtt/MQTTPacket.h	/^		unsigned int retain : 1;		\/**< retained flag bit *\/$/;"	m	struct:__anon29::__anon30
+retain	libmqtt/MQTTPacket.h	/^		unsigned int retain : 1;		\/**< retained flag bit *\/$/;"	m	struct:__anon29::__anon31
 retained	libmqtt/MQTTClient.h	/^   unsigned char retained;$/;"	m	struct:MQTTMessage
-retained	libmqtt/MQTTConnect.h	/^	unsigned char retained;$/;"	m	struct:__anon41
+retained	libmqtt/MQTTConnect.h	/^	unsigned char retained;$/;"	m	struct:__anon24
 returnCode	libmqtt/MQTTErrors.h	/^enum returnCode$/;"	g
 return_type	fwd/inc/aes.h	/^typedef uint_8t return_type;$/;"	t
 rf_chain	hal/loragw_hal.h	/^    uint8_t     rf_chain;       \/*!> through which RF chain the packet was received *\/$/;"	m	struct:lgw_pkt_rx_s
@@ -6439,7 +6439,7 @@ rf_rx_image_phi	hal/sx1302hal/loragw_cal.c	/^static int8_t rf_rx_image_phi[LGW_R
 rf_tx_enable	hal/sx1301hal/loragw_hal_sx1301.c	/^static bool rf_tx_enable[LGW_RF_CHAIN_NB];$/;"	v	file:
 rf_tx_notch_freq	hal/sx1301hal/loragw_hal_sx1301.c	/^static uint32_t rf_tx_notch_freq[LGW_RF_CHAIN_NB];$/;"	v	file:
 rijndael	fwd/inc/cmac.h	/^            aes_context    rijndael;$/;"	m	struct:_AES_CMAC_CTX
-rnd	fwd/inc/aes.h	/^    uint_8t rnd;$/;"	m	struct:__anon32
+rnd	fwd/inc/aes.h	/^    uint_8t rnd;$/;"	m	struct:__anon55
 router	libttn/gateway.pb-c.h	/^  char *router;$/;"	m	struct:_Gateway__Status
 router__device_activation_request__descriptor	libttn/router.pb-c.c	/^const ProtobufCMessageDescriptor router__device_activation_request__descriptor =$/;"	v
 router__device_activation_request__field_descriptors	libttn/router.pb-c.c	/^static const ProtobufCFieldDescriptor router__device_activation_request__field_descriptors[8] =$/;"	v	file:
@@ -6559,7 +6559,7 @@ rssi_target	hal/loragw_hal.h	/^    int8_t                      rssi_target;     
 rssi_tcomp	hal/loragw_hal.h	/^	struct lgw_rssi_tcomp_s rssi_tcomp;         \/*!> Board-specific RSSI temperature compensation coefficients *\/$/;"	m	struct:lgw_conf_rxrf_s	typeref:struct:lgw_conf_rxrf_s::lgw_rssi_tcomp_s
 rssic	hal/loragw_hal.h	/^    float       rssic;          \/*!> average RSSI of the channel in dB *\/$/;"	m	struct:lgw_pkt_rx_s
 rssis	hal/loragw_hal.h	/^    float       rssis;          \/*!> average RSSI of the signal in dB *\/$/;"	m	struct:lgw_pkt_rx_s
-rst	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t rst;$/;"	m	struct:__anon2
+rst	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t rst;$/;"	m	struct:__anon20
 rtt	libttn/gateway.pb-c.h	/^  uint32_t rtt;$/;"	m	struct:_Gateway__Status
 runing	fwd/inc/gwcfg.h	/^    bool        runing;$/;"	m	struct:_thread_info
 running	libttn/test/test.c	/^int running = 1;$/;"	v
@@ -6593,8 +6593,8 @@ rxbytenb_modem	hal/sx1302hal/loragw_sx1302_rx.h	/^    uint8_t     rxbytenb_modem
 rxlorairqmask	hal/lg02hal/loragw_hal_lg02.c	/^static const uint8_t rxlorairqmask[] = {$/;"	v	file:
 rxpkt	fwd/inc/gwcfg.h	/^    struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];$/;"	m	struct:_rxpkts	typeref:struct:_rxpkts::lgw_pkt_rx_s
 rxpkt	fwd/inc/gwcfg.h	/^    struct lgw_pkt_rx_s rxpkt[NB_PKT_MAX];$/;"	m	struct:_server	typeref:struct:_server::lgw_pkt_rx_s
-rxpkts	fwd/inc/gwcfg.h	/^    rxpkts,$/;"	e	enum:__anon14
-rxpkts_list	fwd/inc/gwcfg.h	/^    struct rxpkts_list rxpkts_list;$/;"	m	struct:__anon23	typeref:struct:__anon23::rxpkts_list
+rxpkts	fwd/inc/gwcfg.h	/^    rxpkts,$/;"	e	enum:__anon38
+rxpkts_list	fwd/inc/gwcfg.h	/^    struct rxpkts_list rxpkts_list;$/;"	m	struct:__anon47	typeref:struct:__anon47::rxpkts_list
 rxpkts_s	fwd/inc/gwcfg.h	/^} rxpkts_s;$/;"	t	typeref:struct:_rxpkts
 s	libmqtt/MQTTLinux.h	/^   Semaphore s;$/;"	m	struct:Queue
 s	libmqtt/MQTTLinux.h	/^   sem_t s;$/;"	m	struct:Semaphore
@@ -6623,39 +6623,39 @@ sampling_frequency	hal/test/test_loragw_capture_ram.c	/^uint32_t sampling_freque
 sb_data	fwd/src/aes.c	94;"	d	file:
 sbox	fwd/src/aes.c	/^static const uint_8t sbox[256]  =  sb_data(f1);$/;"	v	file:
 scan_time_us	hal/loragw_hal.h	/^    uint16_t scan_time_us;$/;"	m	struct:lgw_conf_lbt_chan_s
-sck	libmqtt/MQTTPacket.h	/^	void *sck;	\/* pointer to whatever the system may use to identify the transport *\/$/;"	m	struct:__anon51
+sck	libmqtt/MQTTPacket.h	/^	void *sck;	\/* pointer to whatever the system may use to identify the transport *\/$/;"	m	struct:__anon34
 search_dn_list	fwd/src/pkt_serv.c	/^static dn_pkt_s* search_dn_list(const char* addr) {$/;"	f	file:
-sema	fwd/inc/gwcfg.h	/^        sem_t sema;				    \/\/ semaphore for sending data$/;"	m	struct:_server::__anon22
+sema	fwd/inc/gwcfg.h	/^        sem_t sema;				    \/\/ semaphore for sending data$/;"	m	struct:_server::__anon46
 sema	fwd/inc/gwcfg.h	/^    sem_t*      sema;$/;"	m	struct:_thread_info
-semtech	fwd/inc/gwcfg.h	/^	semtech,$/;"	e	enum:__anon12
-semtech_down	fwd/inc/gwcfg.h	/^    semtech_down,$/;"	e	enum:__anon14
+semtech	fwd/inc/gwcfg.h	/^	semtech,$/;"	e	enum:__anon36
+semtech_down	fwd/inc/gwcfg.h	/^    semtech_down,$/;"	e	enum:__anon38
 semtech_pull_down	fwd/src/semtech_serv.c	/^static void semtech_pull_down(void* arg) {$/;"	f	file:
 semtech_push_up	fwd/src/semtech_serv.c	/^static void semtech_push_up(void* arg) {$/;"	f	file:
 semtech_report	fwd/src/stats.c	/^static void semtech_report(serv_s *serv) {$/;"	f	file:
 semtech_start	fwd/src/semtech_serv.c	/^int semtech_start(serv_s* serv) {$/;"	f
 semtech_stop	fwd/src/semtech_serv.c	/^int semtech_stop(serv_s* serv) {$/;"	f
-semtech_up	fwd/inc/gwcfg.h	/^    semtech_up,$/;"	e	enum:__anon14
+semtech_up	fwd/inc/gwcfg.h	/^    semtech_up,$/;"	e	enum:__anon38
 sendPacket	libmqtt/MQTTClient.c	/^static int sendPacket(MQTTClient *c, int length, Timer *timer)$/;"	f	file:
 send_buffer	fwd/inc/mqtt_service.h	/^	unsigned char *send_buffer;$/;"	m	struct:_mqttsession_s
 send_buffer	libttn/session.h	/^  unsigned char *send_buffer;$/;"	m	struct:Session
 send_tx_ack	fwd/src/fwd.c	/^int send_tx_ack(serv_s* serv, uint8_t token_h, uint8_t token_l, enum jit_error_e error, int32_t error_value) {$/;"	f
-serv_list	fwd/inc/gwcfg.h	/^    struct serv_list serv_list;$/;"	m	struct:__anon23	typeref:struct:__anon23::serv_list
-serv_net_s	fwd/inc/gwcfg.h	/^} serv_net_s;$/;"	t	typeref:struct:__anon18
+serv_list	fwd/inc/gwcfg.h	/^    struct serv_list serv_list;$/;"	m	struct:__anon47	typeref:struct:__anon47::serv_list
+serv_net_s	fwd/inc/gwcfg.h	/^} serv_net_s;$/;"	t	typeref:struct:__anon42
 serv_s	fwd/inc/gwcfg.h	/^} serv_s;$/;"	t	typeref:struct:_server
-serv_type	fwd/inc/gwcfg.h	/^} serv_type;$/;"	t	typeref:enum:__anon12
+serv_type	fwd/inc/gwcfg.h	/^} serv_type;$/;"	t	typeref:enum:__anon36
 server_streaming	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean server_streaming;$/;"	m	struct:_Google__Protobuf__MethodDescriptorProto
 service	libttn/descriptor.pb-c.h	/^  Google__Protobuf__ServiceDescriptorProto **service;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
 service_id	libttn/trace.pb-c.h	/^  char *service_id;$/;"	m	struct:_Trace__Trace
 service_name	libttn/trace.pb-c.h	/^  char *service_name;$/;"	m	struct:_Trace__Trace
 service_start	fwd/src/service.c	/^void service_start() {$/;"	f
 service_stop	fwd/src/service.c	/^void service_stop() {$/;"	f
-session	fwd/inc/gwcfg.h	/^    void* session;$/;"	m	struct:__anon17
-sessionpresent	libmqtt/MQTTConnect.h	/^		unsigned int sessionpresent : 1;    \/**< session present flag *\/$/;"	m	struct:__anon43::__anon44
-sessionpresent	libmqtt/MQTTConnect.h	/^		unsigned int sessionpresent : 1;    \/**< session present flag *\/$/;"	m	struct:__anon43::__anon45
+session	fwd/inc/gwcfg.h	/^    void* session;$/;"	m	struct:__anon41
+sessionpresent	libmqtt/MQTTConnect.h	/^		unsigned int sessionpresent : 1;    \/**< session present flag *\/$/;"	m	struct:__anon26::__anon27
+sessionpresent	libmqtt/MQTTConnect.h	/^		unsigned int sessionpresent : 1;    \/**< session present flag *\/$/;"	m	struct:__anon26::__anon28
 setup_sx1272_FSK	hal/lg02hal/loragw_sx127x_radio.c	/^int setup_sx1272_FSK(bool isftdi, uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
 setup_sx1276_FSK	hal/lg02hal/loragw_sx127x_radio.c	/^int setup_sx1276_FSK(bool isftdi, uint32_t frequency, enum lgw_sx127x_rxbw_e rxbw_khz, int8_t rssi_offset) {$/;"	f
 setup_tx_dc_offset	hal/test/test_loragw_cal.c	/^int setup_tx_dc_offset(uint8_t rf_chain, uint32_t freq_hz, uint8_t dac_gain, uint8_t mix_gain, uint8_t radio_type) {$/;"	f
-sf	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t sf;$/;"	m	struct:__anon2
+sf	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t sf;$/;"	m	struct:__anon20
 sf_t	hal/lg02hal/loragw_hal_lg02.h	/^enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };$/;"	g
 shift_sub_rows	fwd/src/aes.c	/^static void shift_sub_rows( uint_8t st[N_BLOCK] )$/;"	f	file:
 showtopics	libmqtt/test/stdoutsub.c	/^   int showtopics;$/;"	m	struct:opts_struct	file:
@@ -6685,52 +6685,52 @@ snr	libttn/gateway.pb-c.h	/^  float snr;$/;"	m	struct:_Gateway__RxMetadata__Ante
 snr_average	hal/sx1302hal/loragw_sx1302_rx.h	/^    int8_t      snr_average;                \/* LoRa only *\/$/;"	m	struct:rx_packet_s
 snr_max	hal/loragw_hal.h	/^    float       snr_max;        \/*!> maximum packet SNR, in dB (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
 snr_min	hal/loragw_hal.h	/^    float       snr_min;        \/*!> minimum packet SNR, in dB (LoRa only) *\/$/;"	m	struct:lgw_pkt_rx_s
-sock_down	fwd/inc/gwcfg.h	/^    int  sock_down;				\/\/ down socket$/;"	m	struct:__anon18
+sock_down	fwd/inc/gwcfg.h	/^    int  sock_down;				\/\/ down socket$/;"	m	struct:__anon42
 sock_ghost	fwd/src/ghost.c	/^static int sock_ghost;			\/* socket for downstream traffic *\/$/;"	v	file:
-sock_up	fwd/inc/gwcfg.h	/^    int  sock_up;				\/\/ up socket$/;"	m	struct:__anon18
+sock_up	fwd/inc/gwcfg.h	/^    int  sock_up;				\/\/ up socket$/;"	m	struct:__anon42
 source_code_info	libttn/descriptor.pb-c.h	/^  Google__Protobuf__SourceCodeInfo *source_code_info;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
 source_file	libttn/descriptor.pb-c.h	/^  char *source_file;$/;"	m	struct:_Google__Protobuf__GeneratedCodeInfo__Annotation
 span	libttn/descriptor.pb-c.h	/^  int32_t *span;$/;"	m	struct:_Google__Protobuf__SourceCodeInfo__Location
 spi_path	hal/loragw_hal.h	/^    char*                       spi_path;$/;"	m	struct:lgw_conf_lbt_s
 spidev_path	hal/loragw_hal.h	/^    char    spidev_path[64];\/*!> Path to access the SPI device to connect to the SX1302 *\/$/;"	m	struct:lgw_conf_board_s
 spidev_path	hal/sx1301hal/loragw_hal_sx1301.c	/^static char	spidev_path[64] = "\/dev\/spidev1.0";$/;"	v	file:
-spipath	hal/lg02hal/loragw_hal_lg02.h	/^    char spipath[32];$/;"	m	struct:__anon2
-spiport	hal/lg02hal/loragw_hal_lg02.h	/^    void* spiport;$/;"	m	struct:__anon2
+spipath	hal/lg02hal/loragw_hal_lg02.h	/^    char spipath[32];$/;"	m	struct:__anon20
+spiport	hal/lg02hal/loragw_hal_lg02.h	/^    void* spiport;$/;"	m	struct:__anon20
 stack	libttn/api.pb-c.h	/^  uint64_t stack;$/;"	m	struct:_Api__ComponentStats__MemoryStats
-stall_time	fwd/inc/gwcfg.h	/^        int  stall_time;$/;"	m	struct:_server::__anon21
-stamp	fwd/inc/gwcfg.h	/^        uint8_t stamp;              \/\/ 用来标记service，当有服务印上这个标记时，代表和当前的service有关联$/;"	m	struct:_server::__anon19
+stall_time	fwd/inc/gwcfg.h	/^        int  stall_time;$/;"	m	struct:_server::__anon45
+stamp	fwd/inc/gwcfg.h	/^        uint8_t stamp;              \/\/ 用来标记service，当有服务印上这个标记时，代表和当前的service有关联$/;"	m	struct:_server::__anon43
 stamps	fwd/inc/gwcfg.h	/^    uint8_t stamps;        \/\/这个指示当前有什么服务对这个包打上了印记$/;"	m	struct:_rxpkts
 start	libttn/descriptor.pb-c.h	/^  int32_t start;$/;"	m	struct:_Google__Protobuf__DescriptorProto__ExtensionRange
 start	libttn/descriptor.pb-c.h	/^  int32_t start;$/;"	m	struct:_Google__Protobuf__DescriptorProto__ReservedRange
 start_routine	fwd/src/utilities.c	/^	void *(*start_routine)(void *);$/;"	m	struct:thr_arg	file:
 started	libmqtt/MQTTLinux.h	/^   int started;$/;"	m	struct:Thread
-startup_time	fwd/inc/gwcfg.h	/^        time_t startup_time;		\/\/ time of server starting$/;"	m	struct:_server::__anon21
-stat_down	fwd/inc/stats.h	/^    stat_dw_s stat_down;$/;"	m	struct:__anon37
-stat_dw	fwd/inc/gwcfg.h	/^        stat_dw_s stat_dw;$/;"	m	struct:__anon23::__anon30
-stat_dw_s	fwd/inc/stats.h	/^} stat_dw_s;$/;"	t	typeref:struct:__anon35
-stat_format	fwd/inc/stats.h	/^    char stat_format[16];               \/\/ format for json statistics$/;"	m	struct:__anon37
-stat_interval	fwd/inc/stats.h	/^    uint16_t stat_interval; 	     \/\/ time interval (in sec) at which statistics are collected and displayed$/;"	m	struct:__anon37
-stat_up	fwd/inc/stats.h	/^    stat_up_s   stat_up;$/;"	m	struct:__anon37
-stat_up_s	fwd/inc/stats.h	/^} stat_up_s;$/;"	t	typeref:struct:__anon36
-state	fwd/inc/gwcfg.h	/^    } state;$/;"	m	struct:_server	typeref:struct:_server::__anon21
-state	libmqtt/MQTTPacket.h	/^	char state;$/;"	m	struct:__anon51
-stats	fwd/inc/gwcfg.h	/^    stats,$/;"	e	enum:__anon14
+startup_time	fwd/inc/gwcfg.h	/^        time_t startup_time;		\/\/ time of server starting$/;"	m	struct:_server::__anon45
+stat_down	fwd/inc/stats.h	/^    stat_dw_s stat_down;$/;"	m	struct:__anon60
+stat_dw	fwd/inc/gwcfg.h	/^        stat_dw_s stat_dw;$/;"	m	struct:__anon47::__anon54
+stat_dw_s	fwd/inc/stats.h	/^} stat_dw_s;$/;"	t	typeref:struct:__anon58
+stat_format	fwd/inc/stats.h	/^    char stat_format[16];               \/\/ format for json statistics$/;"	m	struct:__anon60
+stat_interval	fwd/inc/stats.h	/^    uint16_t stat_interval; 	     \/\/ time interval (in sec) at which statistics are collected and displayed$/;"	m	struct:__anon60
+stat_up	fwd/inc/stats.h	/^    stat_up_s   stat_up;$/;"	m	struct:__anon60
+stat_up_s	fwd/inc/stats.h	/^} stat_up_s;$/;"	t	typeref:struct:__anon59
+state	fwd/inc/gwcfg.h	/^    } state;$/;"	m	struct:_server	typeref:struct:_server::__anon45
+state	libmqtt/MQTTPacket.h	/^	char state;$/;"	m	struct:__anon34
+stats	fwd/inc/gwcfg.h	/^    stats,$/;"	e	enum:__anon38
 status	hal/loragw_hal.h	/^    uint8_t     status;         \/*!> status of the received packet *\/$/;"	m	struct:lgw_pkt_rx_s
 status	hal/tinymt32.h	/^    uint32_t status[4];$/;"	m	struct:TINYMT32_T
 status	libttn/router.pb-c.h	/^  Gateway__Status *status;$/;"	m	struct:_Router__GatewayStatusResponse
-status_report	fwd/inc/stats.h	/^    char status_report[STATUS_SIZE];$/;"	m	struct:__anon37
-statusstream	fwd/inc/stats.h	/^    bool statusstream;$/;"	m	struct:__anon37
+status_report	fwd/inc/stats.h	/^    char status_report[STATUS_SIZE];$/;"	m	struct:__anon60
+statusstream	fwd/inc/stats.h	/^    bool statusstream;$/;"	m	struct:__anon60
 stop	libttn/test/test.c	/^void stop(int sig) {$/;"	f
 stop_clean_service	fwd/src/fwd.c	/^void stop_clean_service(void) {$/;"	f
-stop_sig	fwd/inc/gwcfg.h	/^        bool stop_sig;$/;"	m	struct:_server::__anon22
+stop_sig	fwd/inc/gwcfg.h	/^        bool stop_sig;$/;"	m	struct:_server::__anon46
 str2hex	fwd/src/utilities.c	/^void str2hex(uint8_t* dest, char* src, int len) {$/;"	f
 str_chop	hal/loragw_gps.c	/^int str_chop(char *s, int buff_size, char separator, int *idx_ary, int max_idx) {$/;"	f
 string	fwd/src/parson.c	/^    char        *string;$/;"	m	union:json_value_value	file:
 string_value	libttn/descriptor.pb-c.h	/^  ProtobufCBinaryData string_value;$/;"	m	struct:_Google__Protobuf__UninterpretedOption
-struct_id	libmqtt/MQTTConnect.h	/^	char struct_id[4];$/;"	m	struct:__anon41
-struct_id	libmqtt/MQTTConnect.h	/^	char struct_id[4];$/;"	m	struct:__anon42
-struct_version	libmqtt/MQTTConnect.h	/^	int struct_version;$/;"	m	struct:__anon41
-struct_version	libmqtt/MQTTConnect.h	/^	int struct_version;$/;"	m	struct:__anon42
+struct_id	libmqtt/MQTTConnect.h	/^	char struct_id[4];$/;"	m	struct:__anon24
+struct_id	libmqtt/MQTTConnect.h	/^	char struct_id[4];$/;"	m	struct:__anon25
+struct_version	libmqtt/MQTTConnect.h	/^	int struct_version;$/;"	m	struct:__anon24
+struct_version	libmqtt/MQTTConnect.h	/^	int struct_version;$/;"	m	struct:__anon25
 stts751_configure	hal/sx1302hal/loragw_stts751.c	/^int stts751_configure(int i2c_fd, uint8_t i2c_addr) {$/;"	f
 stts751_get_temperature	hal/sx1302hal/loragw_stts751.c	/^int stts751_get_temperature(int i2c_fd, uint8_t i2c_addr, float * temperature) {$/;"	f
 subscribe	libttn/router.pb-c.h	/^  void (*subscribe)(Router__Router_Service *service,$/;"	m	struct:_Router__Router_Service
@@ -6738,12 +6738,12 @@ swap	libttn/api.pb-c.h	/^  uint64_t swap;$/;"	m	struct:_Api__ComponentStats__Mem
 swapcpy	fwd/src/endianext.c	/^void *swapcpy(void *dest, const void *src, size_t n) {$/;"	f
 swift_prefix	libttn/descriptor.pb-c.h	/^  char *swift_prefix;$/;"	m	struct:_Google__Protobuf__FileOptions
 sx1250_calibrate	hal/sx1302hal/loragw_sx1250.c	/^int sx1250_calibrate(uint8_t rf_chain, uint32_t freq_hz) {$/;"	f
-sx1250_op_code_t	hal/sx1302hal/loragw_sx1250.h	/^} sx1250_op_code_t;$/;"	t	typeref:enum:__anon6
-sx1250_packet_type_t	hal/sx1302hal/loragw_sx1250.h	/^} sx1250_packet_type_t;$/;"	t	typeref:enum:__anon8
-sx1250_ramp_time_t	hal/sx1302hal/loragw_sx1250.h	/^} sx1250_ramp_time_t;$/;"	t	typeref:enum:__anon9
+sx1250_op_code_t	hal/sx1302hal/loragw_sx1250.h	/^} sx1250_op_code_t;$/;"	t	typeref:enum:__anon15
+sx1250_packet_type_t	hal/sx1302hal/loragw_sx1250.h	/^} sx1250_packet_type_t;$/;"	t	typeref:enum:__anon17
+sx1250_ramp_time_t	hal/sx1302hal/loragw_sx1250.h	/^} sx1250_ramp_time_t;$/;"	t	typeref:enum:__anon18
 sx1250_read_command	hal/sx1302hal/loragw_sx1250.c	/^int sx1250_read_command(uint8_t rf_chain, sx1250_op_code_t op_code, uint8_t *data, uint16_t size) {$/;"	f
 sx1250_setup	hal/sx1302hal/loragw_sx1250.c	/^int sx1250_setup(uint8_t rf_chain, uint32_t freq_hz, bool single_input_mode) {$/;"	f
-sx1250_standby_modes_t	hal/sx1302hal/loragw_sx1250.h	/^} sx1250_standby_modes_t;$/;"	t	typeref:enum:__anon7
+sx1250_standby_modes_t	hal/sx1302hal/loragw_sx1250.h	/^} sx1250_standby_modes_t;$/;"	t	typeref:enum:__anon16
 sx1250_write_command	hal/sx1302hal/loragw_sx1250.c	/^int sx1250_write_command(uint8_t rf_chain, sx1250_op_code_t op_code, uint8_t *data, uint16_t size) {$/;"	f
 sx125x_cal	hal/tst/test_loragw_cal.c	/^uint8_t sx125x_cal(uint8_t cal_cmd, struct cal_res_s *cal_res) {$/;"	f
 sx125x_cal_rx_image	hal/sx1302hal/loragw_cal.c	/^int sx125x_cal_rx_image(uint8_t rf_chain, uint32_t freq_hz, bool use_loopback, uint8_t radio_type, struct lgw_sx125x_cal_rx_result_s * res) {$/;"	f
@@ -6755,7 +6755,7 @@ sx125x_regs	hal/sx1302hal/loragw_sx125x.c	/^static const struct radio_reg_s sx12
 sx125x_setup	hal/sx1302hal/loragw_sx125x.c	/^int sx125x_setup(uint8_t rf_chain, uint8_t rf_clkout, bool rf_enable, uint8_t rf_radio_type, uint32_t freq_hz) {$/;"	f
 sx125x_write	hal/sx1301hal/loragw_radio_sx1301.c	/^void sx125x_write(uint8_t channel, uint8_t addr, uint8_t data) {$/;"	f
 sx127x_FskBandwidths	hal/lg02hal/loragw_sx127x_radio.c	/^const struct lgw_sx127x_FSK_bandwidth_s sx127x_FskBandwidths[] =$/;"	v	typeref:struct:lgw_sx127x_FSK_bandwidth_s
-sx127x_dev	hal/lg02hal/loragw_hal_lg02.h	/^} sx127x_dev; $/;"	t	typeref:struct:__anon2
+sx127x_dev	hal/lg02hal/loragw_hal_lg02.h	/^} sx127x_dev; $/;"	t	typeref:struct:__anon20
 sx1301_regs	hal/sx1301hal/loragw_reg_sx1301.c	/^const struct lgw_reg_s sx1301_regs[LGW_SX1301_TOTALREGS] = {$/;"	v	typeref:struct:lgw_reg_s
 sx1301objs	hal/Makefile	/^sx1301objs = $(OBJDIR)\/loragw_hal_sx1301.o $(OBJDIR)\/loragw_radio_sx1301.o $(OBJDIR)\/loragw_reg_sx1301.o $/;"	m
 sx1302_agc_load_firmware	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_agc_load_firmware(const uint8_t *firmware) {$/;"	f
@@ -6777,18 +6777,18 @@ sx1302_arb_wait_status	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_arb_wait_statu
 sx1302_cal_start	hal/sx1302hal/loragw_cal.c	/^int sx1302_cal_start(uint8_t version, struct lgw_conf_rxrf_s * rf_chain_cfg, struct lgw_tx_gain_lut_s * txgain_lut) {$/;"	f
 sx1302_channelizer_configure	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_channelizer_configure(struct lgw_conf_rxif_s * if_cfg, bool fix_gain) {$/;"	f
 sx1302_fetch	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_fetch(uint8_t * nb_pkt) {$/;"	f
-sx1302_fsk_cfg_t	hal/sx1302hal/loragw_sx1302.h	/^} sx1302_fsk_cfg_t;$/;"	t	typeref:struct:__anon5
+sx1302_fsk_cfg_t	hal/sx1302hal/loragw_sx1302.h	/^} sx1302_fsk_cfg_t;$/;"	t	typeref:struct:__anon13
 sx1302_fsk_configure	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_fsk_configure(struct lgw_conf_rxif_s * cfg) {$/;"	f
 sx1302_get_eui	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_get_eui(uint64_t * eui) {$/;"	f
 sx1302_get_ifmod_config	hal/sx1302hal/loragw_sx1302.c	/^uint8_t sx1302_get_ifmod_config(uint8_t if_chain) {$/;"	f
 sx1302_gps_enable	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_gps_enable(bool enable) {$/;"	f
-sx1302_if_cfg_t	hal/sx1302hal/loragw_sx1302.h	/^} sx1302_if_cfg_t;$/;"	t	typeref:struct:__anon3
+sx1302_if_cfg_t	hal/sx1302hal/loragw_sx1302.h	/^} sx1302_if_cfg_t;$/;"	t	typeref:struct:__anon11
 sx1302_init	hal/sx1302hal/loragw_sx1302.c	/^void sx1302_init(struct lgw_conf_timestamp_s *conf_ts) {$/;"	f
 sx1302_lora_correlator_configure	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_lora_correlator_configure() {$/;"	f
 sx1302_lora_modem_configure	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_lora_modem_configure(uint32_t radio_freq_hz) {$/;"	f
 sx1302_lora_payload_crc	hal/sx1302hal/loragw_sx1302.c	/^uint16_t sx1302_lora_payload_crc(const uint8_t * data, uint8_t size) {$/;"	f
 sx1302_lora_payload_crc	tools/payload_tools/payload_crc.c	/^uint16_t sx1302_lora_payload_crc(const uint8_t * data, uint8_t size) {$/;"	f
-sx1302_lora_service_cfg_t	hal/sx1302hal/loragw_sx1302.h	/^} sx1302_lora_service_cfg_t;$/;"	t	typeref:struct:__anon4
+sx1302_lora_service_cfg_t	hal/sx1302hal/loragw_sx1302.h	/^} sx1302_lora_service_cfg_t;$/;"	t	typeref:struct:__anon12
 sx1302_lora_service_correlator_configure	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_lora_service_correlator_configure(struct lgw_conf_rxif_s * cfg) {$/;"	f
 sx1302_lora_service_modem_configure	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_lora_service_modem_configure(struct lgw_conf_rxif_s * cfg, uint32_t radio_freq_hz) {$/;"	f
 sx1302_lora_syncword	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_lora_syncword(bool public, uint8_t lora_service_sf) {$/;"	f
@@ -6812,20 +6812,20 @@ sx1302_tx_set_start_delay	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_tx_set_star
 sx1302_tx_status	hal/sx1302hal/loragw_sx1302.c	/^uint8_t sx1302_tx_status(uint8_t rf_chain) {$/;"	f
 sx1302_update	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_update(void) {$/;"	f
 sx1302objs	hal/Makefile	/^sx1302objs = $(OBJDIR)\/loragw_hal_sx1302.o $(OBJDIR)\/loragw_reg_sx1302.o $(OBJDIR)\/loragw_sx1250.o $(OBJDIR)\/loragw_sx125x.o $(OBJDIR)\/loragw_sx1302.o $(OBJDIR)\/loragw_cal.o $(OBJDIR)\/loragw_hal.o $(OBJDIR)\/loragw_stts751.o $(OBJDIR)\/loragw_sx1302_timestamp.o $(OBJDIR)\/loragw_sx1302_rx.o$/;"	m
-sxcfg	fwd/inc/gwcfg.h	/^    char sxcfg[48];$/;"	m	struct:__anon16
+sxcfg	fwd/inc/gwcfg.h	/^    char sxcfg[48];$/;"	m	struct:__anon40
 sync_error	hal/sx1302hal/loragw_sx1302_rx.h	/^    bool        sync_error;                 \/* LoRa only *\/$/;"	m	struct:rx_packet_s
 sync_word	hal/loragw_hal.h	/^    uint64_t    sync_word;      \/*!> FSK sync word (ALIGN RIGHT, eg. 0xC194C1) *\/$/;"	m	struct:lgw_conf_rxif_s
 sync_word_size	hal/loragw_hal.h	/^    uint8_t     sync_word_size; \/*!> size of FSK sync word (number of bytes, 0 for default) *\/$/;"	m	struct:lgw_conf_rxif_s
 syncthread	fwd/src/db.c	/^static pthread_t syncthread;$/;"	v	file:
-syncword	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t syncword;$/;"	m	struct:__anon2
+syncword	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t syncword;$/;"	m	struct:__anon20
 syntax	libttn/descriptor.pb-c.h	/^  char *syntax;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
 system	libttn/api.pb-c.h	/^  float system;$/;"	m	struct:_Api__ComponentStats__CPUStats
 system	libttn/api.pb-c.h	/^  float system;$/;"	m	struct:_Api__SystemStats__CPUStats
 system	libttn/router.pb-c.h	/^  Api__SystemStats *system;$/;"	m	struct:_Router__Status
 systime	hal/loragw_gps.h	/^    time_t          systime;    \/*!> system time when solution was calculated *\/$/;"	m	struct:tref
 t	libmqtt/MQTTLinux.h	/^   pthread_t t;$/;"	m	struct:Thread
-t_down	fwd/inc/gwcfg.h	/^        pthread_t t_down;			\/\/ semtech down thread$/;"	m	struct:_server::__anon22
-t_up	fwd/inc/gwcfg.h	/^        pthread_t t_up;				\/\/ upstream thread$/;"	m	struct:_server::__anon22
+t_down	fwd/inc/gwcfg.h	/^        pthread_t t_down;			\/\/ semtech down thread$/;"	m	struct:_server::__anon46
+t_up	fwd/inc/gwcfg.h	/^        pthread_t t_up;				\/\/ upstream thread$/;"	m	struct:_server::__anon46
 temperature	libttn/gateway.pb-c.h	/^  float temperature;$/;"	m	struct:_Gateway__Status__OSMetrics
 term	tools/reset_lgw.sh	/^term() {$/;"	f
 test_amp_phi	hal/test/test_loragw_cal.c	/^int test_amp_phi(uint8_t rf_chain, uint8_t f_offset, bool full_log, bool use_agc) {$/;"	f
@@ -6833,14 +6833,14 @@ test_capture_ram	hal/test/test_loragw_cal.c	/^int test_capture_ram(uint8_t rf_ch
 test_freq_scan	hal/test/test_loragw_cal.c	/^int test_freq_scan(uint8_t rf_chain, bool full_log, bool use_agc) {$/;"	f
 test_iq_offset	hal/test/test_loragw_cal.c	/^int test_iq_offset(uint8_t rf_chain, uint8_t f_offset, bool full_log, bool use_agc) {$/;"	f
 thr_arg	fwd/src/utilities.c	/^struct thr_arg {$/;"	s	file:
-thread	fwd/inc/gwcfg.h	/^    } thread;$/;"	m	struct:_server	typeref:struct:_server::__anon22
+thread	fwd/inc/gwcfg.h	/^    } thread;$/;"	m	struct:_server	typeref:struct:_server::__anon46
 thread_ghost	fwd/src/ghost.c	/^static void thread_ghost(void) {$/;"	f	file:
 thread_gps	fwd/src/fwd.c	/^static void thread_gps(void) {$/;"	f	file:
 thread_info	fwd/inc/gwcfg.h	/^} thread_info;$/;"	t	typeref:struct:_thread_info
 thread_jit	fwd/src/fwd.c	/^static void thread_jit(void) {$/;"	f	file:
 thread_rxpkt_recycle	fwd/src/fwd.c	/^static void thread_rxpkt_recycle(void) {$/;"	f	file:
 thread_timersync	fwd/src/timersync.c	/^void thread_timersync(void) {$/;"	f
-thread_type	fwd/inc/gwcfg.h	/^} thread_type;$/;"	t	typeref:enum:__anon14
+thread_type	fwd/inc/gwcfg.h	/^} thread_type;$/;"	t	typeref:enum:__anon38
 thread_up	fwd/src/fwd.c	/^static void thread_up(void) {$/;"	f	file:
 thread_valid	fwd/src/fwd.c	/^static void thread_valid(void) {$/;"	f	file:
 thread_watchdog	fwd/src/fwd.c	/^static void thread_watchdog(void) {$/;"	f	file:
@@ -6849,9 +6849,9 @@ time	libttn/gateway.pb-c.h	/^  int64_t time;$/;"	m	struct:_Gateway__GPSMetadata
 time	libttn/gateway.pb-c.h	/^  int64_t time;$/;"	m	struct:_Gateway__RxMetadata
 time	libttn/gateway.pb-c.h	/^  int64_t time;$/;"	m	struct:_Gateway__Status
 time	libttn/trace.pb-c.h	/^  int64_t time;$/;"	m	struct:_Trace__Trace
-time_interval	fwd/inc/gwcfg.h	/^        uint32_t time_interval;$/;"	m	struct:__anon23::__anon26
-time_reference_gps	fwd/inc/gwcfg.h	/^        struct tref time_reference_gps; \/* time reference used for UTC <-> timestamp conversion *\/$/;"	m	struct:__anon23::__anon27	typeref:struct:__anon23::__anon27::tref
-timersync	fwd/inc/gwcfg.h	/^    timersync,$/;"	e	enum:__anon14
+time_interval	fwd/inc/gwcfg.h	/^        uint32_t time_interval;$/;"	m	struct:__anon47::__anon50
+time_reference_gps	fwd/inc/gwcfg.h	/^        struct tref time_reference_gps; \/* time reference used for UTC <-> timestamp conversion *\/$/;"	m	struct:__anon47::__anon51	typeref:struct:__anon47::__anon51::tref
+timersync	fwd/inc/gwcfg.h	/^    timersync,$/;"	e	enum:__anon38
 timestamp	libttn/gateway.pb-c.h	/^  uint32_t timestamp;$/;"	m	struct:_Gateway__RxMetadata
 timestamp	libttn/gateway.pb-c.h	/^  uint32_t timestamp;$/;"	m	struct:_Gateway__Status
 timestamp	libttn/gateway.pb-c.h	/^  uint32_t timestamp;$/;"	m	struct:_Gateway__TxConfiguration
@@ -6894,7 +6894,7 @@ toStop	libmqtt/test/stdoutsub.c	/^volatile int toStop = 0;$/;"	v
 tobecpy	fwd/src/endianext.c	/^void *tobecpy(void *dest, const void *src, size_t n) {$/;"	f
 topicFilter	libmqtt/MQTTClient.h	/^      const char *topicFilter;$/;"	m	struct:MQTTClient::MessageHandlers
 topicName	libmqtt/MQTTClient.h	/^   MQTTString *topicName;$/;"	m	struct:MessageData
-topicName	libmqtt/MQTTConnect.h	/^	MQTTString topicName;$/;"	m	struct:__anon41
+topicName	libmqtt/MQTTConnect.h	/^	MQTTString topicName;$/;"	m	struct:__anon24
 total	libttn/api.pb-c.h	/^  uint64_t total;$/;"	m	struct:_Api__SystemStats__MemoryStats
 trace	libttn/router.pb-c.h	/^  Trace__Trace *trace;$/;"	m	struct:_Router__DeviceActivationRequest
 trace	libttn/router.pb-c.h	/^  Trace__Trace *trace;$/;"	m	struct:_Router__DownlinkMessage
@@ -6918,9 +6918,9 @@ trailing_comments	libttn/descriptor.pb-c.h	/^  char *trailing_comments;$/;"	m	st
 tref	hal/loragw_gps.h	/^struct tref {$/;"	s
 ts_addr	hal/sx1302hal/loragw_hal_sx1302.c	/^static uint8_t ts_addr = 0xFF;$/;"	v	file:
 ts_fd	hal/sx1302hal/loragw_hal_sx1302.c	/^static int     ts_fd = -1;$/;"	v	file:
-ttn	fwd/inc/gwcfg.h	/^	ttn,$/;"	e	enum:__anon12
-ttn_down	fwd/inc/gwcfg.h	/^    ttn_down,$/;"	e	enum:__anon14
-ttn_up	fwd/inc/gwcfg.h	/^    ttn_up,$/;"	e	enum:__anon14
+ttn	fwd/inc/gwcfg.h	/^	ttn,$/;"	e	enum:__anon36
+ttn_down	fwd/inc/gwcfg.h	/^    ttn_down,$/;"	e	enum:__anon38
+ttn_up	fwd/inc/gwcfg.h	/^    ttn_up,$/;"	e	enum:__anon38
 ttngwc_checkconnected	libttn/connector.c	/^int ttngwc_checkconnected(TTN *s) {$/;"	f
 ttngwc_cleanup	libttn/connector.c	/^void ttngwc_cleanup(TTN *s) {$/;"	f
 ttngwc_connect	libttn/connector.c	/^int ttngwc_connect(TTN *s, const char *host_name, int port, const char *key) {$/;"	f
@@ -6932,30 +6932,30 @@ ttngwc_send_status	libttn/connector.c	/^int ttngwc_send_status(TTN *s, Gateway__
 ttngwc_send_uplink	libttn/connector.c	/^int ttngwc_send_uplink(TTN *s, Router__UplinkMessage *uplink) {$/;"	f
 ttngwc_sendping	libttn/connector.c	/^int ttngwc_sendping(void *s) {$/;"	f
 ttyopt_restore	hal/loragw_gps.c	/^static struct termios ttyopt_restore;$/;"	v	typeref:struct:termios	file:
-tx	fwd/inc/gwcfg.h	/^    } tx;$/;"	m	struct:__anon23	typeref:struct:__anon23::__anon28
+tx	fwd/inc/gwcfg.h	/^    } tx;$/;"	m	struct:__anon47	typeref:struct:__anon47::__anon52
 tx_enable	hal/loragw_hal.h	/^    bool                    tx_enable;      \/*!> enable or disable TX on that RF chain *\/$/;"	m	struct:lgw_conf_rxrf_s
-tx_freq_max	fwd/inc/gwcfg.h	/^        uint32_t tx_freq_max[LGW_RF_CHAIN_NB];$/;"	m	struct:__anon23::__anon28
-tx_freq_min	fwd/inc/gwcfg.h	/^        uint32_t tx_freq_min[LGW_RF_CHAIN_NB];$/;"	m	struct:__anon23::__anon28
+tx_freq_max	fwd/inc/gwcfg.h	/^        uint32_t tx_freq_max[LGW_RF_CHAIN_NB];$/;"	m	struct:__anon47::__anon52
+tx_freq_min	fwd/inc/gwcfg.h	/^        uint32_t tx_freq_min[LGW_RF_CHAIN_NB];$/;"	m	struct:__anon47::__anon52
 tx_gain_lut	hal/loragw_hal.h	/^    struct lgw_tx_gain_lut_s    tx_gain_lut[LGW_RF_CHAIN_NB];$/;"	m	struct:lgw_context_s	typeref:struct:lgw_context_s::lgw_tx_gain_lut_s
 tx_in	libttn/gateway.pb-c.h	/^  uint32_t tx_in;$/;"	m	struct:_Gateway__Status
 tx_mode	hal/loragw_hal.h	/^    uint8_t     tx_mode;        \/*!> select on what event\/time the TX is triggered *\/$/;"	m	struct:lgw_pkt_tx_s
 tx_notch_freq	hal/loragw_hal.h	/^    uint32_t                tx_notch_freq;  \/*!> TX notch filter frequency [126KHz..250KHz] *\/$/;"	m	struct:lgw_conf_rxrf_s
 tx_ok	libttn/gateway.pb-c.h	/^  uint32_t tx_ok;$/;"	m	struct:_Gateway__Status
 txgain_lut	hal/sx1301hal/loragw_hal_sx1301.c	/^static struct lgw_tx_gain_lut_s txgain_lut = {$/;"	v	typeref:struct:lgw_tx_gain_lut_s	file:
-txlut	fwd/inc/gwcfg.h	/^        struct lgw_tx_gain_lut_s txlut[LGW_RF_CHAIN_NB];$/;"	m	struct:__anon23::__anon28	typeref:struct:__anon23::__anon28::lgw_tx_gain_lut_s
+txlut	fwd/inc/gwcfg.h	/^        struct lgw_tx_gain_lut_s txlut[LGW_RF_CHAIN_NB];$/;"	m	struct:__anon47::__anon52	typeref:struct:__anon47::__anon52::lgw_tx_gain_lut_s
 txlut	hal/test/test_loragw_cal.c	/^static struct lgw_tx_gain_lut_s txlut; \/* TX gain table *\/$/;"	v	typeref:struct:lgw_tx_gain_lut_s	file:
 txmode	fwd/inc/pkt_service.h	/^    char txmode[8];$/;"	m	struct:_dn_pkt
-type	fwd/inc/gwcfg.h	/^	    serv_type type;		        \/\/ type of server$/;"	m	struct:_server::__anon19
+type	fwd/inc/gwcfg.h	/^	    serv_type type;		        \/\/ type of server$/;"	m	struct:_server::__anon43
 type	fwd/inc/gwcfg.h	/^    thread_type type;$/;"	m	struct:_thread_info
 type	fwd/src/parson.c	/^    JSON_Value_Type     type;$/;"	m	struct:json_value_t	file:
 type	hal/lg02hal/loragw_sx127x_radio.c	/^    enum lgw_radio_type_e type;$/;"	m	struct:lgw_radio_type_version_s	typeref:enum:lgw_radio_type_version_s::lgw_radio_type_e	file:
 type	hal/loragw_hal.h	/^    enum lgw_radio_type_e   type;           \/*!> Radio type for that RF chain (SX1255, SX1257....) *\/$/;"	m	struct:lgw_conf_rxrf_s	typeref:enum:lgw_conf_rxrf_s::lgw_radio_type_e
-type	libmqtt/MQTTPacket.h	/^		unsigned int type : 4;			\/**< message type nibble *\/$/;"	m	struct:__anon46::__anon47
-type	libmqtt/MQTTPacket.h	/^		unsigned int type : 4;			\/**< message type nibble *\/$/;"	m	struct:__anon46::__anon48
+type	libmqtt/MQTTPacket.h	/^		unsigned int type : 4;			\/**< message type nibble *\/$/;"	m	struct:__anon29::__anon30
+type	libmqtt/MQTTPacket.h	/^		unsigned int type : 4;			\/**< message type nibble *\/$/;"	m	struct:__anon29::__anon31
 type	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto__Type type;$/;"	m	struct:_Google__Protobuf__FieldDescriptorProto
-type_dw_e	fwd/inc/stats.h	/^} type_dw_e;$/;"	t	typeref:enum:__anon33
+type_dw_e	fwd/inc/stats.h	/^} type_dw_e;$/;"	t	typeref:enum:__anon56
 type_name	libttn/descriptor.pb-c.h	/^  char *type_name;$/;"	m	struct:_Google__Protobuf__FieldDescriptorProto
-type_up_e	fwd/inc/stats.h	/^} type_up_e;$/;"	t	typeref:enum:__anon34
+type_up_e	fwd/inc/stats.h	/^} type_up_e;$/;"	t	typeref:enum:__anon57
 types__connect_message__descriptor	libttn/types.pb-c.c	/^const ProtobufCMessageDescriptor types__connect_message__descriptor =$/;"	v
 types__connect_message__field_descriptors	libttn/types.pb-c.c	/^static const ProtobufCFieldDescriptor types__connect_message__field_descriptors[2] =$/;"	v	file:
 types__connect_message__field_indices_by_name	libttn/types.pb-c.c	/^static const unsigned types__connect_message__field_indices_by_name[] = {$/;"	v	file:
@@ -6976,7 +6976,7 @@ types__disconnect_message__number_ranges	libttn/types.pb-c.c	/^static const Prot
 types__disconnect_message__pack	libttn/types.pb-c.c	/^size_t types__disconnect_message__pack$/;"	f
 types__disconnect_message__pack_to_buffer	libttn/types.pb-c.c	/^size_t types__disconnect_message__pack_to_buffer$/;"	f
 types__disconnect_message__unpack	libttn/types.pb-c.c	/^       types__disconnect_message__unpack$/;"	f
-u	fwd/src/ghost.c	/^	uint32_t u;$/;"	m	union:__anon11	file:
+u	fwd/src/ghost.c	/^	uint32_t u;$/;"	m	union:__anon61	file:
 u16	fwd/src/ghost.c	/^static uint16_t u16(uint8_t * p, uint8_t i) {$/;"	f	file:
 u32	fwd/src/ghost.c	/^static uint32_t u32(uint8_t * p, uint8_t i) {$/;"	f	file:
 u8	fwd/src/ghost.c	/^static uint8_t u8(uint8_t * p, uint8_t i) {$/;"	f	file:
@@ -7001,7 +7001,7 @@ uplink	libttn/router.pb-c.h	/^  Api__Rates *uplink;$/;"	m	struct:_Router__Status
 uplink	libttn/router.pb-c.h	/^  void (*uplink)(Router__Router_Service *service,$/;"	m	struct:_Router__Router_Service
 uplink_topic	fwd/inc/mqtt_service.h	/^	char *uplink_topic;$/;"	m	struct:_mqttsession_s
 uptime	libttn/api.pb-c.h	/^  uint64_t uptime;$/;"	m	struct:_Api__ComponentStats
-uptopic	fwd/inc/gwcfg.h	/^    char uptopic[64];$/;"	m	struct:__anon17
+uptopic	fwd/inc/gwcfg.h	/^    char uptopic[64];$/;"	m	struct:__anon41
 usage	fwd/src/fwd.c	/^static void usage( void )$/;"	f	file:
 usage	hal/test/test_loragw_cal.c	/^void usage(void) {$/;"	f
 usage	hal/test/test_loragw_capture_ram.c	/^void usage(void)$/;"	f
@@ -7023,9 +7023,9 @@ usage	util_chip_id/src/chip_id.c	/^void usage(void) {$/;"	f
 used	libttn/api.pb-c.h	/^  uint64_t used;$/;"	m	struct:_Api__SystemStats__MemoryStats
 user	libttn/api.pb-c.h	/^  float user;$/;"	m	struct:_Api__ComponentStats__CPUStats
 user	libttn/api.pb-c.h	/^  float user;$/;"	m	struct:_Api__SystemStats__CPUStats
-username	libmqtt/MQTTConnect.h	/^		unsigned int username : 1;			\/**< 3.1 user name *\/$/;"	m	struct:__anon38::__anon39
-username	libmqtt/MQTTConnect.h	/^		unsigned int username : 1;			\/**< 3.1 user name *\/$/;"	m	struct:__anon38::__anon40
-username	libmqtt/MQTTConnect.h	/^	MQTTString username;$/;"	m	struct:__anon42
+username	libmqtt/MQTTConnect.h	/^		unsigned int username : 1;			\/**< 3.1 user name *\/$/;"	m	struct:__anon21::__anon22
+username	libmqtt/MQTTConnect.h	/^		unsigned int username : 1;			\/**< 3.1 user name *\/$/;"	m	struct:__anon21::__anon23
+username	libmqtt/MQTTConnect.h	/^	MQTTString username;$/;"	m	struct:__anon25
 username	libmqtt/test/stdoutsub.c	/^   char *username;$/;"	m	struct:opts_struct	file:
 utc	hal/loragw_gps.h	/^    struct timespec utc;        \/*!> reference UTC time (from GPS\/NMEA) *\/$/;"	m	struct:tref	typeref:struct:tref::timespec
 validate_nmea_checksum	hal/loragw_gps.c	/^static bool validate_nmea_checksum(const char *serial_buff, int buff_size) {$/;"	f	file:
@@ -7037,26 +7037,26 @@ verify_utf8_sequence	fwd/src/parson.c	/^static int verify_utf8_sequence(const un
 wait_ms	hal/loragw_aux.c	/^void wait_ms(unsigned long a) {$/;"	f
 wait_us	hal/loragw_aux.c	/^void wait_us(unsigned long a) {$/;"	f
 waitfor	libmqtt/MQTTClient.c	/^int waitfor(MQTTClient *c, unsigned short packet_type, Timer *timer)$/;"	f
-watchdog	fwd/inc/gwcfg.h	/^    watchdog$/;"	e	enum:__anon14
-wd_enabled	fwd/inc/gwcfg.h	/^        bool     wd_enabled;		      \/* if watchdog enabled   *\/$/;"	m	struct:__anon23::__anon26
+watchdog	fwd/inc/gwcfg.h	/^    watchdog$/;"	e	enum:__anon38
+wd_enabled	fwd/inc/gwcfg.h	/^        bool     wd_enabled;		      \/* if watchdog enabled   *\/$/;"	m	struct:__anon47::__anon50
 weak	libttn/descriptor.pb-c.h	/^  protobuf_c_boolean weak;$/;"	m	struct:_Google__Protobuf__FieldOptions
 weak_dependency	libttn/descriptor.pb-c.h	/^  int32_t *weak_dependency;$/;"	m	struct:_Google__Protobuf__FileDescriptorProto
-will	libmqtt/MQTTConnect.h	/^		unsigned int will : 1;			    \/**< will flag *\/$/;"	m	struct:__anon38::__anon39
-will	libmqtt/MQTTConnect.h	/^		unsigned int will : 1;			    \/**< will flag *\/$/;"	m	struct:__anon38::__anon40
-will	libmqtt/MQTTConnect.h	/^	MQTTPacket_willOptions will;$/;"	m	struct:__anon42
-willFlag	libmqtt/MQTTConnect.h	/^	unsigned char willFlag;$/;"	m	struct:__anon42
-willQoS	libmqtt/MQTTConnect.h	/^		unsigned int willQoS : 2;				\/**< will QoS value *\/$/;"	m	struct:__anon38::__anon39
-willQoS	libmqtt/MQTTConnect.h	/^		unsigned int willQoS : 2;				\/**< will QoS value *\/$/;"	m	struct:__anon38::__anon40
-willRetain	libmqtt/MQTTConnect.h	/^		unsigned int willRetain : 1;		\/**< will retain setting *\/$/;"	m	struct:__anon38::__anon39
-willRetain	libmqtt/MQTTConnect.h	/^		unsigned int willRetain : 1;		\/**< will retain setting *\/$/;"	m	struct:__anon38::__anon40
+will	libmqtt/MQTTConnect.h	/^		unsigned int will : 1;			    \/**< will flag *\/$/;"	m	struct:__anon21::__anon22
+will	libmqtt/MQTTConnect.h	/^		unsigned int will : 1;			    \/**< will flag *\/$/;"	m	struct:__anon21::__anon23
+will	libmqtt/MQTTConnect.h	/^	MQTTPacket_willOptions will;$/;"	m	struct:__anon25
+willFlag	libmqtt/MQTTConnect.h	/^	unsigned char willFlag;$/;"	m	struct:__anon25
+willQoS	libmqtt/MQTTConnect.h	/^		unsigned int willQoS : 2;				\/**< will QoS value *\/$/;"	m	struct:__anon21::__anon22
+willQoS	libmqtt/MQTTConnect.h	/^		unsigned int willQoS : 2;				\/**< will QoS value *\/$/;"	m	struct:__anon21::__anon23
+willRetain	libmqtt/MQTTConnect.h	/^		unsigned int willRetain : 1;		\/**< will retain setting *\/$/;"	m	struct:__anon21::__anon22
+willRetain	libmqtt/MQTTConnect.h	/^		unsigned int willRetain : 1;		\/**< will retain setting *\/$/;"	m	struct:__anon21::__anon23
 writeCString	libmqtt/MQTTPacket.c	/^void writeCString(unsigned char** pptr, const char* string)$/;"	f
 writeChar	libmqtt/MQTTPacket.c	/^void writeChar(unsigned char** pptr, char c)$/;"	f
 writeInt	libmqtt/MQTTPacket.c	/^void writeInt(unsigned char** pptr, int anInt)$/;"	f
 writeMQTTString	libmqtt/MQTTPacket.c	/^void writeMQTTString(unsigned char** pptr, MQTTString mqttstring)$/;"	f
 write_mutex	libmqtt/MQTTClient.h	/^   Mutex write_mutex;$/;"	m	struct:MQTTClient
 xor_block	fwd/src/aes.c	/^static void xor_block( void *d, const void *s )$/;"	f	file:
-xtal_correct	fwd/inc/gwcfg.h	/^        double xtal_correct;$/;"	m	struct:__anon23::__anon25
-xtal_correct_ok	fwd/inc/gwcfg.h	/^        bool xtal_correct_ok;$/;"	m	struct:__anon23::__anon25
+xtal_correct	fwd/inc/gwcfg.h	/^        double xtal_correct;$/;"	m	struct:__anon47::__anon49
+xtal_correct_ok	fwd/inc/gwcfg.h	/^        bool xtal_correct_ok;$/;"	m	struct:__anon47::__anon49
 xtal_err	hal/loragw_gps.h	/^    double          xtal_err;   \/*!> raw clock error (eg. <1 'slow' XTAL) *\/$/;"	m	struct:tref
 yS	Session.vim	/^nmap yS <Plug>YSurround$/;"	m
 yS	fwd/Session.vim	/^nmap yS <Plug>YSurround$/;"	m

@@ -45,6 +45,7 @@
 #include "base64.h"
 
 #include "loragw_aux.h"
+#include "mac-header-decode.h"
 
 DECLARE_GW;
 DECLARE_HAL;
@@ -53,6 +54,8 @@ static void semtech_pull_down(void* arg);
 static void semtech_push_up(void* arg);
 
 int semtech_start(serv_s* serv) {
+    char family[64] = {'\0'};
+
     serv->net->sock_up = init_sock((char *)&serv->net->addr, (char *)&serv->net->port_up, (void*)&serv->net->push_timeout_half, sizeof(struct timeval));
     serv->net->sock_down = init_sock((char *)&serv->net->addr, (char *)&serv->net->port_down, (void*)&serv->net->pull_timeout, sizeof(struct timeval));
 
@@ -67,11 +70,21 @@ int semtech_start(serv_s* serv) {
 
     serv->state.live = true;
     serv->state.stall_time = 0;
+    serv->state.startup_time = time(NULL);  //UTC seconds
+    serv->state.connecting = false;
+    lgw_db_put("service/lorawan", serv->info.name, "running");
+    lgw_db_put("thread", serv->info.name, "running");
+    if (serv->net->sock_up > 0 && serv->net->sock_down > 0) {
+        serv->state.connecting = true;
+    } 
+    snprintf(family, sizeof(family), "service/lorawan/%s", serv->info.name);
+    lgw_db_put(family, "network", serv->state.connecting ? "online" : "offline");
 
     return 0;
 }
 
 int semtech_stop(serv_s* serv) {
+    char family[64] = {'\0'};
     serv->thread.stop_sig = true;
 	sem_post(&serv->thread.sema);
     pthread_join(serv->thread.t_up, NULL);
@@ -81,6 +94,10 @@ int semtech_stop(serv_s* serv) {
     serv->state.live = false;
     serv->net->sock_up = -1;
     serv->net->sock_down = -1;
+    lgw_db_del("service/lorawan", serv->info.name);
+    lgw_db_del("thread", serv->info.name);
+    snprintf(family, sizeof(family), "service/lorawan/%s", serv->info.name);
+    lgw_db_del(family, "network");
     return 0;
 }
 
@@ -554,7 +571,7 @@ static void semtech_push_up(void* arg) {
         lgw_log(LOG_PKT, "PKTUP~ [%s] JSON: %s\n", serv->info.name, (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
 
         /* send datagram to server */
-        if (serv->net->sock_up == -1) {
+        if (serv->net->sock_up == -1) {  // reconnect
             serv->net->sock_up = init_sock((char *)&serv->net->addr, (char *)&serv->net->port_up, (void*)&serv->net->push_timeout_half, sizeof(struct timeval));
         }
 
@@ -585,7 +602,7 @@ static void semtech_push_up(void* arg) {
                 //lgw_log(LOG_ERROR, "WARNING~ [up] ignored out-of sync ACK packet\n");
                 continue;
             } else {
-                lgw_log(LOG_DEBUG, "DEBUG~ [%s-up] PUSH_ACK received in %i ms\n", serv->info.name, (int)(1000 * difftimespec(recv_time, send_time)));
+                lgw_log(LOG_INFO, "INFO~ [%s-up] PUSH_ACK received in %i ms\n", serv->info.name, (int)(1000 * difftimespec(recv_time, send_time)));
                 time(&serv->state.contact);
                 serv->report->stat_up.meas_up_ack_rcv += 1;
                 break;
@@ -605,6 +622,8 @@ static void semtech_pull_down(void* arg) {
 
     int i; /* loop variables */
     int retry;
+
+    int pull_send = 0, pull_ack = 0;  /* for reconnecting */
 
     /* configuration and metadata for an outbound packet */
     struct lgw_pkt_tx_s txpkt;
@@ -653,6 +672,8 @@ static void semtech_pull_down(void* arg) {
     int32_t field_longitude; /* 3 bytes, derived from reference longitude */
     uint16_t field_crc1, field_crc2;
 
+    LoRaMacMessageData_t macmsg; /* LoraMacMessageData for decode mac header */
+
     /* auto-quit variable */
     uint32_t autoquit_cnt = 0; /* count the number of PULL_DATA sent since the latest PULL_ACK */
 
@@ -663,6 +684,9 @@ static void semtech_pull_down(void* arg) {
     enum jit_error_e warning_result = JIT_ERROR_OK;
     int32_t warning_value = 0;
     uint8_t tx_lut_idx = 0;
+
+    char family[64];  //for sqlite3 database key
+    snprintf(family, sizeof(family), "service/lorawan/%s", serv->info.name);
 
     /* pre-fill the pull request buffer with fixed fields */
     buff_req[0] = PROTOCOL_VERSION;
@@ -782,16 +806,26 @@ static void semtech_pull_down(void* arg) {
         buff_req[1] = token_h;
         buff_req[2] = token_l;
 
-        if (serv->net->sock_down == -1) {
+        if (pull_ack < labs(pull_send * 0.1)) {    // this function will keep the socket alive 
+            pull_send = 0;
+            pull_ack = 0;
+            close(serv->net->sock_down);   //udp socket no need conneting, direct close
+            close(serv->net->sock_up);
             serv->net->sock_down = init_sock((char*)&serv->net->addr, (char*)&serv->net->port_down, (void*)&serv->net->pull_timeout, sizeof(struct timeval));
+            serv->net->sock_up = init_sock((char*)&serv->net->addr, (char*)&serv->net->port_down, (void*)&serv->net->pull_timeout, sizeof(struct timeval));
+            serv->state.connecting = true;
         }
 
-        if (serv->net->sock_down == -1) // 如果没有连接跳过下面步骤，运行下一次循环
+        if (serv->net->sock_down == -1) {// 如果没有连接跳过下面步骤，运行下一次循环
+            serv->state.connecting = false;
             continue;
+        }
+
+        lgw_db_put(family, "network", serv->state.connecting ? "online" : "offline");
 
         /* send PULL request and record time */
         send(serv->net->sock_down, (void *)buff_req, sizeof buff_req, 0);
-        clock_gettime(CLOCK_MONOTONIC, &send_time);
+        pull_send++;
         pthread_mutex_lock(&serv->report->mx_report);
         serv->report->stat_down.meas_dw_pull_sent += 1;
         pthread_mutex_unlock(&serv->report->mx_report);
@@ -799,6 +833,7 @@ static void semtech_pull_down(void* arg) {
         autoquit_cnt++;
 
         /* listen to packets and process them until a new PULL request must be sent */
+        clock_gettime(CLOCK_MONOTONIC, &send_time);
         recv_time = send_time;
         while ((int)difftimespec(recv_time, send_time) < DEFAULT_KEEPALIVE) {
 
@@ -930,6 +965,7 @@ static void semtech_pull_down(void* arg) {
                         lgw_log(LOG_INFO, "INFO~ [%s-down] duplicate ACK received :)\n", serv->info.name);
                     } else { /* if that packet was not already acknowledged */
                         req_ack = true;
+                        pull_ack++;
                         autoquit_cnt = 0;
                         pthread_mutex_lock(&serv->report->mx_report);
                         serv->report->stat_down.meas_dw_ack_rcv += 1;
@@ -1269,6 +1305,12 @@ static void semtech_pull_down(void* arg) {
 
             /* Send acknoledge datagram to server */
             send_tx_ack(serv, buff_down[1], buff_down[2], jit_result, warning_value);
+
+            /* printf mac header */
+            macmsg.Buffer = txpkt.payload;
+            macmsg.BufSize = txpkt.size;
+            if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg) )
+                decode_mac_pkt_down(&macmsg, &txpkt);
         }
     }
     lgw_log(LOG_INFO, "\nINFO~ [%s-down] End of downstream thread\n", serv->info.name);

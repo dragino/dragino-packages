@@ -41,7 +41,9 @@ DECLARE_HAL;
 
 static int parse_SX130x_configuration(const char* conf_file) {
     int i, j;
-    char param_name[32]; /* used to generate variable parameter names */
+    uint32_t freq_hz[LGW_RF_CHAIN_NB];
+    char param_name[32];  /* used to generate variable parameter names */
+    char param_value[48]; /* used to convert variable parameter to string */
     const char *str; /* used to store string value from JSON object */
     const char conf_obj_name[] = "SX130x_conf";
     JSON_Value *root_val = NULL;
@@ -186,6 +188,11 @@ static int parse_SX130x_configuration(const char* conf_file) {
         } else  { /* radio enabled, will parse the other parameters */
             snprintf(param_name, sizeof param_name, "radio_%i.freq", i);
             rfconf.freq_hz = (uint32_t)json_object_dotget_number(conf_obj, param_name);
+            freq_hz[i] = rfconf.freq_hz;
+            /* put the value radio freq_hz on database */
+            snprintf(param_value, sizeof(param_value), "%.3lfMHz", rfconf.freq_hz / 1e6);
+            lgw_db_put("loaradio", param_name, param_value);  
+
             snprintf(param_name, sizeof param_name, "radio_%i.rssi_offset", i);
             rfconf.rssi_offset = (float)json_object_dotget_number(conf_obj, param_name);
             snprintf(param_name, sizeof param_name, "radio_%i.rssi_tcomp.coeff_a", i);
@@ -360,6 +367,12 @@ static int parse_SX130x_configuration(const char* conf_file) {
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, param_name);
             snprintf(param_name, sizeof param_name, "chan_multiSF_%i.if", i);
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, param_name);
+
+            /* put frequency on database :  chan_multisf_index frequency*/
+            snprintf(param_value, sizeof(param_value), "%.3lfMHz", (ifconf.freq_hz + freq_hz[ifconf.rf_chain]) / 1e6);  
+            snprintf(param_name, sizeof param_name, "chan_multiSF_%i.freq", i);
+            lgw_db_put("loaradio", param_name, param_value);  
+
             // TODO: handle individual SF enabling and disabling (spread_factor)
             lgw_log(LOG_INFO, "INFO: Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 5 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
         }
@@ -436,6 +449,11 @@ static int parse_SX130x_configuration(const char* conf_file) {
                 }
             }
 
+            /* put frequency on database :  chan_multisf_index frequency*/
+            snprintf(param_name, sizeof param_name, "chan_Lora_std.freq", i);
+            snprintf(param_value, sizeof(param_value), "%.3lfMHz, %uHz bw, SF %u", (ifconf.freq_hz + freq_hz[ifconf.rf_chain]) / 1e6, bw, sf);  
+            lgw_db_put("loaradio", param_name, param_value);  
+
             lgw_log(LOG_INFO, "INFO: Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u, %s\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf, (ifconf.implicit_hdr == true) ? "Implicit header" : "Explicit header");
         }
         if (HAL.lgw_rxif_setconf(8, &ifconf) != LGW_HAL_SUCCESS) {
@@ -480,6 +498,10 @@ static int parse_SX130x_configuration(const char* conf_file) {
             else if (bw <= 250000) ifconf.bandwidth = BW_250KHZ;
             else if (bw <= 500000) ifconf.bandwidth = BW_500KHZ;
             else ifconf.bandwidth = BW_UNDEFINED;
+
+            snprintf(param_name, sizeof param_name, "chan_FSK.freq", i);
+            snprintf(param_value, sizeof(param_value), "%fMHz, %uHz bw, %u bps datarate", (ifconf.freq_hz + freq_hz[ifconf.rf_chain]) / 1e6, bw, ifconf.datarate);  
+            lgw_db_put("loaradio", param_name, param_value);  
 
             lgw_log(LOG_INFO, "INFO: FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
         }

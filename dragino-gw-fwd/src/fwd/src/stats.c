@@ -288,67 +288,52 @@ static void semtech_report(serv_s *serv) {
 	bool semtech_format = strcmp(serv->report->stat_format, "semtech") == 0;
 	bool other_format = strcmp(serv->report->stat_format, "other") == 0;
 
-	JSON_Value *root_value_verbose = NULL;
-	JSON_Object *root_object_verbose = NULL;
-	//JSON_Value *root_value_concise = NULL;
-	//JSON_Object *root_object_concise = NULL;
+	JSON_Value *root_value = NULL;
+	JSON_Object *root_object = NULL;
 
 	if (other_format) {
-		root_value_verbose = json_value_init_object();
-		root_object_verbose = json_value_get_object(root_value_verbose);
+		root_value = json_value_init_object();
+		root_object = json_value_get_object(root_value);
 		JSON_Value *servers_array_value = json_value_init_array();
 		JSON_Array *servers_array_object = json_value_get_array(servers_array_value);
 
-		if (serv->info.type == semtech) {
-            JSON_Value *sub_value = json_value_init_object();
-            JSON_Object *sub_object = json_value_get_object(sub_value);
-            json_object_set_string(sub_object, "name", serv->info.name);
-            json_object_set_boolean(sub_object, "found", serv->state.live == true);
-            if (serv->state.live == true)
-                json_object_set_number(sub_object, "last_seen", serv->state.stall_time);
-            else
-                json_object_set_string(sub_object, "last_seen", "never");
-            json_array_append_value(servers_array_object, sub_value);
-		}
-		json_object_set_value(root_object_verbose, "servers", servers_array_value);
-		json_object_set_string(root_object_verbose, "time", iso_timestamp);
-		json_object_dotset_string(root_object_verbose, "device.id", GW.info.gateway_id);
-		json_object_dotset_number(root_object_verbose, "device.latitude", cp_gps_coord.lat);
-		json_object_dotset_number(root_object_verbose, "device.longitude", cp_gps_coord.lon);
-		json_object_dotset_number(root_object_verbose, "device.altitude", cp_gps_coord.alt);
-		json_object_dotset_number(root_object_verbose, "device.uptime", current_time - serv->state.startup_time);
-		json_object_dotset_string(root_object_verbose, "device.gps", gps_state);
-		json_object_dotset_string(root_object_verbose, "device.platform", GW.info.platform);
-		json_object_dotset_string(root_object_verbose, "device.email", GW.info.email);
-		json_object_dotset_string(root_object_verbose, "device.description", GW.info.description);
-		json_object_dotset_number(root_object_verbose, "current.up_radio_packets_received", cp_nb_rx_rcv);
-		json_object_dotset_number(root_object_verbose, "current.up_radio_packets_crc_good", cp_nb_rx_ok);
-		json_object_dotset_number(root_object_verbose, "current.up_radio_packets_crc_bad", cp_nb_rx_bad);
-		json_object_dotset_number(root_object_verbose, "current.up_radio_packets_crc_absent", cp_nb_rx_nocrc);
-		json_object_dotset_number(root_object_verbose, "current.up_radio_packets_dropped", cp_nb_rx_drop);
-		json_object_dotset_number(root_object_verbose, "current.up_radio_packets_forwarded", cp_up_pkt_fwd);
-		json_object_dotset_number(root_object_verbose, "current.up_server_datagrams_send", cp_up_dgram_sent);
-		json_object_dotset_number(root_object_verbose, "current.up_server_datagrams_acknowledged", cp_up_ack_rcv);
-		json_object_dotset_number(root_object_verbose, "current.down_heartbeat_send", cp_dw_pull_sent);
-		json_object_dotset_number(root_object_verbose, "current.down_heartbeat_received", cp_dw_ack_rcv);
-		json_object_dotset_number(root_object_verbose, "current.down_server_datagrams_received", cp_dw_dgram_rcv);
-		json_object_dotset_number(root_object_verbose, "current.down_server_datagrams_accepted", cp_dw_dgram_acp);
-		json_object_dotset_number(root_object_verbose, "current.down_radio_packets_succes", cp_nb_tx_ok);
-		json_object_dotset_number(root_object_verbose, "current.down_radio_packets_failure", cp_nb_tx_fail);
-		json_object_dotset_number(root_object_verbose, "current.down_radio_packets_collision_packet", cp_nb_tx_rejected_collision_packet);
-		json_object_dotset_number(root_object_verbose, "current.down_radio_packets_collision_beacon", cp_nb_tx_rejected_collision_beacon);
-		json_object_dotset_number(root_object_verbose, "current.down_radio_packets_too_early", cp_nb_tx_rejected_too_early);
-		json_object_dotset_number(root_object_verbose, "current.down_radio_packets_too_late", cp_nb_tx_rejected_too_late);
-		json_object_dotset_number(root_object_verbose, "current.down_beacon_packets_queued", cp_nb_beacon_queued);
-		json_object_dotset_number(root_object_verbose, "current.down_beacon_packets_send", cp_nb_beacon_sent);
-		json_object_dotset_number(root_object_verbose, "current.down_beacon_packets_rejected", cp_nb_beacon_rejected);
+		json_object_set_value(root_object, "servers", servers_array_value);
+		json_object_set_string(root_object, "time", iso_timestamp);
+		json_object_dotset_string(root_object, "device.id", GW.info.gateway_id);
+		json_object_dotset_number(root_object, "device.latitude", cp_gps_coord.lat);
+		json_object_dotset_number(root_object, "device.longitude", cp_gps_coord.lon);
+		json_object_dotset_number(root_object, "device.altitude", cp_gps_coord.alt);
+		json_object_dotset_number(root_object, "device.uptime", current_time - serv->state.startup_time);
+		json_object_dotset_string(root_object, "device.gps", gps_state);
+		json_object_dotset_string(root_object, "device.platform", GW.info.platform);
+		json_object_dotset_string(root_object, "device.email", GW.info.email);
+		json_object_dotset_string(root_object, "device.description", GW.info.description);
+		json_object_dotset_number(root_object, "current.up_radio_packets_received", cp_nb_rx_rcv);
+		json_object_dotset_number(root_object, "current.up_radio_packets_crc_good", cp_nb_rx_ok);
+		json_object_dotset_number(root_object, "current.up_radio_packets_crc_bad", cp_nb_rx_bad);
+		json_object_dotset_number(root_object, "current.up_radio_packets_crc_absent", cp_nb_rx_nocrc);
+		json_object_dotset_number(root_object, "current.up_radio_packets_dropped", cp_nb_rx_drop);
+		json_object_dotset_number(root_object, "current.up_radio_packets_forwarded", cp_up_pkt_fwd);
+		json_object_dotset_number(root_object, "current.up_server_datagrams_send", cp_up_dgram_sent);
+		json_object_dotset_number(root_object, "current.up_server_datagrams_acknowledged", cp_up_ack_rcv);
+		json_object_dotset_number(root_object, "current.down_heartbeat_send", cp_dw_pull_sent);
+		json_object_dotset_number(root_object, "current.down_heartbeat_received", cp_dw_ack_rcv);
+		json_object_dotset_number(root_object, "current.down_server_datagrams_received", cp_dw_dgram_rcv);
+		json_object_dotset_number(root_object, "current.down_server_datagrams_accepted", cp_dw_dgram_acp);
+		json_object_dotset_number(root_object, "current.down_radio_packets_succes", cp_nb_tx_ok);
+		json_object_dotset_number(root_object, "current.down_radio_packets_failure", cp_nb_tx_fail);
+		json_object_dotset_number(root_object, "current.down_radio_packets_collision_packet", cp_nb_tx_rejected_collision_packet);
+		json_object_dotset_number(root_object, "current.down_radio_packets_collision_beacon", cp_nb_tx_rejected_collision_beacon);
+		json_object_dotset_number(root_object, "current.down_radio_packets_too_early", cp_nb_tx_rejected_too_early);
+		json_object_dotset_number(root_object, "current.down_radio_packets_too_late", cp_nb_tx_rejected_too_late);
+		json_object_dotset_number(root_object, "current.down_beacon_packets_queued", cp_nb_beacon_queued);
+		json_object_dotset_number(root_object, "current.down_beacon_packets_send", cp_nb_beacon_sent);
+		json_object_dotset_number(root_object, "current.down_beacon_packets_rejected", cp_nb_beacon_rejected);
     }
 
 	if (semtech_format) {
 		pthread_mutex_lock(&serv->report->mx_report);
-
         memset(serv->report->status_report, 0, sizeof(serv->report->status_report));
-
 		if ((GW.gps.gps_enabled && coord_ok) || GW.gps.gps_fake_enable) {
 			snprintf(serv->report->status_report, STATUS_SIZE,
 					 "{\"stat\":{\"time\":\"%s\",\"lati\":%.5f,\"long\":%.5f,\"alti\":%i,\"rxnb\":%u,\"rxok\":%u,\"rxfw\":%u,\"ackr\":%.1f,\"dwnb\":%u,\"txnb\":%u,\"pfrm\":\"%s\",\"mail\":\"%s\",\"desc\":\"%s\"}}",
@@ -365,15 +350,21 @@ static void semtech_report(serv_s *serv) {
 					 cp_nb_tx_ok, GW.info.platform, 
                      GW.info.email, GW.info.description);
 		}
-		lgw_log(LOG_INFO, "#[%s] Semtech status report sent. \n", serv->info.name);
-
+		lgw_log(LOG_INFO, "#[%s] Semtech status report ready. \n", serv->info.name);
 		serv->report->report_ready = true;
 		pthread_mutex_unlock(&serv->report->mx_report);
+        //lgw_db_put("/fwd/pkts/report", timestr, serv->report->status_report);
         sem_post(&serv->thread.sema);
 	}
 
-	if (other_format) 
-		json_value_free(root_value_verbose);
+	if (other_format) {
+		pthread_mutex_lock(&serv->report->mx_report);
+        memset(serv->report->status_report, 0, sizeof(serv->report->status_report));
+        json_serialize_to_buffer(root_value, serv->report->status_report, STATUS_SIZE);
+		serv->report->report_ready = true;
+		pthread_mutex_unlock(&serv->report->mx_report);
+		json_value_free(root_value);
+    }
 
 	lgw_log(LOG_INFO, "################### [%s] end of reporting #########################\n", serv->info.name);
 

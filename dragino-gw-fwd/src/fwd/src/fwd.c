@@ -199,6 +199,7 @@ static void usage( void )
 static void sig_handler(int sigio) {
 	if (sigio == SIGQUIT) {
 		quit_sig = true;
+		exit_sig = true;
 	} else if ((sigio == SIGINT) || (sigio == SIGTERM)) {
 		exit_sig = true;
 	}
@@ -432,8 +433,8 @@ int get_rxpkt(serv_s* serv) {
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
 int main(int argc, char *argv[]) {
-	int i;						/* loop variable and temporary variable for return value */
-	struct sigaction sigact;	/* SIGQUIT&SIGINT&SIGTERM signal handling */
+    int i;						/* loop variable and temporary variable for return value */
+    struct sigaction sigact;	/* SIGQUIT&SIGINT&SIGTERM signal handling */
 
     serv_s* serv_entry = NULL;  
 
@@ -522,6 +523,12 @@ int main(int argc, char *argv[]) {
         HAL.lgw_get_temperature = lgw_get_sx1301_temperature;
     }
 
+    /* staring database for temporary data */
+    if (lgw_db_init()) {
+        lgw_log(LOG_ERROR, "[main] ERROR~ Can't initiate sqlite3 database, EXIT!\n");
+        exit(EXIT_FAILURE);
+    }
+
     /* 创建一个默认的service，用来基本包处理：包解析、包解码、包保存、自定义下发等 */
     serv_entry = (serv_s*)lgw_malloc(sizeof(serv_s));
     if (NULL == serv_entry) {
@@ -583,7 +590,8 @@ int main(int argc, char *argv[]) {
     /* starting ghost service */
 	if (GW.cfg.ghoststream_enabled == true) {
         ghost_start(GW.cfg.ghost_host, GW.cfg.ghost_port, GW.gps.reference_coord, GW.info.gateway_id);
-        //lgw_register_atexit(ghost_stop);
+        lgw_register_atexit(ghost_stop);
+        lgw_db_put("loraradio", "ghoststream", "running");
         lgw_log(LOG_INFO, "INFO~ [main] Ghost listener started, ghost packets can now be received.\n");
     }
 
@@ -596,8 +604,10 @@ int main(int argc, char *argv[]) {
         } 
 		i = HAL.lgw_start();
 		if (i == LGW_HAL_SUCCESS) {
+            lgw_db_put("loraradio", "radiostream", "running");
 			lgw_log(LOG_INFO, "INFO~ [main] concentrator started, radio packets can now be received.\n");
 		} else {
+            lgw_db_put("loraradio", "radiostream", "hangup");
 			lgw_log(LOG_ERROR, "ERROR~ [main] failed to start the concentrator\n");
             if (system("/usr/bin/reset_lgw.sh stop") != 0) {
                 lgw_log(LOG_ERROR, "ERROR~ [main] failed to stop SX130X, run script reset_lgw.sh stop!\n");
@@ -611,6 +621,8 @@ int main(int argc, char *argv[]) {
 
     if (lgw_pthread_create(&thrid_up, NULL, (void *(*)(void *))thread_up, NULL))
 		lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create data up thread\n");
+    else
+        lgw_db_put("thread", "thread_up", "running");
 
     /* JIT queue initialization */
     jit_queue_init(&GW.tx.jit_queue[0]);
@@ -618,16 +630,25 @@ int main(int argc, char *argv[]) {
 
     if (lgw_pthread_create(&thrid_jit, NULL, (void *(*)(void *))thread_jit, NULL))
         lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create JIT thread\n");
+    else
+        lgw_db_put("thread", "thread_jit", "running");
+    
 
 	/* spawn thread to manage GPS */
 	if (GW.gps.gps_enabled == true) {
 	    // Timer synchronization needed for downstream ...
 		if (lgw_pthread_create(&thrid_timersync, NULL, (void *(*)(void *))thread_timersync, NULL))
 			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create Timer Sync thread\n");
+        else
+            lgw_db_put("thread", "thread_timersync", "running");
 		if (lgw_pthread_create(&thrid_gps, NULL, (void *(*)(void *))thread_gps, NULL))
 			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create GPS thread\n");
+        else
+            lgw_db_put("thread", "thread_gps", "running");
 		if (pthread_create(&thrid_valid, NULL, (void *(*)(void *))thread_valid, NULL))
 			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create validation thread\n");
+        else
+            lgw_db_put("thread", "thread_valid", "running");
 	}
 
 	/* spawn thread for watchdog */
@@ -635,6 +656,8 @@ int main(int argc, char *argv[]) {
         GW.cfg.last_loop = time(NULL);
 		if (lgw_pthread_create(&thrid_watchdog, NULL, (void *(*)(void *))thread_watchdog, NULL))
 			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create watchdog thread\n");
+        else
+            lgw_db_put("thread", "thread_watchdog", "running");
 	}
 
     /* for debug
@@ -677,6 +700,7 @@ int main(int argc, char *argv[]) {
 
 	//TODO: Dit heeft nawerk nodig / This needs some more work
 	pthread_cancel(thrid_jit);	/* don't wait for jit thread */
+	pthread_join(thrid_up, NULL);	    /* don't wait for up thread */
 
 	if (GW.gps.gps_enabled == true) {
 		pthread_cancel(thrid_timersync);	/* don't wait for timer sync thread */
@@ -684,13 +708,15 @@ int main(int argc, char *argv[]) {
 		pthread_cancel(thrid_valid);	    /* don't wait for validation thread */
 	}
 
-	if (GW.cfg.ghoststream_enabled == true) {
-        ghost_stop();
-    }
+	//if (GW.cfg.ghoststream_enabled == true) {
+    //    ghost_stop();
+    //}
 
-    //lgw_run_atexits(1);
+    lgw_run_atexits(1);
 
     stop_clean_service();
+
+    thread_rxpkt_recycle();
 
 	/* if an exit signal was received, try to quit properly */
 	if (exit_sig || quit_sig) {
@@ -797,12 +823,12 @@ static void thread_up(void) {
 static void thread_rxpkt_recycle(void) {
     rxpkts_s* rxpkt_entry = NULL;
 
-	lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] Runing packages recycle thread\n");
+	lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] running packages recycle thread\n");
 
     LGW_LIST_LOCK(&GW.rxpkts_list);
     LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.rxpkts_list, rxpkt_entry, list) {
 	    lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] recycle thread start traverse, bind=%d\n", rxpkt_entry->bind);
-        if (rxpkt_entry->bind < 1) {
+        if (rxpkt_entry->bind < 1 || exit_sig) {
             LGW_LIST_REMOVE_CURRENT(list);
             lgw_free(rxpkt_entry);
             GW.rxpkts_list.size--;

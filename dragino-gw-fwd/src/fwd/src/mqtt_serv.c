@@ -77,6 +77,7 @@ void dnlink_handler(MessageData* data) {
 
 static int mqtt_connect(serv_s *serv) {
     int err = -1;
+    char family[64];
 
     mqtt_init(serv);
 
@@ -111,20 +112,28 @@ static int mqtt_connect(serv_s *serv) {
     if (session->dnlink_topic)
         err = MQTTSubscribe(&session->client, session->dnlink_topic, QOS_DOWN, &mqtt_dnlink_cb, session);
 
+    snprintf(family, sizeof(family), "service/mqtt/%s", serv->info.name);
+    lgw_db_put(family, "network", serv->state.connecting ? "online" : "offline");
+
 exit:
     return err;
 }
 
-static void mqtt_disconnect(mqttsession_s *session) {
+static void mqtt_disconnect(serv_s* serv) {
+    char family[64];
+    mqttsession_s* session = (mqttsession_s*)serv->net->mqtt->session;
     MQTTDisconnect(&session->client);
     NetworkDisconnect(&session->network);
+    serv->state.connecting = true;
+    snprintf(family, sizeof(family), "service/mqtt/%s", serv->info.name);
+    lgw_db_put(family, "network", serv->state.connecting ? "online" : "offline");
 }
 
 static int mqtt_reconnect(serv_s* serv) {
     serv->state.live = false;
     lgw_log(LOG_INFO, "INFO: [TTN] Reconnecting %s\n",serv->info.name);
     if (serv->net->mqtt->session) {
-        mqtt_disconnect((mqttsession_s*)serv->net->mqtt->session);
+        mqtt_disconnect(serv);
         mqtt_cleanup((mqttsession_s*)serv->net->mqtt->session);
     }
     serv->state.connecting = false;
@@ -193,18 +202,27 @@ int mqtt_start(serv_s* serv) {
         lgw_log(LOG_WARNING, "WARNING~ [%s] Can't create push up pthread.\n", serv->info.name);
         return -1;
     }
+
+    lgw_db_put("service/mqtt", serv->info.name, "running");
+    lgw_db_put("thread", serv->info.name, "running");
+
     return 0;
 }
 
 void mqtt_stop(serv_s* serv) {
+    char family[64];
     serv->thread.stop_sig = true;
 	sem_post(&serv->thread.sema);
 	pthread_join(serv->thread.t_up, NULL);
     if (serv->state.connecting) 
-        mqtt_disconnect((mqttsession_s*)serv->net->mqtt->session);
+        mqtt_disconnect(serv);
     mqtt_cleanup((mqttsession_s*)serv->net->mqtt->session);
     serv->state.connecting = false;
     serv->state.live = false;
+    snprintf(family, sizeof(family), "service/mqtt/%s", serv->info.name);
+    lgw_db_del(family, "network");
+    lgw_db_del("service/mqtt", serv->info.name);
+    lgw_db_del("thread", serv->info.name);
 }
 
 static void mqtt_push_up(void* arg) {

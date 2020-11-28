@@ -39,14 +39,36 @@
 
 #define MAX_DB_FIELD       256
 
-pthread_mutex_t mx_dblock = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t dbcond;
-static sqlite3 *GWDB;
-static pthread_t syncthread;
-static int doexit;
-static int dosync;
+#define CREATE_TB_LIVEPKTS_SQL "CREATE TABLE IF NOT EXISTS `livepkts` (\
+  `id`  INTEGER PRIMARY KEY AUTOINCREMENT,\
+  `time`  TEXT NOT NULL DEFAULT (strftime('%H:%M:%S',time('now', 'localtime'))),\
+  `servname`  TEXT,\
+  `servtype`  TEXT,\
+  `pdtype`  TEXT,\
+  `mod`  TEXT DEFAULT 'LoRa',\
+  `freq`  TEXT,\
+  `dr`  TEXT,\
+  `cnt`  TEXT,\
+  `devaddr` TEXT,\
+  `content` TEXT,\
+  `payload` TEXT)"
 
-static void db_sync(void);
+#define CREATE_TB_GWDB_SQL "CREATE TABLE IF NOT EXISTS gwdb(key VARCHAR(256), value VARCHAR(512), PRIMARY KEY(key))"
+
+#define CREATE_TRG_CLEAN_PKT "CREATE TRIGGER IF NOT EXISTS `trg_clean_pkt` AFTER INSERT ON livepkts BEGIN \
+    INSERT OR REPLACE INTO gwdb VALUES('/fwd/pkts/total', (SELECT ifnull(1+(SELECT value FROM gwdb WHERE key LIKE '/fwd/pkts/total'), 1)));\
+    DELETE FROM livepkts WHERE id < ((SELECT id FROM livepkts ORDER BY id DESC LIMIT 1) - 128);\
+    END;"
+
+#define CREATE_TRG_UP_HOURS "CREATE TRIGGER IF NOT EXISTS `trg_up_hours` AFTER INSERT ON LIVEPKTS WHEN new.pdtype LIKE '%'||'UP' BEGIN \
+    INSERT OR REPLACE INTO gwdb SELECT '/fwd/pkts/up/'||strftime('%m/%d-%H',datetime('now', 'localtime')), (SELECT ifnull(1+(SELECT value FROM gwdb WHERE key LIKE '/fwd/pkts/up/'|| strftime('%m/%d-%H',datetime('now', 'localtime'))), 1));\
+    INSERT OR REPLACE INTO gwdb VALUES('/fwd/pkts/up/total', (SELECT ifnull(1+(SELECT value FROM gwdb WHERE key LIKE '/fwd/pkts/up/total'), 1)));\
+    END;"
+
+#define CREATE_TRG_DOWN_HOURS "CREATE TRIGGER IF NOT EXISTS `trg_down_hours` AFTER INSERT ON LIVEPKTS WHEN new.pdtype LIKE '%'||'DOWN' BEGIN \
+    INSERT OR REPLACE INTO gwdb SELECT '/fwd/pkts/up/'||strftime('%m/%d-%H',datetime('now', 'localtime')), (SELECT ifnull(1+(SELECT value FROM gwdb WHERE key LIKE '/fwd/pkts/up/'|| strftime('%m/%d-%H',datetime('now', 'localtime'))), 1));\
+    INSERT OR REPLACE INTO gwdb values('/fwd/pkts/down/total', (SELECT ifnull(1+(SELECT value FROM gwdb WHERE key LIKE '/fwd/pkts/down/total'), 1)));\
+    END;"
 
 #define DEFINE_SQL_STATEMENT(stmt,sql) static sqlite3_stmt *stmt; \
 	const char stmt##_sql[] = sql;
@@ -59,8 +81,18 @@ DEFINE_SQL_STATEMENT(deltree_all_stmt, "DELETE FROM gwdb")
 DEFINE_SQL_STATEMENT(gettree_stmt, "SELECT key, value FROM gwdb WHERE key || '/' LIKE ? || '/' || '%' ORDER BY key")
 DEFINE_SQL_STATEMENT(gettree_all_stmt, "SELECT key, value FROM gwdb ORDER BY key")
 DEFINE_SQL_STATEMENT(showkey_stmt, "SELECT key, value FROM gwdb WHERE key LIKE '%' || '/' || ? ORDER BY key")
-DEFINE_SQL_STATEMENT(create_gwdb_stmt, "CREATE TEMPORARY TABLE IF NOT EXISTS gwdb(key VARCHAR(256), value VARCHAR(256), PRIMARY KEY(key))")
 DEFINE_SQL_STATEMENT(gettree_prefix_stmt, "SELECT key, value FROM gwdb WHERE key > ?1 AND key <= ?1 || X'ffff'")
+
+DEFINE_SQL_STATEMENT(put_pkt_stmt, "INSERT INTO livepkts (pdtype, freq, dr, cnt, devaddr, content, payload) VALUES (?, ?, ?, ?, ?, ?, ?)")
+
+pthread_mutex_t mx_dblock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t dbcond;
+static sqlite3 *GWDB;
+static pthread_t syncthread;
+static int doexit;
+static int dosync;
+
+static void db_sync(void);
 
 static int init_stmt(sqlite3_stmt **stmt, const char *sql, size_t len)
 {
@@ -105,7 +137,7 @@ static void clean_statements(void)
 	clean_stmt(&gettree_prefix_stmt, gettree_prefix_stmt_sql);
 	clean_stmt(&showkey_stmt, showkey_stmt_sql);
 	clean_stmt(&put_stmt, put_stmt_sql);
-	clean_stmt(&create_gwdb_stmt, create_gwdb_stmt_sql);
+	clean_stmt(&put_pkt_stmt, put_pkt_stmt_sql);
 }
 
 static int init_statements(void)
@@ -120,10 +152,12 @@ static int init_statements(void)
 	|| init_stmt(&gettree_all_stmt, gettree_all_stmt_sql, sizeof(gettree_all_stmt_sql))
 	|| init_stmt(&gettree_prefix_stmt, gettree_prefix_stmt_sql, sizeof(gettree_prefix_stmt_sql))
 	|| init_stmt(&showkey_stmt, showkey_stmt_sql, sizeof(showkey_stmt_sql))
-	|| init_stmt(&put_stmt, put_stmt_sql, sizeof(put_stmt_sql));
+	|| init_stmt(&put_stmt, put_stmt_sql, sizeof(put_stmt_sql))
+	|| init_stmt(&put_pkt_stmt, put_pkt_stmt_sql, sizeof(put_pkt_stmt_sql));
 }
 
-static int db_create_gwdb(void)
+/*
+static int db_create_table(void)
 {
 	int res = 0;
 
@@ -132,16 +166,19 @@ static int db_create_gwdb(void)
 	}
 
 	pthread_mutex_lock(&mx_dblock);
+
 	if (sqlite3_step(create_gwdb_stmt) != SQLITE_DONE) {
-		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't create GWDB table: %s\n", sqlite3_errmsg(GWDB));
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't create GWDB table gwdb: %s\n", sqlite3_errmsg(GWDB));
 		res = -1;
 	}
 	sqlite3_reset(create_gwdb_stmt);
+
 	db_sync();
 	pthread_mutex_unlock(&mx_dblock);
 
 	return res;
 }
+*/
 
 static int db_open(void)
 {
@@ -164,7 +201,7 @@ static int db_init(void)
 		return 0;
 	}
 
-	if (db_open() || db_create_gwdb() || init_statements()) {
+	if (db_open()) {
 		return -1;
 	}
 
@@ -174,7 +211,7 @@ static int db_init(void)
 /* We purposely don't lock around the sqlite3 call because the transaction
  * calls will be called with the database lock held. For any other use, make
  * sure to take the mx_dblock yourself. */
-static int db_execute_sql(const char *sql, int (*callback)(void *, int, char **, char **), void *arg)
+static int db_exec_sql(const char *sql, int (*callback)(void *, int, char **, char **), void *arg)
 {
 	char *errmsg = NULL;
 	int res =0;
@@ -190,17 +227,17 @@ static int db_execute_sql(const char *sql, int (*callback)(void *, int, char **,
 
 static int lgw_db_begin_transaction(void)
 {
-	return db_execute_sql("BEGIN TRANSACTION", NULL, NULL);
+	return db_exec_sql("BEGIN TRANSACTION", NULL, NULL);
 }
 
 static int lgw_db_commit_transaction(void)
 {
-	return db_execute_sql("COMMIT", NULL, NULL);
+	return db_exec_sql("COMMIT", NULL, NULL);
 }
 
 static int lgw_db_rollback_transaction(void)
 {
-	return db_execute_sql("ROLLBACK", NULL, NULL);
+	return db_exec_sql("ROLLBACK", NULL, NULL);
 }
 
 int lgw_db_put(const char *family, const char *key, const char *value)
@@ -229,6 +266,45 @@ int lgw_db_put(const char *family, const char *key, const char *value)
 	}
 
 	sqlite3_reset(put_stmt);
+	db_sync();
+	pthread_mutex_unlock(&mx_dblock);
+
+	return res;
+}
+
+int lgw_db_putpkt(char* pdtype, double freq, char* dr, uint16_t cnt, char* devaddr, char* content, char* payload)
+{
+	int res = 0;
+
+	pthread_mutex_lock(&mx_dblock);
+
+	if (sqlite3_bind_text(put_pkt_stmt, 1, pdtype, -1, SQLITE_STATIC) != SQLITE_OK) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind payloadd type to stmt: %s\n", sqlite3_errmsg(GWDB));
+		res = -1;
+	} else if (sqlite3_bind_double(put_pkt_stmt, 2, freq) != SQLITE_OK) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind frequuency to stmt: %s\n", sqlite3_errmsg(GWDB));
+		res = -1;
+	} else if (sqlite3_bind_text(put_pkt_stmt, 3, dr, -1, SQLITE_STATIC) != SQLITE_OK) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind datarate to stmt: %s\n", sqlite3_errmsg(GWDB));
+		res = -1;
+	} else if (sqlite3_bind_int(put_pkt_stmt, 4, cnt) != SQLITE_OK) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind count to stmt: %s\n", sqlite3_errmsg(GWDB));
+		res = -1;
+	} else if (sqlite3_bind_text(put_pkt_stmt, 5, devaddr, -1, SQLITE_STATIC) != SQLITE_OK) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind devaddr to stmt: %s\n", sqlite3_errmsg(GWDB));
+		res = -1;
+	} else if (sqlite3_bind_text(put_pkt_stmt, 6, content, -1, SQLITE_STATIC) != SQLITE_OK) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind conten to stmt: %s\n", sqlite3_errmsg(GWDB));
+		res = -1;
+	} else if (sqlite3_bind_text(put_pkt_stmt, 7, payload, -1, SQLITE_STATIC) != SQLITE_OK) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't bind payload to stmt: %s\n", sqlite3_errmsg(GWDB));
+		res = -1;
+	} else if (sqlite3_step(put_pkt_stmt) != SQLITE_DONE) {
+		lgw_log(LOG_WARNING, "WARNING~ [db] Couldn't execute statement: %s\n", sqlite3_errmsg(GWDB));
+		res = -1;
+	}
+
+	sqlite3_reset(put_pkt_stmt);
 	db_sync();
 	pthread_mutex_unlock(&mx_dblock);
 
@@ -581,6 +657,17 @@ int lgw_db_init(void)
 	if (db_init()) {
 		return -1;
 	}
+
+    /* sqlite3 staring ... */
+	db_exec_sql(CREATE_TB_GWDB_SQL, NULL, NULL);
+	db_exec_sql("DELETE FROM gwdb", NULL, NULL);
+	db_exec_sql("INSERT OR REPLACE INTO gwdb VALUES ('/fwd/startup',  datetime('now', 'localtime'))", NULL, NULL);
+	db_exec_sql(CREATE_TB_LIVEPKTS_SQL, NULL, NULL);
+	db_exec_sql(CREATE_TRG_CLEAN_PKT, NULL, NULL);
+	db_exec_sql(CREATE_TRG_UP_HOURS, NULL, NULL);
+	db_exec_sql(CREATE_TRG_DOWN_HOURS, NULL, NULL);
+
+    init_statements();
 
 	if (pthread_create(&syncthread, NULL, db_sync_thread, NULL)) {
 		return -1;

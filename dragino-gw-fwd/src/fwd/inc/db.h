@@ -66,6 +66,9 @@ int lgw_db_get_allocated(const char *family, const char *key, char **out);
 /*! \brief Store value addressed by family/key */
 int lgw_db_put(const char *family, const char *key, const char *value);
 
+/*! \brief Store value on table livepkts */
+int lgw_db_putpkt(char* pdtype, double freq, char* dr, uint16_t cnt, char* devaddr, char* content, char* payload);
+
 /*! \brief Delete entry in gwdb */
 int lgw_db_del(const char *family, const char *key);
 

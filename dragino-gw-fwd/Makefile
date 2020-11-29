@@ -50,7 +50,7 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fwd/fwd $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/reset_lgw.sh $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/reset_lgw1.sh $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/lora
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/gwcfg.json $(1)/etc/lora
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/sxcfg.json $(1)/etc/lora

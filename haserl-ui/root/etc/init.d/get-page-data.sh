@@ -424,7 +424,8 @@ if [ $server_type == "lorawan" ]; then
 	info_title3="LoRaWAN Service"
 	server3=$(uci get gateway.general.platform | cut -d "," -f 2)  
 	lorawanstatus=$(ps|grep -c _pkt_fwd)
-	if [ $lorawanstatus == "2" ]; then
+	lorawan_boot=$(ps|grep -c reset_lgw.sh)
+	if [ $lorawanstatus == "2" ] && [ $lorawan_boot == "1" ]; then
 		process3="LoRaWAN process pkt_fwd <b>Running</b>"
 		status3=$(cat /var/iot/status)
 	else

@@ -227,6 +227,13 @@ do
 	sleep 15
 	chk_internet_connection
 	
+	# Control receive size < 2M
+	receive_size=`du -h -k /var/iot/ -d 0 | awk '{print $1}'`
+	if [ $receive_size -gt 1024 ];then
+		rm -rf /var/iot/receive/*
+		rm -rf /var/iot/channels/*
+	fi
+	
 	if [ "$global_ping" -gt "$ZERO" ];then   # Check if the device has internet connection
 		ROUTE_DF=`ip route | grep default | awk '{print $5}'`
 		logger -t iot_keep_alive "Internet Access OK: via $ROUTE_DF"

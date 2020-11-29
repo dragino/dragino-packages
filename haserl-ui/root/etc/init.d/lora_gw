@@ -3,23 +3,25 @@
 START=55
 USE_PROCD=1
 
-init_board() {
+	chip=`cat /var/iot/chip`
 
+init_board() {
+	model=`cat /tmp/iot/model.txt`
     board=`cat /var/iot/board`
+
     mode=`uci get gateway.general.server_type`
 
-    if [[ "$board" = "LG02" ]]; then
+    if [[ "$chip" = "sx1276_2" ]]; then
         process="lg02_pkt_fwd"
-    elif [[ "$board" = "LG01" ]]; then
+    elif [[ "$chip" = "sx1276_1" ]]; then
         process="lg01_pkt_fwd"
-    elif [[ "$board" = "LG08P" ]]; then
+    elif [[ "$chip" = "sx1301" ]] || [[ "$chip" = "sx1308" ]] ; then
         process="lora_pkt_fwd"
 #        /usr/bin/reset_lgw.sh start
         /usr/bin/generate-config.sh
-    elif [[ "$board" = "LG08" ]]; then
-        process="lora_pkt_fwd"
-#        /usr/bin/reset_lgw.sh start
-        /usr/bin/generate-config.sh
+    elif [[ "$chip" = "sx1302" ]]; then
+        process="fwd"
+		/usr/bin/generate-config.sh
     else
         exit 1
     fi
@@ -46,6 +48,9 @@ start_service() {
     init_board
     procd_open_instance
     procd_set_param command /usr/bin/"$process"
+	if [[ "$chip" = "sx1302" ]]; then
+		procd_append_param command -d sx1302
+	fi
     procd_set_param file  /etc/config/gateway
     procd_set_param stdout "$DEB"
     procd_set_param respawn 360 5 0

@@ -4,97 +4,115 @@ START=50
 STOP=90
 
 start() {
+
     mkdir -p /var/iot/channels
     mkdir -p /var/iot/receive
 	mkdir -p /var/iot/push
-
-    rmmod gpio_keys_polled
+	
+	rmmod gpio_keys_polled
     modprobe gpio_keys_polled
+	
+	EC25_P2="/dev/ttyUSB2"
+	EC25_P3="/dev/ttyUSB3"
 
-    rmmod spi-gpio-custom
-    insmod spi-gpio-custom bus0=1,14,16,26,0,8000000,15 bus1=2,18,21,19,0,8000000,24
-    sleep 1
+	SN=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6`
+	case $SN in
+	  *"ig16"*)
+		logger "[Model Detected]: LIG16"
+		chip="sx1302"
+		board="LG08"
+		model="LIG16"
+		pic="Dragino-LIG16.png"
+		rmmod i2c-gpio-custom
+		insmod i2c-gpio-custom bus0=0,7,8
+		rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+		sleep 1
+		;;
+	  *"lps8"*)
+		logger "[Model Detected]: LPS8"
+		chip="sx1308"
+		board="LG08"
+		model="LPS8"
+		pic="Dragino-LPS8.png"
+		rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+		;;
+	  *"los8"*)
+		logger "[Model Detected]: DLOS8"
+		chip="sx1301"
+		board="LG08"
+		model="DLOS8"
+		pic="Dragino-DLOS8.png"
+		ln -s /dev/ttyUSB0 /dev/ttyGPS
+		EC25_P2="/dev/ttyUSB3"
+		EC25_P3="/dev/ttyUSB4"
+		rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+		;;
+	  *)
 
-    /usr/bin/spirw 8 0
+		rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,14,16,26,0,8000000,15 bus1=2,18,21,19,0,8000000,24
+		sleep 1
 
-    if [[ "$?" == "0" ]]; then
-        echo "LG02" > /var/iot/board
-    else 
-        /usr/bin/spirw 23 1
-        if [[ "$?" == "0" ]]; then
-            echo "LG01" > /var/iot/board
-        else
-            rmmod spi-gpio-custom
-            insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21
-            /usr/bin/spirw 12 1
-            if [[ "$?" == "1" ]]; then
-	    	rmmod spi-gpio-custom
-			insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
-                echo "LG08" > /var/iot/board
-            else
-                echo "LG08P" > /var/iot/board
-            fi
-        fi
-    fi
+		/usr/bin/spirw 8 0
+		if [[ "$?" == "0" ]]; then
+			logger "[Model Detected]: LG02"
+			board="LG02"
+			chip="sx1276_2"
+			model="LG02"
+			pic="Dragino-LG02.png"
+		else 
+			/usr/bin/spirw 23 1
+			if [[ "$?" == "0" ]]; then
+				logger "[Model Detected]: LG01"
+				board="LG01"
+				chip="sx1276_1"
+				model="LG01"
+				pic="Dragino-LG01.png"
+			else
+				rmmod spi-gpio-custom
+				insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19 bus1=2,22,14,26,0,8000000,21
+				/usr/bin/spirw 12 1
+				if [[ "$?" == "1" ]]; then
+				chip="sx1301"
+				model="LG308"
+				pic="Dragino-LG308.png"
+				rmmod spi-gpio-custom
+				insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+					logger "[Model Detected]: LG308"
+					board="LG08"
+				else
+					logger "[Model Detected]: LG308P"
+					board="LG08P"
+				fi
+			fi
+		fi
+		;;
+	esac
 
-    board=`cat /var/iot/board`
-	model=$board
-
-    uci set gateway.general.model="$board"
-
-    uci commit system
-    uci commit gateway
+	echo $chip > /var/iot/chip
+	echo $model > /var/iot/model.txt
+	echo $pic   > /var/iot/pic.txt
+	
+	echo $board > /var/iot/board
+	uci set gateway.general.model="$board"
+	uci commit system
+	uci commit gateway
 
     DEB=`uci get gateway.general.DEB`
     if [[ "$DEB" -gt 1 ]]; then
         DEB="1"
     fi
-
+	
 	# Detect Cellular USB device	(and repeat to be sure)
 	cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c > /tmp/cell_detect.txt
 	(sleep 30; cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c > /tmp/cell_detect.txt) &
 	
-	# Detect model
-	is_lps8=$(hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c "lps8")
-	is_dlos8=$(hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c "los8")
-	
-	EC25_P2="/dev/ttyUSB2"
-	EC25_P3="/dev/ttyUSB3"
-	if [ $board == "LG08" ] || [ $board == "LG08P" ];then
-		model="LG308"
-		if [ $is_lps8 == "1" ]; then
-			model="LPS8"
-		elif [ $is_dlos8 == "1" ]; then
-			model="DLOS8"
-			ln -s /dev/ttyUSB0 /dev/ttyGPS
-			EC25_P2="/dev/ttyUSB3"
-			EC25_P3="/dev/ttyUSB4"
-		fi
-	elif [ $board == "LG01" ];then
-		model="LG01"
-	elif [ $board == "LG02" ];then
-		model="LG02"
-	fi	
-	
 	[ "`uci get network.cellular.device`" != "$EC25_P2" ] && uci set network.cellular.device=$EC25_P2 && uci commit network
 	#ln -s $EC25_P2 /dev/ttyModem;
 	ln -s $EC25_P3 /dev/ttyModemAT
-
-
-	case $model in
-		LG01) pic="Dragino-LG01.png"
-		;;
-		LG02) pic="Dragino-LG02.png"
-		;;
-		LG308)	pic="Dragino-LG308.png"
-		;;
-		LPS8)	pic="Dragino-LPS8.png"
-		;;
-		DLOS8) pic="Dragino-DLOS8.png"
-		;;
-	esac
-	echo $model > /tmp/iot/model.txt
-	echo $pic   > /tmp/iot/pic.txt
 }
 
 stop() {

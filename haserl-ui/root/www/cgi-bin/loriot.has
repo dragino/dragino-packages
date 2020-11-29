@@ -40,14 +40,7 @@
 		installed="1"
 	else
 		installed="0"
-	fi
-
-	if [ "$FORM_BUTTON" == "Install" ]; then
-		URL="http://www.dragino.com/downloads/downloads/LoRa_Gateway/LPS8/Firmware/customized_script/loriot_dragino_lg308_spi"
-		installed="2"
-		rm /usr/bin/loriot_dragino_lg308_spi
-		(wget -P /usr/bin $URL > /dev/null; chmod +x /usr/bin/loriot_dragino_lg308_spi) &
-	fi  
+	fi 
 %>
 
 <% 
@@ -180,8 +173,6 @@
 	<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
 	<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
 	<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
-	<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Refresh" onclick="showPageLoaderIcon()">
-	<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Install" onclick="showPageLoaderIcon()">
 	</td>
 </tr>
 </table>

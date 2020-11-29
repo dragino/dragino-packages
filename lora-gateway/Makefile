@@ -69,7 +69,7 @@ define Package/lora-gateway/install
 	$(INSTALL_DIR) $(1)/etc/lora/cfg-308
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/cfg-308/*.json* $(1)/etc/lora/cfg-308
 	$(INSTALL_DIR) $(1)/etc/lora/cfg-302
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/cfg-308/*.json* $(1)/etc/lora/cfg-302
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/lora_pkt_fwd/cfg-302/*.json* $(1)/etc/lora/cfg-302
 	$(INSTALL_DIR) $(1)/etc/lora/customized_scripts
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lora_pkt_fwd/customized_scripts/* $(1)/etc/lora/customized_scripts
 	$(INSTALL_DIR) $(1)/etc/lora/decoder

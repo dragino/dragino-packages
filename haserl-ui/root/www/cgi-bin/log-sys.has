@@ -39,10 +39,11 @@ MEMSTR="Free Memory: "$MEMFREE" / Total Memory: "$MEMTOT
 
 <script>	document.getElementById("loading").style.display = "none"; 	</script>
 
+<!--
 	<h4>	<% echo "Realtime Log: " %> 	</h4>
 	<textarea cols="155" rows="20" ><% logread -f %></textarea>
 	<br><br>
-
+-->
 </div>
 </div> <!-- End page container -->
 </body>

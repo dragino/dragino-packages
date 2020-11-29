@@ -4,6 +4,7 @@
 
 json = require('dragino.json')
 local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
 local bit=require("dragino.bit")
 
 local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
@@ -94,6 +95,18 @@ elseif EXT==7 then
 	count=tonumber(utility.hex2str(string.sub(payload,24,25)))
 	payload_t.Exit_count=count
 end
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.TempC_SHT .. "&field2=".. payload_t.Hum_SHT .. "&field3=".. payload_t.TempC_DS .. "&field4=".. payload_t.BatV .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
 print(json.encode(payload_t)) 
 return json.encode(payload_t)
 

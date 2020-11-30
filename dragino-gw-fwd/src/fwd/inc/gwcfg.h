@@ -273,13 +273,8 @@ typedef struct {
 
 #define INIT_GW gw_s GW = {   .info.lgwm = 0,                                        \
                               .hal.board = "sx1302",                                 \
-<<<<<<< HEAD
                               .hal.confs = { .gwcfg = "/etc/lora/local_conf.json",    \
                                              .sxcfg = "/etc/lora/global_conf.json", },\
-=======
-                              .hal.confs = { .gwcfg = "/etc/lora/local_conf.json",        \
-                                             .sxcfg = "/etc/lora/global_conf.json", },     \
->>>>>>> 30d3949be7e40dc15d434ef6d5481c789cb35d82
                               .hal.mx_concent = PTHREAD_MUTEX_INITIALIZER,           \
                               .hal.mx_xcorr   = PTHREAD_MUTEX_INITIALIZER,           \
                               .hal.xtal_correct_ok = false,                          \

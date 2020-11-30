@@ -818,6 +818,7 @@ static void semtech_pull_down(void* arg) {
 
         if (serv->net->sock_down == -1) {// 如果没有连接跳过下面步骤，运行下一次循环
             serv->state.connecting = false;
+            lgw_db_put(family, "network", "offline");
             continue;
         }
 

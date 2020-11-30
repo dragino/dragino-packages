@@ -29,11 +29,9 @@ objs = $(fobjs) $(sx1302objs) $(sx1301objs) $(lg02objs)
 
 ### linking options
 
-LLIBS := -lloragw -lrt -lmpsse -lm -lusb-1.0 -lftdi1
-
 ### general build targets
 
-all: libloragw.a 
+all: libloragw.a tx_test rx_test
 
 clean:
 	rm -f libloragw.a
@@ -88,10 +86,14 @@ $(OBJDIR)/loragw_hal.o: loragw_hal.c $(INCLUDES) config.h | $(OBJDIR)
 	$(CC) -g -c $(LCFLAGS) $< -o $@
 
 ### static library
-
 libloragw.a: $(objs)
 	$(AR) rcs $@ $^
 
 ### test programs
+tx_test: test/test_loragw_hal_tx.c libloragw.a
+	$(CC) -fPIE $(LCFLAGS) -L. $< -o $@ -lloragw -lmpsse
+
+rx_test: test/test_loragw_hal_rx.c libloragw.a
+	$(CC) -fPIE $(LCFLAGS) -L. $< -o $@ -lloragw -lmpsse
 
 ### EOF

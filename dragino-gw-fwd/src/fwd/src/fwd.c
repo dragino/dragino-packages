@@ -712,9 +712,9 @@ int main(int argc, char *argv[]) {
     //    ghost_stop();
     //}
 
-    lgw_run_atexits(1);
-
     stop_clean_service();
+
+    lgw_run_atexits(1);
 
     thread_rxpkt_recycle();
 

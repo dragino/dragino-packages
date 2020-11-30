@@ -28,6 +28,7 @@
 #define _LGW_DB_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #if defined(__cplusplus) || defined(c_plusplus)
 extern "C" {

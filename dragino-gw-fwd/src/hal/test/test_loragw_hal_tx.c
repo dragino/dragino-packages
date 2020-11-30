@@ -31,9 +31,11 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include <math.h>
 #include <signal.h>     /* sigaction */
 #include <getopt.h>     /* getopt_long */
+#include <strings.h>
 
 #include "loragw_hal.h"
-#include "loragw_reg.h"
+#include "loragw_hal_sx1301.h"
+#include "loragw_hal_sx1302.h"
 #include "loragw_aux.h"
 
 /* -------------------------------------------------------------------------- */
@@ -49,6 +51,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #define DEFAULT_CLK_SRC     0
 #define DEFAULT_FREQ_HZ     868500000U
 
+DEFI_HAL;
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES ---------------------------------------------------- */
 
@@ -56,6 +59,7 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 static int exit_sig = 0; /* 1 -> application terminates cleanly (shut down hardware, close open files, etc) */
 static int quit_sig = 0; /* 1 -> application terminates without shutting down the hardware */
 
+char board[16] = "sx1302";
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS ---------------------------------------------------- */
 
@@ -91,6 +95,7 @@ void usage(void) {
     printf(" --nhdr        Send LoRa packet with implicit header\n");
     printf( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" );
     printf(" --loop        Number of loops for HAL start/stop (HAL unitary test)\n");
+    printf(" --hal <str>   Set sx130x hal (sx1301,sx1302, sx1308)\n");
 }
 
 /* handle signals */
@@ -148,6 +153,42 @@ int main(int argc, char **argv)
     const char * spidev_path = spidev_path_default;
 
     static struct sigaction sigact; /* SIGQUIT&SIGINT&SIGTERM signal handling */
+
+    if (!strncasecmp(board, "sx1302", 6)) {   /* equal sx1302 */
+        HAL.lgw_board_setconf = lgw_board_sx1302_setconf;
+        HAL.lgw_rxrf_setconf = lgw_rxrf_sx1302_setconf;
+        HAL.lgw_rxif_setconf = lgw_rxif_sx1302_setconf;
+        HAL.lgw_debug_setconf = lgw_debug_sx1302_setconf;
+        HAL.lgw_txgain_setconf = lgw_txgain_sx1302_setconf;
+        HAL.lgw_timestamp_setconf = lgw_timestamp_sx1302_setconf; 
+        HAL.lgw_start = lgw_sx1302_start;
+        HAL.lgw_stop = lgw_sx1302_stop; 
+        HAL.lgw_receive = lgw_sx1302_receive;
+        HAL.lgw_send = lgw_sx1302_send; 
+        HAL.lgw_status = lgw_sx1302_status;
+        HAL.lgw_abort_tx = lgw_abort_sx1302_tx;
+        HAL.lgw_get_trigcnt = lgw_get_sx1302_trigcnt;
+        HAL.lgw_get_instcnt = lgw_get_sx1302_instcnt;
+        HAL.lgw_get_eui = lgw_get_sx1302_eui;
+        HAL.lgw_get_temperature = lgw_get_sx1302_temperature;
+    } else {  /* sx1301 , sx1308 */ 
+        HAL.lgw_board_setconf = lgw_board_sx1301_setconf;
+        HAL.lgw_rxrf_setconf = lgw_rxrf_sx1301_setconf;
+        HAL.lgw_rxif_setconf = lgw_rxif_sx1301_setconf;
+        HAL.lgw_debug_setconf = NULL;   
+        HAL.lgw_txgain_setconf = lgw_txgain_sx1301_setconf;
+        HAL.lgw_timestamp_setconf = NULL;
+        HAL.lgw_start = lgw_sx1301_start;
+        HAL.lgw_stop = lgw_sx1301_stop; 
+        HAL.lgw_receive = lgw_sx1301_receive;
+        HAL.lgw_send = lgw_sx1301_send; 
+        HAL.lgw_status = lgw_sx1301_status;
+        HAL.lgw_abort_tx = lgw_abort_sx1301_tx;
+        HAL.lgw_get_trigcnt = lgw_get_sx1301_trigcnt;
+        HAL.lgw_get_instcnt = lgw_get_sx1301_instcnt;
+        HAL.lgw_get_eui = lgw_get_sx1301_eui;
+        HAL.lgw_get_temperature = lgw_get_sx1301_temperature;
+	}
 
     /* Initialize TX gain LUT */
     txlut.size = 0;
@@ -422,7 +463,7 @@ int main(int argc, char **argv)
     boardconf.full_duplex = false;
     strncpy(boardconf.spidev_path, spidev_path, sizeof boardconf.spidev_path);
     boardconf.spidev_path[sizeof boardconf.spidev_path - 1] = '\0'; /* ensure string termination */
-    if (lgw_board_setconf(&boardconf) != LGW_HAL_SUCCESS) {
+    if (HAL.lgw_board_setconf(&boardconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: failed to configure board\n");
         return EXIT_FAILURE;
     }
@@ -433,7 +474,7 @@ int main(int argc, char **argv)
     rfconf.type = radio_type;
     rfconf.tx_enable = true;
     rfconf.single_input_mode = single_input_mode;
-    if (lgw_rxrf_setconf(0, &rfconf) != LGW_HAL_SUCCESS) {
+    if (HAL.lgw_rxrf_setconf(0, &rfconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: failed to configure rxrf 0\n");
         return EXIT_FAILURE;
     }
@@ -444,13 +485,13 @@ int main(int argc, char **argv)
     rfconf.type = radio_type;
     rfconf.tx_enable = false;
     rfconf.single_input_mode = single_input_mode;
-    if (lgw_rxrf_setconf(1, &rfconf) != LGW_HAL_SUCCESS) {
+    if (HAL.lgw_rxrf_setconf(1, &rfconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: failed to configure rxrf 1\n");
         return EXIT_FAILURE;
     }
 
     if (txlut.size > 0) {
-        if (lgw_txgain_setconf(rf_chain, &txlut) != LGW_HAL_SUCCESS) {
+        if (HAL.lgw_txgain_setconf(rf_chain, &txlut) != LGW_HAL_SUCCESS) {
             printf("ERROR: failed to configure txgain lut\n");
             return EXIT_FAILURE;
         }
@@ -464,7 +505,7 @@ int main(int argc, char **argv)
         }
 
         /* connect, configure and start the LoRa concentrator */
-        x = lgw_start();
+        x = HAL.lgw_start();
         if (x != 0) {
             printf("ERROR: failed to start the gateway\n");
             return EXIT_FAILURE;
@@ -518,7 +559,7 @@ int main(int argc, char **argv)
         for (i = 0; i < (int)nb_pkt; i++) {
             if (trig_delay == true) {
                 if (trig_delay_us > 0) {
-                    lgw_get_instcnt(&count_us);
+                    HAL.lgw_get_instcnt(&count_us);
                     printf("count_us:%u\n", count_us);
                     pkt.count_us = count_us + trig_delay_us;
                     printf("programming TX for %u\n", pkt.count_us);
@@ -550,7 +591,7 @@ int main(int argc, char **argv)
 
             pkt.payload[6] = (uint8_t)(i >> 0); /* FCnt */
             pkt.payload[7] = (uint8_t)(i >> 8); /* FCnt */
-            x = lgw_send(&pkt);
+            x = HAL.lgw_send(&pkt);
             if (x != 0) {
                 printf("ERROR: failed to send packet\n");
                 return EXIT_FAILURE;
@@ -558,7 +599,7 @@ int main(int argc, char **argv)
             /* wait for packet to finish sending */
             do {
                 wait_ms(5);
-                lgw_status(pkt.rf_chain, TX_STATUS, &tx_status); /* get TX status */
+                HAL.lgw_status(pkt.rf_chain, TX_STATUS, &tx_status); /* get TX status */
             } while ((tx_status != TX_FREE) && (quit_sig != 1) && (exit_sig != 1));
 
             if ((quit_sig == 1) || (exit_sig == 1)) {
@@ -570,7 +611,7 @@ int main(int argc, char **argv)
         printf( "\nNb packets sent: %u (%u)\n", i, cnt_loop + 1 );
 
         /* Stop the gateway */
-        x = lgw_stop();
+        x = HAL.lgw_stop();
         if (x != 0) {
             printf("ERROR: failed to stop the gateway\n");
             return EXIT_FAILURE;

@@ -105,7 +105,7 @@ typedef enum {
 
 typedef struct {               // 配置文件: sx130x模块配置文件(sxcfg.json)和gw配置文件(gwcfg.json)
     char gwcfg[32];
-    char sxcfg[48];
+    char sxcfg[32];
 } confs_s;
 
 typedef struct {
@@ -273,8 +273,8 @@ typedef struct {
 
 #define INIT_GW gw_s GW = {   .info.lgwm = 0,                                        \
                               .hal.board = "sx1302",                                 \
-                              .hal.confs = { .gwcfg = "/etc/lora/gwcfg.json",        \
-                                             .sxcfg = "/etc/lora/sxcfg.json", },     \
+                              .hal.confs = { .gwcfg = "/etc/lora/local_conf.json",    \
+                                             .sxcfg = "/etc/lora/global_conf.json", },\
                               .hal.mx_concent = PTHREAD_MUTEX_INITIALIZER,           \
                               .hal.mx_xcorr   = PTHREAD_MUTEX_INITIALIZER,           \
                               .hal.xtal_correct_ok = false,                          \

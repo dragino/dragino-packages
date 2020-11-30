@@ -30,9 +30,11 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 #include <unistd.h>
 #include <signal.h>
 #include <math.h>
+#include <strings.h>
 
 #include "loragw_hal.h"
-#include "loragw_reg.h"
+#include "loragw_hal_sx1301.h"
+#include "loragw_hal_sx1302.h"
 #include "loragw_aux.h"
 
 /* -------------------------------------------------------------------------- */
@@ -48,11 +50,14 @@ License: Revised BSD License, see LICENSE.TXT file include in the project
 
 #define DEFAULT_FREQ_HZ     868500000U
 
+DEFI_HAL;
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES ---------------------------------------------------- */
 
 static int exit_sig = 0; /* 1 -> application terminates cleanly (shut down hardware, close open files, etc) */
 static int quit_sig = 0; /* 1 -> application terminates without shutting down the hardware */
+
+char board[16] = "sx1302";
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS ---------------------------------------------------- */
@@ -78,6 +83,7 @@ void usage(void) {
     printf(" -z <uint>     Size of the RX packet array to be passed to lgw_receive()\n");
     printf(" -m <uint>     Channel frequency plan mode [0:LoRaWAN-like, 1:Same frequency for all channels (-400000Hz on RF0)]\n");
     printf(" -j            Set radio in single input mode (SX1250 only)\n");
+    printf(" --hal <str>   Set sx130x hal (sx1301,sx1302, sx1308)\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -110,6 +116,42 @@ int main(int argc, char **argv)
     int nb_pkt;
 
     uint8_t channel_mode = 0; /* LoRaWAN-like */
+
+    if (!strncasecmp(board, "sx1302", 6)) {   /* equal sx1302 */
+        HAL.lgw_board_setconf = lgw_board_sx1302_setconf;
+        HAL.lgw_rxrf_setconf = lgw_rxrf_sx1302_setconf;
+        HAL.lgw_rxif_setconf = lgw_rxif_sx1302_setconf;
+        HAL.lgw_debug_setconf = lgw_debug_sx1302_setconf;
+        HAL.lgw_txgain_setconf = lgw_txgain_sx1302_setconf;
+        HAL.lgw_timestamp_setconf = lgw_timestamp_sx1302_setconf; 
+        HAL.lgw_start = lgw_sx1302_start;
+        HAL.lgw_stop = lgw_sx1302_stop; 
+        HAL.lgw_receive = lgw_sx1302_receive;
+        HAL.lgw_send = lgw_sx1302_send; 
+        HAL.lgw_status = lgw_sx1302_status;
+        HAL.lgw_abort_tx = lgw_abort_sx1302_tx;
+        HAL.lgw_get_trigcnt = lgw_get_sx1302_trigcnt;
+        HAL.lgw_get_instcnt = lgw_get_sx1302_instcnt;
+        HAL.lgw_get_eui = lgw_get_sx1302_eui;
+        HAL.lgw_get_temperature = lgw_get_sx1302_temperature;
+    } else {  /* sx1301 , sx1308 */ 
+        HAL.lgw_board_setconf = lgw_board_sx1301_setconf;
+        HAL.lgw_rxrf_setconf = lgw_rxrf_sx1301_setconf;
+        HAL.lgw_rxif_setconf = lgw_rxif_sx1301_setconf;
+        HAL.lgw_debug_setconf = NULL;   
+        HAL.lgw_txgain_setconf = lgw_txgain_sx1301_setconf;
+        HAL.lgw_timestamp_setconf = NULL;
+        HAL.lgw_start = lgw_sx1301_start;
+        HAL.lgw_stop = lgw_sx1301_stop; 
+        HAL.lgw_receive = lgw_sx1301_receive;
+        HAL.lgw_send = lgw_sx1301_send; 
+        HAL.lgw_status = lgw_sx1301_status;
+        HAL.lgw_abort_tx = lgw_abort_sx1301_tx;
+        HAL.lgw_get_trigcnt = lgw_get_sx1301_trigcnt;
+        HAL.lgw_get_instcnt = lgw_get_sx1301_instcnt;
+        HAL.lgw_get_eui = lgw_get_sx1301_eui;
+        HAL.lgw_get_temperature = lgw_get_sx1301_temperature;
+	}
 
     const int32_t channel_if_mode0[9] = {
         -400000,
@@ -255,7 +297,7 @@ int main(int argc, char **argv)
     boardconf.full_duplex = false;
     strncpy(boardconf.spidev_path, spidev_path, sizeof boardconf.spidev_path);
     boardconf.spidev_path[sizeof boardconf.spidev_path - 1] = '\0'; /* ensure string termination */
-    if (lgw_board_setconf(&boardconf) != LGW_HAL_SUCCESS) {
+    if (HAL.lgw_board_setconf(&boardconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: failed to configure board\n");
         return EXIT_FAILURE;
     }
@@ -268,7 +310,7 @@ int main(int argc, char **argv)
     rfconf.rssi_offset = rssi_offset;
     rfconf.tx_enable = false;
     rfconf.single_input_mode = single_input_mode;
-    if (lgw_rxrf_setconf(0, &rfconf) != LGW_HAL_SUCCESS) {
+    if (HAL.lgw_rxrf_setconf(0, &rfconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: failed to configure rxrf 0\n");
         return EXIT_FAILURE;
     }
@@ -280,7 +322,7 @@ int main(int argc, char **argv)
     rfconf.rssi_offset = rssi_offset;
     rfconf.tx_enable = false;
     rfconf.single_input_mode = single_input_mode;
-    if (lgw_rxrf_setconf(1, &rfconf) != LGW_HAL_SUCCESS) {
+    if (HAL.lgw_rxrf_setconf(1, &rfconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: failed to configure rxrf 1\n");
         return EXIT_FAILURE;
     }
@@ -300,7 +342,7 @@ int main(int argc, char **argv)
             return EXIT_FAILURE;
         }
         ifconf.datarate = DR_LORA_SF7;
-        if (lgw_rxif_setconf(i, &ifconf) != LGW_HAL_SUCCESS) {
+        if (HAL.lgw_rxif_setconf(i, &ifconf) != LGW_HAL_SUCCESS) {
             printf("ERROR: failed to configure rxif %d\n", i);
             return EXIT_FAILURE;
         }
@@ -312,7 +354,7 @@ int main(int argc, char **argv)
     ifconf.freq_hz = channel_if_mode0[i];
     ifconf.datarate = DR_LORA_SF7;
     ifconf.bandwidth = BW_250KHZ;
-    if (lgw_rxif_setconf(8, &ifconf) != LGW_HAL_SUCCESS) {
+    if (HAL.lgw_rxif_setconf(8, &ifconf) != LGW_HAL_SUCCESS) {
         printf("ERROR: failed to configure rxif for LoRa service channel\n");
         return EXIT_FAILURE;
     }
@@ -335,7 +377,7 @@ int main(int argc, char **argv)
         }
 
         /* connect, configure and start the LoRa concentrator */
-        x = lgw_start();
+        x = HAL.lgw_start();
         if (x != 0) {
             printf("ERROR: failed to start the gateway\n");
             return EXIT_FAILURE;
@@ -346,7 +388,7 @@ int main(int argc, char **argv)
         nb_pkt_crc_ok = 0;
         while (((nb_pkt_crc_ok < nb_loop) || nb_loop == 0) && (quit_sig != 1) && (exit_sig != 1)) {
             /* fetch N packets */
-            nb_pkt = lgw_receive(ARRAY_SIZE(rxpkt), rxpkt);
+            nb_pkt = HAL.lgw_receive(ARRAY_SIZE(rxpkt), rxpkt);
 
             if (nb_pkt == 0) {
                 wait_ms(10);
@@ -380,7 +422,7 @@ int main(int argc, char **argv)
         printf( "\nNb valid packets received: %lu CRC OK (%lu)\n", nb_pkt_crc_ok, cnt_loop );
 
         /* Stop the gateway */
-        x = lgw_stop();
+        x = HAL.lgw_stop();
         if (x != 0) {
             printf("ERROR: failed to stop the gateway\n");
             return EXIT_FAILURE;

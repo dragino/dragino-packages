@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dragino_gw_fwd
-PKG_VERSION:=1.1.0
+PKG_VERSION:=1.2.0
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -50,10 +50,12 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fwd/fwd $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/reset_lgw1.sh $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/hal/rx_test $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/hal/tx_test $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/reset_lgw.sh $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc/lora
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/gwcfg.json $(1)/etc/lora
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/sxcfg.json $(1)/etc/lora
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/gwcfg.json $(1)/etc/lora/local_conf.json
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/sxcfg.json $(1)/etc/lora/global_conf.json
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libmqtt/libpahomqtt3c.so $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/etc/lora/cfg

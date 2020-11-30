@@ -1,3 +1,8 @@
 ./candyhouse-ilock
 ./kuaike-app
 ./foxconn-bus-lan
+./dragino-gw-fwd/src/cscope.*
+./dragino-gw-fwd/src/*.vim
+./dragino-gw-fwd/src/tags
+./dragino-gw-fwd/src/fwd/tags
+./dragino-gw-fwd/src/fwd/*.vim

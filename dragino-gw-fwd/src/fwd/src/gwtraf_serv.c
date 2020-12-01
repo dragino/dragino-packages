@@ -99,6 +99,7 @@ static void gwtraf_push_up(void* arg) {
 	uint16_t mote_fcnt = 0;
     uint8_t mote_fport = 0;
 
+    lgw_log(LOG_INFO, "INFO~ [%s] Starting gwtraf_push_up...\n", serv->info.name);
 	while (!serv->thread.stop_sig) {
 		// wait for data to arrive
 		sem_wait(&serv->thread.sema);
@@ -383,6 +384,7 @@ static void gwtraf_push_up(void* arg) {
         }
 
 	}
+    lgw_log(LOG_INFO, "INFO~ [%s] END of gwtraf_push_up\n", serv->info.name);
 }
 
 

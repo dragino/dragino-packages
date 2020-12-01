@@ -288,7 +288,7 @@ static void thread_ghost(void) {
 	uint8_t buff_req[GHST_REQ_BUFFSIZE];	/* buffer to compose pull requests */
 	int msg_len;
 
-	lgw_log(LOG_INFO, "INFO: Ghost thread started.\n");
+	lgw_log(LOG_INFO, "INFO~ Ghost thread started...\n");
 	/* set downstream socket RX timeout */
 	i = setsockopt(sock_ghost, SOL_SOCKET, SO_RCVTIMEO, (void *)&ghost_timeout, sizeof ghost_timeout);
 	if (i != 0) {
@@ -369,6 +369,5 @@ static void thread_ghost(void) {
             }
         }
     }
-
-	lgw_log(LOG_INFO, "INFO: End of ghost thread\n");
+	lgw_log(LOG_INFO, "INFO~ End of ghost thread\n");
 }

@@ -103,7 +103,7 @@ int semtech_stop(serv_s* serv) {
 
 static void semtech_push_up(void* arg) {
     serv_s* serv = (serv_s*) arg;
-    lgw_log(LOG_DEBUG, "DEBUG~ [%s] Starting semtech_push_up thread.\n", serv->info.name);
+    lgw_log(LOG_INFO, "INFO~ [%s] Starting semtech_push_up thread.\n", serv->info.name);
 
     int i, j; /* loop variables */
 
@@ -618,7 +618,7 @@ static void semtech_push_up(void* arg) {
 
 static void semtech_pull_down(void* arg) {
     serv_s* serv = (serv_s*) arg;
-    lgw_log(LOG_DEBUG, "DEBUG~ [%s] Starting semtech_push_down thread.\n", serv->info.name);
+    lgw_log(LOG_INFO, "INFO~ [%s] Starting semtech_push_down thread.\n", serv->info.name);
 
     int i; /* loop variables */
     int retry;

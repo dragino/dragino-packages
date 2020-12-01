@@ -84,7 +84,7 @@ uint8_t LOG_JIT = 0;
 uint8_t LOG_JIT_ERROR = 0;
 uint8_t LOG_BEACON = 0;
 uint8_t LOG_INFO = 1;
-uint8_t LOG_DEBUG = 1;
+uint8_t LOG_DEBUG = 0;
 uint8_t LOG_WARNING = 1;
 uint8_t LOG_ERROR = 1;
 uint8_t LOG_MEM = 0;
@@ -214,10 +214,12 @@ void stop_clean_service(void) {
     LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.serv_list, serv_entry, list) {
         LGW_LIST_REMOVE_CURRENT(list);
         GW.serv_list.size--;
-        if (NULL != serv_entry->net->mqtt)
-            lgw_free(serv_entry->net->mqtt);
-        if (NULL != serv_entry->net)
+        sem_destroy(&serv_entry->thread.sema);
+        if (NULL != serv_entry->net) {
+            if (NULL != serv_entry->net->mqtt)
+                lgw_free(serv_entry->net->mqtt);
             lgw_free(serv_entry->net);
+        }
         if (NULL != serv_entry->report)
             lgw_free(serv_entry->report);
         if (NULL != serv_entry)
@@ -724,7 +726,7 @@ int main(int argc, char *argv[]) {
 		if (GW.cfg.radiostream_enabled == true) {
 			i = HAL.lgw_stop();
 			if (i == LGW_HAL_SUCCESS) {
-                if (system("/usr/bin/reset_lGW.sh stop") != 0) {
+                if (system("/usr/bin/reset_lgw.sh stop") != 0) {
                     lgw_log(LOG_ERROR, "ERROR~ [main] failed to stop SX1302\n");
                 } else 
 				    lgw_log(LOG_ERROR, "INFO~ [main] concentrator stopped successfully\n");
@@ -836,7 +838,6 @@ static void thread_rxpkt_recycle(void) {
     }
     LGW_LIST_TRAVERSE_SAFE_END;
     LGW_LIST_UNLOCK(&GW.rxpkts_list);
-	lgw_log(LOG_DEBUG, "\nDEBUG~ [MAIN] End of recycle \n");
     return;
 }
 
@@ -851,6 +852,8 @@ static void thread_jit(void) {
     enum jit_pkt_type_e pkt_type;
     uint8_t tx_status;
     int i;
+
+	lgw_log(LOG_INFO, "INFO~ [JIT] starting JIT thread...\n");
 
     while (!exit_sig && !quit_sig) {
         wait_ms(10);
@@ -870,14 +873,14 @@ static void thread_jit(void) {
                             /* Compensate breacon frequency with xtal error */
                             pthread_mutex_lock(&GW.hal.mx_xcorr);
                             pkt.freq_hz = (uint32_t)(GW.hal.xtal_correct * (double)pkt.freq_hz);
-                            lgw_log(LOG_BEACON, "DEBUG~ [jit-beacon] beacon_pkt.freq_hz=%u (xtal_correct=%.15lf)\n", pkt.freq_hz, GW.hal.xtal_correct);
+                            lgw_log(LOG_BEACON, "DEBUG~ [JIT] beacon_pkt.freq_hz=%u (xtal_correct=%.15lf)\n", pkt.freq_hz, GW.hal.xtal_correct);
                             pthread_mutex_unlock(&GW.hal.mx_xcorr);
 
                             /* Update statistics */
                             pthread_mutex_lock(&GW.log.mx_report);
                             GW.beacon.meas_nb_beacon_sent += 1;
                             pthread_mutex_unlock(&GW.log.mx_report);
-                            lgw_log(LOG_INFO, "INFO~ [jit-beacon] Beacon dequeued (count_us=%u)\n", pkt.count_us);
+                            lgw_log(LOG_INFO, "INFO~ [JIT] Beacon dequeued (count_us=%u)\n", pkt.count_us);
                         }
 
                         /* check if concentrator is free for sending new packet */
@@ -885,14 +888,14 @@ static void thread_jit(void) {
                         result = HAL.lgw_status(pkt.rf_chain, TX_STATUS, &tx_status);
                         pthread_mutex_unlock(&GW.hal.mx_concent); /* free concentrator ASAP */
                         if (result == LGW_HAL_ERROR) {
-                            lgw_log(LOG_WARNING, "WARNING~ [jit%d] lgw_status failed\n", i);
+                            lgw_log(LOG_WARNING, "WARNING~ [JIT] jit_queue[%d] lgw_status failed\n", i);
                         } else {
                             if (tx_status == TX_EMITTING) {
-                                lgw_log(LOG_ERROR, "ERROR~ [jit] concentrator is currently emitting on rf_chain %d\n", i);
+                                lgw_log(LOG_ERROR, "ERROR~ [JIT] concentrator is currently emitting on rf_chain %d\n", i);
                                 print_tx_status(tx_status);
                                 continue;
                             } else if (tx_status == TX_SCHEDULED) {
-                                lgw_log(LOG_WARNING, "WARNING~ [jit] a downlink was already scheduled on rf_chain %d, overwritting it...\n", i);
+                                lgw_log(LOG_WARNING, "WARNING~ [JIT] a downlink was already scheduled on rf_chain %d, overwritting it...\n", i);
                                 print_tx_status(tx_status);
                             } else {
                                 /* Nothing to do */
@@ -907,25 +910,27 @@ static void thread_jit(void) {
                             pthread_mutex_lock(&GW.log.mx_report);
                             GW.log.stat_dw.meas_nb_tx_fail += 1;
                             pthread_mutex_unlock(&GW.log.mx_report);
-                            lgw_log(LOG_INFO, "WARNING~ [jit] lgw_send failed on rf_chain %d\n", i);
+                            lgw_log(LOG_INFO, "WARNING~ [JIT] lgw_send failed on rf_chain %d\n", i);
                             continue;
                         } else {
                             pthread_mutex_lock(&GW.log.mx_report);
                             GW.log.stat_dw.meas_nb_tx_ok += 1;
                             pthread_mutex_unlock(&GW.log.mx_report);
-                            lgw_log(LOG_INFO, "INFO~ [jit] lgw_send done on rf_chain %d: count_us=%u\n", i, pkt.count_us);
+                            lgw_log(LOG_INFO, "INFO~ [JIT] lgw_send done on rf_chain %d: count_us=%u\n", i, pkt.count_us);
                         }
                     } else {
-                        lgw_log(LOG_ERROR, "ERROR~ [jit] jit_dequeue failed on rf_chain %d with %d\n", i, jit_result);
+                        lgw_log(LOG_ERROR, "ERROR~ [JIT] jit_dequeue failed on rf_chain %d with %d\n", i, jit_result);
                     }
                 }
             } else if (jit_result == JIT_ERROR_EMPTY) {
                 /* Do nothing, it can happen */
             } else {
-                lgw_log(LOG_ERROR, "ERROR~ [jit] jit_peek failed on rf_chain %d with %d\n", i, jit_result);
+                lgw_log(LOG_ERROR, "ERROR~ [JIT] jit_peek failed on rf_chain %d with %d\n", i, jit_result);
             }
         }
     }
+
+	lgw_log(LOG_INFO, "INFO~ [JIT] END of JIT thread...\n");
 }
 
 
@@ -940,7 +945,7 @@ static void gps_process_sync(void) {
 
 	/* get GPS time for synchronization */
 	if (i != LGW_GPS_SUCCESS) {
-		lgw_log(LOG_WARNING, "WARNING~ [gps] could not get GPS time from GPS\n");
+		lgw_log(LOG_WARNING, "WARNING~ [GPS] could not get GPS time from GPS\n");
 		return;
 	}
 
@@ -949,7 +954,7 @@ static void gps_process_sync(void) {
 	i = HAL.lgw_get_trigcnt(&trig_tstamp);
 	pthread_mutex_unlock(&GW.hal.mx_concent);
 	if (i != LGW_HAL_SUCCESS) {
-		lgw_log(LOG_WARNING, "WARNING~ [gps] failed to read concentrator timestamp\n");
+		lgw_log(LOG_WARNING, "WARNING~ [GPS] failed to read concentrator timestamp\n");
 		return;
 	}
 
@@ -958,7 +963,7 @@ static void gps_process_sync(void) {
 	i = lgw_gps_sync(&GW.gps.time_reference_gps, trig_tstamp, utc, gps_time);
 	pthread_mutex_unlock(&GW.gps.mx_timeref);
 	if (i != LGW_GPS_SUCCESS) {
-		lgw_log(LOG_WARNING, "WARNING~ [gps] GPS out of sync, keeping previous time reference\n");
+		lgw_log(LOG_WARNING, "WARNING~ [GPS] GPS out of sync, keeping previous time reference\n");
 	}
 }
 
@@ -989,6 +994,7 @@ static void thread_gps(void) {
 	/* variables for PPM pulse GPS synchronization */
 	enum gps_msg latest_msg;	/* keep track of latest NMEA message parsed */
 
+	lgw_log(LOG_INFO, "INFO~ [GPS] GPS thread starting\n");
 	/* initialize some variables before loop */
 	memset(serial_buff, 0, sizeof serial_buff);
 
@@ -999,7 +1005,7 @@ static void thread_gps(void) {
 		/* blocking non-canonical read on serial port */
 		ssize_t nb_char = read(GW.gps.gps_tty_fd, serial_buff + wr_idx, LGW_GPS_MIN_MSG_SIZE);
 		if (nb_char <= 0) {
-			lgw_log(LOG_WARNING, "WARNING~ [gps] read() returned value %d\n", nb_char);
+			lgw_log(LOG_WARNING, "WARNING~ [GPS] read() returned value %d\n", nb_char);
 			continue;
 		}
 		wr_idx += (size_t) nb_char;
@@ -1025,7 +1031,7 @@ static void thread_gps(void) {
 						frame_size = 0;
 					} else if (latest_msg == INVALID) {
 						/* message header received but message appears to be corrupted */
-						lgw_log(LOG_WARNING, "WARNING~ [gps] could not get a valid message from GPS (no time)\n");
+						lgw_log(LOG_WARNING, "WARNING~ [GPS] could not get a valid message from GPS (no time)\n");
 						frame_size = 0;
 					} else if (latest_msg == UBX_NAV_TIMEGPS) {
 						gps_process_sync();
@@ -1077,7 +1083,7 @@ static void thread_gps(void) {
 			wr_idx -= LGW_GPS_MIN_MSG_SIZE;
 		}
 	}
-	lgw_log(LOG_INFO, "INFO~ End of GPS thread\n");
+	lgw_log(LOG_INFO, "INFO~ [GPS] End of GPS thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1095,7 +1101,7 @@ static void thread_valid(void) {
 	double init_acc = 0.0;
 	double x;
 
-	lgw_log(LOG_INFO, "INFO~ Validation thread activated.\n");
+	lgw_log(LOG_INFO, "INFO~ [valid] Validation thread activated.\n");
 
 	/* main loop task */
 	while (!exit_sig && !quit_sig) {
@@ -1150,7 +1156,7 @@ static void thread_valid(void) {
 		lgw_log(LOG_INFO, "Time ref: %s, XTAL correct: %s (%.15lf)\n", 
                 ref_valid_local ? "valid" : "invalid", GW.hal.xtal_correct_ok ? "valid" : "invalid", GW.hal.xtal_correct);	// DEBUG
 	}
-	lgw_log(LOG_INFO, "INFO~ End of validation thread\n");
+	lgw_log(LOG_INFO, "INFO~ [valid] End of validation thread\n");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1158,15 +1164,16 @@ static void thread_valid(void) {
 
 static void thread_watchdog(void) {
 	/* main loop task */
-	lgw_log(LOG_INFO, "INFO~ [watchdog] Watchdog starting...\n");
+	lgw_log(LOG_INFO, "INFO~ [WD] Watchdog starting...\n");
 	while (!exit_sig && !quit_sig) {
 		wait_ms(30000);
 		// timestamp updated within the last 3 stat intervals? If not assume something is wrong and exit
 		if ((time(NULL) - GW.cfg.last_loop) > (long int)((GW.cfg.time_interval * 3) + 5)) {
-			lgw_log(LOG_ERROR, "ERROR~ [wd] Watchdog timer expired!\n");
+			lgw_log(LOG_ERROR, "ERROR~ [WD] Watchdog timer expired!\n");
 			exit(254);
 		}
 	}
+	lgw_log(LOG_INFO, "INFO~ [WD] Watchdog ENDED!\n");
 }
 
 /* --- EOF ------------------------------------------------------------------ */

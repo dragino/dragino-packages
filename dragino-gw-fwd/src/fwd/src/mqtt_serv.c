@@ -241,6 +241,8 @@ static void mqtt_push_up(void* arg) {
         mqtt_reconnect(serv);
     }
 
+    lgw_log(LOG_INFO, "INFO~ [%s] starting mqtt_push_up thread...\n", serv->info.name);
+
 	while (!serv->thread.stop_sig) {
 		// wait for data to arrive
 		sem_wait(&serv->thread.sema);
@@ -282,6 +284,8 @@ static void mqtt_push_up(void* arg) {
             }
         }
     }
+
+    lgw_log(LOG_INFO, "INFO~ [%s] END of mqtt_push_up thread...\n", serv->info.name);
 }
 
 static int payload_deal(mqttsession_s* session, struct lgw_pkt_rx_s* p) {

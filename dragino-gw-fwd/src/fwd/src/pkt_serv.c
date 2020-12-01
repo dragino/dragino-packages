@@ -253,7 +253,7 @@ void pkt_stop(serv_s* serv) {
 
 static void pkt_deal_up(void* arg) {
     serv_s* serv = (serv_s*) arg;
-    lgw_log(LOG_DEBUG, "DEBUG~ [%s] Staring pkt_deal_up thread\n", serv->info.name);
+    lgw_log(LOG_INFO, "INFO~ [%s] Staring pkt_deal_up thread\n", serv->info.name);
 
 	int i;					/* loop variables */
     int fsize = 0;
@@ -383,11 +383,12 @@ static void pkt_deal_up(void* arg) {
             }
         }
 	}
+    lgw_log(LOG_INFO, "INFO~ [%s] END of pkt_deal_up thread\n", serv->info.name);
 }
 
 static void pkt_prepare_downlink(void* arg) {
     serv_s* serv = (serv_s*) arg;
-    lgw_log(LOG_INFO, "INFO~ [%s] Staring pkt_prepare_downlink thread\n", serv->info.name);
+    lgw_log(LOG_INFO, "INFO~ [%s] Staring pkt_prepare_downlink thread...\n", serv->info.name);
     
     int i, j; /* loop variables */
 
@@ -594,5 +595,6 @@ static void pkt_prepare_downlink(void* arg) {
             lgw_log(LOG_INFO, "INFO~ [DNLK] Cannot close DIR: %s\n", DNPATH);
         wait_ms(100);
     }
+    lgw_log(LOG_INFO, "INFO~ [%s] END of pkt_prepare_downlink thread\n", serv->info.name);
 }
 

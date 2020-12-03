@@ -63,6 +63,50 @@ LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg )
     return LORAMAC_PARSER_SUCCESS;
 }
 
+LoRaMacParserStatus_t LoRaMacParserJoinAccept( LoRaMacMessageJoinAccept_t* macMsg )
+{
+    if( ( macMsg == 0 ) || ( macMsg->Buffer == 0 ) )
+    {   
+        return LORAMAC_PARSER_ERROR_NPE;
+    }
+
+    uint16_t bufItr = 0;
+
+    macMsg->MHDR.Value = macMsg->Buffer[bufItr++];
+
+    lgw_memcpy( macMsg->JoinNonce, &macMsg->Buffer[bufItr], 3 );
+    bufItr = bufItr + 3;
+
+    lgw_memcpy( macMsg->NetID, &macMsg->Buffer[bufItr], 3 );
+    bufItr = bufItr + 3;
+
+    macMsg->DevAddr = ( uint32_t ) macMsg->Buffer[bufItr++];
+    macMsg->DevAddr |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 8 );
+    macMsg->DevAddr |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 16 );
+    macMsg->DevAddr |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 24 );
+
+    macMsg->DLSettings.Value = macMsg->Buffer[bufItr++];
+    
+    macMsg->RxDelay = macMsg->Buffer[bufItr++];
+
+    if( ( macMsg->BufSize - LORAMAC_MIC_FIELD_SIZE - bufItr ) == LORAMAC_CF_LIST_FIELD_SIZE )
+    {
+        lgw_memcpy( macMsg->CFList, &macMsg->Buffer[bufItr], LORAMAC_CF_LIST_FIELD_SIZE );
+        bufItr = bufItr + LORAMAC_CF_LIST_FIELD_SIZE;
+    }   
+    else if( ( macMsg->BufSize - LORAMAC_MIC_FIELD_SIZE - bufItr ) > 0 )
+    {
+        return LORAMAC_PARSER_FAIL;
+    }
+
+    macMsg->MIC = ( uint32_t ) macMsg->Buffer[bufItr++];
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 8 );
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 16 );
+    macMsg->MIC |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 24 );
+
+    return LORAMAC_PARSER_SUCCESS;
+}
+
 void decode_mac_pkt_up(LoRaMacMessageData_t* macMsg, void* pkt)
 {
 
@@ -155,25 +199,24 @@ void decode_mac_pkt_up(LoRaMacMessageData_t* macMsg, void* pkt)
     
     switch (macMsg->MHDR.Bits.MType) {
         case FRAME_TYPE_DATA_CONFIRMED_UP:
-            snprintf(content, sizeof(content), "CONF_UP:{\"ADDR\":\"%08X\", \"Size\":%d, \"FCtrl\":[\"ADR\":%u,\"ACK\":%u, \"FPending\":%u, \"FOptsLen\":%u], \"FCnt\":%u, \"FPort\":%u, \"MIC\":\"%08X\"}", macMsg->FHDR.DevAddr, p->size, macMsg->FHDR.FCtrl.Bits.Adr, macMsg->FHDR.FCtrl.Bits.Ack, macMsg->FHDR.FCtrl.Bits.FPending, macMsg->FHDR.FCtrl.Bits.FOptsLen, macMsg->FHDR.FCnt, macMsg->FPort, macMsg->MIC);
+            snprintf(content, sizeof(content), "CONF_UP:{\"ADDR\":\"%08X\", \"Size\":%d, \"Rssi\":%f/%f, \"snr\":%f, \"FCtrl\":[\"ADR\":%u,\"ACK\":%u, \"FPending\":%u, \"FOptsLen\":%u], \"FCnt\":%u, \"FPort\":%u, \"MIC\":\"%08X\"}", macMsg->FHDR.DevAddr, p->size, p->rssic, p->rssis, p->snr, macMsg->FHDR.FCtrl.Bits.Adr, macMsg->FHDR.FCtrl.Bits.Ack, macMsg->FHDR.FCtrl.Bits.FPending, macMsg->FHDR.FCtrl.Bits.FOptsLen, macMsg->FHDR.FCnt, macMsg->FPort, macMsg->MIC);
             sprintf(pdtype, "DATA_CONF_UP");
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_UP: 
-            snprintf(content, sizeof(content), "UNCONF_UP:{\"ADDR\":\"%08X\", \"Size\":%d, \"FCtrl\":[\"ADR\":%u,\"ACK\":%u, \"FPending\":%u, \"FOptsLen\":%u], \"FCnt\":%u, \"FPort\":%u, \"MIC\":\"%08X\"}", macMsg->FHDR.DevAddr, p->size, macMsg->FHDR.FCtrl.Bits.Adr, macMsg->FHDR.FCtrl.Bits.Ack, macMsg->FHDR.FCtrl.Bits.FPending, macMsg->FHDR.FCtrl.Bits.FOptsLen, macMsg->FHDR.FCnt, macMsg->FPort, macMsg->MIC);
+            snprintf(content, sizeof(content), "UNCONF_UP:{\"ADDR\":\"%08X\", \"Size\":%d, \"Rssi\":%f/%f, \"snr\":%f, \"FCtrl\":[\"ADR\":%u,\"ACK\":%u, \"FPending\":%u, \"FOptsLen\":%u], \"FCnt\":%u, \"FPort\":%u, \"MIC\":\"%08X\"}", macMsg->FHDR.DevAddr, p->size, p->rssic, p->rssis, p->snr, macMsg->FHDR.FCtrl.Bits.Adr, macMsg->FHDR.FCtrl.Bits.Ack, macMsg->FHDR.FCtrl.Bits.FPending, macMsg->FHDR.FCtrl.Bits.FOptsLen, macMsg->FHDR.FCnt, macMsg->FPort, macMsg->MIC);
             sprintf(pdtype, "DATA_UNCONF_UP");
             break;
         case FRAME_TYPE_JOIN_REQ: 
-            for (idx = 1; idx < 1 + 8; idx++) {
+            for (idx = 8; idx > 0; idx--) {  //APPEUI
                 sprintf(cat, "%02X", macMsg->Buffer[idx]);
                 strcat(appeui, cat);
             }
-            for (idx = 9; idx < 9 + 8; idx++) {
+            for (idx = 16; idx > 8; idx--) { //DEVEUI
                 sprintf(cat, "%02X", macMsg->Buffer[idx]);
                 strcat(deveui, cat);
             }
 
-            snprintf(content, sizeof(content), "JOIN_REQ:{\"Size\":%d, \"AppEUI\":\"%s\", \"DevEUI\":\"%s\"}", p->size, appeui, deveui);
-            memset(payloadhex, 0, sizeof(payloadhex));
+            snprintf(content, sizeof(content), "JOIN_REQ:{\"Size\":%d, \"Rssi\":%f/%f, \"snr\":%f, \"AppEUI\":\"%s\", \"DevEUI\":\"%s\"}", p->size, p->rssic, p->rssis, p->snr, appeui, deveui);
             for (idx = 0; idx < p->size; idx++) {
                 sprintf(cat, "%02X", p->payload[idx]);
                 strcat(payloadhex, cat);
@@ -196,17 +239,16 @@ void decode_mac_pkt_down(LoRaMacMessageData_t* macMsg, void* pkt)
     }
 
     int idx = 1;
-    char netid[8] = {'\0'};
+    char dr[20] = {'\0'};
     char cat[3] = {'\0'};
     char pdtype[17] = {'\0'};
     char content[256] = {'\0'};
     char payloadhex[480] = {'\0'};
-    uint32_t devaddr;
 
 	struct lgw_pkt_tx_s* p = (struct lgw_pkt_tx_s*)pkt;
 
-    char dr[20] = {'\0'};
-
+    LoRaMacMessageJoinAccept_t joinMsg;
+    
     switch (p->datarate) {
         case DR_LORA_SF5:
             strcpy(dr, "SF5 ");
@@ -279,30 +321,27 @@ void decode_mac_pkt_down(LoRaMacMessageData_t* macMsg, void* pkt)
 
     switch (macMsg->MHDR.Bits.MType) {
         case FRAME_TYPE_DATA_CONFIRMED_DOWN:
-            snprintf(content, sizeof(content), "CONF_DOWN:{\"ADDR\":\"%08X\", \"Size\":%d, \"FCtrl\":[\"ADR\":%u,\"ACK\":%u, \"FPending\":%u, \"FOptsLen\":%u], \"FCnt\":%u, \"FPort\":%u, \"MIC\":\"%08X\"}", macMsg->FHDR.DevAddr, p->size, macMsg->FHDR.FCtrl.Bits.Adr, macMsg->FHDR.FCtrl.Bits.Ack, macMsg->FHDR.FCtrl.Bits.FPending, macMsg->FHDR.FCtrl.Bits.FOptsLen, macMsg->FHDR.FCnt, macMsg->FPort, macMsg->MIC);
+            snprintf(content, sizeof(content), "CONF_DOWN:{\"ADDR\":\"%08X\", \"Size\":%d, \"InvertPol\":%s, \"FCtrl\":[\"ADR\":%u,\"ACK\":%u, \"FPending\":%u, \"FOptsLen\":%u], \"FCnt\":%u, \"FPort\":%u, \"MIC\":\"%08X\"}", macMsg->FHDR.DevAddr, p->size, p->invert_pol ? "true":"false", macMsg->FHDR.FCtrl.Bits.Adr, macMsg->FHDR.FCtrl.Bits.Ack, macMsg->FHDR.FCtrl.Bits.FPending, macMsg->FHDR.FCtrl.Bits.FOptsLen, macMsg->FHDR.FCnt, macMsg->FPort, macMsg->MIC);
             sprintf(pdtype, "DATA_CONF_DOWN");
             break;
         case FRAME_TYPE_DATA_UNCONFIRMED_DOWN:
-            snprintf(content, sizeof(content), "UNCONF_DOWN:{\"ADDR\":\"%08X\", \"Size\":%d, \"FCtrl\":[\"ADR\":%u,\"ACK\":%u, \"FPending\":%u, \"FOptsLen\":%u], \"FCnt\":%u, \"FPort\":%u, \"MIC\":\"%08X\"}", macMsg->FHDR.DevAddr, p->size, macMsg->FHDR.FCtrl.Bits.Adr, macMsg->FHDR.FCtrl.Bits.Ack, macMsg->FHDR.FCtrl.Bits.FPending, macMsg->FHDR.FCtrl.Bits.FOptsLen, macMsg->FHDR.FCnt, macMsg->FPort, macMsg->MIC);
+            snprintf(content, sizeof(content), "UNCONF_DOWN:{\"ADDR\":\"%08X\", \"Size\":%d, \"InvertPol\":%s, \"FCtrl\":[\"ADR\":%u,\"ACK\":%u, \"FPending\":%u, \"FOptsLen\":%u], \"FCnt\":%u, \"FPort\":%u, \"MIC\":\"%08X\"}", macMsg->FHDR.DevAddr, p->size, p->invert_pol ? "true":"false", macMsg->FHDR.FCtrl.Bits.Adr, macMsg->FHDR.FCtrl.Bits.Ack, macMsg->FHDR.FCtrl.Bits.FPending, macMsg->FHDR.FCtrl.Bits.FOptsLen, macMsg->FHDR.FCnt, macMsg->FPort, macMsg->MIC);
             sprintf(pdtype, "DATA_UNCONF_DOWN");
             break;
         case FRAME_TYPE_JOIN_ACCEPT: 
-            for (idx = 4; idx < 4 + 3; idx++) {
-                sprintf(cat, "%02X", macMsg->Buffer[idx]);
-                strcat(netid, cat);
+            joinMsg.Buffer = p->payload;
+            joinMsg.BufSize = p->size;
+            if (LoRaMacParserJoinAccept(&joinMsg) != LORAMAC_PARSER_SUCCESS)
+                break;
+            snprintf(content, sizeof(content), "JOIN_ACCEPT:{\"Size\":%d, \"NetID\":\"%02X%02X%02X\", \"DevAddr\":\"%08X\", \"DLSettings\":{\"RX1DRoffset\":%u, \"RX2DR\":%u}}", p->size, joinMsg.NetID[0], joinMsg.NetID[1], joinMsg.NetID[2], joinMsg.DevAddr, joinMsg.DLSettings.Bits.RX1DRoffset, joinMsg.DLSettings.Bits.RX2DataRate);
+            if( ( macMsg->BufSize - LORAMAC_MIC_FIELD_SIZE - 12 ) == LORAMAC_CF_LIST_FIELD_SIZE ) {  //CFLIST
+                snprintf(payloadhex, sizeof(payloadhex), "CFLIST:");
+                for (idx = 0; idx < LORAMAC_CF_LIST_FIELD_SIZE; idx++) {
+                    sprintf(cat, "%02X", joinMsg.CFList[idx]);
+                    strcat(payloadhex, cat);
+                }
             }
-            devaddr = ( uint32_t ) macMsg->Buffer[idx++];
-            devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 8 );
-            devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 16 );
-            devaddr |= ( ( uint32_t ) macMsg->Buffer[idx++] << 24 );
-
-            snprintf(content, sizeof(content), "JOIN_ACCEPT:{\"Size\":%d,\"NetID\":\"%s\", \"DevAddr\":\"%08X\"}", p->size, netid, devaddr);
             sprintf(pdtype, "JOIN_ACCEPT_DOWN");
-            memset(payloadhex, 0, sizeof(payloadhex));
-            for (idx = 0; idx < p->size; idx++) {
-                sprintf(cat, "%02X", p->payload[idx]);
-                strcat(payloadhex, cat);
-            }
             break;
         default:
             break;

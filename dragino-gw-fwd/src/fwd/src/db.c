@@ -41,7 +41,7 @@
 
 #define CREATE_TB_LIVEPKTS_SQL "CREATE TABLE IF NOT EXISTS `livepkts` (\
   `id`  INTEGER PRIMARY KEY AUTOINCREMENT,\
-  `time`  TEXT NOT NULL DEFAULT (strftime('%H:%M:%S',time('now', 'localtime'))),\
+  `time`  TEXT NOT NULL DEFAULT (strftime('%m/%d-%H:%M:%S',datetime('now', 'localtime'))),\
   `servname`  TEXT,\
   `servtype`  TEXT,\
   `pdtype`  TEXT,\

@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 /*! Frame header (FHDR) maximum field size */
-#define LORAMAC_FHDR_MAX_FIELD_SIZE            22
+#define LORAMAC_FHDR_MAX_FIELD_SIZE             22
 
 /*! FHDR Device address field size */
 #define LORAMAC_FHDR_DEV_ADD_FIELD_SIZE         4
@@ -22,10 +22,13 @@
 #define LORAMAC_FHDR_F_CNT_FIELD_SIZE           2
 
 /*! FOpts maximum field size */
-#define LORAMAC_FHDR_F_OPTS_MAX_FIELD_SIZE          15
+#define LORAMAC_FHDR_F_OPTS_MAX_FIELD_SIZE      15
 
 /*! MIC field size */
-#define LORAMAC_MIC_FIELD_SIZE              4
+#define LORAMAC_MIC_FIELD_SIZE                  4
+
+/*! CFList field size */
+#define LORAMAC_CF_LIST_FIELD_SIZE              16
 
 typedef struct {
     uint32_t devaddr;
@@ -35,37 +38,6 @@ typedef struct {
     char appskey_str[33];
     char nwkskey_str[33];
 } devinfo_s;
-
-/*!
- * LoRaMAC field definition of DLSettings
- *
- * LoRaWAN Specification V1.0.2, chapter 5.4
- */
-typedef union uLoRaMacDLSettings
-{
-    /*!
-     * Byte-access to the bits
-     */
-    uint8_t Value;
-    /*!
-     * Structure containing single access to header bits
-     */
-    struct sDLSettingsBits
-    {
-        /*!
-         * Indicates network server LoRaWAN implementation version 1.1 or later.
-         */
-        uint8_t OptNeg          : 1;
-        /*!
-         * Offset between up and downlink datarate of first reception slot
-         */
-        uint8_t RX1DRoffset     : 3;
-        /*!
-         * Data rate of a downlink using the second receive window
-         */
-        uint8_t RX2DataRate     : 4;
-    }Bits;
-}LoRaMacDLSettings_t;
 
 /*!
  * LoRaMAC header field definition (MHDR field)
@@ -267,6 +239,85 @@ typedef enum eLoRaMacMessageType
      */
     LORAMAC_MSG_TYPE_UNDEF,
 }LoRaMacMessageType_t;
+
+/*!
+ * LoRaMAC field definition of DLSettings
+ *
+ * LoRaWAN Specification V1.0.2, chapter 5.4
+ */
+typedef union uLoRaMacDLSettings
+{   
+    /*!
+     * Byte-access to the bits
+     */
+    uint8_t Value;
+    /*!
+     * Structure containing single access to header bits
+     */
+    struct sDLSettingsBits
+    {   
+        /*!
+         * Data rate of a downlink using the second receive window
+         */
+        uint8_t RX2DataRate     : 4;
+        /*!
+         * Offset between up and downlink datarate of first reception slot
+         */
+        uint8_t RX1DRoffset     : 3;
+        /*!
+         * Indicates network server LoRaWAN implementation version 1.1 or later.
+         */
+        uint8_t OptNeg          : 1;
+    }Bits;
+}LoRaMacDLSettings_t;
+
+/*!
+ * LoRaMac type for Join-accept message
+ */
+typedef struct sLoRaMacMessageJoinAccept
+{
+    /*!
+     * Serialized message buffer
+     */
+    uint8_t* Buffer;
+    /*!
+     * Size of serialized message buffer
+     */
+    uint8_t BufSize;
+    /*!
+     * MAC header
+     */
+    LoRaMacHeader_t MHDR;
+    /*!
+     *  Server Nonce ( 3 bytes )
+     */
+    uint8_t JoinNonce[3];
+    /*!
+     * Network ID ( 3 bytes )
+     */
+    uint8_t NetID[3];
+    /*!
+     * Device address
+     */
+    uint32_t DevAddr;
+    /*!
+     * Device address
+     */
+    LoRaMacDLSettings_t DLSettings;
+    /*!
+     * Delay between TX and RX
+     */
+    uint8_t RxDelay;
+    /*!
+     * List of channel frequencies (opt.)
+     */
+    uint8_t CFList[16];
+    /*!
+     * Message integrity code (MIC)
+     */
+    uint32_t MIC;
+}LoRaMacMessageJoinAccept_t;
+
 
 /*!
  * LoRaMac Parser Status

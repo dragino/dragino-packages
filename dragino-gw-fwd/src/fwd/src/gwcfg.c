@@ -634,6 +634,34 @@ static int parse_gateway_configuration(const char* conf_file) {
         }
     } 
 
+    str = json_object_get_string(conf_obj, "regional");
+    if (str != NULL) {
+        if (!strcmp(str, "EU")) {
+            GW.cfg.region = EU;
+        } else if(!strcmp(str, "US")) {
+            GW.cfg.region = US;
+        } else if(!strcmp(str, "CN")) {
+            GW.cfg.region = CN;
+        } else if(!strcmp(str, "CN780")) {
+            GW.cfg.region = CN780;
+        } else if(!strcmp(str, "AS1")) {
+            GW.cfg.region = AS1;
+        } else if(!strcmp(str, "AS2")) {
+            GW.cfg.region = AS2;
+        } else if(!strcmp(str, "KR")) {
+            GW.cfg.region = KR;
+        } else if(!strcmp(str, "IN")) {
+            GW.cfg.region = IN;
+        } else if(!strcmp(str, "RU")) {
+            GW.cfg.region = RU;
+        } else if(!strcmp(str, "AU")) {
+            GW.cfg.region = AU;
+        } else  {
+            GW.cfg.region = EU;
+        }
+        lgw_log(LOG_INFO, "INFO: GW regional is configured to \"%s\"\n", str);
+    }
+
     str = json_object_get_string(conf_obj, "ghost_host");
     if (str != NULL) {
         strncpy(GW.cfg.ghost_host, str, sizeof GW.cfg.ghost_host);

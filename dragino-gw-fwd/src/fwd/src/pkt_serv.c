@@ -218,15 +218,41 @@ int pkt_start(serv_s* serv) {
                 rx2bw = BW_125KHZ;
                 rx2freq = 505300000UL;
                 break;
+            case CN780:
+                rx2dr = DR_LORA_SF12;
+                rx2bw = BW_125KHZ;
+                rx2freq = 786000000UL;
+                break;
             case AU:
                 rx2dr = DR_LORA_SF12;
                 rx2bw = BW_500KHZ;
                 rx2freq = 923300000UL;
                 break;
-            default:
+            case AS1:
+            case AS2:
+                rx2dr = DR_LORA_SF10;
+                rx2bw = BW_125KHZ;
+                rx2freq = 923200000UL;
+                break;
+            case KR:
                 rx2dr = DR_LORA_SF12;
                 rx2bw = BW_125KHZ;
                 rx2freq = 921900000UL;
+                break;
+            case IN:
+                rx2dr = DR_LORA_SF12;
+                rx2bw = BW_125KHZ;
+                rx2freq = 866550000UL;
+                break;
+            case RU:
+                rx2dr = DR_LORA_SF12;
+                rx2bw = BW_125KHZ;
+                rx2freq = 869100000UL;
+                break;
+            default:
+                rx2dr = DR_LORA_SF12;
+                rx2bw = BW_125KHZ;
+                rx2freq = 869525000UL;
                 break;
         }
 

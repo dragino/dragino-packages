@@ -60,6 +60,12 @@ typedef enum {   /* Regional parameters */
     EU,
     US,
     CN,
+    CN780,
+    AS1,
+    AS2,
+    KR,
+    IN,
+    RU,
     AU
 } region_s;
 

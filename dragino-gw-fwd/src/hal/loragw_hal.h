@@ -132,7 +132,7 @@
 #define DR_LORA_SF10    10
 #define DR_LORA_SF11    11
 #define DR_LORA_SF12    12
-#define DR_LORA_MULTI   16
+#define DR_LORA_MULTI   0x7E
 /* NOTE: for FSK directly use baudrate between 500 bauds and 250 kbauds */
 #define DR_FSK_MIN      500
 #define DR_FSK_MAX      250000

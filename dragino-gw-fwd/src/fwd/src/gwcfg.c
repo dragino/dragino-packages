@@ -680,28 +680,21 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (str != NULL) {
         strncpy(GW.info.platform, str, sizeof GW.info.platform);
         GW.info.platform[sizeof GW.info.platform - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: GPS serial port path is configured to \"%s\"\n", GW.info.platform);
-    }
-
-    str = json_object_get_string(conf_obj, "platform");
-    if (str != NULL) {
-        strncpy(GW.info.platform, str, sizeof GW.info.platform);
-        GW.info.platform[sizeof GW.info.platform - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: GPS serial port path is configured to \"%s\"\n", GW.info.platform);
+        lgw_log(LOG_INFO, "INFO: Platform is configured to \"%s\"\n", GW.info.platform);
     }
 
     str = json_object_get_string(conf_obj, "email");
     if (str != NULL) {
         strncpy(GW.info.email, str, sizeof GW.info.email);
         GW.info.email[sizeof GW.info.email - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: GPS serial port path is configured to \"%s\"\n", GW.info.email);
+        lgw_log(LOG_INFO, "INFO: email is configured to \"%s\"\n", GW.info.email);
     }
 
     str = json_object_get_string(conf_obj, "description");
     if (str != NULL) {
         strncpy(GW.info.description, str, sizeof GW.info.description);
         GW.info.description[sizeof GW.info.description - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: GPS serial port path is configured to \"%s\"\n", GW.info.description);
+        lgw_log(LOG_INFO, "INFO~ GW description: \"%s\"\n", GW.info.description);
     }
 
     /* GPS module TTY path (optional) */
@@ -1117,6 +1110,7 @@ int parsecfg() {
     int ret = 0;
     if (!strncmp(GW.hal.board, "LG301", 5)) {
         ret = parse_SX130x_configuration(GW.hal.confs.sxcfg);
+        printf("ret1: %d\n", ret);
     } else if (!strncmp(GW.hal.board, "LG302", 5)) { 
         ret = parse_SX130x_configuration(GW.hal.confs.sxcfg);
         ret |= parse_debug_configuration(GW.hal.confs.gwcfg);

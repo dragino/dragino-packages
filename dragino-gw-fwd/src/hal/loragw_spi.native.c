@@ -177,7 +177,7 @@ int lgw_spi_w(void *spi_target, uint8_t spi_mux_target, uint16_t address, uint8_
         out_buf[3] = data;
         command_size = 4;
     } else {
-        out_buf[0] = READ_ACCESS | (address & 0x7F);
+        out_buf[0] = WRITE_ACCESS | (address & 0x7F);
         out_buf[1] = data;
         command_size = 2;
     }

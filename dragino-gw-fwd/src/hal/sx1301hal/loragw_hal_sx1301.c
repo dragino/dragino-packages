@@ -82,9 +82,9 @@ static const uint8_t ifmod_config[LGW_IF_CHAIN_NB] = LGW_IFMODEM_CONFIG;
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES ---------------------------------------------------- */
 
-#include "arb_fw.var" /* external definition of the variable */
-#include "agc_fw.var" /* external definition of the variable */
-#include "cal_fw.var" /* external definition of the variable */
+#include "arb_fw_sx1301.var" /* external definition of the variable */
+#include "agc_fw_sx1301.var" /* external definition of the variable */
+#include "cal_fw_sx1301.var" /* external definition of the variable */
 
 /*
 The following static variables are the configuration set that the user can
@@ -475,7 +475,7 @@ int lgw_rxif_sx1301_setconf(uint8_t if_chain, struct lgw_conf_rxif_s *conf) {
             if_rf_chain[if_chain] = conf->rf_chain;
             if_freq[if_chain] = conf->freq_hz;
             lora_rx_bw = conf->bandwidth;
-            lora_rx_sf = (uint8_t)(DR_LORA_MULTI & conf->datarate); /* filter SF out of the 7-12 range */
+            lora_rx_sf = (uint8_t)conf->datarate; /* filter SF out of the 7-12 range */
             if (SET_PPM_ON(conf->bandwidth, conf->datarate)) {
                 lora_rx_ppm_offset = true;
             } else {

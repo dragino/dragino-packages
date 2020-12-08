@@ -289,7 +289,7 @@ static uint32_t dev_addr_mask = 0;
 /* Decryption loramac payload */
 static char maccrypto[16] = "maccrypto";
 static int maccrypto_num = 0;
-static char dbpath[32] = "/tmp/gwdb";
+static char dbpath[32] = "/etc/lora/devskey";
 
 /* default value of rx2 */
 static char gwcfg[8] = "gwcfg"; /*gw Regional*/
@@ -1470,8 +1470,8 @@ int main(void)
         maccrypto_num = atoi(maccrypto);
 
     // set the dbpath for hardcode
-    //if(!get_config("general", dbpath, sizeof(dbpath)))
-    //   strcpy(dbpath, "/etc/lora/devskey");
+    if(!get_config("general", dbpath, sizeof(dbpath)))
+       strcpy(dbpath, "/etc/lora/devskey");
 
 	
 	MSG_DEBUG(DEBUG_INFO, "INFO~ ABP Decryption: %s\n", maccrypto_num? "yes" : "no");

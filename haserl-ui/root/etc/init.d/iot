@@ -12,7 +12,7 @@ init_board() {
 	ps | grep "loriot_dragino_lg308_spi" | grep -v grep | awk '{print $1}' | xargs kill -s 9
 
 	if [[ "$service" = "tcpudp" ]]; then
-		process="tcp_client.lua"
+		process="tcp_process.sh"
 	elif [[ "$service" = "mqtt" ]]; then
 		process="mqtt_process.sh"
 	elif [[ "$service" = "customized" ]]; then

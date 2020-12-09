@@ -28,7 +28,7 @@ ONE="1"
 ZERO="0"
 iot_online=0
 offline_flag=""
-is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8"`
+is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16"`
 last_reload_time=`date +%s`
 
 board=`cat /var/iot/board`
@@ -295,7 +295,18 @@ do
 			echo out > /sys/class/gpio/gpio21/direction
 		fi
 	fi
-	iot_online=`cat /var/iot/status | grep online -c`
+	
+	if [ "`ps | grep "/usr/bin/fwd" -c`" == 2 ];then
+		status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key like '/service/lorawan/server/network';" | grep -c online`
+		if [ "$status" == "1" ];then
+			echo "online" > /var/iot/status
+		else 
+			echo "offline" > /var/iot/status
+		fi 
+	fi
+	iot_online=`cat /var/iot/status | grep online -c`	
+
+	
 	/usr/bin/blink-stop
 	if [ "$iot_online" = "1" ]; then
 		# IoT Connection is ok

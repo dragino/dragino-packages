@@ -311,7 +311,16 @@ if [ $server_type == "loriot" ]; then
 	pscount=$(ps | grep -c loriot_dragino) # Check is process is running
 	satlink10="/cgi-bin/loriot.has"
 else
-	pscount=$(ps | grep -c pkt_fwd) # Check is process is running
+	if [ "`cat /var/iot/model.txt`" == "LIG16" ];then
+		fwd_pkt_status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key = '/service/pkt/PKT_SERV';" | grep -c runing`
+		if [ "$fwd_pkt_status" == "1" ];then
+			pscount="2"
+		else 
+			pscount="1"
+		fi
+	else 
+		pscount=$(ps | grep -c pkt_fwd) # Check is process is running
+	fi
 	satlink10="/cgi-bin/lora-lora.has"
 fi
 

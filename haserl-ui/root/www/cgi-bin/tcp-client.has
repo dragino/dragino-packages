@@ -6,15 +6,6 @@
 <%
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 
-    if [ "$FORM_CHANGE" == "checked" ]; then
-      change="1"
-    else 
-      change="0"
-    fi
-
-		uci set tcp_client.general.update_onchange="$change"
-
-		uci set tcp_client.general.update_interval="$FORM_UPDATE"
 		uci set tcp_client.general.server_address="$FORM_ADDR"
 		uci set tcp_client.general.server_port="$FORM_PORT"
 
@@ -38,16 +29,8 @@
 
 <%# --- Get the variables for the HTML page --- %>
 <% 
-	update="$(uci -q get tcp_client.general.update_interval)"
 	addr="$(uci -q get tcp_client.general.server_address)"
 	port="$(uci -q get tcp_client.general.server_port)"
-	change="$(uci -q get tcp_client.general.update_onchange)"
-
-  if [ "$change" == "1" ]; then
-    change="checked"
-  else
-    change="0"
-  fi
 %>
 
 
@@ -84,22 +67,7 @@
       <td colspan="3"><label for="PORT">Server Port</label></td>
       <td colspan="5"><input type="text" name="PORT" VALUE="<% echo -n $port %>"></td>
     </tr>
-    <tr class="rowSpacer"></tr>
-    <tr>
-      <td colspan="1"></td>
-      <td colspan="3"><label for="UPDATE">Update Interval (secs)</label></td>
-      <td colspan="1"><input type="text" name="UPDATE" VALUE=<% echo -n $update %>></td>
-      <td colspan="6"><label>Set to 0 to disable perodic update</label></td>
-    </tr>
-    <tr class="rowSpacer"></tr>
-    <tr>
-      <td colspan="1"></td>
-      <td colspan="3"><label for="CHANGE">Update on Change</label>
-        <input type="checkbox" name="CHANGE" value="checked" <% echo -n $change %>></td>
-      <td colspan="1"></td>
-      <td colspan="6"><label>Send to server when a new value arrives</label></td>
-    </tr>
-    <tr class="rowSpacer"></tr>
+
     <tr class="rowSpacer"></tr>
 
     <tr>

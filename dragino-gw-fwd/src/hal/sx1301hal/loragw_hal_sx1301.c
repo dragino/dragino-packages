@@ -22,6 +22,7 @@ Maintainer: Sylvain Miermont
 #include <stdio.h>      /* printf fprintf */
 #include <string.h>     /* memcpy */
 #include <math.h>       /* pow, cell */
+#include <sys/time.h> 
 
 #include "loragw_reg.h"
 #include "loragw_hal.h"
@@ -1626,9 +1627,20 @@ int lgw_get_sx1301_temperature(float* temperature) {
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /** TODO **/
-int lgw_get_sx1301_instcnt(uint32_t* inst_cnt_us) {
-    return LGW_HAL_SUCCESS;
+int lgw_get_sx1301_instcnt(uint32_t* trig_cnt_us) {
+    int i;
+    int32_t val;
+
+    CHECK_NULL(trig_cnt_us);
+    i = lgw_sx1301_reg_r(LGW_TIMESTAMP, &val);
+    if (i == LGW_REG_SUCCESS) {
+        *trig_cnt_us = (uint32_t)val;
+        return LGW_HAL_SUCCESS;
+    } else {
+        return LGW_HAL_ERROR;
+    }
 }
+
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /** TODO **/

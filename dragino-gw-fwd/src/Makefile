@@ -13,10 +13,10 @@ all: hal libmqtt fwd
 hal: 
 	$(MAKE) all -e -C $@
 
-fwd: hal libmqtt
+libmqtt: 
 	$(MAKE) all -e -C $@
 
-libmqtt: 
+fwd: hal libmqtt
 	$(MAKE) all -e -C $@
 
 clean:

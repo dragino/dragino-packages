@@ -49,7 +49,7 @@ Maintainer: Sylvain Miermont
 
 /* -------------------------------------------------------------------------- */
 /* --- INTERNAL SHARED VARIABLES -------------------------------------------- */
-int lgw_regpage = -1; /*! keep the value of the register page selected */
+static int lgw_regpage = -1; /*! keep the value of the register page selected */
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE CONSTANTS ---------------------------------------------------- */

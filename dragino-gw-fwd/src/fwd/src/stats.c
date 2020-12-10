@@ -256,7 +256,7 @@ static void semtech_report(serv_s *serv) {
 
 	lgw_log(LOG_INFO, "### [JIT] ###\n");
     jit_print_queue (&GW.tx.jit_queue[0], false, LOG_JIT);
-    lgw_log(LOG_INFO, "#--------\n");
+    lgw_log(LOG_INFO, "----------------\n");
     jit_print_queue (&GW.tx.jit_queue[1], false, LOG_JIT);
 
     lgw_log(LOG_INFO, "### [GPS] ###\n");

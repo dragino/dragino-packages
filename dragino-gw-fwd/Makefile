@@ -42,8 +42,8 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/lora-gateway
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/hal/*.h $(1)/usr/include/lora-gateway
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/hal/libloragw.a $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libmqtt/libpahomqtt3c.so $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/hal/libloragw.so $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/lib
 endef
 
@@ -58,6 +58,7 @@ define Package/$(PKG_NAME)/install
 	#$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/sxcfg.json $(1)/etc/lora/global_conf.json
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/libmqtt/libpahomqtt3c.so $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/hal/libloragw.so $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/etc/lora/cfg
 	$(CP) $(PKG_BUILD_DIR)/config/*json* $(1)/etc/lora/cfg
 endef

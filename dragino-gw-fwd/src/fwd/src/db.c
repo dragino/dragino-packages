@@ -84,8 +84,8 @@ DEFINE_SQL_STATEMENT(gettree_stmt, "SELECT key, value FROM gwdb WHERE key || '/'
 DEFINE_SQL_STATEMENT(gettree_all_stmt, "SELECT key, value FROM gwdb ORDER BY key")
 DEFINE_SQL_STATEMENT(showkey_stmt, "SELECT key, value FROM gwdb WHERE key LIKE '%' || '/' || ? ORDER BY key")
 DEFINE_SQL_STATEMENT(gettree_prefix_stmt, "SELECT key, value FROM gwdb WHERE key > ?1 AND key <= ?1 || X'ffff'")
-
 DEFINE_SQL_STATEMENT(put_pkt_stmt, "INSERT INTO livepkts (pdtype, freq, dr, cnt, devaddr, content, payload) VALUES (?, ?, ?, ?, ?, ?, ?)")
+//DEFINE_SQL_STATEMENT(import_stmt, "ATTACH DATABASE '/etc/lora/devskey' AS a; SELECT devaddr, appskey, nwkskey FROM a.abpdevs");
 
 pthread_mutex_t mx_dblock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t dbcond;
@@ -652,6 +652,20 @@ static void gwdb_atexit(void)
 	pthread_mutex_unlock(&mx_dblock);
 }
 
+int import_devskey(void *notuse, int argc, char **value, char **name)
+{
+
+    if (argc < 2) return -1;
+
+    char db_family[32] = {'\0'};
+
+    sprintf(db_family, "devinfo/%s", value[0]);
+    lgw_db_put(db_family, name[1], value[1]);
+    lgw_db_put(db_family, name[2], value[2]);
+
+    return 0;
+}
+
 int lgw_db_init(void)
 {
 	pthread_cond_init(&dbcond, NULL);
@@ -665,11 +679,17 @@ int lgw_db_init(void)
 	db_exec_sql("DELETE FROM gwdb", NULL, NULL);
 	db_exec_sql("INSERT OR REPLACE INTO gwdb VALUES ('/fwd/startup',  datetime('now', 'localtime'))", NULL, NULL);
 	db_exec_sql(CREATE_TB_LIVEPKTS_SQL, NULL, NULL);
+	//db_exec_sql(CREATE_TB_ABP_SQL, NULL, NULL);
+	//db_exec_sql("DELETE FROM abpdevs", NULL, NULL);
+	//db_exec_sql("ATTACH `/etc/lora/devskey` as a;INSERT OR REPLACE INTO abpdevs SELECT * FROM a.abpdevs;", NULL, NULL);
 	db_exec_sql(CREATE_TRG_CLEAN_PKT, NULL, NULL);
 	db_exec_sql(CREATE_TRG_UP_HOURS, NULL, NULL);
 	db_exec_sql(CREATE_TRG_DOWN_HOURS, NULL, NULL);
+	db_exec_sql("ATTACH DATABASE '/etc/lora/devskey' AS a", NULL, NULL);
 
     init_statements();
+
+    db_exec_sql("SELECT devaddr, appskey, nwkskey FROM a.abpdevs", import_devskey, NULL);
 
 	if (pthread_create(&syncthread, NULL, db_sync_thread, NULL)) {
 		return -1;
@@ -678,3 +698,4 @@ int lgw_db_init(void)
 	lgw_register_atexit(gwdb_atexit);
 	return 0;
 }
+

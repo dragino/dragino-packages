@@ -13,6 +13,7 @@ AR := $(CROSS_COMPILE)ar
 VPATH := ./ lg02hal sx1301hal sx1302hal
 
 LCFLAGS = $(CFLAGS) -fPIC -Ilg02hal -Isx1301hal -Isx1302hal -I.
+LCFLAGS_SO = $(LCFLAGS) -shared -O2 -Wall -DLINUX_SO
 
 OBJDIR = obj
 INCLUDES = $(wildcard *.h lg02hal/*.h sx1301hal/*.h sx1302hal/*.h)
@@ -31,7 +32,7 @@ objs = $(fobjs) $(sx1302objs) $(sx1301objs) $(lg02objs)
 
 ### general build targets
 
-all: libloragw.a tx_test rx_test
+all: libloragw.so tx_test rx_test
 
 clean:
 	rm -f libloragw.a
@@ -86,14 +87,14 @@ $(OBJDIR)/loragw_hal.o: loragw_hal.c $(INCLUDES) config.h | $(OBJDIR)
 	$(CC) -g -c $(LCFLAGS) $< -o $@
 
 ### static library
-libloragw.a: $(objs)
-	$(AR) rcs $@ $^
+libloragw.so: $(objs)
+	${CC} ${LCFLAGS_SO} -o $@ $^
 
 ### test programs
-tx_test: test/test_loragw_hal_tx.c libloragw.a
+tx_test: test/test_loragw_hal_tx.c libloragw.so
 	$(CC) -fPIE $(LCFLAGS) -L. $< -o $@ -lloragw -lmpsse
 
-rx_test: test/test_loragw_hal_rx.c libloragw.a
+rx_test: test/test_loragw_hal_rx.c libloragw.so
 	$(CC) -fPIE $(LCFLAGS) -L. $< -o $@ -lloragw -lmpsse
 
 ### EOF

@@ -20,7 +20,7 @@ INCLUDES = $(wildcard inc/*.h)
 
 ### linking options
 
-LLIBS := -lloragw -lrt -lsqlite3 -lpthread -lm -lmpsse -L../libmqtt -lpahomqtt3c
+LLIBS := -lloragw -L$(LGW_PATH) -lrt -lsqlite3 -lpthread -lm -lmpsse -L$(MQTT_PATH) -lpahomqtt3c
 
 ### general build targets
 
@@ -40,8 +40,8 @@ $(OBJDIR)/%.o: src/%.c $(INCLUDES) | $(OBJDIR)
 
 ### Main program compilation and assembly
 
-$(APP_NAME): $(LGW_PATH)/libloragw.a $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o  $(OBJDIR)/ghost.o $(OBJDIR)/endianext.o $(OBJDIR)/semtech_serv.o $(OBJDIR)/service.o $(OBJDIR)/stats.o $(OBJDIR)/gwtraf_serv.o $(OBJDIR)/pkt_serv.o $(OBJDIR)/mqtt_serv.o $(OBJDIR)/db.o $(OBJDIR)/utilities.o $(OBJDIR)/lgwmm.o $(OBJDIR)/aes.o $(OBJDIR)/cmac.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/loramac-crypto.o $(OBJDIR)/timersync.o $(OBJDIR)/gwcfg.o $(OBJDIR)/fwd.o | $(OBJDIR)
-	$(CC) -fPIE -L$(LGW_PATH) $^ -o $@ $(LLIBS)
+$(APP_NAME): $(OBJDIR)/parson.o $(OBJDIR)/base64.o $(OBJDIR)/jitqueue.o  $(OBJDIR)/ghost.o $(OBJDIR)/endianext.o $(OBJDIR)/semtech_serv.o $(OBJDIR)/service.o $(OBJDIR)/stats.o $(OBJDIR)/gwtraf_serv.o $(OBJDIR)/pkt_serv.o $(OBJDIR)/mqtt_serv.o $(OBJDIR)/db.o $(OBJDIR)/utilities.o $(OBJDIR)/lgwmm.o $(OBJDIR)/aes.o $(OBJDIR)/cmac.o $(OBJDIR)/mac-header-decode.o $(OBJDIR)/loramac-crypto.o $(OBJDIR)/timersync.o $(OBJDIR)/gwcfg.o $(OBJDIR)/fwd.o | $(OBJDIR)
+	$(CC) -fPIE $^ -o $@ $(LLIBS)
 
 ### test programs
 ### EOF

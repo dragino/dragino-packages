@@ -385,7 +385,7 @@
 <S-Tab>	fwd/Session.vim	/^inoremap <silent> <S-Tab> =BackwardsSnippet()$/;"	m
 >	Session.vim	/^inoremap <expr> > omni#cpp#maycomplete#Arrow()$/;"	m
 >	fwd/Session.vim	/^inoremap <expr> > omni#cpp#maycomplete#Arrow()$/;"	m
-ACK_BUFF_SIZE	fwd/inc/fwd.h	81;"	d
+ACK_BUFF_SIZE	fwd/inc/fwd.h	82;"	d
 AES_CMAC_CTX	fwd/inc/cmac.h	/^    } AES_CMAC_CTX;$/;"	t	typeref:struct:_AES_CMAC_CTX
 AES_CMAC_DIGEST_LENGTH	fwd/inc/cmac.h	9;"	d
 AES_CMAC_Final	fwd/src/cmac.c	/^void AES_CMAC_Final(uint8_t digest[AES_CMAC_DIGEST_LENGTH], AES_CMAC_CTX *ctx)$/;"	f
@@ -396,8 +396,8 @@ AES_CMAC_Update	fwd/src/cmac.c	/^void AES_CMAC_Update(AES_CMAC_CTX *ctx, const u
 AES_DEC_PREKEYED	fwd/inc/aes.h	42;"	d
 AES_ENC_PREKEYED	fwd/inc/aes.h	39;"	d
 AES_H	fwd/inc/aes.h	32;"	d
-AGC_CMD_ABORT	hal/sx1301hal/loragw_hal_sx1301.c	67;"	d	file:
-AGC_CMD_WAIT	hal/sx1301hal/loragw_hal_sx1301.c	66;"	d	file:
+AGC_CMD_ABORT	hal/sx1301hal/loragw_hal_sx1301.c	68;"	d	file:
+AGC_CMD_WAIT	hal/sx1301hal/loragw_hal_sx1301.c	67;"	d	file:
 AGC_MEM_ADDR	hal/sx1302hal/loragw_sx1302.c	73;"	d	file:
 AGC_RADIO_A_INIT_DONE	hal/sx1302hal/loragw_sx1302.c	67;"	d	file:
 AGC_RADIO_B_INIT_DONE	hal/sx1302hal/loragw_sx1302.c	68;"	d	file:
@@ -439,7 +439,7 @@ ARRAY_SIZE	hal/loragw_lbt.c	44;"	d	file:
 ARRAY_SIZE	hal/loragw_reg.c	33;"	d	file:
 ARRAY_SIZE	hal/loragw_spi.ftdi.c	23;"	d	file:
 ARRAY_SIZE	hal/loragw_spi.native.c	40;"	d	file:
-ARRAY_SIZE	hal/sx1301hal/loragw_hal_sx1301.c	38;"	d	file:
+ARRAY_SIZE	hal/sx1301hal/loragw_hal_sx1301.c	39;"	d	file:
 ARRAY_SIZE	hal/sx1301hal/loragw_radio_sx1301.c	34;"	d	file:
 ARRAY_SIZE	hal/sx1301hal/loragw_reg_sx1301.c	34;"	d	file:
 ARRAY_SIZE	hal/sx1302hal/loragw_cal.c	46;"	d	file:
@@ -452,10 +452,12 @@ ARRAY_SIZE	hal/sx1302hal/loragw_sx1302.c	46;"	d	file:
 ARRAY_SIZE	hal/sx1302hal/loragw_sx1302_rx.c	33;"	d	file:
 ARRAY_SIZE	hal/sx1302hal/loragw_sx1302_timestamp.c	37;"	d	file:
 ARRAY_SIZE	hal/test/test_loragw_counter.c	43;"	d	file:
-ARRAY_SIZE	hal/test/test_loragw_hal_rx.c	43;"	d	file:
+ARRAY_SIZE	hal/test/test_loragw_hal_rx.c	45;"	d	file:
 ARRAY_SIZE	hal/tst/test_loragw_cal.c	43;"	d	file:
 ARRAY_SIZE	hal/tst/test_loragw_hal.c	41;"	d	file:
 ARRAY_SIZE	hal/tst/test_loragw_spi.c	29;"	d	file:
+AS1	fwd/inc/gwcfg.h	/^    AS1,$/;"	e	enum:__anon37
+AS2	fwd/inc/gwcfg.h	/^    AS2,$/;"	e	enum:__anon37
 ASSERT	hal/lg02hal/loragw_hal_lg02.h	37;"	d
 AU	fwd/inc/gwcfg.h	/^    AU$/;"	e	enum:__anon37
 Ack	fwd/inc/mac-header-decode.h	/^        uint8_t Ack             : 1;$/;"	m	struct:uLoRaMacFrameCtrl::sCtrlBits
@@ -505,7 +507,9 @@ Bits	fwd/inc/mac-header-decode.h	/^    }Bits;$/;"	m	union:uLoRaMacDLSettings	typ
 Bits	fwd/inc/mac-header-decode.h	/^    }Bits;$/;"	m	union:uLoRaMacFrameCtrl	typeref:struct:uLoRaMacFrameCtrl::sCtrlBits
 Bits	fwd/inc/mac-header-decode.h	/^    }Bits;$/;"	m	union:uLoRaMacHeader	typeref:struct:uLoRaMacHeader::sMacHeaderBits
 BufSize	fwd/inc/mac-header-decode.h	/^    uint8_t BufSize;$/;"	m	struct:sLoRaMacMessageData
+BufSize	fwd/inc/mac-header-decode.h	/^    uint8_t BufSize;$/;"	m	struct:sLoRaMacMessageJoinAccept
 Buffer	fwd/inc/mac-header-decode.h	/^    uint8_t* Buffer;$/;"	m	struct:sLoRaMacMessageData
+Buffer	fwd/inc/mac-header-decode.h	/^    uint8_t* Buffer;$/;"	m	struct:sLoRaMacMessageJoinAccept
 CALIBRATE	hal/sx1302hal/loragw_sx1250.h	/^    CALIBRATE               = 0x89,$/;"	e	enum:__anon15
 CALIBRATE_IMAGE	hal/sx1302hal/loragw_sx1250.h	/^    CALIBRATE_IMAGE         = 0x98,$/;"	e	enum:__anon15
 CAL_DEC_GAIN	hal/test/test_loragw_cal.c	63;"	d	file:
@@ -525,6 +529,7 @@ CFLAGS	tools/payload_tools/Makefile	/^CFLAGS := -O2 -Wall -Wextra -std=c99 -I. -
 CFLAGS	util_chip_id/Makefile	/^CFLAGS := -std=c99 $(WARN_CFLAGS) $(OPT_CFLAGS) $(DEBUG_CFLAGS)$/;"	m
 CFLAGS_SO	libmqtt/Makefile	/^CFLAGS_SO = $(CFLAGS) -fPIC -shared -O2 -Wall -DLINUX_SO -DREVERSED$/;"	m
 CFLAGS_SO	libttn/Makefile	/^CFLAGS_SO := $(CFLAGS) -fPIC -shared -O2 -Wall -I$(PAHO_SRC)$/;"	m
+CFList	fwd/inc/mac-header-decode.h	/^    uint8_t CFList[16];$/;"	m	struct:sLoRaMacMessageJoinAccept
 CHECK_NULL	hal/lg02hal/loragw_hal_lg02.c	56;"	d	file:
 CHECK_NULL	hal/lg02hal/loragw_hal_lg02.c	61;"	d	file:
 CHECK_NULL	hal/lg02hal/loragw_sx127x_radio.c	48;"	d	file:
@@ -543,8 +548,8 @@ CHECK_NULL	hal/loragw_spi.ftdi.c	27;"	d	file:
 CHECK_NULL	hal/loragw_spi.ftdi.c	31;"	d	file:
 CHECK_NULL	hal/loragw_spi.native.c	44;"	d	file:
 CHECK_NULL	hal/loragw_spi.native.c	48;"	d	file:
-CHECK_NULL	hal/sx1301hal/loragw_hal_sx1301.c	43;"	d	file:
-CHECK_NULL	hal/sx1301hal/loragw_hal_sx1301.c	48;"	d	file:
+CHECK_NULL	hal/sx1301hal/loragw_hal_sx1301.c	44;"	d	file:
+CHECK_NULL	hal/sx1301hal/loragw_hal_sx1301.c	49;"	d	file:
 CHECK_NULL	hal/sx1301hal/loragw_radio_sx1301.c	38;"	d	file:
 CHECK_NULL	hal/sx1301hal/loragw_radio_sx1301.c	42;"	d	file:
 CHECK_NULL	hal/sx1301hal/loragw_reg_sx1301.c	38;"	d	file:
@@ -569,6 +574,7 @@ CHECK_NULL	hal/sx1302hal/loragw_sx1302_timestamp.c	41;"	d	file:
 CHECK_NULL	hal/sx1302hal/loragw_sx1302_timestamp.c	45;"	d	file:
 CLR_IRQ_STATUS	hal/sx1302hal/loragw_sx1250.h	/^    CLR_IRQ_STATUS          = 0x02,$/;"	e	enum:__anon15
 CN	fwd/inc/gwcfg.h	/^    CN,$/;"	e	enum:__anon37
+CN780	fwd/inc/gwcfg.h	/^    CN780,$/;"	e	enum:__anon37
 COMMAND_TIMEOUT	fwd/inc/mqtt_service.h	33;"	d
 COMMAND_TIMEOUT	libttn/network.h	15;"	d
 CONNACK	libmqtt/MQTTPacket.h	/^	CONNECT = 1, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL,$/;"	e	enum:msgTypes
@@ -584,6 +590,11 @@ CONTEXT_SPI	hal/sx1302hal/loragw_hal_sx1302.c	67;"	d	file:
 CONTEXT_STARTED	hal/sx1302hal/loragw_hal_sx1302.c	66;"	d	file:
 CONTEXT_TIMESTAMP	hal/sx1302hal/loragw_hal_sx1302.c	75;"	d	file:
 CONTEXT_TX_GAIN_LUT	hal/sx1302hal/loragw_hal_sx1302.c	74;"	d	file:
+CREATE_TB_GWDB_SQL	fwd/src/db.c	56;"	d	file:
+CREATE_TB_LIVEPKTS_SQL	fwd/src/db.c	42;"	d	file:
+CREATE_TRG_CLEAN_PKT	fwd/src/db.c	58;"	d	file:
+CREATE_TRG_DOWN_HOURS	fwd/src/db.c	69;"	d	file:
+CREATE_TRG_UP_HOURS	fwd/src/db.c	63;"	d	file:
 CRIT	fwd/src/base64.c	29;"	d	file:
 CRITICAL_SECTION_BEGIN	fwd/inc/utilities.h	141;"	d
 CRITICAL_SECTION_END	fwd/inc/utilities.h	146;"	d
@@ -604,8 +615,8 @@ DEBUG_ARRAY	hal/loragw_gps.c	43;"	d	file:
 DEBUG_ARRAY	hal/loragw_gps.c	48;"	d	file:
 DEBUG_ARRAY	hal/loragw_hal.c	46;"	d	file:
 DEBUG_ARRAY	hal/loragw_hal.c	51;"	d	file:
-DEBUG_ARRAY	hal/sx1301hal/loragw_hal_sx1301.c	42;"	d	file:
-DEBUG_ARRAY	hal/sx1301hal/loragw_hal_sx1301.c	47;"	d	file:
+DEBUG_ARRAY	hal/sx1301hal/loragw_hal_sx1301.c	43;"	d	file:
+DEBUG_ARRAY	hal/sx1301hal/loragw_hal_sx1301.c	48;"	d	file:
 DEBUG_ARRAY	hal/sx1302hal/loragw_hal_sx1302.c	55;"	d	file:
 DEBUG_ARRAY	hal/sx1302hal/loragw_hal_sx1302.c	60;"	d	file:
 DEBUG_AUX	hal/config.h	4;"	d
@@ -636,8 +647,8 @@ DEBUG_MSG	hal/loragw_spi.ftdi.c	25;"	d	file:
 DEBUG_MSG	hal/loragw_spi.ftdi.c	29;"	d	file:
 DEBUG_MSG	hal/loragw_spi.native.c	42;"	d	file:
 DEBUG_MSG	hal/loragw_spi.native.c	46;"	d	file:
-DEBUG_MSG	hal/sx1301hal/loragw_hal_sx1301.c	40;"	d	file:
-DEBUG_MSG	hal/sx1301hal/loragw_hal_sx1301.c	45;"	d	file:
+DEBUG_MSG	hal/sx1301hal/loragw_hal_sx1301.c	41;"	d	file:
+DEBUG_MSG	hal/sx1301hal/loragw_hal_sx1301.c	46;"	d	file:
 DEBUG_MSG	hal/sx1301hal/loragw_radio_sx1301.c	36;"	d	file:
 DEBUG_MSG	hal/sx1301hal/loragw_radio_sx1301.c	40;"	d	file:
 DEBUG_MSG	hal/sx1301hal/loragw_reg_sx1301.c	36;"	d	file:
@@ -682,8 +693,8 @@ DEBUG_PRINTF	hal/loragw_spi.ftdi.c	26;"	d	file:
 DEBUG_PRINTF	hal/loragw_spi.ftdi.c	30;"	d	file:
 DEBUG_PRINTF	hal/loragw_spi.native.c	43;"	d	file:
 DEBUG_PRINTF	hal/loragw_spi.native.c	47;"	d	file:
-DEBUG_PRINTF	hal/sx1301hal/loragw_hal_sx1301.c	41;"	d	file:
-DEBUG_PRINTF	hal/sx1301hal/loragw_hal_sx1301.c	46;"	d	file:
+DEBUG_PRINTF	hal/sx1301hal/loragw_hal_sx1301.c	42;"	d	file:
+DEBUG_PRINTF	hal/sx1301hal/loragw_hal_sx1301.c	47;"	d	file:
 DEBUG_PRINTF	hal/sx1301hal/loragw_radio_sx1301.c	37;"	d	file:
 DEBUG_PRINTF	hal/sx1301hal/loragw_radio_sx1301.c	41;"	d	file:
 DEBUG_PRINTF	hal/sx1301hal/loragw_reg_sx1301.c	37;"	d	file:
@@ -711,7 +722,7 @@ DEBUG_RAD	hal/config.h	11;"	d
 DEBUG_REG	hal/config.h	7;"	d
 DEBUG_SPI	hal/config.h	5;"	d
 DEBUG_SX1302	hal/config.h	13;"	d
-DECLARE_GW	fwd/inc/gwcfg.h	315;"	d
+DECLARE_GW	fwd/inc/gwcfg.h	321;"	d
 DECLARE_HAL	hal/loragw_hal.h	582;"	d
 DEFAULT_BAUDRATE	hal/loragw_gps.c	59;"	d	file:
 DEFAULT_BEACON_BW_HZ	fwd/inc/gwcfg.h	45;"	d
@@ -720,36 +731,36 @@ DEFAULT_BEACON_FREQ_HZ	fwd/inc/gwcfg.h	41;"	d
 DEFAULT_BEACON_FREQ_NB	fwd/inc/gwcfg.h	42;"	d
 DEFAULT_BEACON_FREQ_STEP	fwd/inc/gwcfg.h	43;"	d
 DEFAULT_BEACON_INFODESC	fwd/inc/gwcfg.h	47;"	d
-DEFAULT_BEACON_POLL_MS	fwd/inc/fwd.h	69;"	d
+DEFAULT_BEACON_POLL_MS	fwd/inc/fwd.h	70;"	d
 DEFAULT_BEACON_POWER	fwd/inc/gwcfg.h	46;"	d
 DEFAULT_CLK_SRC	hal/test/test_loragw_cal.c	56;"	d	file:
-DEFAULT_CLK_SRC	hal/test/test_loragw_hal_tx.c	49;"	d	file:
+DEFAULT_CLK_SRC	hal/test/test_loragw_hal_tx.c	51;"	d	file:
 DEFAULT_CLK_SRC	util_chip_id/src/chip_id.c	51;"	d	file:
 DEFAULT_DAC_GAIN	hal/test/test_loragw_cal.c	59;"	d	file:
 DEFAULT_DOWN_FPORT	fwd/inc/pkt_service.h	37;"	d
-DEFAULT_FETCH_SLEEP_MS	fwd/inc/fwd.h	67;"	d
+DEFAULT_FETCH_SLEEP_MS	fwd/inc/fwd.h	68;"	d
 DEFAULT_FREQ_HZ	hal/test/test_loragw_cal.c	57;"	d	file:
 DEFAULT_FREQ_HZ	hal/test/test_loragw_counter.c	49;"	d	file:
-DEFAULT_FREQ_HZ	hal/test/test_loragw_hal_rx.c	49;"	d	file:
-DEFAULT_FREQ_HZ	hal/test/test_loragw_hal_tx.c	50;"	d	file:
+DEFAULT_FREQ_HZ	hal/test/test_loragw_hal_rx.c	51;"	d	file:
+DEFAULT_FREQ_HZ	hal/test/test_loragw_hal_tx.c	52;"	d	file:
 DEFAULT_FREQ_HZ	util_chip_id/src/chip_id.c	52;"	d	file:
-DEFAULT_GS_PORT_DW	fwd/inc/fwd.h	55;"	d
-DEFAULT_GS_PORT_UP	fwd/inc/fwd.h	53;"	d
-DEFAULT_GS_SERVER	fwd/inc/fwd.h	51;"	d
-DEFAULT_KEEPALIVE	fwd/inc/fwd.h	57;"	d
+DEFAULT_GS_PORT_DW	fwd/inc/fwd.h	56;"	d
+DEFAULT_GS_PORT_UP	fwd/inc/fwd.h	54;"	d
+DEFAULT_GS_SERVER	fwd/inc/fwd.h	52;"	d
+DEFAULT_KEEPALIVE	fwd/inc/fwd.h	58;"	d
 DEFAULT_MIX_GAIN	hal/test/test_loragw_cal.c	60;"	d	file:
 DEFAULT_NOTCH_FREQ	hal/tst/test_loragw_hal.c	47;"	d	file:
 DEFAULT_PAYLOAD_SIZE	fwd/inc/pkt_service.h	36;"	d
-DEFAULT_PULL_INTERVAL	fwd/inc/fwd.h	59;"	d
-DEFAULT_PULL_TIMEOUT_MS	fwd/inc/fwd.h	65;"	d
-DEFAULT_PUSH_TIMEOUT_MS	fwd/inc/fwd.h	63;"	d
+DEFAULT_PULL_INTERVAL	fwd/inc/fwd.h	60;"	d
+DEFAULT_PULL_TIMEOUT_MS	fwd/inc/fwd.h	66;"	d
+DEFAULT_PUSH_TIMEOUT_MS	fwd/inc/fwd.h	64;"	d
 DEFAULT_RSSI_OFFSET	hal/tst/test_loragw_cal.c	49;"	d	file:
 DEFAULT_RSSI_OFFSET	hal/tst/test_loragw_hal.c	46;"	d	file:
-DEFAULT_RXPKTS_LIST_SIZE	fwd/inc/fwd.h	71;"	d
-DEFAULT_STAT_INTERVAL	fwd/inc/fwd.h	61;"	d
-DEFAULT_TRY_TIMES	fwd/inc/fwd.h	47;"	d
+DEFAULT_RXPKTS_LIST_SIZE	fwd/inc/fwd.h	72;"	d
+DEFAULT_STAT_INTERVAL	fwd/inc/fwd.h	62;"	d
+DEFAULT_TRY_TIMES	fwd/inc/fwd.h	48;"	d
 DEFAULT_TX_NOTCH_FREQ	hal/tst/test_loragw_cal.c	48;"	d	file:
-DEFINE_SQL_STATEMENT	fwd/src/db.c	51;"	d	file:
+DEFINE_SQL_STATEMENT	fwd/src/db.c	75;"	d	file:
 DEFI_HAL	hal/loragw_hal.h	581;"	d
 DIO_RSSI_PIN	hal/loragw_lbt.h	34;"	d
 DISCONNECT	libmqtt/MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
@@ -759,6 +770,7 @@ DLLExport	libmqtt/MQTTUnsubscribe.h	25;"	d
 DLLImport	libmqtt/MQTTPublish.h	22;"	d
 DLLImport	libmqtt/MQTTSubscribe.h	22;"	d
 DLLImport	libmqtt/MQTTUnsubscribe.h	22;"	d
+DLSettings	fwd/inc/mac-header-decode.h	/^    LoRaMacDLSettings_t DLSettings;$/;"	m	struct:sLoRaMacMessageJoinAccept
 DNPATH	fwd/inc/pkt_service.h	39;"	d
 DOUBLE_SERIALIZATION_FORMAT	fwd/src/parson.c	42;"	d	file:
 DOWN	fwd/inc/pkt_service.h	42;"	d
@@ -780,6 +792,7 @@ DR_UNDEFINED	hal/loragw_hal.h	126;"	d
 DefaultClient	libmqtt/MQTTClient.h	99;"	d
 Dequeue	libmqtt/MQTTLinux.c	/^int Dequeue(Queue *queue, unsigned short *item, Timer *timer)$/;"	f
 DevAddr	fwd/inc/mac-header-decode.h	/^    uint32_t DevAddr;$/;"	m	struct:sLoRaMacFrameHeader
+DevAddr	fwd/inc/mac-header-decode.h	/^    uint32_t DevAddr;$/;"	m	struct:sLoRaMacMessageJoinAccept
 EMBED_MQTTLIB_C_TARGET	libmqtt/Makefile	/^EMBED_MQTTLIB_C_TARGET = lib${MQTT_EMBED_LIB_C}.so$/;"	m
 ENDIANEXT_H_	fwd/inc/endianext.h	12;"	d
 EU	fwd/inc/gwcfg.h	/^    EU,$/;"	e	enum:__anon37
@@ -842,15 +855,15 @@ FUNC_EXIT_NOLOG	libmqtt/StackTrace.h	58;"	d
 FUNC_EXIT_RC	libmqtt/StackTrace.h	33;"	d
 FUNC_EXIT_RC	libmqtt/StackTrace.h	49;"	d
 FUNC_EXIT_RC	libmqtt/StackTrace.h	61;"	d
-FW_VERSION_ADDR	hal/sx1301hal/loragw_hal_sx1301.c	58;"	d	file:
+FW_VERSION_ADDR	hal/sx1301hal/loragw_hal_sx1301.c	59;"	d	file:
 FW_VERSION_ADDR	hal/tst/test_loragw_cal.c	53;"	d	file:
-FW_VERSION_AGC	hal/sx1301hal/loragw_hal_sx1301.c	60;"	d	file:
+FW_VERSION_AGC	hal/sx1301hal/loragw_hal_sx1301.c	61;"	d	file:
 FW_VERSION_AGC	hal/sx1302hal/loragw_hal_sx1302.c	81;"	d	file:
 FW_VERSION_AGC	hal/test/test_loragw_capture_ram.c	65;"	d	file:
-FW_VERSION_ARB	hal/sx1301hal/loragw_hal_sx1301.c	61;"	d	file:
+FW_VERSION_ARB	hal/sx1301hal/loragw_hal_sx1301.c	62;"	d	file:
 FW_VERSION_ARB	hal/sx1302hal/loragw_hal_sx1302.c	82;"	d	file:
 FW_VERSION_ARB	hal/test/test_loragw_capture_ram.c	66;"	d	file:
-FW_VERSION_CAL	hal/sx1301hal/loragw_hal_sx1301.c	59;"	d	file:
+FW_VERSION_CAL	hal/sx1301hal/loragw_hal_sx1301.c	60;"	d	file:
 FW_VERSION_CAL	hal/sx1302hal/loragw_sx1302.c	78;"	d	file:
 FW_VERSION_CAL	hal/test/test_loragw_capture_ram.c	64;"	d	file:
 FW_VERSION_CAL	hal/tst/test_loragw_cal.c	54;"	d	file:
@@ -933,7 +946,7 @@ GOOGLE__PROTOBUF__UNINTERPRETED_OPTION__NAME_PART__INIT	libttn/descriptor.pb-c.h
 GPIO_IN	hal/gpio.h	38;"	d
 GPIO_OUT	hal/gpio.h	37;"	d
 GPS_DELAYED	hal/loragw_hal.h	160;"	d
-GPS_REF_MAX_AGE	fwd/inc/fwd.h	88;"	d
+GPS_REF_MAX_AGE	fwd/inc/fwd.h	89;"	d
 GWDB	fwd/src/db.c	/^static sqlite3 *GWDB;$/;"	v	file:
 Gateway__GPSMetadata	libttn/gateway.pb-c.h	/^typedef struct _Gateway__GPSMetadata Gateway__GPSMetadata;$/;"	t	typeref:struct:_Gateway__GPSMetadata
 Gateway__GPSMetadata_Closure	libttn/gateway.pb-c.h	/^typedef void (*Gateway__GPSMetadata_Closure)$/;"	t
@@ -1025,11 +1038,12 @@ IF_UNDEFINED	hal/loragw_hal.h	71;"	d
 IF_UNDEFINED	hal/sx1302hal/loragw_sx1302.h	35;"	d
 IGNORED	hal/loragw_gps.h	/^    IGNORED,         \/*!> frame was not parsed by the system *\/$/;"	e	enum:gps_msg
 IMMEDIATE	hal/loragw_hal.h	156;"	d
+IN	fwd/inc/gwcfg.h	/^    IN,$/;"	e	enum:__anon37
 INCLUDE	fwd/inc/gwcfg.h	/^    INCLUDE$/;"	e	enum:__anon39
 INCLUDES	fwd/Makefile	/^INCLUDES = $(wildcard inc\/*.h)$/;"	m
 INCLUDES	hal/Makefile	/^INCLUDES = $(wildcard *.h lg02hal\/*.h sx1301hal\/*.h sx1302hal\/*.h)$/;"	m
 INCOMPLETE	hal/loragw_gps.h	/^    INCOMPLETE,      \/*!> frame parsed was missing bytes *\/$/;"	e	enum:gps_msg
-INIT_GW	fwd/inc/gwcfg.h	274;"	d
+INIT_GW	fwd/inc/gwcfg.h	280;"	d
 INVALID	hal/loragw_gps.h	/^    INVALID,         \/*!> system try to parse frame but failed *\/$/;"	e	enum:gps_msg
 INVERTIQ2_OFF	hal/lg02hal/loragw_hal_lg02.h	90;"	d
 INVERTIQ2_ON	hal/lg02hal/loragw_hal_lg02.h	89;"	d
@@ -1091,11 +1105,14 @@ JSON_Status	fwd/inc/parson.h	/^typedef int JSON_Status;$/;"	t
 JSON_Value	fwd/inc/parson.h	/^typedef struct json_value_t  JSON_Value;$/;"	t	typeref:struct:json_value_t
 JSON_Value_Type	fwd/inc/parson.h	/^typedef int JSON_Value_Type;$/;"	t
 JSON_Value_Value	fwd/src/parson.c	/^} JSON_Value_Value;$/;"	t	typeref:union:json_value_value	file:
+JoinNonce	fwd/inc/mac-header-decode.h	/^    uint8_t JoinNonce[3];$/;"	m	struct:sLoRaMacMessageJoinAccept
 KEEP_ALIVE_INTERVAL	fwd/inc/mqtt_service.h	32;"	d
 KEEP_ALIVE_INTERVAL	libttn/network.h	14;"	d
+KR	fwd/inc/gwcfg.h	/^    KR,$/;"	e	enum:__anon37
 LBT_CHANNEL_FREQ_NB	hal/loragw_hal.h	186;"	d
 LCFLAGS	fwd/Makefile	/^LCFLAGS = $(CFLAGS) -fPIC -Iinc -I. -I..\/hal -I..\/hal\/lg02hal -I..\/hal\/sx1301hal -I..\/hal\/sx1302hal -I..\/libmqtt$/;"	m
 LCFLAGS	hal/Makefile	/^LCFLAGS = $(CFLAGS) -fPIC -Ilg02hal -Isx1301hal -Isx1302hal -I.$/;"	m
+LCFLAGS_SO	hal/Makefile	/^LCFLAGS_SO = $(LCFLAGS) -shared -O2 -Wall -DLINUX_SO$/;"	m
 LDD	libttn/Makefile	/^LDD = -lpthread -L$(PAHO_SRC) -lpahomqtt3c$/;"	m
 LDFLAGS	util_chip_id/Makefile	/^  LDFLAGS       := -Wl,--gc-sections$/;"	m
 LDFLAGS	util_chip_id/Makefile	/^  LDFLAGS       :=$/;"	m
@@ -1186,7 +1203,7 @@ LGW_DBG_DEC_FILT_GAIN	hal/sx1301hal/loragw_reg_sx1301.h	345;"	d
 LGW_DBG_DETECT_CPT	hal/sx1301hal/loragw_reg_sx1301.h	179;"	d
 LGW_DBG_MCU_DATA	hal/sx1301hal/loragw_reg_sx1301.h	331;"	d
 LGW_DBG_SYMB_CPT	hal/sx1301hal/loragw_reg_sx1301.h	180;"	d
-LGW_DB_FILE	fwd/inc/db.h	36;"	d
+LGW_DB_FILE	fwd/inc/db.h	37;"	d
 LGW_DC_NOTCH_EN	hal/sx1301hal/loragw_reg_sx1301.h	182;"	d
 LGW_DEC_GAIN_OFFSET	hal/sx1301hal/loragw_reg_sx1301.h	202;"	d
 LGW_DEC_RSSI	hal/sx1301hal/loragw_reg_sx1301.h	330;"	d
@@ -1549,28 +1566,28 @@ LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_cal.c	54;"	d	file:
 LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_capture_ram.c	45;"	d	file:
 LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_counter.c	41;"	d	file:
 LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_gps.c	46;"	d	file:
-LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_hal_rx.c	41;"	d	file:
-LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_hal_tx.c	47;"	d	file:
+LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_hal_rx.c	43;"	d	file:
+LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_hal_tx.c	49;"	d	file:
 LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_reg.c	39;"	d	file:
 LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_spi.c	50;"	d	file:
 LINUXDEV_PATH_DEFAULT	hal/test/test_loragw_spi_sx1250.c	48;"	d	file:
 LINUXDEV_PATH_DEFAULT	util_chip_id/src/chip_id.c	49;"	d	file:
-LLIBS	fwd/Makefile	/^LLIBS := -lloragw -lrt -lsqlite3 -lpthread -lm -lmpsse -L..\/libmqtt -lpahomqtt3c$/;"	m
-LLIBS	hal/Makefile	/^LLIBS := -lloragw -lrt -lmpsse -lm -lusb-1.0 -lftdi1$/;"	m
+LLIBS	fwd/Makefile	/^LLIBS := -lloragw -L$(LGW_PATH) -lrt -lsqlite3 -lpthread -lm -lmpsse -L$(MQTT_PATH) -lpahomqtt3c$/;"	m
 LNA_LOW_GAIN	hal/lg02hal/loragw_hal_lg02.h	43;"	d
 LNA_MAX_GAIN	hal/lg02hal/loragw_hal_lg02.h	41;"	d
 LNA_OFF_GAIN	hal/lg02hal/loragw_hal_lg02.h	42;"	d
 LOG_BEACON	fwd/src/fwd.c	/^uint8_t LOG_BEACON = 0;$/;"	v
-LOG_DEBUG	fwd/src/fwd.c	/^uint8_t LOG_DEBUG = 1;$/;"	v
+LOG_DEBUG	fwd/src/fwd.c	/^uint8_t LOG_DEBUG = 0;$/;"	v
 LOG_ERROR	fwd/src/fwd.c	/^uint8_t LOG_ERROR = 1;$/;"	v
 LOG_INFO	fwd/src/fwd.c	/^uint8_t LOG_INFO = 1;$/;"	v
-LOG_JIT	fwd/src/fwd.c	/^uint8_t LOG_JIT = 0;$/;"	v
-LOG_JIT_ERROR	fwd/src/fwd.c	/^uint8_t LOG_JIT_ERROR = 0;$/;"	v
+LOG_JIT	fwd/src/fwd.c	/^uint8_t LOG_JIT = 1;$/;"	v
+LOG_JIT_ERROR	fwd/src/fwd.c	/^uint8_t LOG_JIT_ERROR = 1;$/;"	v
 LOG_MEM	fwd/src/fwd.c	/^uint8_t LOG_MEM = 0;$/;"	v
 LOG_PKT	fwd/src/fwd.c	/^uint8_t LOG_PKT = 1;$/;"	v
 LOG_REPORT	fwd/src/fwd.c	/^uint8_t LOG_REPORT = 1;$/;"	v
 LOG_TIMERSYNC	fwd/src/fwd.c	/^uint8_t LOG_TIMERSYNC = 0;$/;"	v
 LOG_WARNING	fwd/src/fwd.c	/^uint8_t LOG_WARNING = 1;$/;"	v
+LORAMAC_CF_LIST_FIELD_SIZE	fwd/inc/mac-header-decode.h	31;"	d
 LORAMAC_FHDR_DEV_ADD_FIELD_SIZE	fwd/inc/mac-header-decode.h	16;"	d
 LORAMAC_FHDR_F_CNT_FIELD_SIZE	fwd/inc/mac-header-decode.h	22;"	d
 LORAMAC_FHDR_F_CTRL_FIELD_SIZE	fwd/inc/mac-header-decode.h	19;"	d
@@ -1637,8 +1654,10 @@ LoRaMacJoinComputeSKeys	fwd/src/loramac-crypto.c	/^void LoRaMacJoinComputeSKeys(
 LoRaMacJoinDecrypt	fwd/src/loramac-crypto.c	/^void LoRaMacJoinDecrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint8_t *decBuffer )$/;"	f
 LoRaMacJoinEncrypt	fwd/src/loramac-crypto.c	/^void LoRaMacJoinEncrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint8_t *encBuffer ){$/;"	f
 LoRaMacMessageData_t	fwd/inc/mac-header-decode.h	/^}LoRaMacMessageData_t;$/;"	t	typeref:struct:sLoRaMacMessageData
+LoRaMacMessageJoinAccept_t	fwd/inc/mac-header-decode.h	/^}LoRaMacMessageJoinAccept_t;$/;"	t	typeref:struct:sLoRaMacMessageJoinAccept
 LoRaMacMessageType_t	fwd/inc/mac-header-decode.h	/^}LoRaMacMessageType_t;$/;"	t	typeref:enum:eLoRaMacMessageType
 LoRaMacParserData	fwd/src/mac-header-decode.c	/^LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg )$/;"	f
+LoRaMacParserJoinAccept	fwd/src/mac-header-decode.c	/^LoRaMacParserStatus_t LoRaMacParserJoinAccept( LoRaMacMessageJoinAccept_t* macMsg )$/;"	f
 LoRaMacParserStatus_t	fwd/inc/mac-header-decode.h	/^}LoRaMacParserStatus_t;$/;"	t	typeref:enum:eLoRaMacParserStatus
 LoRaMacPayloadDecrypt	fwd/src/loramac-crypto.c	/^void LoRaMacPayloadDecrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t address, uint8_t dir, uint32_t sequenceCounter, uint8_t *decBuffer )$/;"	f
 LoRaMacPayloadEncrypt	fwd/src/loramac-crypto.c	/^void LoRaMacPayloadEncrypt( const uint8_t *buffer, uint16_t size, const uint8_t *key, uint32_t address, uint8_t dir, uint32_t sequenceCounter, uint8_t *encBuffer )$/;"	f
@@ -1689,25 +1708,27 @@ MAX_NESTING	fwd/src/parson.c	41;"	d	file:
 MAX_NO_OF_REMAINING_LENGTH_BYTES	libmqtt/MQTTPacket.c	59;"	d	file:
 MAX_PACKET_ID	libmqtt/MQTTClient.h	34;"	d
 MAX_TRY	fwd/inc/utilities.h	37;"	d
-MCU_AGC	hal/sx1301hal/loragw_hal_sx1301.c	55;"	d	file:
+MCU_AGC	hal/sx1301hal/loragw_hal_sx1301.c	56;"	d	file:
 MCU_AGC	hal/sx1302hal/loragw_sx1302.c	70;"	d	file:
 MCU_AGC	hal/tst/test_loragw_cal.c	51;"	d	file:
-MCU_AGC_FW_BYTE	hal/sx1301hal/loragw_hal_sx1301.c	57;"	d	file:
+MCU_AGC_FW_BYTE	hal/sx1301hal/loragw_hal_sx1301.c	58;"	d	file:
 MCU_AGC_FW_BYTE	hal/tst/test_loragw_cal.c	52;"	d	file:
-MCU_ARB	hal/sx1301hal/loragw_hal_sx1301.c	54;"	d	file:
+MCU_ARB	hal/sx1301hal/loragw_hal_sx1301.c	55;"	d	file:
 MCU_ARB	hal/sx1302hal/loragw_sx1302.c	71;"	d	file:
-MCU_ARB_FW_BYTE	hal/sx1301hal/loragw_hal_sx1301.c	56;"	d	file:
+MCU_ARB_FW_BYTE	hal/sx1301hal/loragw_hal_sx1301.c	57;"	d	file:
 MCU_FW_SIZE	hal/sx1302hal/loragw_sx1302.c	76;"	d	file:
 MHDR	fwd/inc/mac-header-decode.h	/^    LoRaMacHeader_t MHDR;$/;"	m	struct:sLoRaMacMessageData
+MHDR	fwd/inc/mac-header-decode.h	/^    LoRaMacHeader_t MHDR;$/;"	m	struct:sLoRaMacMessageJoinAccept
 MIC	fwd/inc/mac-header-decode.h	/^    uint32_t MIC;$/;"	m	struct:sLoRaMacMessageData
+MIC	fwd/inc/mac-header-decode.h	/^    uint32_t MIC;$/;"	m	struct:sLoRaMacMessageJoinAccept
 MIN	fwd/inc/utilities.h	47;"	d
 MINUS_10PPM	hal/loragw_gps.c	58;"	d	file:
-MIN_FSK_PREAMB	fwd/inc/fwd.h	44;"	d
-MIN_FSK_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	71;"	d	file:
+MIN_FSK_PREAMB	fwd/inc/fwd.h	45;"	d
+MIN_FSK_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	72;"	d	file:
 MIN_FSK_PREAMBLE	hal/sx1302hal/loragw_sx1302.c	106;"	d	file:
 MIN_LOOP	hal/tinymt32.c	17;"	d	file:
-MIN_LORA_PREAMB	fwd/inc/fwd.h	42;"	d
-MIN_LORA_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	69;"	d	file:
+MIN_LORA_PREAMB	fwd/inc/fwd.h	43;"	d
+MIN_LORA_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	70;"	d	file:
 MIN_LORA_PREAMBLE	hal/sx1302hal/loragw_sx1302.c	104;"	d	file:
 MOD_CW	hal/loragw_hal.h	98;"	d
 MOD_FSK	hal/loragw_hal.h	100;"	d
@@ -1836,6 +1857,7 @@ N_BLOCK	fwd/inc/aes.h	59;"	d
 N_COL	fwd/inc/aes.h	58;"	d
 N_MAX_ROUNDS	fwd/inc/aes.h	60;"	d
 N_ROW	fwd/inc/aes.h	57;"	d
+NetID	fwd/inc/mac-header-decode.h	/^    uint8_t NetID[3];$/;"	m	struct:sLoRaMacMessageJoinAccept
 Network	libmqtt/MQTTLinux.h	/^typedef struct Network$/;"	s
 Network	libmqtt/MQTTLinux.h	/^} Network;$/;"	t	typeref:struct:Network
 NetworkCheckConnected	libmqtt/MQTTLinux.c	/^int NetworkCheckConnected(Network *n)$/;"	f
@@ -1871,17 +1893,17 @@ PACKET_TYPE_LORA	hal/sx1302hal/loragw_sx1250.h	/^    PACKET_TYPE_LORA        = 0
 PAGE_ADDR	hal/sx1301hal/loragw_reg_sx1301.c	47;"	d	file:
 PAGE_MASK	hal/sx1301hal/loragw_reg_sx1301.c	48;"	d	file:
 PAHO_SRC	libttn/Makefile	/^PAHO_SRC = ..\/libmqtt$/;"	m
-PATH_LEN	fwd/inc/fwd.h	49;"	d
+PATH_LEN	fwd/inc/fwd.h	50;"	d
 PID	hal/loragw_spi.ftdi.c	35;"	d	file:
 PINGREQ	libmqtt/MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
 PINGRESP	libmqtt/MQTTPacket.h	/^	PINGREQ, PINGRESP, DISCONNECT$/;"	e	enum:msgTypes
 PKT_FWD	fwd/inc/stats.h	/^	PKT_FWD$/;"	e	enum:__anon57
-PKT_PULL_ACK	fwd/inc/fwd.h	77;"	d
-PKT_PULL_DATA	fwd/inc/fwd.h	75;"	d
-PKT_PULL_RESP	fwd/inc/fwd.h	76;"	d
-PKT_PUSH_ACK	fwd/inc/fwd.h	74;"	d
-PKT_PUSH_DATA	fwd/inc/fwd.h	73;"	d
-PKT_TX_ACK	fwd/inc/fwd.h	78;"	d
+PKT_PULL_ACK	fwd/inc/fwd.h	78;"	d
+PKT_PULL_DATA	fwd/inc/fwd.h	76;"	d
+PKT_PULL_RESP	fwd/inc/fwd.h	77;"	d
+PKT_PUSH_ACK	fwd/inc/fwd.h	75;"	d
+PKT_PUSH_DATA	fwd/inc/fwd.h	74;"	d
+PKT_TX_ACK	fwd/inc/fwd.h	79;"	d
 PLL_LOCK_MAX_ATTEMPTS	hal/sx1301hal/loragw_radio_sx1301.c	48;"	d	file:
 PLL_LOCK_MAX_ATTEMPTS	hal/sx1302hal/loragw_sx125x.c	51;"	d	file:
 PLUS_10PPM	hal/loragw_gps.c	57;"	d	file:
@@ -1909,8 +1931,8 @@ PROTOBUF_C_github_2ecom_2fTheThingsNetwork_2fttn_2fapi_2ftrace_2ftrace_2eproto__
 PROTOBUF_C_github_2ecom_2fgogo_2fprotobuf_2fgogoproto_2fgogo_2eproto__INCLUDED	libttn/gogo.pb-c.h	5;"	d
 PROTOBUF_C_github_2ecom_2fgogo_2fprotobuf_2fprotobuf_2fgoogle_2fprotobuf_2fdescriptor_2eproto__INCLUDED	libttn/descriptor.pb-c.h	5;"	d
 PROTOBUF_C_github_2ecom_2fgogo_2fprotobuf_2fprotobuf_2fgoogle_2fprotobuf_2fempty_2eproto__INCLUDED	libttn/empty.pb-c.h	5;"	d
-PROTOCOL_JSON_RXPK_FRAME_FORMAT	fwd/inc/fwd.h	40;"	d
-PROTOCOL_VERSION	fwd/inc/fwd.h	39;"	d
+PROTOCOL_JSON_RXPK_FRAME_FORMAT	fwd/inc/fwd.h	41;"	d
+PROTOCOL_VERSION	fwd/inc/fwd.h	40;"	d
 PROTOCOL_VERSION	fwd/src/ghost.c	46;"	d	file:
 PROTOCOL__ACTIVATION_METADATA__INIT	libttn/protocol.pb-c.h	97;"	d
 PROTOCOL__ACTIVATION_METADATA__PROTOCOL_LORAWAN	libttn/protocol.pb-c.h	/^  PROTOCOL__ACTIVATION_METADATA__PROTOCOL_LORAWAN = 1,$/;"	e	enum:__anon9
@@ -1964,8 +1986,8 @@ RAM_SIZE	hal/tst/test_loragw_cal.c	55;"	d	file:
 RAND_LOCAL_MAX	fwd/src/utilities.c	35;"	d	file:
 RAND_RANGE	hal/test/test_loragw_cal.c	46;"	d	file:
 RAND_RANGE	hal/test/test_loragw_counter.c	44;"	d	file:
-RAND_RANGE	hal/test/test_loragw_hal_rx.c	44;"	d	file:
-RAND_RANGE	hal/test/test_loragw_hal_tx.c	42;"	d	file:
+RAND_RANGE	hal/test/test_loragw_hal_rx.c	46;"	d	file:
+RAND_RANGE	hal/test/test_loragw_hal_tx.c	44;"	d	file:
 RAND_RANGE	util_chip_id/src/chip_id.c	44;"	d	file:
 READ_ACCESS	hal/loragw_spi.h	36;"	d
 READ_ACCESS	hal/sx1302hal/loragw_sx125x.c	53;"	d	file:
@@ -1990,20 +2012,21 @@ ROUTER__STATUS_REQUEST__INIT	libttn/router.pb-c.h	141;"	d
 ROUTER__STATUS__INIT	libttn/router.pb-c.h	166;"	d
 ROUTER__SUBSCRIBE_REQUEST__INIT	libttn/router.pb-c.h	44;"	d
 ROUTER__UPLINK_MESSAGE__INIT	libttn/router.pb-c.h	59;"	d
-RSSI_FSK_POLY_0	hal/sx1301hal/loragw_hal_sx1301.c	75;"	d	file:
+RSSI_FSK_POLY_0	hal/sx1301hal/loragw_hal_sx1301.c	76;"	d	file:
 RSSI_FSK_POLY_0	hal/sx1302hal/loragw_sx1302.c	80;"	d	file:
-RSSI_FSK_POLY_1	hal/sx1301hal/loragw_hal_sx1301.c	76;"	d	file:
+RSSI_FSK_POLY_1	hal/sx1301hal/loragw_hal_sx1301.c	77;"	d	file:
 RSSI_FSK_POLY_1	hal/sx1302hal/loragw_sx1302.c	81;"	d	file:
-RSSI_FSK_POLY_2	hal/sx1301hal/loragw_hal_sx1301.c	77;"	d	file:
+RSSI_FSK_POLY_2	hal/sx1301hal/loragw_hal_sx1301.c	78;"	d	file:
 RSSI_FSK_POLY_2	hal/sx1302hal/loragw_sx1302.c	82;"	d	file:
-RSSI_MULTI_BIAS	hal/sx1301hal/loragw_hal_sx1301.c	74;"	d	file:
+RSSI_MULTI_BIAS	hal/sx1301hal/loragw_hal_sx1301.c	75;"	d	file:
+RU	fwd/inc/gwcfg.h	/^    RU,$/;"	e	enum:__anon37
 RX1DRoffset	fwd/inc/mac-header-decode.h	/^        uint8_t RX1DRoffset     : 3;$/;"	m	struct:uLoRaMacDLSettings::sDLSettingsBits
 RX2DataRate	fwd/inc/mac-header-decode.h	/^        uint8_t RX2DataRate     : 4;$/;"	m	struct:uLoRaMacDLSettings::sDLSettingsBits
 RXMODE_RSSI	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon19
 RXMODE_SCAN	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon19
 RXMODE_SINGLE	hal/lg02hal/loragw_hal_lg02.h	/^enum { RXMODE_SINGLE, RXMODE_SCAN, RXMODE_RSSI };$/;"	e	enum:__anon19
 RX_BAD	fwd/inc/stats.h	/^	RX_BAD,$/;"	e	enum:__anon57
-RX_METADATA_NB	hal/sx1301hal/loragw_hal_sx1301.c	64;"	d	file:
+RX_METADATA_NB	hal/sx1301hal/loragw_hal_sx1301.c	65;"	d	file:
 RX_NOCRC	fwd/inc/stats.h	/^	RX_NOCRC,$/;"	e	enum:__anon57
 RX_OFF	hal/loragw_hal.h	178;"	d
 RX_OK	fwd/inc/stats.h	/^	RX_OK,$/;"	e	enum:__anon57
@@ -2037,6 +2060,7 @@ Router__UplinkMessage_Closure	libttn/router.pb-c.h	/^typedef void (*Router__Upli
 RxBwExp	hal/lg02hal/loragw_sx127x_radio.c	/^    uint8_t     RxBwExp;$/;"	m	struct:lgw_sx127x_FSK_bandwidth_s	file:
 RxBwKHz	hal/lg02hal/loragw_sx127x_radio.c	/^    uint32_t    RxBwKHz;$/;"	m	struct:lgw_sx127x_FSK_bandwidth_s	file:
 RxBwMant	hal/lg02hal/loragw_sx127x_radio.c	/^    uint8_t     RxBwMant;$/;"	m	struct:lgw_sx127x_FSK_bandwidth_s	file:
+RxDelay	fwd/inc/mac-header-decode.h	/^    uint8_t RxDelay;$/;"	m	struct:sLoRaMacMessageJoinAccept
 SEND_BUFFER_SIZE	fwd/inc/mqtt_service.h	35;"	d
 SEND_BUFFER_SIZE	libttn/network.h	17;"	d
 SEND_CONNECT	libttn/connector.h	11;"	d
@@ -2090,11 +2114,11 @@ STAT_NO_CRC	hal/loragw_hal.h	151;"	d
 STAT_UNDEFINED	hal/loragw_hal.h	150;"	d
 STDBY_RC	hal/sx1302hal/loragw_sx1250.h	/^    STDBY_RC                = 0x00,$/;"	e	enum:__anon16
 STDBY_XOSC	hal/sx1302hal/loragw_sx1250.h	/^    STDBY_XOSC              = 0x01$/;"	e	enum:__anon16
-STD_FSK_PREAMB	fwd/inc/fwd.h	45;"	d
-STD_FSK_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	72;"	d	file:
+STD_FSK_PREAMB	fwd/inc/fwd.h	46;"	d
+STD_FSK_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	73;"	d	file:
 STD_FSK_PREAMBLE	hal/sx1302hal/loragw_sx1302.c	107;"	d	file:
-STD_LORA_PREAMB	fwd/inc/fwd.h	43;"	d
-STD_LORA_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	70;"	d	file:
+STD_LORA_PREAMB	fwd/inc/fwd.h	44;"	d
+STD_LORA_PREAMBLE	hal/sx1301hal/loragw_hal_sx1301.c	71;"	d	file:
 STD_LORA_PREAMBLE	hal/sx1302hal/loragw_sx1302.c	105;"	d	file:
 STOP_TIMER_ON_PREAMBLE	hal/sx1302hal/loragw_sx1250.h	/^    STOP_TIMER_ON_PREAMBLE  = 0x9F,$/;"	e	enum:__anon15
 STTS751_0_PROD_ID	hal/sx1302hal/loragw_stts751.c	67;"	d	file:
@@ -3746,7 +3770,7 @@ TS_CPS	hal/loragw_gps.c	56;"	d	file:
 TS_HOP	hal/loragw_lbt.h	33;"	d
 TTN	libttn/connector.h	/^typedef void TTN;$/;"	t
 TTNDownlinkHandler	libttn/connector.h	/^typedef void (*TTNDownlinkHandler)(Router__DownlinkMessage *, void *);$/;"	t
-TX_BUFF_SIZE	fwd/inc/fwd.h	80;"	d
+TX_BUFF_SIZE	fwd/inc/fwd.h	81;"	d
 TX_CALIB_DONE_BY_HAL	hal/sx1302hal/loragw_cal.c	41;"	d	file:
 TX_EMITTING	hal/loragw_hal.h	173;"	d
 TX_FAIL	fwd/inc/stats.h	/^	TX_FAIL,$/;"	e	enum:__anon56
@@ -3755,7 +3779,7 @@ TX_GAIN_LUT_SIZE_MAX	hal/loragw_hal.h	183;"	d
 TX_JIT_DELAY	fwd/src/jitqueue.c	39;"	d	file:
 TX_MARGIN_DELAY	fwd/src/jitqueue.c	37;"	d	file:
 TX_MAX_ADVANCE_DELAY	fwd/src/jitqueue.c	40;"	d	file:
-TX_METADATA_NB	hal/sx1301hal/loragw_hal_sx1301.c	63;"	d	file:
+TX_METADATA_NB	hal/sx1301hal/loragw_hal_sx1301.c	64;"	d	file:
 TX_OFF	hal/loragw_hal.h	170;"	d
 TX_OK	fwd/inc/stats.h	/^	TX_OK,$/;"	e	enum:__anon56
 TX_REJ_COLL_BEACON	fwd/inc/stats.h	/^	TX_REJ_COLL_BEACON,$/;"	e	enum:__anon56
@@ -3794,7 +3818,7 @@ Types__DisconnectMessage_Closure	libttn/types.pb-c.h	/^typedef void (*Types__Dis
 UBX_MSG_NAVTIMEGPS_LEN	hal/loragw_gps.c	61;"	d	file:
 UBX_NAV_TIMEGPS	hal/loragw_gps.h	/^    UBX_NAV_TIMEGPS, \/*!> GPS Time Solution *\/$/;"	e	enum:gps_msg
 UBX_NAV_TIMEUTC	hal/loragw_gps.h	/^    UBX_NAV_TIMEUTC  \/*!> UTC Time Solution *\/$/;"	e	enum:gps_msg
-UNIX_GPS_EPOCH_OFFSET	fwd/inc/fwd.h	83;"	d
+UNIX_GPS_EPOCH_OFFSET	fwd/inc/fwd.h	84;"	d
 UNKNOWN	hal/loragw_gps.h	/^    UNKNOWN,         \/*!> neutral value *\/$/;"	e	enum:gps_msg
 UNSUBACK	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
 UNSUBSCRIBE	libmqtt/MQTTPacket.h	/^	PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK,$/;"	e	enum:msgTypes
@@ -3808,7 +3832,6 @@ Value	fwd/inc/mac-header-decode.h	/^    uint8_t Value;$/;"	m	union:uLoRaMacDLSet
 Value	fwd/inc/mac-header-decode.h	/^    uint8_t Value;$/;"	m	union:uLoRaMacFrameCtrl
 Value	fwd/inc/mac-header-decode.h	/^    uint8_t Value;$/;"	m	union:uLoRaMacHeader
 WAIT_BUSY_SX1250_MS	hal/sx1302hal/loragw_sx1250.c	53;"	d	file:
-WAIT_GPIO	tools/reset_lgw.sh	/^WAIT_GPIO() {$/;"	f
 WARN_CFLAGS	util_chip_id/Makefile	/^  WARN_CFLAGS   := -Wall -Wextra$/;"	m
 WARN_CFLAGS	util_chip_id/Makefile	/^  WARN_CFLAGS   :=$/;"	m
 WPOLY	fwd/src/aes.c	75;"	d	file:
@@ -3817,8 +3840,8 @@ WRITE_ACCESS	hal/sx1302hal/loragw_sx125x.c	54;"	d	file:
 WRITE_BUFFER	hal/sx1302hal/loragw_sx1250.h	/^    WRITE_BUFFER            = 0x0E,$/;"	e	enum:__anon15
 WRITE_REGISTER	hal/sx1302hal/loragw_sx1250.h	/^    WRITE_REGISTER          = 0x0D,$/;"	e	enum:__anon15
 X	fwd/inc/cmac.h	/^            uint8_t        X[16];$/;"	m	struct:_AES_CMAC_CTX
-XERR_FILT_COEF	fwd/inc/fwd.h	86;"	d
-XERR_INIT_AVG	fwd/inc/fwd.h	85;"	d
+XERR_FILT_COEF	fwd/inc/fwd.h	87;"	d
+XERR_INIT_AVG	fwd/inc/fwd.h	86;"	d
 XOR	fwd/src/cmac.c	13;"	d	file:
 [	Session.vim	/^nmap [  <Plug>unimpairedBlankUp$/;"	m
 [	fwd/Session.vim	/^nmap [  <Plug>unimpairedBlankUp$/;"	m
@@ -4370,6 +4393,8 @@ block_copy	fwd/src/aes.c	306;"	d	file:
 block_copy_nn	fwd/src/aes.c	302;"	d	file:
 block_copy_nn	fwd/src/aes.c	305;"	d	file:
 board	fwd/inc/gwcfg.h	/^        char board[16];         \/\/ SX1301(LG301) \/ SX1308(LG308) \/ SX1302(LG302) \/ SX1276 (LG02)$/;"	m	struct:__anon47::__anon49
+board	hal/test/test_loragw_hal_rx.c	/^char board[16] = "sx1302";$/;"	v
+board	hal/test/test_loragw_hal_tx.c	/^char board[16] = "sx1302";$/;"	v
 board_cfg	hal/loragw_hal.h	/^    struct lgw_conf_board_s     board_cfg;$/;"	m	struct:lgw_context_s	typeref:struct:lgw_context_s::lgw_conf_board_s
 boolean	fwd/src/parson.c	/^    int          boolean;$/;"	m	union:json_value_value	file:
 boot_time	libttn/gateway.pb-c.h	/^  int64_t boot_time;$/;"	m	struct:_Gateway__Status
@@ -4495,8 +4520,7 @@ data_rate	libttn/lorawan.pb-c.h	/^  char *data_rate;$/;"	m	struct:_Lorawan__TxCo
 datarate	hal/loragw_hal.h	/^    uint32_t    datarate;       \/*!> RX datarate of the packet (SF for LoRa) *\/$/;"	m	struct:lgw_pkt_rx_s
 datarate	hal/loragw_hal.h	/^    uint32_t    datarate;       \/*!> RX datarate, 0 for default *\/$/;"	m	struct:lgw_conf_rxif_s
 datarate	hal/loragw_hal.h	/^    uint32_t    datarate;       \/*!> TX datarate (baudrate for FSK, SF for LoRa) *\/$/;"	m	struct:lgw_pkt_tx_s
-db_create_gwdb	fwd/src/db.c	/^static int db_create_gwdb(void)$/;"	f	file:
-db_execute_sql	fwd/src/db.c	/^static int db_execute_sql(const char *sql, int (*callback)(void *, int, char **, char **), void *arg)$/;"	f	file:
+db_exec_sql	fwd/src/db.c	/^static int db_exec_sql(const char *sql, int (*callback)(void *, int, char **, char **), void *arg)$/;"	f	file:
 db_family	fwd/src/pkt_serv.c	/^static char db_family[32] = {'\\0'};$/;"	v	file:
 db_get_common	fwd/src/db.c	/^static int db_get_common(const char *family, const char *key, char **buffer, int bufferlen)$/;"	f	file:
 db_gettree_common	fwd/src/db.c	/^static struct lgw_db_entry *db_gettree_common(sqlite3_stmt *stmt)$/;"	f	file:
@@ -4522,6 +4546,8 @@ dec_thresh_h1	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t dec_thresh_h1;$/;"
 dec_thresh_h2	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t dec_thresh_h2;$/;"	m	struct:agc_gain_params_s
 dec_thresh_l	hal/sx1302hal/loragw_agc_params.h	/^    uint8_t dec_thresh_l;$/;"	m	struct:agc_gain_params_s
 decodePacket	libmqtt/MQTTClient.c	/^static int decodePacket(MQTTClient *c, int *value, int timeout)$/;"	f	file:
+decode_mac_pkt_down	fwd/src/mac-header-decode.c	/^void decode_mac_pkt_down(LoRaMacMessageData_t* macMsg, void* pkt)$/;"	f
+decode_mac_pkt_up	fwd/src/mac-header-decode.c	/^void decode_mac_pkt_up(LoRaMacMessageData_t* macMsg, void* pkt)$/;"	f
 defaultMessageHandler	libmqtt/MQTTClient.h	/^   void (*defaultMessageHandler)(MessageData *);$/;"	m	struct:MQTTClient
 default_value	libttn/descriptor.pb-c.h	/^  char *default_value;$/;"	m	struct:_Google__Protobuf__FieldDescriptorProto
 delimiter	libmqtt/test/stdoutsub.c	/^   char *delimiter;$/;"	m	struct:opts_struct	file:
@@ -4636,7 +4662,6 @@ fe	fwd/src/aes.c	90;"	d	file:
 field	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FieldDescriptorProto **field;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 file	libttn/descriptor.pb-c.h	/^  Google__Protobuf__FileDescriptorProto **file;$/;"	m	struct:_Google__Protobuf__FileDescriptorSet
 filter	fwd/inc/gwcfg.h	/^    } filter;$/;"	m	struct:_server	typeref:struct:_server::__anon44
-filter_by_mac	fwd/src/mac-header-decode.c	/^int filter_by_mac(LoRaMacMessageData_t* macMsg, uint8_t fport, uint32_t devaddr, uint8_t len) {$/;"	f
 filter_e	fwd/inc/gwcfg.h	/^} filter_e;$/;"	t	typeref:enum:__anon39
 fobjs	hal/Makefile	/^fobjs = $(OBJDIR)\/loragw_hal.o $(OBJDIR)\/loragw_gps.o $(OBJDIR)\/loragw_reg.o $(OBJDIR)\/loragw_spi.native.o $(OBJDIR)\/loragw_spi.ftdi.o $(OBJDIR)\/loragw_aux.o $(OBJDIR)\/loragw_lbt.o $(OBJDIR)\/gpio.o $(OBJDIR)\/loragw_i2c.o $(OBJDIR)\/loragw_debug.o $(OBJDIR)\/tinymt32.o$/;"	m
 force_inline	fwd/inc/compiler.h	30;"	d
@@ -4745,7 +4770,7 @@ gateway_trusted	libttn/gateway.pb-c.h	/^  protobuf_c_boolean gateway_trusted;$/;
 gc_cpu_fraction	libttn/api.pb-c.h	/^  float gc_cpu_fraction;$/;"	m	struct:_Api__ComponentStats
 getLenStringLen	libmqtt/MQTTPacket.c	/^int getLenStringLen(char* ptr)$/;"	f
 getNextPacketId	libmqtt/MQTTClient.c	/^static int getNextPacketId(MQTTClient *c)$/;"	f	file:
-get_concentrator_time	fwd/src/timersync.c	/^int get_concentrator_time(struct timeval *concent_time, struct timeval unix_time) {$/;"	f
+get_concentrator_time	fwd/src/timersync.c	/^int get_concentrator_time(uint32_t* concent_time) {$/;"	f
 get_img_rej	hal/tst/test_loragw_cal.c	/^uint8_t get_img_rej(int16_t *sig_i, int16_t *sig_q, int nb_samp, double f_sig_norm) {$/;"	f
 get_quoted_string	fwd/src/parson.c	/^static char * get_quoted_string(const char **string) {$/;"	f	file:
 get_rxbw_index	hal/loragw_lbt.c	/^enum lgw_sx127x_rxbw_e get_rxbw_index(uint32_t hz) {$/;"	f
@@ -5336,11 +5361,11 @@ implicit_coderate	hal/loragw_hal.h	/^    uint8_t     implicit_coderate;         
 implicit_crc_en	hal/loragw_hal.h	/^    bool        implicit_crc_en;            \/*!> LoRa Service implicit header CRC enable *\/$/;"	m	struct:lgw_conf_rxif_s
 implicit_hdr	hal/loragw_hal.h	/^    bool        implicit_hdr;               \/*!> LoRa Service implicit header *\/$/;"	m	struct:lgw_conf_rxif_s
 implicit_payload_length	hal/loragw_hal.h	/^    uint8_t     implicit_payload_length;    \/*!> LoRa Service implicit header payload length (number of bytes, 0 for default) *\/$/;"	m	struct:lgw_conf_rxif_s
+import_devskey	fwd/src/db.c	/^int import_devskey(void *notuse, int argc, char **value, char **name)$/;"	f
 info	fwd/inc/gwcfg.h	/^    } info;$/;"	m	struct:__anon47	typeref:struct:__anon47::__anon48
 info	fwd/inc/gwcfg.h	/^    } info;$/;"	m	struct:_server	typeref:struct:_server::__anon43
 ini_func1	hal/tinymt32.c	/^static uint32_t ini_func1(uint32_t x) {$/;"	f	file:
 ini_func2	hal/tinymt32.c	/^static uint32_t ini_func2(uint32_t x) {$/;"	f	file:
-init	tools/reset_lgw.sh	/^init() {$/;"	f
 init_sock	fwd/src/service.c	/^int init_sock(const char *addr, const char *port, const void *timeout, int size) {$/;"	f
 init_statements	fwd/src/db.c	/^static int init_statements(void)$/;"	f	file:
 init_stmt	fwd/src/db.c	/^static int init_stmt(sqlite3_stmt **stmt, const char *sql, size_t len)$/;"	f	file:
@@ -5600,6 +5625,7 @@ lgw_db_gettree_by_prefix	fwd/src/db.c	/^struct lgw_db_entry *lgw_db_gettree_by_p
 lgw_db_init	fwd/src/db.c	/^int lgw_db_init(void)$/;"	f
 lgw_db_key_exist	fwd/src/db.c	/^bool lgw_db_key_exist(const char *key) {$/;"	f
 lgw_db_put	fwd/src/db.c	/^int lgw_db_put(const char *family, const char *key, const char *value)$/;"	f
+lgw_db_putpkt	fwd/src/db.c	/^int lgw_db_putpkt(char* pdtype, double freq, char* dr, uint16_t cnt, char* devaddr, char* content, char* payload)$/;"	f
 lgw_db_rollback_transaction	fwd/src/db.c	/^static int lgw_db_rollback_transaction(void)$/;"	f	file:
 lgw_debug_setconf	hal/loragw_hal.h	/^    int (*lgw_debug_setconf)(struct lgw_conf_debug_s *conf);$/;"	m	struct:lorahal_s
 lgw_debug_sx1302_setconf	hal/sx1302hal/loragw_hal_sx1302.c	/^int lgw_debug_sx1302_setconf(struct lgw_conf_debug_s * conf) {$/;"	f
@@ -5614,7 +5640,7 @@ lgw_gen_str	fwd/src/utilities.c	/^char* lgw_gen_str(char *str, int size) {$/;"	f
 lgw_get_eui	hal/loragw_hal.h	/^    int (*lgw_get_eui)(uint64_t * eui);$/;"	m	struct:lorahal_s
 lgw_get_instcnt	hal/loragw_hal.h	/^    int (*lgw_get_instcnt)(uint32_t * inst_cnt_us);$/;"	m	struct:lorahal_s
 lgw_get_sx1301_eui	hal/sx1301hal/loragw_hal_sx1301.c	/^int lgw_get_sx1301_eui(uint64_t* eui) {$/;"	f
-lgw_get_sx1301_instcnt	hal/sx1301hal/loragw_hal_sx1301.c	/^int lgw_get_sx1301_instcnt(uint32_t* inst_cnt_us) {$/;"	f
+lgw_get_sx1301_instcnt	hal/sx1301hal/loragw_hal_sx1301.c	/^int lgw_get_sx1301_instcnt(uint32_t* trig_cnt_us) {$/;"	f
 lgw_get_sx1301_temperature	hal/sx1301hal/loragw_hal_sx1301.c	/^int lgw_get_sx1301_temperature(float* temperature) {$/;"	f
 lgw_get_sx1301_trigcnt	hal/sx1301hal/loragw_hal_sx1301.c	/^int lgw_get_sx1301_trigcnt(uint32_t* trig_cnt_us) {$/;"	f
 lgw_get_sx1302_eui	hal/sx1302hal/loragw_hal_sx1302.c	/^int lgw_get_sx1302_eui(uint64_t* eui) {$/;"	f
@@ -5662,7 +5688,7 @@ lgw_receive	hal/loragw_hal.h	/^    int (*lgw_receive)(uint8_t max_pkt, struct lg
 lgw_reg_s	hal/loragw_reg.h	/^struct lgw_reg_s {$/;"	s
 lgw_register_atexit	fwd/src/fwd.c	/^int lgw_register_atexit(void (*func)(void))$/;"	f
 lgw_register_cleanup	fwd/src/fwd.c	/^int lgw_register_cleanup(void (*func)(void))$/;"	f
-lgw_regpage	hal/sx1301hal/loragw_reg_sx1301.c	/^int lgw_regpage = -1; \/*! keep the value of the register page selected *\/$/;"	v
+lgw_regpage	hal/sx1301hal/loragw_reg_sx1301.c	/^static int lgw_regpage = -1; \/*! keep the value of the register page selected *\/$/;"	v	file:
 lgw_rssi_tcomp_s	hal/loragw_hal.h	/^struct lgw_rssi_tcomp_s {$/;"	s
 lgw_run_atexits	fwd/src/fwd.c	/^static void lgw_run_atexits(int run_cleanups)$/;"	f	file:
 lgw_rxif_setconf	hal/loragw_hal.h	/^    int (*lgw_rxif_setconf)(uint8_t if_chain, struct lgw_conf_rxif_s *conf);$/;"	m	struct:lorahal_s
@@ -6039,7 +6065,7 @@ mqtt	fwd/inc/gwcfg.h	/^    mqttinfo_s *mqtt;$/;"	m	struct:__anon42
 mqtt_checkconnected	fwd/src/mqtt_serv.c	/^static int mqtt_checkconnected(mqttsession_s *session) {$/;"	f	file:
 mqtt_cleanup	fwd/src/mqtt_serv.c	/^static void mqtt_cleanup(mqttsession_s* session) {$/;"	f	file:
 mqtt_connect	fwd/src/mqtt_serv.c	/^static int mqtt_connect(serv_s *serv) {$/;"	f	file:
-mqtt_disconnect	fwd/src/mqtt_serv.c	/^static void mqtt_disconnect(mqttsession_s *session) {$/;"	f	file:
+mqtt_disconnect	fwd/src/mqtt_serv.c	/^static void mqtt_disconnect(serv_s* serv) {$/;"	f	file:
 mqtt_dnlink_cb	fwd/src/mqtt_serv.c	/^static void mqtt_dnlink_cb(struct MessageData *data, void* s) {$/;"	f	file:
 mqtt_getrtt	fwd/src/mqtt_serv.c	/^static long mqtt_getrtt(mqttsession_s *session) {$/;"	f	file:
 mqtt_init	fwd/src/mqtt_serv.c	/^static void mqtt_init(serv_s* serv){$/;"	f	file:
@@ -6288,7 +6314,6 @@ printBuffer	fwd/src/ghost.c	/^static void printBuffer(uint8_t * b, uint8_t len) 
 printRX	fwd/src/ghost.c	/^static void printRX(struct lgw_pkt_rx_s *p) {$/;"	f	file:
 print_downlink	libttn/test/test.c	/^void print_downlink(Router__DownlinkMessage *msg, void *arg) {$/;"	f
 print_tx_status	fwd/src/fwd.c	/^void print_tx_status(uint8_t tx_status) {$/;"	f
-printf_mac_header	fwd/src/mac-header-decode.c	/^void printf_mac_header( LoRaMacMessageData_t* macMsg )$/;"	f
 prlen	hal/lg02hal/loragw_hal_lg02.h	/^    uint8_t prlen;$/;"	m	struct:__anon20
 process_string	fwd/src/parson.c	/^static char* process_string(const char *input, size_t len) {$/;"	f	file:
 protocol__activation_metadata__descriptor	libttn/protocol.pb-c.c	/^const ProtobufCMessageDescriptor protocol__activation_metadata__descriptor =$/;"	v
@@ -6407,7 +6432,6 @@ report_s	fwd/inc/stats.h	/^} report_s;$/;"	t	typeref:struct:__anon60
 report_start	fwd/src/stats.c	/^void report_start() {$/;"	f
 reserved_name	libttn/descriptor.pb-c.h	/^  char **reserved_name;$/;"	m	struct:_Google__Protobuf__DescriptorProto
 reserved_range	libttn/descriptor.pb-c.h	/^  Google__Protobuf__DescriptorProto__ReservedRange **reserved_range;$/;"	m	struct:_Google__Protobuf__DescriptorProto
-reset	tools/reset_lgw.sh	/^reset() {$/;"	f
 reset_sx127x	hal/lg02hal/loragw_sx127x_radio.c	/^int reset_sx127x(bool isftdi, int invert) {$/;"	f
 retain	libmqtt/MQTTPacket.h	/^		unsigned int retain : 1;		\/**< retained flag bit *\/$/;"	m	struct:__anon29::__anon30
 retain	libmqtt/MQTTPacket.h	/^		unsigned int retain : 1;		\/**< retained flag bit *\/$/;"	m	struct:__anon29::__anon31
@@ -6616,6 +6640,7 @@ sCtrlBits	fwd/inc/mac-header-decode.h	/^    struct sCtrlBits$/;"	s	union:uLoRaMa
 sDLSettingsBits	fwd/inc/mac-header-decode.h	/^    struct sDLSettingsBits$/;"	s	union:uLoRaMacDLSettings
 sLoRaMacFrameHeader	fwd/inc/mac-header-decode.h	/^typedef struct sLoRaMacFrameHeader$/;"	s
 sLoRaMacMessageData	fwd/inc/mac-header-decode.h	/^typedef struct sLoRaMacMessageData$/;"	s
+sLoRaMacMessageJoinAccept	fwd/inc/mac-header-decode.h	/^typedef struct sLoRaMacMessageJoinAccept$/;"	s
 sMacHeaderBits	fwd/inc/mac-header-decode.h	/^    struct sMacHeaderBits$/;"	s	union:uLoRaMacHeader
 s_box	fwd/src/aes.c	207;"	d	file:
 s_box	fwd/src/aes.c	290;"	d	file:
@@ -6812,7 +6837,7 @@ sx1302_tx_set_start_delay	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_tx_set_star
 sx1302_tx_status	hal/sx1302hal/loragw_sx1302.c	/^uint8_t sx1302_tx_status(uint8_t rf_chain) {$/;"	f
 sx1302_update	hal/sx1302hal/loragw_sx1302.c	/^int sx1302_update(void) {$/;"	f
 sx1302objs	hal/Makefile	/^sx1302objs = $(OBJDIR)\/loragw_hal_sx1302.o $(OBJDIR)\/loragw_reg_sx1302.o $(OBJDIR)\/loragw_sx1250.o $(OBJDIR)\/loragw_sx125x.o $(OBJDIR)\/loragw_sx1302.o $(OBJDIR)\/loragw_cal.o $(OBJDIR)\/loragw_hal.o $(OBJDIR)\/loragw_stts751.o $(OBJDIR)\/loragw_sx1302_timestamp.o $(OBJDIR)\/loragw_sx1302_rx.o$/;"	m
-sxcfg	fwd/inc/gwcfg.h	/^    char sxcfg[48];$/;"	m	struct:__anon40
+sxcfg	fwd/inc/gwcfg.h	/^    char sxcfg[32];$/;"	m	struct:__anon40
 sync_error	hal/sx1302hal/loragw_sx1302_rx.h	/^    bool        sync_error;                 \/* LoRa only *\/$/;"	m	struct:rx_packet_s
 sync_word	hal/loragw_hal.h	/^    uint64_t    sync_word;      \/*!> FSK sync word (ALIGN RIGHT, eg. 0xC194C1) *\/$/;"	m	struct:lgw_conf_rxif_s
 sync_word_size	hal/loragw_hal.h	/^    uint8_t     sync_word_size; \/*!> size of FSK sync word (number of bytes, 0 for default) *\/$/;"	m	struct:lgw_conf_rxif_s
@@ -6827,7 +6852,6 @@ t	libmqtt/MQTTLinux.h	/^   pthread_t t;$/;"	m	struct:Thread
 t_down	fwd/inc/gwcfg.h	/^        pthread_t t_down;			\/\/ semtech down thread$/;"	m	struct:_server::__anon46
 t_up	fwd/inc/gwcfg.h	/^        pthread_t t_up;				\/\/ upstream thread$/;"	m	struct:_server::__anon46
 temperature	libttn/gateway.pb-c.h	/^  float temperature;$/;"	m	struct:_Gateway__Status__OSMetrics
-term	tools/reset_lgw.sh	/^term() {$/;"	f
 test_amp_phi	hal/test/test_loragw_cal.c	/^int test_amp_phi(uint8_t rf_chain, uint8_t f_offset, bool full_log, bool use_agc) {$/;"	f
 test_capture_ram	hal/test/test_loragw_cal.c	/^int test_capture_ram(uint8_t rf_chain) {$/;"	f
 test_freq_scan	hal/test/test_loragw_cal.c	/^int test_freq_scan(uint8_t rf_chain, bool full_log, bool use_agc) {$/;"	f

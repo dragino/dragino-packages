@@ -179,15 +179,15 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, uint32_t time_us, struct
     enum jit_error_e err_collision;
     uint32_t asap_count_us;
 
-    lgw_log(LOG_JIT, "Current concentrator time is %u, pkt_type=%d\n", time_us, pkt_type);
+    lgw_log(LOG_JIT, "Current concentrator time is %u, pkt_count=%u, pkt_type=%d\n", time_us, packet->count_us, pkt_type);
 
     if (packet == NULL) {
-        lgw_log(LOG_JIT_ERROR, "ERROR: invalid parameter\n");
+        lgw_log(LOG_JIT_ERROR, "ERROR~ [JIT] invalid parameter\n");
         return JIT_ERROR_INVALID;
     }
 
     if (jit_queue_is_full(queue)) {
-        lgw_log(LOG_JIT_ERROR, "ERROR: cannot enqueue packet, JIT queue is full\n");
+        lgw_log(LOG_JIT_ERROR, "ERROR~ [JIT] cannot enqueue packet, JIT queue is full\n");
         return JIT_ERROR_FULL;
     }
 
@@ -268,11 +268,11 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, uint32_t time_us, struct
      *  Note: - Also add some margin, to be checked how much is needed, if needed
      *        - Valid for both Downlinks and Beacon packets
      *
-     *  Warning: unsigned arithmetic (handle roll-over)
+     *  WARNING~ [JIT] unsigned arithmetic (handle roll-over)
      *      t_packet < t_current + TX_START_DELAY + MARGIN
      */
     if ((packet->count_us - time_us) <= (TX_START_DELAY + TX_MARGIN_DELAY + TX_JIT_DELAY)) {
-        lgw_log(LOG_JIT_ERROR, "ERROR: Packet REJECTED, already too late to send it (current=%u, packet=%u, type=%d)\n", time_us, packet->count_us, pkt_type);
+        lgw_log(LOG_JIT_ERROR, "ERROR~ [JIT] Packet REJECTED, already too late to send it (current=%u, packet=%u, type=%d)\n", time_us, packet->count_us, pkt_type);
         pthread_mutex_unlock(&mx_jit_queue);
         return JIT_ERROR_TOO_LATE;
     }
@@ -285,12 +285,12 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, uint32_t time_us, struct
      *  So let's define a safe delay above which we can say that the packet is out of bound: TX_MAX_ADVANCE_DELAY
      *  Note: - Valid for Downlinks only, not for Beacon packets
      *
-     *  Warning: unsigned arithmetic (handle roll-over)
+     *  WARNING~ [JIT] unsigned arithmetic (handle roll-over)
                 t_packet > t_current + TX_MAX_ADVANCE_DELAY
      */
     if ((pkt_type == JIT_PKT_TYPE_DOWNLINK_CLASS_A) || (pkt_type == JIT_PKT_TYPE_DOWNLINK_CLASS_B)) {
         if ((packet->count_us - time_us) > TX_MAX_ADVANCE_DELAY) {
-            lgw_log(LOG_JIT_ERROR, "ERROR: Packet REJECTED, timestamp seems wrong, too much in advance (current=%u, packet=%u, type=%d)\n", time_us, packet->count_us, pkt_type);
+            lgw_log(LOG_JIT_ERROR, "ERROR~ [JIT] Packet REJECTED, timestamp seems wrong, too much in advance (current=%u, packet=%u, type=%d)\n", time_us, packet->count_us, pkt_type);
             pthread_mutex_unlock(&mx_jit_queue);
             return JIT_ERROR_TOO_EARLY;
         }
@@ -310,7 +310,7 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, uint32_t time_us, struct
         }
 
         /* Check if there is a collision
-         *  Warning: unsigned arithmetic (handle roll-over)
+         *  WARNING~ [JIT] unsigned arithmetic (handle roll-over)
          *      t_packet_new - pre_delay_packet_new < t_packet_prev + post_delay_packet_prev (OVERLAP on post delay)
          *      t_packet_new + post_delay_packet_new > t_packet_prev - pre_delay_packet_prev (OVERLAP on pre delay)
          */
@@ -319,18 +319,18 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, uint32_t time_us, struct
                 case JIT_PKT_TYPE_DOWNLINK_CLASS_A:
                 case JIT_PKT_TYPE_DOWNLINK_CLASS_B:
                 case JIT_PKT_TYPE_DOWNLINK_CLASS_C:
-                    lgw_log(LOG_JIT_ERROR, "ERROR: Packet (type=%d) REJECTED, collision with packet already programmed at %u (%u)\n", pkt_type, queue->nodes[i].pkt.count_us, packet->count_us);
+                    lgw_log(LOG_JIT_ERROR, "ERROR~ [JIT] Packet (type=%d) REJECTED, collision with packet already programmed at %u (%u)\n", pkt_type, queue->nodes[i].pkt.count_us, packet->count_us);
                     err_collision = JIT_ERROR_COLLISION_PACKET;
                     break;
                 case JIT_PKT_TYPE_BEACON:
                     if (pkt_type != JIT_PKT_TYPE_BEACON) {
                         /* do not overload logs for beacon/beacon collision, as it is expected to happen with beacon pre-scheduling algorith used */
-                        lgw_log(LOG_JIT_ERROR, "ERROR: Packet (type=%d) REJECTED, collision with beacon already programmed at %u (%u)\n", pkt_type, queue->nodes[i].pkt.count_us, packet->count_us);
+                        lgw_log(LOG_JIT_ERROR, "ERROR~ [JIT] Packet (type=%d) REJECTED, collision with beacon already programmed at %u (%u)\n", pkt_type, queue->nodes[i].pkt.count_us, packet->count_us);
                     }
                     err_collision = JIT_ERROR_COLLISION_BEACON;
                     break;
                 default:
-                    MSG("ERROR: Unknown packet type, should not occur, BUG?\n");
+                    MSG("ERROR~ [JIT] Unknown packet type, should not occur, BUG?\n");
                     assert(0);
                     break;
             }
@@ -364,17 +364,17 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, uint32_t time_us, struct
 
 enum jit_error_e jit_dequeue(struct jit_queue_s *queue, int index, struct lgw_pkt_tx_s *packet, enum jit_pkt_type_e *pkt_type) {
     if (packet == NULL) {
-        MSG("ERROR: invalid parameter\n");
+        MSG("ERROR~ [JIT] invalid parameter\n");
         return JIT_ERROR_INVALID;
     }
 
     if ((index < 0) || (index >= JIT_QUEUE_MAX)) {
-        MSG("ERROR: invalid parameter\n");
+        MSG("ERROR~ [JIT] invalid parameter\n");
         return JIT_ERROR_INVALID;
     }
 
     if (jit_queue_is_empty(queue)) {
-        MSG("ERROR: cannot dequeue packet, JIT queue is empty\n");
+        MSG("ERROR~ [JIT] cannot dequeue packet, JIT queue is empty\n");
         return JIT_ERROR_EMPTY;
     }
 
@@ -411,7 +411,7 @@ enum jit_error_e jit_peek(struct jit_queue_s *queue, uint32_t time_us, int *pkt_
     int i = 0;
     int idx_highest_priority = -1;
     if (pkt_idx == NULL) {
-        MSG("ERROR: invalid parameter\n");
+        MSG("ERROR~ [JIT] invalid parameter\n");
         return JIT_ERROR_INVALID;
     }
 
@@ -427,7 +427,7 @@ enum jit_error_e jit_peek(struct jit_queue_s *queue, uint32_t time_us, int *pkt_
          *  If a packet seems too much in advance, and was not rejected at enqueue time,
          *  it means that we missed it for peeking, we need to drop it
          *
-         *  Warning: unsigned arithmetic
+         *  WARNING~ [JIT] unsigned arithmetic
          *      t_packet > t_current + TX_MAX_ADVANCE_DELAY
          */
         if ((queue->nodes[i].pkt.count_us - time_us) >= TX_MAX_ADVANCE_DELAY) {
@@ -435,9 +435,9 @@ enum jit_error_e jit_peek(struct jit_queue_s *queue, uint32_t time_us, int *pkt_
             queue->num_pkt--;
             if (queue->nodes[i].pkt_type == JIT_PKT_TYPE_BEACON) {
                 queue->num_beacon--;
-                MSG("WARNING: --- Beacon dropped (current_time=%u, packet_time=%u) ---\n", time_us, queue->nodes[i].pkt.count_us);
+                MSG("WARNING~ [JIT] --- Beacon dropped (current_time=%u, packet_time=%u) ---\n", time_us, queue->nodes[i].pkt.count_us);
             } else {
-                MSG("WARNING: --- Packet dropped (current_time=%u, packet_time=%u) ---\n", time_us, queue->nodes[i].pkt.count_us);
+                MSG("WARNING~ [JIT] --- Packet dropped (current_time=%u, packet_time=%u) ---\n", time_us, queue->nodes[i].pkt.count_us);
             }
 
             /* Replace dropped packet with last packet of the queue */
@@ -453,7 +453,7 @@ enum jit_error_e jit_peek(struct jit_queue_s *queue, uint32_t time_us, int *pkt_
         }
 
         /* Then look for highest priority packet to be sent:
-         *  Warning: unsigned arithmetic (handle roll-over)
+         *  WARNING~ [JIT] unsigned arithmetic (handle roll-over)
          *      t_packet < t_highest
          */
         if ((idx_highest_priority == -1) || (((queue->nodes[i].pkt.count_us - time_us) < (queue->nodes[idx_highest_priority].pkt.count_us - time_us)))) {
@@ -462,7 +462,7 @@ enum jit_error_e jit_peek(struct jit_queue_s *queue, uint32_t time_us, int *pkt_
     }
 
     /* Peek criteria 1: look for a packet to be sent in next TX_JIT_DELAY ms timeframe
-     *  Warning: unsigned arithmetic (handle roll-over)
+     *  WARNING~ [JIT] unsigned arithmetic (handle roll-over)
      *      t_packet < t_current + TX_JIT_DELAY
      */
     if ((queue->nodes[idx_highest_priority].pkt.count_us - time_us) < TX_JIT_DELAY) {
@@ -483,15 +483,15 @@ void jit_print_queue(struct jit_queue_s *queue, bool show_all, int debug_level) 
     int loop_end;
 
     if (jit_queue_is_empty(queue)) {
-        lgw_log(debug_level, "INFO: [jit] queue is empty\n");
+        lgw_log(debug_level, "INFO~ [JIT] [jit] queue is empty\n");
     } else {
         pthread_mutex_lock(&mx_jit_queue);
 
-        lgw_log(debug_level, "INFO: [jit] queue contains %d packets:\n", queue->num_pkt);
-        lgw_log(debug_level, "INFO: [jit] queue contains %d beacons:\n", queue->num_beacon);
+        lgw_log(debug_level, "INFO~ [JIT] [jit] queue contains %d packets:\n", queue->num_pkt);
+        lgw_log(debug_level, "INFO~ [JIT] [jit] queue contains %d beacons:\n", queue->num_beacon);
         loop_end = (show_all == true) ? JIT_QUEUE_MAX : queue->num_pkt;
         for (i=0; i<loop_end; i++) {
-            lgw_log(debug_level, " - node[%d]: count_us=%u - type=%d\n",
+            lgw_log(debug_level, " - node[%d]: count_us=%u, type=%d\n",
                         i,
                         queue->nodes[i].pkt.count_us,
                         queue->nodes[i].pkt_type);

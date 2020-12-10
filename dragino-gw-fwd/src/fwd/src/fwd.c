@@ -80,8 +80,8 @@ volatile bool quit_sig = false;	/* 1 -> application terminates without shutting 
 uint8_t LOG_PKT = 1;
 uint8_t LOG_TIMERSYNC = 0;
 uint8_t LOG_REPORT = 1;
-uint8_t LOG_JIT = 0;
-uint8_t LOG_JIT_ERROR = 0;
+uint8_t LOG_JIT = 1;
+uint8_t LOG_JIT_ERROR = 1;
 uint8_t LOG_BEACON = 0;
 uint8_t LOG_INFO = 1;
 uint8_t LOG_DEBUG = 0;
@@ -214,7 +214,6 @@ void stop_clean_service(void) {
     LGW_LIST_TRAVERSE_SAFE_BEGIN(&GW.serv_list, serv_entry, list) {
         LGW_LIST_REMOVE_CURRENT(list);
         GW.serv_list.size--;
-        sem_destroy(&serv_entry->thread.sema);
         if (NULL != serv_entry->net) {
             if (NULL != serv_entry->net->mqtt)
                 lgw_free(serv_entry->net->mqtt);
@@ -222,8 +221,10 @@ void stop_clean_service(void) {
         }
         if (NULL != serv_entry->report)
             lgw_free(serv_entry->report);
-        if (NULL != serv_entry)
+        if (NULL != serv_entry) {
+            sem_destroy(&serv_entry->thread.sema);
             lgw_free(serv_entry);
+        }
     }
     LGW_LIST_TRAVERSE_SAFE_END;
 }
@@ -520,7 +521,7 @@ int main(int argc, char *argv[]) {
         HAL.lgw_status = lgw_sx1301_status;
         HAL.lgw_abort_tx = lgw_abort_sx1301_tx;
         HAL.lgw_get_trigcnt = lgw_get_sx1301_trigcnt;
-        HAL.lgw_get_instcnt = lgw_get_sx1301_instcnt;
+        HAL.lgw_get_instcnt = get_concentrator_time;
         HAL.lgw_get_eui = lgw_get_sx1301_eui;
         HAL.lgw_get_temperature = lgw_get_sx1301_temperature;
     }
@@ -630,6 +631,14 @@ int main(int argc, char *argv[]) {
     jit_queue_init(&GW.tx.jit_queue[0]);
     jit_queue_init(&GW.tx.jit_queue[1]);
 
+	// Timer synchronization needed for downstream ...
+    if (!strncasecmp(GW.hal.board, "sx1301", 6)) {   
+        if (lgw_pthread_create(&thrid_timersync, NULL, (void *(*)(void *))thread_timersync, NULL))
+            lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create Timer Sync thread\n");
+        else
+            lgw_db_put("thread", "thread_timersync", "running");
+    }
+
     if (lgw_pthread_create(&thrid_jit, NULL, (void *(*)(void *))thread_jit, NULL))
         lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create JIT thread\n");
     else
@@ -638,11 +647,6 @@ int main(int argc, char *argv[]) {
 
 	/* spawn thread to manage GPS */
 	if (GW.gps.gps_enabled == true) {
-	    // Timer synchronization needed for downstream ...
-		if (lgw_pthread_create(&thrid_timersync, NULL, (void *(*)(void *))thread_timersync, NULL))
-			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create Timer Sync thread\n");
-        else
-            lgw_db_put("thread", "thread_timersync", "running");
 		if (lgw_pthread_create(&thrid_gps, NULL, (void *(*)(void *))thread_gps, NULL))
 			lgw_log(LOG_ERROR, "ERROR~ [main] impossible to create GPS thread\n");
         else
@@ -705,16 +709,21 @@ int main(int argc, char *argv[]) {
 	pthread_join(thrid_up, NULL);	    /* don't wait for up thread */
 
 	if (GW.gps.gps_enabled == true) {
-		pthread_cancel(thrid_timersync);	/* don't wait for timer sync thread */
 		pthread_cancel(thrid_gps);	        /* don't wait for GPS thread */
 		pthread_cancel(thrid_valid);	    /* don't wait for validation thread */
 	}
+
+    if (!strncasecmp(GW.hal.board, "sx1301", 6)) {   
+		pthread_cancel(thrid_timersync);	/* don't wait for timer sync thread */
+    }
 
 	//if (GW.cfg.ghoststream_enabled == true) {
     //    ghost_stop();
     //}
 
     stop_clean_service();
+
+    printf("STOPpppppppppppppppp\n");
 
     lgw_run_atexits(1);
 
@@ -760,17 +769,35 @@ static void thread_up(void) {
 	while (!exit_sig && !quit_sig) {
 
 		/* fetch packets */
-		pthread_mutex_lock(&GW.hal.mx_concent);
 
-		if (GW.cfg.radiostream_enabled == true)
+		if (GW.cfg.radiostream_enabled == true) {
+		    pthread_mutex_lock(&GW.hal.mx_concent);
 			nb_pkt = HAL.lgw_receive(NB_PKT_MAX, rxpkt);
-		else
+		    pthread_mutex_unlock(&GW.hal.mx_concent);
+        } else
 			nb_pkt = 0;
 
-		pthread_mutex_unlock(&GW.hal.mx_concent);
-
 		if (nb_pkt == LGW_HAL_ERROR) {
-			lgw_log(LOG_ERROR, "ERROR~ [main-up] Failed packet fetch, continue\n");
+			lgw_log(LOG_ERROR, "ERROR~ [main-up] HAL receive failed, try restart HAL\n");
+			if (HAL.lgw_stop() == LGW_HAL_SUCCESS) {
+                if (system("/usr/bin/reset_lgw.sh stop") != 0) {
+                    lgw_log(LOG_ERROR, "ERROR~ [main-up] restart HAL failed!\n");
+                    GW.cfg.radiostream_enabled = false;
+                    lgw_log(LOG_WARNING, "WARNING~ [main-up] close radiostream!\n");
+                } else if (system("/usr/bin/reset_lgw.sh start") != 0) { 
+                    lgw_log(LOG_ERROR, "ERROR~ [main-up] restart HAL failed!\n");
+                    GW.cfg.radiostream_enabled = false;
+                    lgw_log(LOG_WARNING, "WARNING~ [main-up] close radiostream!\n");
+                } else if (HAL.lgw_start() != LGW_HAL_SUCCESS) {
+                    lgw_log(LOG_ERROR, "ERROR~ [main-up] restart HAL failed!\n");
+                    GW.cfg.radiostream_enabled = false;
+                    lgw_log(LOG_WARNING, "WARNING~ [main-up] close radiostream!\n");
+                } else 
+                    lgw_log(LOG_INFO, "INFO~ [main-up] restar radio HAL successful!\n");
+			} else {
+				lgw_log(LOG_WARNING, "WARNING~ [main-up] failed to restart HAL\n");
+                GW.cfg.radiostream_enabled = false;
+			}
             nb_pkt = 0;
 			//exit(EXIT_FAILURE);
 		}
@@ -860,9 +887,12 @@ static void thread_jit(void) {
 
         for (i = 0; i < LGW_RF_CHAIN_NB; i++) {
             /* transfer data and metadata to the concentrator, and schedule TX */
-            pthread_mutex_lock(&GW.hal.mx_concent);
-            HAL.lgw_get_instcnt(&current_concentrator_time);
-            pthread_mutex_unlock(&GW.hal.mx_concent);
+            if (!strncasecmp(GW.hal.board, "sx1302", 6)) {
+                pthread_mutex_lock(&GW.hal.mx_concent);
+                HAL.lgw_get_instcnt(&current_concentrator_time);
+                pthread_mutex_unlock(&GW.hal.mx_concent);
+            } else
+                HAL.lgw_get_instcnt(&current_concentrator_time);
             jit_result = jit_peek(&GW.tx.jit_queue[i], current_concentrator_time, &pkt_index);
             if (jit_result == JIT_ERROR_OK) {
                 if (pkt_index > -1) {
@@ -916,7 +946,7 @@ static void thread_jit(void) {
                             pthread_mutex_lock(&GW.log.mx_report);
                             GW.log.stat_dw.meas_nb_tx_ok += 1;
                             pthread_mutex_unlock(&GW.log.mx_report);
-                            lgw_log(LOG_INFO, "INFO~ [JIT] lgw_send done on rf_chain %d: count_us=%u\n", i, pkt.count_us);
+                            lgw_log(LOG_INFO, "INFO~ [JIT] send done on rf_chain %d in count_us=%u with freq=%u\n", i, pkt.count_us, pkt.freq_hz);
                         }
                     } else {
                         lgw_log(LOG_ERROR, "ERROR~ [JIT] jit_dequeue failed on rf_chain %d with %d\n", i, jit_result);

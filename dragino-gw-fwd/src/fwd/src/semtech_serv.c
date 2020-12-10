@@ -905,9 +905,12 @@ static void semtech_pull_down(void* arg) {
                     beacon_pkt.payload[beacon_pyld_idx++] = 0xFF & (field_crc1 >> 8);
 
                     /* Insert beacon packet in JiT queue */
-                    pthread_mutex_lock(&GW.hal.mx_concent);
-                    HAL.lgw_get_instcnt(&current_concentrator_time);
-                    pthread_mutex_unlock(&GW.hal.mx_concent);
+                    if (!strncasecmp(GW.hal.board, "sx1302", 6)) {
+                        pthread_mutex_lock(&GW.hal.mx_concent);
+                        HAL.lgw_get_instcnt(&current_concentrator_time);
+                        pthread_mutex_unlock(&GW.hal.mx_concent);
+                    } else
+                        HAL.lgw_get_instcnt(&current_concentrator_time);
                     jit_result = jit_enqueue(&GW.tx.jit_queue[0], current_concentrator_time, &beacon_pkt, JIT_PKT_TYPE_BEACON);
                     if (jit_result == JIT_ERROR_OK) {
                         /* update stats */
@@ -982,7 +985,7 @@ static void semtech_pull_down(void* arg) {
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
             //lgw_log(LOG_INFO, "INFO~ [%s-down] PULL_RESP received  - token[%d:%d] :)\n", serv->info.name, buff_down[1], buff_down[2]); /* very verbose */
-            lgw_log(LOG_PKT, "\nPKT~ %s JSON down: %s\n", serv->info.name, (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+            lgw_log(LOG_PKT, "\nPKT~ [%s-down] %s\n", serv->info.name, (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 
             /* initialize TX struct and try to parse JSON */
             memset(&txpkt, 0, sizeof txpkt);
@@ -1269,6 +1272,11 @@ static void semtech_pull_down(void* arg) {
             jit_result = warning_result = JIT_ERROR_OK;
             warning_value = 0;
 
+           if (txpkt.rf_chain >= LGW_RF_CHAIN_NB || txpkt.rf_chain < 0) {
+               lgw_log(LOG_INFO, "[%s] INFO~ (%u)txpkt's rfchain(%d) error!\n", serv->info.name, txpkt.count_us, txpkt.rf_chain);
+               continue;
+           }
+
             /* check TX frequency before trying to queue packet */
             if ((txpkt.freq_hz < GW.tx.tx_freq_min[txpkt.rf_chain]) || (txpkt.freq_hz > GW.tx.tx_freq_max[txpkt.rf_chain])) {
                 jit_result = JIT_ERROR_TX_FREQ;
@@ -1282,20 +1290,24 @@ static void semtech_pull_down(void* arg) {
                     /* this RF power is not supported, throw a warning, and use the closest lower power supported */
                     warning_result = JIT_ERROR_TX_POWER;
                     warning_value = (int32_t)GW.tx.txlut[txpkt.rf_chain].lut[tx_lut_idx].rf_power;
-                    printf("WARNING~ Requested TX power is not supported (%ddBm), actual power used: %ddBm\n", txpkt.rf_power, warning_value);
+                    lgw_log(LOG_WARNING, "[%s-down] WARNING~ Requested TX power is not supported (%ddBm), actual power used: %ddBm\n", serv->info.name, txpkt.rf_power, warning_value);
                     txpkt.rf_power = GW.tx.txlut[txpkt.rf_chain].lut[tx_lut_idx].rf_power;
                 }
             }
 
             /* insert packet to be sent into JIT queue */
             if (jit_result == JIT_ERROR_OK) {
-                pthread_mutex_lock(&GW.hal.mx_concent);
-                HAL.lgw_get_instcnt(&current_concentrator_time);
-                pthread_mutex_unlock(&GW.hal.mx_concent);
+                if (!strncasecmp(GW.hal.board, "sx1302", 6)) {
+                    pthread_mutex_lock(&GW.hal.mx_concent);
+                    HAL.lgw_get_instcnt(&current_concentrator_time);
+                    pthread_mutex_unlock(&GW.hal.mx_concent);
+                } else 
+                    HAL.lgw_get_instcnt(&current_concentrator_time);
                 jit_result = jit_enqueue(&GW.tx.jit_queue[txpkt.rf_chain], current_concentrator_time, &txpkt, downlink_type);
                 if (jit_result != JIT_ERROR_OK) {
-                    printf("ERROR~ Packet REJECTED (jit error=%d)\n", jit_result);
+                    lgw_log(LOG_ERROR, "ERROR~ [%s-down] Packet REJECTED (jit error=%d)\n", serv->info.name, jit_result);
                 } else {
+                    lgw_log(LOG_INFO, "INFO~ [%s-down] %u:A packet enqueue\n", serv->info.name, txpkt.count_us);
                     /* In case of a warning having been raised before, we notify it */
                     jit_result = warning_result;
                 }

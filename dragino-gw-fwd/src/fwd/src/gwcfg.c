@@ -63,17 +63,17 @@ static int parse_SX130x_configuration(const char* conf_file) {
     /* try to parse JSON */
     root_val = json_parse_file_with_comments(conf_file);
     if (root_val == NULL) {
-        lgw_log(LOG_INFO, "ERROR: %s is not a valid JSON file\n", conf_file);
+        lgw_log(LOG_INFO, "ERROR~ [LoadCfg] %s is not a valid JSON file\n", conf_file);
         return -1;
     }
 
     /* point to the gateway configuration object */
     conf_obj = json_object_get_object(json_value_get_object(root_val), conf_obj_name);
     if (conf_obj == NULL) {
-        lgw_log(LOG_INFO, "INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
         return -1;
     } else {
-        lgw_log(LOG_INFO, "INFO: %s does contain a JSON object named %s, parsing SX130x parameters\n", conf_file, conf_obj_name);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] %s does contain a JSON object named %s, parsing SX130x parameters\n", conf_file, conf_obj_name);
     }
 
     /* set board configuration */
@@ -83,7 +83,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
         strncpy(boardconf.spidev_path, str, sizeof boardconf.spidev_path);
         boardconf.spidev_path[sizeof boardconf.spidev_path - 1] = '\0'; /* ensure string termination */
     } else {
-        lgw_log(LOG_INFO, "ERROR: spidev path must be configured in %s\n", conf_file);
+        lgw_log(LOG_INFO, "ERROR~ [LoadCfg] spidev path must be configured in %s\n", conf_file);
         return -1;
     }
 
@@ -91,27 +91,27 @@ static int parse_SX130x_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         boardconf.lorawan_public = (bool)json_value_get_boolean(val);
     } else {
-        lgw_log(LOG_INFO, "WARNING: Data type for lorawan_public seems wrong, please check\n");
+        lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for lorawan_public seems wrong, please check\n");
         boardconf.lorawan_public = false;
     }
     val = json_object_get_value(conf_obj, "clksrc"); /* fetch value (if possible) */
     if (json_value_get_type(val) == JSONNumber) {
         boardconf.clksrc = (uint8_t)json_value_get_number(val);
     } else {
-        lgw_log(LOG_INFO, "WARNING: Data type for clksrc seems wrong, please check\n");
+        lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for clksrc seems wrong, please check\n");
         boardconf.clksrc = 0;
     }
     val = json_object_get_value(conf_obj, "full_duplex"); /* fetch value (if possible) */
     if (json_value_get_type(val) == JSONBoolean) {
         boardconf.full_duplex = (bool)json_value_get_boolean(val);
     } else {
-        lgw_log(LOG_INFO, "WARNING: Data type for full_duplex seems wrong, please check\n");
+        lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for full_duplex seems wrong, please check\n");
         boardconf.full_duplex = false;
     }
-    lgw_log(LOG_INFO, "INFO: spidev_path %s, lorawan_public %d, clksrc %d, full_duplex %d\n", boardconf.spidev_path, boardconf.lorawan_public, boardconf.clksrc, boardconf.full_duplex);
+    lgw_log(LOG_INFO, "INFO~ [LoadCfg] spidev_path %s, lorawan_public %d, clksrc %d, full_duplex %d\n", boardconf.spidev_path, boardconf.lorawan_public, boardconf.clksrc, boardconf.full_duplex);
     /* all parameters parsed, submitting configuration to the HAL */
     if (HAL.lgw_board_setconf(&boardconf) != LGW_HAL_SUCCESS) {
-        lgw_log(LOG_INFO, "ERROR: Failed to configure board\n");
+        lgw_log(LOG_INFO, "ERROR~ [LoadCfg] Failed to configure board\n");
         return -1;
     }
 
@@ -121,22 +121,22 @@ static int parse_SX130x_configuration(const char* conf_file) {
         if (json_value_get_type(val) == JSONNumber) {
             GW.hal.antenna_gain = (int8_t)json_value_get_number(val);
         } else {
-            lgw_log(LOG_INFO, "WARNING: Data type for antenna_gain seems wrong, please check\n");
+            lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for antenna_gain seems wrong, please check\n");
             GW.hal.antenna_gain = 0;
         }
     }
-    lgw_log(LOG_INFO, "INFO: antenna_gain %d dBi\n", GW.hal.antenna_gain);
+    lgw_log(LOG_INFO, "INFO~ [LoadCfg] antenna_gain %d dBi\n", GW.hal.antenna_gain);
 
     /* set timestamp configuration */
     conf_ts_obj = json_object_get_object(conf_obj, "precision_timestamp");
     if (conf_ts_obj == NULL) {
-        lgw_log(LOG_INFO, "INFO: %s does not contain a JSON object for precision timestamp\n", conf_file);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] %s does not contain a JSON object for precision timestamp\n", conf_file);
     } else {
         val = json_object_get_value(conf_ts_obj, "enable"); /* fetch value (if possible) */
         if (json_value_get_type(val) == JSONBoolean) {
             tsconf.enable_precision_ts = (bool)json_value_get_boolean(val);
         } else {
-            lgw_log(LOG_INFO, "WARNING: Data type for precision_timestamp.enable seems wrong, please check\n");
+            lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for precision_timestamp.enable seems wrong, please check\n");
             tsconf.enable_precision_ts = false;
         }
         if (tsconf.enable_precision_ts == true) {
@@ -144,25 +144,25 @@ static int parse_SX130x_configuration(const char* conf_file) {
             if (json_value_get_type(val) == JSONNumber) {
                 tsconf.max_ts_metrics = (uint8_t)json_value_get_number(val);
             } else {
-                lgw_log(LOG_INFO, "WARNING: Data type for precision_timestamp.max_ts_metrics seems wrong, please check\n");
+                lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for precision_timestamp.max_ts_metrics seems wrong, please check\n");
                 tsconf.max_ts_metrics = 0xFF;
             }
             val = json_object_get_value(conf_ts_obj, "nb_symbols"); /* fetch value (if possible) */
             if (json_value_get_type(val) == JSONNumber) {
                 tsconf.nb_symbols = (uint8_t)json_value_get_number(val);
             } else {
-                lgw_log(LOG_INFO, "WARNING: Data type for precision_timestamp.nb_symbols seems wrong, please check\n");
+                lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for precision_timestamp.nb_symbols seems wrong, please check\n");
                 tsconf.nb_symbols = 1;
             }
-            lgw_log(LOG_INFO, "INFO: Configuring precision timestamp: max_ts_metrics:%u, nb_symbols:%u\n", tsconf.max_ts_metrics, tsconf.nb_symbols);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Configuring precision timestamp: max_ts_metrics:%u, nb_symbols:%u\n", tsconf.max_ts_metrics, tsconf.nb_symbols);
 
             /* all parameters parsed, submitting configuration to the HAL */
             if (HAL.lgw_timestamp_setconf(&tsconf) != LGW_HAL_SUCCESS) {
-                lgw_log(LOG_INFO, "ERROR: Failed to configure precision timestamp\n");
+                lgw_log(LOG_INFO, "ERROR~ [LoadCfg] Failed to configure precision timestamp\n");
                 return -1;
             }
         } else {
-            lgw_log(LOG_INFO, "INFO: Configuring legacy timestamp\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Configuring legacy timestamp\n");
         }
     }
 
@@ -172,7 +172,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
         snprintf(param_name, sizeof param_name, "radio_%i", i); /* compose parameter path inside JSON structure */
         val = json_object_get_value(conf_obj, param_name); /* fetch value (if possible) */
         if (json_value_get_type(val) != JSONObject) {
-            lgw_log(LOG_INFO, "INFO: no configuration for radio %i\n", i);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] no configuration for radio %i\n", i);
             continue;
         }
         /* there is an object to configure that radio, let's parse it */
@@ -184,7 +184,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
             rfconf.enable = false;
         }
         if (rfconf.enable == false) { /* radio disabled, nothing else to parse */
-            lgw_log(LOG_INFO, "INFO: radio %i disabled\n", i);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] radio %i disabled\n", i);
         } else  { /* radio enabled, will parse the other parameters */
             snprintf(param_name, sizeof param_name, "radio_%i.freq", i);
             rfconf.freq_hz = (uint32_t)json_object_dotget_number(conf_obj, param_name);
@@ -214,7 +214,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
             } else if (!strncmp(str, "SX1250", 6)) {
                 rfconf.type = LGW_RADIO_TYPE_SX1250;
             } else {
-                lgw_log(LOG_INFO, "WARNING: invalid radio type: %s (should be SX1255 or SX1257 or SX1250)\n", str);
+                lgw_log(LOG_INFO, "WARNING~ [LoadCfg] invalid radio type: %s (should be SX1255 or SX1257 or SX1250)\n", str);
             }
             snprintf(param_name, sizeof param_name, "radio_%i.single_input_mode", i);
             val = json_object_dotget_value(conf_obj, param_name);
@@ -235,7 +235,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
                     snprintf(param_name, sizeof param_name, "radio_%i.tx_freq_max", i);
                     GW.tx.tx_freq_max[i] = (uint32_t)json_object_dotget_number(conf_obj, param_name);
                     if ((GW.tx.tx_freq_min[i] == 0) || (GW.tx.tx_freq_max[i] == 0)) {
-                        lgw_log(LOG_INFO, "WARNING: no frequency range specified for TX rf chain %d\n", i);
+                        lgw_log(LOG_INFO, "WARNING~ [LoadCfg] no frequency range specified for TX rf chain %d\n", i);
                     }
 
                     /* set configuration for tx gains */
@@ -248,17 +248,17 @@ static int parse_SX130x_configuration(const char* conf_file) {
                         conf_txgain_obj = json_array_get_object(conf_txlut_array, 0);
                         val = json_object_dotget_value(conf_txgain_obj, "pwr_idx");
                         if (val != NULL) {
-                            lgw_log(LOG_INFO, "INFO: Configuring Tx Gain LUT for rf_chain %u with %u indexes for sx1250\n", i, GW.tx.txlut[i].size);
+                            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Configuring Tx Gain LUT for rf_chain %u with %u indexes for sx1250\n", i, GW.tx.txlut[i].size);
                             sx1250_tx_lut = true;
                         } else {
-                            lgw_log(LOG_INFO, "INFO: Configuring Tx Gain LUT for rf_chain %u with %u indexes for sx125x\n", i, GW.tx.txlut[i].size);
+                            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Configuring Tx Gain LUT for rf_chain %u with %u indexes for sx125x\n", i, GW.tx.txlut[i].size);
                             sx1250_tx_lut = false;
                         }
                         /* Parse the table */
                         for (j = 0; j < (int)GW.tx.txlut[i].size; j++) {
                              /* Sanity check */
                             if (j >= TX_GAIN_LUT_SIZE_MAX) {
-                                lgw_log(LOG_INFO, "ERROR: TX Gain LUT [%u] index %d not supported, skip it\n", i, j);
+                                lgw_log(LOG_INFO, "ERROR~ [LoadCfg] TX Gain LUT [%u] index %d not supported, skip it\n", i, j);
                                 break;
                             }
                             /* Get TX gain object from LUT */
@@ -268,7 +268,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
                             if (json_value_get_type(val) == JSONNumber) {
                                 GW.tx.txlut[i].lut[j].rf_power = (int8_t)json_value_get_number(val);
                             } else {
-                                lgw_log(LOG_INFO, "WARNING: Data type for %s[%d] seems wrong, please check\n", "rf_power", j);
+                                lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for %s[%d] seems wrong, please check\n", "rf_power", j);
                                 GW.tx.txlut[i].lut[j].rf_power = 0;
                             }
                             /* PA gain */
@@ -276,7 +276,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
                             if (json_value_get_type(val) == JSONNumber) {
                                 GW.tx.txlut[i].lut[j].pa_gain = (uint8_t)json_value_get_number(val);
                             } else {
-                                lgw_log(LOG_INFO, "WARNING: Data type for %s[%d] seems wrong, please check\n", "pa_gain", j);
+                                lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for %s[%d] seems wrong, please check\n", "pa_gain", j);
                                 GW.tx.txlut[i].lut[j].pa_gain = 0;
                             }
                             if (sx1250_tx_lut == false) {
@@ -285,7 +285,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
                                 if (json_value_get_type(val) == JSONNumber) {
                                     GW.tx.txlut[i].lut[j].dig_gain = (uint8_t)json_value_get_number(val);
                                 } else {
-                                    lgw_log(LOG_INFO, "WARNING: Data type for %s[%d] seems wrong, please check\n", "dig_gain", j);
+                                    lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for %s[%d] seems wrong, please check\n", "dig_gain", j);
                                     GW.tx.txlut[i].lut[j].dig_gain = 0;
                                 }
                                 /* DAC gain */
@@ -293,7 +293,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
                                 if (json_value_get_type(val) == JSONNumber) {
                                     GW.tx.txlut[i].lut[j].dac_gain = (uint8_t)json_value_get_number(val);
                                 } else {
-                                    lgw_log(LOG_INFO, "WARNING: Data type for %s[%d] seems wrong, please check\n", "dac_gain", j);
+                                    //lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for %s[%d] seems wrong, please check\n", "dac_gain", j);
                                     GW.tx.txlut[i].lut[j].dac_gain = 3; /* This is the only dac_gain supported for now */
                                 }
                                 /* MIX gain */
@@ -301,7 +301,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
                                 if (json_value_get_type(val) == JSONNumber) {
                                     GW.tx.txlut[i].lut[j].mix_gain = (uint8_t)json_value_get_number(val);
                                 } else {
-                                    lgw_log(LOG_INFO, "WARNING: Data type for %s[%d] seems wrong, please check\n", "mix_gain", j);
+                                    lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for %s[%d] seems wrong, please check\n", "mix_gain", j);
                                     GW.tx.txlut[i].lut[j].mix_gain = 0;
                                 }
                             } else {
@@ -313,7 +313,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
                                 if (json_value_get_type(val) == JSONNumber) {
                                     GW.tx.txlut[i].lut[j].pwr_idx = (uint8_t)json_value_get_number(val);
                                 } else {
-                                    lgw_log(LOG_INFO, "WARNING: Data type for %s[%d] seems wrong, please check\n", "pwr_idx", j);
+                                    lgw_log(LOG_INFO, "WARNING~ [LoadCfg] Data type for %s[%d] seems wrong, please check\n", "pwr_idx", j);
                                     GW.tx.txlut[i].lut[j].pwr_idx = 0;
                                 }
                             }
@@ -321,24 +321,24 @@ static int parse_SX130x_configuration(const char* conf_file) {
                         /* all parameters parsed, submitting configuration to the HAL */
                         if (GW.tx.txlut[i].size > 0) {
                             if (HAL.lgw_txgain_setconf(i, &GW.tx.txlut[i]) != LGW_HAL_SUCCESS) {
-                                lgw_log(LOG_INFO, "ERROR: Failed to configure concentrator TX Gain LUT for rf_chain %u\n", i);
+                                lgw_log(LOG_INFO, "ERROR~ [LoadCfg] Failed to configure concentrator TX Gain LUT for rf_chain %u\n", i);
                                 return -1;
                             }
                         } else {
-                            lgw_log(LOG_INFO, "WARNING: No TX gain LUT defined for rf_chain %u\n", i);
+                            lgw_log(LOG_INFO, "WARNING~ [LoadCfg] No TX gain LUT defined for rf_chain %u\n", i);
                         }
                     } else {
-                        lgw_log(LOG_INFO, "WARNING: No TX gain LUT defined for rf_chain %u\n", i);
+                        lgw_log(LOG_INFO, "WARNING~ [LoadCfg] No TX gain LUT defined for rf_chain %u\n", i);
                     }
                 }
             } else {
                 rfconf.tx_enable = false;
             }
-            lgw_log(LOG_INFO, "INFO: radio %i enabled (type %s), center frequency %u, RSSI offset %f, tx enabled %d, single input mode %d\n", i, str, rfconf.freq_hz, rfconf.rssi_offset, rfconf.tx_enable, rfconf.single_input_mode);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] radio %i enabled (type %s), center frequency %u, RSSI offset %f, tx enabled %d, single input mode %d\n", i, str, rfconf.freq_hz, rfconf.rssi_offset, rfconf.tx_enable, rfconf.single_input_mode);
         }
         /* all parameters parsed, submitting configuration to the HAL */
         if (HAL.lgw_rxrf_setconf(i, &rfconf) != LGW_HAL_SUCCESS) {
-            lgw_log(LOG_INFO, "ERROR: invalid configuration for radio %i\n", i);
+            lgw_log(LOG_INFO, "ERROR~ [LoadCfg] invalid configuration for radio %i\n", i);
             return -1;
         }
     }
@@ -349,7 +349,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
         snprintf(param_name, sizeof param_name, "chan_multiSF_%i", i); /* compose parameter path inside JSON structure */
         val = json_object_get_value(conf_obj, param_name); /* fetch value (if possible) */
         if (json_value_get_type(val) != JSONObject) {
-            lgw_log(LOG_INFO, "INFO: no configuration for Lora multi-SF channel %i\n", i);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] no configuration for Lora multi-SF channel %i\n", i);
             continue;
         }
         /* there is an object to configure that Lora multi-SF channel, let's parse it */
@@ -361,7 +361,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) { /* Lora multi-SF channel disabled, nothing else to parse */
-            lgw_log(LOG_INFO, "INFO: Lora multi-SF channel %i disabled\n", i);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Lora multi-SF channel %i disabled\n", i);
         } else  { /* Lora multi-SF channel enabled, will parse the other parameters */
             snprintf(param_name, sizeof param_name, "chan_multiSF_%i.radio", i);
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, param_name);
@@ -374,11 +374,11 @@ static int parse_SX130x_configuration(const char* conf_file) {
             lgw_db_put("loaradio", param_name, param_value);  
 
             // TODO: handle individual SF enabling and disabling (spread_factor)
-            lgw_log(LOG_INFO, "INFO: Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 5 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Lora multi-SF channel %i>  radio %i, IF %i Hz, 125 kHz bw, SF 5 to 12\n", i, ifconf.rf_chain, ifconf.freq_hz);
         }
         /* all parameters parsed, submitting configuration to the HAL */
         if (HAL.lgw_rxif_setconf(i, &ifconf) != LGW_HAL_SUCCESS) {
-            lgw_log(LOG_INFO, "ERROR: invalid configuration for Lora multi-SF channel %i\n", i);
+            lgw_log(LOG_INFO, "ERROR~ [LoadCfg] invalid configuration for Lora multi-SF channel %i\n", i);
             return -1;
         }
     }
@@ -387,7 +387,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
     memset(&ifconf, 0, sizeof ifconf); /* initialize configuration structure */
     val = json_object_get_value(conf_obj, "chan_Lora_std"); /* fetch value (if possible) */
     if (json_value_get_type(val) != JSONObject) {
-        lgw_log(LOG_INFO, "INFO: no configuration for Lora standard channel\n");
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] no configuration for Lora standard channel\n");
     } else {
         val = json_object_dotget_value(conf_obj, "chan_Lora_std.enable");
         if (json_value_get_type(val) == JSONBoolean) {
@@ -396,7 +396,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) {
-            lgw_log(LOG_INFO, "INFO: Lora standard channel %i disabled\n", i);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Lora standard channel %i disabled\n", i);
         } else  {
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, "chan_Lora_std.radio");
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, "chan_Lora_std.if");
@@ -430,21 +430,21 @@ static int parse_SX130x_configuration(const char* conf_file) {
                 if (json_value_get_type(val) == JSONNumber) {
                     ifconf.implicit_payload_length = (uint8_t)json_value_get_number(val);
                 } else {
-                    lgw_log(LOG_INFO, "ERROR: payload length setting is mandatory for implicit header mode\n");
+                    lgw_log(LOG_INFO, "ERROR~ [LoadCfg] payload length setting is mandatory for implicit header mode\n");
                     return -1;
                 }
                 val = json_object_dotget_value(conf_obj, "chan_Lora_std.implicit_crc_en");
                 if (json_value_get_type(val) == JSONBoolean) {
                     ifconf.implicit_crc_en = (bool)json_value_get_boolean(val);
                 } else {
-                    lgw_log(LOG_INFO, "ERROR: CRC enable setting is mandatory for implicit header mode\n");
+                    lgw_log(LOG_INFO, "ERROR~ [LoadCfg] CRC enable setting is mandatory for implicit header mode\n");
                     return -1;
                 }
                 val = json_object_dotget_value(conf_obj, "chan_Lora_std.implicit_coderate");
                 if (json_value_get_type(val) == JSONNumber) {
                     ifconf.implicit_coderate = (uint8_t)json_value_get_number(val);
                 } else {
-                    lgw_log(LOG_INFO, "ERROR: coding rate setting is mandatory for implicit header mode\n");
+                    lgw_log(LOG_INFO, "ERROR~ [LoadCfg] coding rate setting is mandatory for implicit header mode\n");
                     return -1;
                 }
             }
@@ -454,10 +454,10 @@ static int parse_SX130x_configuration(const char* conf_file) {
             snprintf(param_value, sizeof(param_value), "%.3lfMHz, %uHz bw, SF %u", (ifconf.freq_hz + freq_hz[ifconf.rf_chain]) / 1e6, bw, sf);  
             lgw_db_put("loaradio", param_name, param_value);  
 
-            lgw_log(LOG_INFO, "INFO: Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u, %s\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf, (ifconf.implicit_hdr == true) ? "Implicit header" : "Explicit header");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Lora std channel> radio %i, IF %i Hz, %u Hz bw, SF %u, %s\n", ifconf.rf_chain, ifconf.freq_hz, bw, sf, (ifconf.implicit_hdr == true) ? "Implicit header" : "Explicit header");
         }
         if (HAL.lgw_rxif_setconf(8, &ifconf) != LGW_HAL_SUCCESS) {
-            lgw_log(LOG_INFO, "ERROR: invalid configuration for Lora standard channel\n");
+            lgw_log(LOG_INFO, "ERROR~ [LoadCfg] invalid configuration for Lora standard channel\n");
             return -1;
         }
     }
@@ -466,7 +466,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
     memset(&ifconf, 0, sizeof ifconf); /* initialize configuration structure */
     val = json_object_get_value(conf_obj, "chan_FSK"); /* fetch value (if possible) */
     if (json_value_get_type(val) != JSONObject) {
-        lgw_log(LOG_INFO, "INFO: no configuration for FSK channel\n");
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] no configuration for FSK channel\n");
     } else {
         val = json_object_dotget_value(conf_obj, "chan_FSK.enable");
         if (json_value_get_type(val) == JSONBoolean) {
@@ -475,7 +475,7 @@ static int parse_SX130x_configuration(const char* conf_file) {
             ifconf.enable = false;
         }
         if (ifconf.enable == false) {
-            lgw_log(LOG_INFO, "INFO: FSK channel %i disabled\n", i);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] FSK channel %i disabled\n", i);
         } else  {
             ifconf.rf_chain = (uint32_t)json_object_dotget_number(conf_obj, "chan_FSK.radio");
             ifconf.freq_hz = (int32_t)json_object_dotget_number(conf_obj, "chan_FSK.if");
@@ -503,10 +503,10 @@ static int parse_SX130x_configuration(const char* conf_file) {
             snprintf(param_value, sizeof(param_value), "%fMHz, %uHz bw, %u bps datarate", (ifconf.freq_hz + freq_hz[ifconf.rf_chain]) / 1e6, bw, ifconf.datarate);  
             lgw_db_put("loaradio", param_name, param_value);  
 
-            lgw_log(LOG_INFO, "INFO: FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] FSK channel> radio %i, IF %i Hz, %u Hz bw, %u bps datarate\n", ifconf.rf_chain, ifconf.freq_hz, bw, ifconf.datarate);
         }
         if (HAL.lgw_rxif_setconf(9, &ifconf) != LGW_HAL_SUCCESS) {
-            lgw_log(LOG_INFO, "ERROR: invalid configuration for FSK channel\n");
+            lgw_log(LOG_INFO, "ERROR~ [LoadCfg] invalid configuration for FSK channel\n");
             return -1;
         }
     }
@@ -531,17 +531,17 @@ static int parse_gateway_configuration(const char* conf_file) {
     /* try to parse JSON */
     root_val = json_parse_file_with_comments(conf_file);
     if (root_val == NULL) {
-        lgw_log(LOG_INFO, "ERROR: %s is not a valid JSON file\n", conf_file);
+        lgw_log(LOG_INFO, "ERROR~ [LoadCfg] %s is not a valid JSON file\n", conf_file);
         return -1;
     }
 
     /* point to the gateway configuration object */
     conf_obj = json_object_get_object(json_value_get_object(root_val), conf_obj_name);
     if (conf_obj == NULL) {
-        lgw_log(LOG_INFO, "INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
         return -1;
     } else {
-        lgw_log(LOG_INFO, "INFO: %s does contain a JSON object named %s, parsing gateway parameters\n", conf_file, conf_obj_name);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] %s does contain a JSON object named %s, parsing gateway parameters\n", conf_file, conf_obj_name);
     }
 
     /* gateway unique identifier (aka MAC address) (optional) */
@@ -551,16 +551,16 @@ static int parse_gateway_configuration(const char* conf_file) {
         GW.info.lgwm = ull;
         GW.info.net_mac_h = htonl((uint32_t)(0xFFFFFFFF & (ull>>32)));
         GW.info.net_mac_l = htonl((uint32_t)(0xFFFFFFFF &  ull  ));
-        lgw_log(LOG_INFO, "INFO: gateway MAC address is configured to %016llX\n", ull);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] gateway MAC address is configured to %016llX\n", ull);
     }
 
     val = json_object_get_value(conf_obj, "ghoststream_enabled"); /* fetch value (if possible) */
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.ghoststream_enabled = (bool)json_value_get_boolean(val);
         if (GW.cfg.ghoststream_enabled == true) {
-            lgw_log(LOG_INFO, "INFO: ghoststream_enabled is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] ghoststream_enabled is true\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: ghoststream_enabled is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] ghoststream_enabled is false\n");
         }
     } 
 
@@ -568,9 +568,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.radiostream_enabled = (bool)json_value_get_boolean(val);
         if (GW.cfg.radiostream_enabled == true) {
-            lgw_log(LOG_INFO, "INFO: radiostream_enable is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] radiostream_enable is true\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: radiostream_enable is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] radiostream_enable is false\n");
         }
     } 
 
@@ -578,9 +578,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.wd_enabled = (bool)json_value_get_boolean(val);
         if (GW.cfg.wd_enabled == true) {
-            lgw_log(LOG_INFO, "INFO: wd_enable is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] wd_enable is true\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: wd_enable is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] wd_enable is false\n");
         }
     } 
 
@@ -588,9 +588,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.log.logger_enabled = (bool)json_value_get_boolean(val);
         if (GW.log.logger_enabled == true) {
-            lgw_log(LOG_INFO, "INFO: logger_enabled is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] logger_enabled is true\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: logger_enabled is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] logger_enabled is false\n");
         }
     } 
 
@@ -598,9 +598,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.mac_decoded = (bool)json_value_get_boolean(val);
         if (GW.cfg.mac_decoded == true) {
-            lgw_log(LOG_INFO, "INFO: mac_decoded is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] mac_decoded is true\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: mac_decoded is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] mac_decoded is false\n");
         }
     } 
 
@@ -608,9 +608,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.mac2db = (bool)json_value_get_boolean(val);
         if (GW.cfg.mac2db == true) {
-            lgw_log(LOG_INFO, "INFO: mac2db is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] mac2db is true\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: mac2db is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] mac2db is false\n");
         }
     } 
     
@@ -618,9 +618,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.mac2file = (bool)json_value_get_boolean(val);
         if (GW.cfg.mac2file == true) {
-            lgw_log(LOG_INFO, "INFO: mac2file is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] mac2file is true\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: mac2file is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] mac2file is false\n");
         }
     } 
 
@@ -628,9 +628,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.cfg.custom_downlink = (bool)json_value_get_boolean(val);
         if (GW.cfg.custom_downlink == true) {
-            lgw_log(LOG_INFO, "INFO: custom_downlink is true\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] custom_downlink is true\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: custom_downlink is false\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] custom_downlink is false\n");
         }
     } 
 
@@ -659,42 +659,42 @@ static int parse_gateway_configuration(const char* conf_file) {
         } else  {
             GW.cfg.region = EU;
         }
-        lgw_log(LOG_INFO, "INFO: GW regional is configured to \"%s\"\n", str);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] GW regional is configured to \"%s\"\n", str);
     }
 
     str = json_object_get_string(conf_obj, "ghost_host");
     if (str != NULL) {
         strncpy(GW.cfg.ghost_host, str, sizeof GW.cfg.ghost_host);
         GW.cfg.ghost_host[sizeof GW.cfg.ghost_host - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: ghost_host is configured to \"%s\"\n", GW.cfg.ghost_host);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] ghost_host is configured to \"%s\"\n", GW.cfg.ghost_host);
     }
 
     str = json_object_get_string(conf_obj, "ghost_port");
     if (str != NULL) {
         strncpy(GW.cfg.ghost_port, str, sizeof GW.cfg.ghost_port);
         GW.cfg.ghost_port[sizeof GW.cfg.ghost_port - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: ghost_port is configured to \"%s\"\n", GW.cfg.ghost_port);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] ghost_port is configured to \"%s\"\n", GW.cfg.ghost_port);
     }
 
     str = json_object_get_string(conf_obj, "platform");
     if (str != NULL) {
         strncpy(GW.info.platform, str, sizeof GW.info.platform);
         GW.info.platform[sizeof GW.info.platform - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: Platform is configured to \"%s\"\n", GW.info.platform);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Platform is configured to \"%s\"\n", GW.info.platform);
     }
 
     str = json_object_get_string(conf_obj, "email");
     if (str != NULL) {
         strncpy(GW.info.email, str, sizeof GW.info.email);
         GW.info.email[sizeof GW.info.email - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: email is configured to \"%s\"\n", GW.info.email);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] email is configured to \"%s\"\n", GW.info.email);
     }
 
     str = json_object_get_string(conf_obj, "description");
     if (str != NULL) {
         strncpy(GW.info.description, str, sizeof GW.info.description);
         GW.info.description[sizeof GW.info.description - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO~ GW description: \"%s\"\n", GW.info.description);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] GW description: \"%s\"\n", GW.info.description);
     }
 
     /* GPS module TTY path (optional) */
@@ -702,19 +702,19 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (str != NULL) {
         strncpy(GW.gps.gps_tty_path, str, sizeof GW.gps.gps_tty_path);
         GW.gps.gps_tty_path[sizeof GW.gps.gps_tty_path - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: GPS serial port path is configured to \"%s\"\n", GW.gps.gps_tty_path);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] GPS serial port path is configured to \"%s\"\n", GW.gps.gps_tty_path);
     }
 
     val = json_object_get_value(conf_obj, "autoquit_threshold");
     if (val != NULL) {
         GW.cfg.autoquit_threshold = (uint32_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: autoquit_threshold is configured to %u \n", GW.cfg.autoquit_threshold);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] autoquit_threshold is configured to %u \n", GW.cfg.autoquit_threshold);
     }
 
     val = json_object_get_value(conf_obj, "time_interval");
     if (val != NULL) {
         GW.cfg.time_interval = (uint32_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: time_interval is configured to %u \n", GW.cfg.time_interval);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] time_interval is configured to %u \n", GW.cfg.time_interval);
     }
 
 
@@ -722,17 +722,17 @@ static int parse_gateway_configuration(const char* conf_file) {
     val = json_object_get_value(conf_obj, "ref_latitude");
     if (val != NULL) {
         GW.gps.reference_coord.lat = (double)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Reference latitude is configured to %f deg\n", GW.gps.reference_coord.lat);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Reference latitude is configured to %f deg\n", GW.gps.reference_coord.lat);
     }
     val = json_object_get_value(conf_obj, "ref_longitude");
     if (val != NULL) {
         GW.gps.reference_coord.lon = (double)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Reference longitude is configured to %f deg\n", GW.gps.reference_coord.lon);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Reference longitude is configured to %f deg\n", GW.gps.reference_coord.lon);
     }
     val = json_object_get_value(conf_obj, "ref_altitude");
     if (val != NULL) {
         GW.gps.reference_coord.alt = (short)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Reference altitude is configured to %i meters\n", GW.gps.reference_coord.alt);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Reference altitude is configured to %i meters\n", GW.gps.reference_coord.alt);
     }
 
     /* Gateway GPS coordinates hardcoding (aka. faking) option */
@@ -740,9 +740,9 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (json_value_get_type(val) == JSONBoolean) {
         GW.gps.gps_fake_enable = (bool)json_value_get_boolean(val);
         if (GW.gps.gps_fake_enable == true) {
-            lgw_log(LOG_INFO, "INFO: fake GPS is enabled\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] fake GPS is enabled\n");
         } else {
-            lgw_log(LOG_INFO, "INFO: fake GPS is disabled\n");
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] fake GPS is disabled\n");
         }
     }
 
@@ -751,10 +751,10 @@ static int parse_gateway_configuration(const char* conf_file) {
     if (val != NULL) {
         GW.beacon.beacon_period = (uint32_t)json_value_get_number(val);
         if ((GW.beacon.beacon_period > 0) && (GW.beacon.beacon_period < 6)) {
-            lgw_log(LOG_INFO, "ERROR: invalid configuration for Beacon period, must be >= 6s\n");
+            lgw_log(LOG_INFO, "ERROR~ [LoadCfg] invalid configuration for Beacon period, must be >= 6s\n");
             return -1;
         } else {
-            lgw_log(LOG_INFO, "INFO: Beaconing period is configured to %u seconds\n", GW.beacon.beacon_period);
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] Beaconing period is configured to %u seconds\n", GW.beacon.beacon_period);
         }
     }
 
@@ -762,56 +762,56 @@ static int parse_gateway_configuration(const char* conf_file) {
     val = json_object_get_value(conf_obj, "beacon_freq_hz");
     if (val != NULL) {
         GW.beacon.beacon_freq_hz = (uint32_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Beaconing signal will be emitted at %u Hz\n", GW.beacon.beacon_freq_hz);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Beaconing signal will be emitted at %u Hz\n", GW.beacon.beacon_freq_hz);
     }
 
     /* Number of beacon channels (optional) */
     val = json_object_get_value(conf_obj, "beacon_freq_nb");
     if (val != NULL) {
         GW.beacon.beacon_freq_nb = (uint8_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Beaconing channel number is set to %u\n", GW.beacon.beacon_freq_nb);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Beaconing channel number is set to %u\n", GW.beacon.beacon_freq_nb);
     }
 
     /* Frequency step between beacon channels (optional) */
     val = json_object_get_value(conf_obj, "beacon_freq_step");
     if (val != NULL) {
         GW.beacon.beacon_freq_step = (uint32_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Beaconing channel frequency step is set to %uHz\n", GW.beacon.beacon_freq_step);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Beaconing channel frequency step is set to %uHz\n", GW.beacon.beacon_freq_step);
     }
 
     /* Beacon datarate (optional) */
     val = json_object_get_value(conf_obj, "beacon_datarate");
     if (val != NULL) {
         GW.beacon.beacon_datarate = (uint8_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Beaconing datarate is set to SF%d\n", GW.beacon.beacon_datarate);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Beaconing datarate is set to SF%d\n", GW.beacon.beacon_datarate);
     }
 
     /* Beacon modulation bandwidth (optional) */
     val = json_object_get_value(conf_obj, "beacon_bw_hz");
     if (val != NULL) {
         GW.beacon.beacon_bw_hz = (uint32_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Beaconing modulation bandwidth is set to %dHz\n", GW.beacon.beacon_bw_hz);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Beaconing modulation bandwidth is set to %dHz\n", GW.beacon.beacon_bw_hz);
     }
 
     /* Beacon TX power (optional) */
     val = json_object_get_value(conf_obj, "beacon_power");
     if (val != NULL) {
         GW.beacon.beacon_power = (int8_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Beaconing TX power is set to %ddBm\n", GW.beacon.beacon_power);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Beaconing TX power is set to %ddBm\n", GW.beacon.beacon_power);
     }
 
     /* Beacon information descriptor (optional) */
     val = json_object_get_value(conf_obj, "beacon_infodesc");
     if (val != NULL) {
         GW.beacon.beacon_infodesc = (uint8_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Beaconing information descriptor is set to %u\n", GW.beacon.beacon_infodesc);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Beaconing information descriptor is set to %u\n", GW.beacon.beacon_infodesc);
     }
 
     /* Auto-quit threshold (optional) */
     val = json_object_get_value(conf_obj, "autoquit_threshold");
     if (val != NULL) {
         GW.cfg.autoquit_threshold = (uint32_t)json_value_get_number(val);
-        lgw_log(LOG_INFO, "INFO: Auto-quit after %u non-acknowledged PULL_DATA\n", GW.cfg.autoquit_threshold);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Auto-quit after %u non-acknowledged PULL_DATA\n", GW.cfg.autoquit_threshold);
     }
 
     /* servers configure */
@@ -820,7 +820,7 @@ static int parse_gateway_configuration(const char* conf_file) {
 		/* serv_count represents the maximal number of servers to be read. */
         int count = 0, i = 0, try = 0;
 		count = json_array_get_count(serv_arry);  //number of services should be less than 8
-		lgw_log(LOG_INFO, "INFO: Found %i servers in array.\n", count);
+		lgw_log(LOG_INFO, "INFO~ [LoadCfg] Found %i servers in array.\n", count);
 		for (i = 0; i < count; i++) {
             serv_entry = (serv_s*)lgw_malloc(sizeof(serv_s));
 
@@ -883,10 +883,10 @@ static int parse_gateway_configuration(const char* conf_file) {
             if (str != NULL) {
                 strncpy(serv_entry->info.name, str, sizeof serv_entry->info.name);
                 serv_entry->info.name[sizeof serv_entry->info.name - 1] = '\0'; /* ensure string termination */
-                lgw_log(LOG_INFO, "INFO: Found a server name is \"%s\"\n", str);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] Found a server name is \"%s\"\n", str);
             } else {
                 lgw_gen_str((char*)&serv_entry->info.name, sizeof(serv_entry->info.name));
-                lgw_log(LOG_INFO, "INFO: The server name mustbe configure, generate a random name: %s\n", serv_entry->info.name);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] The server name mustbe configure, generate a random name: %s\n", serv_entry->info.name);
                 continue;
             }
 
@@ -895,7 +895,7 @@ static int parse_gateway_configuration(const char* conf_file) {
                 serv_entry->info.key = lgw_malloc(PATH_LEN);
                 strncpy(serv_entry->info.key, str, PATH_LEN);
                 serv_entry->info.key[PATH_LEN - 1] = '\0'; /* ensure string termination */
-                lgw_log(LOG_INFO, "INFO: Found a server key is \"%s\"\n", str);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] Found a server key is \"%s\"\n", str);
             } 
 
 			str = json_object_get_string(serv_obj, "server_type");
@@ -911,19 +911,19 @@ static int parse_gateway_configuration(const char* conf_file) {
                     if (strr != NULL) {
                         strncpy(serv_entry->net->mqtt->uptopic, strr, sizeof(serv_entry->net->mqtt->uptopic));
                         serv_entry->net->mqtt->uptopic[sizeof(serv_entry->net->mqtt->uptopic) - 1] = '\0'; /* ensure string termination */
-                        lgw_log(LOG_INFO, "INFO: Found a mqtt uptopic is \"%s\"\n", strr);
+                        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Found a mqtt uptopic is \"%s\"\n", strr);
                     } else {
                         strcpy(serv_entry->net->mqtt->uptopic, "test");
-                        lgw_log(LOG_WARNING, "WARNING: Need a uptopic for mqtt publish, set to default value \"test\"\n");
+                        lgw_log(LOG_WARNING, "WARNING~ [LoadCfg] Need a uptopic for mqtt publish, set to default value \"test\"\n");
                     }
                     strr = json_object_get_string(serv_obj, "dntopic");  // MQTT key
                     if (strr != NULL) {
                         strncpy(serv_entry->net->mqtt->dntopic, strr, sizeof(serv_entry->net->mqtt->dntopic));
                         serv_entry->net->mqtt->dntopic[sizeof(serv_entry->net->mqtt->dntopic) - 1] = '\0'; /* ensure string termination */
-                        lgw_log(LOG_INFO, "INFO: Found a mqtt dntopic is \"%s\"\n", strr);
+                        lgw_log(LOG_INFO, "INFO~ [LoadCfg] Found a mqtt dntopic is \"%s\"\n", strr);
                     } else {
                         strcpy(serv_entry->net->mqtt->dntopic, "test");
-                        lgw_log(LOG_WARNING, "WARNING: Need a dntopic for mqtt publish, set to default value \"test\"\n");
+                        lgw_log(LOG_WARNING, "WARNING~ [LoadCfg] Need a dntopic for mqtt publish, set to default value \"test\"\n");
                     }
 				} else if (!strncmp(str, "gwtraf", 6)) {
 					serv_entry->info.type = gwtraf;
@@ -952,7 +952,7 @@ static int parse_gateway_configuration(const char* conf_file) {
             if (str != NULL) {
                 strncpy(serv_entry->net->addr, str, sizeof serv_entry->net->addr);
                 serv_entry->net->addr[sizeof serv_entry->net->addr - 1] = '\0'; /* ensure string termination */
-                lgw_log(LOG_INFO, "INFO: Found a server name is \"%s\"\n", str);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] Found a server name is \"%s\"\n", str);
             } else {  //如果没有设置服务地址，就释放内存，读入下一条记录
                 lgw_free(serv_entry->net);
                 lgw_free(serv_entry->report);
@@ -963,20 +963,20 @@ static int parse_gateway_configuration(const char* conf_file) {
             if (str != NULL) {
                 strncpy(serv_entry->net->port_up, str, sizeof serv_entry->net->port_up);
                 serv_entry->net->port_up[sizeof serv_entry->net->port_up - 1] = '\0'; /* ensure string termination */
-                lgw_log(LOG_INFO, "INFO: [%s] Found a serv_port_up is \"%s\"\n", serv_entry->info.name, serv_entry->net->port_up);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] [%s] Found a serv_port_up is \"%s\"\n", serv_entry->info.name, serv_entry->net->port_up);
             } else {
                 strcpy(serv_entry->net->port_up, "1700");
-                lgw_log(LOG_INFO, "INFO: [%s] Set serv_port_up to \"%s\"\n", serv_entry->info.name, serv_entry->net->port_up);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] [%s] Set serv_port_up to \"%s\"\n", serv_entry->info.name, serv_entry->net->port_up);
             }
 
 			str = json_object_get_string(serv_obj, "serv_port_down");
             if (str != NULL) {
                 strncpy(serv_entry->net->port_down, str, sizeof serv_entry->net->port_down);
                 serv_entry->net->port_down[sizeof serv_entry->net->port_down - 1] = '\0'; /* ensure string termination */
-                lgw_log(LOG_INFO, "INFO: Found a serv_port_down \"%s\"\n", serv_entry->net->port_down);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] Found a serv_port_down \"%s\"\n", serv_entry->net->port_down);
             } else {
                 strcpy(serv_entry->net->port_down, "1700");
-                lgw_log(LOG_INFO, "INFO: [%s] Set serv_port_down to \"%s\"\n", serv_entry->info.name, serv_entry->net->port_down);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] [%s] Set serv_port_down to \"%s\"\n", serv_entry->info.name, serv_entry->net->port_down);
             }
 
             val = json_object_get_value(serv_obj, "push_timeout_ms");
@@ -997,24 +997,24 @@ static int parse_gateway_configuration(const char* conf_file) {
             val = json_object_get_value(serv_obj, "stat_interval");
             if (val != NULL) {
                 serv_entry->report->stat_interval = (int)json_value_get_number(val);
-                lgw_log(LOG_INFO, "INFO: Found a stat_interval is \"%d\"\n", serv_entry->report->stat_interval);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] Found a stat_interval is \"%d\"\n", serv_entry->report->stat_interval);
             }
 
             val = json_object_get_value(serv_obj, "forward_crc_valid");
             if (json_value_get_type(val) == JSONBoolean) {
                 serv_entry->filter.fwd_valid_pkt = (bool)json_value_get_boolean(val);
             }
-            lgw_log(LOG_INFO, "INFO: packets received with a valid CRC will%s be forwarded\n", (serv_entry->filter.fwd_valid_pkt ? "" : " NOT"));
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] packets received with a valid CRC will%s be forwarded\n", (serv_entry->filter.fwd_valid_pkt ? "" : " NOT"));
             val = json_object_get_value(serv_obj, "forward_crc_error");
             if (json_value_get_type(val) == JSONBoolean) {
                 serv_entry->filter.fwd_error_pkt = (bool)json_value_get_boolean(val);
             }
-            lgw_log(LOG_INFO, "INFO: packets received with a CRC error will%s be forwarded\n", (serv_entry->filter.fwd_error_pkt ? "" : " NOT"));
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] packets received with a CRC error will%s be forwarded\n", (serv_entry->filter.fwd_error_pkt ? "" : " NOT"));
             val = json_object_get_value(serv_obj, "forward_crc_disabled");
             if (json_value_get_type(val) == JSONBoolean) {
                 serv_entry->filter.fwd_nocrc_pkt = (bool)json_value_get_boolean(val);
             }
-            lgw_log(LOG_INFO, "INFO: packets received with a no CRC will%s be forwarded\n", (serv_entry->filter.fwd_nocrc_pkt ? "" : " NOT"));
+            lgw_log(LOG_INFO, "INFO~ [LoadCfg] packets received with a no CRC will%s be forwarded\n", (serv_entry->filter.fwd_nocrc_pkt ? "" : " NOT"));
             val = json_object_get_value(serv_obj, "filter_fport");
             if (val != NULL) {
                 serv_entry->filter.fport = (uint8_t)json_value_get_number(val);
@@ -1052,25 +1052,25 @@ static int parse_debug_configuration(const char * conf_file) {
     /* try to parse JSON */
     root_val = json_parse_file_with_comments(conf_file);
     if (root_val == NULL) {
-        lgw_log(LOG_INFO, "ERROR: %s is not a valid JSON file\n", conf_file);
+        lgw_log(LOG_INFO, "ERROR~ [LoadCfg] %s is not a valid JSON file\n", conf_file);
         return -1;
     }
 
     /* point to the gateway configuration object */
     conf_obj = json_object_get_object(json_value_get_object(root_val), conf_obj_name);
     if (conf_obj == NULL) {
-        lgw_log(LOG_INFO, "INFO: %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] %s does not contain a JSON object named %s\n", conf_file, conf_obj_name);
         json_value_free(root_val);
         return -1;
     } else {
-        lgw_log(LOG_INFO, "INFO: %s does contain a JSON object named %s, parsing debug parameters\n", conf_file, conf_obj_name);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] %s does contain a JSON object named %s, parsing debug parameters\n", conf_file, conf_obj_name);
     }
 
     /* Get reference payload configuration */
     conf_array = json_object_get_array (conf_obj, "ref_payload");
     if (conf_array != NULL) {
         debugconf.nb_ref_payload = json_array_get_count(conf_array);
-        lgw_log(LOG_INFO, "INFO: got %u debug reference payload\n", debugconf.nb_ref_payload);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] got %u debug reference payload\n", debugconf.nb_ref_payload);
 
         for (i = 0; i < (int)debugconf.nb_ref_payload; i++) {
             conf_obj_array = json_array_get_object(conf_array, i);
@@ -1078,7 +1078,7 @@ static int parse_debug_configuration(const char * conf_file) {
             str = json_object_get_string(conf_obj_array, "id");
             if (str != NULL) {
                 sscanf(str, "0x%08X", &(debugconf.ref_payload[i].id));
-                lgw_log(LOG_INFO, "INFO: reference payload ID %d is 0x%08X\n", i, debugconf.ref_payload[i].id);
+                lgw_log(LOG_INFO, "INFO~ [LoadCfg] reference payload ID %d is 0x%08X\n", i, debugconf.ref_payload[i].id);
             }
 
             /* global count */
@@ -1091,12 +1091,12 @@ static int parse_debug_configuration(const char * conf_file) {
     if (str != NULL) {
         strncpy(debugconf.log_file_name, str, sizeof debugconf.log_file_name);
         debugconf.log_file_name[sizeof debugconf.log_file_name - 1] = '\0'; /* ensure string termination */
-        lgw_log(LOG_INFO, "INFO: setting debug log file name to %s\n", debugconf.log_file_name);
+        lgw_log(LOG_INFO, "INFO~ [LoadCfg] setting debug log file name to %s\n", debugconf.log_file_name);
     }
 
     /* Commit configuration */
     if (HAL.lgw_debug_setconf(&debugconf) != LGW_HAL_SUCCESS) {
-        lgw_log(LOG_INFO, "ERROR: Failed to configure debug\n");
+        lgw_log(LOG_INFO, "ERROR~ [LoadCfg] Failed to configure debug\n");
         json_value_free(root_val);
         return -1;
     }
@@ -1110,7 +1110,6 @@ int parsecfg() {
     int ret = 0;
     if (!strncmp(GW.hal.board, "LG301", 5)) {
         ret = parse_SX130x_configuration(GW.hal.confs.sxcfg);
-        printf("ret1: %d\n", ret);
     } else if (!strncmp(GW.hal.board, "LG302", 5)) { 
         ret = parse_SX130x_configuration(GW.hal.confs.sxcfg);
         ret |= parse_debug_configuration(GW.hal.confs.gwcfg);

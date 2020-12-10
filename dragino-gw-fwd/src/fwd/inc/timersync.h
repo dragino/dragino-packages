@@ -16,6 +16,8 @@ Maintainer: Michael Coracin
 
 #ifndef _LORA_PKTFWD_TIMERSYNC_H
 #define _LORA_PKTFWD_TIMERSYNC_H
+#include <sys/time.h>
+#include <stdint.h>
 
 /* -------------------------------------------------------------------------- */
 /* --- DEPENDANCIES --------------------------------------------------------- */
@@ -25,7 +27,7 @@ Maintainer: Michael Coracin
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
 
-int get_concentrator_time(struct timeval *concent_time, struct timeval unix_time);
+int get_concentrator_time(uint32_t* concent_time);
 
 void thread_timersync(void);
 

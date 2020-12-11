@@ -16,7 +16,6 @@ Maintainer: Michael Coracin
 
 #ifndef _LORA_PKTFWD_TIMERSYNC_H
 #define _LORA_PKTFWD_TIMERSYNC_H
-#include <sys/time.h>
 #include <stdint.h>
 
 /* -------------------------------------------------------------------------- */

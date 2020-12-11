@@ -23,7 +23,7 @@ Maintainer: Michael Coracin
 #include "gwcfg.h"
 #include "timersync.h"
 #include "loragw_hal.h"
-#include "loragw_reg.h"
+#include "loragw_reg_sx1301.h"
 #include "loragw_aux.h"
 
 /* -------------------------------------------------------------------------- */
@@ -100,17 +100,19 @@ void thread_timersync(void) {
         /* Regularly disable GPS mode of concentrator's counter, in order to get
             real timer value for synchronizing with host's unix timer */
         lgw_log(LOG_TIMERSYNC, "\nINFO~ [TimerSync] Disabling GPS mode for concentrator's counter...\n");
-        //pthread_mutex_lock(&GW.hal.mx_concent);
-        //lgw_reg_w(LGW_GPS_EN, 0);
-        //pthread_mutex_unlock(&GW.hal.mx_concent);
+        pthread_mutex_lock(&GW.hal.mx_concent);
+        lgw_sx1301_reg_w(LGW_GPS_EN, 0);
+        pthread_mutex_unlock(&GW.hal.mx_concent);
 
         /* Get current unix time */
         gettimeofday(&unix_timeval, NULL);
+        //clock_gettime(CLOCK_MONOTONIC, &unix_timeval);
 
         /* Get current concentrator counter value (1MHz) */
         pthread_mutex_lock(&GW.hal.mx_concent);
         HAL.lgw_get_trigcnt(&sx130x_timecount);
         pthread_mutex_unlock(&GW.hal.mx_concent);
+
         concentrator_timeval.tv_sec = sx130x_timecount / 1000000UL;
         concentrator_timeval.tv_usec = sx130x_timecount - (concentrator_timeval.tv_sec * 1000000UL);
 
@@ -122,6 +124,8 @@ void thread_timersync(void) {
         pthread_mutex_lock(&mx_timersync); /* protect global variable access */
         timer_sub(&unix_timeval, &concentrator_timeval, &offset_unix_concent);
         pthread_mutex_unlock(&mx_timersync);
+
+        //printf("#DEBUG#DEBUG# offset=%ld,%ld\n", offset_unix_concent.tv_sec, offset_unix_concent.tv_usec);
 
         timer_sub(&offset_unix_concent, &offset_previous, &offset_drift);
 
@@ -136,9 +140,9 @@ void thread_timersync(void) {
                             offset_unix_concent.tv_usec,
                             offset_drift.tv_sec * 1000000UL + offset_drift.tv_usec);
         lgw_log(LOG_TIMERSYNC, "INFO~ [TimerSync] Enabling GPS mode for concentrator's counter.\n\n");
-        //pthread_mutex_lock(&GW.hal.mx_concent); /* TODO: Is it necessary to protect here? */
-        //lgw_reg_w(LGW_GPS_EN, 1);
-        //pthread_mutex_unlock(&GW.hal.mx_concent);
+        pthread_mutex_lock(&GW.hal.mx_concent); /* TODO: Is it necessary to protect here? */
+        lgw_sx1301_reg_w(LGW_GPS_EN, 1);
+        pthread_mutex_unlock(&GW.hal.mx_concent);
 
         /* delay next sync */
         /* If we consider a crystal oscillator precision of about 20ppm worst case, and a clock

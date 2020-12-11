@@ -723,8 +723,6 @@ int main(int argc, char *argv[]) {
 
     stop_clean_service();
 
-    printf("STOPpppppppppppppppp\n");
-
     lgw_run_atexits(1);
 
     thread_rxpkt_recycle();

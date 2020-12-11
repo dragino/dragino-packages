@@ -256,7 +256,7 @@ int pkt_start(serv_s* serv) {
                 break;
         }
 
-        if (lgw_pthread_create_background(&serv->thread.t_down, NULL, (void *(*)(void *))pkt_prepare_downlink, serv)) {
+        if (lgw_pthread_create_background(&serv->thread.t_down, NULL, (void *(*)(void *))pkt_prepare_downlink, (void*)serv)) {
             lgw_log(LOG_WARNING, "WARNING~ [%s] Can't create pthread for custom downlonk.\n", serv->info.name);
             return -1;
         }
@@ -272,7 +272,9 @@ void pkt_stop(serv_s* serv) {
     serv->thread.stop_sig = true;
 	sem_post(&serv->thread.sema);
 	pthread_join(serv->thread.t_up, NULL);
-	pthread_join(serv->thread.t_down, NULL);
+    if (GW.cfg.custom_downlink) {
+	    pthread_join(serv->thread.t_down, NULL);
+    }
     lgw_db_del("service/pkt", serv->info.name);
     lgw_db_del("thread", serv->info.name);
 }

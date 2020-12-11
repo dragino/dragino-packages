@@ -179,8 +179,7 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, uint32_t time_us, struct
     enum jit_error_e err_collision;
     uint32_t asap_count_us;
 
-    lgw_log(LOG_JIT, "Current concentrator time is %u, pkt_count=%u, pkt_type=%d\n", time_us, packet->count_us, pkt_type);
-
+    lgw_log(LOG_JIT, "Current concentrator time is %u, pkt_count=%u, pkt_type=%d\n", time_us, packet->count_us, pkt_type); 
     if (packet == NULL) {
         lgw_log(LOG_JIT_ERROR, "ERROR~ [JIT] invalid parameter\n");
         return JIT_ERROR_INVALID;

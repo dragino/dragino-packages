@@ -733,13 +733,10 @@ int main(int argc, char *argv[])
 
         pthread_mutex_lock(&mx_radio_lock); /* lock the radio device */
         setup_channel(rfdev);
-        rxlora(rfdev, RXMODE_SINGLE);  /* star lora single receive mode */
-	    clock_gettime(CLOCK_MONOTONIC, &start_time);
+        rxlora(rfdev, RXMODE_SCAN);  /* star lora scan receive mode */
 
-	    end_time = start_time;
-        /* receive timeout, if no readdigital or readerror? */
-        while ((digitalRead(rfdev->dio[1]) != 1) && ((int)difftimespec(end_time, start_time) < RXRF_TIMEOUT_S)) {                 
-            clock_gettime(CLOCK_MONOTONIC, &end_time);
+        /* continously scan untill tx */
+        while (!radio_inuse) {                 
             if (digitalRead(rfdev->dio[0]) != 1) {
                 wait_ms(2);
                 continue;

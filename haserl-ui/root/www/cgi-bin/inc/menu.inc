@@ -36,7 +36,7 @@
   
   
 	<% # Set up LoRaWAN menu for board type
-	if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ]; then
+	if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
 	%>
   <div class="dropdown"> <!-- LoRa Parameter -->
     <button class="dropbtn">LoRaWAN <span class="fas fa-caret-down"></span></button>
@@ -98,7 +98,13 @@
     <button class="dropbtn">LogRead<span class="fas fa-caret-down"></span></button>
     <div class="dropdown-content">
       <a href="/cgi-bin/log-lora.has">LoRa Log</a>
+	  
+	<% # Set up LoRaWAN menu for board type
+	if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
+	%>
       <a href="/cgi-bin/log-traffic.has">Gateway Traffic</a>
+	<% fi %>	
+	
       <a href="/cgi-bin/log-sys.has">System Log</a>
       <a href="/cgi-bin/log-record.has">Record Log</a>
     </div>
@@ -113,4 +119,3 @@
   <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="toggleNavbar()">&#9776;</a>
   
 </div>
-

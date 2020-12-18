@@ -210,7 +210,7 @@ elif [ $server_type == "mqtt" ]; then
 	
 elif [ $server_type == "tcpudp" ]; then
 	satlink3="/cgi-bin/tcp-client.has"
-	tcpstatus=$(ps | grep -c tcp_client)
+	tcpstatus=$(ps | grep -c tcp_process)
 	if [ $tcpstatus == "2" ];then
 		sat3="/static/img/SAT-TCP-tick.png"
 	else

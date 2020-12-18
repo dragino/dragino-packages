@@ -76,8 +76,8 @@ Maintainer: Michael Coracin
 
 uint8_t DEBUG_PKT_FWD    = 0;  
 uint8_t DEBUG_REPORT     = 0;
-uint8_t DEBUG_JIT        = 0;
-uint8_t DEBUG_JIT_ERROR  = 0;
+uint8_t DEBUG_JIT        = 1;
+uint8_t DEBUG_JIT_ERROR  = 1;
 uint8_t DEBUG_TIMERSYNC  = 0;
 uint8_t DEBUG_BEACON     = 0;
 uint8_t DEBUG_INFO       = 1;
@@ -314,6 +314,11 @@ typedef struct dnlink {
     char pdformat[8];
     uint8_t payload[512];
     uint8_t psize;
+    uint8_t txpw;
+    uint8_t txbw;
+    uint8_t txdr;
+    uint32_t txfreq;
+    uint8_t rxwindow;
     struct dnlink *pre;
     struct dnlink *next;
 } DNLINK;
@@ -376,6 +381,8 @@ void thread_ent_dnlink(void);
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE FUNCTIONS DEFINITION ----------------------------------------- */
 void payload_deal(struct lgw_pkt_rx_s* p);
+
+static int strcpypt(char* dest, const char* src, int* start, int size, int len);
 
 static void sig_handler(int sigio) {
     if (sigio == SIGQUIT) {
@@ -1337,8 +1344,8 @@ int main(void)
         case 2:  /* PKT_FWD MSG and MAC_HEAD output */
             DEBUG_PKT_FWD    = 1;  
             DEBUG_REPORT     = 1;
-            DEBUG_JIT        = 0;
-            DEBUG_JIT_ERROR  = 0;
+            DEBUG_JIT        = 1;
+            DEBUG_JIT_ERROR  = 1;
             DEBUG_TIMERSYNC  = 0;
             DEBUG_BEACON     = 0;
             DEBUG_INFO       = 1;
@@ -3590,7 +3597,8 @@ void thread_valid(void) {
 }
 
 void thread_ent_dnlink(void) {
-    int i, j; /* loop variables */
+    int i, j, start; /* loop variables */
+    uint8_t psize = 0, size = 0;
 
     DIR *dir;
     FILE *fp;
@@ -3599,15 +3607,20 @@ void thread_ent_dnlink(void) {
     char dn_file[128]; 
 
     /* data buffers */
-    uint8_t buff_down[512]; /* buffer to receive downstream packets */
-    uint8_t dnpld[256];
-    uint8_t hexpld[256];
+    char buff_down[512]; /* buffer to receive downstream packets */
+    char dnpld[256];
+    char hexpld[256];
+
+    char txdr[5]; 
+    char txpw[3]; 
+    char txbw[4]; 
+    char txfreq[12];
+    char rxwindow[2];
     
-    uint32_t uaddr;
+    char uaddr;
     char addr[16];
     char txmode[8];
     char pdformat[8];
-    uint8_t psize = 0;
 
     DNLINK *entry = NULL;
     DNLINK *tmp = NULL;
@@ -3642,9 +3655,9 @@ void thread_ent_dnlink(void) {
                     continue;
                 }
 
-                memset1(buff_down, '\0', sizeof(buff_down));
+                memset(buff_down, '\0', sizeof(buff_down));
 
-                psize = fread(buff_down, sizeof(char), sizeof(buff_down), fp); /* the size less than buff_down return EOF */
+                size = fread(buff_down, sizeof(char), sizeof(buff_down), fp); /* the size less than buff_down return EOF */
                 fclose(fp);
 
                 unlink(dn_file); /* delete the file */
@@ -3652,10 +3665,19 @@ void thread_ent_dnlink(void) {
                 memset(addr, '\0', sizeof(addr));
                 memset(pdformat, '\0', sizeof(pdformat));
                 memset(txmode, '\0', sizeof(txmode));
-                memset1(hexpld, '\0', sizeof(hexpld));
-                memset1(dnpld, '\0', sizeof(dnpld));
+                memset(hexpld, '\0', sizeof(hexpld));
+                memset(dnpld, '\0', sizeof(dnpld));
+                memset(txdr, '\0', sizeof(txdr));
+                memset(txpw, '\0', sizeof(txpw));
+                memset(txbw, '\0', sizeof(txbw));
+                memset(txfreq, '\0', sizeof(txfreq));
+                memset(rxwindow, '\0', sizeof(rxwindow));
 
-                for (i = 0, j = 0; i < psize; i++) {
+                /* format:  addr,txmode,pdformat,dnpld,txpw,txbw,txdr,txfreq 
+                 * 如果 dnpld 含有','时会造成后面的txpw等值出错
+                **/
+
+                for (i = 0, j = 0; i < size; i++) {
                     if (buff_down[i] == ',')
                         j++;
                 }
@@ -3665,62 +3687,68 @@ void thread_ent_dnlink(void) {
                     continue;
                 }
 
-                for (i = 0, j = 0; i < (int)sizeof(addr); i++) {
-                    if (buff_down[i] == ',') { 
-                        i++;
-                        break;
-                    }
-                    if (buff_down[i] != ' ')
-                        addr[j++] = buff_down[i];
-                }
+                start = 0;
 
-                while (buff_down[i] == ' ' && i < psize) {
-                    i++;
-                }
-
-                for (j = 0; j < (int)sizeof(txmode); i++) {
-                    if (buff_down[i] == ',') {
-                        i++;
-                        break;
-                    }
-                    if (buff_down[i] != ' ')
-                        txmode[j++] = buff_down[i];
-                }
-
-                while (buff_down[i] == ' ' && i < psize) {
-                    i++;
-                }
-
-                for (j = 0; j < (int)sizeof(pdformat); i++) {
-                    if (buff_down[i] == ',') {
-                        i++;
-                        break;
-                    }
-                    if (buff_down[i] != ' ')
-                        pdformat[j++] = buff_down[i];
-                }
-
-                while (buff_down[i] == ' ' && i < psize) {
-                    i++;
-                }
-
-                for (j = 0; i < psize + 1; i++) {
-					if(buff_down[i] != 0 && buff_down[i] != 10 )
-                        dnpld[j++] = buff_down[i];
-                }
-
-                psize = j;
-
-                if ((strlen(addr) < 1) || (psize < 1))
+                if (strcpypt(addr, buff_down, &start, size, sizeof(addr)) < 1) 
                     continue;
-                
-                if (strlen(txmode) < 1)
-                    strcpy(txmode, "time");
 
-                if (strlen(pdformat) < 1)
-                    strcpy(pdformat, "txt");
+                if (strcpypt(txmode, buff_down, &start, size, sizeof(txmode)) < 1)
+                    strcpy(txmode, "time"); 
+
+                if (strcpypt(pdformat, buff_down, &start, size, sizeof(pdformat)) < 1)
+                    strcpy(pdformat, "txt"); 
+
+                psize = strcpypt(dnpld, buff_down, &start, size, sizeof(dnpld)); 
+                if (psize < 1) continue;
 
                 entry = (DNLINK *) malloc(sizeof(DNLINK));
+
+                if (strcpypt(txpw, buff_down, &start, size, sizeof(txpw)) > 0) {
+                    i = sscanf(txpw, "%u", &entry->txpw); 
+                    if (i != 1)
+                        entry->txpw = 0;
+                } else
+                    entry->txpw = 0;
+
+                if (strcpypt(txbw, buff_down, &start, size, sizeof(txbw)) > 0) {
+                    i = sscanf(txbw, "%u", &entry->txbw); 
+                    if (i != 1)
+                        entry->txbw = 0;
+                } else
+                    entry->txbw = 0; 
+
+                if (strcpypt(txdr, buff_down, &start, size, sizeof(txdr)) > 0) {
+                    if (!strncmp(txdr, "SF7", 3))
+                        entry->txdr = DR_LORA_SF7; 
+                    else if (!strncmp(txdr, "SF8", 3))
+                        entry->txdr = DR_LORA_SF8; 
+                    else if (!strncmp(txdr, "SF9", 3))
+                        entry->txdr = DR_LORA_SF9; 
+                    else if (!strncmp(txdr, "SF10", 4))
+                        entry->txdr = DR_LORA_SF10; 
+                    else if (!strncmp(txdr, "SF11", 4))
+                        entry->txdr = DR_LORA_SF11; 
+                    else if (!strncmp(txdr, "SF12", 4))
+                        entry->txdr = DR_LORA_SF12; 
+                    else 
+                        entry->txdr = 0; 
+                } else 
+                    entry->txdr = 0; 
+
+                if (strcpypt(txfreq, buff_down, &start, size, sizeof(txfreq)) > 0) {
+                    i = sscanf(txfreq, "%u", &entry->txfreq);
+                    if (i != 1 || entry->txfreq < 100000000UL)
+                        entry->txfreq = 0;
+                } else 
+                    entry->txfreq = 0; 
+
+                if (strcpypt(rxwindow, buff_down, &start, size, sizeof(rxwindow)) > 0) {
+                    i = sscanf(rxwindow, "%u", &entry->rxwindow);
+                    if (i != 1 || entry->rxwindow > 2 || entry->rxwindow < 1)
+                        entry->rxwindow = 0;
+                } else 
+                    entry->txfreq = 0; 
+
                 strcpy(entry->devaddr, addr);
                 if (strstr(pdformat, "hex") != NULL) { 
                     if (psize % 2) {
@@ -3728,11 +3756,11 @@ void thread_ent_dnlink(void) {
                         free(entry);
                         continue;
                     }
-                    hex2str(dnpld, hexpld, psize);
+                    hex2str((uint8_t*)dnpld, (uint8_t*)hexpld, psize);
                     psize = psize/2;
-                    memcpy1(entry->payload, hexpld, psize + 1);
+                    memcpy1(entry->payload, (uint8_t*)hexpld, psize + 1);
                 } else
-                    memcpy1(entry->payload, dnpld, psize + 1);
+                    memcpy1(entry->payload, (uint8_t*)dnpld, psize + 1);
                 strcpy(entry->txmode, txmode);
                 strcpy(entry->pdformat, pdformat);
                 entry->psize = psize;
@@ -3867,14 +3895,35 @@ static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, ui
 
     memset(&txpkt, 0, sizeof(txpkt));
     txpkt.modulation = MOD_LORA;
-    txpkt.count_us = us + 2000000UL; /* rx2 window plus 1s */
     txpkt.no_crc = true;
-    txpkt.freq_hz = rx2freq; /* same as the up */
+
+    if (dnelem->rxwindow != 1)
+        txpkt.count_us = us + 2000000UL; /* rx2 window plus 1s */
+    else
+        txpkt.count_us = us + 1000000UL; /* rx2 window plus 1s */
+
+    if (dnelem->txfreq > 0)
+        txpkt.freq_hz = dnelem->txfreq; 
+    else
+        txpkt.freq_hz = rx2freq; 
+
     txpkt.rf_chain = 0;
-    txpkt.rf_power = 20;
-    txpkt.datarate = rx2dr;
-    txpkt.bandwidth = rx2bw;
-    txpkt.coderate = CR_LORA_4_5;
+
+    if (dnelem->txpw > 0)
+        txpkt.rf_power = dnelem->txpw;
+    else
+        txpkt.rf_power = 20;
+
+    if (dnelem->txdr > 0)
+        txpkt.datarate = dnelem->txdr;
+    else
+        txpkt.datarate = rx2dr;
+
+    if (dnelem->txbw > 0)
+        txpkt.bandwidth = dnelem->txbw;
+    else
+        txpkt.coderate = CR_LORA_4_5;
+
     txpkt.invert_pol = true;
     txpkt.preamble = STD_LORA_PREAMB;
     txpkt.tx_mode = txmode;
@@ -3946,8 +3995,6 @@ void payload_deal(struct lgw_pkt_rx_s* p) {
             break;
     }
 
-
-
     if (id_found == 2) 
         sprintf(chan_path, "/var/iot/channels/%s", chan_id);
     else {
@@ -3971,5 +4018,35 @@ static void lgw_exit_fail() {
     }
     output_status(0);  /* exist, reset the status */
     exit(EXIT_FAILURE);
+}
+
+static int strcpypt(char* dest, const char* src, int* start, int size, int len)
+{
+    int i, j;
+
+    i = *start;
+    
+    while (src[i] == ' ' && i < size) {
+        i++;
+    }
+
+    if ( i >= size ) return 0;
+
+    for (j = 0; i < size; i++) {
+        if (src[i] == ',') {
+            i++; // skip ','
+            break;
+        }
+
+        if (j == len - 2) 
+            continue;
+
+		if(src[i] != 0 && src[i] != 10 )
+            dest[j++] = src[i];
+    }
+
+    *start = i;
+
+    return j;
 }
 /* --- EOF ------------------------------------------------------------------ */

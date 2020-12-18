@@ -179,7 +179,7 @@ enum jit_error_e jit_enqueue(struct jit_queue_s *queue, struct timeval *time, st
     enum jit_error_e err_collision;
     uint32_t asap_count_us;
 
-    MSG_DEBUG(DEBUG_JIT, "Current concentrator time is %u, pkt_type=%d\n", time_us, pkt_type);
+    MSG_DEBUG(DEBUG_JIT, "Current concentrator time is %u, pkt_countus is %u, pkt_type=%d\n", time_us, packet->count_us, pkt_type);
 
     if (packet == NULL) {
         MSG_DEBUG(DEBUG_JIT_ERROR, "ERROR: invalid parameter\n");

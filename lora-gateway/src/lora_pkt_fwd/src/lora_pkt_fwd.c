@@ -314,11 +314,11 @@ typedef struct dnlink {
     char pdformat[8];
     uint8_t payload[512];
     uint8_t psize;
-    uint8_t txpw;
-    uint8_t txbw;
-    uint8_t txdr;
+    int txpw;
+    int txbw;
+    int txdr;
+    int rxwindow;
     uint32_t txfreq;
-    uint8_t rxwindow;
     struct dnlink *pre;
     struct dnlink *next;
 } DNLINK;
@@ -3617,7 +3617,7 @@ void thread_ent_dnlink(void) {
     char txfreq[12];
     char rxwindow[2];
     
-    char uaddr;
+    uint32_t uaddr;
     char addr[16];
     char txmode[8];
     char pdformat[8];
@@ -3704,16 +3704,12 @@ void thread_ent_dnlink(void) {
                 entry = (DNLINK *) malloc(sizeof(DNLINK));
 
                 if (strcpypt(txpw, buff_down, &start, size, sizeof(txpw)) > 0) {
-                    i = sscanf(txpw, "%u", &entry->txpw); 
-                    if (i != 1)
-                        entry->txpw = 0;
+                    entry->txpw = atoi(txpw);
                 } else
                     entry->txpw = 0;
 
                 if (strcpypt(txbw, buff_down, &start, size, sizeof(txbw)) > 0) {
-                    i = sscanf(txbw, "%u", &entry->txbw); 
-                    if (i != 1)
-                        entry->txbw = 0;
+                    entry->txbw = atoi(txbw);
                 } else
                     entry->txbw = 0; 
 
@@ -3737,17 +3733,17 @@ void thread_ent_dnlink(void) {
 
                 if (strcpypt(txfreq, buff_down, &start, size, sizeof(txfreq)) > 0) {
                     i = sscanf(txfreq, "%u", &entry->txfreq);
-                    if (i != 1 || entry->txfreq < 100000000UL)
+                    if (i != 1)
                         entry->txfreq = 0;
                 } else 
                     entry->txfreq = 0; 
 
                 if (strcpypt(rxwindow, buff_down, &start, size, sizeof(rxwindow)) > 0) {
-                    i = sscanf(rxwindow, "%u", &entry->rxwindow);
-                    if (i != 1 || entry->rxwindow > 2 || entry->rxwindow < 1)
+                    entry->rxwindow = atoi(rxwindow);
+                    if (entry->rxwindow > 2 || entry->rxwindow < 1)
                         entry->rxwindow = 0;
                 } else 
-                    entry->txfreq = 0; 
+                    entry->rxwindow = 0; 
 
                 strcpy(entry->devaddr, addr);
                 if (strstr(pdformat, "hex") != NULL) { 
@@ -3922,8 +3918,9 @@ static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, ui
     if (dnelem->txbw > 0)
         txpkt.bandwidth = dnelem->txbw;
     else
-        txpkt.coderate = CR_LORA_4_5;
+        txpkt.bandwidth = rx2bw;
 
+    txpkt.coderate = CR_LORA_4_5;
     txpkt.invert_pol = true;
     txpkt.preamble = STD_LORA_PREAMB;
     txpkt.tx_mode = txmode;
@@ -3952,8 +3949,8 @@ static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, ui
     gettimeofday(&current_unix_time, NULL);
     get_concentrator_time(&current_concentrator_time, current_unix_time);
     jit_result = jit_enqueue(&jit_queue, &current_concentrator_time, &txpkt, downlink_type);
-    MSG_DEBUG(DEBUG_INFO, "INFO~ [CUSDN]DNRX2-> tmst:%u, freq:%u, psize:%u.\n",
-            txpkt.count_us, txpkt.freq_hz, txpkt.size);
+    MSG_DEBUG(DEBUG_INFO, "INFO~ [CUSDN]DNRX2-> %s, size:%u, tmst:%u, freq:%u, txdr:%u, txbw:%u, txpw:%u.\n",
+            txmode?"TIME":"IMME", txpkt.size, txpkt.count_us, txpkt.freq_hz, txpkt.datarate, txpkt.bandwidth, txpkt.rf_power);
 
     return jit_result;
 }
@@ -4038,7 +4035,7 @@ static int strcpypt(char* dest, const char* src, int* start, int size, int len)
             break;
         }
 
-        if (j == len - 2) 
+        if (j == len - 1) 
             continue;
 
 		if(src[i] != 0 && src[i] != 10 )

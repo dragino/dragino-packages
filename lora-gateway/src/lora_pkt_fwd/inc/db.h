@@ -10,7 +10,7 @@
 
 #include <sqlite3.h>
 
-#define LOOKUPSKEY "select appskey, nwkskey from abpdevs where devaddr = ?;"
+#define LOOKUPSKEY "select appskey, nwkskey from KEY.abpdevs where devaddr = ?;"
 #define INCTATOLUP "update totalpkt set totalup = ?;"
 #define INCTATOLDW "update totalpkt set totaldw = ?;"
 

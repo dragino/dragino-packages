@@ -51,8 +51,7 @@ out:
 
 bool db_init(const char* dbpath, struct context* cntx) {
     int ret;
-    sqlite3_stmt* initpkt_stmt;
-    sqlite3_stmt* delpkt_stmt;
+    sqlite3_stmt* tmp_stmt;
 
     ret = sqlite3_open(dbpath, &cntx->db);
     if (ret) {
@@ -68,18 +67,41 @@ bool db_init(const char* dbpath, struct context* cntx) {
     INITSTMT(INCTATOLUP, cntx->totalup_stmt);
     INITSTMT(INCTATOLDW, cntx->totaldw_stmt);
 
-    INITSTMT("delete from totalpkt;", delpkt_stmt);
-    INITSTMT("insert into totalpkt values (time('now', 'localtime'), 0, 0);", initpkt_stmt);
+    INITSTMT("delete from abpdevs;", tmp_stmt);
+    ret = sqlite3_step(tmp_stmt);  // insert the first row of totalpkt table
+    if (ret != SQLITE_DONE) 
+        printf("DBDEBUG~ delete from devskey: %s \n", sqlite3_errstr(ret));
+    sqlite3_finalize(tmp_stmt);
 
-    ret = sqlite3_step(delpkt_stmt);
+    INITSTMT("ATTACH DATABASE '/etc/lora/devskey' AS COPY;", tmp_stmt);
+    ret = sqlite3_step(tmp_stmt);  // insert the first row of totalpkt table
+    if (ret != SQLITE_DONE) 
+        printf("DBDEBUG~ attach database: %s \n", sqlite3_errstr(ret));
+    sqlite3_finalize(tmp_stmt);
+    
+    INITSTMT("INSERT OR REPLACE INTO ABPDEVS (devaddr, appskey, nwkskey) SELECT devaddr,appskey, nwkskey FROM COPY.abpdevs;", tmp_stmt);
+    ret = sqlite3_step(tmp_stmt);  // insert the first row of totalpkt table
+    if (ret != SQLITE_DONE) 
+        printf("DBDEBUG~ Copy from devskey: %s \n", sqlite3_errstr(ret));
+    sqlite3_finalize(tmp_stmt);
+
+    INITSTMT("DETACH DATABASE COPY;", tmp_stmt);
+    ret = sqlite3_step(tmp_stmt);  // insert the first row of totalpkt table
+    if (ret != SQLITE_DONE) 
+        printf("DBDEBUG~ DETACH from devskey: %s \n", sqlite3_errstr(ret));
+    sqlite3_finalize(tmp_stmt);
+
+    INITSTMT("delete from totalpkt;", tmp_stmt);
+    ret = sqlite3_step(tmp_stmt);
     if (ret != SQLITE_DONE) 
         printf("DBDEBUG~ delete from tatalpkt: %s \n", sqlite3_errstr(ret));
-    sqlite3_finalize(delpkt_stmt);
+    sqlite3_finalize(tmp_stmt);
 
-    ret = sqlite3_step(initpkt_stmt);  // insert the first row of totalpkt table
+    INITSTMT("insert into totalpkt values (time('now', 'localtime'), 0, 0);", tmp_stmt);
+    ret = sqlite3_step(tmp_stmt);  // insert the first row of totalpkt table
     if (ret != SQLITE_DONE) 
-        printf("DBDEBUG~ delete from tatalpkt: %s \n", sqlite3_errstr(ret));
-    sqlite3_finalize(initpkt_stmt);
+        printf("DBDEBUG~ init tatalpkt: %s \n", sqlite3_errstr(ret));
+    sqlite3_finalize(tmp_stmt);
 
     return true;
 

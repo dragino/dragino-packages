@@ -1489,7 +1489,7 @@ int main(void)
 	if (!get_config("general", gwcfg, sizeof(gwcfg)))
         strcpy(gwcfg, "EU");  /* default regional config */
 
-    if ((strstr(gwcfg, "EU") != NULL) || (strstr(gwcfg, "IN") != NULL)) {
+    if (strstr(gwcfg, "EU") != NULL) {
         rx2dr = DR_LORA_SF12;
         rx2bw = BW_125KHZ;
         rx2freq = 869525000UL;

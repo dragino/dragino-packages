@@ -677,6 +677,7 @@ void rxlora(radiodev *dev, uint8_t rxmode)
 
     // now instruct the radio to receive
     if (rxmode == RXMODE_SINGLE) { // single rx
+        writeReg(dev->spiport, REG_SYMB_TIMEOUT_LSB , 0xFF);
         //printf("start rx_single\n");
         opmode(dev->spiport, OPMODE_RX_SINGLE);
         //writeReg(dev->spiport, REG_OPMODE, OPMODE_RX_SINGLE);

@@ -11,6 +11,8 @@ dpp=`uci get gateway.general.dwport`
 stat=`uci get gateway.general.stat`
 email=`uci get gateway.general.email`
 maccrypto=`uci get gateway.general.maccrypto`
+mac2db=`uci get gateway.general.mac2db`
+custom_downlink=`uci get gateway.general.custom_downlink`
 
 latitude=`uci get gateway.general.LAT`
 longitude=`uci get gateway.general.LON`
@@ -55,11 +57,22 @@ gen_gw_cfg() {
 	
 	#ABP Communication
 	if [ "$maccrypto" = "1" ];then
-		json_add_boolean "mac_decode" 1	    #ABP Decode
+		json_add_boolean "mac_decoded" 1	    #ABP Decode
 	fi
-	json_add_boolean "mac2file" 0   # Save Decode Payload to file 
-	json_add_boolean "mac2db" 0   # Save Decode Payload to database 
-	json_add_boolean "custom_downlink" 0   # Allow custom downlink
+
+	json_add_boolean "mac2file" 1   # Save Decode Payload to file 
+
+	if [ "$mac2db" = "1" ];then
+		json_add_boolean "mac2db" 1	    
+    else
+		json_add_boolean "mac2db" 0	   
+	fi
+
+	if [ "$custom_downlink" = "1" ];then
+		json_add_boolean "custom_downlink" 1	    
+    else
+		json_add_boolean "custom_downlink" 0	    
+	fi
 
         # stastatic 状态和统计的间隔时间，单位是秒*/
 	json_add_int	"stat_interval" "30"  # 这个和 server 里面的 Kepp Alive 区别? 

@@ -121,6 +121,7 @@ gen_gw_cfg() {
 		  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
 		  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
 		json_add_int "fport_filter" "`uci get gateway.server1.fport_filter`" 
+		json_add_int "filter_fport" "`uci get gateway.server1.devaddr_filter`"
 		json_add_string "devaddr_filter" "`uci get gateway.server1.devaddr_filter`"
 		json_add_boolean "forward_crc_valid" "`uci get gateway.server1.forward_crc_valid`"
 		json_add_boolean "forward_crc_error" "`uci get gateway.server1.forward_crc_error`"
@@ -147,6 +148,7 @@ gen_gw_cfg() {
 		  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
 		  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
 		json_add_int "fport_filter" "0" 
+		json_add_int "filter_devaddr" "0" 
 		json_add_string "devaddr_filter" "0"
 		json_add_boolean "forward_crc_valid" 1
 		json_add_boolean "forward_crc_error" 0

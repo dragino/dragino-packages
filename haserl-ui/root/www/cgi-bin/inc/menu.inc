@@ -28,6 +28,7 @@
     <div class="dropdown-content">
       <a href="/cgi-bin/lora-lora.has">LoRa</a>
       <a href="/cgi-bin/lora-abp.has">ABP Decryption</a>
+      <a href="/cgi-bin/lora-filter.has">Filter Configure</a>
     </div>
   </div>
   <% else %>

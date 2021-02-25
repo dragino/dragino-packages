@@ -32,7 +32,7 @@ gen_gw_cfg() {
 	json_add_string "email" "$email"
 	json_add_string "gateway_ID" "$gwid" 
 	
-	json_add_int "log_mask" "100"    # Log Level
+	json_add_string "log_mask" "100"    # Log Level
 	json_add_boolean "radiostream_enable" 1    # Enable SX Radio TX /RX
 	
 	#ghoststream
@@ -57,7 +57,7 @@ gen_gw_cfg() {
 	
 	#ABP Communication
 	if [ "$maccrypto" = "1" ];then
-		json_add_boolean "mac_decoded" 1	    #ABP Decode
+		json_add_boolean "mac_decode" 1	    #ABP Decode
 	fi
 
 	json_add_boolean "mac2file" 1   # Save Decode Payload to file 

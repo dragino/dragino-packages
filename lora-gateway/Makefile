@@ -39,13 +39,6 @@ define Build/Prepare
 	$(CP) ./src/?* $(PKG_BUILD_DIR)/
 endef
 
-define Build/InstallDev
-	$(INSTALL_DIR) $(1)/usr/include/lora-gateway
-	$(CP) $(PKG_BUILD_DIR)/libloragw/inc/* $(1)/usr/include/lora-gateway
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/libloragw/libloragw.a $(1)/usr/lib/
-endef
-
 define Package/lora-gateway/install
 	$(INSTALL_DIR) $(1)/usr/lora
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libloragw/test* $(1)/usr/lora

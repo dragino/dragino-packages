@@ -147,6 +147,8 @@ uint8_t DEBUG_ERROR      = 1;
 #define UP                          0
 #define DOWN                        1
 
+#define FCNT_GAP                    9
+
 #define MAXPAYLOAD                  512
 
 /* -------------------------------------------------------------------------- */
@@ -2392,9 +2394,13 @@ void thread_up(void) {
 }
 
 void thread_proc_rxpkt() {
-    int idx; /* loop variables */
+    int i, idx; /* loop variables */
     int fsize = 0;
     struct lgw_pkt_rx_s *p; /* pointer on a RX packet */
+
+    uint32_t mic;
+    uint32_t fcnt;
+    bool fcnt_valid;
 
     enum jit_error_e jit_result = JIT_ERROR_OK;
 
@@ -2435,30 +2441,50 @@ void thread_proc_rxpkt() {
                             if (p->size > 13) { /* offset of frmpayload */
                                 fsize = p->size - 13 - macmsg.FHDR.FCtrl.Bits.FOptsLen; 
                                 memcpy(payloaden, p->payload + 9 + macmsg.FHDR.FCtrl.Bits.FOptsLen, fsize);
-                                LoRaMacPayloadDecrypt(payloaden, fsize, devinfo.appskey, devinfo.devaddr, UP, (uint32_t)macmsg.FHDR.FCnt, payloadtxt);
-
-                                /* Debug message of decoded payload
-                                printf("INFO~ [Decode]RX(%d):", fsize);
-                                for (i = 0; i < fsize; ++i) {
-                                    printf("%02X", payloadtxt[i]);
+                                fcnt_valid = false;
+                                for (i = 0; i < FCNT_GAP; i++) {   // loop 8 times
+                                    fcnt = macmsg.FHDR.FCnt | (i * 0x10000);
+                                    LoRaMacComputeMic(p->payload, p->size - 4, devinfo.nwkskey, devinfo.devaddr, UP, fcnt, &mic);
+                                    MSG_DEBUG(DEBUG_INFO, "INFO~ [MIC] mic=%08X, MIC=%08X, fcnt=%u, FCNT=%u\n", mic, macmsg.MIC, fcnt, macmsg.FHDR.FCnt);
+                                    if (mic == macmsg.MIC) {
+                                        fcnt_valid = true;
+                                        MSG_DEBUG(DEBUG_INFO, "INFO~ [MIC] Found a match fcnt(=%u)\n", fcnt);
+                                        break;
+                                    }
                                 }
-                                printf("\n");
-                                */
 
-                                FILE *fp;
-                                char pushpath[128];
-								char rssi_snr[32] = {'\0'};
-								sprintf(rssi_snr, "%08X%08X", (short)p->rssi, (short)(p->snr*10));
-                                snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
-                                fp = fopen(pushpath, "w+");
-                                if (NULL == fp)
-                                    MSG_DEBUG(DEBUG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
-                                else { 
-                                    fwrite(rssi_snr,sizeof(uint8_t), 16, fp);
-									fwrite(payloadtxt, sizeof(uint8_t), fsize + 1, fp);
-                                    fflush(fp); 
-                                    fclose(fp);
-                                }
+                                if (fcnt_valid) {
+
+                                    if (macmsg.FPort == 0)
+                                        LoRaMacPayloadDecrypt(payloaden, fsize, devinfo.nwkskey, devinfo.devaddr, UP, fcnt, payloadtxt);
+                                    else
+                                        LoRaMacPayloadDecrypt(payloaden, fsize, devinfo.appskey, devinfo.devaddr, UP, fcnt, payloadtxt);
+
+                                    /* Debug message of decoded payload
+                                    printf("INFO~ [Decode]RX(%d):", fsize);
+                                    for (i = 0; i < fsize; ++i) {
+                                        printf("%02X", payloadtxt[i]);
+                                    }
+                                    printf("\n");
+                                    */
+
+                                    FILE *fp;
+                                    char pushpath[128];
+                                    char rssi_snr[32] = {'\0'};
+                                    sprintf(rssi_snr, "%08X%08X", (short)p->rssi, (short)(p->snr*10));
+                                    snprintf(pushpath, sizeof(pushpath), "/var/iot/channels/%08X", devinfo.devaddr);
+                                    fp = fopen(pushpath, "w+");
+                                    if (NULL == fp)
+                                        MSG_DEBUG(DEBUG_INFO, "INFO~ [Decrypto] Fail to open path: %s\n", pushpath);
+                                    else { 
+                                        fwrite(rssi_snr,sizeof(uint8_t), 16, fp);
+                                        fwrite(payloadtxt, sizeof(uint8_t), fsize + 1, fp);
+                                        fflush(fp); 
+                                        fclose(fp);
+                                    }
+                                } else 
+                                    MSG_DEBUG(DEBUG_INFO, "INFO~ [MIC] Invalid fcnt(=%u) for devaddr:%08X \n", macmsg.FHDR.FCnt, devinfo.devaddr);
+
                             }
 
                             /* Customer downlink process */

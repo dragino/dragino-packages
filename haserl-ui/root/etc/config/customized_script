@@ -1,0 +1,4 @@
+
+config settings 'general'
+	option para1 '/var/sensor_data'
+

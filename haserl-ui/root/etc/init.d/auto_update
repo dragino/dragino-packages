@@ -1,0 +1,257 @@
+#!/bin/sh /etc/rc.common
+START=99
+
+start()
+{	
+	# Auto update settiings. 
+	. /usr/share/libubox/jshn.sh
+
+	PROVISION_SERVER=`uci get system.@system[0].provision_server`
+	let CONFIG_ORIG=`uci get system.@system[0].config_ver`
+
+	#eth1_net will look for local server at WAN port 
+	if [ "$PROVISION_SERVER" == "eth1_net" ];then
+		eval $(ifconfig eth1 | grep "inet addr" | awk -F "[ :.]+" '{printf("a=%s;b=%s;c=%s",$4,$5,$6);}')
+		
+		if [ ! -z $a ];then
+			PROVISION_SERVER="http://$a.$b.$c.254"    ## point to 254 ip in the same eth1 network. 	
+		fi
+	fi
+
+	#Get WiFI MAC Address: 	
+	WIFI_MAC=`xxd -ps -l 6 -s 0x1002 /dev/mtd6`
+
+	PROVISION_PATH=$PROVISION_SERVER      
+	LOCAL_FILE="/var/$WIFI_MAC"
+
+	rm -f $LOCAL_FILE
+
+	#Get provision file
+	wget $PROVISION_PATH/$WIFI_MAC -O $LOCAL_FILE &> /var/provision.log
+	status=`tail -n 1 /var/provision.log`
+	if [ "`echo $status | grep "Download completed" -c`" == 1 ];then
+		logger -t auto_update "download complete"
+	else 
+		logger -t auto_update "Get provision file fail: $status"
+		echo "<span class="impact-light">Get provision file fail: $status</span>" > /var/provision.log
+		exit
+	fi
+
+	# Sansacti Check
+	jshn -R $LOCAL_FILE &> /var/provision.log
+	JSON_CHECK=`cat /var/provision.log | grep "Failed to parse message data" -c`
+	if [ "$JSON_CHECK" == "1" ];then
+		logger -t auto_update "Provision file check fail: not a Json file" 
+		echo "<span class="impact-light">Provision file check fail: not a Json file</span>" > /var/provision.log
+		exit
+	fi
+
+	json_load_file "$LOCAL_FILE"
+	json_get_var provision_server "provision_server"
+	json_get_var config_ver "config_ver"
+	json_get_var gateway_id "gateway_id"
+	json_get_var email "email"
+	json_get_var gateway_conf "gateway_conf"
+	json_get_var network_conf "network_conf"
+	json_get_var wireless_conf "wireless_conf"
+	json_get_var host_status "host_status"
+	json_get_var ABP_KEY "ABP_KEY"
+	json_get_var mqtt_channel "mqtt_channel"
+	json_get_var mqtt_conf "mqtt_conf"	
+	json_get_var provision_key "provision_key"
+
+	# Check the Key match.
+	local_key=`hexdump -v -e '1/1 "%.2x"' -s $((0x100)) -n 32 /dev/mtd6` 
+	if [ "$provision_key" != "$local_key" ];then
+		logger -t auto_update "Key mismatch, Quit Update"
+		echo "<span class="impact-light">Key mismatch, Quit Update</span>" > /var/provision.log
+		exit
+	fi 
+
+
+
+	# Compare if server have a higher configure version. 
+	[ -z $CONFIG_ORIG ] && CONFIG_ORIG=0
+	if [ $CONFIG_ORIG -ge $config_ver ]; then
+		logger -t auto_update "local config has higher or equal version. Quit Update"
+		echo "<span class="impactOK">local config has higher or equal version</span>" > /var/provision.log
+		exit
+	fi 
+
+	reload_iot=0
+
+	# Get and Replace Gateway Configure File  
+	if [ ! -z $gateway_conf ]; then
+		rm -f /var/gateway
+		wget $PROVISION_PATH/$gateway_conf -O /var/gateway &> /var/provision.log
+		status=`tail -n 1 /var/provision.log`
+		if [ "`echo $status | grep "Download completed" -c`" == 1 ];then
+			#record Gateway ID and email
+			if [ -z $gateway_id ] || [ "$gateway_id" == "keep" ]; then
+				GWID="`uci get gateway.general.GWID`"
+			else 
+				GWID="$gateway_id"
+			fi 
+
+			if [ -z $email ] || [ "$email" == "keep" ]; then
+				GWMAIL="`uci get gateway.general.email`"
+			else 
+				GWMAIL="$email"
+			fi 
+		
+			logger -t auto_update "gateway config download complete"
+			cp -f /var/gateway /etc/config/
+			#set back gateway ID and email. 
+			uci set gateway.general.GWID=$GWID
+			uci set gateway.general.email=$GWMAIL
+			uci commit gateway
+			reload_iot=1
+		else 
+			logger -t auto_update "get gateway config file fail: $status"
+		fi
+	fi 
+
+
+	# Get and Replace ABP Key File
+	if [ ! -z $ABP_KEY ]; then
+		rm -f /var/devskey
+		wget $PROVISION_PATH/$ABP_KEY -O /var/devskey &> /var/provision.log
+		status=`tail -n 1 /var/provision.log`
+		if [ "`echo $status | grep "Download completed" -c`" == 1 ];then
+			logger -t auto_update "abp key download complete"
+			cp -f /var/devskey /etc/lora/
+		else 
+			logger -t auto_update "get abp key file fail: $status"
+		fi
+	fi 
+
+
+
+	##############################################
+	# Get and Replace MQTT Configure File
+	if [ ! -z $mqtt_conf ]; then
+		rm -f /var/mqtt
+		wget $PROVISION_PATH/$mqtt_conf -O /var/mqtt &> /var/provision.log
+		status=`tail -n 1 /var/provision.log`
+		if [ "`echo $status | grep "Download completed" -c`" == 1 ];then
+			logger -t auto_update "mqtt config download complete"
+			cp -f /var/mqtt /etc/config/
+			uci commit mqtt
+			reload_iot=1
+		else 
+			logger -t auto_update "get mqtt config file fail: $status"
+		fi
+	fi
+
+	# Get and Replace MQTT_Channel file
+	if [ ! -z $mqtt_channel ]; then
+		rm -f /var/mqtt_channel
+		wget $PROVISION_PATH/$mqtt_channel -O /var/mqtt_channel &> /var/provision.log
+		status=`tail -n 1 /var/provision.log`
+		if [ "`echo $status | grep "Download completed" -c`" == 1 ];then
+			logger -t auto_update "download mqtt channel complete"
+			cp -f /var/mqtt_channel /etc/iot/channels
+		else 
+			logger -t auto_update "get mqtt channel file fail: $status"
+		fi
+	fi 
+
+
+	#Reload IoT Service
+	if [ $reload_iot -eq 1 ]; then
+		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
+		killall -q inotifywait                  # Remove any inotfywait process
+		killall -q loriot_dragino_lg308_spi  # Remove any remaining LORIOT process
+		/etc/init.d/lora_gw reload > /dev/null
+		sleep 2
+		/etc/init.d/iot reload > /dev/null
+		rm -f /var/iot/status
+	fi
+
+
+	##############################################
+	# Get and Replace Network Configure File
+	reload_net=0
+	if [ ! -z $network_conf ]; then
+		rm -f /var/network
+		wget $PROVISION_PATH/$network_conf -O /var/network &> /var/provision.log
+		status=`tail -n 1 /var/provision.log`
+		if [ "`echo $status | grep "Download completed" -c`" == 1 ];then
+			wan_host=`uci get network.wan.hostname`
+			logger -t auto_update "network config download complete"
+			cp -f /var/network /etc/config/
+			if [ -z $host_status ] || [ $host_status -ne 0 ]; then
+				uci set network.wan.hostname="$wan_host"
+			fi 
+			uci commit network
+			reload_net=1
+		else 
+			logger -t auto_update "get network config file fail: $status"
+		fi
+	fi
+
+	# Get and Replace Wireless Configure File
+	if [ ! -z $wireless_conf ]; then
+		rm -f /var/wireless
+		wget $PROVISION_PATH/$wireless_conf -O /var/wireless &> /var/provision.log
+		status=`tail -n 1 /var/provision.log`
+		if [ "`echo $status | grep "Download completed" -c`" == 1 ];then
+			ssid=`uci get wireless.ap_0.ssid`
+			logger -t auto_update "wireless config download complete"
+			cp -f /var/wireless /etc/config/
+			if [ -z $host_status ] || [ $host_status -ne 0 ]; then
+				uci set wireless.ap_0.ssid=$ssid
+			fi 
+			uci commit wireless
+			reload_net=1
+		else 
+			logger -t auto_update "get wireless config file fail: $status"
+		fi
+	fi
+
+	#reload network
+	if [ $reload_net -eq 1 ]; then
+		(sleep 1; /etc/init.d/network restart) &
+		(sleep 20; /etc/init.d/fallbackip start) &
+	fi
+
+	# Change root password
+	json_get_var root_password "root_password"
+	if [ ! -z $root_password ] && [ ${#root_password} -ge 6 ];then
+		(echo $root_password;sleep 1; echo $root_password ) | passwd root
+		/etc/init.d/uhttpd restart
+	fi
+
+	# Change Admin password
+	json_get_var admin_password "admin_password"
+	if [ ! -z $admin_password ] && [ ${#admin_password} -ge 6 ];then
+		(echo $admin_password;sleep 1; echo $admin_password ) | passwd admin
+		/etc/init.d/uhttpd restart
+	fi
+
+	json_get_var script "script"
+	echo $script
+	if [ ! -z $script ]; then
+		rm -f /var/auto_script
+		wget $PROVISION_PATH/$script -O /var/auto_script &> /var/provision.log
+		status=`tail -n 1 /var/provision.log`
+		if [ "`echo $status | grep "Download completed" -c`" == 1 ];then
+			logger -t auto_update "Auto script download complete"
+			chmod +x /var/auto_script
+			/var/auto_script
+		else 
+			logger -t auto_update "get auto script file fail: $status"
+		fi
+	fi
+
+	#Upgrade to latest configure version
+	[ ! -z $provision_server ] && uci set system.@system[0].provision_server=$provision_server
+	uci set system.@system[0].config_ver=$config_ver
+	uci commit system
+	echo "<span class="impactOK">Update to version : $config_ver</span>" > /var/provision.log
+
+	json_get_var reboot "reboot"	
+	if [ ! -z $reboot ] && [ $reboot -eq 1 ]; then
+		reboot
+	fi
+}

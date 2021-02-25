@@ -3,14 +3,11 @@
 START=58
 USE_PROCD=1
 
-
-
 init_board() {
     echo 15 > /sys/class/gpio/export
 	echo low > /sys/class/gpio/gpio15/direction
 	service=`uci get gateway.general.server_type`
-	ps | grep "loriot_dragino_lg308_spi" | grep -v grep | awk '{print $1}' | xargs kill -s 9
-
+	
 	if [[ "$service" = "tcpudp" ]]; then
 		process="tcp_process.sh"
 	elif [[ "$service" = "mqtt" ]]; then
@@ -24,6 +21,9 @@ init_board() {
 		process="loriot_dragino_lg308_spi"
 		option="-f -s ${LORIOT_URL}"
 		/usr/bin/${process} ${option}  > /dev/null &
+		exit
+	elif [[ "$service" = "station" ]]; then
+		cd /etc/station ; station -L /var/iot/station.log -d
 		exit
 	fi
 }

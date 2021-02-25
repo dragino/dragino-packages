@@ -21,12 +21,13 @@ init_board() {
         /usr/bin/generate-config.sh
     elif [[ "$chip" = "sx1302" ]]; then
         process="fwd"
-		/usr/bin/generate-config.sh
+	ln -sf /usr/bin/fwd_sx1302 /usr/bin/fwd
+	/usr/bin/generate-config.sh
     else
         exit 1
     fi
 
-    if [[ "$mode" = "disabled" ]] || [[ "$mode" = "loriot" ]]; then
+    if [[ "$mode" = "disabled" ]] || [[ "$mode" = "loriot" ]] || [[ "$mode" = "station" ]] ; then
         process_running=`pidof $process`
         if [[ ! -z "process_running" ]]; then
             stop

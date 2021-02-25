@@ -6,12 +6,12 @@
 <%
   # Update server_type for changeFunct()
 	if [ -e /tmp/changeFunct.flag ]; then
-    rm /tmp/changeFunct.flag
-    if [ "$FORM_SERVER_TYPE" != "" ]; then  # Make sure it is a real change
-   	  uci set mqtt.common.server_type=$FORM_SERVER_TYPE
-      uci commit mqtt
-    fi
-  fi
+		rm /tmp/changeFunct.flag
+		if [ "$FORM_SERVER_TYPE" != "" ]; then  # Make sure it is a real change
+		  uci set mqtt.common.server_type=$FORM_SERVER_TYPE
+		  uci commit mqtt
+		fi
+	fi
 
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
     server_type=$(uci -q get mqtt.common.server_type)
@@ -51,13 +51,9 @@
   if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set gateway.general.server_type="mqtt"
 		uci commit gateway
-		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
-		killall inotifywait                  # Remove any inotfywait process
-		killall -q loriot_dragino_lg308_spi  # Remove any remaining LORIOT process
-    /etc/init.d/lora_gw restart > /dev/null
-    sleep 2
-    /etc/init.d/iot reload > /dev/null
-		rm /var/iot/status
+		/etc/init.d/lora_gw reload > /dev/null
+		sleep 2
+		/usr/bin/reload_iot_service.sh
   fi
   
   rm /tmp/changeFunct.flag   # Just to be sure
@@ -69,35 +65,50 @@
 # --- Get the variables for the HTML page ---
 	board=`cat /var/iot/board`
 	iot_service="$(uci -q get gateway.general.server_type)"
-  server_type="$(uci -q get mqtt.common.server_type)"
+	server_type="$(uci -q get mqtt.common.server_type)"
 
 	url="$(uci -q get mqtt.$server_type.url)"
 	port="$(uci -q get mqtt.$server_type.port)"
-  user="$(uci -q get mqtt.$server_type.user)"                                                                          
+	user="$(uci -q get mqtt.$server_type.user)"                                                                          
 	pwd="$(uci -q get mqtt.$server_type.pwd)"
 	cert="$(uci -q get mqtt.$server_type.cert)"
-  key="$(uci -q get mqtt.$server_type.key)"
+	key="$(uci -q get mqtt.$server_type.key)"
 	cafile="$(uci -q get mqtt.$server_type.cafile)"
 	cid="$(uci -q get mqtt.$server_type.cid)"
 
 	pub_enable="$(uci -q get mqtt.common.pub_enable)"
-  pub_qos="$(uci -q get mqtt.$server_type.pub_qos)"                                                                      
+	pub_qos="$(uci -q get mqtt.$server_type.pub_qos)"                                                                      
 	topic="$(uci -q get mqtt.$server_type.pub_topic)"
-  data="$(uci -q get mqtt.$server_type.data)"
+	data="$(uci -q get mqtt.$server_type.data)"
 
 	sub_enable="$(uci -q get mqtt.common.sub_enable)"
-  sub_qos="$(uci -q get mqtt.$server_type.sub_qos)"
+	sub_qos="$(uci -q get mqtt.$server_type.sub_qos)"
 	sub_topic="$(uci -q get mqtt.$server_type.sub_topic)"
 	
-  # Prepare script select list
-  certdir="/etc/iot/cert"
-  rm /tmp/certs.txt
-  touch /tmp/certs.txt
-  cert_list=$(ls -1 $certdir)
-  for x in $cert_list; do
-  	echo "<option value=\"$x\">$x</option>" >> /tmp/certs.txt
-  done
+	# Prepare script select list
+	certdir="/etc/iot/cert"
+	rm /tmp/certs.txt
+	touch /tmp/certs.txt
+	cert_list=$(ls -1 $certdir)
+	for x in $cert_list; do
+		echo "<option value=\"$x\">$x</option>" >> /tmp/certs.txt
+	done
 	
+	type="$(uci -q get gateway.general.server_type)"
+	if [ "$type" == "station" ];  then	
+		trust_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Station for AWS </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>'	
+	elif [ "$type" == "loriot" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
+	elif [ "$type" == "mqtt" ];  then
+		trust_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN MQTT</span>'
+	elif [ "$type" == "tcpudp" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
+	elif [ "$type" == "customized" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
+	elif [ "$type" == "lorawan" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN  </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
+	fi
+
 	
 # --- Set up server specific display fields ---
 
@@ -338,6 +349,10 @@
 
 <tr class="rowSpacer"><td colspan="20"></td></tr>
 <tr class="rowSpacer"><td colspan="20"></td></tr>
+<tr>		
+	<td colspan="32"><% echo -n $trust_status%></td>
+</tr>
+
 <tr>
 	<td colspan="20">
 

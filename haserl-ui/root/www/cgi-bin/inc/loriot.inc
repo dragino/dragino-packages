@@ -11,6 +11,4 @@
 <option value="us1.loriot.io">California - us1.loriot.io</option>
 <option value="us2.loriot.io">New York - us2.loriot.io</option>
 <option value="sa1.loriot.io">Sao Paulo - sa1.loriot.io</option>
-
-
-
+<option value="custom" >Custom Loriot Server</option>

@@ -10,6 +10,13 @@ KEY_FILE="/etc/lora/devskey"
 server=`uci -q get tcp_client.general.server_address`
 port=`uci -q get tcp_client.general.server_port`
 
+# Check board type
+if [ -f /var/iot/board ]; then
+	board_type=`cat /var/iot/board`
+else
+	board_type="LG01"
+fi
+
 # Run Forever - process publish requests.
 while [ 1 ]
 do
@@ -19,6 +26,11 @@ do
 		if [ -n "$CID" ];then
 			[ $DEBUG -ge 2 ] && [ -n "$CID" ] && logger "[IoT.TCP]: Found Data at Local Channels:" $CID
 			for channel in $CID; do
+					
+				if [ "$board_type" == "LG01" ] || [ "$board_type" == "LG02" ]; then
+					tcp_data=`cat /var/iot/channels/$channel`
+					DECODER="LG01/LG02 Raw Data"
+				else
 					DECODER=`sqlite3 $KEY_FILE "SELECT decoder from abpdevs where devaddr = '$channel';"`					
 					logger "[IoT.TCP]: DECODER $DECODER $channel"
 					# Send the File
@@ -34,6 +46,7 @@ do
 							tcp_data=`/etc/lora/decoder/$DECODER $channel`
 						fi
 					fi
+				fi
 					
 					tcp_data="$channel:$tcp_data;"
 					

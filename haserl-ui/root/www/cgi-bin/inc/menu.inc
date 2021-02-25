@@ -38,19 +38,23 @@
 	<% # Set up LoRaWAN menu for board type
 	if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
 	%>
-  <div class="dropdown"> <!-- LoRa Parameter -->
-    <button class="dropbtn">LoRaWAN <span class="fas fa-caret-down"></span></button>
-    <div class="dropdown-content">
-      <a href="/cgi-bin/lorawan.has">LoRaWAN</a>
-      <a href="/cgi-bin/loriot.has">LORIOT</a>
-    </div>
-  </div>
-  <% else %>  
-    <a href="/cgi-bin/lorawan.has">LoRaWAN</a>
-	
-	<a href="/cgi-bin/http-client.has">HTTP</a>
-	
-  <% fi %>
+		<div class="dropdown"> <!-- LoRa Parameter -->
+			<button class="dropbtn">LoRaWAN <span class="fas fa-caret-down"></span></button>
+			<div class="dropdown-content">
+				<a href="/cgi-bin/lorawan.has">LoRaWAN</a>
+				
+				<% # Set up LoRaWAN menu for board type
+				if [ $model == "LIG16" ] ; then
+				%>
+					<a href="/cgi-bin/lorawan-aws.has">Amazon AWS IoT</a>
+				<% fi %>
+				<a href="/cgi-bin/loriot.has">LORIOT</a>
+			</div>
+		</div>
+	<% else %>  
+		<a href="/cgi-bin/lorawan.has">LoRaWAN</a>
+		<a href="/cgi-bin/http-client.has">HTTP</a>
+	<% fi %>
 
 
   <div class="dropdown"> <!-- MQTT -->

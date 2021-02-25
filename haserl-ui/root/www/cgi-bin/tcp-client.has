@@ -15,13 +15,9 @@
   if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		uci set gateway.general.server_type="tcpudp"
 		uci commit gateway
-		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
-		killall inotifywait                  # Remove any inotfywait process
-		killall -q loriot_dragino_lg308_spi  # Remove any remaining LORIOT process
-    /etc/init.d/lora_gw reload > /dev/null
-    sleep 2
-    /etc/init.d/iot reload > /dev/null
-		rm /var/iot/status
+		/etc/init.d/lora_gw reload > /dev/null
+		sleep 2
+		/usr/bin/reload_iot_service.sh
   fi
 
 %>
@@ -31,6 +27,22 @@
 <% 
 	addr="$(uci -q get tcp_client.general.server_address)"
 	port="$(uci -q get tcp_client.general.server_port)"
+	
+	type="$(uci -q get gateway.general.server_type)"
+	if [ "$type" == "station" ];  then	
+		trust_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Station for AWS </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">LoRaWAN TCP </span>'	
+	elif [ "$type" == "loriot" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN TCP </span>'
+	elif [ "$type" == "mqtt" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN TCP </span>'
+	elif [ "$type" == "tcpudp" ];  then
+		trust_status='<span class="black-light">Current Mode:</span>''<span class="impact-light"> LoRaWAN TCP </span>'
+	elif [ "$type" == "customized" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN TCP </span>'
+	elif [ "$type" == "lorawan" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN for IOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN TCP </span>'
+	fi
+
 %>
 
 
@@ -69,6 +81,10 @@
     </tr>
 
     <tr class="rowSpacer"></tr>
+   <tr>		
+			<td colspan="32"><% echo -n $trust_status%></td>
+   </tr>
+
 
     <tr>
       <td colspan="1"></td>

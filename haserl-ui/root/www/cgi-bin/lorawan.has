@@ -8,7 +8,7 @@
 		uci set gateway.general.GWID="$FORM_GWID"
 		uci set gateway.general.email="$FORM_EMAIL"
 
-		
+
 		# Set up the platform provider fields
 		primary_provider="$FORM_PRIMARY_PROVIDER"
 		logger "$FORM_PRIMARY_PROVIDER"
@@ -20,6 +20,9 @@
 		elif [ $primary_provider == "ttn" ];then
 			server_address="$FORM_SERVER_ADDRESS_TTN"
 			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS_TTN"
+		elif [ $primary_provider == "ttn_V3" ];then
+			server_address="$FORM_SERVER_ADDRESS_TTN_V3"
+			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS_TTN_V3"
 		elif [ $primary_provider == "mydevice" ];then
 			server_address="$FORM_SERVER_ADDRESS_MYDEVICE"
 			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS_MYDEVICE"
@@ -34,17 +37,14 @@
 		uci commit gateway
 	fi
 
-  if [ $FORM_BUTTON == "Save&Apply" ]; then
+	if [ $FORM_BUTTON == "Save&Apply" ]; then
 		uci set gateway.general.server_type="lorawan"
 		uci commit gateway
-		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
-		killall inotifywait                  # Remove any inotfywait process
-		killall -q loriot_dragino_lg308_spi  # Remove any remaining LORIOT process
-    /etc/init.d/lora_gw reload > /dev/null
-    sleep 2
-    /etc/init.d/iot reload > /dev/null
-		rm /var/iot/status
-  fi
+
+		/etc/init.d/lora_gw reload > /dev/null
+		sleep 2
+		/usr/bin/reload_iot_service.sh
+	fi
 %>
 
 <%# --- Get the variables for the HTML page --- %>
@@ -84,6 +84,22 @@
 	txsyncwd="$(uci -q get gateway.radio2.SYNCWD)"
 	
 	debug_str="<script>document.getElementById("debug").value="3";</script>"
+
+	type="$(uci -q get gateway.general.server_type)"
+	if [ "$type" == "station" ];  then	
+		trust_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Station for AWS </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'	
+	elif [ "$type" == "loriot" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+	elif [ "$type" == "mqtt" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+	elif [ "$type" == "tcpudp" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+	elif [ "$type" == "customized" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+	elif [ "$type" == "lorawan" ];  then
+		trust_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Semtech UDP</span>'
+	fi
+
 %>
 
 
@@ -142,7 +158,8 @@
 		<td colspan="1"></td>
 		<td colspan="5"><label for="PLATFORM">Service Provider</label></td>
 		<td colspan="6"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
-		  <option value="ttn" >The Things Network</option>
+		  <option value="ttn" >The Things Network V2</option>
+		  <option value="ttn_V3" >The Things Network V3</option>
 		  <option value="mydevice" >IoT In A Box</option>
 		  <option value="router.cn.thethings.network" >Tencent</option>		
 		  <option value="127.0.0.1" >Built-in for ABP Decode to MQTT</option>
@@ -160,13 +177,17 @@
 			<select id='server_address_ttn' name='SERVER_ADDRESS_TTN' style="display:none;">
 				<%inc /www/cgi-bin/inc/ttn-server.inc %>
 			</select>
-			
+
+			<select id='server_address_ttn_V3' name='SERVER_ADDRESS_TTN_V3' style="display:none;">
+				<%inc /www/cgi-bin/inc/ttn_V3-server.inc %>	
+			</select>			
+
 			<select id='server_address_mydevice' name='SERVER_ADDRESS_MYDEVICE' style="display:none;">
 				<%inc /www/cgi-bin/inc/iot-in-a-box-server.inc %>
 			</select>
 		</td>
 		<script>document.getElementById("server_address_ttn").value="<% echo -n $primary_server %>";</script>
-		
+		<script>document.getElementById("server_address_mydevice").value="<% echo -n $primary_server %>";</script>		
 	</tr>
 
 	<tr>
@@ -201,16 +222,22 @@
 		<td colspan="5"><label for="DEV_FILTER">DevAddr Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
 		<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
 		<p>Filter Unconfirmed Data Up & Confirmed Data Up if Dev Addr Prefix doesn't match</p>
-		<p>Value Range:1 ~ 8 bytes hex char: (0 to accept any Dev Addr Prefix)</p> 
+		<p>Value Range:1 ~ 8 hex char: (0 to accept any Dev Addr Prefix)</p> 
 		<p style="text-align: center;"><br>[Close]</p>
 		</div>
 		</td>
-		<td colspan="3"><input type="text" name="PRI_DEVADDR_FILTER" maxlength="3" VALUE=<% echo -n $pri_devaddr_filter %> ></td>
+		<td colspan="5"><input type="text" name="PRI_DEVADDR_FILTER" maxlength="8" VALUE=<% echo -n $pri_devaddr_filter %> ></td>
 		
 	</tr>
 	
 	<tr class="rowSpacer"></tr>
 	<tr class="rowSpacer"></tr>
+
+	<tr>
+		
+			<td colspan="32"><% echo -n $trust_status%></td>
+	</tr>
+
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="16">
@@ -234,6 +261,10 @@
 	document.getElementById("server_address_ttn").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
 	}
+	if (x == "ttn_V3") {
+	document.getElementById("server_address_ttn_V3").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
 	if (x == "mydevice") {
 	document.getElementById("server_address_mydevice").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
@@ -243,6 +274,7 @@ function displayServerURL(){
 	document.getElementById("server_address_label").style.display = "none";
 	document.getElementById("server_address").style.display = "none";
 	document.getElementById("server_address_ttn").style.display = "none";
+	document.getElementById("server_address_ttn_V3").style.display = "none";
 	document.getElementById("server_address_mydevice").style.display = "none";	
 	
 	var x = document.getElementById("primary_provider").value;
@@ -252,6 +284,10 @@ function displayServerURL(){
 	}
 	if (x == "ttn") {
 	document.getElementById("server_address_ttn").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
+	if (x == "ttn_V3") {
+	document.getElementById("server_address_ttn_V3").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
 	}
 	if (x == "mydevice") {

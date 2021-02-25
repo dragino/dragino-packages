@@ -9,6 +9,7 @@ fw_str=$(cat /etc/banner | grep Version | awk '{print $3}')
 date_str=$(date)
 up_str=$(uptime | cut -d " " -f4,5 | tr , " ")
 host_str=$(echo $HOSTNAME)
+service=$(uci get gateway.general.server_type)
 pic=$(cat /tmp/iot/pic.txt) #get centre icon photo filename
 %>
 
@@ -132,6 +133,7 @@ pic=$(cat /tmp/iot/pic.txt) #get centre icon photo filename
 <div class="footer" id="infoBar">
   <span>Firmware: <% echo -n $fw_str %></span>
   <span>Hostname: <% echo -n $host_str %> </span>
+  <span>IoT Service: <% echo -n $service %> </span>
   <span id="uptime" style="float: right;">Uptime: <% echo -n $up_str %> </span>
   <span id="sys-time" style="float: right;">System Time: <% echo -n $date_str %> </span>
 </div>

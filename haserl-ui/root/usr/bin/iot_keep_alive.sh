@@ -24,11 +24,15 @@ PING_WAN_HOST="139.130.4.5"  # Use this IP to check WAN connection (ns1.telstra.
 gsm_mode=0
 toggle_3g_time=90
 last_check_3g_dial=0
+RETRY_POWEROFF_GSM=5
+RETRY_REBOOT_GSM=61
 ONE="1"
 ZERO="0"
-iot_online=0
+retry_gsm=0
+iot_online="1"
 offline_flag=""
 is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16"`
+
 last_reload_time=`date +%s`
 
 board=`cat /var/iot/board`
@@ -195,13 +199,13 @@ use_wifi_as_gateway()
 gsm_poweroff()
 {
     logger -t iot_keep_alive "Turning off GSM module"
-    echo 0 > /sys/devices/virtual/gpio/gpio$Cellular_CTL/value
+    echo 1 > /sys/class/gpio/gpio$Cellular_CTL/value
 }
 
 gsm_poweron()
 {
     logger -t iot_keep_alive "Turning on GSM module"
-    echo 1 > /sys/devices/virtual/gpio/gpio$Cellular_CTL/value
+    echo 0 > /sys/class/gpio/gpio$Cellular_CTL/value
 }
 
 update_gateway()
@@ -232,6 +236,7 @@ do
 	if [ $receive_size -gt 1024 ];then
 		rm -rf /var/iot/receive/*
 		rm -rf /var/iot/channels/*
+		rm -f /var/iot/station.log
 	fi
 	
 	if [ "$global_ping" -gt "$ZERO" ];then   # Check if the device has internet connection
@@ -256,37 +261,54 @@ do
 		fi
 	else
 		has_internet=0
-		logger -t iot_keep_alive "Internet fail. Check interfaces for network connection"
-		chk_eth1_connection
-		if [ "$wan_ping" -gt "$ZERO" ];then
-			use_wan_as_gateway
-			has_internet=1
-		else 
-			logger -t iot_keep_alive "XX ping ETH1 $PING_WAN_HOST via eth1 fail"
-			chk_wlan0_connection
-			if [ "$wifi_ping" -gt "$ZERO" ];then
-				use_wifi_as_gateway
+		if [ "$iot_online" = "0" ] && [ "`uci get gateway.general.server_type`" = "lorawan" ]; then
+			logger -t iot_keep_alive "Internet fail. Check interfaces for network connection"
+			chk_eth1_connection
+			if [ "$wan_ping" -gt "$ZERO" ];then
+				use_wan_as_gateway
 				has_internet=1
-			else
-				logger -t iot_keep_alive "XX ping WiFi $PING_WIFI_HOST via wlan0-2 fail"
-				check_3g_connection
-				if [ "$gsm_ping" -gt "$ZERO" ]; then
+			else 
+				logger -t iot_keep_alive "XX ping ETH1 $PING_WAN_HOST via eth1 fail"
+				chk_wlan0_connection
+				if [ "$wifi_ping" -gt "$ZERO" ];then
+					use_wifi_as_gateway
 					has_internet=1
-					use_gsm_as_gateway
 				else
-				#All Interface doesn't have internet connection, reset all. 
-					logger -t iot_keep_alive "No internet at any interface"
-					update_gateway $WAN_IF
-					update_gateway $WIFI_IF
-				fi 
+					logger -t iot_keep_alive "XX ping WiFi $PING_WIFI_HOST via wlan0-2 fail"
+					if [ "`uci get network.cellular.auto`" = "1" ];then
+						check_3g_connection
+						if [ "$gsm_ping" -eq "$ZERO" ]; then
+							retry_gsm=`expr $retry_gsm + 1`
+							if [ "`expr $retry_gsm % $RETRY_POWEROFF_GSM`" -eq 0 ];then
+								gsm_poweroff 
+								sleep 5
+								gsm_poweron
+							elif [ "`expr $retry_gsm % $RETRY_REBOOT_GSM`" -eq 0 ];then
+								reboot
+							fi
+						fi
+					fi
+					if [ "$gsm_ping" -gt "$ZERO" ]; then
+						has_internet=1
+						use_gsm_as_gateway
+					else
+					#All Interface doesn't have internet connection, reset all. 
+						logger -t iot_keep_alive "No internet at any interface"
+						update_gateway $WAN_IF
+						update_gateway $WIFI_IF
+					fi 
+				fi
 			fi
-		fi
+		else
+			logger -t iot_keep_alive "No Internet Connection but IoT Service Online,No Action"
+		fi 
 	fi	
 
 	#Show LED status
 	# echo 1 > /sys/class/leds/dragino2\:red\:system/brightness GPIO28
 	# LPS8:GPIO21: RED, GPIO28: Blue GLobal
 	# LGxx: GPIO21: N/A. GPIO28: RED Global
+	# LIG16: GPIO21(LOW): GREEN; GPIO28: RED; GPIO22(Low), RED
 	# Check IoT Connection first. 
 	#echo "iot"
 	if [ "$is_lps8" = "1" ];then
@@ -304,7 +326,7 @@ do
 			echo "offline" > /var/iot/status
 		fi 
 	fi
-	iot_online=`cat /var/iot/status | grep online -c`	
+	[ "`uci get gateway.general.server_type`" = "lorawan" ] && iot_online=`cat /var/iot/status | grep online -c`	
 
 	
 	/usr/bin/blink-stop
@@ -329,5 +351,4 @@ do
 		echo 0 > /sys/class/leds/dragino2\:red\:system/brightness
 		[ "$is_lps8" = "1" ] && echo 1 > /sys/class/gpio/gpio21/value
 	fi
-	#echo "iot-end"	
 done

@@ -91,6 +91,8 @@ model=$(cat /tmp/iot/model.txt)
 	<tr class="rowSpacer"></tr>
 	<tr><td colspan="3">Build Time:</td><td colspan="17"><% cat /etc/banner | grep Build %></td></tr>
 	<tr class="rowSpacer"></tr>
+	<tr><td colspan="3">FWD version:</td><td colspan="17"><% fwd -h | grep Release %></td></tr> 
+	<tr class="rowSpacer"></tr>
 	<tr><td colspan="3">Cellular :</td><td colspan="17"><% echo $cellular_status %></td></tr>
 	<tr class="rowSpacer"></tr>
 	<tr><td colspan="3">System Time:</td><td colspan="17"><% date %></td></tr>
@@ -103,7 +105,6 @@ model=$(cat /tmp/iot/model.txt)
 	<tr class="rowSpacer"></tr>
 	<tr><td colspan="3">IoT Service:</td><td colspan="17"><% echo $server_type %></td></tr>
 	<tr class="rowSpacer"></tr>
-
 	<tr><td colspan="5"><% echo $connection %> <img src="<% echo -n $connect_img %>" width="50" height="50"></td></tr>
 	<tr class="rowSpacer"></tr>
 

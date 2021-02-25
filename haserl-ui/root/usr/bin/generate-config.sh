@@ -56,10 +56,16 @@ gen_gw_cfg() {
 	#ABP Communication
 	if [ "$maccrypto" = "1" ];then
 		json_add_boolean "mac_decode" 1	    #ABP Decode
+		json_add_boolean "mac2file" 1   # Save Decode Payload to file 
+		json_add_boolean "custom_downlink" 1   # Allow custom downlink
+	else
+		json_add_boolean "mac_decode" 0	    #ABP Decode
+		json_add_boolean "mac2file" 0   # Save Decode Payload to file 	
+		json_add_boolean "custom_downlink" 0   # Allow custom downlink	
 	fi
-	json_add_boolean "mac2file" 0   # Save Decode Payload to file 
+
 	json_add_boolean "mac2db" 0   # Save Decode Payload to database 
-	json_add_boolean "custom_downlink" 0   # Allow custom downlink
+
 
         # stastatic 状态和统计的间隔时间，单位是秒*/
 	json_add_int	"stat_interval" "30"  # 这个和 server 里面的 Kepp Alive 区别? 
@@ -115,7 +121,7 @@ gen_gw_cfg() {
 		json_close_object 
 	
 		#Server2
-		json_add_object "server1"
+		json_add_object "server2"
 		json_add_string "server_name" "name"  #name是服务的标识，必须要设置一个name   ?? 哪里需要用到，可以用 Server 1 替代吗？
 		json_add_string "server_type" "semtech"  #服务类型有：semtech, mqtt, gwtraft, ttn	几个服务类型什么区别，什么场合用到. MQTT 是指 LoRaWAN over MQTT 吧? 
 		json_add_string	"server_id"  "mqtt_user" # 类型是mqtt或ttn时才需要设置   --> 对应哪个参数?? 连接例子? 

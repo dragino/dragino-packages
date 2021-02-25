@@ -59,7 +59,7 @@ config settings 'general'
 	option LAT '22.700000'
 	option LON '114.240000'
 	option ALT '450'
-	option fake_gps '1'
+	option fake_gps '0'
 	option gwcfg 'EU'
 
 config settings 'radio1'

@@ -8,6 +8,9 @@
 <%
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
   
+		if [ $FORM_URL == "custom" ];then
+			FORM_URL=$FORM_SERVER_ADDRESS
+		fi
 		uci set loriot.loriot.url="$FORM_URL"
 		uci set loriot.loriot.port="$FORM_PORT"
 		uci set loriot.loriot.cert="$FORM_CERT"
@@ -28,11 +31,9 @@
 		uci set loriot.loriot.version="$version"
 		uci commit loriot 
 		
-		/etc/init.d/lora_gw restart > /dev/null
+		/etc/init.d/lora_gw stop > /dev/null
 		sleep 2
-		/etc/init.d/iot reload > /dev/null
-		rm /var/iot/status
-		#$loriot_sw  -s $FORM_URL -c $FORM_CAFILE  -a $FORM_CERT -k $FORM_KEY > /dev/null
+		/usr/bin/reload_iot_service.sh
 	fi
 
 	# Check if LORIOT software is installed
@@ -64,6 +65,22 @@
 	done
 	
 	eui=$(ifconfig eth0|grep "HWaddr" | awk '{print $5}')
+
+	type="$(uci -q get gateway.general.server_type)"
+	if [ "$type" == "station" ];  then	
+		trust_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Station for AWS </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">LoRIOT </span>'	
+	elif [ "$type" == "loriot" ];  then
+		trust_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRIOT</span>'
+	elif [ "$type" == "mqtt" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRIOT </span>'
+	elif [ "$type" == "tcpudp" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRIOT </span>'
+	elif [ "$type" == "customized" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRIOT </span>'
+	elif [ "$type" == "lorawan" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN Semtech UDP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRIOT </span>'
+	fi
+
 %>
 
 <%# --- Present the HTML page --- %>
@@ -98,18 +115,27 @@
 		<td></td>
 		<td colspan="4"><label for="URL">Server Address </label></td>
 			<td colspan="5">
-				<select id="url" name="URL" >
+				<select id="url" name="URL" onchange="displayServerURL()">
 	  			<%inc /www/cgi-bin/inc/loriot.inc %>
 	  			<option value=" " > </option>
 				</select>
 			</td>
+			<script>document.getElementById("url").value="<% echo -n $url %>";</script>
 		<td colspan="1"></td>
   		<td colspan="3"><label for="PORT">Server Port </label></td>
 		<td colspan="4"><input type="number" min="1" max="65535" name="PORT" Placeholder="Default" maxlength="5" VALUE="<% echo -n $port %>" ></td>
 		<td colspan="1"></td>
 	</tr>
-		<script>document.getElementById("url").value="<% echo -n $url %>";</script>
-		<script>document.getElementById("port").value="<% echo -n $port %>";</script>
+	<tr class="rowSpacer"><td colspan="20"></td></tr>
+	<tr>
+		<td></td>
+  		<td colspan="4"><label id="server_address_label" style="display:none;">Customize Address</label></td>
+		<td colspan="3"><input type="text" id="server_address" name="SERVER_ADDRESS" style="display:none;" 
+		    VALUE="<% echo -n $url %>"></td>
+		<td colspan="1"></td>
+	</tr>
+
+	<script>document.getElementById("port").value="<% echo -n $port %>";</script>
 
 </table>
 
@@ -168,6 +194,11 @@
 </table>
 
 <table class="configTable">
+	<tr>
+		
+			<td colspan="32"><% echo -n $trust_status%></td>
+	</tr>
+
 	<td colspan="20">
 	<br>
 	<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
@@ -179,5 +210,24 @@
 
 </form>
 </div>
+
+<script>
+		var x = document.getElementById("url").value;
+		if (x == "custom") {
+		document.getElementById("server_address").style.display = "inline";
+		document.getElementById("server_address_label").style.display = "inline";
+		}
+
+	
+function displayServerURL(){
+	document.getElementById("server_address").style.display = "none";
+	
+	var x = document.getElementById("url").value;
+	if (x == "custom") {
+	document.getElementById("server_address").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
+}
+</script>
 </body>
 </html>

@@ -118,28 +118,28 @@
 			uci set gateway.general.server_type="relay"
 			uci commit gateway
 		fi
+		
+		if [ "$server_type" == "station" ] ||  [ "$server_type" == "loriot" ];then
+			uci set gateway.general.server_type="lorawan"
+			uci commit gateway
+		fi
+
 	fi
 	
 
-  if [ "$FORM_BUTTON" == "Save&Apply" ]; then
-		killall -q mosquitto_sub  # Remove any remaining MQTT subscribe process
-    /etc/init.d/lora_gw reload > /dev/null
-    sleep 2
-    /etc/init.d/iot reload > /dev/null
-		rm /var/iot/status
-  fi
+	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
+		/etc/init.d/lora_gw reload > /dev/null
+		sleep 2
+		/usr/bin/reload_iot_service.sh
+	fi
 
-  if [ "$FORM_BUTTON" == "Disable" ]; then
+	if [ "$FORM_BUTTON" == "Disable" ]; then
 		uci set gateway.general.server_type="disabled"
 		uci commit gateway
-		killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
-		killall inotifywait                  # Remove any inotfywait process
-		killall -q loriot_dragino_lg308_spi  # Remove any remaining LORIOT process
-    /etc/init.d/lora_gw reload > /dev/null
-    sleep 2
-    /etc/init.d/iot reload > /dev/null
-		rm /var/iot/status
-  fi
+		/etc/init.d/lora_gw reload > /dev/null
+		sleep 2
+		/usr/bin/reload_iot_service.sh
+	fi
 %>
 
 <%# --- Get the variables for the HTML page --- %>
@@ -243,7 +243,25 @@
 	lorachan_radio="$(uci -q get gateway.general.lorachan_radio)"
 	lorachan="$(uci -q get gateway.general.lorachan)"
 	lorachan_sf="$(uci -q get gateway.general.lorachan_sf)"
-	lorachan_bw="$(uci -q get gateway.general.lorachan_bw)"		
+	lorachan_bw="$(uci -q get gateway.general.lorachan_bw)"
+
+	type="$(uci -q get gateway.general.server_type)"
+	if [ "$type" == "station" ];  then	
+		trust_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Station for AWS </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'	
+	elif [ "$type" == "loriot" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+	elif [ "$type" == "mqtt" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>'
+	elif [ "$type" == "tcpudp" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>'
+	elif [ "$type" == "customized" ];  then
+		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>'
+	elif [ "$type" == "lorawan" ];  then
+		trust_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Semtech UDP</span>'
+	fi
+
+
+
 %>
 
 
@@ -743,6 +761,11 @@
 <table class="configTable">
 	<tr class="rowSpacer"></tr>
 	<tr class="rowSpacer"></tr>
+	
+	<tr>	
+			<td colspan="32"><% echo -n $trust_status%></td>
+	</tr>
+
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="17">

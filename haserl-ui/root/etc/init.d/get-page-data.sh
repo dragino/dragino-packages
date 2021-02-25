@@ -187,7 +187,10 @@ if [ $server_type == "disabled" ]; then
 elif [ $server_type == "loriot" ]; then
 	satlink3="/cgi-bin/loriot.has"
 	sat3="/static/img/SAT-Loriot.png"
-  mouseover3='info-3a'
+	mouseover3='info-3a'
+elif [ $server_type == "station" ]; then
+	satlink3="/cgi-bin/lorawan-aws.has"
+	sat3="/static/img/SAT-LoRaWAN-tick.png"
 elif [ $server_type == "lorawan" ]; then
 	satlink3="/cgi-bin/lorawan.has"
 		status=$(cat /var/iot/status)
@@ -310,15 +313,20 @@ fi
 if [ $server_type == "loriot" ]; then
 	pscount=$(ps | grep -c loriot_dragino) # Check is process is running
 	satlink10="/cgi-bin/loriot.has"
+elif [ $server_type == "station" ];then
+	pscount=$(ps | grep station | grep -c -v grep) # Check is process is running
+	satlink10="/cgi-bin/lorawan-aws.has"
+	version10=`station -v`
 else
-	if [ "`cat /var/iot/model.txt`" == "LIG16" ];then
+	new_fwd=$(ps | grep -c fwd) 	# Check new_fwd or pkt_fwd
+	if [ "$new_fwd" == "2" ] ;then
 		fwd_pkt_status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key = '/service/pkt/PKT_SERV';" | grep -c runing`
 		if [ "$fwd_pkt_status" == "1" ];then
 			pscount="2"
-		else 
+		else
 			pscount="1"
 		fi
-	else 
+	else
 		pscount=$(ps | grep -c pkt_fwd) # Check is process is running
 	fi
 	satlink10="/cgi-bin/lora-lora.has"
@@ -334,10 +342,12 @@ satvis10="visible"
 
 if [ $server_type == "loriot" ]; then
  	mouseover10='info-10c'
-elif [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ]; then
- 	mouseover10='info-10b'
-else
+elif [ $server_type == "station" ]; then
+	mouseover10='info-10d'
+elif [ $model == "LG01" ] || [ $model == "LG02" ]; then
  	mouseover10='info-10a'
+else
+ 	mouseover10='info-10b'
 fi
 
 ################
@@ -431,7 +441,7 @@ server3=" "
 
 if [ $server_type == "lorawan" ]; then
 	info_title3="LoRaWAN Service"
-	server3=$(uci get gateway.general.platform | cut -d "," -f 2)  
+	server3=$(uci get gateway.server1.server_address)  
 	lorawanstatus=$(ps|grep -c _pkt_fwd)
 	lorawan_boot=$(ps|grep -c reset_lgw.sh)
 	if [ $lorawanstatus == "2" ] && [ $lorawan_boot == "1" ]; then
@@ -439,6 +449,17 @@ if [ $server_type == "lorawan" ]; then
 		status3=$(cat /var/iot/status)
 	else
 		process3="LoRaWAN process pkt_fwd <b>Not Running</b>"
+	fi
+
+elif [ $server_type == "station" ]; then
+	info_title3="AWS-IoT Service"
+	server3=`cat /etc/station/cups.uri`
+	station_status=$(ps | grep station | grep -c -v grep)
+	if [ $station_status == "2" ]; then
+		process3="Station is <b>Running</b>"
+		status3=$(cat /var/iot/status)
+	else
+		process3="Station is <b>Not Running</b>"
 	fi
 
 elif [ $server_type == "loriot" ]; then
@@ -552,6 +573,9 @@ fi
 if [ $server_type == "loriot" ]; then
 	info_title10="LORIOT Mode"
 	server10="$server3"
+elif [ $server_type == "station" ];then
+	info_title10="AWS-IoT Core Station"
+	server10="$server3"
 else
 	info_title10="LoRa Radio"
 fi
@@ -574,9 +598,7 @@ elif [ $model == "LG02" ];then
 	txcr10=$(uci get gateway.radio2.TXCR)
 	rxsf10=$(uci get gateway.radio1.RXSF)
 	txsf10=$(uci get gateway.radio2.TXSF)
-fi
-
-if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ]; then
+else
 	gwcfg=$(uci get gateway.general.gwcfg)
 	subband=$(uci get gateway.general.subband)
 	
@@ -588,7 +610,7 @@ if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ]; then
 		subband10=$(grep -e \"$subband\" /www/cgi-bin/inc/subband-us.inc | cut -d ">" -f 2 | cut -d " " -f 1,2,3)
 	elif [ $gwcfg == "CUS" ]; then
 		band10="Custom"
-		subband10=" "
+		subband10=" " 
 	else
 		subband10=" "
 	fi
@@ -700,7 +722,14 @@ cat > /tmp/popup-data.txt << EOF
 		<tr>	  <th colspan="2">$info_title10 </th>	</tr>
 		<tr>	  <td>Server:</td><td>$server10</td>	</tr>
 	</table>
-	</div>	
+</div>	
+
+<div class="info" id="info-10d">
+	<table>
+		<tr>	  <th colspan="2">$info_title10 </th>	</tr>
+		<tr>	  <td>Version:</td><td>$version10</td>	</tr>
+	</table>
+</div>
 
 <div class="info" id="info-11">
 	<table>

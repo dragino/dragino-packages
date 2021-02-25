@@ -21,13 +21,8 @@ init_board() {
         /usr/bin/generate-config.sh
     elif [[ "$chip" = "sx1302" ]]; then
         process="fwd"
-<<<<<<< HEAD
 	ln -sf /usr/bin/fwd_sx1302 /usr/bin/fwd
 	/usr/bin/generate-config.sh
-=======
-        ln -sf /usr/bin/fwd_sx1302 /usr/bin/fwd
-		/usr/bin/generate-config.sh
->>>>>>> 22c4a942f54f863f35df1ea790b8e00a82826b71
     else
         exit 1
     fi

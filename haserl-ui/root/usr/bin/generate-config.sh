@@ -11,8 +11,6 @@ dpp=`uci get gateway.general.dwport`
 stat=`uci get gateway.general.stat`
 email=`uci get gateway.general.email`
 maccrypto=`uci get gateway.general.maccrypto`
-mac2db=`uci get gateway.general.mac2db`
-custom_downlink=`uci get gateway.general.custom_downlink`
 
 latitude=`uci get gateway.general.LAT`
 longitude=`uci get gateway.general.LON`
@@ -32,7 +30,7 @@ gen_gw_cfg() {
 	json_add_string "email" "$email"
 	json_add_string "gateway_ID" "$gwid" 
 	
-	json_add_string "log_mask" "100"    # Log Level
+	json_add_int "log_mask" "100"    # Log Level
 	json_add_boolean "radiostream_enable" 1    # Enable SX Radio TX /RX
 	
 	#ghoststream
@@ -66,24 +64,8 @@ gen_gw_cfg() {
 		json_add_boolean "custom_downlink" 0   # Allow custom downlink	
 	fi
 
-<<<<<<< HEAD
 	json_add_boolean "mac2db" 0   # Save Decode Payload to database 
 
-=======
-	json_add_boolean "mac2file" 1   # Save Decode Payload to file 
-
-	if [ "$mac2db" = "1" ];then
-		json_add_boolean "mac2db" 1	    
-    else
-		json_add_boolean "mac2db" 0	   
-	fi
-
-	if [ "$custom_downlink" = "1" ];then
-		json_add_boolean "custom_downlink" 1	    
-    else
-		json_add_boolean "custom_downlink" 0	    
-	fi
->>>>>>> 22c4a942f54f863f35df1ea790b8e00a82826b71
 
         # stastatic 状态和统计的间隔时间，单位是秒*/
 	json_add_int	"stat_interval" "30"  # 这个和 server 里面的 Kepp Alive 区别? 
@@ -132,7 +114,6 @@ gen_gw_cfg() {
 		  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
 		  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
 		json_add_int "fport_filter" "`uci get gateway.server1.fport_filter`" 
-		json_add_int "filter_fport" "`uci get gateway.server1.devaddr_filter`"
 		json_add_string "devaddr_filter" "`uci get gateway.server1.devaddr_filter`"
 		json_add_boolean "forward_crc_valid" "`uci get gateway.server1.forward_crc_valid`"
 		json_add_boolean "forward_crc_error" "`uci get gateway.server1.forward_crc_error`"
@@ -159,7 +140,6 @@ gen_gw_cfg() {
 		  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
 		  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
 		json_add_int "fport_filter" "0" 
-		json_add_int "filter_devaddr" "0" 
 		json_add_string "devaddr_filter" "0"
 		json_add_boolean "forward_crc_valid" 1
 		json_add_boolean "forward_crc_error" 0

@@ -29,6 +29,7 @@ gen_gw_cfg() {
 	json_add_string "description" "Dragino LoRaWAN Gateway"	
 	json_add_string "email" "$email"
 	json_add_string "gateway_ID" "$gwid" 
+	json_add_string "regional" "$def_cfg" 
 	
 	json_add_int "log_mask" "100"    # Log Level
 	json_add_boolean "radiostream_enable" 1    # Enable SX Radio TX /RX

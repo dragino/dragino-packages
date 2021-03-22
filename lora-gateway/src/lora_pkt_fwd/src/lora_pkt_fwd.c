@@ -3920,9 +3920,9 @@ static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, ui
     txpkt.no_crc = true;
 
     if (dnelem->rxwindow != 1)
-        txpkt.count_us = us + 2000000UL; /* rx2 window plus 1s */
+        txpkt.count_us = us + 2000000UL; /* rx2 window plus 2s */
     else
-        txpkt.count_us = us + 1000000UL; /* rx2 window plus 1s */
+        txpkt.count_us = us + 1000000UL; 
 
     if (dnelem->txfreq > 0)
         txpkt.freq_hz = dnelem->txfreq; 

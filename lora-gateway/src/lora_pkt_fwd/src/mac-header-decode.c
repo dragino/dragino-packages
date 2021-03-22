@@ -134,6 +134,7 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
     char netid[8] = {'\0'};
     char cat[3] = {'\0'};
     uint32_t devaddr;
+    uint16_t devnonce;
 
     if( ( macMsg == 0 ) || ( macMsg->Buffer == 0 ) )
     {
@@ -205,7 +206,11 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
                 sprintf(cat, "%02X", macMsg->Buffer[idx]);
                 strcat(deveui, cat);
             }
-            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_REQ+ {\"AppEUI\":, \"%s\", \"DevEUI\":, \"%s\"}\n", appeui, deveui);
+
+            devnonce = (uint16_t)macMsg->Buffer[idx++];
+            devnonce |= ((uint16_t)macMsg->Buffer[idx++] << 8);
+
+            MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_REQ+ {\"AppEUI\":,\"%s\", \"DevEUI\":,\"%s\", \"DevNonce\": \"%u\"}\n", appeui, deveui, devnonce);
             break;
         default:
             break;

@@ -3,7 +3,6 @@ START=99
 
 start()
 {	
-    [ ! -L /usr/bin/rssh ] && ln -sf /usr/bin/ssh /usr/bin/rssh
 	host_id="$(uci -q get rssh.rssh.host_id)"
 	host_addr="$(uci -q get rssh.rssh.host_addr)"
 	host_port="$(uci -q get rssh.rssh.host_port)"

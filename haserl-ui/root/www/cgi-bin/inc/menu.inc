@@ -20,7 +20,7 @@
 
 	<% # Set up LoRa menu for board type
 	board=$(cat /var/iot/board)
-	if [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ]; then
+	if [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ] || [ "$model" == "LIG16" ]; then
 	#if [ "$board" == "LG08" ] || [ "$board" == "LG08P" ]; then
 	%>
   <div class="dropdown"> <!-- LoRa Parameter -->
@@ -44,7 +44,7 @@
 				<a href="/cgi-bin/lorawan.has">LoRaWAN</a>
 				
 				<% # Set up LoRaWAN menu for board type
-				if [ $model == "LIG16" ] ; then
+				if [ $model == "LIG16" ] || [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ]; then
 				%>
 					<a href="/cgi-bin/lorawan-aws.has">Amazon AWS IoT</a>
 				<% fi %>

@@ -70,13 +70,13 @@
     <tr class="rowSpacer"><td colspan="15"></td></tr> <!-- Determines the column widths -->
     <tr>
       <td colspan="1"></td>
-      <td colspan="3"><label for="ADDR">Server Address</label></td>
+      <td colspan="5"><label for="ADDR">Server Address</label></td>
       <td colspan="5"><input type="text" name="ADDR" size="40" VALUE="<% echo -n $addr %>"></td>
     </tr>
     <tr class="rowSpacer"></tr>
     <tr>
       <td colspan="1"></td>
-      <td colspan="3"><label for="PORT">Server Port</label></td>
+      <td colspan="5"><label for="PORT">Server Port</label></td>
       <td colspan="5"><input type="text" name="PORT" VALUE="<% echo -n $port %>"></td>
     </tr>
 

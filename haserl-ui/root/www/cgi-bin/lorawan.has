@@ -1,7 +1,7 @@
 #!/usr/bin/haserl
 
 <%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
-
+ 
 <%# --- Process the form submission --- %>
 <%
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
@@ -139,15 +139,15 @@
 	<tr><td colspan="18"><h3>General Settings</h3></td></tr>	
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><label for="EMAIL">Email</label></td>
-		<td colspan="8"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
+		<td colspan="12"><label for="EMAIL">Email</label></td>
+		<td colspan="24"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
 		<td colspan="6"></td>
 	</tr>
-	
+	<td></td>
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><label for="GWID">Gateway ID</label></td>
-		<td colspan="6"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
+		<td colspan="12"><label for="GWID">Gateway ID</label></td>
+		<td colspan="18"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
 		<td colspan="8"></td>
 	</tr>
 
@@ -156,8 +156,8 @@
  
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><label for="PLATFORM">Service Provider</label></td>
-		<td colspan="6"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
+		<td colspan="12"><label for="PLATFORM">Service Provider</label></td>
+		<td colspan="24"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
 		  <option value="ttn" >The Things Network V2</option>
 		  <option value="ttn_V3" >The Things Network V3</option>
 		  <option value="mydevice" >IoT In A Box</option>
@@ -168,9 +168,9 @@
 		<script>document.getElementById("primary_provider").value="<% echo -n $primary_provider %>";</script>
 
 		<td colspan="2"></td>
-		<td colspan="5"><label id="server_address_label" style="display:none;">Server Address</label></td>	
+		<td colspan="12"><label id="server_address_label" style="display:none;">Server Address</label></td>	
 			
-		<td colspan="12">
+		<td colspan="35">
 			<input type="text" id="server_address" name="SERVER_ADDRESS" style="display:none;" 
 		    VALUE="<% echo -n $primary_server %>">
 			
@@ -186,17 +186,18 @@
 				<%inc /www/cgi-bin/inc/iot-in-a-box-server.inc %>
 			</select>
 		</td>
+		<script>document.getElementById("server_address_ttn_V3").value="<% echo -n $primary_server %>";</script>
 		<script>document.getElementById("server_address_ttn").value="<% echo -n $primary_server %>";</script>
 		<script>document.getElementById("server_address_mydevice").value="<% echo -n $primary_server %>";</script>		
 	</tr>
-
+	<td></td>
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><label for="PRI_UPP">Uplink Port</label></td>
-		<td colspan="6"><input type="text" name="PRI_UPP" maxlength="8" VALUE="<% echo -n $pri_upp %>" pattern="[0-9]{1,8}" ></td>
-		<td colspan="2"></td>
-		<td colspan="5"><label for="PRI_DPP">Downlink Port</label></td>
-		<td colspan="3"><input type="text" name="PRI_DPP" maxlength="8" VALUE="<% echo -n $pri_dpp %>" pattern="[0-9]{1,8}" ></td>
+		<td colspan="12"><label for="PRI_UPP">Uplink Port</label></td>
+		<td colspan="8"><input type="text" name="PRI_UPP" maxlength="8" VALUE="<% echo -n $pri_upp %>" pattern="[0-9]{1,8}" ></td>
+		<td colspan="18"></td>
+		<td colspan="12"><label for="PRI_DPP">Downlink Port</label></td>
+		<td colspan="8"><input type="text" name="PRI_DPP" maxlength="8" VALUE="<% echo -n $pri_dpp %>" pattern="[0-9]{1,8}" ></td>
 		<td colspan=""></td>
 	</tr>
 	
@@ -209,24 +210,23 @@
 
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><label for="FPORTNUM">Fport Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+		<td colspan="12"><label for="FPORTNUM">Fport Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
 		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
 		<p>Filter Unconfirmed Data Up & Confirmed Data Up if Fport doesn't match</p>
 		<p>Value Range:0~243: (0 to accept any Fport)</p> 
 		<p style="text-align: center;"><br>[Close]</p>
 		</div>
 		</td>
-		<td colspan="3"><input type="text" name="PRI_FPORTNUM" maxlength="3" VALUE=<% echo -n $pri_fportnum %> ></td>
-		
-		<td colspan="5"></td>
-		<td colspan="5"><label for="DEV_FILTER">DevAddr Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
+		<td colspan="8"><input type="text" name="PRI_FPORTNUM" maxlength="3" VALUE=<% echo -n $pri_fportnum %> ></td>
+		<td colspan="18"></td>
+		<td colspan="12"><label for="DEV_FILTER">DevAddr Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
 		<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
 		<p>Filter Unconfirmed Data Up & Confirmed Data Up if Dev Addr Prefix doesn't match</p>
 		<p>Value Range:1 ~ 8 hex char: (0 to accept any Dev Addr Prefix)</p> 
 		<p style="text-align: center;"><br>[Close]</p>
 		</div>
 		</td>
-		<td colspan="5"><input type="text" name="PRI_DEVADDR_FILTER" maxlength="8" VALUE=<% echo -n $pri_devaddr_filter %> ></td>
+		<td colspan="8"><input type="text" name="PRI_DEVADDR_FILTER" maxlength="8" VALUE=<% echo -n $pri_devaddr_filter %> ></td>
 		
 	</tr>
 	
@@ -235,7 +235,7 @@
 
 	<tr>
 		
-			<td colspan="32"><% echo -n $trust_status%></td>
+			<td colspan="80"><% echo -n $trust_status%></td>
 	</tr>
 
 	<tr>

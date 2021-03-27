@@ -318,7 +318,7 @@ elif [ $server_type == "station" ];then
 	satlink10="/cgi-bin/lorawan-aws.has"
 	version10=`station -v`
 else
-	new_fwd=$(ps | grep -c fwd) 	# Check new_fwd or pkt_fwd
+	new_fwd=$(ps | grep -c /usr/bin/fwd) 	# Check new_fwd or pkt_fwd
 	if [ "$new_fwd" == "2" ] ;then
 		fwd_pkt_status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key = '/service/pkt/PKT_SERV';" | grep -c runing`
 		if [ "$fwd_pkt_status" == "1" ];then

@@ -533,15 +533,15 @@
 
 		<tr>
 			<td colspan="1"></td>
-			<td colspan="4"><label for="KEEPALIVE">Keep Alive Period (sec)</label></td>
+			<td colspan="6"><label for="KEEPALIVE">Keep Alive Period (sec)</label></td>
 			<td colspan="3"><input type="text" name="KEEPALIVE" maxlength="6" VALUE="<% echo -n $keepalive %>" pattern="[0-9]{1,6}" ></td>
 			<td></td>
 		</tr>
 
 		<tr>
 			<td></td>
-			<td colspan="4"><label for="GWCFG">Frequency Plan</label></td>
-			<td colspan="7"><select id="gwcfg" name="GWCFG" onchange="displaySubband()" >
+			<td colspan="6"><label for="GWCFG">Frequency Plan</label></td>
+			<td colspan="12"><select id="gwcfg" name="GWCFG" onchange="displaySubband()" >
 				<%inc /www/cgi-bin/inc/band.inc %>
 			  <option value="CUS" >Customized Bands</option> 
 			</select> </td>
@@ -551,7 +551,7 @@
   
 		<tr>
 			<td></td>
-			<td colspan="4"><label for="SUBBAND" id="subband_label" style="visibility:hidden;">Frequency Sub Band</label></td>
+			<td colspan="6"><label for="SUBBAND" id="subband_label" style="visibility:hidden;">Frequency Sub Band</label></td>
 			
 			<td colspan="7">
 			<select id="subband-us" name="SUBBAND_US" style="visibility:hidden; display:none;">

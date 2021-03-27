@@ -174,7 +174,7 @@ Count_RAW_26=tonumber(utility.hex2str(string.sub(payload,26,26)),16)
 Count_RAW_27=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
 minus_flag_1 = bit.bit_lshift(Count_RAW_26,8)
 minus_flag_2 = bit.bit_lshift(Count_RAW_25,16)
-Count_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(OPEN_TIMES_RAW_24,24),minus_flag_2)),Count_RAW_26),Count_RAW_27)
+Count_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(Count_RAW_24,24),minus_flag_2)),minus_flag_1),Count_RAW_27)
 payload_t.Count=Count_0
 
 

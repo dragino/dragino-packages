@@ -659,7 +659,7 @@ void rxlora(radiodev *dev, uint8_t rxmode)
         writeReg(dev->spiport, REG_MODEM_CONFIG2, RXLORA_RXMODE_RSSI_REG_MODEM_CONFIG2);
     }
 
-    writeReg(dev->spiport, REG_MAX_PAYLOAD_LENGTH, 0x80);
+    writeReg(dev->spiport, REG_MAX_PAYLOAD_LENGTH, 0xFF);
     //writeReg(dev->spiport, REG_PAYLOAD_LENGTH, PAYLOAD_LENGTH);
     writeReg(dev->spiport, REG_HOP_PERIOD, 0xFF);
     writeReg(dev->spiport, REG_FIFO_RX_BASE_AD, 0x00);

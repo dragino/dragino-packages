@@ -194,13 +194,13 @@
 </table>
 
 <table class="configTable">
-	<tr>
+	<br><tr>
 		
 			<td colspan="32"><% echo -n $trust_status%></td>
 	</tr>
 
 	<td colspan="20">
-	<br>
+	
 	<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
 	<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
 	<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">

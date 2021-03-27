@@ -5,26 +5,25 @@
 <%
 	# Default Host Addr and ID
 	default_host_addr="support.dragino.com"
-	default_host_id="sshuser"
+	default_host_id="rsshuser"
 
-	# Calculate port no. from GWID
-  pos="8"; len="4"
-  gwid=$(uci get gateway.general.GWID)
-  str=${gwid:pos:len}
-  x=$(echo $((0x$str)))
-  if [ $x -ge "32768" ]; then
-    x=$(($x - 32768))
-  fi
-  port=$((x + 20000))
-
+	# Calculate port no. from rsshid
+	rssh_id="$(uci -q get rssh.rssh.rssh_id)"
 %>
 <%# --- Process the form submission --- %>
 <%
+# Update Server
+if [ "$FORM_BUTTON" == "RequestUpdate" ]; then
+	uci set system.@system[0].provision_server="$FORM_PROVISION_SERVER"
+	uci commit
+	/etc/init.d/auto_update start
+fi
+
 # Save parameters
 	if [ "$FORM_BUTTON" == "Save" ]; then
 		uci set rssh.rssh.host_id="$FORM_HOST_ID"
 		uci set rssh.rssh.host_addr="$FORM_HOST_ADDR"
-		uci set rssh.rssh.host_port="$FORM_HOST_PORT"
+		#uci set rssh.rssh.host_port="$FORM_HOST_PORT"
 
 		# Enable re-connection at startup if required, only if certificate and connection params have been set up.
 		if [ "$FORM_RSSH_ENABLE" == "checked" ] \
@@ -44,18 +43,18 @@
 	if [ "$FORM_BUTTON" == "Connect" ]; then
 		uci set rssh.rssh.host_id="$FORM_HOST_ID"
 		uci set rssh.rssh.host_addr="$FORM_HOST_ADDR"
-		uci set rssh.rssh.host_port="$FORM_HOST_PORT"
+		#uci set rssh.rssh.host_port="$FORM_HOST_PORT"
 
 		uci set rssh.rssh.manual_connect="1"
 		uci commit rssh
 	
 		/etc/init.d/DR_enable_rssh.sh start
-  fi
+	fi
 
 # De-Activate RSSH connection now
 	if [ "$FORM_BUTTON" == "Disconnect" ]; then
 		/etc/init.d/DR_enable_rssh.sh stop
-  fi
+	fi
 
 # Generate new keys
 	if [ "$FORM_BUTTON" == "Generate" ]; then
@@ -73,19 +72,20 @@
 		host_addr=$default_host_addr
 		uci set rssh.rssh.host_addr=$default_host_addr
 		# Assign auto port number
-		host_port=$port
-		uci set rssh.rssh.host_port=$port
+		#host_port=$port
+		#uci set rssh.rssh.host_port=$port
 		uci commit rssh
 	fi
 %>
-
 
 <%# --- Get the variables for the HTML page --- %>
 <% 
 	host_id="$(uci -q get rssh.rssh.host_id)"
 	host_addr="$(uci -q get rssh.rssh.host_addr)"
-	host_port="$(uci -q get rssh.rssh.host_port)"
+	#host_port="$(uci -q get rssh.rssh.host_port)"
 	rssh_enable="$(uci -q get rssh.rssh.rssh_enable)"
+	provision_server="$(uci -q get system.@system[0].provision_server)"
+	config_version="$(uci -q get system.@system[0].config_ver)"
 
 	if [ -e "/etc/dropbear/id_dropbear" ]; then
 		fingerprint=$(dropbearkey -y -f /etc/dropbear/id_dropbear | grep "Fingerprint")
@@ -93,14 +93,10 @@
 		fingerprint="No keyfile present"
 	fi
 
-	# Check connectivity to host
-	ping -c1 $host_addr 1>/dev/null 2>/dev/null; 	ping_ok=$?
-	# Check ssh process running - should be "2" processes
-#	ssh_ok=$(ps|grep -c -e "-i /etc/dropbear/id_dropbear -f -N -T -R" )
-	ssh_ok=$(ps|grep -c -e "-i /etc/dropbear/id_dropbear " )
+	# Check ssh process running - should be "1" processes
+	ssh_ok=$(ps | grep "ssh" | grep "localhost:22" -c)
 	
-#	if [ $ping_ok -eq "0" ] && [ $ssh_ok -ge "1" ]; then
-	if [ $ping_ok -eq "0" ] && [ $ssh_ok -eq "2" ]; then
+	if [ $ssh_ok -eq "1" ]; then
 		connection_status="<span class="impactOK">RSSH Host connection OK</span>"
 	else
 		connection_status="<span class="impact">Not connected to RSSH Host</span>"
@@ -118,16 +114,38 @@
 <body>
 <%inc /www/cgi-bin/inc/menu.inc %>
 <div class="page-container">
-<h2>R-SSH Host Settings</h2>
-
 <form name="REMOTE" id="REMOTE" action="<% echo -n $SCRIPT_NAME %>" method="POST">
+<br>
+<br>
 <table class="configTable">
-	<tr class="rowSpacer"></tr>
-	<tr><td colspan="20"></td></tr> <!--Determines column widths-->
+	<h2>Auto Provision</h2>
+	<tr><td colspan="10"></td></tr> <!--Determines column widths-->
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="3""><label for="HOST_ID">Login ID</label></td>
-		<td colspan="4"><input type="text" name="HOST_ID" placeholder="sshuser" value="<% echo -n $host_id %>" ></td>
+		<td colspan="3"><label for="PROVISION_SERVER">Provision Server</label></td>
+		<td colspan="4"><input type="text" name="PROVISION_SERVER" value="<% echo -n $provision_server %>" ></td>
+
+		<td colspan="1"></td>
+		<td colspan="11">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="RequestUpdate" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="7"><label>Configure Version:&nbsp;&nbsp;</label> <b><% echo -n $config_version %></b></td>
+		<td colspan="8"> <% echo -n `cat /var/provision.log` ; rm -f /var/provision.log %></td>
+	</tr>
+</table>
+
+<br>
+<br>
+<table class="configTable">
+	<h2>R-SSH Host Settings</h2>
+	<tr><td colspan="10"></td></tr> <!--Determines column widths-->
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label for="HOST_ID">Login ID</label></td>
+		<td colspan="4"><input type="text" name="HOST_ID" placeholder="rsshuser" value="<% echo -n $host_id %>" ></td>
 	</tr>
 	<tr class="rowSpacer"></tr>
 	<tr>
@@ -135,15 +153,13 @@
 		<td colspan="3"><label for="HOST_ADDR">Host Address</label></td>
 		<td colspan="4"><input type="text" name="HOST_ADDR" placeholder="<% echo -n $default_host_addr %>" value="<% echo -n $host_addr %>" ></td>
 		<td colspan="1"></td>
-		<td colspan="2"><label for="HOST_PORT">Host Port</label></td>
-		<td colspan="4"><input type="text" name="HOST_PORT" VALUE="<% echo -n $host_port %>" ></td>
+		<td colspan="6"> RSSH ID: <% echo -n $rssh_id %> </td>
 	</tr>
 	<tr class="rowSpacer"></tr>
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="8"><label for="RSSH_ENABLE">Connect at Startup</label>
-			  <input type="checkbox" name="RSSH_ENABLE" value="checked" <% echo -n $rssh_enable %>></td>
-		<td colspan="6"> GWID: <% echo -n $gwid %> </td>
+		<input type="checkbox" name="RSSH_ENABLE" value="checked" <% echo -n $rssh_enable %>></td>
 	</tr>
 
 	<tr class="rowSpacer"></tr>
@@ -188,5 +204,3 @@
 </div>
 </body>
 </html>
-
-

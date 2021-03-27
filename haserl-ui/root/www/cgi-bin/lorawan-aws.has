@@ -6,13 +6,11 @@
 <%
 	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		echo "$FORM_CUPSURI" > /etc/station/cups.uri
-	
-		uci set gateway.general.GWID="$FORM_GWID"
 		uci set gateway.general.email="$FORM_EMAIL"
 		uci set gateway.general.server_type="station"
-		
 		uci commit gateway
-
+		sed -i '/routerid/d' /etc/station/station.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station.conf		
+	
 		/etc/init.d/lora_gw stop > /dev/null
 		sleep 2
 		/usr/bin/reload_iot_service.sh
@@ -89,10 +87,12 @@
 <%# --- Get the variables for the HTML page --- %>
 <% 
 	cups_uri="$(cat /etc/station/cups.uri)"
-	gwid="$(uci -q get gateway.general.GWID)"	
+	gwid="$(cat /etc/station/station.conf | grep routerid | awk -F "\"" '{print $4}')"
+	if [ -z "$gwid" ];then
+		gwid="$(uci -q get gateway.general.GWID)"
+	fi
 	email="$(uci -q get gateway.general.email)"
-	
-	
+
 
 	if [ -e "/etc/station/cups.trust" ]; then
 	  	trust_status=`ls /etc/station/cups.trust | awk -F '/' '{print $4}'`
@@ -154,7 +154,7 @@
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="5"><label for="CUPSURI">CUPS URI</label></td>
-		<td colspan="22"><input type="text" name="CUPSURI" maxlength="62" placeholder="example: https://xxxxxxx.cups.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $cups_uri %> ></td>
+		<td colspan="22"><input type="text" name="CUPSURI" maxlength="128" placeholder="example: https://xxxxxxx.cups.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $cups_uri %> ></td>
 	</tr>
 
 	<tr>
@@ -170,6 +170,8 @@
 		<td colspan="6"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
 		<td colspan="8"></td>
 	</tr>
+
+	
 		
 	<tr>
 		<td colspan="1"></td>

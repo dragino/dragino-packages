@@ -7,6 +7,10 @@
 MEMFREE=`cat /proc/meminfo | grep MemFree |cut -d : -f2 | tr -d ' '|tr -d 'kB'`
 MEMTOT=`cat /proc/meminfo | grep MemTotal |cut -d : -f2 | tr -d ' '`
 MEMSTR="Free Memory: "$MEMFREE" / Total Memory: "$MEMTOT
+ETH0_MAC=$(ifconfig eth0|grep "HWaddr" | awk '{print $5}')
+ETH1_MAC=$(ifconfig eth1|grep "HWaddr" | awk '{print $5}')
+WIFI_MAC=$(ifconfig wlan0|grep "HWaddr" | awk '{print $5}')
+
 
 # Get default route
 route=$(ip route|grep default | cut -d " " -f 5)
@@ -105,8 +109,19 @@ model=$(cat /tmp/iot/model.txt)
 	<tr class="rowSpacer"></tr>
 	<tr><td colspan="3">IoT Service:</td><td colspan="17"><% echo $server_type %></td></tr>
 	<tr class="rowSpacer"></tr>
+	<tr><td colspan="3">ETH0 MAC:</td><td colspan="17"><% echo $ETH0_MAC %></td></tr>
+	<tr class="rowSpacer"></tr>
+	<tr><td colspan="3">ETH1 MAC:</td><td colspan="17"><% echo $ETH1_MAC %></td></tr>
+	<tr class="rowSpacer"></tr>
+	<tr><td colspan="3">WiFi MAC:</td><td colspan="17"><% echo $WIFI_MAC %></td></tr>
+
+
+	<tr class="rowSpacer"></tr>
 	<tr><td colspan="5"><% echo $connection %> <img src="<% echo -n $connect_img %>" width="50" height="50"></td></tr>
 	<tr class="rowSpacer"></tr>
+
+	
+	
 
 	<tr>
 		<td colspan="20">

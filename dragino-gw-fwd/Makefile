@@ -25,7 +25,7 @@ define Package/$(PKG_NAME)
 $(call Package/$(PKG_NAME)/Default)
     SECTION:=utils
     CATEGORY:=Utilities
-	DEPENDS:=+libsqlite3 
+	DEPENDS:=+libsqlite3 +libmpsse +libftdi1
 endef
 
 define Package/$(PKG_NAME)/description
@@ -40,6 +40,7 @@ define Package/$(PKG_NAME)/extra_provides
 	echo 'libsx1301hal.so';\
 	echo 'libsx1302hal.so';\
 	echo 'libmbedtls.so.12';\
+	echo 'libusb-1.0.so.1';\
 	echo 'libmbedcrypto.so.3';\
 	echo 'libmbedx509.so.0'; 
 endef

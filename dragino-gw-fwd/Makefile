@@ -54,32 +54,23 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fwd/fwd_sx1301 $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fwd/fwd_sx1302 $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/station/station_sx1301 $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/station/station_sx1302 $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/station/rinit.sh $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/sx1302hal/test_* $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/rssh_client $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/reset_lgw.sh $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/??* $(1)/usr/bin
 	$(LN) test_loragw_hal_rx $(1)/usr/bin/rx_test
 	$(LN) test_loragw_hal_tx $(1)/usr/bin/tx_test
 
-	$(INSTALL_DIR) $(1)/etc/station
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/station/config/*.conf $(1)/etc/station/
-
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libmqtt/libpahomqtt3c.so $(1)/usr/lib
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/sx1301hal/libsx1301hal.so $(1)/usr/lib
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/sx1302hal/libsx1302hal.so $(1)/usr/lib
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/lib/*.so $(1)/usr/lib
 	$(LN) libsx1302hal.so $(1)/usr/lib/libloragw.so
 
+	$(INSTALL_DIR) $(1)/etc/station
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/config/station/*.conf $(1)/etc/station/
+
 	$(INSTALL_DIR) $(1)/etc/lora/cfg
-	$(CP) $(PKG_BUILD_DIR)/config/*json* $(1)/etc/lora/cfg
+	$(CP) $(PKG_BUILD_DIR)/config/fwd/??* $(1)/etc/lora/cfg
 
 	$(INSTALL_DIR) $(1)/etc/lora
-	$(CP) $(PKG_BUILD_DIR)/config/global_conf.json $(1)/etc/lora
-	$(CP) $(PKG_BUILD_DIR)/config/local_conf.json $(1)/etc/lora
+	$(CP) $(PKG_BUILD_DIR)/config/fwd/global_conf.json $(1)/etc/lora
+	$(CP) $(PKG_BUILD_DIR)/config/fwd/local_conf.json $(1)/etc/lora
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

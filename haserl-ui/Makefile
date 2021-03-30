@@ -20,7 +20,6 @@ define Package/$(PKG_NAME)
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:= Dragino loragateway web panel
-  DEPENDS:=+uhttpd-mod-lua
   URL:=http://www.dragino.com
   MAINTAINER:=Dragino <info@dragino.com>
 endef

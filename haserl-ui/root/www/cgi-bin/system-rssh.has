@@ -21,13 +21,21 @@ fi
 
 # Save parameters
 	if [ "$FORM_BUTTON" == "Save" ]; then
+		connection_type="$FORM_CONNECTION_TYPE"
+		if [ $connection_type  == "NOPASSWD" ];then
+			uci set gateway.general.tvpe=0
+			uci set rssh.rssh.connection_type="$FORM_CONNECTION_TYPE"
+		elif [ $connection_type  == "PUBLICKEY" ];then
+			uci set gateway.general.tvpe=1
+			uci set rssh.rssh.connection_type="$FORM_CONNECTION_TYPE"
+		fi
 		uci set rssh.rssh.host_id="$FORM_HOST_ID"
 		uci set rssh.rssh.host_addr="$FORM_HOST_ADDR"
 		#uci set rssh.rssh.host_port="$FORM_HOST_PORT"
 
 		# Enable re-connection at startup if required, only if certificate and connection params have been set up.
 		if [ "$FORM_RSSH_ENABLE" == "checked" ] \
-			&& [ ! -z "$FORM_HOST_ID" ] && [ ! -z "$FORM_HOST_ADDR" ] && [ ! -z "$FORM_HOST_PORT" ] \
+			&& [ ! -z "$FORM_HOST_ID" ] && [ ! -z "$FORM_HOST_ADDR" ]  \
 			&& [ -e /etc/dropbear/id_dropbear ]; then
 			uci set rssh.rssh.rssh_enable="$FORM_RSSH_ENABLE"
 			/etc/init.d/DR_enable_rssh.sh enable
@@ -44,6 +52,15 @@ fi
 		uci set rssh.rssh.host_id="$FORM_HOST_ID"
 		uci set rssh.rssh.host_addr="$FORM_HOST_ADDR"
 		#uci set rssh.rssh.host_port="$FORM_HOST_PORT"
+		
+		connection_type="$FORM_CONNECTION_TYPE"
+		if [ $connection_type  == "NOPASSWD" ];then
+			uci set gateway.general.tvpe=0
+			uci set rssh.rssh.connection_type="$FORM_CONNECTION_TYPE"
+		elif [ $connection_type  == "PUBLICKEY" ];then
+			uci set gateway.general.tvpe=1
+			uci set rssh.rssh.connection_type="$FORM_CONNECTION_TYPE"
+		fi
 
 		uci set rssh.rssh.manual_connect="1"
 		uci commit rssh
@@ -86,7 +103,8 @@ fi
 	rssh_enable="$(uci -q get rssh.rssh.rssh_enable)"
 	provision_server="$(uci -q get system.@system[0].provision_server)"
 	config_version="$(uci -q get system.@system[0].config_ver)"
-
+	connection_type="$(uci -q get rssh.rssh.connection_type)"
+	
 	if [ -e "/etc/dropbear/id_dropbear" ]; then
 		fingerprint=$(dropbearkey -y -f /etc/dropbear/id_dropbear | grep "Fingerprint")
 	else
@@ -94,12 +112,12 @@ fi
 	fi
 
 	# Check ssh process running - should be "1" processes
-	ssh_ok=$(ps | grep "ssh" | grep "localhost:22" -c)
-	
+	ssh_ok=$(ps | grep "ssh" | grep "yfNR" -c)
+		
 	if [ $ssh_ok -eq "1" ]; then
 		connection_status="<span class="impactOK">RSSH Host connection OK</span>"
 	else
-		connection_status="<span class="impact">Not connected to RSSH Host</span>"
+		connection_status="<span class="impact">Not connected to RSSH Host </span>"
 	fi
 %>
 
@@ -142,6 +160,19 @@ fi
 <table class="configTable">
 	<h2>R-SSH Host Settings</h2>
 	<tr><td colspan="10"></td></tr> <!--Determines column widths-->
+	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label for="STYPE">Connection Type</label></td>
+		<td colspan="6"><select id='connection_type' name='CONNECTION_TYPE' onchange="displayServerURL()">
+			 <option value="NOPASSWD" > No Passwd </option> 
+			 <option value="PUBLICKEY"> Public key </option>
+		</select> </td>
+		<td colspan="6"></td>
+	</tr>
+	<script>document.getElementById("connection_type").value="<% echo -n $connection_type %>";</script>
+	<tr class="rowSpacer"></tr>
+
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="3"><label for="HOST_ID">Login ID</label></td>

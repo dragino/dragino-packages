@@ -11,7 +11,7 @@ start()
 
 	# Check for successful connection
 	sleep 2
-	check_connect=$(ps | grep "ssh" | grep "localhost:22" -c)
+	check_connect=$(ps | grep "ssh" | grep "yfNR" -c)
 	
 	# Connecr to Server
 	if [ $check_connect != "1" ] || [ $manual_connect == "1" ]; then
@@ -20,17 +20,14 @@ start()
 		rssh_id="$(uci -q get rssh.rssh.rssh_id)"
 		killall rssh_client
 		killall ssh
-		type="$(uci -q get gateway.general.tvpe)"
+		type="$(uci -q get rssh.rssh.connection_check)"
 		
 		if [ $type == "1" ]; then
 		rssh_client -s $host_addr -m $rssh_id -u $host_id -i /etc/dropbear/id_dropbear > /dev/null &		
 		else
 		rssh_client -s $host_addr -m $rssh_id -u $host_id  > /dev/null &
 		fi
-		if [ $manual_connect == "1" ] ; then
-		uci set rssh.rssh.manual_connect="0";
-		uci commit rssh
-		fi
+		[ $manual_connect == "1" ] && uci set rssh.rssh.manual_connect="0";	
 	fi
 }
 

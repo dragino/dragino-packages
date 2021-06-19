@@ -32,6 +32,7 @@
   </div>
   <% else %>
   <a href="/cgi-bin/lora-lora.has">LoRa</a>
+
   <% fi %>
   
   
@@ -43,12 +44,20 @@
 			<div class="dropdown-content">
 				<a href="/cgi-bin/lorawan.has">LoRaWAN</a>
 				
+
 				<% # Set up LoRaWAN menu for board type
 				if [ $model == "LIG16" ] || [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ]; then
 				%>
 					<a href="/cgi-bin/lorawan-aws.has">Amazon AWS IoT</a>
 				<% fi %>
-				<a href="/cgi-bin/loriot.has">LORIOT</a>
+
+				<% # Set up LoRaWAN menu for board type
+				if [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ]; then
+				%>
+					<a href="/cgi-bin/lorawan-helium.has">Helium IoT</a>
+				<% fi %>
+
+				<a href="/cgi-bin/loriot.has">LORIOT</a>				
 			</div>
 		</div>
 	<% else %>  

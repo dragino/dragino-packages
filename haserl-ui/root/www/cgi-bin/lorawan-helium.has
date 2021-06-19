@@ -1,0 +1,178 @@
+#!/usr/bin/haserl --upload-limit=4096 --upload-dir=/tmp
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+<%# --- Process the form submission --- %>
+<%
+	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
+		uci set gateway.server1.server_address="127.0.0.1"
+		uci set gateway.server1.provider="custom"
+		uci set gateway.server1.upp="$FORM_PRI_UPP"
+		uci set gateway.server1.dpp="$FORM_PRI_DPP"
+		/etc/init.d/helium_gateway  start
+	fi
+	
+	if [ "$FORM_BUTTON" == "Download_Helium_Server" ]; then
+		if  [ ! -e "/tmp/releases" ]; then
+			cd /tmp; wget https://github.com/helium/gateway-rs/releases
+		fi
+			if [ ! -f "/tmp/helium-gateway-rs-dragino.ipk" ]; then
+				latest_version="$(cat /tmp/releases |  grep dragin* |  awk -F"/" 'NR==1 {print$6}' |  sed 's/ //g')"
+				cd /tmp;wget -O helium-gateway-rs-dragino.ipk https://github.com/helium/gateway-rs/releases/download/"$latest_version"/helium-gateway-"$latest_version"-dragino.ipk
+				if [ ! -f "/tmp/helium-gateway-rs-dragino.ipk" ]; then
+					Download_status="<span class="impactOK">Download failed,Please Download again.</span>"
+				else
+					Download_status="<span class="impactOK">Download successful,Please Install Helium gateway-rs.</span>"
+				fi
+			else
+				Download_status="<span class="impactOK">Helium has been Downloaded,Please Install Helium gateway-rs</span>"
+			fi
+	fi
+
+	if [ "$FORM_BUTTON" == "Install_Helium_Server" ]; then
+		if [ -f "/tmp/helium-gateway-rs-dragino.ipk" ]; then
+			if  [ ! -e "/etc/init.d/helium_gateway" ]; then
+				opkg install /tmp/helium-gateway-rs-dragino.ipk
+				Install_status="<span class='impactOK'>Helium server has been Installed successfully </span>"
+			else
+				Install_status="<span class='impactOK'>Helium gateway-rs has been Installed</span>"
+			fi
+		else
+			Install_status="<span class='impact-light'>Download failed,Please click Download again</span>"
+		fi
+	fi
+
+
+
+%>
+
+
+<%# --- Get the variables for the HTML page --- %>
+<% 	
+	up_port="$(uci -q get gateway.server1.upp)"
+	dl_prot="$(uci -q get gateway.server1.dpp)"
+	helium_version="$(helium_gateway -V)"
+
+	helium_server_connect_status=$(ps | grep "/etc/helium_gateway" -c)
+	if [ $helium_server_connect_status -eq "2" ]; then
+		helium_server_status="<span class="impactOK">Helium Gateway-rs Connect is OK</span>"
+	else
+		helium_server_status="<span class="impact">No Helium Gateway-rs Connect </span>"
+	fi
+
+		
+	
+	
+%>
+
+<%# --- Present the HTML page --- %>
+<html lang="en">
+<head>
+	<%inc /www/cgi-bin/inc/head.inc %>
+</head>
+
+<body onload="displayCustomURL()">
+<%inc /www/cgi-bin/inc/menu.inc %>
+<div class="page-container">
+<h2>Helium IoT -- LoRaWAN</h2>
+
+<form id="lora" action="<% echo -n $SCRIPT_NAME %>" method="POST" enctype="multipart/form-data">
+
+<table class="configTable">
+	<tr><td colspan="18"><h3>Settings</h3></td></tr>	
+	
+		
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="FPORTNUM">Server Provider</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+		<p>Currently, the default configuration has been completed. Users only need to install Helium service and click Save</p>
+		<p>Users will view the status of Helium's gateway-rs through Helium connect status</p> 
+		<p style="text-align: center;"><br>[Close]</p>
+		</div>
+		</td>
+
+		<td colspan="6"><input type="text" id="server_address" name="SERVER_PROVIDER" Placeholder="Helium" maxlength="0" VALUE="<% echo Helium %>"></td>
+		<td colspan="2"></td>
+  		<td colspan="4"><label for="PORT">Server Address </label></td>
+		<td colspan="6"><input type="text" name="SERVER_ADDRESS" Placeholder="127.0.0.1" maxlength="0" VALUE="<% echo 127.0.0.1 %>" ></td>
+		<td colspan="2"></td>
+	</tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="PRI_UPP">Uplink Port</label></td>
+		<td colspan="6"><input type="text" name="PRI_UPP" maxlength="0"  VALUE="<% echo 1680 %>"  Placeholder="1680" ></td>
+		<td colspan="2"></td>
+		<td colspan="4"><label for="PRI_DPP">Downlink Port</label></td>
+		<td colspan="6"><input type="text" name="PRI_DPP" maxlength="0" VALUE="<% echo 1680 %>" pattern="[0-9]{1,8}" Placeholder="1680" ></td>
+		<td colspan="2"></td>
+	</tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="9"><label for="helium_server">Download Helium gateway-rs</label></td>
+		<td><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Download_Helium_Server" onclick="return confirm('Start Download Helium gateway-rs')"></td>
+		<td colspan="6"></td>
+		<td colspan="12"><% echo -n  $Download_status %></td>
+		
+		
+	</tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="9"><label for="helium_server">Install Helium gateway-rs</label></td>
+		<td><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Install_Helium_Server" onclick="return confirm('Start Install Helium gateway-rs')" ></td>
+		<td colspan="6"></td>
+		<td colspan="12"><% echo -n $Install_status %></td>
+	</tr>
+	
+	
+
+  	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="8"><label for="helium_server">Helium Gateway Connect</label></td>
+		<td colspan="1"></td>
+		<td colspan="10"><% echo -n $helium_server_status %></td>
+	</tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+		<td colspan="1"></td>
+		<td colspan="8"><label for="helium_version">Helium Gateway-rs version</label></td>
+		<td colspan="1"></td>
+		<td colspan="10"><% helium_gateway -V %></td>
+
+	
+	<tr class="rowSpacer"><td colspan="15"></tr>
+	<tr class="rowSpacer"><td colspan="15"></tr>
+
+
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="16">
+			<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+
+	
+</table>
+	
+</form>
+</div>
+<script>
+function showHelp1() {
+document.getElementById("helptext1").style.display="inline";
+}
+
+function hideHelp() {
+document.getElementById("helptext1").style.display="none";
+
+}
+</script>
+
+</body>
+</html>
+
+

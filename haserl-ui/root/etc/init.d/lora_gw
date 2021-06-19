@@ -18,19 +18,19 @@ init_board() {
     elif [[ "$chip" = "sx1301" ]] || [[ "$chip" = "sx1308" ]] ; then
         process="lora_pkt_fwd"
 	    ln -sf /usr/bin/station_sx1301 /usr/bin/station
-        cp -f /etc/station/station-sx1301.conf /etc/station/station.conf
-        /usr/bin/generate-config.sh
+            cp -f /etc/station/station-sx1301.conf /etc/station/station.conf
+            /usr/bin/generate-config.sh
     elif [[ "$chip" = "sx1302" ]]; then
         process="fwd"
 	    ln -sf /usr/bin/fwd_sx1302 /usr/bin/fwd
 	    ln -sf /usr/bin/station_sx1302 /usr/bin/station
-        cp -f /etc/station/station-sx1302.conf /etc/station/station.conf
+            cp -f /etc/station/station-sx1302.conf /etc/station/station.conf
 	    /usr/bin/generate-config.sh
     else
         exit 1
     fi
 
-    if [[ "$mode" = "disabled" ]] || [[ "$mode" = "loriot" ]] || [[ "$mode" = "station" ]] ; then
+    if [[ "$mode" = "disabled" ]] || [[ "$mode" = "loriot" ]] ; then
         process_running=`pidof $process`
         if [[ ! -z "process_running" ]]; then
             stop

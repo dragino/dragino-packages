@@ -23,8 +23,17 @@ init_board() {
 		/usr/bin/${process} ${option}  > /dev/null &
 		exit
 	elif [[ "$service" = "station" ]]; then
+		logger "Start station"
+		# must run pkt_fwd or fwd first then kill it to make sure the station runs.
+		sleep 20
+		/etc/init.d/lora_gw stop
+		sleep 10
 		cd /etc/station ; station -L /var/iot/station.log -d
+		logger "Finished station"
+		# make sure pkt_fwd has benn killed
+		/etc/init.d/lora_gw stop
 		exit
+	
 	fi
 }
 

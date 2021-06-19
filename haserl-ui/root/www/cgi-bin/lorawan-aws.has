@@ -9,8 +9,12 @@
 		uci set gateway.general.email="$FORM_EMAIL"
 		uci set gateway.general.server_type="station"
 		uci commit gateway
-		sed -i '/routerid/d' /etc/station/station.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station.conf		
-	
+
+		#Enter the routerid into the station configuration file
+		sed -i '/routerid/d' /etc/station/station.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station.conf			
+		sed -i '/routerid/d' /etc/station/station-sx1301.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station-sx1301.conf
+		sed -i '/routerid/d' /etc/station/station-sx1302.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station-sx1302.conf
+
 		/etc/init.d/lora_gw stop > /dev/null
 		sleep 2
 		/usr/bin/reload_iot_service.sh

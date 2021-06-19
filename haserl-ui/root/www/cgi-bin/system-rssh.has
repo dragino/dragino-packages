@@ -23,20 +23,18 @@ fi
 	if [ "$FORM_BUTTON" == "Save" ]; then
 		connection_type="$FORM_CONNECTION_TYPE"
 		if [ $connection_type  == "NOPASSWD" ];then
-			uci set gateway.general.tvpe=0
+			uci set rssh.rssh.connection_check=0
 			uci set rssh.rssh.connection_type="$FORM_CONNECTION_TYPE"
 		elif [ $connection_type  == "PUBLICKEY" ];then
-			uci set gateway.general.tvpe=1
+			uci set rssh.rssh.connection_check=1
 			uci set rssh.rssh.connection_type="$FORM_CONNECTION_TYPE"
 		fi
 		uci set rssh.rssh.host_id="$FORM_HOST_ID"
 		uci set rssh.rssh.host_addr="$FORM_HOST_ADDR"
-		#uci set rssh.rssh.host_port="$FORM_HOST_PORT"
 
 		# Enable re-connection at startup if required, only if certificate and connection params have been set up.
 		if [ "$FORM_RSSH_ENABLE" == "checked" ] \
-			&& [ ! -z "$FORM_HOST_ID" ] && [ ! -z "$FORM_HOST_ADDR" ]  \
-			&& [ -e /etc/dropbear/id_dropbear ]; then
+			&& [ ! -z "$FORM_HOST_ID" ] && [ ! -z "$FORM_HOST_ADDR" ]; then
 			uci set rssh.rssh.rssh_enable="$FORM_RSSH_ENABLE"
 			/etc/init.d/DR_enable_rssh.sh enable
 		else
@@ -51,14 +49,13 @@ fi
 	if [ "$FORM_BUTTON" == "Connect" ]; then
 		uci set rssh.rssh.host_id="$FORM_HOST_ID"
 		uci set rssh.rssh.host_addr="$FORM_HOST_ADDR"
-		#uci set rssh.rssh.host_port="$FORM_HOST_PORT"
 		
 		connection_type="$FORM_CONNECTION_TYPE"
 		if [ $connection_type  == "NOPASSWD" ];then
-			uci set gateway.general.tvpe=0
+			uci set rssh.rssh.connection_check=0
 			uci set rssh.rssh.connection_type="$FORM_CONNECTION_TYPE"
 		elif [ $connection_type  == "PUBLICKEY" ];then
-			uci set gateway.general.tvpe=1
+			uci set rssh.rssh.connection_check=1
 			uci set rssh.rssh.connection_type="$FORM_CONNECTION_TYPE"
 		fi
 

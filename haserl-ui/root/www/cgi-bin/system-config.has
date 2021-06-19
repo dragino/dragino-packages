@@ -40,29 +40,30 @@
 
 	<tr>
 		
-		<td colspan="20"><label>Cilck "Generate archive"to download a tar archive of the current configuration files."</label></td>
+		<td colspan="30"><label>Cilck "Generate archive"to download a tar archive of the current configuration files."</label></td>
 	</tr>
 	
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><h3 for ="DOWNLOADBACKUP">Download backup:</h3></td>
+		<td colspan="10"><h3 for ="DOWNLOADBACKUP">Download backup:</h3></td>
 		<td colspan="10"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Generate_archive"> </td>
+		<td colspan="5"></td>
+		<td colspan="12"><a class="impactOK" href="/tmp/backup.tar.gz">Download Backup File</a></td>
+
 	</tr>
-	
-		
+			
 	<tr>
-		<td colspan="20"><label>To restore configuration files,you can upload a previously generated backup archive here.</label></td>
+		<td colspan="30"><label>To restore configuration files,you can upload a previously generated backup archive here.</label></td>
 	</tr>
 	
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><h3 for ="RESTOREBACKUP">Restore backup:</h3></td>
-		<td colspan="8"><input type=file name=uploadfile></td>
+		<td colspan="10"><h3 for ="RESTOREBACKUP">Restore backup:</h3></td>
+		<td colspan="10"><input type=file name=uploadfile></td>
 		<td colspan="5"><% echo -n $trust_status %></td>
 		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_archive" onclick="showPageLoaderIcon()"></td>
-	</tr>
+	</tr>	
 	
-
 </table>
 	
 </form>

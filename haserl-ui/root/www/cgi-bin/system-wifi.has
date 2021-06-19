@@ -120,14 +120,14 @@
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="4"><label for="SSID">WiFi Name SSID</label></td>
-		<td colspan="3"><input type="text" name="SSID" required maxlength="128" VALUE="<% echo -n $ssid %>" pattern="[a-zA-Z0-9_*.$%<>;:?@=!^|&+()#~\{\}\-]{1,128}" ></td>
+		<td colspan="3"><input type="text" name="SSID" required maxlength="128" VALUE="<% echo -n $ssid %>" pattern="[a-zA-Z0-9/\_*.$%<>;:?@=!^|&+()#~\{\}\-]{1,128}" ></td>
 		<td colspan="12"></td>
 	</tr>
 
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="4"><label for="KEY"> Passphrase (8-32 char)</label></td>
-		<td colspan="3"><input type="password" name="KEY" id="key" required maxlength="32" VALUE="<% echo -n $key %>" pattern="[a-zA-Z0-9_*.$%<>;:?@=!^|&+()#~\{\}\-]{8,32}" ></td>
+		<td colspan="3"><input type="password" name="KEY" id="key" required maxlength="32" VALUE="<% echo -n $key %>" pattern="[a-zA-Z0-9/\_*.$%<>;:?@=!^|&+()#~\{\}\-]{8,32}" ></td>
 		<td colspan="1"><span class="btnShow" onclick="toggleVis('key')">Show</span></td>
 		<td colspan="2"></td>
 		<td colspan="3"><label for="ENCRYPTION"> Encryption</label></td>
@@ -154,7 +154,7 @@
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="4"><label for="HOST_SSID">Host WiFi SSID</label></td>
-		<td colspan="3"><input type="text" name="HOST_SSID" id="host_ssid" maxlength="128" VALUE="<% echo -n $host_ssid %>" pattern="[a-zA-Z0-9_*.$%<>;:?@=!^|&+()#~\{\}\-\s]{1,128}" ></td>
+		<td colspan="3"><input type="text" name="HOST_SSID" id="host_ssid" maxlength="128" VALUE="<% echo -n $host_ssid %>" pattern="[a-zA-Z0-9/\_*.$%<>;:?@=!^|&+()#~\{\}\-\s]{1,128}" ></td>
 		<td colspan="3"></td>
 		<td colspan="3"><label for="SSID_SURVEY">WiFi Survey</label></td>
 		<td colspan="4"><select name="SSID_SURVEY" id="ssid_survey"  style="width: 160px" onchange="writeToHostSSID()" >
@@ -274,7 +274,7 @@
 		chan=$(cat /tmp/scan.txt| grep -w -A 2 "$addr" | grep "Channel" | cut -d : -f3)
 		ssid=$(cat /tmp/scan.txt| grep -w -A 1 "$addr" | grep "ESSID" | cut -d : -f2 | sed 's/"//g')
 		
-		ssid_str="<option	value="$ssid::$encr"><pre> $ssid  (Ch: $chan  Encr: $encr_str Sig: $sig) </pre> </option>"$ssid_str
+		ssid_str="<option value=\"$ssid::$encr\"><pre> $ssid  (Ch: $chan  Encr: $encr_str Sig: $sig) </pre> </option>"$ssid_str
 	done	
 %>	
 

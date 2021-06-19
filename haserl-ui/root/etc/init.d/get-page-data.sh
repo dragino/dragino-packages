@@ -442,15 +442,34 @@ server3=" "
 if [ $server_type == "lorawan" ]; then
 	info_title3="LoRaWAN Service"
 	server3=$(uci get gateway.server1.server_address)  
-	lorawanstatus=$(ps|grep -c _pkt_fwd)
+	lorawanstatus_pkt_fwd=$(ps|grep -c _pkt_fwd)
 	lorawan_boot=$(ps|grep -c reset_lgw.sh)
-	if [ $lorawanstatus == "2" ] && [ $lorawan_boot == "1" ]; then
-		process3="LoRaWAN process pkt_fwd <b>Running</b>"
-		status3=$(cat /var/iot/status)
+	lorawanstatus_fwd=$(ps|grep -c fwd)
+	model=$(cat /tmp/iot/model.txt)
+
+	if [ "$model" == "LIG16" ]; then
+		fwd_type=1
 	else
-		process3="LoRaWAN process pkt_fwd <b>Not Running</b>"
+		fwd_type=2
 	fi
 
+	if [ $fwd_type == "1" ];then
+		if [ $lorawanstatus_fwd == "2" ] && [ $lorawan_boot == "1" ];then
+			process3="LoRaWAN process fwd <b>Running</b>"
+			status3=$(cat /var/iot/status)
+		else  
+			process3="LoRaWAN process fwd <b>Not Running</b>"
+		fi
+
+	elif [ $fwd_type == "2" ];then
+
+		if [ $lorawanstatus_pkt_fwd == "2" ] && [ $lorawan_boot == "1" ]; then
+			process3="LoRaWAN process pkt_fwd <b>Running</b>"
+			status3=$(cat /var/iot/status)
+		else  
+			process3="LoRaWAN process pkt_fwd <b>Not Running</b>"
+		fi
+	fi
 elif [ $server_type == "station" ]; then
 	info_title3="AWS-IoT Service"
 	server3=`cat /etc/station/cups.uri`

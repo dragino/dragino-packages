@@ -83,6 +83,7 @@ uint8_t DEBUG_BEACON     = 0;
 uint8_t DEBUG_INFO       = 1;
 uint8_t DEBUG_WARNING    = 1;
 uint8_t DEBUG_ERROR      = 1;
+uint8_t DEBUG_DEBUG      = 0;
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS ------------------------------------------------------- */
@@ -868,7 +869,7 @@ static int parse_gateway_configuration(const char * conf_file) {
     }
 
 	
-// 开始配置Server info	
+    /* configure server information */
 	serv_arry = json_object_get_array(conf_obj, "servers");
 	if (serv_arry != NULL) {
 		serv_obj = json_array_get_object(serv_arry, 0);
@@ -930,13 +931,10 @@ static int parse_gateway_configuration(const char * conf_file) {
 		}
 		MSG_DEBUG(DEBUG_INFO, "INFO~ packets received with no CRC will%s be forwarded\n", (fwd_nocrc_pkt ? "" : " NOT"));
 		
-		
-	
     } else 
-        printf("WARNING~ No service offer.\n");
+        MSG_DEBUG(DEBUG_WARNING, "WARNING~ No service offer.\n");
 	
-/////以上为服务器配置	
-	
+    /* end of server info */
 	
 	
     /* GPS module TTY path (optional) */
@@ -1216,7 +1214,7 @@ static int init_socket(const char *servaddr, const char *servport, const char *r
         return -1;
     }
 
-    MSG_DEBUG(DEBUG_INFO, "INFO~ sockfd=%d\n", sockfd);
+    MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ Create sockfd=%d\n", sockfd);
 
     return sockfd;
 }
@@ -1375,6 +1373,18 @@ int main(void)
             DEBUG_INFO       = 1;
             DEBUG_WARNING    = 1;
             DEBUG_ERROR      = 1;
+            break;
+        case 9:  /* all */
+            DEBUG_PKT_FWD    = 1;  
+            DEBUG_REPORT     = 1;
+            DEBUG_JIT        = 1;
+            DEBUG_JIT_ERROR  = 1;
+            DEBUG_TIMERSYNC  = 0;
+            DEBUG_BEACON     = 1;
+            DEBUG_INFO       = 1;
+            DEBUG_WARNING    = 1;
+            DEBUG_ERROR      = 1;
+            DEBUG_DEBUG      = 1;
             break;
         default: /* default is 2 level */
             break;
@@ -1574,7 +1584,7 @@ int main(void)
     /* init semaphore */
     i = sem_init(&rxpkt_rec_sem, 0, 0);
     if (i != 0)
-        MSG_DEBUG(DEBUG_WARNING, "[sem]Semaphore initialization failed!\n");
+        MSG_DEBUG(DEBUG_WARNING, "WARNING~ [sem]Semaphore initialization failed!\n");
 
     /* Board reset */          
     if (system("/usr/bin/reset_lgw.sh start") != 0) {
@@ -1887,13 +1897,12 @@ int main(void)
         if (push_ack < labs(stat_send * 0.3)) {  /*maybe not recv push_ack, 90% */
             push_ack = 0;
             stat_send = 0;
-            MSG_DEBUG(DEBUG_INFO, "INFO~ [up] PUSH_ACK mismatch, reconnect server \n");
+            MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ [up] PUSH_ACK mismatch, reconnect server \n");
             output_status(0);
             /* maybe theadup is sending message */
             pthread_mutex_lock(&mx_sockup); /* if a lock ? */
             if (sock_up) close(sock_up);
-            if ((sock_up = init_socket(serv_addr, serv_port_up,
-                                      (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
+            if ((sock_up = init_socket(serv_addr, serv_port_up, (void *)&push_timeout_half, sizeof(push_timeout_half))) == -1)
                 exit(EXIT_FAILURE);
             pthread_mutex_unlock(&mx_sockup);
         }
@@ -2442,13 +2451,13 @@ void thread_proc_rxpkt() {
                                 fsize = p->size - 13 - macmsg.FHDR.FCtrl.Bits.FOptsLen; 
                                 memcpy(payloaden, p->payload + 9 + macmsg.FHDR.FCtrl.Bits.FOptsLen, fsize);
                                 fcnt_valid = false;
-                                for (i = 0; i < FCNT_GAP; i++) {   // loop 8 times
+                                for (i = 0; i < FCNT_GAP; i++) {   // loop 9 times
                                     fcnt = macmsg.FHDR.FCnt | (i * 0x10000);
                                     LoRaMacComputeMic(p->payload, p->size - 4, devinfo.nwkskey, devinfo.devaddr, UP, fcnt, &mic);
-                                    MSG_DEBUG(DEBUG_INFO, "INFO~ [MIC] mic=%08X, MIC=%08X, fcnt=%u, FCNT=%u\n", mic, macmsg.MIC, fcnt, macmsg.FHDR.FCnt);
+                                    MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ [MIC] mic=%08X, MIC=%08X, fcnt=%u, FCNT=%u\n", mic, macmsg.MIC, fcnt, macmsg.FHDR.FCnt);
                                     if (mic == macmsg.MIC) {
                                         fcnt_valid = true;
-                                        MSG_DEBUG(DEBUG_INFO, "INFO~ [MIC] Found a match fcnt(=%u)\n", fcnt);
+                                        MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ [MIC] Found a match fcnt(=%u)\n", fcnt);
                                         break;
                                     }
                                 }
@@ -3216,7 +3225,7 @@ void thread_down(void) {
 			if (!strcmp(server_type, "lorawan")) {
 				pull_ack = 0;
 				pull_send = 0;
-				MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_ACK mismatch, reconnect server\n");
+				MSG_DEBUG(DEBUG_DEBUG, "INFO~ [down] PULL_ACK mismatch, reconnect server\n");
 				pthread_mutex_lock(&mx_sockdn); /*maybe reconnect, so lock */ 
 				if (sock_down) close(sock_down);
 				if ((sock_down = init_socket(serv_addr, serv_port_down,

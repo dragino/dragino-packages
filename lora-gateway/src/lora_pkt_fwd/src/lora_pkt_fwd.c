@@ -3823,6 +3823,10 @@ void thread_ent_dnlink(void) {
                     dn_link = entry;
                 } else {
                     while (tmp->next != NULL) {
+                        if (!strcmp(tmp->devaddr, entry->devaddr)) {  /* dnlink have the same devaddr */
+                            tmp->pre->next = tmp->next;
+                            free(tmp);
+                        }
                         tmp = tmp->next;
                         ++j;
                     }

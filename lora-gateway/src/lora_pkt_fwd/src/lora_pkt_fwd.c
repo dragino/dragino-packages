@@ -311,6 +311,8 @@ static struct context cntx = {'\0'};
 
 static uint32_t dwfcnt = 0;  /* for local downlink frame counter */
 
+static int dnlink_size = 0;  /* for dn_link packages size */
+
 typedef struct dnlink {
     char devaddr[16];
     char txmode[8];
@@ -2498,12 +2500,17 @@ void thread_proc_rxpkt() {
 
                             /* Customer downlink process */
                             sprintf(addr, "%08X", devinfo.devaddr);
-                            dnelem = search_dnlink(addr);
+                            pthread_mutex_lock(&mx_dnlink);
+                            dnelem = dn_link;
+                            while (dnelem != NULL) {
+                                if (!strcmp(dnelem->devaddr, addr))
+                                    break;
+                                dnelem = dnelem->next;
+                            }
                             if (dnelem != NULL) {
                                 MSG_DEBUG(DEBUG_INFO, "INFO~ [procpkt]Found a match devaddr: %s\n", addr);
                                 jit_result = custom_rx2dn(dnelem, &devinfo, p->count_us, TIMESTAMPED);
                                 if (jit_result == JIT_ERROR_OK) { /* Next upmsg willbe indicate if received by note */
-                                    pthread_mutex_lock(&mx_dnlink);
                                     if (dnelem == dn_link) 
                                         dn_link = dnelem->next;
                                     if (dnelem->pre != NULL)
@@ -2511,11 +2518,12 @@ void thread_proc_rxpkt() {
                                     if (dnelem->next != NULL)
                                         dnelem->next->pre = dnelem->pre;
                                     free(dnelem);
-                                    pthread_mutex_unlock(&mx_dnlink);
+                                    dnlink_size--;
                                 } else {
                                     MSG_DEBUG(DEBUG_ERROR, "ERROR~ [procpkt]Packet REJECTED (jit error=%d)\n", jit_result);
                                 }
                             }
+                            pthread_mutex_unlock(&mx_dnlink);
 
                         } else
                             MSG_DEBUG(DEBUG_WARNING, "DECRYPT~ [Ignore] Can't find SessionKeys for Dev %08X\n", devinfo.devaddr);
@@ -3659,6 +3667,7 @@ void thread_ent_dnlink(void) {
 
     DNLINK *entry = NULL;
     DNLINK *tmp = NULL;
+    DNLINK *tmp2 = NULL;
 
     enum jit_error_e jit_result = JIT_ERROR_OK;
 
@@ -3817,34 +3826,44 @@ void thread_ent_dnlink(void) {
                 }
 
                 pthread_mutex_lock(&mx_dnlink);
-                j = 1;
+
                 tmp = dn_link;
                 if (tmp == NULL) {
                     dn_link = entry;
+                    ++dnlink_size;
                 } else {
-                    while (tmp->next != NULL) {
-                        if (!strcmp(tmp->devaddr, entry->devaddr)) {  /* dnlink have the same devaddr */
-                            tmp->pre->next = tmp->next;
+                    do {
+                        if (dnlink_size > MAX_DNLINK_PKTS) { /* remove the first package */
+                            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the first package of custom downlink.\n");
+                            dn_link = dn_link->next;
                             free(tmp);
+                            tmp = dn_link;
+                            dnlink_size--;
                         }
-                        tmp = tmp->next;
-                        ++j;
-                    }
-                    entry->pre = tmp;
-                    tmp->next = entry;  
-                }
-                if (j > MAX_DNLINK_PKTS) { /* minus 1/2 pkts */
-                    MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] Adjust dnlink.\n");
-                    for (i = 0; i < j/2; ++i) {
-                        tmp = dn_link;
-                        dn_link = dn_link->next;
-                        if (tmp != NULL)
+                        if (!strcmp(tmp->devaddr, entry->devaddr)) {  /* dnlink have the same devaddr */
+                            if (NULL != tmp->pre)
+                                tmp->pre->next = tmp->next;
+                            tmp2 = tmp->next;
                             free(tmp);
-                    }
+                            tmp = tmp2;
+                            dnlink_size--;
+                            continue;
+                        } 
+                        tmp2 = tmp;
+                        tmp = tmp->next;
+                    } while (tmp != NULL);
+
+                    tmp = entry;
+                    tmp->pre = tmp2;
+
+                    ++dnlink_size;
                 }
+
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] DNLINK PENDING!(%d elems).\n", dnlink_size);
                 pthread_mutex_unlock(&mx_dnlink);
-                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] DNLINK PENDING!(%d elems).\n", j);
+
             }
+
             wait_ms(20); /* wait for HAT send or other process */
         }
         if (closedir(dir) < 0)
@@ -3907,8 +3926,6 @@ static void prepare_frame(uint8_t type, struct devinfo *devinfo, uint32_t downcn
 
 static DNLINK* search_dnlink(char *addr) {
     DNLINK *entry;
-
-    /* pthread_mutex_lock(&mx_dnlink); only read link, I think no need a lock! */ 
     entry = dn_link;
     while (entry != NULL) {
         if (!strcmp(entry->devaddr, addr))

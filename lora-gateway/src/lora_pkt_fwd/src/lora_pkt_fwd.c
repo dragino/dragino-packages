@@ -3833,14 +3833,17 @@ void thread_ent_dnlink(void) {
                     dn_link = entry;
                     ++dnlink_size;
                 } else {
+
+                    if (dnlink_size > MAX_DNLINK_PKTS) { /* remove the first package */
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the first package of custom downlink.\n");
+                        tmp2 = dn_link->next;
+                        free(dn_link);
+                        dn_link = tmp2;
+                        dnlink_size--;
+                    }
+
                     do {
-                        if (dnlink_size > MAX_DNLINK_PKTS) { /* remove the first package */
-                            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the first package of custom downlink.\n");
-                            dn_link = dn_link->next;
-                            free(tmp);
-                            tmp = dn_link;
-                            dnlink_size--;
-                        }
+
                         if (!strcmp(tmp->devaddr, entry->devaddr)) {  /* dnlink have the same devaddr */
                             MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the duplicate devaddr package of custom downlink.\n");
                             if (NULL != tmp->pre)
@@ -3853,8 +3856,10 @@ void thread_ent_dnlink(void) {
                             dnlink_size--;
                             continue;
                         } 
+
                         tmp2 = tmp;
                         tmp = tmp->next;
+
                     } while (tmp != NULL);
 
                     tmp = entry;

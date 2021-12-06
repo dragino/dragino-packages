@@ -2500,6 +2500,7 @@ void thread_proc_rxpkt() {
 
                             /* Customer downlink process */
                             sprintf(addr, "%08X", devinfo.devaddr);
+
                             pthread_mutex_lock(&mx_dnlink);
                             dnelem = dn_link;
                             while (dnelem != NULL) {
@@ -3841,9 +3842,12 @@ void thread_ent_dnlink(void) {
                             dnlink_size--;
                         }
                         if (!strcmp(tmp->devaddr, entry->devaddr)) {  /* dnlink have the same devaddr */
+                            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the duplicate devaddr package of custom downlink.\n");
                             if (NULL != tmp->pre)
                                 tmp->pre->next = tmp->next;
                             tmp2 = tmp->next;
+                            if (tmp == dn_link) 
+                                dn_link = tmp2;
                             free(tmp);
                             tmp = tmp2;
                             dnlink_size--;
@@ -3855,6 +3859,9 @@ void thread_ent_dnlink(void) {
 
                     tmp = entry;
                     tmp->pre = tmp2;
+
+                    if (NULL == dn_link) 
+                        dn_link = tmp;
 
                     ++dnlink_size;
                 }

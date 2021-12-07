@@ -305,7 +305,7 @@ static struct context cntx = {'\0'};
 
 /* queue about data down */
 
-#define MAX_DNLINK_PKTS   32  /* MAX number of dnlink pkts */
+#define MAX_DNLINK_PKTS   15  /* MAX number of dnlink pkts */
 #define DNFPORT           2   /* default fport for downlink */
 #define DNPATH      "/var/iot/push"   /* default path for downlink */
 
@@ -327,7 +327,7 @@ typedef struct dnlink {
     struct dnlink *pre;
     struct dnlink *next;
 } DNLINK;
-static DNLINK *dn_link = NULL;
+static DNLINK *dn_head = NULL;
 
 typedef struct pkts {
     int nb_pkt;
@@ -2500,7 +2500,7 @@ void thread_proc_rxpkt() {
                             sprintf(addr, "%08X", devinfo.devaddr);
 
                             pthread_mutex_lock(&mx_dnlink);
-                            dnelem = dn_link;
+                            dnelem = dn_head;
                             while (dnelem != NULL) {
                                 if (!strcmp(dnelem->devaddr, addr))
                                     break;
@@ -2510,8 +2510,8 @@ void thread_proc_rxpkt() {
                                 MSG_DEBUG(DEBUG_INFO, "INFO~ [procpkt]Found a match devaddr: %s\n", addr);
                                 jit_result = custom_rx2dn(dnelem, &devinfo, p->count_us, TIMESTAMPED);
                                 if (jit_result == JIT_ERROR_OK) { /* Next upmsg willbe indicate if received by note */
-                                    if (dnelem == dn_link) 
-                                        dn_link = dnelem->next;
+                                    if (dnelem == dn_head) 
+                                        dn_head = dnelem->next;
                                     if (dnelem->pre != NULL)
                                         dnelem->pre->next = dnelem->next;
                                     if (dnelem->next != NULL)
@@ -3665,8 +3665,8 @@ void thread_ent_dnlink(void) {
     char pdformat[8];
 
     DNLINK *entry = NULL;
-    DNLINK *tmp = NULL;
-    DNLINK *tmp2 = NULL;
+    DNLINK *dn_cur = NULL;
+    DNLINK *dn_next = NULL;
 
     enum jit_error_e jit_result = JIT_ERROR_OK;
 
@@ -3692,199 +3692,196 @@ void thread_ent_dnlink(void) {
                 continue;
             }
 
-            if ((statbuf.st_mode & S_IFMT) == S_IFREG) {
-                if ((fp = fopen(dn_file, "r")) == NULL) {
-                    MSG_DEBUG(DEBUG_ERROR, "ERROR~ [DNLK]Cannot open %s\n", ptr->d_name);
-                    continue;
-                }
+            if ((statbuf.st_mode & S_IFMT) != S_IFREG) {
+                MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ [DNLK]Not a Regular file: %s!\n", ptr->d_name);
+                continue;
+            }
 
-                memset(buff_down, '\0', sizeof(buff_down));
+            if ((fp = fopen(dn_file, "r")) == NULL) {
+                MSG_DEBUG(DEBUG_ERROR, "ERROR~ [DNLK]Cannot open %s\n", ptr->d_name);
+                continue;
+            }
 
-                size = fread(buff_down, sizeof(char), sizeof(buff_down), fp); /* the size less than buff_down return EOF */
+            memset(buff_down, '\0', sizeof(buff_down));
 
-                fclose(fp);
+            size = fread(buff_down, sizeof(char), sizeof(buff_down), fp); /* the size less than buff_down return EOF */
 
-                unlink(dn_file); /* delete the file */
+            if (fclose(fp) != 0) {
+                MSG_DEBUG(DEBUG_DEBUG, "DEBUG~ [DNLK]Can't close file: %s!\n", ptr->d_name);
+                unlink(dn_file); /* may be link */ 
+                continue;
+            }
 
-                memset(addr, '\0', sizeof(addr));
-                memset(pdformat, '\0', sizeof(pdformat));
-                memset(txmode, '\0', sizeof(txmode));
-                memset(hexpld, '\0', sizeof(hexpld));
-                memset(dnpld, '\0', sizeof(dnpld));
-                memset(txdr, '\0', sizeof(txdr));
-                memset(txpw, '\0', sizeof(txpw));
-                memset(txbw, '\0', sizeof(txbw));
-                memset(txfreq, '\0', sizeof(txfreq));
-                memset(rxwindow, '\0', sizeof(rxwindow));
+            unlink(dn_file); /* delete the file */
 
-                /* format:  addr,txmode,pdformat,dnpld,txpw,txbw,txdr,txfreq 
-                 * 如果 dnpld 含有','时会造成后面的txpw等值出错
-                **/
+            memset(addr, '\0', sizeof(addr));
+            memset(pdformat, '\0', sizeof(pdformat));
+            memset(txmode, '\0', sizeof(txmode));
+            memset(hexpld, '\0', sizeof(hexpld));
+            memset(dnpld, '\0', sizeof(dnpld));
+            memset(txdr, '\0', sizeof(txdr));
+            memset(txpw, '\0', sizeof(txpw));
+            memset(txbw, '\0', sizeof(txbw));
+            memset(txfreq, '\0', sizeof(txfreq));
+            memset(rxwindow, '\0', sizeof(rxwindow));
 
-                for (i = 0, j = 0; i < size; i++) {
-                    if (buff_down[i] == ',')
-                        j++;
-                }
+            /* format:  addr,txmode,pdformat,dnpld,txpw,txbw,txdr,txfreq 
+             * 如果 dnpld 含有','时会造成后面的txpw等值出错
+            **/
 
-                if (j < 3) { /* Error Format, ',' must be greater than or equal to 3*/
-                    MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Format error: %s\n", buff_down);
-                    continue;
-                }
+            for (i = 0, j = 0; i < size; i++) {
+                if (buff_down[i] == ',')
+                    j++;
+            }
 
-                start = 0;
+            if (j < 3) { /* Error Format, ',' must be greater than or equal to 3*/
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Format error: %s\n", buff_down);
+                continue;
+            }
 
-                if (strcpypt(addr, buff_down, &start, size, sizeof(addr)) < 1) 
-                    continue;
+            start = 0;
 
-                if (strcpypt(txmode, buff_down, &start, size, sizeof(txmode)) < 1)
-                    strcpy(txmode, "time"); 
+            if (strcpypt(addr, buff_down, &start, size, sizeof(addr)) < 1) 
+                continue;
 
-                if (strcpypt(pdformat, buff_down, &start, size, sizeof(pdformat)) < 1)
-                    strcpy(pdformat, "txt"); 
+            if (strcpypt(txmode, buff_down, &start, size, sizeof(txmode)) < 1)
+                strcpy(txmode, "time"); 
 
-                psize = strcpypt(dnpld, buff_down, &start, size, sizeof(dnpld)); 
-                if (psize < 1) continue;
+            if (strcpypt(pdformat, buff_down, &start, size, sizeof(pdformat)) < 1)
+                strcpy(pdformat, "txt"); 
 
-                entry = (DNLINK *) malloc(sizeof(DNLINK));
+            psize = strcpypt(dnpld, buff_down, &start, size, sizeof(dnpld)); 
+            if (psize < 1) continue;
 
-                if (strcpypt(txpw, buff_down, &start, size, sizeof(txpw)) > 0) {
-                    entry->txpw = atoi(txpw);
-                } else
-                    entry->txpw = 0;
+            entry = (DNLINK *) malloc(sizeof(DNLINK));
 
-                if (strcpypt(txbw, buff_down, &start, size, sizeof(txbw)) > 0) {
-                    entry->txbw = atoi(txbw);
-                } else
-                    entry->txbw = 0; 
+            if (strcpypt(txpw, buff_down, &start, size, sizeof(txpw)) > 0) {
+                entry->txpw = atoi(txpw);
+            } else
+                entry->txpw = 0;
 
-                if (strcpypt(txdr, buff_down, &start, size, sizeof(txdr)) > 0) {
-                    if (!strncmp(txdr, "SF7", 3))
-                        entry->txdr = DR_LORA_SF7; 
-                    else if (!strncmp(txdr, "SF8", 3))
-                        entry->txdr = DR_LORA_SF8; 
-                    else if (!strncmp(txdr, "SF9", 3))
-                        entry->txdr = DR_LORA_SF9; 
-                    else if (!strncmp(txdr, "SF10", 4))
-                        entry->txdr = DR_LORA_SF10; 
-                    else if (!strncmp(txdr, "SF11", 4))
-                        entry->txdr = DR_LORA_SF11; 
-                    else if (!strncmp(txdr, "SF12", 4))
-                        entry->txdr = DR_LORA_SF12; 
-                    else 
-                        entry->txdr = 0; 
-                } else 
+            if (strcpypt(txbw, buff_down, &start, size, sizeof(txbw)) > 0) {
+                entry->txbw = atoi(txbw);
+            } else
+                entry->txbw = 0; 
+
+            if (strcpypt(txdr, buff_down, &start, size, sizeof(txdr)) > 0) {
+                if (!strncmp(txdr, "SF7", 3))
+                    entry->txdr = DR_LORA_SF7; 
+                else if (!strncmp(txdr, "SF8", 3))
+                    entry->txdr = DR_LORA_SF8; 
+                else if (!strncmp(txdr, "SF9", 3))
+                    entry->txdr = DR_LORA_SF9; 
+                else if (!strncmp(txdr, "SF10", 4))
+                    entry->txdr = DR_LORA_SF10; 
+                else if (!strncmp(txdr, "SF11", 4))
+                    entry->txdr = DR_LORA_SF11; 
+                else if (!strncmp(txdr, "SF12", 4))
+                    entry->txdr = DR_LORA_SF12; 
+                else 
                     entry->txdr = 0; 
+            } else 
+                entry->txdr = 0; 
 
-                if (strcpypt(txfreq, buff_down, &start, size, sizeof(txfreq)) > 0) {
-                    i = sscanf(txfreq, "%u", &entry->txfreq);
-                    if (i != 1)
-                        entry->txfreq = 0;
-                } else 
-                    entry->txfreq = 0; 
+            if (strcpypt(txfreq, buff_down, &start, size, sizeof(txfreq)) > 0) {
+                i = sscanf(txfreq, "%u", &entry->txfreq);
+                if (i != 1)
+                    entry->txfreq = 0;
+            } else 
+                entry->txfreq = 0; 
 
-                if (strcpypt(rxwindow, buff_down, &start, size, sizeof(rxwindow)) > 0) {
-                    entry->rxwindow = atoi(rxwindow);
-                    if (entry->rxwindow > 2 || entry->rxwindow < 1)
-                        entry->rxwindow = 0;
-                } else 
-                    entry->rxwindow = 0; 
+            if (strcpypt(rxwindow, buff_down, &start, size, sizeof(rxwindow)) > 0) {
+                entry->rxwindow = atoi(rxwindow);
+                if (entry->rxwindow > 2 || entry->rxwindow < 1)
+                    entry->rxwindow = 0;
+            } else 
+                entry->rxwindow = 0; 
 
-                strcpy(entry->devaddr, addr);
-                if (strstr(pdformat, "hex") != NULL) { 
-                    if (psize % 2) {
-                        MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] Size of hex payload invalid.\n");
-                        free(entry);
-                        continue;
-                    }
-                    hex2str((uint8_t*)dnpld, (uint8_t*)hexpld, psize);
-                    psize = psize/2;
-                    memcpy1(entry->payload, (uint8_t*)hexpld, psize + 1);
-                } else
-                    memcpy1(entry->payload, (uint8_t*)dnpld, psize + 1);
-                strcpy(entry->txmode, txmode);
-                strcpy(entry->pdformat, pdformat);
-                entry->psize = psize;
-                entry->pre = NULL;
-                entry->next = NULL;
-				
-                MSG_DEBUG(DEBUG_INFO, 
-                        "INFO~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d\n",
-                        entry->devaddr, entry->txmode, entry->pdformat, entry->psize);
-
-                if (strstr(entry->txmode, "imme") != NULL) {
-                    MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Pending IMMEDIATE of %s\n", addr);
-                    uaddr  = strtoul(addr, NULL, 16);
-                    struct devinfo devinfo = { .devaddr = uaddr };
-                    if (db_lookup_skey(cntx.lookupskey, (void *) &devinfo)) {
-                        jit_result = custom_rx2dn(entry, &devinfo, 0, IMMEDIATE);
-                        if (jit_result != JIT_ERROR_OK)  
-                            MSG_DEBUG(DEBUG_ERROR, "ERROR~ [DNLK]Packet REJECTED (jit error=%d)\n", jit_result);
-                    } else
-                            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]No devaddr match, Drop the link of %s\n", addr);
+            strcpy(entry->devaddr, addr);
+            if (strstr(pdformat, "hex") != NULL) { 
+                if (psize % 2) {
+                    MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] Size of hex payload invalid.\n");
                     free(entry);
                     continue;
                 }
+                hex2str((uint8_t*)dnpld, (uint8_t*)hexpld, psize);
+                psize = psize/2;
+                memcpy1(entry->payload, (uint8_t*)hexpld, psize + 1);
+            } else
+                memcpy1(entry->payload, (uint8_t*)dnpld, psize + 1);
+            strcpy(entry->txmode, txmode);
+            strcpy(entry->pdformat, pdformat);
+            entry->psize = psize;
+            entry->pre = NULL;
+            entry->next = NULL;
+			
+            MSG_DEBUG(DEBUG_INFO, 
+                    "INFO~ [DNLK]devaddr:%s, txmode:%s, pdfm:%s, size:%d\n",
+                    entry->devaddr, entry->txmode, entry->pdformat, entry->psize);
 
-                pthread_mutex_lock(&mx_dnlink);
-
-                tmp = dn_link;
-                if (tmp == NULL) {
-                    dn_link = entry;
-                    ++dnlink_size;
-                } else {
-
-                    if (dnlink_size > MAX_DNLINK_PKTS) { /* remove the first package */
-                        MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the first package of custom downlink.\n");
-                        tmp2 = dn_link->next;
-                        free(dn_link);
-                        dn_link = tmp2;
-                        tmp = dn_link;
-                        dnlink_size--;
-                    }
-
-                    while (tmp != NULL) {
-
-                        tmp2 = tmp->next;
-
-                        if (!strcmp(entry->devaddr, tmp->devaddr)) {  /* dnlink have the same devaddr */
-                            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the duplicate devaddr package of custom downlink.\n");
-                            if (tmp == dn_link) 
-                                dn_link = dn_link->next;
-                            if (NULL != tmp->pre)
-                                tmp->pre->next = tmp->next;
-                            if (NULL != tmp->next)
-                                tmp->next->pre = tmp->pre;
-                            free(tmp);
-                            dnlink_size--;
-                        } 
-
-                        tmp = tmp2;
-                        if (tmp != NULL)
-                            tmp2 = tmp->pre;
-                        else 
-                            tmp2 = NULL;
-                    } 
-
-                    tmp = entry;
-                    tmp->pre = tmp2;
-
-                    if (NULL == dn_link) 
-                        dn_link = tmp;
-
-                    ++dnlink_size;
-                }
-
-                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] DNLINK PENDING!(%d elems).\n", dnlink_size);
-                pthread_mutex_unlock(&mx_dnlink);
-
+            if (strstr(entry->txmode, "imme") != NULL) {
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]Pending IMMEDIATE of %s\n", addr);
+                uaddr  = strtoul(addr, NULL, 16);
+                struct devinfo devinfo = { .devaddr = uaddr };
+                if (db_lookup_skey(cntx.lookupskey, (void *) &devinfo)) {
+                    jit_result = custom_rx2dn(entry, &devinfo, 0, IMMEDIATE);
+                    if (jit_result != JIT_ERROR_OK)  
+                        MSG_DEBUG(DEBUG_ERROR, "ERROR~ [DNLK]Packet REJECTED (jit error=%d)\n", jit_result);
+                } else
+                        MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK]No devaddr match, Drop the link of %s\n", addr);
+                free(entry);
+                continue;
             }
+
+            pthread_mutex_lock(&mx_dnlink);
+
+            if (dnlink_size > MAX_DNLINK_PKTS) { /* remove the first package */
+                MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the first package of custom downlink.\n");
+                dn_next = dn_head->next;
+                free(dn_head);
+                dn_head = dn_next;
+                dnlink_size--;
+            }
+
+            dn_next = NULL;
+            dn_cur = dn_head;
+
+            while (dn_cur != NULL) {
+                dn_next = dn_cur->next;
+                if (!strcmp(entry->devaddr, dn_cur->devaddr)) {  /* dnlink have the same devaddr */
+                    if (dn_cur == dn_head) 
+                        dn_head = dn_next;
+                    if (NULL != dn_cur->pre)
+                        dn_cur->pre->next = dn_next;
+                    if (NULL != dn_next)
+                        dn_next->pre = dn_cur->pre;
+                    free(dn_cur);
+                    dnlink_size--;
+                } 
+                dn_cur = dn_next;
+            }
+
+            dn_cur = dn_head;
+
+            if (dn_cur != NULL) {
+                while (dn_cur->next != NULL) {
+                    dn_cur = dn_cur->next;
+                }
+                entry->pre = dn_cur;
+                dn_cur->next = entry;
+            } else
+                dn_head = entry;
+
+            ++dnlink_size;
+
+            MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] DNLINK PENDING!(%d elems).\n", dnlink_size);
+            pthread_mutex_unlock(&mx_dnlink);
 
             wait_ms(200); /* wait for HAT send or other process */
         }
 
         if (closedir(dir) < 0)
             MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] Cannot close DIR: %s\n", DNPATH);
-
 
         wait_ms(100);
     }

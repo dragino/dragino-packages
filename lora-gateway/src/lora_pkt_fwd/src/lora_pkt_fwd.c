@@ -342,8 +342,6 @@ static sem_t rxpkt_rec_sem;  /* sem for alarm process upload message */
 
 static void prepare_frame(uint8_t type, struct devinfo *devinfo, uint32_t downcnt, const uint8_t* payload, int payload_size, uint8_t* frame, int* frame_size) ;
 
-static DNLINK* search_dnlink(char *addr);
-
 static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, uint32_t us, uint8_t txmode);
 
 /* -------------------------------------------------------------------------- */
@@ -3703,6 +3701,7 @@ void thread_ent_dnlink(void) {
                 memset(buff_down, '\0', sizeof(buff_down));
 
                 size = fread(buff_down, sizeof(char), sizeof(buff_down), fp); /* the size less than buff_down return EOF */
+
                 fclose(fp);
 
                 unlink(dn_file); /* delete the file */
@@ -3839,28 +3838,32 @@ void thread_ent_dnlink(void) {
                         tmp2 = dn_link->next;
                         free(dn_link);
                         dn_link = tmp2;
+                        tmp = dn_link;
                         dnlink_size--;
                     }
 
-                    do {
+                    while (tmp != NULL) {
 
-                        if (!strcmp(tmp->devaddr, entry->devaddr)) {  /* dnlink have the same devaddr */
+                        tmp2 = tmp->next;
+
+                        if (!strcmp(entry->devaddr, tmp->devaddr)) {  /* dnlink have the same devaddr */
                             MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] remove the duplicate devaddr package of custom downlink.\n");
+                            if (tmp == dn_link) 
+                                dn_link = dn_link->next;
                             if (NULL != tmp->pre)
                                 tmp->pre->next = tmp->next;
-                            tmp2 = tmp->next;
-                            if (tmp == dn_link) 
-                                dn_link = tmp2;
+                            if (NULL != tmp->next)
+                                tmp->next->pre = tmp->pre;
                             free(tmp);
-                            tmp = tmp2;
                             dnlink_size--;
-                            continue;
                         } 
 
-                        tmp2 = tmp;
-                        tmp = tmp->next;
-
-                    } while (tmp != NULL);
+                        tmp = tmp2;
+                        if (tmp != NULL)
+                            tmp2 = tmp->pre;
+                        else 
+                            tmp2 = NULL;
+                    } 
 
                     tmp = entry;
                     tmp->pre = tmp2;
@@ -3876,10 +3879,13 @@ void thread_ent_dnlink(void) {
 
             }
 
-            wait_ms(20); /* wait for HAT send or other process */
+            wait_ms(200); /* wait for HAT send or other process */
         }
+
         if (closedir(dir) < 0)
             MSG_DEBUG(DEBUG_INFO, "INFO~ [DNLK] Cannot close DIR: %s\n", DNPATH);
+
+
         wait_ms(100);
     }
 }
@@ -3936,6 +3942,8 @@ static void prepare_frame(uint8_t type, struct devinfo *devinfo, uint32_t downcn
 	*frame_size = index + 1;
 }
 
+/*
+
 static DNLINK* search_dnlink(char *addr) {
     DNLINK *entry;
     entry = dn_link;
@@ -3946,6 +3954,7 @@ static DNLINK* search_dnlink(char *addr) {
     }
     return entry;
 }
+*/
 
 static enum jit_error_e custom_rx2dn(DNLINK *dnelem, struct devinfo *devinfo, uint32_t us, uint8_t txmode) {
     int i, fsize = 0;

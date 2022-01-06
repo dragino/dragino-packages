@@ -98,27 +98,30 @@ route=$(ip route|grep default | cut -d " " -f 5)
 host1="1.1.1.1"
 host2="www.dragino.com"
 
-fping -q $host1 
-if [ $? -eq "0" ]; then
-  internet="1"
-else
-	fping $host2
-	if [ $? -eq "0" ]; then
-  	internet="1"
-	else
-		fping -q -w2 $host1
-		if [ $? -eq "0" ]; then
-  		internet="1"
-  	else
-  		fping -q -w2 $host2
-			if [ $? -eq "0" ]; then
-  			internet="1"
-  		else
-  			internet="0"
-  		fi
-  	fi
-  fi
-fi
+# fping -q $host1 
+# if [ $? -eq "0" ]; then
+#  internet="1"
+# else
+#	fping $host2
+#	if [ $? -eq "0" ]; then
+#  	internet="1"
+#	else
+#		fping -q -w2 $host1
+#		if [ $? -eq "0" ]; then
+# 		internet="1"
+#  	else
+#  		fping -q -w2 $host2
+#			if [ $? -eq "0" ]; then
+#  			internet="1"
+#  		else
+#  			internet="0"
+#  		fi
+#  	fi
+#  fi
+# fi
+
+internet=`cat /var/iot/internet`
+
 
 ##################################
 # SAT Display Data
@@ -189,7 +192,7 @@ elif [ $server_type == "loriot" ]; then
 	sat3="/static/img/SAT-Loriot.png"
 	mouseover3='info-3a'
 elif [ $server_type == "station" ]; then
-	satlink3="/cgi-bin/lorawan-aws.has"
+	satlink3="/cgi-bin/lorawan-basicstation.has"
 	sat3="/static/img/SAT-LoRaWAN-tick.png"
 elif [ $server_type == "lorawan" ]; then
 	satlink3="/cgi-bin/lorawan.has"
@@ -270,27 +273,28 @@ else
 fi
 
 # Cell Internet check	
-fping -q -I 3g-cellular $host1 
-if [ $? -eq "0" ]; then
- 	internet_cell="1"
-else
-	fping -q -I 3g-cellular $host2
-	if [ $? -eq "0" ]; then
- 		internet_cell="1"
- 	else
-		fping -q -w2 $host1
-		if [ $? -eq "0" ]; then
-  		internet_cell="1"
-  	else
-  		fping -q -w2 $host2
-			if [ $? -eq "0" ]; then
-  			internet_cell="1"
-  		else
-				internet_cell="0"
-			fi
-		fi
-	fi
-fi
+# fping -q -I 3g-cellular $host1 
+# if [ $? -eq "0" ]; then
+ 	# internet_cell="1"
+# else
+	# fping -q -I 3g-cellular $host2
+	# if [ $? -eq "0" ]; then
+ 		# internet_cell="1"
+ 	# else
+		# fping -q -w2 $host1
+		# if [ $? -eq "0" ]; then
+  		# internet_cell="1"
+  	# else
+  		# fping -q -w2 $host2
+			# if [ $? -eq "0" ]; then
+  			# internet_cell="1"
+  		# else
+				# internet_cell="0"
+			# fi
+		# fi
+	# fi
+# fi
+internet_cell=`cat /var/iot/internet`
 
 # Set up the SAT icon
 if [ $route == "3g-cellular" ] && [ $internet_cell == "1" ]; then
@@ -315,8 +319,8 @@ if [ $server_type == "loriot" ]; then
 	satlink10="/cgi-bin/loriot.has"
 elif [ $server_type == "station" ];then
 	pscount=$(ps | grep station | grep -c -v grep) # Check is process is running
-	satlink10="/cgi-bin/lorawan-aws.has"
-	version10=`station -v`
+	satlink10="/cgi-bin/lorawan-basicstation.has"
+	version10=`station -v | awk 'NR==1''{print}'`
 else
 	new_fwd=$(ps | grep -c /usr/bin/fwd) 	# Check new_fwd or pkt_fwd
 	if [ "$new_fwd" == "2" ] ;then
@@ -447,7 +451,7 @@ if [ $server_type == "lorawan" ]; then
 	lorawanstatus_fwd=$(ps|grep -c fwd)
 	model=$(cat /tmp/iot/model.txt)
 
-	if [ "$model" == "LIG16" ]; then
+	if [ "$model" == "LIG16" ] || [ "$model" == "LPS8-N" ] ; then
 		fwd_type=1
 	else
 		fwd_type=2
@@ -471,12 +475,20 @@ if [ $server_type == "lorawan" ]; then
 		fi
 	fi
 elif [ $server_type == "station" ]; then
-	info_title3="AWS-IoT Service"
-	server3=`cat /etc/station/cups.uri`
+	info_title3="LoRaWAN Basic Station"
+	server_provider=`uci get  gateway.general.station_server_provider`
+	if [ "$server_provider" == "AWS" ]; then
+		server3=`cat /etc/station/cups.uri`
+	elif [ "$server_provider" == "TTN" ]; then
+		server3=`cat /etc/station/cups.uri`
+	elif [ "$server_provider" == "CS" ]; then
+		server3=`cat /etc/station/tc.uri`
+	fi
 	station_status=$(ps | grep station | grep -c -v grep)
+	
 	if [ $station_status == "2" ]; then
 		process3="Station is <b>Running</b>"
-		status3=$(cat /var/iot/status)
+		status3=Online
 	else
 		process3="Station is <b>Not Running</b>"
 	fi
@@ -593,8 +605,8 @@ if [ $server_type == "loriot" ]; then
 	info_title10="LORIOT Mode"
 	server10="$server3"
 elif [ $server_type == "station" ];then
-	info_title10="AWS-IoT Core Station"
-	server10="$server3"
+	info_title10="LoRaWAN Basic Station"
+	server10=`station -V`
 else
 	info_title10="LoRa Radio"
 fi

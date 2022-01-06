@@ -5,14 +5,18 @@
 <%# --- Process the form submission --- %>
 <%
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
+		uci set gateway.general.server_type="lorawan"
 		uci set gateway.server1.server_address="127.0.0.1"
-		uci set gateway.server1.provider="custom"
+		uci set gateway.server1.provider="helium"
 		uci set gateway.server1.upp="$FORM_PRI_UPP"
 		uci set gateway.server1.dpp="$FORM_PRI_DPP"
+		/etc/init.d/lora_gw reload > /dev/null
+		sleep 2
+		/usr/bin/reload_iot_service.sh
 		/etc/init.d/helium_gateway  start
 	fi
 	
-	if [ "$FORM_BUTTON" == "Download_Helium_Server" ]; then
+	if [ "$FORM_BUTTON" == "Download gateway-rs" ]; then
 		if  [ ! -e "/tmp/releases" ]; then
 			cd /tmp; wget https://github.com/helium/gateway-rs/releases
 		fi
@@ -29,7 +33,7 @@
 			fi
 	fi
 
-	if [ "$FORM_BUTTON" == "Install_Helium_Server" ]; then
+	if [ "$FORM_BUTTON" == "Install gateway-rs" ]; then
 		if [ -f "/tmp/helium-gateway-rs-dragino.ipk" ]; then
 			if  [ ! -e "/etc/init.d/helium_gateway" ]; then
 				opkg install /tmp/helium-gateway-rs-dragino.ipk
@@ -42,7 +46,25 @@
 		fi
 	fi
 
+	if [ "$FORM_BUTTON" == "Upload_Hotspot_key" ]; then
+		if test -n "$HASERL_uploadfile_path"; then
+			key_name=$FORM_uploadfile_name
 
+			if [ "$key_name" != "" ]; then
+				if [ "$key_name" ==  "gateway_key.bin" ]; then
+					find /etc/helium_gateway -name "gateway_key.bin"|xargs rm -rfv  # Remove the original gateway_key.bin file
+					savedfile=$HASERL_uploadfile_path
+					cp $savefile /etc/helium_gateway/$savedfile
+					trust_status2="<span class='impactOK'>Upload Finished </span>"
+				else
+					trust_status2="<span class='impact'>file name must be gateway_key.bin</span>"	
+				fi
+			else
+			
+				trust_status2="<span class='impact'>&nbsp;&nbsp; Invalid file! </span>"
+			fi
+		fi
+	fi
 
 %>
 
@@ -51,16 +73,33 @@
 <% 	
 	up_port="$(uci -q get gateway.server1.upp)"
 	dl_prot="$(uci -q get gateway.server1.dpp)"
-	helium_version="$(helium_gateway -V)"
+	
+
 
 	helium_server_connect_status=$(ps | grep "/etc/helium_gateway" -c)
 	if [ $helium_server_connect_status -eq "2" ]; then
-		helium_server_status="<span class="impactOK">Helium Gateway-rs Connect is OK</span>"
+		helium_server_status="<span class="impactOK">&nbsp;&nbsp;Gateway-rs Connected</span>"
+		helium_key="$(helium_gateway key info | grep address | awk '{print $2}' | cut -d '"' -f 2)"	
+		helium_name="$(helium_gateway key info | grep name | awk '{print $2}' | cut -d '"' -f 2)"
 	else
-		helium_server_status="<span class="impact">No Helium Gateway-rs Connect </span>"
+		helium_server_status="<span class="impact">No Gateway-rs Connected </span>"
+		helium_key="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
+		helium_name="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
+	fi
+	
+	if [ -e "/etc/helium_gateway/gateway_key.bin" ]; then
+		trust_status="$(ls /etc/helium_gateway/gateway_key.bin | awk -F '/' '{print $4}')"
+	else
+		trust_status="<span class='impact'>&nbsp;&nbsp;No Found </span>"
 	fi
 
-		
+	if [ -f "/usr/bin/helium_gateway" ]; then
+ 		 helium_version="$(helium_gateway -V)"
+	else
+		helium_version="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
+	fi
+	
+	[[ -f /etc/helium_gateway/gateway_key.bin ]] && [[ -f /tmp/gateway_key.bin ]] || cp /etc/helium_gateway/gateway_key.bin /tmp/gateway_key.bin;
 	
 	
 %>
@@ -84,7 +123,7 @@
 		
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><label for="FPORTNUM">Server Provider</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+		<td colspan="8"><label for="FPORTNUM">Server Provider</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
 		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
 		<p>Currently, the default configuration has been completed. Users only need to install Helium service and click Save</p>
 		<p>Users will view the status of Helium's gateway-rs through Helium connect status</p> 
@@ -101,7 +140,7 @@
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="5"><label for="PRI_UPP">Uplink Port</label></td>
+		<td colspan="8"><label for="PRI_UPP">Uplink Port</label></td>
 		<td colspan="6"><input type="text" name="PRI_UPP" maxlength="0"  VALUE="<% echo 1680 %>"  Placeholder="1680" ></td>
 		<td colspan="2"></td>
 		<td colspan="4"><label for="PRI_DPP">Downlink Port</label></td>
@@ -111,8 +150,8 @@
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="9"><label for="helium_server">Download Helium gateway-rs</label></td>
-		<td><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Download_Helium_Server" onclick="return confirm('Start Download Helium gateway-rs')"></td>
+		<td colspan="8"><label for="helium_server">Download</label></td>
+		<td><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Download gateway-rs" onclick="return confirm('Start Download Helium gateway-rs')"></td>
 		<td colspan="6"></td>
 		<td colspan="12"><% echo -n  $Download_status %></td>
 		
@@ -121,8 +160,8 @@
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="9"><label for="helium_server">Install Helium gateway-rs</label></td>
-		<td><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Install_Helium_Server" onclick="return confirm('Start Install Helium gateway-rs')" ></td>
+		<td colspan="8"><label for="helium_server">Install</label></td>
+		<td><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Install gateway-rs" onclick="return confirm('Start Install Helium gateway-rs')" ></td>
 		<td colspan="6"></td>
 		<td colspan="12"><% echo -n $Install_status %></td>
 	</tr>
@@ -132,17 +171,49 @@
   	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="8"><label for="helium_server">Helium Gateway Connect</label></td>
-		<td colspan="1"></td>
+		<td colspan="8"><label for="helium_server">gateway-rs status</label></td>
 		<td colspan="10"><% echo -n $helium_server_status %></td>
 	</tr>
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 		<td colspan="1"></td>
-		<td colspan="8"><label for="helium_version">Helium Gateway-rs version</label></td>
+		<td colspan="8"><label for="helium_version">gateway-rs version</label></td>
+		<td colspan="10"><% echo -n $helium_version %></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
 		<td colspan="1"></td>
-		<td colspan="10"><% helium_gateway -V %></td>
+		<td colspan="8"><label for="helium_key">Hostpot key</label></td>
+		<td colspan="10"><% echo -n $helium_key %></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+		<td colspan="1"></td>
+		<td colspan="8"><label for="helium_name">Hostpot animal name</label></td>
+		<td colspan="10"><% echo -n $helium_name %></td>
+	</tr>
+	
 
 	
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="8"><label for="HOTSPOT">Upload gateway-rs key</label></td>
+		<td colspan="6"><% echo -n $trust_status%></td>
+		<td colspan="8"><input type=file name=uploadfile></td>
+		<td colspan="5"><% echo -n $trust_status2%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_Hotspot_key" onclick="return confirm('The original gateway-rs key file will be overwritten')"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="8"><label for="helium_key_backup">Back Up gateway-rs key</label></td>
+		<td colspan="8"><a class="impactOK" href="/tmp/gateway_key.bin ">Download Key File</a></td>
+	</tr>
+	
+	
+
 	<tr class="rowSpacer"><td colspan="15"></tr>
 	<tr class="rowSpacer"><td colspan="15"></tr>
 

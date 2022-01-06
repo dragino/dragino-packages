@@ -16,7 +16,7 @@ if [ -f /var/iot/board ]; then
 else
 	board_type="LG01"
 fi
-
+	 telnet 10.130.2.221 9001 &
 # Run Forever - process publish requests.
 while [ 1 ]
 do
@@ -51,6 +51,13 @@ do
 					tcp_data="$channel:$tcp_data;"
 					
 					echo $tcp_data | telnet $server $port
+		
+					sleep 3 | telnet $server $port > /var/iot/tcp_dwn
+					if [ -s /var/iot/tcp_dwn ]; then
+						tcp_dwn="$(cat /var/iot/tcp_dwn)"
+						echo $tcp_dwn > /var/iot/push/test
+						rm /var/iot/tcp_dwn
+					fi
 
 					# Debug output to log
 					if [ $DEBUG -ge 1 ]; then
@@ -61,11 +68,24 @@ do
 						logger "[IoT.TCP]:decoder: "$DECODER
 						logger "[IoT.TCP]:tcp_data: $tcp_data"
 						logger "[IoT.TCP]:------"
+						
+						if [ -z /var/iot/tcp_d ]; then
+							killall telnet
+						fi
 					fi 
 					
 
 					# Delete the Channel info
 					rm /var/iot/channels/$channel*
+
+					# telnet $server $port > /var/iot/tcp_d
+					# if [ -z /var/iot/tcp_d ]; then
+					# 	tcp_dwn="$(cat /var/iot/tcp_d)"
+					# 	echo $tcp_dwn > /var/iot/push/test
+					#	killall telnet
+					#	rm /var/iot/tcp_d
+					# fi
+			
 			done
 		fi
 done

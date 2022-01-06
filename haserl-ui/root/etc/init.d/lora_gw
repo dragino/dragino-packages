@@ -15,6 +15,7 @@ init_board() {
         process="lg02_pkt_fwd"
     elif [[ "$chip" = "sx1276_1" ]]; then
         process="lg01_pkt_fwd"
+	echo 22 > /sys/class/gpio/unexport
     elif [[ "$chip" = "sx1301" ]] || [[ "$chip" = "sx1308" ]] ; then
         process="lora_pkt_fwd"
 	    ln -sf /usr/bin/station_sx1301 /usr/bin/station
@@ -30,7 +31,7 @@ init_board() {
         exit 1
     fi
 
-    if [[ "$mode" = "disabled" ]] || [[ "$mode" = "loriot" ]] ; then
+    if [[ "$mode" = "disabled" ]] || [[ "$mode" = "loriot" ]] || [[ "$mode" = "station" ]]; then
         process_running=`pidof $process`
         if [[ ! -z "process_running" ]]; then
             stop

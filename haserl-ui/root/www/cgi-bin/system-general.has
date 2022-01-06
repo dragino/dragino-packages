@@ -20,6 +20,7 @@
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		echo $FORM_TIMEZONE > /etc/TZ
 		uci set system.@system[0].timezone=$FORM_TIMEZONE
+		uci set system.@system[0].iot_interval=$FORM_IOT_INTERVAL
 		uci commit system
 		
 		if [ "$FORM_HTTP_ENABLE" == "checked" ]; then
@@ -35,14 +36,17 @@
 		fi
 		uci commit firewall
 		/etc/init.d/firewall restart > /dev/null
+		/etc/init.d/fallbackip reload
 	fi
+	
+	
 %>
 
 <%# --- Get the variables for the HTML page --- %>
 <% 
 	user=$(echo $USER)
 	timezone=$(uci get system.@system[0].timezone)
-	
+	iot_interval=`uci get system.@system[0].iot_interval`
 	ssh_enabled="$(uci -q get firewall.ssh.dest)"
   if [ "$ssh_enabled" == "lan" ]; then
   	ssh_tick="checked"
@@ -162,6 +166,13 @@
 		<td colspan="1"><input type="checkbox" name="SSH_ENABLE" value="checked" <% echo -n $ssh_tick %> ></td>
 	</tr>
 
+	<tr><td colspan="20"><h3>Keepalive_Script</h3></td></tr>
+		<td colspan="1"></td>
+		<td colspan="4"><label for="HTTP">Interval setting</label></td>
+		<td colspan="4"><input type="iot_interval" name="IOT_INTERVAL" id="iot_interval" maxlength="32" value=<% echo -n $iot_interval%>></td>
+	</tr>
+		
+	<tr class="rowSpacer"></tr>
 	<tr class="rowSpacer"></tr>
 	<tr>
 		<td colspan="1"></td>

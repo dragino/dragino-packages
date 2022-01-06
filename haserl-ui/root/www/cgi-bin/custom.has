@@ -55,18 +55,25 @@
   done
 
 	type="$(uci -q get gateway.general.server_type)"
+	station_paltform_server_type="$(uci get gateway.general.station_server_provider)"
 	if [ "$type" == "station" ];  then	
-		trust_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Station for AWS </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">Custom Script  </span>'	
+		if [ "$station_paltform_server_type" == "AWS" ]; then 
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- AWS</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">Custom Script  </span>'
+		elif [ "$station_paltform_server_type" == "TTN" ]; then
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- TTN</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">Custom Script  </span>'
+		else
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Basic Station</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">Custom Script  </span>'
+		fi	
 	elif [ "$type" == "loriot" ];  then
-		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">Custom Script  </span>'
+		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">Custom Script  </span>'
 	elif [ "$type" == "mqtt" ];  then
-		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">Custom Script </span>'
+		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">Custom Script </span>'
 	elif [ "$type" == "tcpudp" ];  then
-		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light"> Custom Script  </span>'
+		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light"> Custom Script  </span>'
 	elif [ "$type" == "customized" ];  then	
-		trust_status='<span class="black-light">Current Mode:</span>''<span class="impact-light"> Custom Script </span>'
+		curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light"> Custom Script </span>'
 	elif [ "$type" == "lorawan" ];  then
-		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN for IOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light"> Custom Script </span>'
+		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN for IOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light"> Custom Script </span>'
 	fi
 
 %>
@@ -152,7 +159,7 @@
 	<tr class="rowSpacer"></tr>
 	<tr class="rowSpacer"></tr>
 		<tr>		
-			<td colspan="16"><% echo -n $trust_status%></td>
+			<td colspan="16"><% echo -n $curent_mode_status%></td>
 		</tr>
 
 	<tr>

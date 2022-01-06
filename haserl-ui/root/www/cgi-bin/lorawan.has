@@ -86,18 +86,26 @@
 	debug_str="<script>document.getElementById("debug").value="3";</script>"
 
 	type="$(uci -q get gateway.general.server_type)"
+	station_paltform_server_type="$(uci get gateway.general.station_server_provider)"
 	if [ "$type" == "station" ];  then	
-		trust_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Station for AWS </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'	
+		if [ "$station_paltform_server_type" == "AWS" ]; then 
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- AWS</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+
+		elif [ "$station_paltform_server_type" == "TTN" ]; then
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- TTN</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+		else
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Basic Station</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+		fi
 	elif [ "$type" == "loriot" ];  then
-		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
 	elif [ "$type" == "mqtt" ];  then
-		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
 	elif [ "$type" == "tcpudp" ];  then
-		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
 	elif [ "$type" == "customized" ];  then
-		trust_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
 	elif [ "$type" == "lorawan" ];  then
-		trust_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Semtech UDP</span>'
+		curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Semtech UDP</span>'
 	fi
 
 %>
@@ -143,10 +151,11 @@
 		<td colspan="24"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
 		<td colspan="6"></td>
 	</tr>
-	<td></td>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="12"><label for="GWID">Gateway ID</label></td>
+		<td colspan="12"><label for="GWID">Gateway EUI</label></td>
 		<td colspan="18"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
 		<td colspan="8"></td>
 	</tr>
@@ -158,7 +167,6 @@
 		<td colspan="1"></td>
 		<td colspan="12"><label for="PLATFORM">Service Provider</label></td>
 		<td colspan="24"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
-		  <option value="ttn" >The Things Network V2</option>
 		  <option value="ttn_V3" >The Things Network V3</option>
 		  <option value="mydevice" >IoT In A Box</option>
 		  <option value="router.cn.thethings.network" >Tencent</option>		
@@ -174,10 +182,6 @@
 			<input type="text" id="server_address" name="SERVER_ADDRESS" style="display:none;" 
 		    VALUE="<% echo -n $primary_server %>">
 			
-			<select id='server_address_ttn' name='SERVER_ADDRESS_TTN' style="display:none;">
-				<%inc /www/cgi-bin/inc/ttn-server.inc %>
-			</select>
-
 			<select id='server_address_ttn_V3' name='SERVER_ADDRESS_TTN_V3' style="display:none;">
 				<%inc /www/cgi-bin/inc/ttn_V3-server.inc %>	
 			</select>			
@@ -190,7 +194,8 @@
 		<script>document.getElementById("server_address_ttn").value="<% echo -n $primary_server %>";</script>
 		<script>document.getElementById("server_address_mydevice").value="<% echo -n $primary_server %>";</script>		
 	</tr>
-	<td></td>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="12"><label for="PRI_UPP">Uplink Port</label></td>
@@ -235,7 +240,7 @@
 
 	<tr>
 		
-			<td colspan="80"><% echo -n $trust_status%></td>
+			<td colspan="80"><% echo -n $curent_mode_status%></td>
 	</tr>
 
 	<tr>
@@ -257,10 +262,6 @@
 	document.getElementById("server_address").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
 	}
-	if (x == "ttn") {
-	document.getElementById("server_address_ttn").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
-	}
 	if (x == "ttn_V3") {
 	document.getElementById("server_address_ttn_V3").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
@@ -273,7 +274,6 @@
 function displayServerURL(){
 	document.getElementById("server_address_label").style.display = "none";
 	document.getElementById("server_address").style.display = "none";
-	document.getElementById("server_address_ttn").style.display = "none";
 	document.getElementById("server_address_ttn_V3").style.display = "none";
 	document.getElementById("server_address_mydevice").style.display = "none";	
 	
@@ -282,11 +282,7 @@ function displayServerURL(){
 	document.getElementById("server_address").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
 	}
-	if (x == "ttn") {
-	document.getElementById("server_address_ttn").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
-	}
-	if (x == "ttn_V3") {
+		if (x == "ttn_V3") {
 	document.getElementById("server_address_ttn_V3").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
 	}

@@ -4,6 +4,7 @@ config system
 	option firstboot '1'
 	option debug_inet '0'
 
+
 config timeserver 'ntp'
 	list server '0.openwrt.pool.ntp.org'
 	list server '1.openwrt.pool.ntp.org'

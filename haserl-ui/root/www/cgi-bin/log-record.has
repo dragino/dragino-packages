@@ -27,17 +27,29 @@
 
 <%# --- Process the form submission --- %>
 <%
+	server_type="$(uci -q get gateway.general.server_type)"
 	if [ "$FORM_BUTTON" == "StartLog" ]; then
 		touch /tmp/logging.flag
-		logging="1"
-		logready="0"
-		killall logread
-		echo "DMESG:" > /tmp/logfile.log 
-		dmesg >> /tmp/logfile.log
-		echo "LOGREAD:" >> /tmp/logfile.log
-		logread >> /tmp/logfile.log
-		echo "LOGREAD -f:" >> /tmp/logfile.log
-		/usr/bin/save_log.sh &
+		if [ "$server_type"  == "station" ]; then
+			
+			logging="1"
+			logready="0"
+			killall tail
+			cat /var/iot/station.log >> /tmp/logfile.log
+			tail -f  /var/iot/station.log >> /tmp/logfile.log &
+
+			
+		else
+			logging="1"
+			logready="0"
+			killall logread
+			echo "DMESG:" > /tmp/logfile.log 
+			dmesg >> /tmp/logfile.log
+			echo "LOGREAD:" >> /tmp/logfile.log
+			logread >> /tmp/logfile.log
+			echo "LOGREAD -f:" >> /tmp/
+			/usr/bin/save_log.sh &
+		fi
 	fi
 	
 	if [ "$FORM_BUTTON" == "StopLog" ]; then
@@ -78,7 +90,7 @@
 <%inc /www/cgi-bin/inc/menu.inc %>
     
 <div class="page-container">
-<h2>Record Log</h2>
+<h2> Record Log </h2>
 <br><br>
 
 <form name="LOG-RECORD" id="LOG-RECORD" action="<% echo -n $SCRIPT_NAME %>" method="POST">
@@ -101,6 +113,9 @@
 	<p class="impact-light" id="logstopped" style="visibility:hidden" >Logging is stopped. Max file size reached.</p>
 	<p class="impact-light" id="logready" style="visibility:hidden" >Log available for download.</p>
 	</td>
+	</tr>
+	<tr>
+	<td colspan="5"><% echo $server_type %></td>
 	</tr>
 </table>
 

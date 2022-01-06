@@ -7,6 +7,7 @@
 MEMFREE=`cat /proc/meminfo | grep MemFree |cut -d : -f2 | tr -d ' '|tr -d 'kB'`
 MEMTOT=`cat /proc/meminfo | grep MemTotal |cut -d : -f2 | tr -d ' '`
 MEMSTR="Free Memory: "$MEMFREE" / Total Memory: "$MEMTOT
+server_type="$(uci -q get gateway.general.server_type)"
 %>
 
 <!DOCTYPE html>
@@ -32,10 +33,19 @@ MEMSTR="Free Memory: "$MEMFREE" / Total Memory: "$MEMTOT
 	<h4><% echo "Boot Info:  " %></h4>
 	<textarea cols="155" rows="10" ><% dmesg %></textarea>
 	<br><br>
-
-	<h4><% echo "Previous Log:  " %></h4>
+	<% echo $station_type %>
+	
+	
+	<h4><% echo "Previous Log:  $server_type " %></h4>
+	<% if [ "$server_type" == "station" ] ; then %>
+	<textarea cols="155" rows="20" ><% tail -f /var/iot/station.log %></textarea>
+	<br><br>
+	<% else %>
+		<h4><% echo "Previous Log: " %></h4>
 	<textarea cols="155" rows="20" ><% logread %></textarea>
 	<br><br>
+
+	<% fi %>
 
 <script>	document.getElementById("loading").style.display = "none"; 	</script>
 

@@ -50,6 +50,19 @@ start() {
 		rmmod spi-gpio-custom
 		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
 		;;
+		
+	 *"ps8n"*) 
+	    logger "[Model Detected]: LPS8-N"
+		chip="sx1302"
+		board="LG08"
+		model="LPS8-N"
+		pic="Dragino-LPS8-N.png"
+		rmmod i2c-gpio-custom
+		insmod i2c-gpio-custom bus0=0,7,8
+		rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+		sleep 1
+		;;
 	  *)
 
 		rmmod spi-gpio-custom

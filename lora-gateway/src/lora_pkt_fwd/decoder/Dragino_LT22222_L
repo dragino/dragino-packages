@@ -1,0 +1,302 @@
+#!/usr/bin/lua
+
+--Decoder for LT22222-L/LT33222-L firmware version
+
+json = require('dragino.json')
+local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+--Get Hardware 
+Hardware_HEX=string.sub(payload,27,27)
+Hardware_RAW=utility.hex2str(Hardware_HEX)
+Hardware_0=bit.bit_and(tonumber(Hardware_RAW,16),tonumber("C0",16))
+Hardware_1=bit.bit_rshift(Hardware_0,2)
+Hardware=Hardware_1
+
+--Get Mode0 
+MODE0_HEX=string.sub(payload,27,27)
+MODE0_RAW=utility.hex2str(MODE0_HEX)
+MODE0_0=bit.bit_and(tonumber(MODE0_RAW,16),tonumber("FF",16))
+MODE0=MODE0_0
+
+--Get Mode 
+MODE_HEX=string.sub(payload,27,27)
+MODE_RAW=utility.hex2str(MODE_HEX)
+MODE_0=bit.bit_and(tonumber(MODE_RAW,16),tonumber("3F",16))
+MODE=MODE_0
+
+if Hardware==0 then 
+ payload_t.Hardware_mode="LT33222"
+ DO3_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_0=bit.bit_and(tonumber(DO3_status_RAW,16),tonumber("04",16))
+  payload_t.DO3_status=(pin_level_0 == 4) and "L" or "H"
+  if (mode0==1) then 
+  DI3_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_1=bit.bit_and(tonumber(DI3_status_RAW,16),tonumber("20",16))
+  payload_t.DI3_status=(pin_level_1 == 32) and "H" or "L"
+  end
+
+
+elseif Hardware==1 then
+payload_t.Hardware_mode="LT22222"
+end
+
+if MODE~=6 then 
+ DO1_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_2=bit.bit_and(tonumber(DO1_status_RAW,16),tonumber("01",16))
+  payload_t.DO1_status=(pin_level_2 == 1) and "L" or "H"
+  
+   DO2_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_3=bit.bit_and(tonumber(DO2_status_RAW,16),tonumber("02",16))
+  payload_t.DO2_status=(pin_level_3 == 2) and "L" or "H"
+  
+   RO1_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_4=bit.bit_and(tonumber(RO1_status_RAW,16),tonumber("80",16))
+  payload_t.RO1_status=(pin_level_4 == 128) and "ON" or "OFF"
+  
+   RO2_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_5=bit.bit_and(tonumber(RO2_status_RAW,16),tonumber("40",16))
+  payload_t.RO2_status=(pin_level_5 == 64) and "ON" or "OFF"
+  if MODE~=1 then 
+  if MODE~=5 then 
+Count1_times_RAW_24=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+Count1_times_RAW_25=tonumber(utility.hex2str(string.sub(payload,18,18)),16)
+Count1_times_RAW_26=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+Count1_times_RAW_27=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+minus_flag_1 = bit.bit_lshift(Count1_times_RAW_26,8)
+minus_flag_2 = bit.bit_lshift(Count1_times_RAW_25,16)
+Count1_times_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(Count1_times_RAW_24,24),minus_flag_2)),minus_flag_1),Count1_times_RAW_27)
+payload_t.Count1_times=Count1_times_0
+  end
+  First_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_6=bit.bit_and(tonumber(First_status_RAW,16),tonumber("20",16))
+  payload_t.First_status=(pin_level_6 == 32) and "YES" or "NO"
+ end
+end
+
+if MODE==1 then 
+payload_t.Work_mode="2ACI+2AVI"
+AVI1_V_RAW_3=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+  AVI1_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,18,18)),16)
+  minus_flag = bit.bit_rshift(AVI1_V_RAW_3,7)
+  AVI1_V_0=(bit.bit_or(bit.bit_lshift(AVI1_V_RAW_3,8),AVI1_V_RAW_4)-minus_flag*65536)/1000
+  payload_t.AVI1_V=AVI1_V_0
+  
+  AVI2_V_RAW_3=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+  AVI2_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+  minus_flag = bit.bit_rshift(AVI2_V_RAW_3,7)
+  AVI2_V_0=(bit.bit_or(bit.bit_lshift(AVI2_V_RAW_3,8),AVI2_V_RAW_4)-minus_flag*65536)/1000
+  payload_t.AVI2_V=AVI2_V_0
+  
+  ACI1_mA_RAW_3=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+  ACI1_mA_RAW_4=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+  minus_flag = bit.bit_rshift(ACI1_mA_RAW_3,7)
+  ACI1_mA_0=(bit.bit_or(bit.bit_lshift(ACI1_mA_RAW_3,8),ACI1_mA_RAW_4)-minus_flag*65536)/1000
+  payload_t.ACI1_mA=ACI1_mA_0
+  
+  ACI2_mA_RAW_3=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+  ACI2_mA_RAW_4=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+  minus_flag = bit.bit_rshift(ACI2_mA_RAW_3,7)
+  ACI2_mA_0=(bit.bit_or(bit.bit_lshift(ACI2_mA_RAW_3,8),ACI2_mA_RAW_4)-minus_flag*65536)/1000
+  payload_t.ACI2_mA=ACI2_mA_0
+
+  DI1_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_8=bit.bit_and(tonumber(DI1_status_RAW,16),tonumber("08",16))
+  payload_t.DI1_status=(pin_level_8 == 8) and "H" or "L"
+  
+  DI2_status_RAW=utility.hex2str(string.sub(payload,25,25))
+  pin_level_9=bit.bit_and(tonumber(DI2_status_RAW,16),tonumber("10",16))
+  payload_t.DI2_status=(pin_level_9 == 16) and "H" or "L"
+
+elseif MODE==2 then
+payload_t.Work_mode="Count mode 1"
+Count2_times_RAW_24=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+Count2_times_RAW_25=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+Count2_times_RAW_26=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+Count2_times_RAW_27=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+minus_flag_1 = bit.bit_lshift(Count2_times_RAW_26,8)
+minus_flag_2 = bit.bit_lshift(Count2_times_RAW_25,16)
+Count2_times_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(Count2_times_RAW_24,24),minus_flag_2)),minus_flag_1),Count2_times_RAW_27)
+payload_t.Count2_times=Count2_times_0
+
+elseif MODE==3 then
+payload_t.Work_mode="2ACI+1Count"
+ACI1_mA_RAW_3=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+  ACI1_mA_RAW_4=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+  minus_flag = bit.bit_rshift(ACI1_mA_RAW_3,7)
+  ACI1_mA_0=(bit.bit_or(bit.bit_lshift(ACI1_mA_RAW_3,8),ACI1_mA_RAW_4)-minus_flag*65536)/1000
+  payload_t.ACI1_mA=ACI1_mA_0
+  
+  ACI2_mA_RAW_3=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+  ACI2_mA_RAW_4=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+  minus_flag = bit.bit_rshift(ACI2_mA_RAW_3,7)
+  ACI2_mA_0=(bit.bit_or(bit.bit_lshift(ACI2_mA_RAW_3,8),ACI2_mA_RAW_4)-minus_flag*65536)/1000
+  payload_t.ACI2_mA=ACI2_mA_0
+
+elseif MODE==4 then
+payload_t.Work_mode="Count mode 2"
+Acount_times_RAW_24=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+Acount_times_RAW_25=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+Acount_times_RAW_26=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+Acount_times_RAW_27=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+minus_flag_1 = bit.bit_lshift(Acount_times_RAW_26,8)
+minus_flag_2 = bit.bit_lshift(Acount_times_RAW_25,16)
+Acount_times_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(Acount_times_RAW_24,24),minus_flag_2)),minus_flag_1),Acount_times_RAW_27)
+payload_t.Acount_times=Acount_times_0
+
+elseif MODE==5 then
+payload_t.Work_mode="1ACI+2AVI+1Count"
+AVI1_V_RAW_3=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+  AVI1_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,18,18)),16)
+  minus_flag = bit.bit_rshift(AVI1_V_RAW_3,7)
+  AVI1_V_0=(bit.bit_or(bit.bit_lshift(AVI1_V_RAW_3,8),AVI1_V_RAW_4)-minus_flag*65536)/1000
+  payload_t.AVI1_V=AVI1_V_0
+  
+  AVI2_V_RAW_3=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+  AVI2_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+  minus_flag = bit.bit_rshift(AVI2_V_RAW_3,7)
+  AVI2_V_0=(bit.bit_or(bit.bit_lshift(AVI2_V_RAW_3,8),AVI2_V_RAW_4)-minus_flag*65536)/1000
+  payload_t.AVI2_V=AVI2_V_0
+  
+  ACI1_mA_RAW_3=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+  ACI1_mA_RAW_4=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+  minus_flag = bit.bit_rshift(ACI1_mA_RAW_3,7)
+  ACI1_mA_0=(bit.bit_or(bit.bit_lshift(ACI1_mA_RAW_3,8),ACI1_mA_RAW_4)-minus_flag*65536)/1000
+  payload_t.ACI1_mA=ACI1_mA_0
+
+Count1_times_RAW=tonumber(utility.hex2str(string.sub(payload,23,24)),16)
+payload_t.Count1_times=Count1_times_RAW
+
+elseif MODE==6 then
+payload_t.Work_mode="Exit mode"
+
+  Mode_status_RAW=utility.hex2str(string.sub(payload,26,26))
+  pin_1=tonumber(Mode_status_RAW,16)
+  payload_t.Mode_status=(pin_1 == 0) and "False" or "True"
+
+  AV1L_flag_RAW=utility.hex2str(string.sub(payload,17,17))
+  pin_2=bit.bit_and(tonumber(AV1L_flag_RAW,16),tonumber("80",16))
+  payload_t.AV1L_flag=(pin_2 == 128) and "True" or "False"
+  
+  AV1H_flag_RAW=utility.hex2str(string.sub(payload,17,17))
+  pin_3=bit.bit_and(tonumber(AV1H_flag_RAW,16),tonumber("40",16))
+  payload_t.AV1H_flag=(pin_3 == 64) and "True" or "False"
+  
+  AV2L_flag_RAW=utility.hex2str(string.sub(payload,17,17))
+  pin_4=bit.bit_and(tonumber(AV2L_flag_RAW,16),tonumber("20",16))
+  payload_t.AV2L_flag=(pin_4 == 32) and "True" or "False"
+  
+  AV2H_flag_RAW=utility.hex2str(string.sub(payload,17,17))
+  pin_5=bit.bit_and(tonumber(AV2H_flag_RAW,16),tonumber("10",16))
+  payload_t.AV2H_flag=(pin_5 == 16) and "True" or "False"
+  
+  AC1L_flag_RAW=utility.hex2str(string.sub(payload,17,17))
+  pin_6=bit.bit_and(tonumber(AC1L_flag_RAW,16),tonumber("08",16))
+  payload_t.AC1L_flag=(pin_6 == 8) and "True" or "False"
+  
+  AC1H_flag_RAW=utility.hex2str(string.sub(payload,17,17))
+  pin_7=bit.bit_and(tonumber(AC1H_flag_RAW,16),tonumber("04",16))
+  payload_t.AC1H_flag=(pin_7 == 4) and "True" or "False"
+  
+  AC2L_flag_RAW=utility.hex2str(string.sub(payload,17,17))
+  pin_8=bit.bit_and(tonumber(AC2L_flag_RAW,16),tonumber("02",16))
+  payload_t.AC2L_flag=(pin_8 == 2) and "True" or "False"
+  
+  AC2H_flag_RAW=utility.hex2str(string.sub(payload,17,17))
+  pin_9=bit.bit_and(tonumber(AC2H_flag_RAW,16),tonumber("01",16))
+  payload_t.AC2H_flag=(pin_9 == 1) and "True" or "False"
+  
+  AV1L_status_RAW=utility.hex2str(string.sub(payload,18,18))
+  pin_10=bit.bit_and(tonumber(AV1L_status_RAW,16),tonumber("80",16))
+  payload_t.AV1L_status=(pin_10 == 128) and "True" or "False"
+  
+  AV1H_status_RAW=utility.hex2str(string.sub(payload,18,18))
+  pin_11=bit.bit_and(tonumber(AV1H_status_RAW,16),tonumber("40",16))
+  payload_t.AV1H_status=(pin_11 == 64) and "True" or "False"
+  
+  AV2L_status_RAW=utility.hex2str(string.sub(payload,18,18))
+  pin_12=bit.bit_and(tonumber(AV2L_status_RAW,16),tonumber("20",16))
+  payload_t.AV2L_status=(pin_12 == 32) and "True" or "False"
+  
+  AV2H_status_RAW=utility.hex2str(string.sub(payload,18,18))
+  pin_13=bit.bit_and(tonumber(AV2H_status_RAW,16),tonumber("10",16))
+  payload_t.AV2H_status=(pin_13 == 16) and "True" or "False"
+  
+  AC1L_status_RAW=utility.hex2str(string.sub(payload,18,18))
+  pin_14=bit.bit_and(tonumber(AC1L_status_RAW,16),tonumber("08",16))
+  payload_t.AC1L_status=(pin_14 == 8) and "True" or "False"
+  
+  AC1H_status_RAW=utility.hex2str(string.sub(payload,18,18))
+  pin_15=bit.bit_and(tonumber(AC1H_status_RAW,16),tonumber("04",16))
+  payload_t.AC1H_status=(pin_15 == 4) and "True" or "False"
+  
+  AC2L_status_RAW=utility.hex2str(string.sub(payload,18,18))
+  pin_16=bit.bit_and(tonumber(AC2L_status_RAW,16),tonumber("02",16))
+  payload_t.AC2L_status=(pin_16 == 2) and "True" or "False"
+  
+  AC2H_status_RAW=utility.hex2str(string.sub(payload,18,18))
+  pin_17=bit.bit_and(tonumber(AC2H_status_RAW,16),tonumber("01",16))
+  payload_t.AC2H_status=(pin_17 == 1) and "True" or "False"
+
+  DI2_status_RAW=utility.hex2str(string.sub(payload,19,19))
+  pin_18=bit.bit_and(tonumber(DI2_status_RAW,16),tonumber("08",16))
+  payload_t.DI2_status=(pin_18 == 8) and "True" or "False"
+  
+  DI2_flag_RAW=utility.hex2str(string.sub(payload,19,19))
+  pin_19=bit.bit_and(tonumber(DI2_flag_RAW,16),tonumber("04",16))
+  payload_t.DI2_flag=(pin_19 == 4) and "True" or "False"
+  
+  DI1_status_RAW=utility.hex2str(string.sub(payload,19,19))
+  pin_20=bit.bit_and(tonumber(DI1_status_RAW,16),tonumber("02",16))
+  payload_t.DI1_status=(pin_20 == 2) and "True" or "False"
+  
+  DI1_flag_RAW=utility.hex2str(string.sub(payload,19,19))
+  pin_21=bit.bit_and(tonumber(DI1_flag_RAW,16),tonumber("01",16))
+  payload_t.DI1_flag=(pin_21 == 1) and "True" or "False"
+end
+
+
+
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.Hardware_mode .. "&field2=".. payload_t.DO3_status .. "&field3=".. payload_t.DI3_status .. "&field4=".. payload_t.DO1_status .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&field7=".. payload_t.DO2_status.. "&field8="..payload_t.RO1_status.. "&field9=".. payload_t.RO2_status.. "&field10=".. payload_t.Count1_times.. "&field11=".. payload_t.First_status.. "&field12=".. payload_t.Work_mode.. "&field13=".. payload_t.AVI1_V.. "&field14=".. payload_t.AVI2_V.. "&field15=".. payload_t.ACI1_mA .. "&field16=".. payload_t.ACI2_mA.. "&field17=".. payload_t.DI1_status.. "&field18="..payload_t.DI2_status.. "&field19=".. payload_t.Count2_times.. "&field20=".. payload_t.Acount_times.. "&field21=".. payload_t.Mode_status.. "&field22=".. payload_t.AV1L_flag.. "&field23=".. payload_t.AV1H_flag.. "&field24=".. payload_t.AV2L_flag.. "&field25=".. payload_t.AV2H_flag.. "&field26=".. payload_t.AC1L_flag.. "&field27=".. payload_t.AC1H_flag.."&field28=".. payload_t.AC2L_flag.."&field29=".. payload_t.AC2H_flag.."&field30=".. payload_t.AV1L_status.."&field31=".. payload_t.AV1H_status.."&field32=".. payload_t.AV2L_status.."&field33=".. payload_t.AV2H_status.."&field34=".. payload_t.AC1L_status.."&field35=".. payload_t.AC1H_status.."&field36=".. payload_t.AC2L_status.."&field37=".. payload_t.AC2H_status.."&field38=".. payload_t.DI2_status.."&field39=".. payload_t.DI2_flag.."&field40=".. payload_t.DI1_status.."&field41=".. payload_t.DI1_flag.."&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t)) 
+return json.encode(payload_t)
+
+
+
+
+

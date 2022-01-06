@@ -12,7 +12,7 @@ WIFI_IF='wlan0-2'
 WIFI_GW=""
 RETRY_WIFI_GW=0
 wifi_ip=""
-
+iot_interval=` uci get system.@system[0].iot_interval`
 
 GSM_IF="3g-cellular" # 3g interface
 
@@ -31,7 +31,7 @@ ZERO="0"
 retry_gsm=0
 iot_online="1"
 offline_flag=""
-is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16"`
+is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16|ps8n"`
 
 last_reload_time=`date +%s`
 
@@ -50,9 +50,12 @@ echo out > /sys/class/gpio/gpio$Cellular_CTL/direction
 chk_internet_connection()
 {
 	global_ping="$ZERO"
-	global_ping=`fping $PING_HOST | grep -c alive`
+	global_ping=`fping $PING_HOST | grep -c alive` && echo "$global_ping" > /var/iot/internet
 	if [ "$global_ping" -eq "$ZERO" ];then
 		global_ping=`fping $PING_HOST2 | grep -c alive`
+		echo "$global_ping" > /var/iot/internet
+	else
+		echo "$global_ping" > /var/iot/internet
 	fi
 }
 
@@ -228,7 +231,7 @@ toggle_3g()
 
 while :
 do 
-	sleep 15
+	sleep "$iot_interval"
 	chk_internet_connection
 	
 	# Control receive size < 2M

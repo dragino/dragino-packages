@@ -20,7 +20,7 @@
 
 	<% # Set up LoRa menu for board type
 	board=$(cat /var/iot/board)
-	if [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ] || [ "$model" == "LIG16" ]; then
+	if [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ] || [ "$model" == "DLOS8" ] || [ "$model" == "LIG16" ]; then
 	#if [ "$board" == "LG08" ] || [ "$board" == "LG08P" ]; then
 	%>
   <div class="dropdown"> <!-- LoRa Parameter -->
@@ -37,23 +37,18 @@
   
   
 	<% # Set up LoRaWAN menu for board type
-	if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
+	if [ $model == "LG308" ] ||  [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ]  || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
 	%>
 		<div class="dropdown"> <!-- LoRa Parameter -->
 			<button class="dropbtn">LoRaWAN <span class="fas fa-caret-down"></span></button>
 			<div class="dropdown-content">
-				<a href="/cgi-bin/lorawan.has">LoRaWAN</a>
+				<a href="/cgi-bin/lorawan.has">LoRaWAN -- Semtech UDP</a>
 				
 
 				<% # Set up LoRaWAN menu for board type
-				if [ $model == "LIG16" ] || [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ]; then
+				if [ $model == "LIG16" ] || [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ] || [ "$model" == "DLOS8" ]; then
 				%>
-					<a href="/cgi-bin/lorawan-aws.has">Amazon AWS IoT</a>
-				<% fi %>
-
-				<% # Set up LoRaWAN menu for board type
-				if [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ]; then
-				%>
+					<a href="/cgi-bin/lorawan-basicstation.has">LoRaWAN -- Basic Station</a>
 					<a href="/cgi-bin/lorawan-helium.has">Helium IoT</a>
 				<% fi %>
 
@@ -100,6 +95,7 @@
 		<a href="/cgi-bin/system-overview.has">System Overview</a>
 		<a href="/cgi-bin/system-general.has">General</a>
 		<a href="/cgi-bin/system-config.has">Back Up / Restore Config</a>
+		<a href="/cgi-bin/system-remoteit.has">Remote.it</a>
 		<a href="/cgi-bin/system-rssh.has">Remote Mgmt</a>
 		<a href="/cgi-bin/system-firmware.has">Firmware Upgrade</a>
 		<a href="/cgi-bin/system-reboot.has">Reboot / Reset</a>
@@ -113,7 +109,7 @@
       <a href="/cgi-bin/log-lora.has">LoRa Log</a>
 	  
 	<% # Set up LoRaWAN menu for board type
-	if [ $model == "LG308" ] || [ $model == "LPS8" ] || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
+	if [ $model == "LG308" ] ||  [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ]  || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
 	%>
       <a href="/cgi-bin/log-traffic.has">Gateway Traffic</a>
 	<% fi %>	

@@ -1,0 +1,577 @@
+#!/usr/bin/haserl --upload-limit=4096 --upload-dir=/tmp
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+<%# --- Process the form submission --- %>
+<%
+	
+
+	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
+		if [ "$FORM_PALTFORM_SERVER_TYPE" == "AWS" ]; then
+			if [ -n "$FORM_CUPSURI" ]; then
+				echo "$FORM_CUPSURI" > /etc/station/cups.uri;
+			fi
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "TTN" ]; then 
+			if [ -n "$FORM_TTN_URI" ]; then
+				echo "$FORM_TTN_URI" > /etc/station/cups.uri;
+			fi
+			
+			if [ -n "$FORM_TTN_CUPS" ]; then
+				cups_key=$FORM_TTN_CUPS
+				echo "Authorization: Bearer "$FORM_TTN_CUPS"" > /etc/station/cupst.key
+				sed -e 's/$/\r/' /etc/station/cupst.key > /etc/station/cups.key
+				rm /etc/station/cupst.key;
+			fi
+			
+			if [ -n "$FORM_TTN_LNS" ]; then
+				cups_key=$FORM_TTN_LNS
+				echo "Authorization: Bearer "$FORM_TTN_LNS"" > /etc/station/lnst.key
+				sed -e 's/$/\r/' /etc/station/lnst.key > /etc/station/lns.key
+				rm /etc/station/lnst.key;
+			fi
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "CS" ]; then
+			if [ -n "$FORM_LNSURI_CS" ]; then
+				echo "$FORM_LNSURI_CS" > /etc/station/tc.uri
+			fi
+			
+		fi
+		
+		uci set gateway.general.station_server_provider=$FORM_PALTFORM_SERVER_TYPE	
+		uci set gateway.general.email="$FORM_EMAIL"
+		uci set gateway.general.server_type="station"
+		uci commit gateway
+
+		#Enter the routerid into the station configuration file
+		sed -i '/routerid/d' /etc/station/station.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station.conf			
+		sed -i '/routerid/d' /etc/station/station-sx1301.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station-sx1301.conf
+		sed -i '/routerid/d' /etc/station/station-sx1302.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station-sx1302.conf
+
+		/etc/init.d/lora_gw stop > /dev/null
+		sleep 2
+		/usr/bin/reload_iot_service.sh &
+	fi
+
+	if [ "$FORM_BUTTON" == "DEFAULT_CERTIFICATE" ]; then
+		if [ -e /etc/station/cups.trust]; then
+			ttn_trust_file_status="<span class='impactOK'>CA has been installed.</span>"
+		else
+			cd /etc/station; wget https://www.dragino.com/downloads/downloads/LoRa_Gateway/LG02-OLG02/Firmware/customized_script/cups.trust
+		fi
+		if [ -e /etc/station/cups.trust]; then
+			ttn_trust_file_status="<span class='impactOK'>Install CA Successful.</span>"
+		else
+			ttn_trust_file_status="<span class="impact-light">The network is abnormal,Please trt again.</span>"
+		fi
+	fi
+
+	if [ "$FORM_BUTTON" == "Upload_CUPS_Trust" ]; then
+		if test -n "$HASERL_uploadfile_pem_trust_path"; then
+		  cups_trust_name=$FORM_uploadfile_pem_trust_name
+		  if [ "$cups_trust_name" != "" ]; then
+		  	if [ "$cups_trust_name" == "cups.trust" ];then
+				find /etc/station -name "cups.trust*"|xargs rm -rfv   #  Remove the original cups.trust file
+				savedfile=$HASERL_uploadfile_pem_trust_path
+				cp $savedfile /etc/station/$cups_trust_name  # Store the cert file
+				trust_upload_status="<span class='impactOK'>Upload Finished </span>"			
+			else 
+				trust_upload_status="<span class='impact'>file name must be cups.trust </span>"
+			fi 
+		  else
+		  	trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! $cups_trust_name </span>"
+		  fi
+		fi
+	fi
+	
+	if [ "$FORM_BUTTON" == "Upload_Private_key" ]; then
+		if test -n "$HASERL_uploadfile_key_path"; then
+			private_key_name=$FORM_uploadfile_key_name			
+						
+			if [ "$private_key_name" != "" ]; then				
+				if [ "${private_key_name##*.}"x = "key"x ];then
+					find /etc/station/ -name '*private.key*' | xargs rm    #  Remove the original private.key file
+					savedfile=$HASERL_uploadfile_key_path
+					cp $savedfile /etc/station/$private_key_name  # Store the cert file
+					mv $savedfile /etc/station/cups.key    # Store Copy the cert file
+					key_upload_status="<span class='impactOK'>Upload Finished </span>"
+				else
+
+					key_upload_status="<span class='impact'>file suffix must be private.key </span>"
+		        	fi
+			else
+				key_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! </span>"
+			fi
+		fi
+	fi
+
+	if  [ "$FORM_BUTTON" == "Upload_Cert_pem" ]; then
+		if test -n "$HASERL_uploadfile_pem_path"; then
+		 	cert_pem_name=$FORM_uploadfile_pem_name
+
+			if [ "$cert_pem_name" != "" ]; then
+				if [ "${cert_pem_name##*.}"x = "pem"x ];then
+					find /etc/station/ -name '*cert.pem*' | xargs rm        #  Remove the original cert.pem file
+					savedfile=$HASERL_uploadfile_pem_path
+					cp $savedfile /etc/station/$cert_pem_name  # Store the cert file
+					mv $savedfile /etc/station/cups.crt    # Store Copy the cert file	
+					pem_upload_status="<span class='impactOK'>Upload Finished </span>"
+				else
+					pem_upload_status="<span class='impact'>file suffix must be Cert.pem </span>"
+				fi
+			
+			else
+				pem_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! </span>"
+			fi
+		fi
+	fi
+	if [ "$FORM_BUTTON" == "Restore_Configuration" ]; then
+		cd /etc/station/; ls | grep -v station.conf | grep -v station-sx1301.conf | grep -v station-sx1302.conf | xargs rm -rf {}
+		if [ `ls /etc/station/ | wc -w` == "3" ]; then
+			clearing_status="<span class='impactOK'>Deleting the confiuration file is complete</span>"
+		else
+			clearing_status="<span class='impact'>&nbsp;&nbsp; Deleting failure! </span>"
+		fi
+	fi
+	
+	if [ "$FORM_BUTTON" == "Upload_CUPS_Cert" ]; then
+		if test -n "$HASERL_uploadfile_pem_ttn_path"; then
+		  ttn_trust_name=$FORM_uploadfile_pem_ttn_name
+		  if [ "$ttn_trust_name" != "" ]; then
+		  	if [ "${ttn_trust_name##*.}"x = "pem"x ] || [ "${ttn_trust_name##*.}"x = "trust"x ];then
+				find /etc/station -name "cups.trust"| xargs rm -rfv   #  Remove the original tc.trust file
+				savedfile=$HASERL_uploadfile_pem_ttn_path
+				#cp $savedfile /etc/station/$tc_trust_name
+				mv $savedfile /etc/station/cups.trust  # Store the cert file
+				ttn_trust_upload_status="<span class='impactOK'>Upload Finished</span>"			
+			else 
+				ttn_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
+			fi 
+		  else
+		  	ttn_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
+		  fi
+		fi
+	fi
+	
+	
+	if [ "$FORM_BUTTON" == "Upload_LNS_Trust" ]; then
+		if test -n "$HASERL_uploadfile_tc_pem_trust_path"; then
+		  tc_trust_name=$FORM_uploadfile_tc_pem_trust_name
+		  if [ "$tc_trust_name" != "" ]; then
+		  	if [ "${tc_trust_name##*.}"x = "pem"x ] || [ "${tc_trust_name##*.}"x = "trust"x ];then
+				find /etc/station -name "tc.trust"| xargs rm -rfv   #  Remove the original tc.trust file
+				savedfile=$HASERL_uploadfile_tc_pem_trust_path
+				#cp $savedfile /etc/station/$tc_trust_name
+				mv $savedfile /etc/station/tc.trust  # Store the cert file
+				tc_trust_upload_status="<span class='impactOK'>Upload Finished</span>"			
+			else 
+				tc_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
+			fi 
+		  else
+		  	tc_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
+		  fi
+		fi
+	fi
+	
+	if [ "$FORM_BUTTON" == "Upload_LNS_key" ]; then
+		if test -n "$HASERL_uploadfile_tc_key_path"; then
+			tc_private_key_name=$FORM_uploadfile_tc_key_name			
+						
+			if [ "$tc_private_key_name" != "" ]; then				
+				if [ "${tc_private_key_name##*.}"x = "key"x ];then
+					find /etc/station/ -name '*private.key*' | xargs rm    #  Remove the original private.key file
+					savedfile=$HASERL_uploadfile_tc_key_path
+					cp $savedfile /etc/station/$private_key_name  # Store the cert file
+					mv $savedfile /etc/station/tc.key    # Store Copy the cert file
+					tc_key_upload_status="<span class='impactOK'>Upload Finished </span>"
+				else
+
+					tc_key_upload_status="<span class='impact'>file suffix must be private.key </span>"
+		        fi
+			else
+				tc_key_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! </span>"
+			fi
+		fi
+	fi
+	
+	if [ "$FORM_BUTTON" == "Upload_LNS_pem" ]; then
+		if test -n "$HASERL_uploadfile_tc_pem_path"; then
+		 	tc_cert_pem_name=$FORM_uploadfile_tc_pem_name
+			
+			if [ "$tc_cert_pem_name" != "" ]; then
+				if [ "${tc_cert_pem_name##*.}"x = "pem"x ];then
+					find /etc/station/ -name '*cert.pem*' | xargs rm        #  Remove the original cert.pem file
+					savedfile=$HASERL_uploadfile_tc_pem_path
+					cp $savedfile /etc/station/tc.crt  # Store the cert file
+					#mv $savedfile /etc/station/tc.crt    # Store Copy the cert file	
+					tc_pem_upload_status="<span class='impactOK'>Upload Finished </span>"
+				else
+					tc_pem_upload_status="<span class='impact'>file suffix must be Cert.pem </span>"
+				fi
+			
+			else
+				tc_pem_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! </span>"
+			fi
+		fi
+	fi
+%>
+
+
+<%# --- Get the variables for the HTML page --- %>
+<% 
+	paltform_server_type_select=$FORM_PALTFORM_SERVER_TYPE
+	if [ -z "$paltform_server_type_select"]; then
+		paltform_server_type_select="$(uci get gateway.general.station_server_provider)"
+	fi
+	paltform_server_type="$(uci get gateway.general.station_server_provider)"
+	ttn_cups_key="$(cat /etc/station/cups.key | awk '{print $3}')"
+	ttn_lns_key="$(cat /etc/station/lns.key | awk '{print $3}')"
+	cups_uri="$(cat /etc/station/cups.uri)"
+	tc_uri="$(cat /etc/station/tc.uri)"
+	gwid="$(cat /etc/station/station.conf | grep routerid | awk -F "\"" '{print $4}')"
+	if [ -z "$gwid" ];then
+		gwid="$(uci -q get gateway.general.GWID)"
+	fi
+	email="$(uci -q get gateway.general.email)"
+
+
+	if [ -e "/etc/station/cups.trust" ]; then
+	  	trust_status=`ls /etc/station/cups.trust | awk -F '/' '{print $4}'`
+	else
+	  	trust_status='<span class="impact-light">Not Found</span>'
+	fi
+
+	if [ -e "/etc/station/cups.key" ]; then
+		key_file_status=`ls /etc/station/*.private.key | awk -F '/' '{print $4}'`
+	else
+	  	key_file_status='<span class="impact-light">Not Found</span>'
+	fi
+
+	if [ -e "/etc/station/cups.crt" ]; then
+		pem_file_status=`ls /etc/station/*.cert.pem | awk -F '/' '{print $4}'`
+
+	else
+	  	pem_file_status='<span class="impact-light">Not Found</span>'
+	fi
+	
+	if [ -e "/etc/station/cups.trust" ]; then
+		ttn_trust_file_status=`ls /etc/station/cups.trust | awk -F '/' '{print $4}'`
+	else
+		ttn_trust_file_status='<span class="impact-light">Not Found CUPS Certificate Authority</span>'
+	fi
+	
+	if [ -e "/etc/station/tc.trust" ]; then
+	  	tc_trust_status=`ls /etc/station/tc.trust | awk -F '/' '{print $4}'`
+	else
+	  	tc_trust_status='<span class="impact-light">Not Found</span>'
+	fi
+	
+	if [ -e "/etc/station/tc.key" ]; then
+		tc_key_file_status=`ls /etc/station/*.key | awk -F '/' '{print $4}'`
+	else
+	  	tc_key_file_status='<span class="impact-light">Not Found</span>'
+	fi
+
+	if [ -e "/etc/station/tc.crt" ]; then
+		tc_pem_file_status=`ls /etc/station/*.crt | awk -F '/' '{print $4}'`
+
+	else
+	  	tc_pem_file_status='<span class="impact-light">Not Found</span>'
+	fi
+
+	type="$(uci -q get gateway.general.server_type)"
+	
+	if [ "$type" == "lorawan" ];  then	
+		mode_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Semtech UDP </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">LoRaWAN Basic Station </span>'	
+	elif [ "$type" == "loriot" ];  then
+		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
+	elif [ "$type" == "mqtt" ];  then
+		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
+	elif [ "$type" == "tcp" ];  then
+		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
+	elif [ "$type" == "tcpudp" ];  then
+		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
+	elif [ "$type" == "customized" ];  then
+		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
+	elif [ "$type" == "station" ];  then
+		if [ "$paltform_server_type" == "AWS" ]; then 
+			mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- AWS</span>'
+		elif [ "$paltform_server_type" == "TTN" ]; then
+			mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- TTN</span>'
+		else
+			mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Basic Station</span>'
+		fi
+	fi
+	
+	
+	
+	disp1="inline"; disp2="none"; disp3="none";
+	# Set up display options
+	if [ "$paltform_server_type_select" == "AWS" ]; then
+		disp1="none"; disp2="inline"; disp3="none"
+	elif [ "$paltform_server_type_select" == "TTN" ]; then
+		disp1="inline";disp2="none"; disp3="none"
+	elif [ "$paltform_server_type_select" == "CS" ]; then
+		disp1="none"; disp2="none"; disp3="inline"
+	fi
+
+
+	
+%>
+
+<%# --- Present the HTML page --- %>
+<html lang="en">
+<head>
+	<%inc /www/cgi-bin/inc/head.inc %>
+<script>
+	function displayFunction() {
+	    document.getElementById("div1").style.display = "<% echo -n $disp1 %>"; 
+	    document.getElementById("div2").style.display = "<% echo -n $disp2 %>";      
+		document.getElementById("div3").style.display = "<% echo -n $disp3 %>"; 
+    	}
+	function changeFunc(val) {
+	    document.forms["station"].submit();
+	}
+</script>
+</head>
+
+<body onload="displayFunction() ">
+<%inc /www/cgi-bin/inc/menu.inc %>
+<div class="page-container">
+
+<h2>LoRaWAN -- Basic Station</h2>
+
+<form id="station" action="<% echo -n $SCRIPT_NAME %>" method="POST" enctype="multipart/form-data">
+
+
+<table class="configTable">
+	<tr><td colspan="18"><h3>General Settings</h3></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label for="EMAIL">Email</label></td>
+		<td colspan="7"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
+		<td colspan="6"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label for="GWID">Gateway ID</label></td>
+		<td colspan="5"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
+		<td colspan="3"></td>
+		<td colspan="3"><label for="CLEAR">Restore</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+		<p>Users can remove current confiuration files via this botton of remove configurations include CA certificate and URI </p> 
+		<p style="text-align: center;"><br>[Close]</p>
+		</div>
+		</td>
+		<td colspan="6"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Restore_Configuration" onclick="return confirm('Start to remove the confiuration file include CA Certificate and URI')"></td>
+		<td colspan="6"><% echo -n $clearing_status %></td>
+	</tr>
+</table>
+
+<table class="configTable">
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="4"><h3>Primary LoRaWAN Server</h3></td>
+		
+	</tr> 
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="3"><label for="SERVER_TYPE">Service Provider</label></td>
+		<td colspan="5">
+			<select id="paltform_server_type"  name="PALTFORM_SERVER_TYPE" onchange="changeFunc(this.value)" >
+	  		<option value="TTN" >The Things Network -- Basic Station</option>
+	  		<option value="AWS" >Amazon IoT -- Basic Stion </option>
+			<option value="CS" >ChirpStack -- Basic Station </option>
+		</select></td>
+	</tr>
+
+	<script>document.getElementById("paltform_server_type").value="<% echo -n $paltform_server_type_select %>";</script>
+</table>
+
+	
+
+<div id="div1" >
+<table class="configTable">
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="13"><label for="CUPSURI">CUPS Server URI</label></td>
+		<td colspan="22"><input type="text" name="TTN_URI" maxlength="128" placeholder="example: https://eu1.cloud.thethings.network:443" VALUE=<% echo -n $cups_uri %> ></td>
+		<td colspan="6"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="13"><label for="CUPSKEY">CUPS Authorization Key</label></td>
+		<td colspan="42"><input type="text" name="TTN_CUPS" maxlength="128" placeholder="example: NNSXS.2WT4MDZ3R24GFIRNJB6A3OKZWPRNT6HZLXM3PXI.JT42TOKFSAGZ3JZIRVFHE37Q7IKBPSI7H7EKWIED2VTXUZJCC67Q" VALUE=<% echo -n "$ttn_cups_key" %>></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="13"><label for="LNSKEY">LNS Authentication Key</label></td>
+		<td colspan="42"><input type="text" name="TTN_LNS" maxlength="128" placeholder="example: NNSXS.2WT4MDZ3R24GFIRNJB6A3OKZWPRNT6HZLXM3PXI.JT42TOKFSAGZ3JZIRVFHE37Q7IKBPSI7H7EKWIED2VTXUZJCC67Q" VALUE=<% echo -n "$ttn_lns_key" %>></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="13"><label for="CLEAR">CUPS Certificate Authority</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp_ca()">&nbsp;&nbsp;?</span>
+		<div id="helptext_ca" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+		<p>User can clicking DEFAULTDE CERTIFICATE to download certificate or upload own certificate </p> 
+		<p style="text-align: center;"><br>[Close]</p>
+		</div>
+		</td>
+		<td colspan="1"></td>
+		<td colspan="20"><% echo -n $ttn_trust_file_status %></td>		
+	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="8"></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DEFAULT_CERTIFICATE" onclick="return confirm('Start install default CA Certificate')"></td>
+		<td colspan="12"></td>
+		<td colspan="8"><input type=file name=uploadfile_pem_ttn></td>
+		<td colspan="4"></td>
+		<td colspan="14"><% echo -n $ttn_trust_upload_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Cert" onclick="showPageLoaderIcon()"></td>
+	</tr>
+</table>
+</div>
+
+
+
+
+<div id="div2">
+<table class="configTable">
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSURI">CUPS URI</label></td>
+		<td colspan="24"><input type="text" name="CUPSURI" maxlength="128" placeholder="example: https://xxxxxxx.cups.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $cups_uri %> ></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSTRUST">CUPS trust</label></td>
+		<td colspan="10"><% echo -n $trust_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_pem_trust></td>
+		<td colspan="5"><% echo -n $trust_upload_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Trust" onclick="showPageLoaderIcon()"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="PRIBATEKEY">Private key</label></td>
+		<td colspan="10"><% echo -n $key_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_key></td>
+		<td colspan="5"><% echo -n $key_upload_status%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_Private_key" onclick="showPageLoaderIcon()"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CERTPEM">Cert pem</label></td>
+		<td colspan="10"><% echo -n $pem_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_pem></td>
+		<td colspan="5"><% echo -n $pem_upload_status%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_Cert_pem" onclick="showPageLoaderIcon()"></td>
+	</tr>
+</table>	
+</div>
+
+<div id="div3">
+	<table class="configTable">
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
+		<td colspan="24"><input type="text" name="LNSURI_CS" maxlength="128" placeholder="example: wss://xxxx.chirpstack.com:443 or ws://xxx.chirpstack.com:3001 " VALUE=<% echo -n $tc_uri %>  ></td>
+	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSTRUST">LNS TLS trust</label></td>
+		<td colspan="10"><% echo -n $tc_trust_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_tc_pem_trust></td>
+		<td colspan="5"><% echo -n $tc_trust_upload_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
+	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="PRIBATEKEY">Private TLS key</label></td>
+		<td colspan="10"><% echo -n $tc_key_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_tc_key></td>
+		<td colspan="5"><% echo -n $tc_key_upload_status%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_key" onclick="showPageLoaderIcon()"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CERTPEM">Private TLS Cert</label></td>
+		<td colspan="10"><% echo -n $tc_pem_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_tc_pem></td>
+		<td colspan="5"><% echo -n $tc_pem_upload_status%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_pem" onclick="showPageLoaderIcon()"></td>
+	</tr>
+	
+	
+	
+</table>
+</div>
+
+<table class="configTable">		
+	<tr class="rowSpacer"></tr>
+	<tr class="rowSpacer"></tr>
+		<tr>
+		
+			<td colspan="18"><% echo -n $mode_status%></td>
+		</tr>
+		<td colspan="16">
+			<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+	
+</table>
+<script>
+function showHelp1() {
+document.getElementById("helptext1").style.display="inline";
+
+}
+function showHelp_ca() {
+document.getElementById("helptext_ca").style.display="inline";
+}
+
+function hideHelp() {
+document.getElementById("helptext1").style.display="none";
+document.getElementById("helptext_ca").style.display="none";
+}
+
+
+
+</script>
+	
+</form>
+</div>
+</body>
+</html>
+
+

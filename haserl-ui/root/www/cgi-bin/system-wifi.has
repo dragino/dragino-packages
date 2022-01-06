@@ -272,9 +272,9 @@
 
 		sig=$(cat /tmp/scan.txt | grep -w -A 3 "$addr" | grep "Signal" | cut -d : -f 2 | cut -d " " -f2,3)
 		chan=$(cat /tmp/scan.txt| grep -w -A 2 "$addr" | grep "Channel" | cut -d : -f3)
-		ssid=$(cat /tmp/scan.txt| grep -w -A 1 "$addr" | grep "ESSID" | cut -d : -f2 | sed 's/"//g')
-		
-		ssid_str="<option value=\"$ssid::$encr\"><pre> $ssid  (Ch: $chan  Encr: $encr_str Sig: $sig) </pre> </option>"$ssid_str
+		ssid=$(cat /tmp/scan.txt| grep -w -A 1 "$addr" | grep "ESSID" | cut -d : -f2 | sed 's/ //'| sed 's/"//g')
+
+		ssid_str="<option value="\"$ssid::$encr\""><pre> $ssid (Ch: $chan  Encr: $encr_str Sig: $sig) </pre> </option>"$ssid_str
 	done	
 %>	
 

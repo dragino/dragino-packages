@@ -9,4 +9,5 @@
 			  <option value="AS21" >AS923 Asia (Default:921.4/921.6) AS923-2</option>
 			  <option value="AS31" >AS923 Asia (Default:916.6/916.8) AS923-3</option>
 			  <option value="RU"  >RU864 Russia 864MHz (864~870) </option>
-			  <option value="MA"  >MA869 Morocco 869(869.1-870.3)MHz  </option>
+			  <option value="MA"  >MA869 Morocco 869MHz(869.1-870.3) </option>
+			  <option value="KZ"  >KZ865 Morocco 869MHz (865.1-865.9) </option>

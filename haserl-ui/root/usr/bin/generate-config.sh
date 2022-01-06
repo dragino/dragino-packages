@@ -69,7 +69,7 @@ gen_gw_cfg() {
 
 
         # stastatic 状态和统计的间隔时间，单位是秒*/
-	json_add_int	"stat_interval" "30"  # 这个和 server 里面的 Kepp Alive 区别? 
+	json_add_int	"stat_interval" "`uci -q get gateway.general.stat`"  # 这个和 server 里面的 Kepp Alive 区别? 
 
 	##GPS coordinates. use fake GPS from UI or via GPS module
 	if [ "$fake_gps" == "1" ];then
@@ -105,6 +105,7 @@ gen_gw_cfg() {
 		json_add_int "serv_port_up" "`uci get gateway.server1.upp`"
 		json_add_int "serv_port_down" "`uci get gateway.server1.dpp`"
 		
+		json_add_int	"stat_interval" "`uci -q get gateway.general.stat`"
 		#adjust the following parameters for your network 
 		json_add_int "keepalive_interval" "`uci get gateway.server1.keepalive_interval`" #以前的默认值是多少? 
 		json_add_int "push_timeout_ms" "`uci get gateway.server1.push_timeout_ms`"  #以前的默认值是多少? 
@@ -317,7 +318,7 @@ if [ $model == "LG308" ] || [ $model == "DLOS8" ];then
 	chip="301"
 elif [ $model == "LPS8" ];then
 	chip="308"
-elif [ $model == "LIG16" ];then
+elif [ $model == "LIG16" ] || [ $model == "LPS8-N" ];then
 	chip="302"
 	json_section_name="SX130x_conf"
 fi

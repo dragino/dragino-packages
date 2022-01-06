@@ -198,11 +198,11 @@ void printf_mac_header( LoRaMacMessageData_t* macMsg )
             MSG_DEBUG(DEBUG_PKT_FWD, "PKT_FWD~ JOIN_ACCEPT+ {\"NetID\": \"%s\", \"DevAddr\": \"%08X\"}\n", netid, devaddr);
             break;
         case FRAME_TYPE_JOIN_REQ: 
-            for (idx = 1; idx < 1 + 8; idx++) {
+            for (idx = 8; idx > 0; idx--) {
                 sprintf(cat, "%02X", macMsg->Buffer[idx]);
                 strcat(appeui, cat);
             }
-            for (idx = 9; idx < 9 + 8; idx++) {
+            for (idx = 16; idx > 8; idx--) {
                 sprintf(cat, "%02X", macMsg->Buffer[idx]);
                 strcat(deveui, cat);
             }

@@ -1,0 +1,177 @@
+#!/usr/bin/haserl
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+<%# --- Process the form submission --- %>
+<%
+		if [ -e "/usr/share/remoteit" ]; then
+			echo "<p style='color:Green;'> Remoteit is installed </p>"   > /tmp/remoteit_status.txt
+		else
+			echo "<p style='color:Red;'> Remoteit is not installed </p>" > /tmp/remoteit_status.txt
+		fi
+		
+		if [ -e "/etc/remoteit/config.json" ]; then
+			echo "<p style='color:Green;'> Device is registered </p>"   >> /tmp/remoteit_status.txt
+		else
+			echo "<p style='color:Red;'> Device is not registered </p>" >> /tmp/remoteit_status.txt
+		fi
+
+	if [ "$FORM_BUTTON" = "Install" ]; then
+		# Check if already installed
+		if [ -e "/usr/share/remoteit" ]; then
+			echo "<p style='color:Red;'> Remoteit is already installed. </p>"            > /tmp/remoteit_status.txt
+			echo "<p style='color:Red;'> Please Remove then Install and Register </p>"  >> /tmp/remoteit_status.txt
+		else	
+			download_url="https://www.dragino.com/downloads/downloads/LoRa_Gateway/LPS8/Firmware/remoteit/"
+			# Clean up
+			rm /etc/remoteit/config.json
+			rm /etc/remoteit/registration; touch /etc/remoteit/registration
+			opkg remove remoteit > /tmp/remoteit_status.txt
+			cd /var/
+			wget ${download_url}jq_1.5-3_mips_24kc.ipk
+
+			wget ${download_url}remoteit_4.13.5.ipk
+			opkg install /var/jq_1.5-3_mips_24kc.ipk
+			opkg install /var/remoteit_4.13.5.ipk         > /tmp/remoteit_status.txt
+			echo "<p style='color:Green;'> Installation complete </p>"              >> /tmp/remoteit_status.txt
+				if [ -e "/etc/remoteit/config.json" ]; then
+					echo "<p style='color:Green;'> Device is registered </p>"   >> /tmp/remoteit_status.txt
+				else
+					echo "<p style='color:Red;'> Device is not registered </p>" >> /tmp/remoteit_status.txt
+				fi
+			rm jq_1.5-3_mips_24kc.ipk
+			rm remoteit_4.13.5.ipk
+		fi
+	fi
+	
+	if [ "$FORM_BUTTON" = "Register" ]; then
+		# Check if already registered
+		if [ -e "/etc/remoteit/config.json" ]; then
+			echo "<p style='color:Red;'> Device is already registered. </p>"            > /tmp/remoteit_status.txt
+			echo "<p style='color:Red;'> Please Remove then Install and Register </p>" >> /tmp/remoteit_status.txt
+		else
+			echo $FORM_REGISTRATION_CODE > /etc/remoteit/registration
+			# Clean up
+			rm /etc/remoteit/config.json  
+			# Register
+			/usr/share/remoteit/refresh.sh                                     > /tmp/remoteit_status.txt
+			echo "<p style='color:Green;'> Registration complete </p>"        >> /tmp/remoteit_status.txt
+		
+			if [ -e "/etc/remoteit/config.json" ]; then
+				echo "<p style='color:Green;'> Device is registered </p>"       >> /tmp/remoteit_status.txt
+			else
+				echo "<p style='color:Red;'> Device is not registered </p>"     >> /tmp/remoteit_status.txt
+			fi
+		fi
+  fi
+
+	if [ "$FORM_BUTTON" = "Remove" ]; then
+		opkg remove remoteit                                             > /tmp/remoteit_status.txt
+		rm -rf /usr/share/remoteit/
+		rm /etc/remoteit/config.json
+		rm /etc/remoteit/registration; touch /etc/remoteit/registration
+		echo "<p style='color:Green;'> Removal complete </p>"           >> /tmp/remoteit_status.txt
+	fi 
+
+	if [ "$FORM_BUTTON" = "Save" ]; then
+		echo $FORM_REGISTRATION_CODE > /etc/remoteit/registration
+	fi 
+
+%>
+
+<%# --- Get the variables for the HTML page --- %>
+<% 
+	registration_code="$(cat /etc/remoteit/registration)"
+%>
+
+<%# --- Present the HTML page --- %>
+<html>
+
+<head>
+<%inc /www/cgi-bin/inc/head.inc %>
+</head>
+
+<body>
+<%inc /www/cgi-bin/inc/menu.inc %>
+
+<div class="page-container">
+
+<h2>
+	<a href="https://remote.it" target="_blank"> Remote.it  </a
+	<a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </a>
+	<a href="https://support.remote.it/hc/en-us/articles/360044787712-Create-a-remote-it-account" target="_blank"> 
+		<img src="/static/img/remoteit.png" alt="Create Remote.it Account"> 
+	</a>
+</h2>   		
+
+<form name="SYSTEM-REMOTEIT" id="SYSTEM-REMOTEIT" action="<% echo -n $SCRIPT_NAME %>" method="POST">
+
+<table class="configTable">
+	<tr>
+		<td colspan="3"><h3> 1. Install Remote.it </h3></td>
+	</tr> <!--Determines the column widths-->
+	
+	<tr>
+		<td colspan="4">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Install" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+	
+	<tr class="rowSpacer"></tr>
+	<tr><td colspan="3"><h3> 2. Register </h3></td>
+		<td><a href="https://support.remote.it/hc/en-us/articles/360044865271-1-Create-a-Product-Definition" target="_blank"> 
+			<img src="/static/img/remoteit.png" alt="Create a Product Definition"> </a>
+		</td>
+	</tr>
+	
+	<tr>
+		<td colspan="4"><label for="REGISTRATION_CODE">Bulk ID Code / Licence Key</label></td>
+		<td colspan="5"><input type="text" name="REGISTRATION_CODE" id="registration_code" maxlength="40" size="40"
+		    pattern="[a-zA-Z0-9_*.$%<>;:?@=!^|&+()#~\{\}\-]{1,128}" VALUE="<% echo -n $registration_code %>"></td>
+		<td colspan="2"></td>
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+		<tr>
+		<td colspan="8">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save" onclick="showPageLoaderIcon()">
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Register" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="3"><h3> 3. Remove </h3></td>
+	</tr>
+	
+	<tr>
+		<td colspan="4">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Remove" onclick="showPageLoaderIcon()">
+		</td>
+		<td colspan="10">  To change registration, please Remove and then Install again. </td> 
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr><td><h3>Status</h3></td></tr>
+	
+	<tr>
+		<td colspan="10">
+				<% cat /tmp/remoteit_status.txt %>
+		</td>
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="10">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Refresh" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+
+
+</table>
+</form>
+</div>
+</body>
+</html>
+

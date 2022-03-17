@@ -39,20 +39,21 @@ TARGET_CFLAGS += $(FPIC)
 CONFIGURE_ARGS += --disable-python
 
 define Build/Prepare
-	$(call Build/Prepare/Default)
-	cd $(PKG_BUILD_DIR); cp -r src/* ./;
+    mkdir -p $(PKG_BUILD_DIR)
+    $(CP) src/* $(PKG_BUILD_DIR)
 endef
 
 define Build/InstallDev
-	$(INSTALL_DIR) $(1)/usr/include/
-	$(CP) $(PKG_INSTALL_DIR)/usr/include/mpsse.h $(1)/usr/include/
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libmpsse.{a,so} $(1)/usr/lib/
+    $(INSTALL_DIR) $(1)/usr/include/
+    $(CP) $(PKG_BUILD_DIR)/mpsse.h $(1)/usr/include/
+    $(INSTALL_DIR) $(1)/usr/lib
+    $(CP) $(PKG_BUILD_DIR)/libmpsse.{a,so} $(1)/usr/lib/
 endef
+
 
 define Package/libmpsse/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libmpsse.so $(1)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/usr/lib/libmpsse.so $(1)/usr/lib/
 endef
 
 $(eval $(call BuildPackage,libmpsse))

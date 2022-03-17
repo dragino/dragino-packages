@@ -1,0 +1,116 @@
+#!/usr/bin/lua
+
+--Decoder for LHT65 v1.7 firmware version
+
+json = require('dragino.json')
+local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+
+--Get Battery
+HEX_BAT=string.sub(payload,17,18)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+payload_t.BatV=BAT
+
+--Get SHT20 Temp
+SHT20_T_RAW_3=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+SHT20_T_RAW_4=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+minus_flag = bit.bit_rshift(SHT20_T_RAW_3,7)
+SHT20_Temp=(bit.bit_or(bit.bit_lshift(SHT20_T_RAW_3,8),SHT20_T_RAW_4)-minus_flag*65536)/100
+payload_t.TempC_SHT=SHT20_Temp
+
+--Get SHT20 Humidity
+SHT20_H_RAW=utility.hex2str(string.sub(payload,21,22))
+SHT20_Hum=tonumber(SHT20_H_RAW,16)/10
+payload_t.Hum_SHT=SHT20_Hum
+
+--Check EXT type
+EXT_Byte=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+sensor_disconnect=bit.bit_rshift(EXT_Byte,7)
+EXT=bit.bit_and(EXT_Byte,tonumber("3F",16))
+
+payload_t.EXT="No External Sensor"
+
+payload_t.ext_sensor=1
+if EXT ~= 1 and sensor_disconnect == 1 then 
+	payload_t.ext_sensor=0
+end 
+
+if EXT==1 then
+	payload_t.EXT="Temperature Sensor"
+	DS18B20_T_RAW_8=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+	DS18B20_T_RAW_9=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+	minus_flag = bit.bit_rshift(DS18B20_T_RAW_8,7)
+	DS18B20_Temp=(bit.bit_or(bit.bit_lshift(DS18B20_T_RAW_8,8),DS18B20_T_RAW_9)-minus_flag*65536)/100
+	if DS18B20_Temp == 327.67 then
+		payload_t.ext_sensor=0
+	end
+	payload_t.TempC_DS=DS18B20_Temp
+	
+elseif EXT==4 then
+	payload_t.EXT="Interrupt Sensor send"
+	pin_level=tonumber(utility.hex2str(string.sub(payload,24,25)),16)
+	payload_t.Exti_pin_level=(pin_level == 1) and "High" or "Low"
+	
+	interrupt=tonumber(utility.hex2str(string.sub(payload,24,25)),16)
+	payload_t.Exti_status=(Exti_status == 1) and "True" or "False"
+	
+elseif EXT==5 then	
+	payload_t.EXT="Illumination Sensor"
+	light_level=tonumber(utility.hex2str(string.sub(payload,24,25)),16)
+	payload_t.ILL_lux=light_level
+	
+elseif EXT==6 then	
+	payload_t.EXT="ADC Sensor"	
+	analog=tonumber(utility.hex2str(string.sub(payload,24,25)),16)/1000
+	payload_t.ADC_V=analog
+
+elseif EXT==7 then	
+	payload_t.EXT="Interrupt Sensor count"	
+	count=tonumber(utility.hex2str(string.sub(payload,24,25)))
+	payload_t.Exit_count=count
+end
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.TempC_SHT .. "&field2=".. payload_t.Hum_SHT .. "&field3=".. payload_t.TempC_DS .. "&field4=".. payload_t.BatV .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t)) 
+return json.encode(payload_t)
+
+
+
+
+

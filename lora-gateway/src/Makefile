@@ -13,7 +13,6 @@ all:
 	$(MAKE) all -e -C util_tx_test
 	$(MAKE) all -e -C util_lbt_test
 	$(MAKE) all -e -C util_tx_continuous
-	$(MAKE) all -e -C util_spectral_scan
 	$(MAKE) all -e -C lora_pkt_fwd
 	$(MAKE) all -e -C util_test_hal
 
@@ -25,6 +24,5 @@ clean:
 	$(MAKE) clean -e -C util_lbt_test
 	$(MAKE) clean -e -C util_tx_continuous
 	$(MAKE) clean -e -C util_test_hal
-	$(MAKE) clean -e -C util_spectral_scan
 
 ### EOF

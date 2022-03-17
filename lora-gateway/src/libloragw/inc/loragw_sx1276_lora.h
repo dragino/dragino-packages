@@ -91,4 +91,11 @@ Maintainer: Michael Coracin
 #define SX1276_REG_LR_AGCTHRESH3                           0x64
 #define SX1276_REG_LR_PLL                                  0x70
 
+// sx1276 RegModemConfig2
+#define SX1276_MC2_RX_PAYLOAD_CRCON                        0x04
+
+// sx1276 RegModemConfig3
+#define SX1276_MC3_LOW_DATA_RATE_OPTIMIZE                  0x08
+#define SX1276_MC3_AGCAUTO                                 0x04
+
 #endif // _LORAGW_SX1276_REGS_LORA_H

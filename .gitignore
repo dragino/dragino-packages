@@ -6,3 +6,5 @@
 ./dragino-gw-fwd/src/tags
 ./dragino-gw-fwd/src/fwd/tags
 ./dragino-gw-fwd/src/fwd/*.vim
+*tags
+*cscope*

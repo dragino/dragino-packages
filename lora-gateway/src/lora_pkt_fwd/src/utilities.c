@@ -90,3 +90,50 @@ int8_t Nibble2HexChar( uint8_t a )
         return '?';
     }
 }
+
+void str2hex(uint8_t* dest, char* src, int len) {
+    int i;
+    uint8_t ch1;
+    uint8_t ch2;
+    uint8_t ui1;
+    uint8_t ui2;
+    for(i = 0; i < len; i++) {
+        ch1 = src[i*2];
+        ch2 = src[i*2+1];
+        ui1 = toupper(ch1) - 0x30;
+        if (ui1 > 9)
+            ui1 -= 7;
+        ui2 = toupper(ch2) - 0x30;
+        if (ui2 > 9)
+            ui2 -= 7;
+        dest[i] = ui1*16 + ui2;
+    }
+}
+
+static uint8_t hex2int(char c) {
+    /* 0x30 - 0x39 (0 - 9) 
+     * 0x61 - 0x66 (a - f) 
+     * 0x41 - 0x46 (A - F)
+     * */
+    if( c >= '0' && c <= '9') {
+        return (uint8_t) (c - 0x30);
+    } else if( c >= 'A' && c <= 'F') {
+        return (uint8_t) (c - 0x37);
+    } else if( c >= 'a' && c <= 'f') {
+        return (uint8_t) (c - 0x57);
+    } else {
+        return 0;
+    }
+}
+
+void hex2str(uint8_t* hex, uint8_t* str, uint8_t len) {
+    int i = 0, j;
+    uint8_t h, l;
+
+    for(j = 0; j < len - 1; ) {
+        h = hex2int(hex[j++]);
+        l = hex2int(hex[j++]);
+        str[i++] = (h<<4) | l;
+    }
+}
+

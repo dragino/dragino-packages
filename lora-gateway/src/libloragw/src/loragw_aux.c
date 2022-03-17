@@ -26,6 +26,10 @@ Maintainer: Sylvain Miermont
 
 #include <stdio.h>  /* printf fprintf */
 #include <time.h>   /* clock_nanosleep */
+#include <unistd.h>   
+#include <fcntl.h>   
+#include <sys/stat.h>
+#include <sys/types.h>
 
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE MACROS ------------------------------------------------------- */

@@ -1,0 +1,132 @@
+#!/usr/bin/lua
+
+--Decoder for LGT92 firmware version
+
+json = require('dragino.json')
+local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+--Get Battery
+HEX_BAT=string.sub(payload,25,26)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+payload_t.BatV=BAT
+
+--Get Alarm
+Alarm_status_RAW=utility.hex2str(string.sub(payload,25,25))
+pin_level_5=bit.bit_and(tonumber(Alarm_status_RAW,16),tonumber("40",16))
+payload_t.Alarm_status=(pin_level_5 == 64) and "TRUE" or "FALSE"
+
+--Get Latitude 
+latitude_RAW_24=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+latitude_RAW_25=tonumber(utility.hex2str(string.sub(payload,18,18)),16)
+latitude_RAW_26=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+latitude_RAW_27=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+minus_flag_1 = bit.bit_lshift(latitude_RAW_26,8)
+minus_flag_2 = bit.bit_lshift(latitude_RAW_25,16)
+latitude_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(latitude_RAW_24,24),minus_flag_2)),minus_flag_1),latitude_RAW_27)
+payload_t.Latitude=latitude_0/1000000
+
+--Get Longitude 
+longitude_RAW_24=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+longitude_RAW_25=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+longitude_RAW_26=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+longitude_RAW_27=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+minus_flag_1 = bit.bit_lshift(longitude_RAW_26,8)
+minus_flag_2 = bit.bit_lshift(longitude_RAW_25,16)
+longitude_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(longitude_RAW_24,24),minus_flag_2)),minus_flag_1),longitude_RAW_27)-tonumber("FFFFFFFF00000000",16)
+payload_t.Longitude=longitude_0/1000000
+
+
+Move_status_RAW=utility.hex2str(string.sub(payload,27,27))
+pin_level_0=bit.bit_and(tonumber(Move_status_RAW,16),tonumber("C0",16))
+
+if pin_level_0==64 then 
+  payload_t.MD="Move"
+
+elseif pin_level_0==128 then
+payload_t.MD="Collide"
+
+elseif pin_level_0==192 then
+payload_t.MD="User"
+
+else
+payload_t.MD="Disable"
+end
+
+led_updown_RAW=utility.hex2str(string.sub(payload,27,27))
+led_updown_5=bit.bit_and(tonumber(led_updown_RAW,16),tonumber("20",16))
+payload_t.LON=(led_updown_5 == 32) and "ON" or "OFF"
+
+Firmware_RAW=utility.hex2str(string.sub(payload,27,27))
+Firmware=bit.bit_and(tonumber(Firmware_RAW,16),tonumber("1F",16))
+payload_t.FW=160+Firmware
+
+roll_V_RAW_3=tonumber(utility.hex2str(string.sub(payload,28,28)),16)
+roll_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,29,29)),16)
+minus_flag = bit.bit_rshift(roll_V_RAW_3,7)
+roll_V_0=(bit.bit_or(bit.bit_lshift(roll_V_RAW_3,8),roll_V_RAW_4)-minus_flag*65536)/100
+payload_t.Roll=roll_V_0
+
+pitch_V_RAW_3=tonumber(utility.hex2str(string.sub(payload,30,30)),16)
+pitch_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,31,31)),16)
+minus_flag = bit.bit_rshift(pitch_V_RAW_3,7)
+pitch_V_0=(bit.bit_or(bit.bit_lshift(pitch_V_RAW_3,8),pitch_V_RAW_4)-minus_flag*65536)/100
+payload_t.Pitch=pitch_V_0
+
+hdop_RAW=utility.hex2str(string.sub(payload,32,32))
+hdop=tonumber(hdop_RAW,16)
+if hdop>0 then 
+payload_t.HDOP=hdop/100
+else
+payload_t.HDOP=hdop
+end
+
+altitude_V_RAW_3=tonumber(utility.hex2str(string.sub(payload,33,33)),16)
+altitude_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,34,34)),16)
+minus_flag = bit.bit_rshift(altitude_V_RAW_3,7)
+altitude_V_0=(bit.bit_or(bit.bit_lshift(altitude_V_RAW_3,8),altitude_V_RAW_4)-minus_flag*65536)/100
+payload_t.Altitude=altitude_V_0
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.Latitude .. "&field2=".. payload_t.Longitude .. "&field3=".. payload_t.Roll .. "&field4=".. payload_t.Pitch .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&field7=".. payload_t.ALARM_status.. "&field8="..payload_t.MD.. "&field9=".. payload_t.LON.. "&field10=".. payload_t.FW.. "&field11=".. payload_t.HDOP.. "&field12=".. payload_t.Altitude.. "&field13=".. payload_t.BatV.."&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t)) 
+return json.encode(payload_t)
+
+
+
+
+

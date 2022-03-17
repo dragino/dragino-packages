@@ -37,10 +37,11 @@ Maintainer: Sylvain Miermont
 /* -------------------------------------------------------------------------- */
 /* --- MAIN FUNCTION -------------------------------------------------------- */
 
-int main()
+int main(int argc, char* argv[])
 {
-    int i;
+    int i, spistat = 0;
     void *spi_target = NULL;
+    char spidev[32] = {'\0'};
     uint8_t data = 0;
     uint8_t dataout[BURST_TEST_SIZE];
     uint8_t datain[BURST_TEST_SIZE];
@@ -51,33 +52,52 @@ int main()
         datain[i] = 0x23; /* garbage data, to be overwritten by received data */
     }
 
+    if (argc == 2) 
+        strncpy(spidev, argv[1], sizeof(spidev) - 1);
+    else
+        strcpy(spidev, "/dev/spidev1.0");
+
     printf("Beginning of test for loragw_spi.c\n");
-    lgw_spi_open(&spi_target);
+    lgw_spi_open(&spi_target, spidev);
 
     /* normal R/W test */
     for (i = 0; i < TIMING_REPEAT; ++i)
-        lgw_spi_w(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0xAA, 0x96);
+        spistat = lgw_spi_w(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0xAA, 0x96);
     for (i = 0; i < TIMING_REPEAT; ++i)
-        lgw_spi_r(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x55, &data);
+        spistat |= lgw_spi_r(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x55, &data);
 
     /* burst R/W test, small bursts << LGW_BURST_CHUNK */
     for (i = 0; i < TIMING_REPEAT; ++i)
-        lgw_spi_wb(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x55, dataout, 16);
+        spistat |= lgw_spi_wb(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x55, dataout, 16);
     for (i = 0; i < TIMING_REPEAT; ++i)
-        lgw_spi_rb(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x55, datain, 16);
+        spistat |= lgw_spi_rb(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x55, datain, 16);
 
     /* burst R/W test, large bursts >> LGW_BURST_CHUNK */
     for (i = 0; i < TIMING_REPEAT; ++i)
-        lgw_spi_wb(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x5A, dataout, ARRAY_SIZE(dataout));
+        spistat |= lgw_spi_wb(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x5A, dataout, ARRAY_SIZE(dataout));
     for (i = 0; i < TIMING_REPEAT; ++i)
-        lgw_spi_rb(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x5A, datain, ARRAY_SIZE(datain));
+        spistat |= lgw_spi_rb(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x5A, datain, ARRAY_SIZE(datain));
+
+    if (spistat) {
+        printf(">>FAIL: spi test failed, check if sx130x chip connected!\n");
+        lgw_spi_close(spi_target);
+        return -1;
+    }
+        
 
     /* last read (blocking), just to be sure no to quit before the FTDI buffer is flushed */
     lgw_spi_r(spi_target, spi_mux_mode, LGW_SPI_MUX_TARGET_SX1301, 0x55, &data);
-    printf("data received (simple read): %d\n",data);
+
+    printf("Simple Read: %d\n",data);
+
+    if (data == 0) {
+        printf(">>FAIL: chip Version error, can't read version register!\n");
+        lgw_spi_close(spi_target);
+        return -1;
+    }
 
     lgw_spi_close(spi_target);
-    printf("End of test for loragw_spi.c\n");
+    printf(">>PASS: End of test for loragw_spi.c\n");
 
     return 0;
 }

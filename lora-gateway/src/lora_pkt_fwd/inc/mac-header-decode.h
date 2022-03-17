@@ -22,10 +22,26 @@
 #define LORAMAC_FHDR_F_CNT_FIELD_SIZE           2
 
 /*! FOpts maximum field size */
-#define LORAMAC_FHDR_F_OPTS_MAX_FIELD_SIZE          15
+#define LORAMAC_FHDR_F_OPTS_MAX_FIELD_SIZE      15
 
 /*! MIC field size */
-#define LORAMAC_MIC_FIELD_SIZE              4
+#define LORAMAC_MIC_FIELD_SIZE                  4
+
+/*! Join EUI field size */
+#define LORAMAC_JOIN_EUI_FIELD_SIZE             8
+
+/*! Device EUI field size */
+#define LORAMAC_DEV_EUI_FIELD_SIZE              8
+
+/*! Join-server nonce field size */
+#define LORAMAC_JOIN_NONCE_FIELD_SIZE           3
+
+/*! Network ID field size */
+#define LORAMAC_NET_ID_FIELD_SIZE               3
+
+/*! CFList field size */
+#define LORAMAC_CF_LIST_FIELD_SIZE          16
+
 
 /*!
  * LoRaMAC field definition of DLSettings
@@ -44,17 +60,17 @@ typedef union uLoRaMacDLSettings
     struct sDLSettingsBits
     {
         /*!
-         * Data rate of a downlink using the second receive window
+         * Indicates network server LoRaWAN implementation version 1.1 or later.
          */
-        uint8_t RX2DataRate     : 4;
+        uint8_t OptNeg          : 1;
         /*!
          * Offset between up and downlink datarate of first reception slot
          */
         uint8_t RX1DRoffset     : 3;
         /*!
-         * Indicates network server LoRaWAN implementation version 1.1 or later.
+         * Data rate of a downlink using the second receive window
          */
-        uint8_t OptNeg          : 1;
+        uint8_t RX2DataRate     : 4;
     }Bits;
 }LoRaMacDLSettings_t;
 
@@ -260,6 +276,88 @@ typedef enum eLoRaMacMessageType
 }LoRaMacMessageType_t;
 
 /*!
+ * LoRaMac type for Join-request message
+ */
+typedef struct sLoRaMacMessageJoinRequest
+{   
+    /*!
+     * Serialized message buffer
+     */
+    uint8_t* Buffer;
+    /*!
+     * Size of serialized message buffer
+     */
+    uint8_t BufSize;
+    /*!
+     * MAC header
+     */
+    LoRaMacHeader_t MHDR;
+    /*!
+     *  Join EUI
+     */
+    uint8_t JoinEUI[LORAMAC_JOIN_EUI_FIELD_SIZE];
+    /*!
+     * Device EUI
+     */
+    uint8_t DevEUI[LORAMAC_DEV_EUI_FIELD_SIZE];
+    /*!
+     * Device Nonce
+     */
+    uint16_t DevNonce;
+    /*!
+     * Message integrity code (MIC)
+     */
+    uint32_t MIC;
+}LoRaMacMessageJoinRequest_t;
+
+/*!
+ * LoRaMac type for Join-accept message
+ */
+typedef struct sLoRaMacMessageJoinAccept
+{
+    /*!
+     * Serialized message buffer
+     */
+    uint8_t* Buffer;
+    /*!
+     * Size of serialized message buffer
+     */
+    uint8_t BufSize;
+    /*!
+     * MAC header
+     */
+    LoRaMacHeader_t MHDR;
+    /*!
+     *  Server Nonce ( 3 bytes )
+     */
+    uint8_t JoinNonce[LORAMAC_JOIN_NONCE_FIELD_SIZE];
+    /*!
+     * Network ID ( 3 bytes )
+     */
+    uint8_t NetID[LORAMAC_NET_ID_FIELD_SIZE];
+    /*!
+     * Device address
+     */
+    uint32_t DevAddr;
+    /*!
+     * Device address
+     */
+    LoRaMacDLSettings_t DLSettings;
+    /*!
+     * Delay between TX and RX
+     */
+    uint8_t RxDelay;
+    /*!
+     * List of channel frequencies (opt.)
+     */
+    uint8_t CFList[16];
+    /*!
+     * Message integrity code (MIC)
+     */
+    uint32_t MIC;
+}LoRaMacMessageJoinAccept_t;
+
+/*!
  * LoRaMac Parser Status
  */
 typedef enum eLoRaMacParserStatus
@@ -282,9 +380,25 @@ typedef enum eLoRaMacParserStatus
     LORAMAC_PARSER_ERROR,
 }LoRaMacParserStatus_t;
 
+/*!
+ * LoRaMac general message type
+ */
+typedef struct sLoRaMacMessage
+{
+    LoRaMacMessageType_t Type;
+    union uMessage
+    {
+        LoRaMacMessageJoinRequest_t JoinReq;
+        LoRaMacMessageJoinAccept_t JoinAccept;
+        LoRaMacMessageData_t Data;
+    }Message;
+}LoRaMacMessage_t;
+
+
 LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg );
 
 void printf_mac_header( LoRaMacMessageData_t* macMsg ); 
 
+int filter_by_mac(LoRaMacMessageData_t* macMsg, uint8_t fport,uint32_t devaddr, uint8_t len);
 
 #endif // __LORAMAC_HEADER_DECODE_H_

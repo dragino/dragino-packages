@@ -25,11 +25,14 @@ Maintainer: Sylvain Miermont
 /* --- DEPENDANCIES --------------------------------------------------------- */
 
 #include <stdint.h>        /* C99 types*/
+#include <stdbool.h>        /* C99 types*/
 
 #include "config.h"    /* library configuration options (dynamically generated) */
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC CONSTANTS ----------------------------------------------------- */
+
+#define SPI_DEV_PATH    "/dev/spidev1.0"
 
 #define LGW_SPI_SUCCESS     0
 #define LGW_SPI_ERROR       -1
@@ -43,6 +46,9 @@ Maintainer: Sylvain Miermont
 #define LGW_SPI_MUX_TARGET_EEPROM   0x2
 #define LGW_SPI_MUX_TARGET_SX127X   0x3
 
+#define READ_ACCESS		0x00
+#define WRITE_ACCESS	0x80
+
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */
 
@@ -52,7 +58,9 @@ Maintainer: Sylvain Miermont
 @return status of register operation (LGW_SPI_SUCCESS/LGW_SPI_ERROR)
 */
 
-int lgw_spi_open(void **spi_target_ptr);
+int lgw_spi_open(void **spi_target_ptr, const char* spi_path);
+
+int lgw_ft_spi_open(void **spi_target_ptr);
 
 /**
 @brief LoRa concentrator SPI close
@@ -61,6 +69,8 @@ int lgw_spi_open(void **spi_target_ptr);
 */
 
 int lgw_spi_close(void *spi_target);
+
+int lgw_ft_spi_close(void *spi_target);
 
 /**
 @brief LoRa concentrator SPI single-byte write
@@ -71,6 +81,8 @@ int lgw_spi_close(void *spi_target);
 */
 int lgw_spi_w(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t data);
 
+int lgw_ft_spi_w(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t data);
+
 /**
 @brief LoRa concentrator SPI single-byte read
 @param spi_target generic pointer to SPI target (implementation dependant)
@@ -79,6 +91,8 @@ int lgw_spi_w(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, ui
 @return status of register operation (LGW_SPI_SUCCESS/LGW_SPI_ERROR)
 */
 int lgw_spi_r(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t *data);
+
+int lgw_ft_spi_r(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t *data);
 
 /**
 @brief LoRa concentrator SPI burst (multiple-byte) write
@@ -99,6 +113,12 @@ int lgw_spi_wb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, u
 @return status of register operation (LGW_SPI_SUCCESS/LGW_SPI_ERROR)
 */
 int lgw_spi_rb(void *spi_target, uint8_t spi_mux_mode, uint8_t spi_mux_target, uint8_t address, uint8_t *data, uint16_t size);
+
+/**
+@brief sx127x ftdi device reset
+@return status of register operation (LGW_SPI_SUCCESS/LGW_SPI_ERROR)
+*/
+int ftdi_sx127x_reset(void*, bool);
 
 #endif
 

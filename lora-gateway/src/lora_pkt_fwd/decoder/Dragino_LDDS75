@@ -1,0 +1,61 @@
+#!/usr/bin/lua
+
+json = require('dragino.json')
+local utility = require("dragino.utility")
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+			
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+			
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+				
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+					
+--Get Battery
+HEX_BAT=string.sub(payload,17,18)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+payload_t.BatV=BAT		
+			
+--Get LDDS75 Level
+LDDS75_L_RAW=utility.hex2str(string.sub(payload,19,20))
+LDDS75_Level=tonumber(LDDS75_L_RAW,16)
+
+--if LDDS75_Level == 0 then
+--	LDDS75_Level="No sensor"
+--elseif (LDDS75_Level < 280) then
+--	LDDS75_Level="Invalid Reading"
+--end
+
+payload_t.Level=LDDS75_Level
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.Level .. "&field2=".. payload_t.BatV .. "&field3=".. payload_t.RSSI .. "&field4=".. payload_t.SNR .."&status=MQTTPUBLISH"
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t))
+return json.encode(payload_t)

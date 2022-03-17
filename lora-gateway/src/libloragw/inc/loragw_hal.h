@@ -194,6 +194,7 @@ struct lgw_conf_lbt_chan_s {
 */
 struct lgw_conf_lbt_s {
     bool                        enable;             /*!> enable or disable LBT */
+    bool                        isftdi;             /*!> is ftdi module or not */
     int8_t                      rssi_target;        /*!> RSSI threshold to detect if channel is busy or not (dBm) */
     uint8_t                     nb_channel;         /*!> number of LBT channels */
     struct lgw_conf_lbt_chan_s  channels[LBT_CHANNEL_FREQ_NB];
@@ -413,6 +414,12 @@ const char* lgw_version_info(void);
 @return the packet time on air in milliseconds
 */
 uint32_t lgw_time_on_air(struct lgw_pkt_tx_s *packet);
+
+/**
+@brief Return sf value or bw value 
+*/
+int32_t lgw_sf_getval(int x);
+int32_t lgw_bw_getval(int x);
 
 #endif
 

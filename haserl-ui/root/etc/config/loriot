@@ -1,0 +1,5 @@
+
+config settings 'loriot'
+	option port '1700'
+	option url 'eu1.loriot.io'
+

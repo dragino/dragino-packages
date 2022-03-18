@@ -1,0 +1,128 @@
+#!/usr/bin/haserl
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+<% sql_file="/etc/lora/devskey" %>
+
+<% sqlite3 $sql_file "CREATE TABLE IF NOT EXISTS 'filter' ('name' text, 'type' text, 'value' text);" %>
+
+<%# --- Process the form submission --- %>
+<%
+  if [ "$FORM_BUTTON" == "ADD_FILTER" ];then
+	if [ -n "$FORM_SERV_NAME" ] && [ -n "$FORM_FILTER_CATE" ] && [ -n "$FORM_FILTER_VALUE" ];then
+		serv_name=${FORM_SERV_NAME}
+		filter_cate=${FORM_FILTER_CATE} 
+		filter_value=${FORM_FILTER_VALUE}
+		sqlite3 $sql_file "INSERT OR REPLACE INTO filter (name, type, value) VALUES  ('$serv_name', '$filter_cate', '$filter_value');"
+	else
+		add_filter_error="Invalid Keys"
+	fi 
+  fi
+  
+  if [ "$FORM_BUTTON" == "DELETE" ];then
+        if [ -n "$FORM_DEL_NAME" -a -n "$FORM_DEL_VALUE" ]; then 
+		    sqlite3 $sql_file "DELETE FROM filter WHERE name LIKE '$FORM_DEL_NAME' AND value LIKE '$FORM_DEL_VALUE';"
+        fi
+  fi
+
+  if [ $FORM_BUTTON == "Save&Apply" ]; then
+        uci set gateway.general.server_type="lorawan"
+        uci commit gateway
+        killall -q mosquitto_sub             # Remove any remaining MQTT subscribe process
+        killall inotifywait                  # Remove any inotfywait process
+        killall -q loriot_dragino_lg308_spi  # Remove any remaining LORIOT process
+    /etc/init.d/lora_gw reload > /dev/null
+    sleep 2
+    /etc/init.d/iot reload > /dev/null
+        rm /var/iot/status
+  fi
+
+%>
+
+
+<%# --- Get the variables for the HTML page --- %>
+
+
+<%# --- Present the HTML page --- %>
+<html lang="en">
+<head>
+	<%inc /www/cgi-bin/inc/head.inc %>
+</head>
+
+<body>
+<%inc /www/cgi-bin/inc/menu.inc %>
+<div class="page-container">
+<h2>Filter configure</h2>
+
+<form action="<% echo -n $SCRIPT_NAME %>" method="POST">
+<table class="configTable">
+	<tr class="rowSpacer"></tr>
+
+	<tr><td colspan="10"><h3> Add Filter </h3></td></tr> <!-- Determines the column widths -->
+	
+	<tr>
+		<td></td>
+		<td colspan="2"><label for="SERV_NAME">Name:</label></td>
+		<td colspan="3"><input type="text" size="16" name="SERV_NAME"  placeholder="name of service"></td>
+		<td colspan="4"></td>
+	</tr>
+		
+	<tr>
+		<td></td>
+		<td colspan="2"><label for="FILTER_CATE">Cate:</label></td>
+		<td colspan="5"><input type="text" size="16" name="FILTER_CATE"  placeholder="fitler category(fport or devaddr)"></td>
+		<td colspan="2"></td>
+	</tr>
+		
+	<tr>
+		<td></td>
+		<td colspan="2"><label for="FILTER_VALUE">Value:</label></td>
+		<td colspan="5"><input type="text" size="16" name="FILTER_VALUE" placeholder="filter value"></td>
+		<td colspan="2"></td>
+	</tr>
+	
+	<tr>
+		<td></td>
+		<td colspan="2"></td>
+		<td colspan="7"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="ADD_FILTER"></td>
+	</tr>
+
+	<tr>
+		<td colspan="3"></td>
+		<td class="impact" colspan="7"><% echo $add_filter_error %></td>
+	</tr>
+	<tr class="rowSpacer"></tr>
+
+	<tr>
+		<td colspan="2"><h3> Delete: </h3></td> 
+		<td colspan="1"><label for="DEL_NAME"> Name:</label></td>
+		<td colspan="5"><input type="text" size="16" name="DEL_NAME"  placeholder="delete name"></td>
+		<td colspan="1"><label for="DEL_VALUE"> Value:</label></td>
+		<td colspan="5"><input type="text" size="16" name="DEL_VALUE"  placeholder="delete value"></td>
+		<td colspan="4"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DELETE"></td>
+	</tr>
+
+
+	<tr>
+		<td colspan="3"></td>
+		<td class="impact" colspan="7"><% echo $del_filter_error %></td>
+	</tr>
+    <tr>
+        <td colspan="2">
+            <INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s">
+            <INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+        </td>
+    </tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr><td colspan="10"><h3>Filter values:</h3></td></tr>
+	<tr><td colspan="10"><text>Service Name&nbsp;&nbsp;|&nbsp;&nbsp;Filter Category &nbsp;&nbsp;|&nbsp;&nbsp;fileter value &nbsp;&nbsp;&nbsp;&nbsp;  </text></td></tr>
+</table>
+
+<textarea cols="155" rows="20" ><% sqlite3 $sql_file "SELECT * FROM filter ORDER BY name" | awk -F '\\|' '{print $1"  |  "$2"  |  "$3 }' %></textarea>
+	
+</form>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,76 @@
+#!/usr/bin/haserl --upload-limit=4096 --upload-dir=/tmp
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+
+<%# --- Process the form submission --- %>
+<%
+	if [ "$FORM_BUTTON" == "Generate_archive" ]; then
+		sysupgrade --create-backup /var/backup.tar.gz
+	 
+	fi
+	
+	if [ "$FORM_BUTTON" == "Upload_archive" ]; then
+		if  test -n "$HASERL_uploadfile_path" ; then	  
+		  filename=$FORM_uploadfile_name
+		  savedfile=$HASERL_uploadfile_path
+		  cp $savedfile /var/backup.tar.gz
+		     logger "backup"
+		  sysupgrade -r /var/backup.tar.gz
+		     logger "restore backup"			
+		fi
+	fi
+	
+
+%>
+
+<%# --- Present the HTML page --- %>
+<html lang="en">
+<head>
+	<%inc /www/cgi-bin/inc/head.inc %>
+</head>
+<body onload="displayCustomURL()">
+<%inc /www/cgi-bin/inc/menu.inc %>
+<div class="page-container">
+<h2>Backup/Restore</h2>
+
+<form name="BACKUP-RESTORE" id="BACKUP-RESTORE" action="<% echo -n $SCRIPT_NAME %>" method="POST" enctype="multipart/form-data">
+
+<table class="configTable"><br>
+
+	<tr>
+		
+		<td colspan="30"><label>Cilck "Generate archive"to download a tar archive of the current configuration files."</label></td>
+	</tr>
+	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="10"><h3 for ="DOWNLOADBACKUP">Download backup:</h3></td>
+		<td colspan="10"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Generate_archive"> </td>
+		<td colspan="5"></td>
+		<td colspan="12"><a class="impactOK" href="/tmp/backup.tar.gz">Download Backup File</a></td>
+
+	</tr>
+			
+	<tr>
+		<td colspan="30"><label>To restore configuration files,you can upload a previously generated backup archive here.</label></td>
+	</tr>
+	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="10"><h3 for ="RESTOREBACKUP">Restore backup:</h3></td>
+		<td colspan="10"><input type=file name=uploadfile></td>
+		<td colspan="5"><% echo -n $trust_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_archive" onclick="showPageLoaderIcon()"></td>
+	</tr>	
+	
+</table>
+	
+</form>
+</div>
+</body>
+</html>
+
+
+
+

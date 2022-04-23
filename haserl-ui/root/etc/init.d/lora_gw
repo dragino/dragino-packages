@@ -17,15 +17,16 @@ init_board() {
         process="lg01_pkt_fwd"
 	echo 22 > /sys/class/gpio/unexport
     elif [[ "$chip" = "sx1301" ]] || [[ "$chip" = "sx1308" ]] ; then
-        process="lora_pkt_fwd"
+        process="fwd"
+		ln -sf /usr/bin/fwd_sx1301 /usr/bin/fwd
 	    ln -sf /usr/bin/station_sx1301 /usr/bin/station
-            cp -f /etc/station/station-sx1301.conf /etc/station/station.conf
-            /usr/bin/generate-config.sh
+        cp -f /etc/station/station-sx1301.conf /etc/station/station.conf
+        /usr/bin/generate-config.sh
     elif [[ "$chip" = "sx1302" ]]; then
         process="fwd"
 	    ln -sf /usr/bin/fwd_sx1302 /usr/bin/fwd
 	    ln -sf /usr/bin/station_sx1302 /usr/bin/station
-            cp -f /etc/station/station-sx1302.conf /etc/station/station.conf
+        cp -f /etc/station/station-sx1302.conf /etc/station/station.conf
 	    /usr/bin/generate-config.sh
     else
         exit 1

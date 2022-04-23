@@ -13,7 +13,6 @@
 		primary_provider="$FORM_PRIMARY_PROVIDER"
 		logger "$FORM_PRIMARY_PROVIDER"
 		uci set gateway.server1.provider="$FORM_PRIMARY_PROVIDER"
-
 		if [ $primary_provider == "custom" ];then
 			server_address="$FORM_SERVER_ADDRESS"
 			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS"
@@ -26,13 +25,40 @@
 		elif [ $primary_provider == "mydevice" ];then
 			server_address="$FORM_SERVER_ADDRESS_MYDEVICE"
 			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS_MYDEVICE"
+		elif [ $primary_provider == "helium" ];then
+			server_address="$FORM_SERVER_ADDRESS_HELIUM"
+			uci set gateway.server1.server_address="$FORM_SERVER_ADDRESS_HELIUM"
 		else
 			uci set gateway.server1.server_address="$primary_provider"
 		fi
+		
 		uci set gateway.server1.upp="$FORM_PRI_UPP"
 		uci set gateway.server1.dpp="$FORM_PRI_DPP"
 		uci set gateway.server1.fport_filter="$FORM_PRI_FPORTNUM" 
-		uci set gateway.server1.devaddr_filter="$FORM_PRI_DEVADDR_FILTER"		
+		uci set gateway.server1.devaddr_filter="$FORM_PRI_DEVADDR_FILTER"
+
+		# Set up the secondary platform provider fields
+		secondary_provider="$FORM_SECONDARY_PROVIDER"
+		logger "$FORM_SECONDARY_PROVIDER"
+		uci set gateway.server2.provider="$FORM_SECONDARY_PROVIDER"
+		if [ "$secondary_provider" == "custom_secondary" ]; then
+			server2_address="$FORM_SERVER_ADDRESS_SECONDARY"
+			uci set gateway.server2.server_address="$FORM_SERVER_ADDRESS_SECONDARY"
+		elif [ "$secondary_provider" == "ttn_V3_secondary" ]; then
+			server2_address="$FORM_SERVER_ADDRESS_TTN_V3_SECONDARY"
+			uci set gateway.server2.server_address="$FORM_SERVER_ADDRESS_TTN_V3_SECONDARY"
+		elif [ "$secondary_provider" == "helium_secondary" ]; then
+			server2_address="$FORM_SERVER_ADDRESS_HELIUM_SECONDARY"
+			uci set gateway.server2.server_address="$FORM_SERVER_ADDRESS_HELIUM_SECONDARY"
+		elif [ "$secondary_provider" == "disable" ]; then
+			server2_address=localhost
+			uci set gateway.server2.server_address="localhost"
+		fi
+		
+		uci set gateway.server2.upp="$FORM_SED_UPP"
+		uci set gateway.server2.dpp="$FORM_SED_DPP"
+		uci set gateway.server2.fport_filter="$FORM_SED_FPORTNUM" 
+		uci set gateway.server2.devaddr_filter="$FORM_SED_DEVADDR_FILTER"
 
 		uci commit gateway
 	fi
@@ -44,6 +70,10 @@
 		/etc/init.d/lora_gw reload > /dev/null
 		sleep 2
 		/usr/bin/reload_iot_service.sh
+		if [ "$primary_provider" == "helium" ] || [ "$secondary_provider" == "helium_secondary" ]; then
+			sleep 2;
+			/etc/init.d/helium_gateway  start;
+		fi	
 	fi
 %>
 
@@ -57,12 +87,17 @@
 	primary_server="$(uci -q get gateway.server1.server_address)"
 	pri_fportnum="$(uci -q get gateway.server1.fport_filter)"
 	pri_devaddr_filter="$(uci -q get gateway.server1.devaddr_filter)"
-	
 	pri_upp="$(uci -q get gateway.server1.upp)"
 	pri_dpp="$(uci -q get gateway.server1.dpp)"
+	
+	secondary_provider="$(uci -q get gateway.server2.provider)"
+	secondary_server="$(uci -q get gateway.server2.server_address)"
+	sed_fportnum="$(uci -q get gateway.server2.fport_filter)"
+	sed_devaddr_filter="$(uci -q get gateway.server2.devaddr_filter)"
+	sed_upp="$(uci -q get gateway.server2.upp)"
+	sed_dpp="$(uci -q get gateway.server2.dpp)"
+	
 	rfpower="$(uci -q get gateway.general.RFPOWER)"
-
-
 	rffreq="$(uci -q get gateway.radio1.RFFREQ)"
 	rfsf="$(uci -q get gateway.radio1.RFSF)"
 	rfcr="$(uci -q get gateway.radio1.RFCR)"
@@ -110,26 +145,6 @@
 
 %>
 
-
-<%# --- Set up field display --- %>
-<% 
-  # Set up display defaults
-  disp1="inline"; disp2="none";disp3="none"
-
-  # Adjust display for board type
-  board=`cat /var/iot/board`
-  if [[ "$board" == "LG01" ]]; then
-    disp1="inline"; disp2="none";
-  elif [[ "$board" == "LG02" ]]; then
-    disp1="none"; disp2="inline";
-  elif [[ "$board" == "LG08P" ]]; then
-    disp1="inline"; disp2="none";
-  elif [[ "$board" == "LG08" ]]; then
-    disp1="inline"; disp2="none";
-  fi
-
-%>
-
 <%# --- Present the HTML page --- %>
 <html lang="en">
 <head>
@@ -160,15 +175,16 @@
 		<td colspan="8"></td>
 	</tr>
 
+<%# --- Primary LoRaWAN Server --- %>
 	<tr class="rowSpacer"></tr>	
 	<tr><td colspan="25"><h3>Primary LoRaWAN Server</h3></td></tr> <!-- Determines the column widths -->
- 
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="12"><label for="PLATFORM">Service Provider</label></td>
 		<td colspan="24"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
 		  <option value="ttn_V3" >The Things Network V3</option>
 		  <option value="mydevice" >IoT In A Box</option>
+		  <option value="helium">Helium</option>
 		  <option value="router.cn.thethings.network" >Tencent</option>		
 		  <option value="127.0.0.1" >Built-in for ABP Decode to MQTT</option>
 		  <option value="custom" >Custom / Private LoRaWAN</option>
@@ -184,7 +200,11 @@
 			
 			<select id='server_address_ttn_V3' name='SERVER_ADDRESS_TTN_V3' style="display:none;">
 				<%inc /www/cgi-bin/inc/ttn_V3-server.inc %>	
-			</select>			
+			</select>
+
+			<select id='server_address_helium' name='SERVER_ADDRESS_HELIUM' style="display:none;">
+				<%inc /www/cgi-bin/inc/helium.inc %>	
+			</select>	
 
 			<select id='server_address_mydevice' name='SERVER_ADDRESS_MYDEVICE' style="display:none;">
 				<%inc /www/cgi-bin/inc/iot-in-a-box-server.inc %>
@@ -194,7 +214,6 @@
 		<script>document.getElementById("server_address_ttn").value="<% echo -n $primary_server %>";</script>
 		<script>document.getElementById("server_address_mydevice").value="<% echo -n $primary_server %>";</script>		
 	</tr>
-	
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
@@ -207,10 +226,9 @@
 	</tr>
 	
 	<tr class="rowSpacer"></tr>
-	
 	<tr>
 		<td colspan="1"></td>
-		<td colspan="16"><h4>Packet Filter</h4></td>
+		<td colspan="24"><h4>Primary Packet Filter</h4></td>
 	</tr>
 
 	<tr>
@@ -235,11 +253,79 @@
 		
 	</tr>
 	
+<%# --- Secondary LoRaWAN Server --- %>
+	<tr class="rowSpacer"></tr>
+	
+	<tr>
+		<td colspan="28"><h3>Secondary LoRaWAN Server</h3></td>
+	</tr>
+	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="12"><label for="PLATFORM">Service Provider</label></td>
+		<td colspan="24"><select id='secondary_provider' name='SECONDARY_PROVIDER' onchange="displayServerURL()">
+		  <option value="ttn_V3_secondary" >The Things Network V3</option>
+		  <option value="helium_secondary" >Helium</option>
+		  <option value="custom_secondary" >Custom / Private LoRaWAN</option>
+		  <option value="disable">Disable</option>
+		</select></td>
+		<script>document.getElementById("secondary_provider").value="<% echo -n $secondary_provider %>";</script>
+	
+		<td colspan="2"></td>
+		<td colspan="12"><label id="server_address_label_secondary" style="display:none;">Server Address</label></td>	
+		<td colspan="35">
+			<input type="text" id="server_address_secondary" name="SERVER_ADDRESS_SECONDARY" style="display:none;" 
+		    VALUE="<% echo -n $secondary_server %>">
+			<select id='server_address_ttn_V3_secondary' name='SERVER_ADDRESS_TTN_V3_SECONDARY' style="display:none;">
+				<%inc /www/cgi-bin/inc/ttn_V3-server.inc %>	
+			</select>
+			<select id='server_address_helium_secondary' name='SERVER_ADDRESS_HELIUM_SECONDARY' style="display:none;">
+				<%inc /www/cgi-bin/inc/helium.inc %>	
+			</select></td>
+		<script>document.getElementById("server_address_ttn_V3_secondary").value="<% echo -n $secondary_server %>";</script>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="12"><label for="SED_UPP" id="label_sed_upp" onchange="displayServerURL()">Uplink Port</label></td>
+		<td colspan="8"><input type="text" name="SED_UPP" id="sed_upp" onchange="displayServerURL()" maxlength="8" VALUE="<% echo -n $sed_upp %>" pattern="[0-9]{1,8}" ></td>
+		<td colspan="18"></td>
+		<td colspan="12"><label for="SED_DPP" id="label_sed_dpp" onchange="displayServerURL()">Downlink Port</label></td>
+		<td colspan="8"><input type="text" name="SED_DPP" id="sed_dpp" onchange="displayServerURL()" maxlength="8" VALUE="<% echo -n $sed_dpp %>" pattern="[0-9]{1,8}" ></td>
+		<td colspan=""></td>
+	</tr>
+	<tr class="rowSpacer"></tr>
+	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="24"><h4>Secondary Packet Filter</h4></td>
+	</tr>
+
+		<tr>
+		<td colspan="1"></td>
+		<td colspan="12"><label for="FPORTNUM">Fport Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp_sed()">
+		<p>Filter Unconfirmed Data Up & Confirmed Data Up if Fport doesn't match</p>
+		<p>Value Range:0~243: (0 to accept any Fport)</p> 
+		<p style="text-align: center;"><br>[Close]</p>
+		</div>
+		</td>
+		<td colspan="8"><input type="text" name="PRI_FPORTNUM" maxlength="3" VALUE=<% echo -n $pri_fportnum %> ></td>
+		<td colspan="18"></td>
+		<td colspan="12"><label for="DEV_FILTER">DevAddr Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
+		<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp_sed()">
+		<p>Filter Unconfirmed Data Up & Confirmed Data Up if Dev Addr Prefix doesn't match</p>
+		<p>Value Range:1 ~ 8 hex char: (0 to accept any Dev Addr Prefix)</p> 
+		<p style="text-align: center;"><br>[Close]</p>
+		</div>
+		</td>
+		<td colspan="8"><input type="text" name="PRI_DEVADDR_FILTER" maxlength="8" VALUE=<% echo -n $pri_devaddr_filter %> ></td>	
+	</tr>
+	
 	<tr class="rowSpacer"></tr>
 	<tr class="rowSpacer"></tr>
 
 	<tr>
-		
 			<td colspan="80"><% echo -n $curent_mode_status%></td>
 	</tr>
 
@@ -270,39 +356,121 @@
 	document.getElementById("server_address_mydevice").style.display = "inline";
 	document.getElementById("server_address_label").style.display = "inline";
 	}
-
+	if (x == "helium") {
+	document.getElementById("server_address_helium").style.display = "inline";
+	document.getElementById("server_address_label").style.display = "inline";
+	}
+	
+	
+	var y = document.getElementById("secondary_provider").value;
+	
+	if (y == "custom_secondary") {
+		document.getElementById("server_address_secondary").style.display = "inline";
+		document.getElementById("server_address_label_secondary").style.display = "inline";
+	}
+	
+	if (y == "ttn_V3_secondary") {
+		document.getElementById("server_address_ttn_V3_secondary").style.display = "inline";
+		document.getElementById("server_address_label_secondary").style.display = "inline";
+	}
+	
+	if (y == "helium_secondary") {
+		document.getElementById("server_address_helium_secondary").style.display = "inline";
+		document.getElementById("server_address_label_secondary").style.display = "inline";
+	}
+	
+	if (y == "disable") {
+		document.getElementById("label_sed_upp").style.display = "none";
+		document.getElementById("label_sed_dpp").style.display = "none";
+		document.getElementById("sed_upp").style.display = "none";
+		document.getElementById("sed_dpp").style.display = "none";
+	}
+	
 function displayServerURL(){
 	document.getElementById("server_address_label").style.display = "none";
 	document.getElementById("server_address").style.display = "none";
 	document.getElementById("server_address_ttn_V3").style.display = "none";
-	document.getElementById("server_address_mydevice").style.display = "none";	
+	document.getElementById("server_address_mydevice").style.display = "none";
+	document.getElementById("server_address_helium").style.display = "none";
 	
 	var x = document.getElementById("primary_provider").value;
 	if (x == "custom") {
-	document.getElementById("server_address").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
+		document.getElementById("server_address").style.display = "inline";
+		document.getElementById("server_address_label").style.display = "inline";
 	}
-		if (x == "ttn_V3") {
-	document.getElementById("server_address_ttn_V3").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
+	if (x == "ttn_V3") {
+		document.getElementById("server_address_ttn_V3").style.display = "inline";
+		document.getElementById("server_address_label").style.display = "inline";
 	}
 	if (x == "mydevice") {
-	document.getElementById("server_address_mydevice").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
+		document.getElementById("server_address_mydevice").style.display = "inline";
+		document.getElementById("server_address_label").style.display = "inline";
+	}
+	if (x == "helium") {
+		document.getElementById("server_address_helium").style.display = "inline";
+		document.getElementById("server_address_label").style.display = "inline";
+	}
+	
+	document.getElementById("server_address_label_secondary").style.display = "none";
+	document.getElementById("server_address_secondary").style.display = "none";
+	document.getElementById("server_address_ttn_V3_secondary").style.display = "none";
+	document.getElementById("server_address_helium_secondary").style.display = "none";
+	
+	var y = document.getElementById("secondary_provider").value;
+	if (y == "custom_secondary") {
+		document.getElementById("server_address_secondary").style.display = "inline";
+		document.getElementById("server_address_label_secondary").style.display = "inline";
+		document.getElementById("label_sed_upp").style.display = "inline";
+		document.getElementById("label_sed_dpp").style.display = "inline";
+		document.getElementById("sed_upp").style.display = "inline";
+		document.getElementById("sed_dpp").style.display = "inline";
+		
+	}
+	if (y == "ttn_V3_secondary") {
+		document.getElementById("server_address_ttn_V3_secondary").style.display = "inline";
+		document.getElementById("server_address_label_secondary").style.display = "inline";
+		document.getElementById("label_sed_upp").style.display = "inline";
+		document.getElementById("label_sed_dpp").style.display = "inline";
+		document.getElementById("sed_upp").style.display = "inline";
+		document.getElementById("sed_dpp").style.display = "inline";
+		
+	}
+	if (y == "disable" ) {
+		document.getElementById("label_sed_upp").style.display = "none";
+		document.getElementById("label_sed_dpp").style.display = "none";
+		document.getElementById("sed_upp").style.display = "none";
+		document.getElementById("sed_dpp").style.display = "none";
+		document.getElementById("div1").style.display = "none";
+	}
+	if (y == "helium_secondary" ) {
+		document.getElementById("server_address_helium_secondary").style.display = "inline";
+		document.getElementById("server_address_label_secondary").style.display = "inline";
+		document.getElementById("label_sed_upp").style.display = "inline";
+		document.getElementById("label_sed_dpp").style.display = "inline";
+		document.getElementById("sed_upp").style.display = "inline";
+		document.getElementById("sed_dpp").style.display = "inline";
+		
 	}
 }
 
 function showHelp1() {
 document.getElementById("helptext1").style.display="inline";
+document.getElementById("helptext1_sed").style.display="inline";
 }
 
 function showHelp2() {
 document.getElementById("helptext2").style.display="inline";
+document.getElementById("helptext2_sed").style.display="inline";
 }
 
 function hideHelp() {
 document.getElementById("helptext1").style.display="none";
 document.getElementById("helptext2").style.display="none";
+}
+
+function hideHelp_sed() {
+document.getElementById("helptext1_sed").style.display="none";
+document.getElementById("helptext2_sed").style.display="none";
 }
 
 </script>

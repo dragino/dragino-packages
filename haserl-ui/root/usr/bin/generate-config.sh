@@ -69,7 +69,7 @@ gen_gw_cfg() {
 
 
         # stastatic 状态和统计的间隔时间，单位是秒*/
-	json_add_int	"stat_interval" "`uci -q get gateway.general.stat`"  # 这个和 server 里面的 Kepp Alive 区别? 
+	json_add_int	"stat_interval" "`uci -q get gateway.general.stat`"  # 
 
 	##GPS coordinates. use fake GPS from UI or via GPS module
 	if [ "$fake_gps" == "1" ];then
@@ -97,19 +97,19 @@ gen_gw_cfg() {
 		#Server1
 		json_add_object "server1"
 		
-		json_add_string "server_name" "`uci get gateway.server1.server_id`"  #name是服务的标识，必须要设置一个name   ?? 哪里需要用到，可以用 Server 1 替代吗？
-		json_add_string "server_type" "semtech"  #服务类型有：semtech, mqtt, gwtraft, ttn	几个服务类型什么区别，什么场合用到. MQTT 是指 LoRaWAN over MQTT 吧? 
-		json_add_string	"server_id"  "`uci get gateway.server1.mqtt_user`" # 类型是mqtt或ttn时才需要设置   --> 对应哪个参数?? 连接例子? 
-		json_add_string "server_key" "`uci get gateway.server1.mqtt_pass`" # 类型是mqtt或ttn时才需要设置	--> 对应哪个参数?? 连接例子?
+		json_add_string "server_name" "`uci get gateway.server1.server_id`"  #name是服务的标识，必须要设置一个name  
+		json_add_string "server_type" "semtech"  #服务类型有：semtech, mqtt, gwtraft, ttn
+		json_add_string	"server_id"  "`uci get gateway.server1.mqtt_user`" # 类型是mqtt或ttn时才需要设置   
+		json_add_string "server_key" "`uci get gateway.server1.mqtt_pass`" # 类型是mqtt或ttn时才需要设置	
 		json_add_string	"server_address" "`uci get gateway.server1.server_address`"   
 		json_add_int "serv_port_up" "`uci get gateway.server1.upp`"
 		json_add_int "serv_port_down" "`uci get gateway.server1.dpp`"
 		
 		json_add_int	"stat_interval" "`uci -q get gateway.general.stat`"
 		#adjust the following parameters for your network 
-		json_add_int "keepalive_interval" "`uci get gateway.server1.keepalive_interval`" #以前的默认值是多少? 
-		json_add_int "push_timeout_ms" "`uci get gateway.server1.push_timeout_ms`"  #以前的默认值是多少? 
-		json_add_int "pull_timeout_ms" "`uci get gateway.server1.pull_timeout_ms`" #以前的默认值是多少?
+		json_add_int "keepalive_interval" "`uci get gateway.server1.keepalive_interval`" 
+		json_add_int "push_timeout_ms" "`uci get gateway.server1.push_timeout_ms`"   
+		json_add_int "pull_timeout_ms" "`uci get gateway.server1.pull_timeout_ms`" 
 
 		#forward only valid packets
 		  #                   /*fport的过滤方法, 0是不处理，1是只转发数据库里设置了的fport，2不转发数据库里的fport */
@@ -124,18 +124,18 @@ gen_gw_cfg() {
 	
 		#Server2
 		json_add_object "server2"
-		json_add_string "server_name" "name"  #name是服务的标识，必须要设置一个name   ?? 哪里需要用到，可以用 Server 1 替代吗？
-		json_add_string "server_type" "semtech"  #服务类型有：semtech, mqtt, gwtraft, ttn	几个服务类型什么区别，什么场合用到. MQTT 是指 LoRaWAN over MQTT 吧? 
-		json_add_string	"server_id"  "mqtt_user" # 类型是mqtt或ttn时才需要设置   --> 对应哪个参数?? 连接例子? 
-		json_add_string "server_key" "mqtt_pass" # 类型是mqtt或ttn时才需要设置	--> 对应哪个参数?? 连接例子?
-		json_add_string	"server_address" "localhost"   
-		json_add_int "serv_port_up" "1730"
-		json_add_int "serv_port_down" "1730"
+		json_add_string "server_name" "`uci get gateway.server2.server_id`"  #name是服务的标识，必须要设置一个name   
+		json_add_string "server_type" "semtech"  #semtech, mqtt, gwtraft, ttn	 
+		json_add_string	"server_id"  "`uci get gateway.server2.mqtt_user`" # 类型是mqtt或ttn时才需要设置
+		json_add_string "server_key" "`uci get gateway.server2.mqtt_pass`" # 类型是mqtt或ttn时才需要设置
+		json_add_string	"server_address" "`uci get gateway.server2.server_address`"   
+		json_add_int "serv_port_up" "`uci get gateway.server2.upp`"
+		json_add_int "serv_port_down" "`uci get gateway.server2.dpp`"
 		
 		#adjust the following parameters for your network 
-		json_add_int "keepalive_interval" "10" #以前的默认值是多少? 
-		json_add_int "push_timeout_ms" "100"  #以前的默认值是多少? 
-		json_add_int "pull_timeout_ms" "100" #以前的默认值是多少?
+		json_add_int "keepalive_interval" "30" 
+		json_add_int "push_timeout_ms" "100"  
+		json_add_int "pull_timeout_ms" "100"
 
 		#forward only valid packets
 		  #                   /*fport的过滤方法, 0是不处理，1是只转发数据库里设置了的fport，2不转发数据库里的fport */

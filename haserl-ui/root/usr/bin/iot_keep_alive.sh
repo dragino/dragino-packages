@@ -1,5 +1,11 @@
 #!/bin/sh
 
+
+#History:
+# 2021/1/6   Add function station_check_time
+#			 Add WAN and WWAN are get the gateway at staic 
+# 2021/1/20  Add AT&T disconnection detection
+
 DEVPATH=/sys/bus/usb/devices
 #VID=12d1
 #PID=1001 
@@ -15,6 +21,8 @@ wifi_ip=""
 iot_interval=` uci get system.@system[0].iot_interval`
 
 GSM_IF="3g-cellular" # 3g interface
+GSM_IMSI=""
+ENABLE_USAGE="0"
 
 PING_HOST='1.1.1.1' # enter IP of first host to check.
 PING_HOST2='8.8.8.8' # enter IP of second host to check.
@@ -31,9 +39,10 @@ ZERO="0"
 retry_gsm=0
 iot_online="1"
 offline_flag=""
-is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16|ps8n"`
+is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16"`
 
 last_reload_time=`date +%s`
+station_check_time=1
 
 board=`cat /var/iot/board`
 if [ "$board" = "LG01" ] || [ "$board" = "LG02" ];then
@@ -57,6 +66,7 @@ chk_internet_connection()
 	else
 		echo "$global_ping" > /var/iot/internet
 	fi
+
 }
 
 chk_eth1_connection()
@@ -69,6 +79,7 @@ chk_eth1_connection()
 
 		if [ -n "$wan_ip" ]; then
 			#Try to get WAN GW 
+			proto=`uci get network.wan.proto`
 			if [ -z $WAN_GW ] && [ "`uci get network.wan.proto`" = "dhcp" ] && [ $RETRY_WAN_GW -lt 5 ];then
 				ifup wan
 				RETRY_WAN_GW=`expr $RETRY_WAN_GW + 1`
@@ -76,12 +87,18 @@ chk_eth1_connection()
 				sleep 20
 				WAN_GW=`ip route | grep "$WAN_IF" | grep default | awk '{print $3;}'`	
 				[ -n $WAN_GW ] && ip route add $PING_WAN_HOST via $WAN_GW dev $WAN_IF
+			elif [ -z $WAN_GW ] && [ "`uci get network.wan.proto`" = "static" ];then
+				WAN_GW=`uci get network.wan.gateway`
+				[ -n $WAN_GW ] && ip route add $PING_WAN_HOST via $WAN_GW dev $WAN_IF
+				logger -t iot_keep_alive "$WAN_GW"
 			fi
 			
 			# Ping Host to check eth1 connection. 
 			if [ "`ip route | grep $PING_WAN_HOST | awk '{print $3;}'`" = "$WAN_GW"  ];then
 				logger -t iot_keep_alive "Ping WAN via $WAN_GW"
 				wan_ping=`fping $PING_WAN_HOST | grep -c alive`
+			elif [ "`uci get network.wan.proto`" = "static" ]; then
+				wan_ping=`fping $WAN_GW | grep -c alive`
 			fi 
 		fi
 	fi
@@ -104,12 +121,19 @@ chk_wlan0_connection()
 				sleep 20
 				WIFI_GW=`ip route | grep "$WIFI_IF" | grep default | awk '{print $3;}'` # get IP for default gateway on WIFI interface	
 				[ -n $WIFI_GW ] && ip route add $PING_WIFI_HOST via $WIFI_GW dev $WIFI_IF
+			
+				
+			elif [ -z $WIFI_GW ] && [ "`uci get network.wwan.proto`" = "static" ] && [ $RETRY_WIFI_GW -lt 5 ];then
+				WIFI_GW='uci get network.wwan.gateway'
+				[ -n $WIFI_GW ] && ip route add $PING_WIFI_HOST via $WIFI_GW dev $WIFI_IF
 			fi
 			
 			# Ping  Host to check wifi connection. 
 			if [ "`ip route | grep $PING_WIFI_HOST | awk '{print $3;}'`" = "$WIFI_GW"  ];then
 				logger -t iot_keep_alive "Ping WiFi via $WIFI_GW"
 				wifi_ping=`fping $PING_WIFI_HOST | grep -c alive`
+			elif [ "`uci get network.wwan.proto`" = "static" ]; then
+				wifi_ping= `fping $WIFI_GW | grep -c alive`
 			fi 
 		fi
 	fi 	
@@ -127,6 +151,15 @@ reload_iot_service()
 
 check_3g_connection()
 {
+
+	if [ -z "$GSM_IMSI" ]; then # Get Cellular GSM_IMSI
+		killall comgt;
+		GSM_IMSI='gcom -d /dev/ttyModemAT -s /etc/gcom/getGSM_IMSI.gcom | cut -c 1,2,3,4,5,6'
+		if [ -z "$(echo $GSM_IMSI | sed -n "/^[0-9]\+$/p")" ];then 
+			GSM_IMSI=""
+		fi
+	fi
+	
     #echo "3g"
 	GSM_IF=`ifconfig |grep "3g-" | awk '{print $1}'` # 3g interface
 	gsm_ping="$ZERO"
@@ -229,6 +262,37 @@ toggle_3g()
     logger -t iot_keep_alive "Restart 3G Interface"
 }
 
+enable_ue_usage()
+{
+	killall comgt;
+	gcom -d /dev/ttyModemAT -s /etc/gcom/enable-usage.gcom > /var/iot/cell_usage.txt
+	if [ `cat /var/iot/cell_usage.txt | grep "Start" -c` -ge "1" ]; then
+		if [ `cat /var/iot/cell_usage.txt | grep "successfully" -c` -ge "1"]; then
+			ENABLE_USAGE="1"
+		fi
+	fi
+
+}
+
+station_time_check()
+{
+	currentype="$(uci -q get gateway.general.server_type)"
+	if [ "$currentype" = "station" ]; then
+		if [ "$station_check_time" = "1" ]; then 
+			syscurrent_time="$(date +"%Y-%m-%d")" 
+			stationcurrent_time="$(cat /var/iot/station.log | grep 20 | awk '{print $1}' | grep 20 | sed -n '1p' )" 
+			t1="$(date -d "$syscurrent_time" +%s)" 
+			t2="$(date -d "$stationcurrent_time" +%s)" 
+			if [ $t1 -ne $t2 ]; then
+				/usr/bin/reload_iot_service.sh &
+				station_check_time=0
+			fi 
+		fi 
+	else
+		station_check_time=0
+	fi
+}
+
 while :
 do 
 	sleep "$iot_interval"
@@ -242,10 +306,25 @@ do
 		rm -f /var/iot/station.log
 	fi
 	
+	# AT&T disconnection detection
+	if [ -n "$GSM_IMSI" ] && [ "$ENABLE_USAGE" == "0" ];then
+		case "$GSM_IMSI"
+		in
+			310030) enable_ue_usage;;
+			310170) enable_ue_usage;;
+			310280) enable_ue_usage;;
+			310410) enable_ue_usage;;
+			310560) enable_ue_usage;;
+			311180) enable_ue_usage;;
+			310950) enable_ue_usage;;
+		esac
+	fi
+	
 	if [ "$global_ping" -gt "$ZERO" ];then   # Check if the device has internet connection
 		ROUTE_DF=`ip route | grep default | awk '{print $5}'`
 		logger -t iot_keep_alive "Internet Access OK: via $ROUTE_DF"
-		has_internet=1	
+		has_internet=1
+		station_time_check
 		if [ "$ROUTE_DF" = "$WAN_IF" ] || [ "$ROUTE_DF" = "$WIFI_IF" ];then  #Check If device has WIFi or WAN Connection.
 			logger -t iot_keep_alive "use WAN or WiFi for internet access now"
 		elif [ "$ROUTE_DF" = "$GSM_IF" ] && [ "`uci get network.cellular.backup`" = "1" ];then

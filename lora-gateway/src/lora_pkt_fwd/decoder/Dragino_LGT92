@@ -48,7 +48,11 @@ latitude_RAW_26=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
 latitude_RAW_27=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
 minus_flag_1 = bit.bit_lshift(latitude_RAW_26,8)
 minus_flag_2 = bit.bit_lshift(latitude_RAW_25,16)
+if latitude_RAW_24 > 239 then
+latitude_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(latitude_RAW_24,24),minus_flag_2)),minus_flag_1),latitude_RAW_27)-tonumber("FFFFFFFF00000000",16)
+else
 latitude_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(latitude_RAW_24,24),minus_flag_2)),minus_flag_1),latitude_RAW_27)
+end 
 payload_t.Latitude=latitude_0/1000000
 
 --Get Longitude 
@@ -58,7 +62,11 @@ longitude_RAW_26=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
 longitude_RAW_27=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
 minus_flag_1 = bit.bit_lshift(longitude_RAW_26,8)
 minus_flag_2 = bit.bit_lshift(longitude_RAW_25,16)
+if longitude_RAW_24 > 239 then
 longitude_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(longitude_RAW_24,24),minus_flag_2)),minus_flag_1),longitude_RAW_27)-tonumber("FFFFFFFF00000000",16)
+else 
+longitude_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(longitude_RAW_24,24),minus_flag_2)),minus_flag_1),longitude_RAW_27)
+end
 payload_t.Longitude=longitude_0/1000000
 
 
@@ -86,6 +94,14 @@ Firmware_RAW=utility.hex2str(string.sub(payload,27,27))
 Firmware=bit.bit_and(tonumber(Firmware_RAW,16),tonumber("1F",16))
 payload_t.FW=160+Firmware
 
+
+pan1=string.sub(payload,28,29)
+pan2=string.sub(payload,30,31)
+pan3=string.sub(payload,32,32)
+pan4=string.sub(payload,33,34)
+
+
+if pan1~="" and pan2~="" and pan3~="" and pan4~="" then
 roll_V_RAW_3=tonumber(utility.hex2str(string.sub(payload,28,28)),16)
 roll_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,29,29)),16)
 minus_flag = bit.bit_rshift(roll_V_RAW_3,7)
@@ -111,6 +127,8 @@ altitude_V_RAW_4=tonumber(utility.hex2str(string.sub(payload,34,34)),16)
 minus_flag = bit.bit_rshift(altitude_V_RAW_3,7)
 altitude_V_0=(bit.bit_or(bit.bit_lshift(altitude_V_RAW_3,8),altitude_V_RAW_4)-minus_flag*65536)/100
 payload_t.Altitude=altitude_V_0
+end
+
 
 local server_type = uci:get("gateway","general","server_type")
 local mqtt_broker = uci:get("mqtt","common","server_type")

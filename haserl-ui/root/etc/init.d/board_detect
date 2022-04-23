@@ -57,6 +57,7 @@ start() {
 		board="LG08"
 		model="LPS8-N"
 		pic="Dragino-LPS8-N.png"
+		EC25_P3="/dev/ttyUSB2"
 		rmmod i2c-gpio-custom
 		insmod i2c-gpio-custom bus0=0,7,8
 		rmmod spi-gpio-custom

@@ -45,6 +45,7 @@
   pincode="$(uci -q get network.cellular.pincode)"
   user="$(uci -q get network.cellular.username)"
   pass="$(uci -q get network.cellular.password)"
+  model=`cat /var/iot/model.txt`
   
   cell_enable="0"
   cell_disabled="$(uci -q get network.cellular.auto)"
@@ -59,7 +60,14 @@
   	cell_backup="checked"
   fi
   
-  cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c > /tmp/cell_detect.txt
+	if [ `cat /sys/kernel/debug/usb/devices | grep "Vendor=1e0e ProdID=9011" -c` == "1" ]; then
+		echo 1 > /tmp/cell_detect.txt
+	elif [ `cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c` == "1" ]; then
+		echo 1 > /tmp/cell_detect.txt
+	else
+		echo 0 /tmp/cell_detect.txt
+	fi
+	
   cell_detect=$(cat /tmp/cell_detect.txt)
 %>
 

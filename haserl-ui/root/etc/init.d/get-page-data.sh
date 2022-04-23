@@ -322,17 +322,17 @@ elif [ $server_type == "station" ];then
 	satlink10="/cgi-bin/lorawan-basicstation.has"
 	version10=`station -v | awk 'NR==1''{print}'`
 else
-	new_fwd=$(ps | grep -c /usr/bin/fwd) 	# Check new_fwd or pkt_fwd
-	if [ "$new_fwd" == "2" ] ;then
-		fwd_pkt_status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key = '/service/pkt/PKT_SERV';" | grep -c runing`
-		if [ "$fwd_pkt_status" == "1" ];then
-			pscount="2"
-		else
-			pscount="1"
-		fi
+	#new_fwd=$(ps | grep -c /usr/bin/fwd) 	# Check new_fwd or pkt_fwd
+	#if [ "$new_fwd" == "2" ] ;then
+	fwd_status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key = '/service/pkt/PKT_SERV';" | grep -c runing`
+	if [ "$fwd_status" == "1" ];then
+		pscount="2"
 	else
-		pscount=$(ps | grep -c pkt_fwd) # Check is process is running
+		pscount="1"
 	fi
+	#else
+		#pscount=$(ps | grep -c pkt_fwd) # Check is process is running
+	#fi
 	satlink10="/cgi-bin/lora-lora.has"
 fi
 
@@ -457,7 +457,7 @@ if [ $server_type == "lorawan" ]; then
 		fwd_type=2
 	fi
 
-	if [ $fwd_type == "1" ];then
+	#if [ $fwd_type == "1" ];then
 		if [ $lorawanstatus_fwd == "2" ] && [ $lorawan_boot == "1" ];then
 			process3="LoRaWAN process fwd <b>Running</b>"
 			status3=$(cat /var/iot/status)
@@ -465,15 +465,15 @@ if [ $server_type == "lorawan" ]; then
 			process3="LoRaWAN process fwd <b>Not Running</b>"
 		fi
 
-	elif [ $fwd_type == "2" ];then
+	#elif [ $fwd_type == "2" ];then
 
-		if [ $lorawanstatus_pkt_fwd == "2" ] && [ $lorawan_boot == "1" ]; then
-			process3="LoRaWAN process pkt_fwd <b>Running</b>"
-			status3=$(cat /var/iot/status)
-		else  
-			process3="LoRaWAN process pkt_fwd <b>Not Running</b>"
-		fi
-	fi
+	#	if [ $lorawanstatus_pkt_fwd == "2" ] && [ $lorawan_boot == "1" ]; then
+	#		process3="LoRaWAN process pkt_fwd <b>Running</b>"
+	#		status3=$(cat /var/iot/status)
+	#	else  
+	#		process3="LoRaWAN process pkt_fwd <b>Not Running</b>"
+	#	fi
+	#fi
 elif [ $server_type == "station" ]; then
 	info_title3="LoRaWAN Basic Station"
 	server_provider=`uci get  gateway.general.station_server_provider`
@@ -566,8 +566,21 @@ if [ $cell_en == "1" ]; then
 
   # Get cell status and save to file
   cp /tmp/celltmp.txt /tmp/cell1.txt 
-  killall comgt
-  (comgt -d /dev/ttyModemAT > /tmp/celltmp.txt; ) &
+  killall comgt;
+  
+  if [ `cat /sys/kernel/debug/usb/devices | grep "Vendor=1e0e ProdID=9011" -c` == "1" ]; then
+	(comgt -d /dev/ttyUSB1 > /tmp/celltmp.txt; ) &
+	if [ -e /tmp/celltmp.txt ]; then
+		cops_format=`cat /tmp/celltmp.txt  | awk NR==3 |  cut -c 30-34`
+		if [ "$cops_format" -gt "0" ]; then
+			comgt -d /dev/ttyUSB1 -s /etc/gcom/setcopsfromat.gcom 
+		fi
+	fi
+	
+  else
+	(comgt -d /dev/ttyModemAT > /tmp/celltmp.txt; ) &
+  fi
+  
   
   # Extract data for Info box
   sim5=$(cat /tmp/cell1.txt|grep SIM)

@@ -54,7 +54,8 @@
 				if [ "$key_name" ==  "gateway_key.bin" ]; then
 					find /etc/helium_gateway -name "gateway_key.bin"|xargs rm -rfv  # Remove the original gateway_key.bin file
 					savedfile=$HASERL_uploadfile_path
-					cp $savefile /etc/helium_gateway/$savedfile
+					cp $HASERL_uploadfile_path /etc/helium_gateway/gateway_key.bin
+					#cp $savefile /etc/helium_gateway/$savedfile
 					trust_status2="<span class='impactOK'>Upload Finished </span>"
 				else
 					trust_status2="<span class='impact'>file name must be gateway_key.bin</span>"	
@@ -79,7 +80,7 @@
 	helium_server_connect_status=$(ps | grep "/etc/helium_gateway" -c)
 	if [ $helium_server_connect_status -eq "2" ]; then
 		helium_server_status="<span class="impactOK">&nbsp;&nbsp;Gateway-rs Connected</span>"
-		helium_key="$(helium_gateway key info | grep address | awk '{print $2}' | cut -d '"' -f 2)"	
+		helium_key="$(helium_gateway key info | grep key | awk '{print $2}' | cut -d '"' -f 2)"	
 		helium_name="$(helium_gateway key info | grep name | awk '{print $2}' | cut -d '"' -f 2)"
 	else
 		helium_server_status="<span class="impact">No Gateway-rs Connected </span>"

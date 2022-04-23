@@ -11,10 +11,10 @@ init_board() {
 	gwcfg=`uci get gateway.general.gwcfg`
 
 	if [[ "$service" = "tcpudp" ]]; then
-		ls /etc/init.d/helium_gateway && /etc/init.d/helium_gateway stop # make sure no helimgateway-rs is runing.
+		ls /etc/init.d/helium_gateway
 		process="tcp_process.sh"
 	elif [[ "$service" = "mqtt" ]]; then
-		ls /etc/init.d/helium_gateway && /etc/init.d/helium_gateway stop
+		ls /etc/init.d/helium_gateway
 		process="mqtt_process.sh"
 	elif [[ "$service" = "lorawan" ]]; then
 		if [[ "$provider" = "helium" ]]; then

@@ -45,7 +45,7 @@
 
     # Run in background    
 		(sleep 1; /etc/init.d/network restart) &
-		(sleep 20; /etc/init.d/fallbackip start) &
+		(sleep 30; /etc/init.d/fallbackip start) &
     #/etc/init.d/DR_wifi_wan start &  # Check that WiFi WAN is operating correctly, else disable after 30 seconds.
   fi
 %>

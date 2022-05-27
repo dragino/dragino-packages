@@ -23,70 +23,45 @@ init_board() {
 			regino_check_default="$(cat /etc/helium_gateway/default.toml | grep region -c)"
 			logger  test "$regino_check_seetting" "$regino_check_default" "$gwcfg"
 			if [[ "$gwcfg"  = "EU" ]];then
-				if [[ "$regino_check_seetting" = "0" ]] ; then
-					sed -i '1 i\region = "EU868"' /etc/helium_gateway/settings.toml
-				else
-					sed -i '/region/d' /etc/helium_gateway/settings.toml
-					sed -i '1 i\region = "EU868"' /etc/helium_gateway/settings.toml	
-				fi
-
-				if [[ "$regino_check_default" = "0" ]]; then
-					sed -i '20 i\region = "EU868"' /etc/helium_gateway/default.toml
-				else
-					sed -i '/region/d' /etc/helium_gateway/default.toml
-					sed -i '20 i\region = "EU868"' /etc/helium_gateway/default.toml
-				fi
-				/etc/init.d/helium_gateway start
+				region="EU868"
 			elif [[ "$gwcfg" = "US" ]];then
-				if [[ "$regino_check_seetting" = "0" ]] ; then
-					sed -i '1 i\region = "US915"' /etc/helium_gateway/settings.toml
-				else
-					sed -i '/region/d' /etc/helium_gateway/settings.toml
-					sed -i '1 i\region = "US915"' /etc/helium_gateway/settings.toml	
-				fi
-
-				if [[ "$regino_check_default" = "0" ]]; then
-					sed -i '20 i\region = "US915"' /etc/helium_gateway/default.toml
-				else
-					sed -i '/region/d' /etc/helium_gateway/default.toml
-					sed -i '20 i\region = "US915"' /etc/helium_gateway/default.toml
-				fi
-				/etc/init.d/helium_gateway start
-
+				region="US915"
 			elif [[ "$gwcfg" = "AU" ]];then
-				if [[ "$regino_check_seetting" = "0" ]] ; then
-					sed -i '1 i\region = "AU915"' /etc/helium_gateway/settings.toml
-				else
-					sed -i '/region/d' /etc/helium_gateway/settings.toml
-					sed -i '1 i\region = "AU915"' /etc/helium_gateway/settings.toml	
-				fi
-
-				if [[ "$regino_check_default" = "0" ]]; then
-					sed -i '20 i\region = "AU915"' /etc/helium_gateway/default.toml
-				else
-					sed -i '/region/d' /etc/helium_gateway/default.toml
-					sed -i '20 i\region = "AU915"' /etc/helium_gateway/default.toml
-				fi
-				/etc/init.d/helium_gateway start
+				region="AU915"
 			elif [[ "$gwcfg" = "CN" ]];then
-				if [[ "$regino_check_seetting" = "0" ]] ; then
-					sed -i '1 i\region = "CN868"' /etc/helium_gateway/settings.toml
-				else
-					sed -i '/region/d' /etc/helium_gateway/settings.toml
-					sed -i '1 i\region = "CN868"' /etc/helium_gateway/settings.toml	
-				fi
-
-				if [[ "$regino_check_default" = "0" ]]; then
-					sed -i '20 i\region = "CN868"' /etc/helium_gateway/default.toml
-				else
-					sed -i '/region/d' /etc/helium_gateway/default.toml
-					sed -i '20 i\region = "CN868"' /etc/helium_gateway/default.toml
-				fi
-				/etc/init.d/helium_gateway start
-			fi	
+				region="CN470"
+			elif [[ "$gwcfg" = "IN" ]];then
+				region="IN865"
+			elif [[ "$gwcfg" = "RU" ]];then
+				region="RU864"
+			elif [[ "$gwcfg" = "AS1_2" ]] || [[ "$gwcfg" = "AS1" ]] || [[ "$gwcfg" = "KR" ]]; then
+				region="AS923_1"
+			elif [[ "$gwcfg" = "AS2" ]]; then
+				region="AS923_2"
+			elif [[ "$gwcfg" = "AS3" ]]; then
+				region="AS923_3"
+			elif [[ "$gwcfg" = "AS4" ]]; then
+				region="AS923_4"
+			fi
+		
+		if [[ "$regino_check_seetting" = "0" ]] ; then
+				sed -i "1 i\region = \"${region}\"" /etc/helium_gateway/settings.toml
 		else
-			/etc/init.d/helium_gateway stop
+				sed -i '/region/d' /etc/helium_gateway/settings.toml
+				sed -i "1 i\region = \"${region}\"" /etc/helium_gateway/settings.toml	
 		fi
+
+		if [[ "$regino_check_default" = "0" ]]; then
+			sed -i "20 i\region = \"${region}\"" /etc/helium_gateway/default.toml
+		else
+			sed -i '/region/d' /etc/helium_gateway/default.toml
+			sed -i "20 i\region = \"${region}\"" /etc/helium_gateway/default.toml
+		fi
+		/etc/init.d/helium_gateway start		
+	else
+		/etc/init.d/helium_gateway stop
+	fi
+		
 	elif [[ "$service" = "customized" ]]; then
 		process=`uci get customized_script.general.script_name`
 		chmod +x /etc/lora/customized_scripts/$process

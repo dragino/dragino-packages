@@ -34,10 +34,10 @@ define Package/$(PKG_NAME)/description
 endef
 
 define Package/$(PKG_NAME)/extra_provides
-	echo 'libmbedcrypto.so.7';\
-	echo 'libmbedcrypto.so.14';\
-	echo 'libmbedtls.so.14';\
-	echo 'libmbedx509.so.1';
+	echo 'libmbedcrypto.so.1';\
+	echo 'libmbedcrypto.so.0';\
+	echo 'libmbedtls.so.10';\
+	echo 'libmbedx509.so.0';
 endef
 
 define Build/Prepare
@@ -66,6 +66,9 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libmqtt/libpahomqtt3c.so $(1)/usr/lib
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/sx1301hal/libsx1301hal.so $(1)/usr/lib
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/sx1302hal/libsx1302hal.so $(1)/usr/lib
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libmbed/libmbedx509.so.0 $(1)/usr/lib
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libmbed/libmbedtls.so.10 $(1)/usr/lib
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libmbed/libmbedcrypto.so.0 $(1)/usr/lib
 	$(LN) libsx1302hal.so $(1)/usr/lib/libloragw.so
 
 	$(INSTALL_DIR) $(1)/etc/lora/cfg

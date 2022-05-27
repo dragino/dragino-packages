@@ -26,69 +26,69 @@
 		"radio_0": {
 			"enable": true,
 			"type": "SX1257",
-			"freq": 921700000,
+			"freq": 917600000,
 			"rssi_offset": -166.0,
 			"tx_enable": true,
-			"tx_freq_min": 921300000,
-			"tx_freq_max": 922900000
+			"tx_freq_min": 923200000,
+			"tx_freq_max": 925000000
 		},
 		"radio_1": {
 			"enable": true,
 			"type": "SX1257",
-			"freq": 922500000,
+			"freq": 918400000,
 			"rssi_offset": -166.0,
 			"tx_enable": false
 		},
 		"chan_multiSF_0": {
-			"desc": "Lora MAC, 125kHz, all SF, 921.4 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 917.3 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": -300000
 		},
 		"chan_multiSF_1": {
-			"desc": "Lora MAC, 125kHz, all SF, 921.6 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 917.5 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": -100000
 		},
 		"chan_multiSF_2": {
-			"desc": "Lora MAC, 125kHz, all SF, 921.8 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 917.7 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": 100000
 		},
 		"chan_multiSF_3": {
-			"desc": "Lora MAC, 125kHz, all SF, 922.0 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 917.9 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": 300000
 		},
 		"chan_multiSF_4": {
-			"desc": "Lora MAC, 125kHz, all SF, 922.2 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 918.1 MHz",
 			"enable": true,
 			"radio": 1,
 			"if": -300000
 		},
 		"chan_multiSF_5": {
-			"desc": "Lora MAC, 125kHz, all SF, 922.4 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 918.3 MHz",
 			"enable": true,
 			"radio": 1,
 			"if": -100000
 		},
 		"chan_multiSF_6": {
-			"desc": "Lora MAC, 125kHz, all SF, 922.6 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 918.5 MHz",
 			"enable": true,
 			"radio": 1,
 			"if": 100000
 		},
 		"chan_multiSF_7": {
-			"desc": "Lora MAC, 125kHz, all SF, 922.8 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 918.8 MHz",
 			"enable": true,
 			"radio": 1,
 			"if": 300000
 		},
 		"chan_Lora_std": {
-			"desc": "Lora MAC, 250kHz, SF7, 922.0 MHz",
+			"desc": "Lora MAC, 250kHz, SF7, 917.9 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": 300000,
@@ -96,7 +96,7 @@
 			"spread_factor": 7
 		},
 		"chan_FSK": {
-			"desc": "FSK 50kbps, 922.8 MHz",
+			"desc": "FSK 50kbps, 918.7 MHz",
 			"enable": true,
 			"radio": 1,
 			"if": 300000,

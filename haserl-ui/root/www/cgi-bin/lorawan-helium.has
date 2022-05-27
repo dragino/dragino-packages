@@ -76,7 +76,7 @@
 	dl_prot="$(uci -q get gateway.server1.dpp)"
 	
 
-
+	helium_region=`helium_gateway info | grep region | awk -F'"' '{print $4}'`
 	helium_server_connect_status=$(ps | grep "/etc/helium_gateway" -c)
 	if [ $helium_server_connect_status -eq "2" ]; then
 		helium_server_status="<span class="impactOK">&nbsp;&nbsp;Gateway-rs Connected</span>"
@@ -193,7 +193,11 @@
 		<td colspan="10"><% echo -n $helium_name %></td>
 	</tr>
 	
-
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+		<td colspan="1"></td>
+		<td colspan="8"><label for="helium_region">Region</label></td>
+		<td colspan="10"><% echo -n $helium_region %></td>
+	</tr>
 	
 
 	<tr class="rowSpacer"><td colspan="15"></td></tr>

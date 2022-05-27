@@ -77,7 +77,7 @@ gen_gw_cfg() {
 		json_add_double "ref_latitude" "$latitude"
 		json_add_double "ref_longitude" "$longitude"
 		json_add_double "ref_altitude" "$altitude"	
-	elif [ "$model" == "DLOS8" ];then	
+	elif [ "$model" == "DLOS8" ]|| [ "$model" == "LPS8-G" ] || [ "$model" == "DLOS8N" ];then	
 		json_add_string "gps_tty_path" "/dev/ttyUSB0"
 	fi
      
@@ -105,7 +105,7 @@ gen_gw_cfg() {
 		json_add_int "serv_port_up" "`uci get gateway.server1.upp`"
 		json_add_int "serv_port_down" "`uci get gateway.server1.dpp`"
 		
-		json_add_int	"stat_interval" "`uci -q get gateway.general.stat`"
+		json_add_int	"time_interval" "`uci -q get gateway.general.stat`"
 		#adjust the following parameters for your network 
 		json_add_int "keepalive_interval" "`uci get gateway.server1.keepalive_interval`" 
 		json_add_int "push_timeout_ms" "`uci get gateway.server1.push_timeout_ms`"   
@@ -318,7 +318,7 @@ if [ $model == "LG308" ] || [ $model == "DLOS8" ];then
 	chip="301"
 elif [ $model == "LPS8" ];then
 	chip="308"
-elif [ $model == "LIG16" ] || [ $model == "LPS8-N" ];then
+elif [ $model == "LIG16" ] || [ $model == "LPS8-N" ]|| [ $model == "LPS8-G" ]|| [ $model == "LG308-N" ]|| [ $model == "DLOS8N" ];then
 	chip="302"
 	json_section_name="SX130x_conf"
 fi

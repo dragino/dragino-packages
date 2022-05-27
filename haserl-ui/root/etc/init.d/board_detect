@@ -51,6 +51,22 @@ start() {
 		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
 		;;
 		
+	  *"os8n"*)
+		logger "[Model Detected]: DLOS8N"
+		chip="sx1302"
+		board="LG08"
+		model="DLOS8N"
+		pic="Dragino-DLOS8.png"
+		ln -s /dev/ttyUSB0 /dev/ttyGPS
+		EC25_P2="/dev/ttyUSB3"
+		EC25_P3="/dev/ttyUSB4"
+		rmmod i2c-gpio-custom
+		insmod i2c-gpio-custom bus0=0,7,8
+		rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+		sleep 1
+		;;
+		
 	 *"ps8n"*) 
 	    logger "[Model Detected]: LPS8-N"
 		chip="sx1302"
@@ -64,6 +80,37 @@ start() {
 		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
 		sleep 1
 		;;
+		
+	 *"ps8g"*) 
+	    logger "[Model Detected]: LPS8-G"
+		chip="sx1302"
+		board="LG08"
+		model="LPS8-G"
+		pic="Dragino-LPS8-N.png"
+		ln -s /dev/ttyUSB0 /dev/ttyGPS
+		EC25_P3="/dev/ttyUSB2"
+		rmmod i2c-gpio-custom
+		insmod i2c-gpio-custom bus0=0,7,8
+		rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+		sleep 1
+		;;
+		
+	*"308n"*) 
+	    logger "[Model Detected]: LG308-N"
+		chip="sx1302"
+		board="LG08"
+		model="LG308-N"
+		pic="Dragino-LG308.png"
+		EC25_P2="/dev/ttyUSB2"
+		EC25_P3="/dev/ttyUSB3"
+		rmmod i2c-gpio-custom
+		insmod i2c-gpio-custom bus0=0,7,8
+		rmmod spi-gpio-custom
+		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
+		sleep 1
+		;;
+		
 	  *)
 
 		rmmod spi-gpio-custom
@@ -98,8 +145,9 @@ start() {
 					logger "[Model Detected]: LG308"
 					board="LG08"
 				else
-					logger "[Model Detected]: LG308P"
-					board="LG08P"
+					
+						logger "[Model Detected]: LG308P"
+						board="LG08P"
 				fi
 			fi
 		fi

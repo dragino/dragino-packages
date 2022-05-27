@@ -163,7 +163,7 @@
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="12"><label for="EMAIL">Email</label></td>
-		<td colspan="24"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
+		<td colspan="24"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-zA-Z0-9/\_*.$%<>;:?@=!^|&+()#~\{\}\-]{8,32}" ></td>
 		<td colspan="6"></td>
 	</tr>
 	

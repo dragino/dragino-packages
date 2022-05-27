@@ -38,8 +38,8 @@ ONE="1"
 ZERO="0"
 retry_gsm=0
 iot_online="1"
-offline_flag=""
-is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16"`
+offline_flag="1"
+is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16|ps8n|ps8g|os8n"`
 
 last_reload_time=`date +%s`
 station_check_time=1
@@ -144,7 +144,10 @@ reload_iot_service()
 		cur_reload_time=`date +%s`
 		if [ "`uci get gateway.general.server_type`" = "lorawan" ] && [ `expr $cur_reload_time - $last_reload_time` -gt 40 ];then
 			#Socket Reconnect
-			ps | grep "pkt_fwd" | grep -v grep | awk '{print $1}' | xargs kill -USR1
+			ps | grep "fwd" | grep -v grep | awk '{print $1}' | xargs kill -USR1
+			last_reload_time=`date +%s`
+		elif [ "`uci get gateway.general.server_type`" = "station" ] && [ `expr $cur_reload_time - $last_reload_time` -gt 40 ];then
+			/usr/bin/reload_iot_service.sh &
 			last_reload_time=`date +%s`
 		fi	
 }
@@ -409,8 +412,16 @@ do
 		fi 
 	fi
 	[ "`uci get gateway.general.server_type`" = "lorawan" ] && iot_online=`cat /var/iot/status | grep online -c`	
-
-	
+	if [ "`uci get gateway.general.server_type`" = "station" ]; then
+		station_status=`tail /var/iot/station.log | grep -e "HTTP connect failed" -e "failed" -e "Interaction with CUPS failed" -c`
+		if [ $station_status -gt "0" ]; then
+			iot_online=0
+			echo "offline" > /var/iot/status
+		else
+			iot_online=0
+			echo "online" > /var/iot/status
+		fi
+	fi
 	/usr/bin/blink-stop
 	if [ "$iot_online" = "1" ]; then
 		# IoT Connection is ok

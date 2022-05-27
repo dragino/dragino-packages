@@ -20,7 +20,7 @@
 
 	<% # Set up LoRa menu for board type
 	board=$(cat /var/iot/board)
-	if [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ] || [ "$model" == "DLOS8" ] || [ "$model" == "LIG16" ]; then
+	if [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ] || [ "$model" == "DLOS8" ] || [ "$model" == "LIG16" ]|| [ "$model" == "LPS8-G" ]|| [ "$model" == "DLOS8N" ]|| [ "$model" == "LG308-N" ]; then
 	#if [ "$board" == "LG08" ] || [ "$board" == "LG08P" ]; then
 	%>
   <div class="dropdown"> <!-- LoRa Parameter -->
@@ -37,7 +37,7 @@
   
   
 	<% # Set up LoRaWAN menu for board type
-	if [ $model == "LG308" ] ||  [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ]  || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
+	if [ $model == "LG308" ] ||  [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ]  || [ $model == "DLOS8" ] || [ $model == "LIG16" ] || [ "$model" == "LPS8-G" ] || [ "$model" == "DLOS8N" ]|| [ "$model" == "LG308-N" ]; then
 	%>
 		<div class="dropdown"> <!-- LoRa Parameter -->
 			<button class="dropbtn">LoRaWAN <span class="fas fa-caret-down"></span></button>
@@ -46,7 +46,7 @@
 				
 
 				<% # Set up LoRaWAN menu for board type
-				if [ $model == "LIG16" ] || [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ] || [ "$model" == "DLOS8" ]; then
+				if [ $model == "LIG16" ] || [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ] || [ "$model" == "DLOS8" ] || [ "$model" == "LPS8-G" ] || [ "$model" == "DLOS8N" ]|| [ "$model" == "LG308-N" ]; then
 				%>
 					<a href="/cgi-bin/lorawan-basicstation.has">LoRaWAN -- Basic Station</a>
 					<a href="/cgi-bin/lorawan-helium.has">Helium IoT</a>
@@ -109,7 +109,7 @@
       <a href="/cgi-bin/log-lora.has">LoRa Log</a>
 	  
 	<% # Set up LoRaWAN menu for board type
-	if [ $model == "LG308" ] ||  [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ]  || [ $model == "DLOS8" ] || [ $model == "LIG16" ] ; then
+	if [ $model == "LG308" ] ||  [ "$model" == "LPS8" ] ||  [ "$model" == "LPS8-N" ]  || [ $model == "DLOS8" ] || [ $model == "LIG16" ] || [ "$model" == "LPS8-G" ] || [ "$model" == "DLOS8N" ]|| [ "$model" == "LG308-N" ] ; then
 	%>
       <a href="/cgi-bin/log-traffic.has">Gateway Traffic</a>
 	<% fi %>	

@@ -1492,7 +1492,6 @@ int main(void)
     //if(!get_config("general", dbpath, sizeof(dbpath)))
     //  strcpy(dbpath, "/etc/lora/devskey");
 
-	
 	MSG_DEBUG(DEBUG_INFO, "INFO~ ABP Decryption: %s\n", maccrypto_num? "yes" : "no");
 
     // open sqlite3 context for something, such as pakeages report
@@ -1860,7 +1859,7 @@ int main(void)
         buff_stat[buff_index] = '}';
         ++buff_index;
         buff_stat[buff_index] = 0; /* add string terminator, for safety */
-        MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_stat + 12)); /* DEBUG: display JSON payload */
+        MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~[stat] %s\n", (char *)(buff_stat + 12)); /* DEBUG: display JSON payload */
 
         /* send datagram to server */
         send(sock_up, (void *)buff_stat, buff_index, 0);
@@ -2067,22 +2066,27 @@ void thread_up(void) {
         for (i=0; i < nb_pkt; ++i) {
             p = &rxpkt[i];
 
+			memset(&macmsg, 0, sizeof(macmsg));
             macmsg.Buffer = p->payload;
             macmsg.BufSize = p->size;
-            if (LORAMAC_PARSER_SUCCESS != LoRaMacParserData(&macmsg))  
+
+            MSG_DEBUG(DEBUG_DEBUG, "LoRaMacParser~[up] Start macMsg parser\n"); 
+            if (LORAMAC_PARSER_SUCCESS != LoRaMacParserData(&macmsg)) {  
                 continue;
+			}
+            MSG_DEBUG(DEBUG_DEBUG, "LoRaMacParser~[up] END... macMsg parser\n"); 
 
             if ((macmsg.MHDR.Bits.MType == FRAME_TYPE_DATA_UNCONFIRMED_UP) || (macmsg.MHDR.Bits.MType == FRAME_TYPE_DATA_CONFIRMED_UP)) {
                 sprintf(devchar, "%08X", macmsg.FHDR.DevAddr);
 
                 /* basic packet filtering */
                 if (fport_num != 0 && !(macmsg.FPort == fport_num)){
-                    MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to Fport doesn't match fport filter:%u, message Fport: %u\n", fport_num,macmsg.FPort); /* DEBUG: display JSON payload */
+                    MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~[up] Drop due to Fport doesn't match fport filter:%u, message Fport: %u\n", fport_num,macmsg.FPort); /* DEBUG: display JSON payload */
                     continue;
                 } /* filter */
                  
                 if (dev_addr_mask != 0 && strncmp(devaddr_mask, "0", 1) && (strncmp(devchar, devaddr_mask, strlen(devaddr_mask)) != 0 )){
-                    MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ Drop due to DevAddr(0x%s) doesn't match mask (0x%s)\n", 
+                    MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~[up] Drop due to DevAddr(0x%s) doesn't match mask (0x%s)\n", 
                            devchar,devaddr_mask); /* DEBUG: display JSON payload */
                     continue;
                 }
@@ -2366,7 +2370,7 @@ void thread_up(void) {
         buff_up[buff_index] = '}';
         ++buff_index;
         buff_up[buff_index] = 0; /* add string terminator, for safety */
-        MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
+        MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~[up] %s\n", (char *)(buff_up + 12)); /* DEBUG: display JSON payload */
 
         pthread_mutex_lock(&mx_sockup); /*maybe reconnect, so lock */ 
         send(sock_up, (void *)buff_up, buff_index, 0);
@@ -2430,12 +2434,12 @@ void thread_proc_rxpkt() {
         do {
             for (idx = 0; idx < entry->nb_pkt; ++idx) {
                 p = &entry->rxpkt[idx];
+				memset(&macmsg, 0, sizeof(macmsg));
                 macmsg.Buffer = p->payload;
                 macmsg.BufSize = p->size;
                 if ( LORAMAC_PARSER_SUCCESS == LoRaMacParserData(&macmsg)) { 
                     printf_mac_header(&macmsg);
-					
-					if (maccrypto_num) {
+            		if (((macmsg.MHDR.Bits.MType == FRAME_TYPE_DATA_UNCONFIRMED_UP) || (macmsg.MHDR.Bits.MType == FRAME_TYPE_DATA_CONFIRMED_UP)) && maccrypto_num ) {
                         struct devinfo devinfo = { .devaddr = macmsg.FHDR.DevAddr };
                         if (db_lookup_skey(cntx.lookupskey, (void *) &devinfo)) {
 
@@ -2899,7 +2903,7 @@ void thread_down(void) {
             /* the datagram is a PULL_RESP */
             buff_down[msg_len] = 0; /* add string terminator, just to be safe */
             MSG_DEBUG(DEBUG_INFO, "INFO~ [down] PULL_RESP received  - token[%d:%d] :)\n", buff_down[1], buff_down[2]); /* very verbose */
-            MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~ %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
+            MSG_DEBUG(DEBUG_PKT_FWD, "RXTX~[down] %s\n", (char *)(buff_down + 4)); /* DEBUG: display JSON payload */
 
 
             /* initialize TX struct and try to parse JSON */

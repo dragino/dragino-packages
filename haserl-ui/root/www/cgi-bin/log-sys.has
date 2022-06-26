@@ -33,19 +33,19 @@ server_type="$(uci -q get gateway.general.server_type)"
 	<h4><% echo "Boot Info:  " %></h4>
 	<textarea cols="155" rows="10" ><% dmesg %></textarea>
 	<br><br>
-	<% echo $station_type %>
 	
-	
-	<h4><% echo "Previous Log:  $server_type " %></h4>
 	<% if [ "$server_type" == "station" ] ; then %>
 	<textarea cols="155" rows="20" ><% tail -f /var/iot/station.log %></textarea>
 	<br><br>
 	<% else %>
-		<h4><% echo "Previous Log: " %></h4>
+		<h4><% echo "Previous Log:  $server_type " %></h4>
 	<textarea cols="155" rows="20" ><% logread %></textarea>
 	<br><br>
-
 	<% fi %>
+	
+	<h4><% echo "Network State:  " %></h4>
+	<textarea cols="155" rows="10" ><% logread -l 100 | grep iot_keep_alive %></textarea>
+	<br><br>
 
 <script>	document.getElementById("loading").style.display = "none"; 	</script>
 

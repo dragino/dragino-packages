@@ -35,9 +35,34 @@
 
 	if [ "$FORM_BUTTON" == "Install gateway-rs" ]; then
 		if [ -f "/tmp/helium-gateway-rs-dragino.ipk" ]; then
-			if  [ ! -e "/etc/init.d/helium_gateway" ]; then
-				opkg install /tmp/helium-gateway-rs-dragino.ipk
+			if  [ ! -e "/etc/init.d/helium_gateway" ]; then	
 				Install_status="<span class='impactOK'>Helium server has been Installed successfully </span>"
+				%>
+		<html>
+			<span class="impact">
+				<br><br>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				Please wait for installtion fot the helium gateway-rs. 
+				Time remaining:	<span id="seconds"> Starting </span>
+			</span>
+				<script>
+	  			var seconds = 60; /* Set time (secs) to reload */
+    			setInterval(
+      			function(){
+        			if (seconds<=0){
+          			window.location.href = "/cgi-bin/lorawan-helium.has"; /* Reload page */
+        			} else {
+          			document.getElementById('seconds').innerHTML = --seconds;
+        			}
+      			}, 1000
+    			);
+				</script>
+
+		</html>
+<%
+			opkg install /tmp/helium-gateway-rs-dragino.ipk
 			else
 				Install_status="<span class='impactOK'>Helium gateway-rs has been Installed</span>"
 			fi
@@ -75,17 +100,17 @@
 	up_port="$(uci -q get gateway.server1.upp)"
 	dl_prot="$(uci -q get gateway.server1.dpp)"
 	
-
-	helium_region=`helium_gateway info | grep region | awk -F'"' '{print $4}'`
 	helium_server_connect_status=$(ps | grep "/etc/helium_gateway" -c)
 	if [ $helium_server_connect_status -eq "2" ]; then
 		helium_server_status="<span class="impactOK">&nbsp;&nbsp;Gateway-rs Connected</span>"
 		helium_key="$(helium_gateway key info | grep key | awk '{print $2}' | cut -d '"' -f 2)"	
 		helium_name="$(helium_gateway key info | grep name | awk '{print $2}' | cut -d '"' -f 2)"
+		helium_region=`helium_gateway info | grep region | awk -F'"' '{print $4}'`
 	else
 		helium_server_status="<span class="impact">No Gateway-rs Connected </span>"
 		helium_key="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
 		helium_name="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
+		helium_region="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
 	fi
 	
 	if [ -e "/etc/helium_gateway/gateway_key.bin" ]; then

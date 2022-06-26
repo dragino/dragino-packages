@@ -32,6 +32,20 @@ LINE="<hr style=\"height:2px;border:none;border-top:2px ridge green;\" width=\"1
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
+		<h4>	<% echo "IoT Server Connection Ctate:  " %> 	</h4>
+        <%= $LINE %>
+		<% cat /tmp/status_log | awk 'BEGIN{FS="\n"} {print $s, "'$FM'"}' %>
+	</td></tr>
+	
+	<tr class="rowSpacer"></tr>
+	<tr><td>
+		<h4>	<% echo "Logread FWD State:  " %> 	</h4>
+        <%= $LINE %>
+		<% logread -l 100 | grep "dragino.com" | grep -v server2 | awk 'BEGIN{FS="}"} {print $s, "'$FM'"}'  %>
+	</td></tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr><td>
 		<h4>	<% echo "Logread Error:  " %> 	</h4>
         <%= $LINE %>
 		<% logread -e "ERROR~" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
@@ -41,22 +55,16 @@ LINE="<hr style=\"height:2px;border:none;border-top:2px ridge green;\" width=\"1
 	<tr><td>
 		<h4>	<% echo "Logread RxTxJson:  " %> 	</h4>
         <%= $LINE %>
-		<% logread -l 50 -e "RXTX~" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
+		<% logread -l 50 | grep "PKTUP~ \[server\] JSON" | grep -v "dragino.com" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
 	</td></tr>
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
-		<h4>	<% echo "Logread REPORT:  " %> 	</h4>
+		<h4>	<% echo "Logread PULL State:  " %> 	</h4>
         <%= $LINE %>
-		<% logread -e REPORT | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
+		<% logread -l 50 | grep PULL_ACK | awk 'BEGIN{FS="ms"} {print $s, "'$FM'"}' %>
 	</td></tr>
 
-	<tr class="rowSpacer"></tr>
-	<tr><td>
-		<h4>	<% echo "Logread INFO (json):  " %> 	</h4>
-        <%= $LINE %>
-		<% logread -e "INFO~ (json):" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
-	</td></tr>
 
 </table>
 </div>

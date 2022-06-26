@@ -90,7 +90,8 @@ gen_gw_cfg() {
 	json_add_int "beacon_bw_hz" "125000"	
 	json_add_int "beacon_power" "14"
 	json_add_int "beacon_infodesc" "0"	
-
+	json_add_int	"time_interval" "`uci -q get gateway.general.stat`"
+	
 	###Servers Setting. 
 	json_add_array "servers"
 	

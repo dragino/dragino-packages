@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dragino_gw_fwd
-PKG_VERSION:=2.2.0
+PKG_VERSION:=2.5.0
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -34,10 +34,9 @@ define Package/$(PKG_NAME)/description
 endef
 
 define Package/$(PKG_NAME)/extra_provides
-	echo 'libmbedcrypto.so.1';\
 	echo 'libmbedcrypto.so.0';\
-	echo 'libmbedtls.so.10';\
-	echo 'libmbedx509.so.0';
+    echo 'libmbedtls.so.10';\
+    echo 'libmbedx509.so.0'
 endef
 
 define Build/Prepare

@@ -346,7 +346,7 @@ do
 		fi
 	else
 		has_internet=0
-		if [ "$iot_online" = "0" ] && [ "`uci get gateway.general.server_type`" = "lorawan" ]; then
+		if [ "$iot_online" = "0" ] && [ "`uci get gateway.general.server_type`" = "lorawan" ] || [ "`uci get gateway.general.server_type`" = "station" ]; then
 			logger -t iot_keep_alive "Internet fail. Check interfaces for network connection"
 			chk_eth1_connection
 			if [ "$wan_ping" -gt "$ZERO" ];then
@@ -376,6 +376,8 @@ do
 					if [ "$gsm_ping" -gt "$ZERO" ]; then
 						has_internet=1
 						use_gsm_as_gateway
+						sleep 10;
+						[ "`uci get gateway.general.server_type`" = "lorawan" ] || [ "`uci get gateway.general.server_type`" = "station" ]  && reload_iot_service
 					else
 					#All Interface doesn't have internet connection, reset all. 
 						logger -t iot_keep_alive "No internet at any interface"
@@ -418,7 +420,7 @@ do
 			iot_online=0
 			echo "offline" > /var/iot/status
 		else
-			iot_online=0
+			iot_online=1
 			echo "online" > /var/iot/status
 		fi
 	fi

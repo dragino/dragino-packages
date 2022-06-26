@@ -324,15 +324,16 @@ elif [ $server_type == "station" ];then
 else
 	#new_fwd=$(ps | grep -c /usr/bin/fwd) 	# Check new_fwd or pkt_fwd
 	#if [ "$new_fwd" == "2" ] ;then
-	fwd_status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key = '/service/pkt/PKT_SERV';" | grep -c runing`
-	if [ "$fwd_status" == "1" ];then
-		pscount="2"
+	if [ $model == "LG01" ] || [ $model == "LG02" ]; then
+		pscount=$(ps | grep -c pkt_fwd) # Check is process is running
 	else
-		pscount="1"
+		fwd_status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key = '/service/pkt/PKT_SERV';" | grep -c runing`
+		if [ "$fwd_status" == "1" ];then
+			pscount="2"
+		else
+			pscount="1"
+		fi
 	fi
-	#else
-		#pscount=$(ps | grep -c pkt_fwd) # Check is process is running
-	#fi
 	satlink10="/cgi-bin/lora-lora.has"
 fi
 
@@ -578,7 +579,11 @@ if [ $cell_en == "1" ]; then
 	fi
 	
   else
-	(comgt -d /dev/ttyModemAT > /tmp/celltmp.txt; ) &
+	if [ "$model" = "LPS8-N" ]; then
+		(comgt -d /dev//ttyUSB3 > /tmp/celltmp.txt; ) &
+	else	
+		(comgt -d /dev/ttyModemAT > /tmp/celltmp.txt; ) &
+	fi
   fi
   
   

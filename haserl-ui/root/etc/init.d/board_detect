@@ -39,18 +39,28 @@ start() {
 		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
 		;;
 	  *"los8"*)
-		logger "[Model Detected]: DLOS8"
-		chip="sx1301"
-		board="LG08"
-		model="DLOS8"
+        rmmod i2c-gpio-custom
+        insmod i2c-gpio-custom bus0=0,7,8
+        /usr/bin/test_loragw_i2c;
+        if [[ "$?" == "0" ]]; then
+				logger "[Model Detected]: DLOS8N"
+				chip="sx1302"
+				board="LG08"
+				model="DLOS8N"                  
+		else
+
+				logger "[Model Detected]: DLOS8"
+				chip="sx1301"
+				board="LG08"
+				model="DLOS8"                
+		fi
 		pic="Dragino-DLOS8.png"
 		ln -s /dev/ttyUSB0 /dev/ttyGPS
 		EC25_P2="/dev/ttyUSB3"
 		EC25_P3="/dev/ttyUSB4"
 		rmmod spi-gpio-custom
 		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
-		;;
-		
+        ;;
 	  *"os8n"*)
 		logger "[Model Detected]: DLOS8N"
 		chip="sx1302"
@@ -86,7 +96,7 @@ start() {
 		chip="sx1302"
 		board="LG08"
 		model="LPS8-G"
-		pic="Dragino-LPS8-N.png"
+		pic="Dragino-LPS8G.png"
 		ln -s /dev/ttyUSB0 /dev/ttyGPS
 		EC25_P3="/dev/ttyUSB2"
 		rmmod i2c-gpio-custom

@@ -37,6 +37,10 @@
 			if [ -n "$FORM_CUPSURI_TP" ]; then
 				echo "$FORM_CUPSURI_TP" > /etc/station/cups.uri
 			fi
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "SN" ]; then
+			if [ -n "$FORM_LNSURI_SN" ]; then
+				echo "$FORM_LNSURI_SN" > /etc/station/tc.uri
+			fi
 		fi
 		
 		uci set gateway.general.station_server_provider=$FORM_PALTFORM_SERVER_TYPE	
@@ -164,7 +168,6 @@
 		 fi
 	elif [ "$FORM_BUTTON" == "Upload_CUPS_Cert" ] && [ "$FORM_PALTFORM_SERVER_TYPE" == "TP" ]; then
 		if test -n "$HASERL_uploadfile_cer_tp_path" ; then
-		echo $FORM_uploadfile_cer_tp_name > /root/test1
 		  tp_trust_name=$FORM_uploadfile_cer_tp_name
 		  if [ "$tp_trust_name" != "" ]; then
 		  	if [ "${tp_trust_name##*.}"x = "cer"x ] || [ "${tp_trust_name##*.}"x = "pem"x ];then
@@ -336,16 +339,18 @@
 	
 	
 	
-	disp1="inline"; disp2="none"; disp3="none";
+	disp1="inline"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"
 	# Set up display options
 	if [ "$paltform_server_type_select" == "AWS" ]; then
-		disp1="none"; disp2="inline"; disp3="none"; disp_TP="none"
+		disp1="none"; disp2="inline"; disp3="none"; disp_TP="none"; disp_SN="none"
 	elif [ "$paltform_server_type_select" == "TTN" ]; then
-		disp1="inline";disp2="none"; disp3="none"; disp_TP="none"
+		disp1="inline";disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"
 	elif [ "$paltform_server_type_select" == "CS" ]; then
-		disp1="none"; disp2="none"; disp3="inline"; disp_TP="none"
+		disp1="none"; disp2="none"; disp3="inline"; disp_TP="none"; disp_SN="none"
 	elif [ "$paltform_server_type_select" == "TP" ]; then
-		disp1="none"; disp2="none"; disp3="none"; disp_TP="inline"
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="inline"; disp_SN="none"
+	elif [ "$paltform_server_type_select" == "SN" ]; then
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="inline"
 	fi
 
 
@@ -361,7 +366,8 @@
 	    document.getElementById("div1").style.display = "<% echo -n $disp1 %>"; 
 	    document.getElementById("div2").style.display = "<% echo -n $disp2 %>";      
 		document.getElementById("div3").style.display = "<% echo -n $disp3 %>"; 
-		document.getElementById("div_TP").style.display = "<% echo -n $disp_TP %>"; 
+		document.getElementById("div_TP").style.display = "<% echo -n $disp_TP %>";
+		document.getElementById("div_SN").style.display = "<% echo -n $disp_SN %>"; 
     	}
 	function changeFunc(val) {
 	    document.forms["station"].submit();
@@ -423,6 +429,7 @@
 	  		<option value="AWS" >Amazon IoT -- Basic Stion </option>
 			<option value="CS" >ChirpStack -- Basic Station </option>
 			<option value="TP">ThingPark -- Basic Station </option>
+			<option value="SN">Senet -- Basic Station </option>
 		</select></td>
 	</tr>
 
@@ -535,7 +542,7 @@
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
-		<td colspan="24"><input type="text" name="LNSURI_CS" maxlength="128" placeholder="example: wss://xxxx.chirpstack.com:443 or ws://xxx.chirpstack.com:3001 " VALUE=<% echo -n $cups_uri %>  ></td>
+		<td colspan="24"><input type="text" name="LNSURI_CS" maxlength="128" placeholder="example: wss://xxxx.chirpstack.com:443 or ws://xxx.chirpstack.com:3001 " VALUE=<% echo -n $tc_uri %>  ></td>
 	</tr>
 	
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
@@ -605,6 +612,28 @@
 		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Cert" onclick="showPageLoaderIcon()"></td>
 	</tr>
 	
+</table>
+</div>
+
+<div id="div_SN">
+	<table class="configTable">
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
+		<td colspan="24"><input type="text" name="LNSURI_SN" maxlength="128" placeholder="example: wss://collector.senetco.io:6042 " VALUE=<% echo -n $tc_uri %>  ></td>
+	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSTRUST">LNS TLS trust</label></td>
+		<td colspan="10"><% echo -n $tc_trust_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_tc_pem_trust></td>
+		<td colspan="5"><% echo -n $tc_trust_upload_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
+	</tr>
 </table>
 </div>
 

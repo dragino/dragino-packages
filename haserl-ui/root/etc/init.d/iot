@@ -4,17 +4,15 @@ START=58
 USE_PROCD=1
 
 init_board() {
-    	echo 15 > /sys/class/gpio/export
+    echo 15 > /sys/class/gpio/export
 	echo low > /sys/class/gpio/gpio15/direction
 	service=`uci get gateway.general.server_type`
 	provider=`uci get gateway.server1.provider`
 	gwcfg=`uci get gateway.general.gwcfg`
 
 	if [[ "$service" = "tcpudp" ]]; then
-		ls /etc/init.d/helium_gateway
 		process="tcp_process.sh"
 	elif [[ "$service" = "mqtt" ]]; then
-		ls /etc/init.d/helium_gateway
 		process="mqtt_process.sh"
 	elif [[ "$service" = "lorawan" ]]; then
 		if [[ "$provider" = "helium" ]]; then

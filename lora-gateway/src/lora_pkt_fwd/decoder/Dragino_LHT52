@@ -1,0 +1,117 @@
+#!/usr/bin/lua
+
+--Decoder for LHT52 firmware version
+
+json = require('dragino.json')
+local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+function str_pad(str)
+     local str_hex=utility.hex2str(string.sub(payload,str,str))
+     return str_hex
+end
+
+pan1=string.sub(payload,27,27)
+pan2=string.sub(payload,24,24)
+pan3=string.sub(payload,23,23)
+if  pan1~="" then 
+
+TempC_SHT_RAW_3=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+TempC_SHT_RAW_4=tonumber(utility.hex2str(string.sub(payload,18,18)),16)
+minus_flag = bit.bit_rshift(TempC_SHT_RAW_3,7)
+TempC_SHT_0=(bit.bit_or(bit.bit_lshift(TempC_SHT_RAW_3,8),TempC_SHT_RAW_4)-minus_flag*65536)/100
+payload_t.TempC_SHT=TempC_SHT_0
+
+Hum_SHT_RAW_3=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+Hum_SHT_RAW_4=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+minus_flag = bit.bit_rshift(Hum_SHT_RAW_3,7)
+Hum_SHT_0=(bit.bit_or(bit.bit_lshift(Hum_SHT_RAW_3,8),Hum_SHT_RAW_4)-minus_flag*65536)/10
+payload_t.Hum_SHT=Hum_SHT_0
+
+TempC_DS_RAW_3=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+TempC_DS_RAW_4=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+minus_flag = bit.bit_rshift(TempC_DS_RAW_3,7)
+TempC_DS_0=(bit.bit_or(bit.bit_lshift(TempC_DS_RAW_3,8),TempC_DS_RAW_4)-minus_flag*65536)/100
+payload_t.TempC_DS=TempC_DS_0
+
+Ext_RAW=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+payload_t.Ext=Ext_RAW
+
+data_time_RAW_24=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+data_time_RAW_25=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+data_time_RAW_26=tonumber(utility.hex2str(string.sub(payload,26,26)),16)
+data_time_RAW_27=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+minus_flag_1 = bit.bit_lshift(data_time_RAW_26,8)
+minus_flag_2 = bit.bit_lshift(data_time_RAW_25,16)
+data_time_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(data_time_RAW_24,24),minus_flag_2)),minus_flag_1),data_time_RAW_27)
+payload_t.Systimestamp=data_time_0
+
+elseif pan2~="" then
+payload_t.DS18B20_ID=str_pad(17)..str_pad(18)..str_pad(19)..str_pad(20)..str_pad(21)..str_pad(22)..str_pad(23)..str_pad(24)
+
+elseif pan3~="" then
+Sensor_Model_RAW=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+payload_t.Sensor_Model=Sensor_Model_RAW
+
+Firmware_Version_RAW=tonumber(utility.hex2str(string.sub(payload,18,18)),16)
+Firmware_Version_0=Firmware_Version_RAW..str_pad(19)
+payload_t.Firmware_Version=Firmware_Version_0
+
+Freq_Band_RAW=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+payload_t.Freq_Band=Freq_Band_RAW
+
+Sub_Band_RAW=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+payload_t.Sub_Band=Sub_Band_RAW
+
+HEX_BAT=string.sub(payload,22,23)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  
+payload_t.Bat_V=BAT
+
+else 
+payload_t.Status="RPL data or sensor reset"
+payload_t.Status2="Data retrieved, your need to parse it by the application server"
+end
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.DS18B20_ID .. "&field2=".. payload_t.Status .. "&field3=".. payload_t.Status2 .. "&field4=".. payload_t.Freq_Band .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&field7=".. payload_t.Systimestamp.. "&field8="..payload_t.Ext.. "&field9=".. payload_t.TempC_DS.. "&field10=".. payload_t.Hum_SHT.. "&field11=".. payload_t.TempC_SHT.. "&field12=".. payload_t.TRIGGER_MODE.. "&field13=".. payload_t.KEEP_STATUS.. "&field14=".. payload_t.Sensor_Model.. "&field15=".. payload_t.Sub_Band .. "&field16=".. payload_t.FREQUENCY_BAND.. "&field17=".. payload_t.Bat_V.. "&field18="..payload_t.Firmware_Version..  "&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t)) 
+return json.encode(payload_t)
+
+
+
+
+

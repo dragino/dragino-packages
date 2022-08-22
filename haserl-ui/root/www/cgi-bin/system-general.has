@@ -17,6 +17,13 @@
 		((echo $FORM_PASSWORD2; sleep 1; echo $FORM_PASSWORD2) | passwd admin; /etc/init.d/uhttpd restart) &
 	fi
 	
+	if [ "$FORM_BUTTON" == "Change_Level" ]; then
+		uci set system.level.log_level=$FORM_LOGREADLEVEL
+		uci commit system
+		sleep 2;
+		/usr/bin/reload_iot_service.sh 
+	fi
+	
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 		echo $FORM_TIMEZONE > /etc/TZ
 		uci set system.@system[0].timezone=$FORM_TIMEZONE
@@ -48,6 +55,7 @@
 	timezone=$(uci get system.@system[0].timezone)
 	iot_interval=`uci get system.@system[0].iot_interval`
 	ssh_enabled="$(uci -q get firewall.ssh.dest)"
+	logreadlevel=$(uci -q get system.level.log_level)
   if [ "$ssh_enabled" == "lan" ]; then
   	ssh_tick="checked"
   else
@@ -169,8 +177,20 @@
 	<tr><td colspan="20"><h3>Keepalive_Script</h3></td></tr>
 		<td colspan="1"></td>
 		<td colspan="4"><label for="HTTP">Interval setting</label></td>
-		<td colspan="4"><input type="iot_interval" name="IOT_INTERVAL" id="iot_interval" maxlength="32" value=<% echo -n $iot_interval%>></td>
+		<td colspan="2"><input type="iot_interval" name="IOT_INTERVAL" id="iot_interval" maxlength="32" value=<% echo -n $iot_interval%>></td>
 	</tr>
+	
+	<tr><td colspan="20"><h3>Logread Level</h3></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="4"><label for="LOGREADLEVEL"> Logread level</label></td>
+	  	<td colspan="2"><SELECT name="LOGREADLEVEL" id="logreadlevel">
+						      <option value="info">Info</option>
+						      <option value="debug">Debug</option>
+				</SELECT></td>
+		<td colspan="4"> <INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Change_Level"> </td>
+		<script>document.getElementById("logreadlevel").value="<% echo -n $logreadlevel %>";</script>
+	</tr>	
 		
 	<tr class="rowSpacer"></tr>
 	<tr class="rowSpacer"></tr>

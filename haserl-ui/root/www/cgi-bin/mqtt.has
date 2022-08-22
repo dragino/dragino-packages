@@ -320,6 +320,7 @@
     <p>DATA: Substitute payload text without metadata</p>
     <p>BIN_ASCII: Substitute binary data payload converted to ascii text</p>
     <p>FILE: Send file of data as received</p>
+	<P>JSON: Substitue payload txt, SNR and RSSI to json format</p>
     <p style="text-align: center;"><br>[Close]</p>
 </div>
 

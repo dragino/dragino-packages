@@ -320,15 +320,14 @@ if [ $server_type == "loriot" ]; then
 elif [ $server_type == "station" ];then
 	pscount=$(ps | grep station | grep -c -v grep) # Check is process is running
 	satlink10="/cgi-bin/lorawan-basicstation.has"
-	version10=`station -v | awk 'NR==1''{print}'`
 else
 	#new_fwd=$(ps | grep -c /usr/bin/fwd) 	# Check new_fwd or pkt_fwd
 	#if [ "$new_fwd" == "2" ] ;then
 	if [ $model == "LG01" ] || [ $model == "LG02" ]; then
 		pscount=$(ps | grep -c pkt_fwd) # Check is process is running
 	else
-		fwd_status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key = '/service/pkt/PKT_SERV';" | grep -c runing`
-		if [ "$fwd_status" == "1" ];then
+		fwd_status=`pgrep fwd`
+		if [ -n "$fwd_status" ];then
 			pscount="2"
 		else
 			pscount="1"
@@ -477,13 +476,17 @@ if [ $server_type == "lorawan" ]; then
 	#fi
 elif [ $server_type == "station" ]; then
 	info_title3="LoRaWAN Basic Station"
-	server_provider=`uci get  gateway.general.station_server_provider`
+	server_provider=`uci get gateway.general.station_server_provider`
 	if [ "$server_provider" == "AWS" ]; then
-		server3=`cat /etc/station/cups.uri`
+		server3=AWS,`cat /etc/station/cups.uri`
 	elif [ "$server_provider" == "TTN" ]; then
-		server3=`cat /etc/station/cups.uri`
+		server3=TTN,`cat /etc/station/cups.uri`
 	elif [ "$server_provider" == "CS" ]; then
-		server3=`cat /etc/station/tc.uri`
+		server3=Chirpstack,`cat /etc/station/tc.uri`
+	elif [ "$server_provider" == "SN" ]; then
+		server3=Senet,`cat /etc/station/tc.uri`
+	elif [ "$server_provider" == "TP" ]; then
+		server3=ThingPart,`cat /etc/station/tc.uri`
 	fi
 	station_status=$(ps | grep station | grep -c -v grep)
 	
@@ -577,7 +580,7 @@ if [ $cell_en == "1" ]; then
 			comgt -d /dev/ttyUSB1 -s /etc/gcom/setcopsfromat.gcom 
 		fi
 	fi
-	
+
   else
 	if [ "$model" = "LPS8-N" ]; then
 		(comgt -d /dev//ttyUSB3 > /tmp/celltmp.txt; ) &
@@ -585,8 +588,8 @@ if [ $cell_en == "1" ]; then
 		(comgt -d /dev/ttyModemAT > /tmp/celltmp.txt; ) &
 	fi
   fi
-  
-  
+
+
   # Extract data for Info box
   sim5=$(cat /tmp/cell1.txt|grep SIM)
   sig=$(cat /tmp/cell1.txt | grep Signal)
@@ -617,14 +620,13 @@ fi
 
 ################
 # SAT10 Data - LoRa Radios
-
 # Check for LORIOT mode
 if [ $server_type == "loriot" ]; then
 	info_title10="LORIOT Mode"
 	server10="$server3"
 elif [ $server_type == "station" ];then
 	info_title10="LoRaWAN Basic Station"
-	server10=`station -V`
+	server10="Station: 2.0.6(mips-openwrt/dragino) 2022-06-27 07:23:31"
 else
 	info_title10="LoRa Radio"
 fi
@@ -776,7 +778,7 @@ cat > /tmp/popup-data.txt << EOF
 <div class="info" id="info-10d">
 	<table>
 		<tr>	  <th colspan="2">$info_title10 </th>	</tr>
-		<tr>	  <td>Version:</td><td>$version10</td>	</tr>
+		<tr>	  <td>Version:</td><td>$server10</td>	</tr>
 	</table>
 </div>
 

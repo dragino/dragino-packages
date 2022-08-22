@@ -20,6 +20,12 @@ fake_gps=`uci get gateway.general.fake_gps`
 model=`cat /tmp/iot/model.txt`
 json_section_name="SX130x_conf"
 
+logread_level=`uci -q get system.level.log_level`
+if [ $logread_level == "debug" ]; then
+	log_mask=111111
+else
+	log_mask=1111
+fi
 
 gen_gw_cfg() {
  
@@ -31,7 +37,7 @@ gen_gw_cfg() {
 	json_add_string "gateway_ID" "$gwid" 
 	json_add_string "regional" "$def_cfg" 
 	
-	json_add_string "log_mask" "1111"    # Log Level
+	json_add_string "log_mask" "$log_mask"    # Log Level
 	json_add_boolean "radiostream_enable" 1    # Enable SX Radio TX /RX
 	
 	#ghoststream
@@ -116,8 +122,8 @@ gen_gw_cfg() {
 		  #                   /*fport的过滤方法, 0是不处理，1是只转发数据库里设置了的fport，2不转发数据库里的fport */
 		  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
 		  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
-		json_add_int "fport_filter" "`uci get gateway.server1.fport_filter`" 
-		json_add_string "devaddr_filter" "`uci get gateway.server1.devaddr_filter`"
+		json_add_int "fport_filter" "`uci get gateway.server1.fport_filter_level`" 
+		json_add_int "devaddr_filter" "`uci get gateway.server1.devaddr_filter_level`"
 		json_add_boolean "forward_crc_valid" "`uci get gateway.server1.forward_crc_valid`"
 		json_add_boolean "forward_crc_error" "`uci get gateway.server1.forward_crc_error`"
 		json_add_boolean "forward_crc_disabled" "`uci get gateway.server1.forward_crc_disabled`"
@@ -142,8 +148,8 @@ gen_gw_cfg() {
 		  #                   /*fport的过滤方法, 0是不处理，1是只转发数据库里设置了的fport，2不转发数据库里的fport */
 		  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
 		  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
-		json_add_int "fport_filter" "0" 
-		json_add_string "devaddr_filter" "0"
+		json_add_int "fport_filter" "`uci get gateway.server2.fport_filter_level`" 
+		json_add_int "devaddr_filter" "`uci get gateway.server2.devaddr_filter_level`"
 		json_add_boolean "forward_crc_valid" 1
 		json_add_boolean "forward_crc_error" 0
 		json_add_boolean "forward_crc_disabled" 0
@@ -319,9 +325,25 @@ if [ $model == "LG308" ] || [ $model == "DLOS8" ];then
 	chip="301"
 elif [ $model == "LPS8" ];then
 	chip="308"
-elif [ $model == "LIG16" ] || [ $model == "LPS8-N" ]|| [ $model == "LPS8-G" ]|| [ $model == "LG308-N" ]|| [ $model == "DLOS8N" ];then
+elif [ $model == "LIG16" ] ;then
 	chip="302"
 	json_section_name="SX130x_conf"
+elif [ $model == "LPS8-N" ] || [ $model == "DLOS8N" ] ||  [ $model == "LPS8-G" ] || [ $model == "LG308-N" ]; then
+	SN=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | cut -b '1-4'`
+	case $SN in
+		ps8n | ps8g | los8 )
+			chip="302-zn"
+			json_section_name="SX130x_conf"
+			;;
+		308n )
+			chip="302"
+			json_section_name="SX130x_conf"
+			;;
+		*)
+			chip="302"
+			json_section_name="SX130x_conf"
+			;;
+	esac
 fi
 
 

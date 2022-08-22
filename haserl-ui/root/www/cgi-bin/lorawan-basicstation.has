@@ -186,23 +186,41 @@
 	fi
 	
 	
-	if [ "$FORM_BUTTON" == "Upload_LNS_Trust" ]; then
-		if test -n "$HASERL_uploadfile_tc_pem_trust_path"; then
-		  tc_trust_name=$FORM_uploadfile_tc_pem_trust_name
-		  if [ "$tc_trust_name" != "" ]; then
-		  	if [ "${tc_trust_name##*.}"x = "pem"x ] || [ "${tc_trust_name##*.}"x = "trust"x ];then
-				find /etc/station -name "tc.trust"| xargs rm -rfv   #  Remove the original tc.trust file
-				savedfile=$HASERL_uploadfile_tc_pem_trust_path
-				#cp $savedfile /etc/station/$tc_trust_name
-				mv $savedfile /etc/station/tc.trust  # Store the cert file
-				tc_trust_upload_status="<span class='impactOK'>Upload Finished</span>"			
-			else 
-				tc_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
-			fi 
-		  else
-		  	tc_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
-		  fi
-		fi
+	if [ "$FORM_BUTTON" == "Upload_LNS_Trust" ] && [ "$FORM_PALTFORM_SERVER_TYPE" == "CS" ]; then
+
+			if test -n "$HASERL_uploadfile_tc_pem_trust_path"; then
+			  tc_trust_name=$FORM_uploadfile_tc_pem_trust_name
+			  if [ "$tc_trust_name" != "" ]; then
+				if [ "${tc_trust_name##*.}"x = "pem"x ] || [ "${tc_trust_name##*.}"x = "trust"x ];then
+					find /etc/station -name "tc.trust"| xargs rm -rfv   #  Remove the original tc.trust file
+					savedfile=$HASERL_uploadfile_tc_pem_trust_path
+					#cp $savedfile /etc/station/$tc_trust_name
+					mv $savedfile /etc/station/tc.trust  # Store the cert file
+					tc_trust_upload_status="<span class='impactOK'>Upload Finished</span>"			
+				else 
+					tc_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
+				fi 
+			  else
+				tc_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
+			  fi
+			fi
+	elif [ "$FORM_BUTTON" == "Upload_LNS_Trust" ] && [ "$FORM_PALTFORM_SERVER_TYPE" == "SN" ]; then
+		if test -n "$HASERL_uploadfile_sn_pem_trust_path"; then
+			  tc_trust_name=$FORM_uploadfile_sn_pem_trust_name
+			  if [ "$tc_trust_name" != "" ]; then
+				if [ "${tc_trust_name##*.}"x = "pem"x ] || [ "${tc_trust_name##*.}"x = "trust"x ];then
+					find /etc/station -name "tc.trust"| xargs rm -rfv   #  Remove the original tc.trust file
+					savedfile=$HASERL_uploadfile_sn_pem_trust_path
+					#cp $savedfile /etc/station/$tc_trust_name
+					mv $savedfile /etc/station/tc.trust  # Store the cert file
+					tc_trust_upload_status="<span class='impactOK'>Upload Finished</span>"			
+				else 
+					tc_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
+				fi 
+			  else
+				tc_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
+			  fi
+			fi
 	fi
 	
 	if [ "$FORM_BUTTON" == "Upload_LNS_key" ]; then
@@ -535,6 +553,7 @@
 </table>	
 </div>
 
+<%#----chirpstack %>
 <div id="div3">
 	<table class="configTable">
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
@@ -630,7 +649,7 @@
 		<td colspan="1"></td>
 		<td colspan="5"><label for="CUPSTRUST">LNS TLS trust</label></td>
 		<td colspan="10"><% echo -n $tc_trust_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_tc_pem_trust></td>
+		<td colspan="8"><input type=file name=uploadfile_sn_pem_trust></td>
 		<td colspan="5"><% echo -n $tc_trust_upload_status %></td>
 		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
 	</tr>

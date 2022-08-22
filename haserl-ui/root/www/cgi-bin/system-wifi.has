@@ -43,6 +43,7 @@
 		
     uci commit wireless 
 
+    [ -f /var/log/wifi_handle.txt ] && rm /var/log/wifi_handle.txt;
     # Run in background    
 		(sleep 1; /etc/init.d/network restart) &
 		(sleep 30; /etc/init.d/fallbackip start) &
@@ -166,7 +167,7 @@
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="4"><label for="HOST_KEY"> Passphrase </label></td>
-		<td colspan="3"><input type="password" name="HOST_KEY" id="host_key" maxlength="128" VALUE="<% echo -n $host_key %>" pattern="[a-zA-Z0-9_*.$%<>;:?@=!^|&+()#~\{\}\-\s\/]{8,128}" ></td>
+		<td colspan="3"><input type="password" name="HOST_KEY" id="host_key" maxlength="128" VALUE="<% echo -n $host_key %>" pattern="[a-zA-Z0-9/\_*.$%<>;:?@=!^|&+()#~\{\}\-]{8,32}"  ></td>
 		<td colspan="1"><span class="btnShow" onclick="toggleVis('host_key')">Show</span></td>
 		<td colspan="2"></td>
 		<td colspan="3"><label for="HOST_ENCRYPTION">Encryption</label></td>
@@ -200,6 +201,15 @@
 		 	Warning: WiFi WAN Host SSID is not present in scan.
 		 	</span></td>
 	</tr>
+	<% if [ -n /var/log/wifi_handle.txt ]; then %>
+	
+	<tr>
+		<td colspan="20"><span id="host_str" class="impact" style="visibility:visible; display:inline;">
+		 	<% cat /var/log/wifi_handle.txt %>
+		 	</span></td>
+	</tr>
+	
+	<% fi %>
 	
 	<tr><td></td></tr>
   

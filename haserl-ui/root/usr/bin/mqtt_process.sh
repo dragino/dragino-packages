@@ -325,11 +325,21 @@ do
 					if [ ! -z $DECODER ]; then
 						PUB_FLAG="-m "
 						if [ "$DECODER" == "ASCII" ]; then
-							#Send As ASCII String
-							rssi=`hexdump -v -e '11/1 "%c"'  -n 16 /var/iot/channels/$channel | tr A-Z a-z`
-							payload=`xxd -p /var/iot/channels/$channel`
-							payload=`echo ${payload:32}`
-							mqtt_data=$rssi$payload
+							if [ "$data_format" == "JSON" ]; then
+								rssi=`expr $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '1-8')) - 4294967296`
+								snr=`expr  $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '9-16')) / 10`
+								payload=`xxd -p /var/iot/channels/$channel`
+								payload=`echo ${payload:32}`
+							
+								mqtt_data="{\"rssi\": \"$rssi\", \"payload\": \"$payload\",\"snr\": \"$snr\"}"	
+							else
+								#Send As ASCII String
+								rssi=`hexdump -v -e '11/1 "%c"'  -n 16 /var/iot/channels/$channel | tr A-Z a-z`
+								payload=`xxd -p /var/iot/channels/$channel`
+								payload=`echo ${payload:32}`
+								mqtt_data=$rssi$payload
+							fi
+							
 						else
 							#Decode the sensor value use pre-set format and send
 							mqtt_data=`/etc/lora/decoder/$DECODER $channel`
@@ -342,6 +352,14 @@ do
 						xxd -p /var/iot/channels/$channel | tr -d '\n'> /var/iot/channels/$channel.asc
 						PUB_FLAG="-m "
 						mqtt_data=$(cat /var/iot/channels/$channel.asc)
+					elif [ "data_format" == "JSON" ]; then
+						rssi=`expr $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '1-8')) - 4294967296`
+						snr=`expr  $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '9-16')) / 10`
+						payload=`xxd -p /var/iot/channels/$channel`
+						payload=`echo ${payload:32}`
+						
+						mqtt_data="{\"rssi\"\: \"$rssi\"\, \"payload\"\:\"$payload\"\,\"snr\"\:\"$snr\"}"
+					
 					else 
 						DECODER="Not Set"
 					fi

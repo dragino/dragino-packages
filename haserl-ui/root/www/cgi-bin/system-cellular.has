@@ -65,7 +65,7 @@
 	elif [ `cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c` == "1" ]; then
 		echo 1 > /tmp/cell_detect.txt
 	else
-		echo 0 /tmp/cell_detect.txt
+		echo 0 > /tmp/cell_detect.txt
 	fi
 	
   cell_detect=$(cat /tmp/cell_detect.txt)

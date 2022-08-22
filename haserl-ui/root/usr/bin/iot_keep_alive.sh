@@ -144,7 +144,8 @@ reload_iot_service()
 		cur_reload_time=`date +%s`
 		if [ "`uci get gateway.general.server_type`" = "lorawan" ] && [ `expr $cur_reload_time - $last_reload_time` -gt 40 ];then
 			#Socket Reconnect
-			ps | grep "fwd" | grep -v grep | awk '{print $1}' | xargs kill -USR1
+			#ps | grep "fwd" | grep -v grep | awk '{print $1}' | xargs kill -USR1
+			/etc/init.d/lora_gw reload
 			last_reload_time=`date +%s`
 		elif [ "`uci get gateway.general.server_type`" = "station" ] && [ `expr $cur_reload_time - $last_reload_time` -gt 40 ];then
 			/usr/bin/reload_iot_service.sh &
@@ -296,6 +297,36 @@ station_time_check()
 	fi
 }
 
+
+chk_wlan0_client()
+{
+	handle_fail=`logread -l 50 | grep "handle_probe_req: send failed" -c`
+	if [ "$handle_fail" -gt "25" ];then
+		if [ "`uci get wireless.sta_0.disabled`" = "0" ];then
+			logger -t iot_keep_alive "wifi_client setting incorrect or AP not in range"
+			echo "Detection of wifi handle request failure and automatically turn off wifi function, and will reconnect every ten minutes\
+				possible causes: 1) weak signal, 2) password error." > /var/log/wifi_handle.txt
+			last_handle_fail_time=`date +%s` && echo "$last_handle_fail_time" > /var/log/last_handle_fail_time.txt;
+			uci set wireless.sta_0.disabled=1
+			uci commit wireless
+			wifi reload
+		fi
+	else
+		cur_time=`date +%s`
+		[ -z $last_handle_fail_time ] && [ -f /var/log/last_handle_fail_time.txt ] && last_handle_fail_time=`cat /var/log/last_handle_fail_time.txt`
+		#check every ten minutes for wifi_client
+		if [ "$last_handle_fail_time" -gt "0" ] && [ `expr $cur_time - $last_handle_fail_time` -gt 600 ];then
+			logger -t iot_keep_alive "try connect wifi again"
+			[ -f /var/log/wifi_handle.txt ] && rm /var/log/wifi_handle.txt
+			last_handle_fail_time=0
+			uci set wireless.sta_0.disabled=0
+			uci commit wireless
+			wifi reload
+		fi
+	fi	
+}
+
+
 while :
 do 
 	sleep "$iot_interval"
@@ -322,6 +353,9 @@ do
 			310950) enable_ue_usage;;
 		esac
 	fi
+
+	#check WiFi Client settings, handle in case AP-SSID is not present or login incorrect
+	chk_wlan0_client
 	
 	if [ "$global_ping" -gt "$ZERO" ];then   # Check if the device has internet connection
 		ROUTE_DF=`ip route | grep default | awk '{print $5}'`
@@ -413,9 +447,15 @@ do
 			echo "offline" > /var/iot/status
 		fi 
 	fi
-	[ "`uci get gateway.general.server_type`" = "lorawan" ] && iot_online=`cat /var/iot/status | grep online -c`	
-	if [ "`uci get gateway.general.server_type`" = "station" ]; then
+	[ "`uci get gateway.general.server_type`" == "lorawan" ] && iot_online=`cat /var/iot/status | grep online -c`	
+	if [ "`uci get gateway.general.server_type`" == "station" ]; then
 		station_status=`tail /var/iot/station.log | grep -e "HTTP connect failed" -e "failed" -e "Interaction with CUPS failed" -c`
+		station_abandon=`cat /var/iot/station.log | grep -e "abandoning" -c`
+		if [ "$station_abandon" -gt "0" ]; then
+			rm -f /var/iot/station.log
+			reload_iot_service
+			sleep 15;
+		fi
 		if [ $station_status -gt "0" ]; then
 			iot_online=0
 			echo "offline" > /var/iot/status
@@ -424,6 +464,14 @@ do
 			echo "online" > /var/iot/status
 		fi
 	fi
+
+	if [ "`uci get gateway.general.server_type`" == "mqtt" ] && [ "`uci get mqtt.common.sub_enable`" == "checked" ]; then
+        mqtt_subpid=`pgrep mosquitto_sub`                                                                  
+        if [ -z $mqtt_subpid ]; then                                    
+            /etc/init.d/iot reload                                  
+        fi                                                         
+    fi   
+
 	/usr/bin/blink-stop
 	if [ "$iot_online" = "1" ]; then
 		# IoT Connection is ok

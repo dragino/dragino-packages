@@ -16,6 +16,14 @@ LoRaMacParserStatus_t LoRaMacParserData( LoRaMacMessageData_t* macMsg )
 
     macMsg->MHDR.Value = macMsg->Buffer[bufItr++];
 
+    switch (macMsg->MHDR.Bits.MType) {
+        case FRAME_TYPE_JOIN_ACCEPT:
+        case FRAME_TYPE_JOIN_REQ:
+            return LORAMAC_PARSER_SUCCESS;
+        default:
+            break;
+    }
+
     macMsg->FHDR.DevAddr = macMsg->Buffer[bufItr++];
     macMsg->FHDR.DevAddr |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 8 );
     macMsg->FHDR.DevAddr |= ( ( uint32_t ) macMsg->Buffer[bufItr++] << 16 );

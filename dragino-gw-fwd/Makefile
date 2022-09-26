@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dragino_gw_fwd
-PKG_VERSION:=2.5.0
+PKG_VERSION:=2.6.1
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -72,6 +72,19 @@ define Package/$(PKG_NAME)/install
 
 	$(INSTALL_DIR) $(1)/etc/lora/cfg
 	$(CP) $(PKG_BUILD_DIR)/config/*json* $(1)/etc/lora/cfg
+	
+	$(INSTALL_DIR) $(1)/etc/lora/cfg-301
+	$(CP) $(PKG_BUILD_DIR)/cfg-301/*.json* $(1)/etc/lora/cfg-301
+	$(INSTALL_DIR) $(1)/etc/lora/cfg-308
+	$(CP) $(PKG_BUILD_DIR)/cfg-308/*.json* $(1)/etc/lora/cfg-308
+	$(INSTALL_DIR) $(1)/etc/lora/cfg-302
+	$(CP) $(PKG_BUILD_DIR)/cfg-302/*.json* $(1)/etc/lora/cfg-302
+	$(INSTALL_DIR) $(1)/etc/lora/cfg-302-zn
+	$(CP) $(PKG_BUILD_DIR)/cfg-302/*.json* $(1)/etc/lora/cfg-302-zn
+	$(INSTALL_DIR) $(1)/etc/lora/customized_scripts
+	$(CP) $(PKG_BUILD_DIR)/customized_scripts/* $(1)/etc/lora/customized_scripts
+	$(INSTALL_DIR) $(1)/etc/lora/decoder
+	$(CP) $(PKG_BUILD_DIR)/decoder/* $(1)/etc/lora/decoder
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

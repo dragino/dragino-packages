@@ -11,6 +11,10 @@
 			if [ -n "$FORM_CUPSURI" ]; then
 				echo "$FORM_CUPSURI" > /etc/station/cups.uri;
 			fi
+			
+			if [ -n "$FORM_LNSURI" ]; then
+				echo "$FORM_LNSURI" > /etc/station/lns.uri;
+			fi
 		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "TTN" ]; then 
 			if [ -n "$FORM_TTN_URI" ]; then
 				echo "$FORM_TTN_URI" > /etc/station/cups.uri;
@@ -95,6 +99,24 @@
 			fi 
 		  else
 		  	trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! $cups_trust_name </span>"
+		  fi
+		fi
+	fi
+	
+	if [ "$FORM_BUTTON" == "Upload_LNS_Trust" ]; then
+		if test -n "$HASERL_uploadfile_lns_trust_path"; then
+		  lns_trust_name=$FORM_uploadfile_lns_trust_name
+		  if [ "$lns_trust_name" != "" ]; then
+		  	if [ "$lns_trust_name" == "lns.trust" ];then
+				find /etc/station -name "lns.trust*"|xargs rm -rfv   #  Remove the original lns.trust file
+				savedfile=$HASERL_uploadfile_lns_trust_path
+				cp $savedfile /etc/station/$lns_trust_name  # Store the cert file
+				lns_trust_upload_status="<span class='impactOK'>Upload Finished </span>"			
+			else 
+				lns_trust_upload_status="<span class='impact'>file name must be lns.trust </span>"
+			fi 
+		  else
+		  	lns_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! $lns_trust_name </span>"
 		  fi
 		fi
 	fi
@@ -278,6 +300,7 @@
 	ttn_lns_key="$(cat /etc/station/lns.key | awk '{print $3}')"
 	cups_uri="$(cat /etc/station/cups.uri)"
 	tc_uri="$(cat /etc/station/tc.uri)"
+	lns_uri="$(cat /etc/station/lns.uri)"
 	gwid="$(cat /etc/station/station.conf | grep routerid | awk -F "\"" '{print $4}')"
 	if [ -z "$gwid" ];then
 		gwid="$(uci -q get gateway.general.GWID)"
@@ -290,6 +313,12 @@
 	  	trust_status=`ls /etc/station/cups.trust | awk -F '/' '{print $4}'`
 	else
 	  	trust_status='<span class="impact-light">Not Found</span>'
+	fi
+	
+	if [ -e "/etc/station/lns.trust" ]; then
+	  	lns_trust_status=`ls /etc/station/lns.trust | awk -F '/' '{print $4}'`
+	else
+	  	lns_trust_status='<span class="impact-light">Not Found</span>'
 	fi
 
 	if [ -e "/etc/station/cups.key" ]; then
@@ -508,17 +537,22 @@
 </table>
 </div>
 
-
-
-
 <div id="div2">
 <table class="configTable">
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="5"><label for="CUPSURI">CUPS URI</label></td>
 		<td colspan="24"><input type="text" name="CUPSURI" maxlength="128" placeholder="example: https://xxxxxxx.cups.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $cups_uri %> ></td>
+	</tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSURI">LNS  URI</label></td>
+		<td colspan="24"><input type="text" name="LNSURI" maxlength="128" placeholder="example: wss://xxxxxxx.lns.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $lns_uri %> ></td>
 	</tr>
 
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
@@ -529,6 +563,16 @@
 		<td colspan="8"><input type=file name=uploadfile_pem_trust></td>
 		<td colspan="5"><% echo -n $trust_upload_status %></td>
 		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Trust" onclick="showPageLoaderIcon()"></td>
+	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSTRUST">LNS  trust</label></td>
+		<td colspan="10"><% echo -n $lns_trust_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_lns_trust></td>
+		<td colspan="5"><% echo -n $lns_trust_upload_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
 	</tr>
 
 	<tr class="rowSpacer"><td colspan="15"></td></tr>

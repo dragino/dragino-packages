@@ -18,7 +18,7 @@ WIFI_IF='wlan0-2'
 WIFI_GW=""
 RETRY_WIFI_GW=0
 wifi_ip=""
-iot_interval=` uci get system.@system[0].iot_interval`
+iot_interval=`uci get system.@system[0].iot_interval`
 
 GSM_IF="3g-cellular" # 3g interface
 GSM_IMSI=""
@@ -411,7 +411,7 @@ do
 						has_internet=1
 						use_gsm_as_gateway
 						sleep 10;
-						[ "`uci get gateway.general.server_type`" = "lorawan" ] || [ "`uci get gateway.general.server_type`" = "station" ]  && reload_iot_service
+						[ "`uci get gateway.general.server_type`" = "lorawan" ] || [ "`uci get gateway.general.server_type`" = "station" ]  && reload_iot_service && logger use_gsm
 					else
 					#All Interface doesn't have internet connection, reset all. 
 						logger -t iot_keep_alive "No internet at any interface"
@@ -486,8 +486,9 @@ do
 			echo "`date`: switch to offline" >> /var/status_log
 			offline_flag="1"
 		elif [ "$offline_flag" = "1" ]; then
-			logger -t iot_keep_alive "Reload IoT Service"
+			logger -t iot_keep_alive "Reload IoT Service_flag"
 			reload_iot_service
+			sleep 30
 		fi
 	else 
 		# IoT Connection Fail, Internet Down

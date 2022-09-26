@@ -40,7 +40,7 @@
                 "tx_freq_min": 470000000,
                 "tx_freq_max": 510000000,
                 "tx_gain_lut":[
-                    {"rf_power": 12, "pa_gain": 0, "pwr_idx": 15},
+                   {"rf_power": 12, "pa_gain": 0, "pwr_idx": 15},
                     {"rf_power": 13, "pa_gain": 0, "pwr_idx": 16},
                     {"rf_power": 14, "pa_gain": 0, "pwr_idx": 17},
                     {"rf_power": 15, "pa_gain": 0, "pwr_idx": 19},

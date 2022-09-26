@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=haserl-ui
-PKG_VERSION:=1.1.1
+PKG_VERSION:=1.2.1
 PKG_RELEASE:=2
 
 

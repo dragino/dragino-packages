@@ -32,19 +32,19 @@
             "radio_0": {
                 "enable": true,
                 "type": "SX1250",
-                "freq": 865300000,
+                "freq": 923000000,
                 "rssi_offset": -215.4,
                             
                 "rssi_tcomp": {"coeff_a": 0, "coeff_b": 0, "coeff_c": 20.41, "coeff_d": 2162.56, "coeff_e": 0},
 
                 "tx_enable": true,
-                "tx_freq_min": 865000000,
-                "tx_freq_max": 867000000,
+                "tx_freq_min": 920000000,
+                "tx_freq_max": 923400000,
                 "tx_gain_lut":[
-                     {"rf_power": 12, "pa_gain": 0, "pwr_idx": 18},
-                    {"rf_power": 13, "pa_gain": 0, "pwr_idx": 19},
+                    {"rf_power": 12, "pa_gain": 0, "pwr_idx": 19},
+                    {"rf_power": 13, "pa_gain": 0, "pwr_idx": 20},
                     {"rf_power": 14, "pa_gain": 0, "pwr_idx": 21},
-                    {"rf_power": 15, "pa_gain": 1, "pwr_idx": 2},
+                    {"rf_power": 15, "pa_gain": 0, "pwr_idx": 22},
                     {"rf_power": 16, "pa_gain": 1, "pwr_idx": 3},
                     {"rf_power": 17, "pa_gain": 1, "pwr_idx": 4},
                     {"rf_power": 18, "pa_gain": 1, "pwr_idx": 5},
@@ -62,27 +62,23 @@
             "radio_1": {
                 "enable": true,
                 "type": "SX1250",
-                "freq": 866385000,
+                "freq": 922000000,
                 "rssi_offset": -215.4,
                 "rssi_tcomp": {"coeff_a": 0, "coeff_b": 0, "coeff_c": 20.41, "coeff_d": 2162.56, "coeff_e": 0},
                 "tx_enable": false
             },
-            "chan_multiSF_0": {"enable": true, "radio": 0, "if": -237500,"desc": "Lora MAC, 125kHz, all SF, 865.0625 MHz"},
-            "chan_multiSF_1": {"enable": true, "radio": 0, "if": -102500,"desc": "Lora MAC, 125kHz, all SF, 865.4025 MHz"},
-<<<<<<< HEAD
-            "chan_multiSF_2": {"enable": true, "radio": 0, "if": -67500,"desc": "Lora MAC, 125kHz, all SF, 865.2325 MHz"},
-=======
-            "chan_multiSF_2": {"enable": true, "radio": 0, "if":  302500,"desc": "Lora MAC, 125kHz, all SF, 865.6025 MHz"},
->>>>>>> 016e08365de0fa3f2285dfb3da395834383cd767
-            "chan_multiSF_3": {"enable": true, "radio": 1, "if": -400000,"desc": "Lora MAC, 125kHz, all SF, 865.9850 MHz"},
-            "chan_multiSF_4": {"enable": true, "radio": 1, "if": -200000,"desc": "Lora MAC, 125kHz, all SF, 866.1850 MHz"},
-            "chan_multiSF_5": {"enable": true, "radio": 1, "if":  0,"desc": "Lora MAC, 125kHz, all SF, 866.3850 MHz"},
-            "chan_multiSF_6": {"enable": true, "radio": 1, "if":  200000,"desc": "Lora MAC, 125kHz, all SF, 866.5850 MHz"},
-            "chan_multiSF_7": {"enable": true, "radio": 1, "if":  400000,"desc": "Lora MAC, 125kHz, all SF, 866.7850 MHz"},
+            "chan_multiSF_0": {"enable": true, "radio": 0, "if":  200000, "desc": "Lora MAC, 125kHz, all SF, 923.2 MHz"},
+            "chan_multiSF_1": {"enable": true, "radio": 0, "if":  400000, "desc": "Lora MAC, 125kHz, all SF, 923.4 MHz"},
+            "chan_multiSF_2": {"enable": true, "radio": 1, "if":  200000, "desc": "Lora MAC, 125kHz, all SF, 922.2 MHz"},
+            "chan_multiSF_3": {"enable": true, "radio": 1, "if":  400000, "desc": "Lora MAC, 125kHz, all SF, 922.4 MHz"},
+            "chan_multiSF_4": {"enable": true, "radio": 0, "if": -400000, "desc": "Lora MAC, 125kHz, all SF, 922.6 MHz"},
+            "chan_multiSF_5": {"enable": true, "radio": 0, "if": -200000, "desc": "Lora MAC, 125kHz, all SF, 922.8 MHz"},
+            "chan_multiSF_6": {"enable": true, "radio": 0, "if":  0, "desc": "Lora MAC, 125kHz, all SF, 923.0 MHz"},
+            "chan_multiSF_7": {"enable": true, "radio": 1, "if":  0, "desc": "Lora MAC, 125kHz, all SF, 922.0 MHz"},
 
-            "chan_Lora_std":  {"enable": true, "radio": 0, "if": -100000, "bandwidth": 250000, "spread_factor": 7, 
-                "implicit_hdr": false, "implicit_payload_length": 17, "implicit_crc_en": false, "implicit_coderate": 1,"desc": "Lora MAC, 250kHz, SF7, 865.2 MHz"},
+            "chan_Lora_std":  {"enable": true, "radio": 1, "if": 100000, "bandwidth": 250000, "spread_factor": 7,
+                               "implicit_hdr": false, "implicit_payload_length": 17, "implicit_crc_en": false, "implicit_coderate": 1, "desc": "Lora MAC, 250kHz, SF7, 922.1 MHz"},
             
-            "chan_FSK":       {"enable": true, "radio": 0, "if": -100000, "bandwidth": 125000, "datarate": 50000,"desc": "FSK 50kbps, 865.2 MHz"}
-    }
-}
+            "chan_FSK":       {"enable": true, "radio": 1, "if":  -200000, "bandwidth": 125000, "datarate": 50000, "desc": "FSK 50kbps, 921.8 MHz"}
+        }
+}    

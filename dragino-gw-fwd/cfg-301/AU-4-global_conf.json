@@ -1,7 +1,7 @@
 {
 	"SX130x_conf": {
-		"full_duplex": false,
 		"spidev_path": "/dev/spidev0.0",
+		"full_duplex": false,
 		"lorawan_public": true,
 		"clksrc": 1,
 		"clksrc_desc": "radio_1 provides clock to concentrator for most devices except MultiTech. For MultiTech set to 0.",
@@ -10,167 +10,153 @@
 		"radio_0": {
 			"enable": true,
 			"type": "SX1257",
-			"freq": 865300000,
+			"freq": 920400000,
 			"rssi_offset": -166.0,
 			"tx_enable": true,
-			"tx_freq_min": 865000000,
-			"tx_freq_max": 867000000,
-			"tx_notch_freq": 129000
+			"tx_freq_min": 915000000,
+			"tx_freq_max": 928000000
 		},
 		"radio_1": {
 			"enable": true,
 			"type": "SX1257",
-			"freq": 866385000,
+			"freq": 921100000,
 			"rssi_offset": -166.0,
 			"tx_enable": false
 		},
 		"chan_multiSF_0": {
-			"desc": "Lora MAC, 125kHz, all SF, 865.0625 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 920 MHz",
 			"enable": true,
 			"radio": 0,
-			"if": -237500
-		},
-		"chan_multiSF_1": {
-			"desc": "Lora MAC, 125kHz, all SF, 865.4025 MHz",
-			"enable": true,
-			"radio": 0,
-			"if": 102500
-		},
-		"chan_multiSF_2": {
-<<<<<<< HEAD
-			"desc": "Lora MAC, 125kHz, all SF, 865.2325 MHz",
-			"enable": true,
-			"radio": 0,
-			"if": -67500
-		},
-		
-=======
-			"desc": "Lora MAC, 125kHz, all SF, 865.6025 MHz",
-			"enable": true,
-			"radio": 0,
-			"if": 302500
-		},
->>>>>>> 016e08365de0fa3f2285dfb3da395834383cd767
-		"chan_multiSF_3": {
-			"desc": "Lora MAC, 125kHz, all SF, 865.9850 MHz",
-			"enable": true,
-			"radio": 1,
 			"if": -400000
 		},
-		"chan_multiSF_4": {
-			"desc": "Lora MAC, 125kHz, all SF, 866.1850 MHz",
+		"chan_multiSF_1": {
+			"desc": "Lora MAC, 125kHz, all SF, 920.2 MHz",
 			"enable": true,
-			"radio": 1,
+			"radio": 0,
 			"if": -200000
 		},
-		"chan_multiSF_5": {
-			"desc": "Lora MAC, 125kHz, all SF, 866.3850 MHz",
+		"chan_multiSF_2": {
+			"desc": "Lora MAC, 125kHz, all SF, 920.4 MHz",
 			"enable": true,
-			"radio": 1,
+			"radio": 0,
 			"if": 0
 		},
-		"chan_multiSF_6": {
-			"desc": "Lora MAC, 125kHz, all SF, 866.5850 MHz",
+		"chan_multiSF_3": {
+			"desc": "Lora MAC, 125kHz, all SF, 920.6 MHz",
 			"enable": true,
-			"radio": 1,
+			"radio": 0,
 			"if": 200000
 		},
-		"chan_multiSF_7": {
-			"desc": "Lora MAC, 125kHz, all SF, 866.7850 MHz",
+		"chan_multiSF_4": {
+			"desc": "Lora MAC, 125kHz, all SF, 920.8 MHz",
 			"enable": true,
 			"radio": 1,
-			"if": 400000
+			"if": -300000
+		},
+		"chan_multiSF_5": {
+			"desc": "Lora MAC, 125kHz, all SF, 921 MHz",
+			"enable": true,
+			"radio": 1,
+			"if": -100000
+		},
+		"chan_multiSF_6": {
+			"desc": "Lora MAC, 125kHz, all SF, 921.2 MHz",
+			"enable": true,
+			"radio": 1,
+			"if": 100000
+		},
+		"chan_multiSF_7": {
+			"desc": "Lora MAC, 125kHz, all SF, 921.4 MHz",
+			"enable": true,
+			"radio": 1,
+			"if": 300000
 		},
 		"chan_Lora_std": {
-			"desc": "Lora MAC, 250kHz, SF7, 865.7 MHz",
+			"desc": "Lora MAC, 500kHz, SF8, 920.7 MHz",
 			"enable": true,
 			"radio": 0,
-			"if": -100000,
-			"bandwidth": 250000,
-			"spread_factor": 7
+			"if": 300000,
+			"bandwidth": 500000,
+			"spread_factor": 8
 		},
 		"chan_FSK": {
-			"desc": "FSK 50kbps, 865.7 MHz",
-			"enable": true,
-			"radio": 0,
-			"if": -100000,
-			"bandwidth": 125000,
-			"datarate": 50000
+			"desc": "disabled",
+			"enable": false
 		},
 		"tx_lut_0": {
 			"desc": "TX gain table, index 0",
 			"pa_gain": 2,
-			"mix_gain": 9,
+			"mix_gain": 11,
 			"rf_power": 12,
 			"dig_gain": 2
 		},
 		"tx_lut_1": {
 			"desc": "TX gain table, index 1",
 			"pa_gain": 2,
-			"mix_gain": 9,
+			"mix_gain": 10,
 			"rf_power": 13,
-			"dig_gain": 1
+			"dig_gain": 0
 		},
 		"tx_lut_2": {
 			"desc": "TX gain table, index 2",
 			"pa_gain": 2,
-			"mix_gain": 10,
+			"mix_gain": 12,
 			"rf_power": 14,
 			"dig_gain": 2
 		},
 		"tx_lut_3": {
 			"desc": "TX gain table, index 3",
 			"pa_gain": 2,
-			"mix_gain": 10,
+			"mix_gain": 13,
 			"rf_power": 15,
-			"dig_gain": 1
+			"dig_gain": 2
 		},
 		"tx_lut_4": {
 			"desc": "TX gain table, index 4",
 			"pa_gain": 2,
-			"mix_gain": 10,
+			"mix_gain": 13,
 			"rf_power": 16,
-			"dig_gain": 0
+			"dig_gain": 1
 		},
 		"tx_lut_5": {
 			"desc": "TX gain table, index 5",
 			"pa_gain": 2,
-			"mix_gain": 11,
+			"mix_gain": 14,
 			"rf_power": 17,
 			"dig_gain": 1
 		},
 		"tx_lut_6": {
 			"desc": "TX gain table, index 6",
 			"pa_gain": 2,
-			"mix_gain": 11,
+			"mix_gain": 15,
 			"rf_power": 18,
-			"dig_gain": 0
+			"dig_gain": 2
 		},
 		"tx_lut_7": {
 			"desc": "TX gain table, index 7",
 			"pa_gain": 2,
-			"mix_gain": 12,
+			"mix_gain": 15,
 			"rf_power": 19,
-			"dig_gain": 0
+			"dig_gain": 1
 		},
 		"tx_lut_8": {
 			"desc": "TX gain table, index 8",
 			"pa_gain": 2,
-			"mix_gain": 13,
+			"mix_gain": 15,
 			"rf_power": 20,
-			"dig_gain": 0
+			"dig_gain": 1
 		},
 		"tx_lut_9": {
 			"desc": "TX gain table, index 9",
-			"pa_gain": 2,
-			"mix_gain": 14,
+			"pa_gain": 3,
+			"mix_gain": 9,
 			"rf_power": 21,
 			"dig_gain": 0
 		},
 		"tx_lut_10": {
 			"desc": "TX gain table, index 10",
-			"pa_gain": 2,
-			"mix_gain": 15,
+			"pa_gain": 3,
+			"mix_gain": 10,
 			"rf_power": 22,
 			"dig_gain": 0
 		},
@@ -211,11 +197,11 @@
 		}
 	},
 	"gateway_conf": {
-		"server_address": "router.as.thethings.network",
+		"server_address": "router.au.thethings.network",
 		"serv_port_up": 1700,
 		"serv_port_down": 1700,
 		"servers": [ {
-			"server_address": "router.as.thethings.network",
+			"server_address": "router.au.thethings.network",
 			"serv_port_up": 1700,
 			"serv_port_down": 1700,
 			"serv_enabled": true

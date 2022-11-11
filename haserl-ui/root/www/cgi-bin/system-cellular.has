@@ -67,7 +67,7 @@
 	else
 		echo 0 > /tmp/cell_detect.txt
 	fi
-	
+
   cell_detect=$(cat /tmp/cell_detect.txt)
 %>
 
@@ -92,7 +92,11 @@
   <% if [ "$cell_detect" == "1" ]; then %>
        		<input type="checkbox" name="CELL_ENABLE" value="checked" <% echo -n $cell_enable %> > <font size="4"> Enable Cellular WAN </font>
   <% else %>
+		 <% if [ -f "/var/cell_poweroff.txt" ]; then %>
+			<span class="impact"> <% cat /var/cell_poweroff.txt  %> </span>
+		 <% else %>
        		<span class="impact"> Cellular device not detected </span>
+		 <% fi %>	
   <% fi %>
 			</td>
 		</tr>

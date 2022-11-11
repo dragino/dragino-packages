@@ -335,7 +335,7 @@ elif [ $model == "LPS8-N" ] || [ $model == "DLOS8N" ] ||  [ $model == "LPS8-G" ]
 			chip="302-zn"
 			json_section_name="SX130x_conf"
 			;;
-		308n )
+		308n|os8l|ps8l )
 			chip="302"
 			json_section_name="SX130x_conf"
 			;;

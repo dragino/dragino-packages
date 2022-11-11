@@ -1,0 +1,106 @@
+#!/usr/bin/lua
+
+--Decoder for LSE01 firmware version
+
+json = require('dragino.json')
+local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+--Get Battery
+HEX_BAT=string.sub(payload,17,18)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+payload_t.BatV=BAT
+
+--Get Ext
+Ext_HEX=string.sub(payload,19,19)
+Ext_RAW=utility.hex2str(Ext_HEX)
+Ext_0=bit.bit_and(tonumber(Ext_RAW,16),tonumber("0F",16))
+Ext=Ext_0
+payload_t.Ext=Ext_0
+
+if Ext==1 then
+Temp_Channel1_RAW_3=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+Temp_Channel1_RAW_4=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+minus_flag = bit.bit_rshift(Temp_Channel1_RAW_3,7)
+Temp_Channel1_0=(bit.bit_or(bit.bit_lshift(Temp_Channel1_RAW_3,8),Temp_Channel1_RAW_4)-minus_flag*65536)/100
+payload_t.Temp_Channel1=Temp_Channel1_0    
+	
+Temp_Channel2_RAW_3=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+Temp_Channel2_RAW_4=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+minus_flag = bit.bit_rshift(Temp_Channel2_RAW_3,7)
+Temp_Channel2_0=(bit.bit_or(bit.bit_lshift(Temp_Channel2_RAW_3,8),Temp_Channel2_RAW_4)-minus_flag*65536)/100
+payload_t.Temp_Channel2=Temp_Channel2_0   
+	
+elseif Ext==2 then
+Temp_Channel1_RAW_3=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+Temp_Channel1_RAW_4=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+minus_flag = bit.bit_rshift(Temp_Channel1_RAW_3,7)
+Temp_Channel1_0=(bit.bit_or(bit.bit_lshift(Temp_Channel1_RAW_3,8),Temp_Channel1_RAW_4)-minus_flag*65536)/10
+payload_t.Temp_Channel1=Temp_Channel1_0    
+	
+Temp_Channel2_RAW_3=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+Temp_Channel2_RAW_4=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+minus_flag = bit.bit_rshift(Temp_Channel2_RAW_3,7)
+Temp_Channel2_0=(bit.bit_or(bit.bit_lshift(Temp_Channel2_RAW_3,8),Temp_Channel2_RAW_4)-minus_flag*65536)/10
+payload_t.Temp_Channel2=Temp_Channel2_0   
+
+elseif Ext==3 then
+Res_Channel1_RAW=tonumber(utility.hex2str(string.sub(payload,20,21)),16)/100
+payload_t.Res_Channel1=Res_Channel1_RAW
+	
+Res_Channel2_RAW=tonumber(utility.hex2str(string.sub(payload,22,23)),16)/100
+payload_t.Res_Channel2=Res_Channel2_RAW
+end
+
+Systimestamp_RAW_24=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+Systimestamp_RAW_25=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+Systimestamp_RAW_26=tonumber(utility.hex2str(string.sub(payload,26,26)),16)
+Systimestamp_RAW_27=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+minus_flag_1 = bit.bit_lshift(Systimestamp_RAW_26,8)
+minus_flag_2 = bit.bit_lshift(Systimestamp_RAW_25,16)
+Systimestamp_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(Systimestamp_RAW_24,24),minus_flag_2)),minus_flag_1),Systimestamp_RAW_27)
+payload_t.Systimestamp=Systimestamp_0
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.Ext .. "&field2=".. payload_t.BatV .. "&field3=".. payload_t.Temp_Channel1 .. "&field4=".. payload_t.Temp_Channel2 .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&field7=".. payload_t.Res_Channel1.. "&field8="..payload_t.Res_Channel2.. "&field9=".. payload_t.Systimestamp.."&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t)) 
+return json.encode(payload_t)
+
+
+
+
+

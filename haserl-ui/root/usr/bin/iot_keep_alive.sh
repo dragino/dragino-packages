@@ -5,6 +5,7 @@
 # 2021/1/6   Add function station_check_time
 #			 Add WAN and WWAN are get the gateway at staic 
 # 2021/1/20  Add AT&T disconnection detection
+# 2022/10/18 Add gsm check
 
 DEVPATH=/sys/bus/usb/devices
 #VID=12d1
@@ -29,7 +30,10 @@ PING_HOST2='8.8.8.8' # enter IP of second host to check.
 PING_WIFI_HOST="8.8.4.4" # Use this IP to check WiFi Connection. 
 PING_WAN_HOST="139.130.4.5"  # Use this IP to check WAN connection (ns1.telstra.net)
 
+check_gsm=0
+gsm_poweroff_time=""
 gsm_mode=0
+gsm_enable=`uci get network.cellular.auto`
 toggle_3g_time=90
 last_check_3g_dial=0
 RETRY_POWEROFF_GSM=5
@@ -39,7 +43,7 @@ ZERO="0"
 retry_gsm=0
 iot_online="1"
 offline_flag="1"
-is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16|ps8n|ps8g|os8n"`
+is_lps8=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | grep -c -E "lps8|los8|ig16|ps8n|ps8g|os8n|os8l|ps8l"`
 
 last_reload_time=`date +%s`
 station_check_time=1
@@ -66,7 +70,7 @@ chk_internet_connection()
 	else
 		echo "$global_ping" > /var/iot/internet
 	fi
-
+w
 }
 
 chk_eth1_connection()
@@ -158,12 +162,12 @@ check_3g_connection()
 
 	if [ -z "$GSM_IMSI" ]; then # Get Cellular GSM_IMSI
 		killall comgt;
-		GSM_IMSI='gcom -d /dev/ttyModemAT -s /etc/gcom/getGSM_IMSI.gcom | cut -c 1,2,3,4,5,6'
+		GSM_IMSI='gcom -d /dev/ttyModemAT -s /etc/gcom/getimsi.gcom | cut -c 1,2,3,4,5,6'
 		if [ -z "$(echo $GSM_IMSI | sed -n "/^[0-9]\+$/p")" ];then 
 			GSM_IMSI=""
 		fi
 	fi
-	
+
     #echo "3g"
 	GSM_IF=`ifconfig |grep "3g-" | awk '{print $1}'` # 3g interface
 	gsm_ping="$ZERO"
@@ -364,6 +368,25 @@ do
 		station_time_check
 		if [ "$ROUTE_DF" = "$WAN_IF" ] || [ "$ROUTE_DF" = "$WIFI_IF" ];then  #Check If device has WIFi or WAN Connection.
 			logger -t iot_keep_alive "use WAN or WiFi for internet access now"
+			if [ "$gsm_enable" = "1" ]; then #Check if dev has gsm enable
+				if [ -z "$gsm_poweroff_time" ]; then #check if power off gsm
+					check_3g_connection
+					logger -t iot_keep_alive "check gsm"
+					check_gsm=`expr $check_gsm + 1`
+					if [ "$gsm_ping" -eq "$ZERO" ] && [ "$check_gsm" -gt 4 ]; then #check if the gsm connection
+						gsm_poweroff && gsm_poweroff_time=`date +%s`
+						check_gsm=0
+						echo "The device checked that the GSM connection was not working properly, tried to shut down the gsm at $(date +%f) and tried to start the connection again after 6 hours automaticly or you can manually reboot the device." > /var/cell_poweroff.txt
+					fi				
+				else
+					pre_time=`date +%s`
+					if [ `expr $pre_time - $gsm_poweroff_time` -gt 21600 ]; then # gsm shutdown for more than 6 hours will try to start
+						gsm_poweron && gsm_poweron_time=`date +%s`
+						gsm_poweroff_time="" && rm /var/cell_poweroff.txt
+					fi
+				fi
+						
+			fi
 		elif [ "$ROUTE_DF" = "$GSM_IF" ] && [ "`uci get network.cellular.backup`" = "1" ];then
 			chk_eth1_connection
 			if [ "$wan_ping" -gt "$ZERO" ];then
@@ -423,7 +446,7 @@ do
 		else
 			logger -t iot_keep_alive "No Internet Connection but IoT Service Online,No Action"
 		fi 
-	fi	
+	fi
 
 	#Show LED status
 	# echo 1 > /sys/class/leds/dragino2\:red\:system/brightness GPIO28
@@ -438,7 +461,7 @@ do
 			echo out > /sys/class/gpio/gpio21/direction
 		fi
 	fi
-	
+
 	if [ "`ps | grep "/usr/bin/fwd" -c`" == 2 ];then
 		status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key like '/service/lorawan/server/network';" | grep -c online`
 		if [ "$status" == "1" ];then

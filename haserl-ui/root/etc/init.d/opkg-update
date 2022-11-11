@@ -1,0 +1,40 @@
+#!/bin/sh /etc/rc.common
+START=99
+
+start(){
+
+# remove cache
+rm /var/opkg-lists/ -rf;
+
+# spicefy repository
+echo "src/gz dragino http://www.dragino.com/downloads/downloads/LoRa_Gateway/DLOS8/Firmware/Packages/dragino/" > /etc/opkg/distfeeds.conf \
+&& opkg update \
+&& echo "update done" >> /var/log/opkg_update.log
+
+#recovery repository
+cp /etc/opkg/distfeeds.conf.bak /etc/opkg/distfeeds.conf
+
+#list upgradable package
+package=$(opkg list-upgradable | awk '{print $1}')
+logfile=/var/log/opkg_update.log
+
+#upgrade cycle
+for a in $package
+do
+	if [ ! -z $a ]; then
+		cp -r /etc/config /tmp/config.bak; # backup config file
+		echo "================================================" >> $logfile
+		echo "$(date +"%Y-%m-%d %H:%M")" >> $logfile
+		echo "installed $a" >> $logfile
+		opkg install $a >> $logfile
+		echo "================================================" >> $logfile
+		cp -r /tmp/config.bak/* /etc/config/; # recovery config file
+	fi
+done
+if [ ! -z $package ]; then
+	/etc/init.d/lora_gw reload
+	sleep 5;
+	/usr/bin/reload_iot_service.sh
+fi
+
+}

@@ -1,0 +1,239 @@
+#!/usr/bin/lua
+
+--Decoder for LSN50v2-D20 firmware version
+
+json = require('dragino.json')
+local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+
+--Get Mode 
+MODE_HEX=string.sub(payload,23,23)
+MODE_RAW=utility.hex2str(MODE_HEX)
+MODE_0=bit.bit_and(tonumber(MODE_RAW,16),tonumber("7C",16))
+MODE_1=bit.bit_rshift(MODE_0,2)
+MODE=MODE_1
+payload_t.MODE=MODE_1
+
+if ((MODE~=2)and(MODE~=31)) then 
+HEX_BAT=string.sub(payload,17,18)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+payload_t.BatV=BAT
+
+TempC1_RAW_3=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+TempC1_RAW_4=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+minus_flag = bit.bit_rshift(TempC1_RAW_3,7)
+TempC1_0=(bit.bit_or(bit.bit_lshift(TempC1_RAW_3,8),TempC1_RAW_4)-minus_flag*65536)/10
+payload_t.TempC1=TempC1_0
+  
+analog=tonumber(utility.hex2str(string.sub(payload,21,22)),16)/1000
+payload_t.ADC_CH0V=analog
+
+Digital_IStatus_RAW=utility.hex2str(string.sub(payload,23,23))
+pin_level=bit.bit_and(tonumber(Digital_IStatus_RAW,16),tonumber("02",16))
+payload_t.Digital_IStatus=(pin_level == 2) and "High" or "Low"
+
+  if MODE~=6 then
+  EXTI_Trigger_RAW=utility.hex2str(string.sub(payload,23,23))
+  pin_level_0=bit.bit_and(tonumber(EXTI_Trigger_RAW,16),tonumber("01",16))
+  payload_t.EXTI_Trigger=(pin_level_0 == 1) and "TRUE" or "FALSE"
+  
+  Door_status_RAW=utility.hex2str(string.sub(payload,23,23))
+  pin_level_1=bit.bit_and(tonumber(Door_status_RAW,16),tonumber("80",16))
+  payload_t.Door_status=(pin_level_1 == 128) and "CLOSE" or "OPEN"
+  end 
+end
+
+Pd=tonumber(utility.hex2str(string.sub(payload,26,27)),16)
+
+if MODE==0 then 
+payload_t.Work_mode="IIC"
+   if Pd==0 then 
+   Illum_RAW_3=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+   Illum_RAW_4=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+   minus_flag = bit.bit_rshift(Illum_RAW_3,7)
+   Illum_RAW=bit.bit_or(bit.bit_lshift(Illum_RAW_3,8),Illum_RAW_4)-minus_flag*65536
+   payload_t.Illum=Illum_RAW
+   else 
+   TempC_SHT_RAW_3=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+   TempC_SHT_RAW_4=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+   minus_flag = bit.bit_rshift(TempC_SHT_RAW_3,7)
+   TempC_SHT_0=(bit.bit_or(bit.bit_lshift(TempC_SHT_RAW_3,8),TempC_SHT_RAW_4)-minus_flag*65536)/10
+   payload_t.TempC_SHT=TempC_SHT_0
+   
+   Hum_SHT_RAW=tonumber(utility.hex2str(string.sub(payload,26,27)),16)/10
+   payload_t.Hum_SHT=Hum_SHT_RAW
+   end
+  
+  
+elseif MODE==1 then
+payload_t.Work_mode="Distance"
+Distance_cm_RAW=tonumber(utility.hex2str(string.sub(payload,24,25)),16)/10
+payload_t.Distance_cm=Distance_cm_RAW
+   if Pd~=65535 then 
+   Distance_signal_strength_RAW=tonumber(utility.hex2str(string.sub(payload,26,27)),16)
+   payload_t.Distance_signal_strength=Distance_signal_strength_RAW
+   end
+  
+
+elseif MODE==2 then
+payload_t.Work_mode="3ADC"
+BatV_RAW=tonumber(utility.hex2str(string.sub(payload,28,28)),16)/10
+payload_t.BatV=BatV_RAW
+
+analog_0=tonumber(utility.hex2str(string.sub(payload,17,18)),16)/1000
+payload_t.ADC_CH0V=analog_0
+
+analog_1=tonumber(utility.hex2str(string.sub(payload,19,20)),16)/1000
+payload_t.ADC_CH1V=analog_1
+
+analog_4=tonumber(utility.hex2str(string.sub(payload,21,22)),16)/1000
+payload_t.ADC_CH4V=analog_4
+
+Digital_IStatus_RAW=utility.hex2str(string.sub(payload,23,23))
+pin_level=bit.bit_and(tonumber(Digital_IStatus_RAW,16),tonumber("02",16))
+payload_t.Digital_IStatus=(pin_level == 2) and "High" or "Low"
+
+EXTI_Trigger_RAW=utility.hex2str(string.sub(payload,23,23))
+pin_level_0=bit.bit_and(tonumber(EXTI_Trigger_RAW,16),tonumber("01",16))
+payload_t.EXTI_Trigger=(pin_level_0 == 1) and "TRUE" or "FALSE"
+
+Door_status_RAW=utility.hex2str(string.sub(payload,23,23))
+pin_level_1=bit.bit_and(tonumber(Door_status_RAW,16),tonumber("80",16))
+payload_t.Door_status=(pin_level_1 == 128) and "CLOSE" or "OPEN"
+
+  if Pd==0 then 
+  Illum_RAW_3=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+  Illum_RAW_4=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+  minus_flag = bit.bit_rshift(Illum_RAW_3,7)
+  Illum_RAW=bit.bit_or(bit.bit_lshift(Illum_RAW_3,8),Illum_RAW_4)-minus_flag*65536
+  payload_t.Illum=Illum_RAW
+  else 
+  TempC_SHT_RAW_3=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+  TempC_SHT_RAW_4=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+  minus_flag = bit.bit_rshift(TempC_SHT_RAW_3,7)
+  TempC_SHT_0=(bit.bit_or(bit.bit_lshift(TempC_SHT_RAW_3,8),TempC_SHT_RAW_4)-minus_flag*65536)/10
+  payload_t.TempC_SHT=TempC_SHT_0
+  
+  Hum_SHT_RAW=tonumber(utility.hex2str(string.sub(payload,26,27)),16)/10
+  payload_t.Hum_SHT=Hum_SHT_RAW
+  end
+ 
+
+elseif MODE==3 then 
+payload_t.Work_mode="3DS18B20"
+TempC2_SHT_RAW_3=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+TempC2_SHT_RAW_4=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+minus_flag = bit.bit_rshift(TempC2_SHT_RAW_3,7)
+TempC2_SHT_0=(bit.bit_or(bit.bit_lshift(TempC2_SHT_RAW_3,8),TempC2_SHT_RAW_4)-minus_flag*65536)/10
+payload_t.TempC2=TempC2_SHT_0
+
+TempC3_RAW=tonumber(utility.hex2str(string.sub(payload,26,27)),16)/10
+payload_t.TempC3=TempC3_RAW
+
+
+elseif MODE==4 then
+payload_t.Work_mode="Weight"
+Weight_RAW_3=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+Weight_RAW_4=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+minus_flag = bit.bit_rshift(Weight_RAW_3,7)
+Weight_0=bit.bit_or(bit.bit_lshift(Weight_RAW_3,8),Weight_RAW_4)-minus_flag*65536
+payload_t.Weight=Weight_0
+
+
+elseif MODE==5 then
+payload_t.Work_mode="Count"
+Count_RAW_24=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+Count_RAW_25=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+Count_RAW_26=tonumber(utility.hex2str(string.sub(payload,26,26)),16)
+Count_RAW_27=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+minus_flag_1 = bit.bit_lshift(Count_RAW_26,8)
+minus_flag_2 = bit.bit_lshift(Count_RAW_25,16)
+Count_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(Count_RAW_24,24),minus_flag_2)),minus_flag_1),Count_RAW_27)
+payload_t.Count=Count_0
+
+
+elseif MODE==31 then
+payload_t.Work_mode="ALARM"
+BatV_1=tonumber(utility.hex2str(string.sub(payload,17,18)),16)/1000
+payload_t.BatV=BatV_1
+
+TempC1_RAW_3=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+TempC1_RAW_4=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+minus_flag = bit.bit_rshift(TempC1_RAW_3,7)
+TempC1_0=(bit.bit_or(bit.bit_lshift(TempC1_RAW_3,8),TempC1_RAW_4)-minus_flag*65536)/10
+payload_t.TempC1=TempC1_0
+
+TempC1MIN_RAW_3=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+minus_flag_2 = bit.bit_lshift(TempC1MIN_RAW_3,24)
+minus_flag_3 = bit.bit_rshift(minus_flag_2,24)
+payload_t.TempC1MIN=minus_flag_3
+
+TempC1MAX_RAW_3=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+minus_flag_4 = bit.bit_lshift(TempC1MAX_RAW_3,24)
+minus_flag_5 = bit.bit_rshift(minus_flag_4,24)
+payload_t.TempC1MAX=minus_flag_5
+
+SHTEMPMIN_RAW_3=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+minus_flag_6 = bit.bit_lshift(SHTEMPMIN_RAW_3,24)
+minus_flag_7 = bit.bit_rshift(minus_flag_6,24)
+payload_t.SHTEMPMIN=minus_flag_7
+
+SHTEMPMAX_RAW_3=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+minus_flag_8 = bit.bit_lshift(SHTEMPMAX_RAW_3,24)
+minus_flag_9 = bit.bit_rshift(minus_flag_8,24)
+payload_t.SHTEMPMAX=minus_flag_9
+
+SHTHUMMIN_RAW=tonumber(utility.hex2str(string.sub(payload,26,26)),16)
+payload_t.SHTHUMMIN=SHTHUMMIN_RAW
+
+SHTHUMMAX_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+payload_t.SHTHUMMAX=SHTHUMMAX_RAW
+end
+
+
+
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.MODE .. "&field2=".. payload_t.BatV .. "&field3=".. payload_t.TempC1 .. "&field4=".. payload_t.ADC_CH0V .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&field7=".. payload_t.Digital_IStatus.. "&field8="..payload_t.EXTI_Trigger.. "&field9=".. payload_t.Door_status.. "&field10=".. payload_t.Illum.. "&field11=".. payload_t.TempC_SHT.. "&field12=".. payload_t.Hum_SHT.. "&field13=".. payload_t.Distance_cm.. "&field14=".. payload_t.Distance_signal_strength.. "&field15=".. payload_t.TempC1MIN .. "&field16=".. payload_t.Weight.. "&field17=".. payload_t.ADC_CH1V.. "&field18="..payload_t.ADC_CH4V.. "&field19=".. payload_t.SHTHUMMAX.. "&field20=".. payload_t.SHTHUMMIN.. "&field21=".. payload_t.SHTEMPMAX.. "&field22=".. payload_t.SHTEMPMIN.. "&field23=".. payload_t.TempC1MAX.. "&field24=".. payload_t.Count.. "&field25=".. payload_t.Work_mode.. "&field26=".. payload_t.TempC2.. "&field27=".. payload_t.TempC3.."&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t)) 
+return json.encode(payload_t)
+
+
+
+
+

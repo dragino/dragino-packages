@@ -125,7 +125,7 @@
 	</tr>
 	
 	<tr>
-		<td colspan="4"><label for="REGISTRATION_CODE">Bulk ID Code / Licence Key</label></td>
+		<td colspan="4"><label for="REGISTRATION_CODE">Bulk ID Code / License Key</label></td>
 		<td colspan="5"><input type="text" name="REGISTRATION_CODE" id="registration_code" maxlength="40" size="40"
 		    pattern="[a-zA-Z0-9_*.$%<>;:?@=!^|&+()#~\{\}\-]{1,128}" VALUE="<% echo -n $registration_code %>"></td>
 		<td colspan="2"></td>

@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dragino_gw_fwd
-PKG_VERSION:=2.6.1
+PKG_VERSION:=2.6.2
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -80,7 +80,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/lora/cfg-302
 	$(CP) $(PKG_BUILD_DIR)/cfg-302/*.json* $(1)/etc/lora/cfg-302
 	$(INSTALL_DIR) $(1)/etc/lora/cfg-302-zn
-	$(CP) $(PKG_BUILD_DIR)/cfg-302/*.json* $(1)/etc/lora/cfg-302-zn
+	$(CP) $(PKG_BUILD_DIR)/cfg-302-zn/*.json* $(1)/etc/lora/cfg-302-zn
 	$(INSTALL_DIR) $(1)/etc/lora/customized_scripts
 	$(CP) $(PKG_BUILD_DIR)/customized_scripts/* $(1)/etc/lora/customized_scripts
 	$(INSTALL_DIR) $(1)/etc/lora/decoder

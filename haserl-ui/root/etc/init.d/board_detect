@@ -61,7 +61,7 @@ start() {
 		rmmod spi-gpio-custom
 		insmod spi-gpio-custom bus0=1,24,18,20,0,8000000,19
         ;;
-	  *"os8n"*)
+	  *"os8n"*|*"os8l"*)
 		logger "[Model Detected]: DLOS8N"
 		chip="sx1302"
 		board="LG08"
@@ -77,7 +77,7 @@ start() {
 		sleep 1
 		;;
 		
-	 *"ps8n"*) 
+	 *"ps8n"*|*"ps8l"*) 
 	    logger "[Model Detected]: LPS8-N"
 		chip="sx1302"
 		board="LG08"

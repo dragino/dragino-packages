@@ -1,0 +1,92 @@
+#!/usr/bin/lua
+
+--Decoder for LSE01 firmware version
+
+json = require('dragino.json')
+local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+--Get Battery
+HEX_BAT=string.sub(payload,17,18)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+payload_t.BatV=BAT
+
+
+
+Temp_DS18B20_0=tonumber(utility.hex2str(string.sub(payload,19,20)),16)
+status_RAW=utility.hex2str(string.sub(payload,19,19))
+status_RAW1=bit.bit_and(tonumber(status_RAW,16),tonumber("80",16))
+
+if status_RAW1 ~=0 then
+RAW_3=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+RAW_4=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+minus_flag = bit.bit_rshift(RAW_3,7)
+Temp_DS18B20_0=bit.bit_or(bit.bit_lshift(RAW_3,8),RAW_4)-minus_flag*65536
+end
+payload_t.Temp_DS18B20=Temp_DS18B20_0/10
+
+
+moisture_RAW=tonumber(utility.hex2str(string.sub(payload,21,22)),16)/10
+payload_t.Leaf_Moisture=moisture_RAW
+  
+Temp_SOIL_RAW3=tonumber(utility.hex2str(string.sub(payload,23,24)),16)
+Temp_SOIL_RAW=utility.hex2str(string.sub(payload,23,24))
+Temp_SOIL_RAW1=bit.bit_and(tonumber(Temp_SOIL_RAW,16),tonumber("8000",16))
+Temp_SOIL_RAW2 = bit.bit_rshift(Temp_SOIL_RAW1,15)
+
+if Temp_SOIL_RAW2 == 0 then
+payload_t.Leaf_Temperature=Temp_SOIL_RAW3/10
+elseif Temp_SOIL_RAW2 ==1 then 
+payload_t.Leaf_Temperature=(Temp_SOIL_RAW3-65535)/10
+end
+
+i_flag=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+payload_t.Interrupt_flag=i_flag
+
+mes_type=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+payload_t.Message_type=mes_type
+
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.Leaf_Temperature .. "&field2=".. payload_t.BatV .. "&field3=".. payload_t.Temp_DS18B20 .. "&field4=".. payload_t.Leaf_Moisture .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .. "&field7="..payload_t.Message_type.. "&field8=".. payload_t.Interrupt_flag.."&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t)) 
+return json.encode(payload_t)
+
+
+
+
+

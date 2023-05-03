@@ -106,7 +106,7 @@ start() {
 		sleep 1
 		;;
 		
-	*"308n"*) 
+	*"308n"*|*"308l"*) 
 	    logger "[Model Detected]: LG308-N"
 		chip="sx1302"
 		board="LG08"

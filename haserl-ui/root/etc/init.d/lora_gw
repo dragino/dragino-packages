@@ -24,9 +24,24 @@ init_board() {
         /usr/bin/generate-config.sh
     elif [[ "$chip" = "sx1302" ]]; then
         process="fwd"
+		SN=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | cut -b '1-4'`
 	    ln -sf /usr/bin/fwd_sx1302 /usr/bin/fwd
 	    ln -sf /usr/bin/station_sx1302 /usr/bin/station
-        cp -f /etc/station/station-sx1302.conf /etc/station/station.conf
+		case $SN in
+			ps8n | ps8g | los8| 308l )
+				if [ -f  /etc/station/station-sx1302-zn.conf ]; then
+					cp -f /etc/station/station-sx1302-zn.conf /etc/station/station.conf
+				else
+					cp -f /etc/station/station-sx1302.conf /etc/station/station.conf
+				fi
+			;;
+			308n | ig16 | ps8l | os8n )
+				cp -f /etc/station/station-sx1302.conf /etc/station/station.conf
+			;;
+			*)
+				cp -f /etc/station/station-sx1302.conf /etc/station/station.conf
+			;;
+		esac
 	    /usr/bin/generate-config.sh
     else
         exit 1
@@ -72,7 +87,7 @@ reload_service() {
 service_triggers()
 {
     procd_add_reload_trigger "network" "wireless" "gateway" "mqtt" "tcp_client"
-    for iface in `cat /etc/config/network | grep interface | awk -F "\'"  '{print $2}'`; do
+    for iface in `cat /etc/config/network | grep interface | awk -F "\'"  '{print $2}' | sed '5d'`; do
         procd_add_interface_trigger "interface.*.up" "$iface" /etc/init.d/lora_gw reload
     done
 }

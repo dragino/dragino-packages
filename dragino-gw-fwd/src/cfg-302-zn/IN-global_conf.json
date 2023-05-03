@@ -68,7 +68,7 @@
                 "tx_enable": false
             },
             "chan_multiSF_0": {"enable": true, "radio": 0, "if": -237500,"desc": "Lora MAC, 125kHz, all SF, 865.0625 MHz"},
-            "chan_multiSF_1": {"enable": true, "radio": 0, "if": -102500,"desc": "Lora MAC, 125kHz, all SF, 865.4025 MHz"},
+            "chan_multiSF_1": {"enable": true, "radio": 0, "if": 102500,"desc": "Lora MAC, 125kHz, all SF, 865.4025 MHz"},
             "chan_multiSF_2": {"enable": true, "radio": 0, "if": -67500, "desc": "Lora MAC, 125kHz, all SF, 865.2325 MHz"},
             "chan_multiSF_3": {"enable": true, "radio": 1, "if": -400000,"desc": "Lora MAC, 125kHz, all SF, 865.9850 MHz"},
             "chan_multiSF_4": {"enable": true, "radio": 1, "if": -200000,"desc": "Lora MAC, 125kHz, all SF, 866.1850 MHz"},

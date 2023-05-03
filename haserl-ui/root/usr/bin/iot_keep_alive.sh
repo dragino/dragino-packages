@@ -20,6 +20,7 @@ WIFI_GW=""
 RETRY_WIFI_GW=0
 wifi_ip=""
 iot_interval=`uci get system.@system[0].iot_interval`
+STA_DISENABLE=$(uci get wireless.sta_0.disabled)
 
 GSM_IF="3g-cellular" # 3g interface
 GSM_IMSI=""
@@ -70,7 +71,6 @@ chk_internet_connection()
 	else
 		echo "$global_ping" > /var/iot/internet
 	fi
-w
 }
 
 chk_eth1_connection()
@@ -304,30 +304,33 @@ station_time_check()
 
 chk_wlan0_client()
 {
-	handle_fail=`logread -l 50 | grep "handle_probe_req: send failed" -c`
-	if [ "$handle_fail" -gt "25" ];then
-		if [ "`uci get wireless.sta_0.disabled`" = "0" ];then
-			logger -t iot_keep_alive "wifi_client setting incorrect or AP not in range"
-			echo "Detection of wifi handle request failure and automatically turn off wifi function, and will reconnect every ten minutes\
-				possible causes: 1) weak signal, 2) password error." > /var/log/wifi_handle.txt
-			last_handle_fail_time=`date +%s` && echo "$last_handle_fail_time" > /var/log/last_handle_fail_time.txt;
-			uci set wireless.sta_0.disabled=1
-			uci commit wireless
-			wifi reload
+	check_link=$(iw dev wlan0-2 link|grep Not -c)
+	sta_ssid=$(uci get wireless.sta_0.ssid)
+	if [ "$STA_DISENABLE" = "0" ];then
+		if [ $check_link = 1 ]; then
+		check_scan=$(iwinfo radio0 scan | grep "$sta_ssid" -c)
+			if [ ! -z $check_scan ] && [ $check_scan -ge "1" ]; then
+				wifi
+			else
+				logger -t iot_keep_alive "wifi_client setting incorrect or AP not in range"
+				echo "Detection of wifi handle request failure and automatically turn off wifi function, and will auto reconnect when wifi is scaned" > /usr/share/wifi_handle.txt
+				last_handle_fail_time=`date +%s` && echo "$last_handle_fail_time" > /var/log/last_handle_fail_time.txt;
+				uci set wireless.sta_0.disabled=1
+				uci commit wireless
+				wifi reload
+				wifi_sta_off_flag=1 && echo 1 >> /usr/share/wifi_sta_off_flag
+			fi
 		fi
-	else
-		cur_time=`date +%s`
-		[ -z $last_handle_fail_time ] && [ -f /var/log/last_handle_fail_time.txt ] && last_handle_fail_time=`cat /var/log/last_handle_fail_time.txt`
-		#check every ten minutes for wifi_client
-		if [ "$last_handle_fail_time" -gt "0" ] && [ `expr $cur_time - $last_handle_fail_time` -gt 600 ];then
-			logger -t iot_keep_alive "try connect wifi again"
-			[ -f /var/log/wifi_handle.txt ] && rm /var/log/wifi_handle.txt
-			last_handle_fail_time=0
-			uci set wireless.sta_0.disabled=0
-			uci commit wireless
+	elif [ "$wifi_sta_off_flag" = "1" ]; then
+		check_scan=$(iwinfo radio0 scan | grep "$sta_ssid" -c)
+		if [ ! -z $check_scan ] && [ $check_scan -ge "1" ]; then
+			uci set wireless.sta_0.disabled=0 && uci commit wireless
 			wifi reload
+			wifi_sta_off_flag=0
+			[ -f /usr/share/wifi_handle.txt ] && rm /usr/share/wifi_handle.txt
+			[ -f /usr/share/wifi_sta_off_flag ] && rm /usr/share/wifi_sta_off_flag
 		fi
-	fi	
+	fi
 }
 
 
@@ -359,7 +362,10 @@ do
 	fi
 
 	#check WiFi Client settings, handle in case AP-SSID is not present or login incorrect
-	chk_wlan0_client
+	[ -f /usr/share/wifi_sta_off_flag ] && wifi_sta_off_flag=1
+	if [ "$STA_DISENABLE" = "0" ] || [ $wifi_sta_off_flag = "1" ]; then
+		chk_wlan0_client
+	fi
 	
 	if [ "$global_ping" -gt "$ZERO" ];then   # Check if the device has internet connection
 		ROUTE_DF=`ip route | grep default | awk '{print $5}'`
@@ -368,25 +374,6 @@ do
 		station_time_check
 		if [ "$ROUTE_DF" = "$WAN_IF" ] || [ "$ROUTE_DF" = "$WIFI_IF" ];then  #Check If device has WIFi or WAN Connection.
 			logger -t iot_keep_alive "use WAN or WiFi for internet access now"
-			if [ "$gsm_enable" = "1" ]; then #Check if dev has gsm enable
-				if [ -z "$gsm_poweroff_time" ]; then #check if power off gsm
-					check_3g_connection
-					logger -t iot_keep_alive "check gsm"
-					check_gsm=`expr $check_gsm + 1`
-					if [ "$gsm_ping" -eq "$ZERO" ] && [ "$check_gsm" -gt 4 ]; then #check if the gsm connection
-						gsm_poweroff && gsm_poweroff_time=`date +%s`
-						check_gsm=0
-						echo "The device checked that the GSM connection was not working properly, tried to shut down the gsm at $(date +%f) and tried to start the connection again after 6 hours automaticly or you can manually reboot the device." > /var/cell_poweroff.txt
-					fi				
-				else
-					pre_time=`date +%s`
-					if [ `expr $pre_time - $gsm_poweroff_time` -gt 21600 ]; then # gsm shutdown for more than 6 hours will try to start
-						gsm_poweron && gsm_poweron_time=`date +%s`
-						gsm_poweroff_time="" && rm /var/cell_poweroff.txt
-					fi
-				fi
-						
-			fi
 		elif [ "$ROUTE_DF" = "$GSM_IF" ] && [ "`uci get network.cellular.backup`" = "1" ];then
 			chk_eth1_connection
 			if [ "$wan_ping" -gt "$ZERO" ];then
@@ -395,6 +382,7 @@ do
 				logger -t iot_keep_alive "XX ping ETH1 $PING_WAN_HOST via eth1 fail"
 				chk_wlan0_connection
 				if [ "$wifi_ping" -gt "$ZERO" ];then
+					[ -f /var/log/last_handle_fail_time.txt ] && rm /var/log/last_handle_fail_time.txt
 					use_wifi_as_gateway
 				else
 					logger -t iot_keep_alive "XX ping WiFi $PING_WIFI_HOST via wlan0-2 fail"
@@ -415,6 +403,7 @@ do
 				if [ "$wifi_ping" -gt "$ZERO" ];then
 					use_wifi_as_gateway
 					has_internet=1
+					[ -f /var/log/last_handle_fail_time.txt ] && rm /var/log/last_handle_fail_time.txt
 				else
 					logger -t iot_keep_alive "XX ping WiFi $PING_WIFI_HOST via wlan0-2 fail"
 					if [ "`uci get network.cellular.auto`" = "1" ];then
@@ -462,15 +451,20 @@ do
 		fi
 	fi
 
-	if [ "`ps | grep "/usr/bin/fwd" -c`" == 2 ];then
-		status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key like '/service/lorawan/server/network';" | grep -c online`
-		if [ "$status" == "1" ];then
-			echo "online" > /var/iot/status
-		else 
-			echo "offline" > /var/iot/status
-		fi 
+	if [ "`uci get gateway.general.server_type`" == "lorawan" ]; then
+		if [ -z $(pgrep fwd) ];then
+			logger -t iot_keep_alive "IoT Server is not Runing, So Reload IoT Service_flag"
+			reload_iot_service
+		else
+			status=`sqlite3 /var/lgwdb.sqlite "select * from gwdb where key like '/service/lorawan/server/network';" | grep -c online`
+			if [ "$status" == "1" ];then
+				echo "online" > /var/iot/status
+			else 
+				echo "offline" > /var/iot/status
+			fi 
+		fi
+		iot_online=`cat /var/iot/status | grep online -c`
 	fi
-	[ "`uci get gateway.general.server_type`" == "lorawan" ] && iot_online=`cat /var/iot/status | grep online -c`	
 	if [ "`uci get gateway.general.server_type`" == "station" ]; then
 		station_status=`tail /var/iot/station.log | grep -e "HTTP connect failed" -e "failed" -e "Interaction with CUPS failed" -c`
 		station_abandon=`cat /var/iot/station.log | grep -e "abandoning" -c`

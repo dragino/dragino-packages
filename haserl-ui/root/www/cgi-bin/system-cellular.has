@@ -61,9 +61,15 @@
   fi
   
 	if [ `cat /sys/kernel/debug/usb/devices | grep "Vendor=1e0e ProdID=9011" -c` == "1" ]; then
-		echo 1 > /tmp/cell_detect.txt
+		echo 1 > /tmp/cell_detect.txt	
 	elif [ `cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c` == "1" ]; then
 		echo 1 > /tmp/cell_detect.txt
+		if [ ! -f /tmp/cell_imei.txt ]; then
+			gcom -d /dev/ttyUSB3 -s /etc/gcom/getimei.gcom  |awk 'NR==2{print$0}' > /tmp/cell_imei.txt
+			IMEI=$(cat /tmp/cell_imei.txt)
+		else
+			IMEI=$(cat /tmp/cell_imei.txt)
+		fi
 	else
 		echo 0 > /tmp/cell_detect.txt
 	fi
@@ -108,6 +114,13 @@
        		<input type="checkbox" name="CELL_BACKUP" value="checked" <% echo -n $cell_backup %> > <font size="4"> Use Cellular as Backup WAN</font>
   <% fi %>
 			</td>
+		</tr>
+		
+		<tr class="rowSpacer"><td colspan="20"></td></tr>  <!--Determines column widths-->
+		<tr>
+			<td colspan="1"></td>
+			<td colspan="3"><label for="IMEI">IMEI</label></td>
+			<td colspan="3"><label for="IMEI"><% echo $IMEI %></label></td>
 		</tr>
 
 		<tr class="rowSpacer"></tr>

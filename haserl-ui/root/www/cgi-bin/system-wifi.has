@@ -43,10 +43,13 @@
 		
     uci commit wireless 
 
-    [ -f /var/log/wifi_handle.txt ] && rm /var/log/wifi_handle.txt;
-    # Run in background    
-		(sleep 1; /etc/init.d/network restart) &
-		(sleep 30; /etc/init.d/fallbackip start) &
+    [ -f /usr/share/wifi_handle.txt ] && rm /usr/share/wifi_handle.txt;
+    wifi reload
+	sleep 5;
+	
+	# Run in background    
+		#(sleep 1; /etc/init.d/network restart) &
+		#(sleep 30; /etc/init.d/fallbackip start) &
     #/etc/init.d/DR_wifi_wan start &  # Check that WiFi WAN is operating correctly, else disable after 30 seconds.
   fi
 %>
@@ -201,11 +204,11 @@
 		 	Warning: WiFi WAN Host SSID is not present in scan.
 		 	</span></td>
 	</tr>
-	<% if [ -n /var/log/wifi_handle.txt ]; then %>
+	<% if [ -f /usr/share/wifi_handle.txt ]; then %>
 	
 	<tr>
 		<td colspan="20"><span id="host_str" class="impact" style="visibility:visible; display:inline;">
-		 	<% cat /var/log/wifi_handle.txt %>
+		 	<% cat /usr/share/wifi_handle.txt %>
 		 	</span></td>
 	</tr>
 	

@@ -129,6 +129,7 @@ gen_gw_cfg() {
 		json_add_boolean "forward_crc_disabled" "`uci get gateway.server1.forward_crc_disabled`"
 		json_close_object 
 	
+	if [ `uci get gateway.server2.provider` != "disable" ]; then
 		#Server2
 		json_add_object "server2"
 		json_add_string "server_name" "`uci get gateway.server2.server_id`"  #name是服务的标识，必须要设置一个name   
@@ -154,7 +155,7 @@ gen_gw_cfg() {
 		json_add_boolean "forward_crc_error" 0
 		json_add_boolean "forward_crc_disabled" 0
 		json_close_object 
-		
+	fi
 	json_close_array
 
     json_close_object
@@ -331,7 +332,7 @@ elif [ $model == "LIG16" ] ;then
 elif [ $model == "LPS8-N" ] || [ $model == "DLOS8N" ] ||  [ $model == "LPS8-G" ] || [ $model == "LG308-N" ]; then
 	SN=`hexdump -v -e '11/1 "%_p"' -s $((0x908)) -n 11 /dev/mtd6 | cut -b '1-4'`
 	case $SN in
-		ps8n | ps8g | los8 )
+		ps8n | ps8g | los8 |308l)
 			chip="302-zn"
 			json_section_name="SX130x_conf"
 			;;

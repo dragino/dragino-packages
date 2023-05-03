@@ -10,6 +10,7 @@
 		uci set gateway.server1.provider="helium"
 		uci set gateway.server1.upp="$FORM_PRI_UPP"
 		uci set gateway.server1.dpp="$FORM_PRI_DPP"
+		uci commit gateway
 		/etc/init.d/lora_gw reload > /dev/null
 		sleep 2
 		/usr/bin/reload_iot_service.sh
@@ -17,20 +18,17 @@
 	fi
 	
 	if [ "$FORM_BUTTON" == "Download gateway-rs" ]; then
-		if  [ ! -e "/tmp/releases" ]; then
-			cd /tmp; wget https://github.com/helium/gateway-rs/releases
-		fi
+		
+		if [ ! -f "/tmp/helium-gateway-rs-dragino.ipk" ]; then
+			cd /tmp;wget -O helium-gateway-rs-dragino.ipk https://www.dragino.com/downloads/downloads/LoRa_Gateway/3rd-software/helium/gateway-rs/data-only/gateway-rs-latest.ipk
 			if [ ! -f "/tmp/helium-gateway-rs-dragino.ipk" ]; then
-				latest_version="$(cat /tmp/releases |  grep dragin* |  awk -F"/" 'NR==1 {print$6}' |  sed 's/ //g')"
-				cd /tmp;wget -O helium-gateway-rs-dragino.ipk https://github.com/helium/gateway-rs/releases/download/"$latest_version"/helium-gateway-"$latest_version"-dragino.ipk
-				if [ ! -f "/tmp/helium-gateway-rs-dragino.ipk" ]; then
-					Download_status="<span class="impactOK">Download failed,Please Download again.</span>"
-				else
-					Download_status="<span class="impactOK">Download successful,Please Install Helium gateway-rs.</span>"
-				fi
+				Download_status="<span class="impactOK">Download failed,Please Download again.</span>"
 			else
-				Download_status="<span class="impactOK">Helium has been Downloaded,Please Install Helium gateway-rs</span>"
+				Download_status="<span class="impactOK">Download successful,Please Install Helium gateway-rs.</span>"
 			fi
+		else
+			Download_status="<span class="impactOK">Helium has been Downloaded,Please Install Helium gateway-rs</span>"
+		fi
 	fi
 
 	if [ "$FORM_BUTTON" == "Install gateway-rs" ]; then
@@ -102,15 +100,23 @@
 	
 	helium_server_connect_status=$(ps | grep "/etc/helium_gateway" -c)
 	if [ $helium_server_connect_status -eq "2" ]; then
-		helium_server_status="<span class="impactOK">&nbsp;&nbsp;Gateway-rs Connected</span>"
+		connected_status=$(helium_gateway info router|grep connected|awk '{print$2}'|sed 's/\,//g')
+		if [ $connected_status = "true" ]; then
+			connected_status=Connected
+		else
+			connected_status=Unconnected
+		fi
+		helium_server_status="<span class="impactOK">$connected_status</span>"
 		helium_key="$(helium_gateway key info | grep key | awk '{print $2}' | cut -d '"' -f 2)"	
 		helium_name="$(helium_gateway key info | grep name | awk '{print $2}' | cut -d '"' -f 2)"
-		helium_region=`helium_gateway info | grep region | awk -F'"' '{print $4}'`
+		helium_region=$(helium_gateway info region |awk 'NR==2{print$2}'|sed 's/\"//g')
+		helium_server_router=$(helium_gateway info router |grep uri|awk -F'"' '{print$4}')
 	else
-		helium_server_status="<span class="impact">No Gateway-rs Connected </span>"
+		helium_server_status="<span class="impact">No Gateway-rs Running </span>"
 		helium_key="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
 		helium_name="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
 		helium_region="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
+		helium_server_router="<span class='impact'>&nbsp;&nbsp;NULL! </span>"
 	fi
 	
 	if [ -e "/etc/helium_gateway/gateway_key.bin" ]; then
@@ -200,6 +206,14 @@
 		<td colspan="8"><label for="helium_server">gateway-rs status</label></td>
 		<td colspan="10"><% echo -n $helium_server_status %></td>
 	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="8"><label for="helium_server_router">gateway-rs Router</label></td>
+		<td colspan="10"><% echo -n $helium_server_router %></td>
+	</tr>
+	
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 		<td colspan="1"></td>
 		<td colspan="8"><label for="helium_version">gateway-rs version</label></td>

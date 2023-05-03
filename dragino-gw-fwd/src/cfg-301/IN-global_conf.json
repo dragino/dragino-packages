@@ -37,17 +37,10 @@
 			"if": 102500
 		},
 		"chan_multiSF_2": {
-<<<<<<< HEAD
 			"desc": "Lora MAC, 125kHz, all SF, 865.2325 MHz",
 			"enable": true,
 			"radio": 0,
 			"if": -67500
-=======
-			"desc": "Lora MAC, 125kHz, all SF, 865.6025 MHz",
-			"enable": true,
-			"radio": 0,
-			"if": 302500
->>>>>>> 016e08365de0fa3f2285dfb3da395834383cd767
 		},
 		"chan_multiSF_3": {
 			"desc": "Lora MAC, 125kHz, all SF, 865.9850 MHz",

@@ -13,7 +13,11 @@ killall -q station
 #cd /etc/station ; station -k
 rm -f /var/iot/status
 
-/etc/init.d/iot reload
+if [ "$service" = "station" ]; then
+	station --home /etc/station -L /var/iot/station.log -d
+else
+	/etc/init.d/iot reload
+fi
 
 killall -q inotifywait                  # Remove any inotfywait process, need to put at the last
 

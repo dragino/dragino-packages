@@ -15,50 +15,16 @@ init_board() {
 	elif [[ "$service" = "mqtt" ]]; then
 		process="mqtt_process.sh"
 	elif [[ "$service" = "lorawan" ]]; then
+		provider=$(uci get gateway.server1.provider)
 		if [[ "$provider" = "helium" ]]; then
 			logger "Start Helium-gateway-rs"
-			regino_check_seetting="$(cat /etc/helium_gateway/settings.toml | grep region -c)"
-			regino_check_default="$(cat /etc/helium_gateway/default.toml | grep region -c)"
-			logger  test "$regino_check_seetting" "$regino_check_default" "$gwcfg"
-			if [[ "$gwcfg"  = "EU" ]];then
-				region="EU868"
-			elif [[ "$gwcfg" = "US" ]];then
-				region="US915"
-			elif [[ "$gwcfg" = "AU" ]];then
-				region="AU915"
-			elif [[ "$gwcfg" = "CN" ]];then
-				region="CN470"
-			elif [[ "$gwcfg" = "IN" ]];then
-				region="IN865"
-			elif [[ "$gwcfg" = "RU" ]];then
-				region="RU864"
-			elif [[ "$gwcfg" = "AS1_2" ]] || [[ "$gwcfg" = "AS1" ]] || [[ "$gwcfg" = "KR" ]]; then
-				region="AS923_1"
-			elif [[ "$gwcfg" = "AS2" ]]; then
-				region="AS923_2"
-			elif [[ "$gwcfg" = "AS3" ]]; then
-				region="AS923_3"
-			elif [[ "$gwcfg" = "AS4" ]]; then
-				region="AS923_4"
+			/etc/init.d/helium_gateway restart
+		else
+			if [[ -f /etc/init.d/helium_gateway ]]; then
+				/etc/init.d/helium_gateway stop
 			fi
-		
-		if [[ "$regino_check_seetting" = "0" ]] ; then
-				sed -i "1 i\region = \"${region}\"" /etc/helium_gateway/settings.toml
-		else
-				sed -i '/region/d' /etc/helium_gateway/settings.toml
-				sed -i "1 i\region = \"${region}\"" /etc/helium_gateway/settings.toml	
 		fi
-
-		if [[ "$regino_check_default" = "0" ]]; then
-			sed -i "20 i\region = \"${region}\"" /etc/helium_gateway/default.toml
-		else
-			sed -i '/region/d' /etc/helium_gateway/default.toml
-			sed -i "20 i\region = \"${region}\"" /etc/helium_gateway/default.toml
-		fi
-		/etc/init.d/helium_gateway start		
-	else
-		/etc/init.d/helium_gateway stop
-	fi
+		exit
 		
 	elif [[ "$service" = "customized" ]]; then
 		process=`uci get customized_script.general.script_name`
@@ -68,7 +34,7 @@ init_board() {
 		LORIOT_URL=`uci -q get loriot.loriot.url`
 		process="loriot_dragino_lg308_spi"
 		option="-f -s ${LORIOT_URL}"
-		/usr/bin/${process} ${option}  > /dev/null 
+		/usr/bin/${process} ${option}  &> /dev/null &
 		exit
 	elif [[ "$service" = "station" ]]; then
 		logger "Start station"

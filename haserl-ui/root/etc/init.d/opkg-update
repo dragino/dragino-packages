@@ -15,23 +15,32 @@ echo "src/gz dragino http://www.dragino.com/downloads/downloads/LoRa_Gateway/DLO
 cp /etc/opkg/distfeeds.conf.bak /etc/opkg/distfeeds.conf
 
 #list upgradable package
-package=$(opkg list-upgradable | awk '{print $1}')
+package=$(opkg list-upgradable | awk '{print $1}'|grep -e dragino_gw_fwd -e haserl-ui -e  helium_gateway )
 logfile=/var/log/opkg_update.log
+
+#init info
+gwid="$(cat /etc/station/station.conf | grep routerid | awk -F "\"" '{print $4}')"
 
 #upgrade cycle
 for a in $package
 do
 	if [ ! -z $a ]; then
-		cp -r /etc/config /tmp/config.bak; # backup config file
+		tar cvpzf /tmp/backup.tar.gz  /etc/config/; # backup config file
 		echo "================================================" >> $logfile
 		echo "$(date +"%Y-%m-%d %H:%M")" >> $logfile
 		echo "installed $a" >> $logfile
 		opkg install $a >> $logfile
 		echo "================================================" >> $logfile
-		cp -r /tmp/config.bak/* /etc/config/; # recovery config file
+		tar xvpfz /tmp/backup.tar.gz -C /; # recovery config file
 	fi
 done
 if [ ! -z $package ]; then
+	if [ `uci get gateway.general.server_type` = "station" ]; then
+		sed -i '/routerid/d' /etc/station/station.conf;  sed -i '/"station_conf"/a\"routerid":"'$gwid'",' /etc/station/station.conf			
+		sed -i '/routerid/d' /etc/station/station-sx1301.conf;  sed -i '/"station_conf"/a\"routerid":"'$gwid'",' /etc/station/station-sx1301.conf
+		sed -i '/routerid/d' /etc/station/station-sx1302.conf;  sed -i '/"station_conf"/a\"routerid":"'$gwid'",' /etc/station/station-sx1302.conf
+	fi
+	
 	/etc/init.d/lora_gw reload
 	sleep 5;
 	/usr/bin/reload_iot_service.sh

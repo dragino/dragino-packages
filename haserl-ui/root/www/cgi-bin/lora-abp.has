@@ -1,4 +1,4 @@
-#!/usr/bin/haserl
+#!/usr/bin/haserl --upload-limit=4096 --upload-dir=/tmp
 
 <%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
 
@@ -18,8 +18,44 @@
 	fi 
   fi
   
+  if [ "$FORM_BUTTON" == "Add Proces" ]; then
+	if test -n "$HASERL_uploadfile_path"; then
+		uploadfile_name=$FORM_uploadfile_name
+		if [ "$uploadfile_name" != "" ]; then
+			if [ "${uploadfile_name##*.}"x = "csv"x ];then
+				find /tmp -name "*csv*"|xargs rm -rfv   #  Remove the original cups.trust file
+				savedfile=$HASERL_uploadfile_path
+				cp $savedfile /tmp/$uploadfile_name  # Store the cert file
+				upload_status="<span class='impactOK'>Upload Finished </span>"
+				csv_line=`wc -l /tmp/$uploadfile_name | awk '{print $1}'` && i=1
+				while [ $i -le $csv_line ]
+				do
+					dev_addr=`awk -F',' 'NR=='$i'{print $1}' /tmp/$uploadfile_name`
+					appskey=`awk -F',' 'NR=='$i'{print $2}' /tmp/$uploadfile_name`
+					nwkskey=`awk -F',' 'NR=='$i'{print $3}' /tmp/$uploadfile_name`
+					decoder=`awk -F',' 'NR=='$i'{print $4}' /tmp/$uploadfile_name`
+					sqlite3 $sql_file "INSERT INTO abpdevs (devaddr, appskey, nwkskey , decoder) VALUES  ('$dev_addr', '$appskey', '$nwkskey' , '$decoder');"
+					i=$((i+1))
+				done
+			else 
+				upload_status="<span class='impact'>file name must be csv </span>"
+			fi 
+		  else
+		  	upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!</span>"
+		  fi
+		fi
+	fi
+		
   if [ "$FORM_BUTTON" == "DELETE" ];then
-		sqlite3 $sql_file "DELETE FROM abpdevs where devaddr = '$FORM_DEVADDR';"
+		if [ "$FORM_DEVADDR" == "ALL" ]; then
+			addr=`sqlite3 /etc/lora/devskey  "SELECT *from abpdevs" | awk -F'|' '{print$1}'`
+			for ar in $addr
+			do
+				sqlite3 $sql_file "DELETE FROM abpdevs where devaddr = '$ar';"
+			done
+		else
+			sqlite3 $sql_file "DELETE FROM abpdevs where devaddr = '$FORM_DEVADDR';"
+		fi
   fi
 
   if [ "$FORM_BUTTON" == "SAVE" ]; then
@@ -65,7 +101,7 @@
 <div class="page-container">
 <h2>Decrypt ABP End Node Packets</h2>
 
-<form action="<% echo -n $SCRIPT_NAME %>" method="POST">
+<form id="lorabap" action="<% echo -n $SCRIPT_NAME %>" method="POST" enctype="multipart/form-data">
 <table class="configTable">
 	<tr class="rowSpacer"></tr>
 	<tr>
@@ -101,7 +137,7 @@
 	<tr>
 		<td></td>
 		<td colspan="2"><label for="DECODER">Decoder:</label></td>
-		<td colspan="3"><select id="decoder" style="padding-right:130px" name="DECODER">
+		<td colspan="3"><select id="decoder" style="padding-right:10px" name="DECODER">
 			<option value="ASCII" selected = "selected" >ASCII String</option>
 		<% for file in $(ls /etc/lora/decoder/); do %>   
 			<option value="<% echo -n "$file" %>" ><% echo -n "$file" %></option>                                  
@@ -109,7 +145,7 @@
 		</select></td>
 		<td colspan="2"></td>
 	</tr>
-		
+
 	<tr>
 		<td></td>
 		<td colspan="2"></td>
@@ -120,15 +156,28 @@
 		<td colspan="3"></td>
 		<td class="impact" colspan="7"><% echo $add_key_error %></td>
 	</tr>
-	<tr class="rowSpacer"></tr>
+	
 
 	<tr>
+		<td colspan="2"><h3>Batch Add</h3></td>
+	</td>
+	
+	<tr>
+		<td colspan="2"></td>
+		<td colspan="4"><input type=file name=uploadfile></td>
+		<td colspan="2 "><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Add Proces"></td>
+		<td colspan="3"><% echo -n $upload_status %></td>
+	</tr>
+	
+	<tr class="rowSpacer"></tr>
+	<tr>
 		<td colspan="2"><h3> Delete Key </h3></td>
-		<td colspan="1"><label for="DEL_DEV_ADDR">Dev ADDR:</label></td>
+		<td colspan="2"><label for="DEL_DEV_ADDR">Dev ADDR:</label></td>
 		<td colspan="3"><select id="devaddr" style="padding-right:130px" name="DEVADDR">
 		<% for dev_addr in $(sqlite3 $sql_file "SELECT *from abpdevs" | awk -F '\\|' '{print $1}'); do %>   
-			<option value="<% echo -n "$dev_addr" %>" ><% echo -n "$dev_addr" %></option>                                  
+			<option value="<% echo -n "$dev_addr" %>" ><% echo -n "$dev_addr" %></option>
 		<% done %>
+			<option value="ALL" >ALL</option>
 		</select></td>
 		<td colspan="4"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DELETE"></td>
 		</tr>

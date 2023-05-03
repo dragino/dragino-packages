@@ -69,16 +69,6 @@
     	if [ "$FORM_BUTTON" == "Proceed" ]; then
 		%>
 				<p class="impact">*** Sysupgrade starting now... </p>
-			<%				
-				if [ "$FORM_SETTINGS_ENABLE" == "checked" ]; then
-					echo "Configuration settings will be retained."
-					settings=" "
-				else
-					echo "Configuration settings will be reset to Factory Default."
-					settings=" -n "
-				fi 
-			%> 
-			
 				<p class="impact">*** Please allow 3 minutes to complete flash operation. </p>
   			<p>Time remaining:	<span id="seconds"> Starting </span>.</p>
 				<script>
@@ -94,21 +84,56 @@
     			);
 				</script>
 				
-		<%					
-    		sysupgrade $settings -v /tmp/flash.bin                      # Perform the firmware upgrade
-				echo "<p class="impact">*** Sysupgrade terminated...</p>"   # Show Fail message if sysupgrade returns
+		<%	
+		  if [ -f /lib/upgrade/custom/remoteit/remoteit ]; then
+			if [ "$FORM_SETTINGS_REMOTE" == "checked" ] && [ "$FORM_SETTINGS_GENERAL" == "checked" ]; then
+				sysupgrade -general -remoteit -v /tmp/flash.bin  # Perform the firmware upgrade
+			elif [ "$FORM_SETTINGS_REMOTE" == "checked" ]; then
+				sysupgrade -remoteit  -v /tmp/flash.bin 		 # Perform the firmware upgrade
+			elif [ "$FORM_SETTINGS_GENERAL" == "checked" ]; then
+				sysupgrade -general -v /tmp/flash.bin 			 # Perform the firmware upgrade
+			else
+				sysupgrade -n -v /tmp/flash.bin                  # Perform the firmware upgrade
 			fi
+    		
+		  else
+			if [ "$FORM_SETTINGS_ENABLE" == "checked" ]; then
+				sysupgrade -v /tmp/flash.bin                      # Perform the firmware upgrade
+			else
+				sysupgrade -n -v /tmp/flash.bin                      # Perform the firmware upgrade
+			fi 
+		  fi
+
+			echo "<p class="impact">*** Sysupgrade terminated...</p>"   # Show Fail message if sysupgrade returns
+		fi
     %>
       </td>
     </tr>
+	<% if [ -f /lib/upgrade/custom/remoteit/remoteit ]; then %>
     
+		<tr>
+			<td colspan="20"><font size="4"> Preserve Settings </font>
+		</tr>
+		<tr>
+		<td colspan="1"></td>
+		<td colspan="4"><label size="2"> Remote.it </label></td>
+		<td colspan="2"><input type="checkbox" name="SETTINGS_REMOTE" value="checked" ></td>
+
+		</tr>
+		<tr>
+		<td colspan="1"></td>
+		<td colspan="4"><label size="2"> General Settings </label></td>
+		<td colspan="2"><input type="checkbox" name="SETTINGS_GENERAL" value="checked" ></td>
+		</tr>
+		<tr class="rowSpacer"></tr>
+	<% else %>
 		<tr>
 			<td colspan="20"><font size="4"> Preserve Settings </font>
 			<input type="checkbox" name="SETTINGS_ENABLE" value="checked" ></td>
 		</tr>
-    
+
+	<% fi %>
     <tr>
-      <td colspan="1"></td>
       <td colspan="19">
       	<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Proceed">
         <INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel">

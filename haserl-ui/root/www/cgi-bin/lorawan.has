@@ -93,7 +93,15 @@
 	fi
 
 	if [ $FORM_BUTTON == "DELETE" ]; then
-		sqlite3 /etc/lora/devskey "DELETE FROM filter where value  = '$FORM_DELFILTER';"
+		if [ "$FORM_DELFILTER" == "ALL" ]; then
+			server=`sqlite3 /etc/lora/devskey  "SELECT *from filter" | awk -F'|' '{print$1}'`
+			for sr in $server
+			do
+				sqlite3 /etc/lora/devskey "DELETE FROM filter where name = '$sr';"
+			done
+		else
+			sqlite3 /etc/lora/devskey "DELETE FROM filter where value  = '$FORM_DELFILTER';"
+		fi
 	fi
 %>
 
@@ -399,6 +407,7 @@
 		<% for filter_value in $(sqlite3 /etc/lora/devskey "SELECT *from filter" | awk -F '\\|' '{print $3}'); do %>   
 			<option value="<% echo -n "$filter_value" %>" ><% echo -n "$filter_value" %></option>                                  
 		<% done %>
+			<option value="ALL">ALL</option>
 		</select></td>
 		<td colspan="6"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DELETE"></td>
 	</tr>

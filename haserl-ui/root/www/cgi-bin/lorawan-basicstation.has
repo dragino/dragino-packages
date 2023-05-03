@@ -56,6 +56,7 @@
 		sed -i '/routerid/d' /etc/station/station.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station.conf			
 		sed -i '/routerid/d' /etc/station/station-sx1301.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station-sx1301.conf
 		sed -i '/routerid/d' /etc/station/station-sx1302.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station-sx1302.conf
+		sed -i '/routerid/d' /etc/station/station-sx1302-zn.conf;  sed -i '/"station_conf"/a\"routerid":"'$(echo -n $FORM_GWID)'",' /etc/station/station-sx1302-zn.conf
 
 		/etc/init.d/lora_gw stop > /dev/null
 		sleep 2
@@ -163,8 +164,8 @@
 		fi
 	fi
 	if [ "$FORM_BUTTON" == "Restore_Configuration" ]; then
-		cd /etc/station/; ls | grep -v station.conf | grep -v station-sx1301.conf | grep -v station-sx1302.conf | xargs rm -rf {}
-		if [ `ls /etc/station/ | wc -w` == "3" ]; then
+		cd /etc/station/; ls | grep -v station.conf | grep -v station-sx1301.conf | grep -v station-sx1302.conf | grep -v station-sx1302-zn.conf | xargs rm -rf {}
+		if [ `ls /etc/station/ | wc -w` == "4" ]; then
 			clearing_status="<span class='impactOK'>Deleting the confiuration file is complete</span>"
 		else
 			clearing_status="<span class='impact'>&nbsp;&nbsp; Deleting failure! </span>"

@@ -20,6 +20,14 @@
 	if [ "$FORM_BUTTON" == "DELETE" ];then
 		sqlite3 $sql_file "DELETE FROM mapping where local = '$FORM_DEL_CHAN';"
 	fi
+
+	if [ "$FORM_BUTTON" == "AUTO_ADD" ];then
+		addr=$(sqlite3 /etc/lora/devskey  "SELECT *from abpdevs" | awk -F'|' '{print $1}')
+		for dr in $addr
+		do
+			sqlite3 $sql_file "INSERT INTO mapping (local, remote, APIKey) VALUES  ('$dr', '$dr', '');"
+		done
+	fi
 %>
 
 
@@ -62,6 +70,12 @@
 		<td class="impact" colspan="8"><% echo $add_chan_error %></td>
 	</tr>
 	<tr class="rowSpacer"></tr>
+
+	<tr><td colspan="10"><h3>Auto Add Channel </h3></td></tr> <!-- Determines the column widths -->
+	<tr>
+		<td colspan="2"></td>	
+		<td colspan="8"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="AUTO_ADD"></td>
+	</tr>
 
 	<tr><td colspan="10"><h3>Delete Channel</h3></td></tr>
 	<tr>

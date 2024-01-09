@@ -51,8 +51,11 @@
 					<a href="/cgi-bin/lorawan-basicstation.has">LoRaWAN -- Basic Station</a>
 					<a href="/cgi-bin/lorawan-helium.has">Helium IoT</a>
 				<% fi %>
-
-				<a href="/cgi-bin/loriot.has">LORIOT</a>				
+				<% # Set up LoRaWAN menu for board type
+				if  [ "$model" == "LG308" ] || [ "$model" == "LPS8" ] || [ "$model" == "DLOS8" ]; then
+				%>
+				<a href="/cgi-bin/loriot.has">LORIOT</a>
+				<% fi %>	
 			</div>
 		</div>
 	<% else %>  
@@ -96,6 +99,7 @@
 		<a href="/cgi-bin/system-general.has">General</a>
 		<a href="/cgi-bin/system-config.has">Back Up / Restore Config</a>
 		<a href="/cgi-bin/system-remoteit.has">Remote.it</a>
+		<a href="/cgi-bin/system-wireguard.has">WireGuard</a>
 		<a href="/cgi-bin/system-rssh.has">Remote Mgmt</a>
 		<a href="/cgi-bin/system-firmware.has">Firmware Upgrade</a>
 		<a href="/cgi-bin/system-reboot.has">Reboot / Reset</a>

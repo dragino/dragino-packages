@@ -272,210 +272,210 @@ fi
 while [ 1 ]
 do
 	inotifywait -q -e 'create,modify' /var/iot/channels/
-	
-		CID=`ls /var/iot/channels/`
-		[ $DEBUG -ge 2 ] && logger "[IoT.MQTT]: Check for sensor update"
-		if [ -n "$CID" ];then
-			[ $DEBUG -ge 2 ] && [ -n "$CID" ] && logger "[IoT.MQTT]: Found Data at Local Channels:" $CID
-			for channel in $CID; do
-				CHAN_INFO=`sqlite3 $CHAN_FILE "SELECT *from mapping where local = '$channel';"`
-				if [ -n "$CHAN_INFO" ];then
-					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
 
-					# Get values
-					local_id=`echo $CHAN_INFO | awk -F '\\|' '{print $1}'`
-					remote_id=`echo $CHAN_INFO | awk -F '\\|' '{print $2}'`
-					channel_API=`echo $CHAN_INFO | awk -F '\\|' '{print $3}'`
-					
-					# Send Data  
-					# META 					
-					meta=`cat /var/iot/channels/$channel`
-					time=`echo $meta | cut -d , -f 1` 
-					rssi=`echo $meta | cut -d , -f 2` 	
-					# Strip out meta data if not required
-					data=$(echo $meta | cut  -d , -f 3-100)		# For late version with metadata from radio
- 					#data=$(cat /var/iot/channels/$channel)   # For early version with no metadata from radio
-					
- 					# JSON 
-					str=`echo $data | sed 's/{//'` 
-					json="{\"timestamp\":\"$time\",\"rssi\":\"$rssi\",$str" 
-					
-					# Generate Topic and Data strings
-					# Initialise strings
-					pub_topic=$pub_topic_format
-					mqtt_data=$data_format
+	CID=`ls /var/iot/channels/`
+	[ $DEBUG -ge 2 ] && logger "[IoT.MQTT]: Check for sensor update"
+	if [ -n "$CID" ];then
+		[ $DEBUG -ge 2 ] && [ -n "$CID" ] && logger "[IoT.MQTT]: Found Data at Local Channels:" $CID
+		for channel in $CID; do
+			#channel_sql=$(echo $channel|cut -b '1-8')
+			CHAN_INFO=`sqlite3 $CHAN_FILE "SELECT *from mapping where local = '$channel';"`
+			if [ -n "$CHAN_INFO" ];then
+				[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
 
-					# Replace topic macros
-					pub_topic=`echo ${pub_topic/CHANNEL/$remote_id}`  
-					pub_topic=`echo ${pub_topic/CLIENTID/$clientID}`				
-					pub_topic=`echo ${pub_topic/WRITE_API/$channel_API}`
-					pub_topic=`echo ${pub_topic/USERNAME/$user}`
-					pub_topic=`echo ${pub_topic/HOSTNAME/$hostname}`
-					# Replace data macros
-					mqtt_data=`echo ${mqtt_data/HOSTNAME/$hostname}`  
-					mqtt_data=`echo ${mqtt_data/CHANNEL/$remote_id}`
-					mqtt_data=`echo ${mqtt_data/DATA/$data}`  
-					mqtt_data=`echo ${mqtt_data/META/$meta}`  
-					mqtt_data=`echo ${mqtt_data/JSON/$json}`  
-					
-					PUB_FLAG="-m "  # Default
-					DECODER=`sqlite3 $KEY_FILE "SELECT decoder from abpdevs where devaddr = '$channel';"`					
-					logger "[IoT.MQTT]: DECODER $DECODER $channel"
-					# Send the File
-					if [ ! -z $DECODER ]; then
-						PUB_FLAG="-m "
-						if [ "$DECODER" == "ASCII" ]; then
-							if [ "$data_format" == "JSON" ]; then
-								rssi=`expr $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '1-8')) - 4294967296`
-								snr=`expr  $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '9-16')) / 10`
-								payload=`xxd -p /var/iot/channels/$channel`
-								payload=`echo ${payload:32}`
-							
-								mqtt_data="{\"rssi\": \"$rssi\", \"payload\": \"$payload\",\"snr\": \"$snr\"}"	
-							else
-								#Send As ASCII String
-								rssi=`hexdump -v -e '11/1 "%c"'  -n 16 /var/iot/channels/$channel | tr A-Z a-z`
-								payload=`xxd -p /var/iot/channels/$channel`
-								payload=`echo ${payload:32}`
-								mqtt_data=$rssi$payload
-							fi
-							
+				# Get values
+				local_id=`echo $CHAN_INFO | awk -F '\\|' '{print $1}'`
+				remote_id=`echo $CHAN_INFO | awk -F '\\|' '{print $2}'`
+				channel_API=`echo $CHAN_INFO | awk -F '\\|' '{print $3}'`
+				
+				# Send Data  
+				# META 					
+				meta=`cat /var/iot/channels/$channel`
+				time=`echo $meta | cut -d , -f 1` 
+				rssi=`echo $meta | cut -d , -f 2` 	
+				# Strip out meta data if not required
+				data=$(echo $meta | cut  -d , -f 3-100)		# For late version with metadata from radio
+				#data=$(cat /var/iot/channels/$channel)   # For early version with no metadata from radio
+				
+				# JSON 
+				str=`echo $data | sed 's/{//'` 
+				json="{\"timestamp\":\"$time\",\"rssi\":\"$rssi\",$str" 
+				
+				# Generate Topic and Data strings
+				# Initialise strings
+				pub_topic=$pub_topic_format
+				mqtt_data=$data_format
+
+				# Replace topic macros
+				pub_topic=`echo ${pub_topic/CHANNEL/$remote_id}`  
+				pub_topic=`echo ${pub_topic/CLIENTID/$clientID}`				
+				pub_topic=`echo ${pub_topic/WRITE_API/$channel_API}`
+				pub_topic=`echo ${pub_topic/USERNAME/$user}`
+				pub_topic=`echo ${pub_topic/HOSTNAME/$hostname}`
+				# Replace data macros
+				mqtt_data=`echo ${mqtt_data/HOSTNAME/$hostname}`  
+				mqtt_data=`echo ${mqtt_data/CHANNEL/$remote_id}`
+				mqtt_data=`echo ${mqtt_data/DATA/$data}`  
+				mqtt_data=`echo ${mqtt_data/META/$meta}`  
+				mqtt_data=`echo ${mqtt_data/JSON/$json}`  
+				
+				PUB_FLAG="-m "  # Default
+				DECODER=`sqlite3 $KEY_FILE "SELECT decoder from abpdevs where devaddr = '$channel';"`					
+				logger "[IoT.MQTT]: DECODER $DECODER $channel_sql"
+				# Send the File
+				if [ ! -z $DECODER ]; then
+					PUB_FLAG="-m "
+					if [ "$DECODER" == "ASCII" ]; then
+						if [ "$data_format" == "JSON" ]; then
+							rssi=`expr $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '1-8')) - 4294967296`
+							snr=`expr  $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '9-16')) / 10`
+							payload=`xxd -p /var/iot/channels/$channel`
+							payload=`echo ${payload:32}`
+						
+							mqtt_data="{\"rssi\": \"$rssi\", \"payload\": \"$payload\",\"snr\": \"$snr\"}"	
 						else
-							#Decode the sensor value use pre-set format and send
-							mqtt_data=`/etc/lora/decoder/$DECODER $channel`
+							#Send As ASCII String
+							rssi=`hexdump -v -e '11/1 "%c"'  -n 16 /var/iot/channels/$channel | tr A-Z a-z`
+							payload=`xxd -p /var/iot/channels/$channel`
+							payload=`echo ${payload:32}`
+							mqtt_data=$rssi$payload
 						fi
-					elif [ "$data_format" == "FILE" ];then 
-						PUB_FLAG="-f"
-						mqtt_data="/var/iot/channels/$channel"	
 						
-					elif [ "$data_format" == "BIN_ASCII" ];then
-						xxd -p /var/iot/channels/$channel | tr -d '\n'> /var/iot/channels/$channel.asc
-						PUB_FLAG="-m "
-						mqtt_data=$(cat /var/iot/channels/$channel.asc)
-					elif [ "data_format" == "JSON" ]; then
-						rssi=`expr $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '1-8')) - 4294967296`
-						snr=`expr  $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '9-16')) / 10`
-						payload=`xxd -p /var/iot/channels/$channel`
-						payload=`echo ${payload:32}`
-						
-						mqtt_data="{\"rssi\"\: \"$rssi\"\, \"payload\"\:\"$payload\"\,\"snr\"\:\"$snr\"}"
-					
-					else 
-						DECODER="Not Set"
-					fi
-
-					# Initialise debug flag
-					D=" "
-					if [ $DEBUG -ge 10 ]; then
-						# Set test level debug flag
-						D="-d"
-					fi
-
-					# ------------------------------------------
-					# Call MQTT Publish command
-					
-					# 1. Case with User, Password and Client ID present  (e.g. Azure)
-					if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
-						case="1"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -u $user -P "$pass" $C $cafile $PUB_FLAG "$mqtt_data"
-						
-					# 2. Case with Certificate, Key and ClientID present (e.g. AWS)
-					elif [ ! -z "$certfile" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then
-						case="2"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic --cert $cert --key $key $C $cafile $PUB_FLAG "$mqtt_data"
-						
-					# 3. Case with no User, Certificate or ClientID present
-					elif [ -z "$user" ] && [ -z "$certfile" ] && [ -z "$clientID" ]; then
-						case="3"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -t $pub_topic $PUB_FLAG "$mqtt_data" 
-						
-					# 4. Case with no User, Certificate, but with ClientID present
-					elif [ -z "$user" ] && [ -z "$certfile" ] && [ ! -z "$clientID" ]; then
-						case="4"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic $PUB_FLAG "$mqtt_data"
-						
-					# 5. Case with User and ClientID present, but no Password and no Certificate present
-					elif [ -z "$pass" ] && [ -z "$certfile" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
-						case="5"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -u $user $PUB_FLAG "$mqtt_data"
-						
-					# 6. Case with User and Password present, but no ClientID and no Certificate present
-					elif [ ! -z "$user" ] && [ ! -z "$pass" ] && [ -z "$clientID" ] && [ -z "$certfile" ]; then
-						case="6"  
-						mosquitto_pub $D -h $server -p $port -q $pub_qos  -t $pub_topic -u $user -P "$pass" $PUB_FLAG "$mqtt_data"
-						
-					# 0. Else - invalid parameters, just log
 					else
-						case="Invalid parameters"  
-						logger "[IoT.MQTT]:Invalid Parameters - mosquitto_pub not called."
+						#Decode the sensor value use pre-set format and send
+						mqtt_data=`/etc/lora/decoder/$DECODER $channel`
 					fi
-
-					# -----------------------------------------
-					# Debug output to log
-					if [ $DEBUG -ge 1 ]; then
-						logger "[IoT.MQTT]:  "
-						logger "[IoT.MQTT]:-----"
-						logger "[IoT.MQTT]:MQTT Publish Case: "$case
-						logger "[IoT.MQTT]:MQTT Publish Parameters"
-						logger "[IoT.MQTT]:server[-h]: "$server
-						logger "[IoT.MQTT]:port[-p]: "$port
-						logger "[IoT.MQTT]:user[-u]: "$user
-						logger "[IoT.MQTT]:pass[-P]: "$pass
-						logger "[IoT.MQTT]:pub_qos[-q]: "$pub_qos
-						logger "[IoT.MQTT]:cafile[--cafile]: "$cafile
-						logger "[IoT.MQTT]:cert[--cert]: "$cert
-						logger "[IoT.MQTT]:key[--key]: "$key
-						logger "[IoT.MQTT]:clientID[-i]: "$clientID
-						logger "[IoT.MQTT]:remote_id: "$remote_id
-						logger "[IoT.MQTT]:pub_topic[-t]: "$pub_topic
-						logger "[IoT.MQTT]:decoder: "$DECODER
-						if [ "$data_format" == "FILE" ];then
-							logger "[IoT.MQTT]:mqtt_file[-f]: $mqtt_data"
-						else
-							logger "[IoT.MQTT]:mqtt_data[-m]: $mqtt_data"
-						fi	
-						logger "[IoT.MQTT]:------"
-					fi 
-
-					# ------------------------------------------
-					# Debug console output for manual testing
-
-					if [ $DEBUG -ge 10 ]; then
-						# Echo parameters to console
-						echo " "
-						echo "-----"
-						echo "MQTT Publish Case: "$case
-						echo "MQTT Publish Parameters"
-						echo "server: "$server
-						echo "port: "$port
-						echo "user: "$user
-						echo "pass: "$pass
-						echo "pub_qos: "$pub_qos
-						echo "certfile: "$certfile
-						echo "cert: "$cert
-						echo "key: "$key
-						echo "cafile: "$cafile
-						echo "clientID: "$clientID
-						echo "remoteID: "$remote_id
-						echo "pub_topic: "$pub_topic
-						echo "decoder: "$DECODER
-						if [ "$data_format" == "FILE" ];then 
-							echo "[IoT.MQTT]:mqtt_file[-f]: $mqtt_data"
-						else
-							echo "[IoT.MQTT]:mqtt_data[-m]: $mqtt_data"
-						fi
-						echo "------"
-					fi
-
-					# ------------------------------------------
-					# Delete the Channel info
-					rm /var/iot/channels/$channel*
+				elif [ "$data_format" == "FILE" ];then 
+					PUB_FLAG="-f"
+					mqtt_data="/var/iot/channels/$channel"	
 					
-				else
-					[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Did Not Find Match Entry for $channel" 
-					rm /var/iot/channels/$channel.*
+				elif [ "$data_format" == "BIN_ASCII" ];then
+					xxd -p /var/iot/channels/$channel | tr -d '\n'> /var/iot/channels/$channel.asc
+					PUB_FLAG="-m "
+					mqtt_data=$(cat /var/iot/channels/$channel.asc)
+				elif [ "data_format" == "JSON" ]; then
+					rssi=`expr $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '1-8')) - 4294967296`
+					snr=`expr  $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '9-16')) / 10`
+					payload=`xxd -p /var/iot/channels/$channel`
+					payload=`echo ${payload:32}`
+					
+					mqtt_data="{\"rssi\"\: \"$rssi\"\, \"payload\"\:\"$payload\"\,\"snr\"\:\"$snr\"}"
+				
+				else 
+					DECODER="Not Set"
 				fi
-			done
-		fi
+
+				# Initialise debug flag
+				D=" "
+				if [ $DEBUG -ge 10 ]; then
+					# Set test level debug flag
+					D="-d"
+				fi
+
+				# ------------------------------------------
+				# Call MQTT Publish command
+				
+				# 1. Case with User, Password and Client ID present  (e.g. Azure)
+				if [ ! -z "$pass" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
+					case="1"  
+					mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -u $user -P "$pass" $C $cafile $PUB_FLAG "$mqtt_data"
+					
+				# 2. Case with Certificate, Key and ClientID present (e.g. AWS)
+				elif [ ! -z "$certfile" ] && [ ! -z "$key" ] && [ ! -z "$clientID" ]; then
+					case="2"  
+					mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic --cert $cert --key $key $C $cafile $PUB_FLAG "$mqtt_data"
+					
+				# 3. Case with no User, Certificate or ClientID present
+				elif [ -z "$user" ] && [ -z "$certfile" ] && [ -z "$clientID" ]; then
+					case="3"  
+					mosquitto_pub $D -h $server -p $port -q $pub_qos -t $pub_topic $PUB_FLAG "$mqtt_data" 
+					
+				# 4. Case with no User, Certificate, but with ClientID present
+				elif [ -z "$user" ] && [ -z "$certfile" ] && [ ! -z "$clientID" ]; then
+					case="4"  
+					mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic $PUB_FLAG "$mqtt_data"
+					
+				# 5. Case with User and ClientID present, but no Password and no Certificate present
+				elif [ -z "$pass" ] && [ -z "$certfile" ] && [ ! -z "$user" ] && [ ! -z "$clientID" ]; then
+					case="5"  
+					mosquitto_pub $D -h $server -p $port -q $pub_qos -i $clientID -t $pub_topic -u $user $PUB_FLAG "$mqtt_data"
+					
+				# 6. Case with User and Password present, but no ClientID and no Certificate present
+				elif [ ! -z "$user" ] && [ ! -z "$pass" ] && [ -z "$clientID" ] && [ -z "$certfile" ]; then
+					case="6"  
+					mosquitto_pub $D -h $server -p $port -q $pub_qos  -t $pub_topic -u $user -P "$pass" $PUB_FLAG "$mqtt_data"
+					
+				# 0. Else - invalid parameters, just log
+				else
+					case="Invalid parameters"  
+					logger "[IoT.MQTT]:Invalid Parameters - mosquitto_pub not called."
+				fi
+
+				# -----------------------------------------
+				# Debug output to log
+				if [ $DEBUG -ge 1 ]; then
+					logger "[IoT.MQTT]:  "
+					logger "[IoT.MQTT]:-----"
+					logger "[IoT.MQTT]:MQTT Publish Case: "$case
+					logger "[IoT.MQTT]:MQTT Publish Parameters"
+					logger "[IoT.MQTT]:server[-h]: "$server
+					logger "[IoT.MQTT]:port[-p]: "$port
+					logger "[IoT.MQTT]:user[-u]: "$user
+					logger "[IoT.MQTT]:pass[-P]: "$pass
+					logger "[IoT.MQTT]:pub_qos[-q]: "$pub_qos
+					logger "[IoT.MQTT]:cafile[--cafile]: "$cafile
+					logger "[IoT.MQTT]:cert[--cert]: "$cert
+					logger "[IoT.MQTT]:key[--key]: "$key
+					logger "[IoT.MQTT]:clientID[-i]: "$clientID
+					logger "[IoT.MQTT]:remote_id: "$remote_id
+					logger "[IoT.MQTT]:pub_topic[-t]: "$pub_topic
+					logger "[IoT.MQTT]:decoder: "$DECODER
+					if [ "$data_format" == "FILE" ];then
+						logger "[IoT.MQTT]:mqtt_file[-f]: $mqtt_data"
+					else
+						logger "[IoT.MQTT]:mqtt_data[-m]: $mqtt_data"
+					fi	
+					logger "[IoT.MQTT]:------"
+				fi 
+
+				# ------------------------------------------
+				# Debug console output for manual testing
+
+				if [ $DEBUG -ge 10 ]; then
+					# Echo parameters to console
+					echo " "
+					echo "-----"
+					echo "MQTT Publish Case: "$case
+					echo "MQTT Publish Parameters"
+					echo "server: "$server
+					echo "port: "$port
+					echo "user: "$user
+					echo "pass: "$pass
+					echo "pub_qos: "$pub_qos
+					echo "certfile: "$certfile
+					echo "cert: "$cert
+					echo "key: "$key
+					echo "cafile: "$cafile
+					echo "clientID: "$clientID
+					echo "remoteID: "$remote_id
+					echo "pub_topic: "$pub_topic
+					echo "decoder: "$DECODER
+					if [ "$data_format" == "FILE" ];then 
+						echo "[IoT.MQTT]:mqtt_file[-f]: $mqtt_data"
+					else
+						echo "[IoT.MQTT]:mqtt_data[-m]: $mqtt_data"
+					fi
+					echo "------"
+				fi
+
+				# ------------------------------------------
+				# Delete the Channel info
+				rm /var/iot/channels/$channel
+			else
+				[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Did Not Find Match Entry for $channel" 
+				rm /var/iot/channels/$channel
+			fi
+		done
+	fi
 done
 

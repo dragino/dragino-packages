@@ -96,8 +96,7 @@ start() {
 		chip="sx1302"
 		board="LG08"
 		model="LPS8-G"
-		pic="Dragino-LPS8G.png"
-		ln -s /dev/ttyUSB0 /dev/ttyGPS
+		pic="Dragino-LPS8-N.png"
 		EC25_P3="/dev/ttyUSB2"
 		rmmod i2c-gpio-custom
 		insmod i2c-gpio-custom bus0=0,7,8

@@ -45,6 +45,11 @@
 			if [ -n "$FORM_LNSURI_SN" ]; then
 				echo "$FORM_LNSURI_SN" > /etc/station/tc.uri
 			fi
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "LR" ]; then
+			if [ -n "$FORM_LNSURI_LR" ]; then
+				echo "$FORM_LNSURI_LR" > /etc/station/tc.uri
+
+			fi
 		fi
 		
 		uci set gateway.general.station_server_provider=$FORM_PALTFORM_SERVER_TYPE	
@@ -246,19 +251,17 @@
 			fi
 	fi
 	
-	if [ "$FORM_BUTTON" == "Upload_LNS_key" ]; then
+	if [ "$FORM_BUTTON" == "Upload_LNS_key" ] || [ "$FORM_BUTTON" == "Upload_TLS_key" ]; then
 		if test -n "$HASERL_uploadfile_tc_key_path"; then
-			tc_private_key_name=$FORM_uploadfile_tc_key_name			
-						
-			if [ "$tc_private_key_name" != "" ]; then				
-				if [ "${tc_private_key_name##*.}"x = "key"x ];then
+			tc_private_key_name=$FORM_uploadfile_tc_key_name
+			if [ "$tc_private_key_name" != "" ]; then		
+				if [ "${tc_private_key_name##*.}"x = "key"x ] ;then
 					find /etc/station/ -name '*private.key*' | xargs rm    #  Remove the original private.key file
 					savedfile=$HASERL_uploadfile_tc_key_path
 					cp $savedfile /etc/station/$private_key_name  # Store the cert file
 					mv $savedfile /etc/station/tc.key    # Store Copy the cert file
 					tc_key_upload_status="<span class='impactOK'>Upload Finished </span>"
 				else
-
 					tc_key_upload_status="<span class='impact'>file suffix must be private.key </span>"
 		        fi
 			else
@@ -266,13 +269,12 @@
 			fi
 		fi
 	fi
-	
-	if [ "$FORM_BUTTON" == "Upload_LNS_pem" ]; then
+
+	if [ "$FORM_BUTTON" == "Upload_LNS_pem" ]|| [ "$FORM_BUTTON" == "Upload_TLS_Cerificate" ]; then
 		if test -n "$HASERL_uploadfile_tc_pem_path"; then
 		 	tc_cert_pem_name=$FORM_uploadfile_tc_pem_name
-			
 			if [ "$tc_cert_pem_name" != "" ]; then
-				if [ "${tc_cert_pem_name##*.}"x = "pem"x ];then
+				if [ "${tc_cert_pem_name##*.}"x = "pem"x ] || [ "${tc_cert_pem_name##*.}"x = "crt"x ];then
 					find /etc/station/ -name '*cert.pem*' | xargs rm        #  Remove the original cert.pem file
 					savedfile=$HASERL_uploadfile_tc_pem_path
 					cp $savedfile /etc/station/tc.crt  # Store the cert file
@@ -284,6 +286,24 @@
 			
 			else
 				tc_pem_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! </span>"
+			fi
+		fi
+	fi
+	if [ "$FORM_BUTTON" == "Upload_CA_Certificate" ]; then
+		if test -n "$HASERL_uploadfile_loriot_ca_path"; then
+			loriot_ca_name=$FORM_uploadfile_loriot_ca_name
+			if [ "$loriot_ca_name" != "" ]; then
+			if [ "${loriot_ca_name##*.}"x = "pem"x ] || [ "${loriot_ca_name##*.}"x = "crt"x ];then
+				find /etc/station -name "tc.trust"| xargs rm -rfv   #  Remove the original tc.trust file
+				savedfile=$HASERL_uploadfile_loriot_ca_path
+				#cp $savedfile /etc/station/$loriot_ca_name
+				mv $savedfile /etc/station/tc.trust  # Store the cert file
+				loriot_ca_upload_status="<span class='impactOK'>Upload Finished</span>"			
+			else 
+				loriot_ca_upload_status="<span class='impact'>file name should be tc.trust or XX.crt </span>"
+			fi 
+			else
+			loriot_ca_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
 			fi
 		fi
 	fi
@@ -348,13 +368,13 @@
 	fi
 	
 	if [ -e "/etc/station/tc.key" ]; then
-		tc_key_file_status=`ls /etc/station/*.key | awk -F '/' '{print $4}'`
+		tc_key_file_status=`ls /etc/station/*.key | awk -F '/' '{print $4}'|grep -v bak`
 	else
 		tc_key_file_status='<span class="impact-light">Not Found</span>'
 	fi
 
 	if [ -e "/etc/station/tc.crt" ]; then
-		tc_pem_file_status=`ls /etc/station/*.crt | awk -F '/' '{print $4}'`
+		tc_pem_file_status=`ls /etc/station/*.crt | awk -F '/' '{print $4}'|grep -v bak`
 
 	else
 		tc_pem_file_status='<span class="impact-light">Not Found</span>'
@@ -390,15 +410,17 @@
 	disp1="inline"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"
 	# Set up display options
 	if [ "$paltform_server_type_select" == "AWS" ]; then
-		disp1="none"; disp2="inline"; disp3="none"; disp_TP="none"; disp_SN="none"
+		disp1="none"; disp2="inline"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="none"
 	elif [ "$paltform_server_type_select" == "TTN" ]; then
-		disp1="inline";disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"
+		disp1="inline";disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="none"
 	elif [ "$paltform_server_type_select" == "CS" ]; then
-		disp1="none"; disp2="none"; disp3="inline"; disp_TP="none"; disp_SN="none"
+		disp1="none"; disp2="none"; disp3="inline"; disp_TP="none"; disp_SN="none"; disp_LR="none"
 	elif [ "$paltform_server_type_select" == "TP" ]; then
-		disp1="none"; disp2="none"; disp3="none"; disp_TP="inline"; disp_SN="none"
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="inline"; disp_SN="none"; disp_LR="none"
 	elif [ "$paltform_server_type_select" == "SN" ]; then
-		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="inline"
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="inline"; disp_LR="none"
+	elif [ "$paltform_server_type_select" == "LR" ]; then
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="inline"
 	fi
 
 
@@ -416,6 +438,7 @@
 		document.getElementById("div3").style.display = "<% echo -n $disp3 %>"; 
 		document.getElementById("div_TP").style.display = "<% echo -n $disp_TP %>";
 		document.getElementById("div_SN").style.display = "<% echo -n $disp_SN %>"; 
+		document.getElementById("div_LR").style.display = "<% echo -n $disp_LR %>"; 
     	}
 	function changeFunc(val) {
 	    document.forms["station"].submit();
@@ -478,6 +501,7 @@
 			<option value="CS" >ChirpStack -- Basic Station </option>
 			<option value="TP">ThingPark -- Basic Station </option>
 			<option value="SN">Senet -- Basic Station </option>
+			<option value="LR">LORIOT -- Basic Station </option>
 		</select></td>
 	</tr>
 
@@ -701,6 +725,49 @@
 </table>
 </div>
 
+<div id="div_LR">
+	<table class="configTable">
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
+		<td colspan="24"><input type="text" name="LNSURI_LR" maxlength="128" placeholder="example: wss://xxx.loriot.io:xxx " VALUE=<% echo -n $tc_uri %>  ></td>
+	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSTRUST">TLS CA Certificate</label></td>
+		<td colspan="10"><% echo -n $tc_trust_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_loriot_ca></td>
+		<td colspan="5"><% echo -n $loriot_ca_upload_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CA_Certificate" onclick="showPageLoaderIcon()"></td>
+	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="PRIBATEKEY">TLS Certificate</label></td>
+		<td colspan="10"><% echo -n $tc_pem_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_tc_pem></td>
+		<td colspan="5"><% echo -n $tc_pem_upload_status%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_TLS_Cerificate" onclick="showPageLoaderIcon()"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CERTPEM">TLS Key</label></td>
+		<td colspan="10"><% echo -n $tc_key_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_tc_key></td>
+		<td colspan="5"><% echo -n $tc_key_upload_status%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_TLS_key" onclick="showPageLoaderIcon()"></td>
+	</tr>
+</table>
+</div>
+
+
 <table class="configTable">		
 	<tr class="rowSpacer"></tr>
 	<tr class="rowSpacer"></tr>
@@ -714,7 +781,6 @@
 			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
 		</td>
 	</tr>
-	
 </table>
 <script>
 function showHelp1() {

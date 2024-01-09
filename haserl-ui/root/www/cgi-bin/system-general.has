@@ -46,7 +46,32 @@
 		/etc/init.d/fallbackip reload
 	fi
 	
+	if [ "$FORM_BUTTON" == "Set Fallback Service" ]; then
+	  if [ "$FORM_FALLBACK_ENABLE" == "checked" ]; then
+		uci set system.@system[0].fallback=checked && uci commit system
+		sed  -i 's/#ifconfig/ifconfig/' /etc/init.d/fallbackip 
+		/etc/init.d/fallbackip start
+	  else
+		uci set system.@system[0].fallback=0 && uci commit system
+		interface=$(ip route|grep 172.31.255.254|awk '{print$3}')
+		ifconfig $interface:9 down
+		sed -i  's/ifconfig/#&/g' /etc/init.d/fallbackip
+	  fi	
+	fi
+
+
 	
+	if [ "$FORM_BUTTON" == "Enable Detect Service" ]; then
+		if  [ "$FORM_INTERNER_DETECT" == "checked" ]; then
+			uci set system.@system[0].internet_detect=checked && uci commit system
+			kill $(ps |grep iot_keep_alive|grep -v grep|awk '{print $1}') &> /dev/null
+			/usr/bin/iot_keep_alive.sh &
+		else
+			uci set system.@system[0].internet_detect=0 && uci commit system
+			kill $(ps |grep iot_keep_alive|grep -v grep|awk '{print $1}') &> /dev/null
+			/usr/bin/iot_keep_alive.sh &
+		fi
+	fi
 %>
 
 <%# --- Get the variables for the HTML page --- %>
@@ -68,6 +93,17 @@
   else
     http_tick="0"
   fi
+
+  fallback_tick=$(uci get system.@system[0].fallback)
+  if [ -z $fallback_tick ]; then
+	if [ "$(ip route|grep 172.31.255.254 -c)" = "1" ]; then
+		fallback_tick="Checked"
+	else
+		fallback_tick=0
+	fi
+  fi
+
+  internet_detect_tick=$(uci get system.@system[0].internet_detect)
 %>
   
 <%# --- Present the HTML page --- %>
@@ -173,6 +209,15 @@
 		<td colspan="4"><label for="SSH">Enable SSH Forward</label></td>
 		<td colspan="1"><input type="checkbox" name="SSH_ENABLE" value="checked" <% echo -n $ssh_tick %> ></td>
 	</tr>
+	
+	<tr><td colspan="20"><h3>Fallback Settings</h3></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="4"><label for="HTTP">Fallback Interface</label></td>
+		<td colspan="1"><input type="checkbox" name="FALLBACK_ENABLE" value="checked" <% echo -n $fallback_tick %> ></td>
+		<td colspan="4"> <INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Set Fallback Service"> </td>
+	</tr>
+
 
 	<tr><td colspan="20"><h3>Keepalive_Script</h3></td></tr>
 		<td colspan="1"></td>
@@ -190,7 +235,15 @@
 				</SELECT></td>
 		<td colspan="4"> <INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Change_Level"> </td>
 		<script>document.getElementById("logreadlevel").value="<% echo -n $logreadlevel %>";</script>
-	</tr>	
+	</tr>
+
+	<tr><td colspan="20"><h3>Enable Internet Detect and Recover</h3></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="4"><label for="HTTP">Enable Internet Detect</label></td>
+		<td colspan="1"><input type="checkbox" name="INTERNER_DETECT" value="checked" <% echo -n $internet_detect_tick %> ></td>
+		<td colspan="4"> <INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Enable Detect Service"> </td>
+	</tr>
 		
 	<tr class="rowSpacer"></tr>
 	<tr class="rowSpacer"></tr>

@@ -69,6 +69,59 @@
 		fi
 	fi
 
+	if [ "$FORM_BUTTON" == "Upgrade gateway-rs" ]; then
+		[ -f /tmp/gateway-rs-latest.ipk ] && rm /tmp/gateway-rs-latest.ipk
+		cur_version=$(opkg list-installed|grep helium|awk '{print $3}')
+		if [ -z "$cur_version" ]; then
+			Upgrade_status="<span class='impact-light'>Gateway-rs not installed</span>"
+		else
+			RELEASED=$(curl  https://www.dragino.com/downloads/downloads/LoRa_Gateway/3rd-software/helium/gateway-rs/data-only/Released)
+			rem_version=$(echo $RELEASED|awk '{print $1}')
+			rem_sha256=$(echo $RELEASED|awk '{print $2}')
+			if [ "$rem_version" \> "$cur_version" ]; then
+				wget -P /tmp https://www.dragino.com/downloads/downloads/LoRa_Gateway/3rd-software/helium/gateway-rs/data-only/gateway-rs-latest.ipk
+				if [ ! -f "/tmp/gateway-rs-latest.ipk" ]; then
+					Upgrade_status="<span class="impactOK">Download failed,Please Download again.</span>"
+				else
+					cur_sha256=$(sha256sum /tmp/gateway-rs-latest.ipk |awk '{print $1}')
+					if [ "$cur_sha256" == "$rem_sha256" ]; then 
+						Upgrade_status="<span class='impactOK'>Helium server has been Installed successfully </span>"
+						%>
+							<html>
+								<span class="impact">
+									<br><br>
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+									Please wait for installtion fot the helium gateway-rs. 
+									Time remaining:	<span id="seconds"> Starting </span>
+								</span>
+									<script>
+									var seconds = 60; /* Set time (secs) to reload */
+									setInterval(
+									function(){
+										if (seconds<=0){
+										window.location.href = "/cgi-bin/lorawan-helium.has"; /* Reload page */
+										} else {
+										document.getElementById('seconds').innerHTML = --seconds;
+										}
+									}, 1000
+									);
+									</script>
+
+							</html>
+						<%
+						opkg install /tmp/gateway-rs-latest.ipk
+					else
+						Upgrade_status="<span class="impactOK">Incorrect checksum, installation failed.</span>"
+					fi
+				fi
+			else
+				Upgrade_status="<span class='impactOK'>Currently the latest version</span>"
+			fi
+		fi
+	fi
+
 	if [ "$FORM_BUTTON" == "Upload_Hotspot_key" ]; then
 		if test -n "$HASERL_uploadfile_path"; then
 			key_name=$FORM_uploadfile_name
@@ -179,6 +232,7 @@
 		<td colspan="6"><input type="text" name="PRI_DPP" maxlength="0" VALUE="<% echo 1680 %>" pattern="[0-9]{1,8}" Placeholder="1680" ></td>
 		<td colspan="2"></td>
 	</tr>
+	
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
@@ -186,9 +240,8 @@
 		<td><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Download gateway-rs" onclick="return confirm('Start Download Helium gateway-rs')"></td>
 		<td colspan="6"></td>
 		<td colspan="12"><% echo -n  $Download_status %></td>
-		
-		
 	</tr>
+
 	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>
 		<td colspan="1"></td>
@@ -198,7 +251,14 @@
 		<td colspan="12"><% echo -n $Install_status %></td>
 	</tr>
 	
-	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="8"><label for="helium_server">Upgrade</label></td>
+		<td><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upgrade gateway-rs" onclick="return confirm('Please back the bin file and will upgrade gateway-rs')" ></td>
+		<td colspan="6"></td>
+		<td colspan="12"><% echo -n $Upgrade_status %></td>
+	</tr>
 
   	<tr class="rowSpacer"><td colspan="15"></td></tr>
 	<tr>

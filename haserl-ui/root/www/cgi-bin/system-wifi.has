@@ -108,7 +108,7 @@
 	<tr>
 		<td colspan="1"></td>
 		<td colspan="4"><label for="CHANNEL"> Channel (1-11) </label></td>
-		<td colspan="3"><input class="shortText" type="text" name="CHANNEL" maxlength="2" VALUE="<% echo -n $channel %>"   pattern="(1[0-1]|[1-9])$"></td>
+		<td colspan="3"><input class="shortText" type="text" name="CHANNEL" maxlength="2" VALUE="<% echo -n $channel %>"   pattern="(1[0-4]|[1-9])$"></td>
 		<td colspan="2"></td>
 		<td colspan="4"><label for="TXPOWER"> Tx Power (0-18) dBm</label></td>
 		<td colspan="3"><input class="shortText" type="text" name="TXPOWER" maxlength="2" VALUE="<% echo -n $txpower %>" pattern="(1[0-8]|[0-9])$"></td>

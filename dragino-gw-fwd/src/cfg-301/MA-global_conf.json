@@ -36,7 +36,7 @@
 			"if": -200000
 		},
 		"chan_multiSF_2": {
-			"desc": "Lora MAC, 125kHz, all SF, 868.5 MHz",
+			"desc": "Lora MAC, 125kHz, all SF, 869.5 MHz",
 			"enable": true,
 			"radio": 1,
 			"if": 0

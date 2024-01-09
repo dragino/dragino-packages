@@ -35,6 +35,7 @@
 		uci set gateway.server1.dpp="$FORM_PRI_DPP"
 		uci set gateway.server1.fport_filter_level="$FORM_PRIMARY_FPORT_FILTER" 
 		uci set gateway.server1.devaddr_filter_level="$FORM_PRIMARY_ADDR_FILTER"
+		uci set gateway.server1.nwkid_filter_level="$FORM_PRIMARY_NWKID_FILTER"
 
 		# Set up the secondary platform provider fields
 		secondary_provider="$FORM_SECONDARY_PROVIDER"
@@ -50,14 +51,15 @@
 			server2_address="$FORM_SERVER_ADDRESS_HELIUM_SECONDARY"
 			uci set gateway.server2.server_address="$FORM_SERVER_ADDRESS_HELIUM_SECONDARY"
 		elif [ "$secondary_provider" == "disable" ]; then
-			server2_address=localhost
-			uci set gateway.server2.server_address="localhost"
+			server2_address=disable
+			uci set gateway.server2.server_address="disable"
 		fi
 
 		uci set gateway.server2.upp="$FORM_SED_UPP"
 		uci set gateway.server2.dpp="$FORM_SED_DPP"
 		uci set gateway.server2.fport_filter_level="$FORM_SECONDARY_FPORT_FILTER" 
 		uci set gateway.server2.devaddr_filter_level="$FORM_SECONDARY_ADDR_FILTER"
+		uci set gateway.server2.nwkid_filter_level="$FORM_SECONDARY_NWKID_FILTER"
 
 		uci commit gateway
 	fi
@@ -84,8 +86,10 @@
 			fi
 			if [ $FORM_FILTERTYPE == "fport_type" ]; then
 				filter_type=fport
-			else
+			elif [ $FORM_FILTERTYPE == "addr_type" ]; then
 				filter_type=devaddr
+			elif [ $FORM_FILTERTYPE == "nwkid_type" ]; then
+				filter_type=nwkid
 			fi
 			filter_value1=`echo $FORM_FILTERVALUE | tr -d " " | tr '[a-z]' '[A-Z]'`
 			sqlite3 /etc/lora/devskey "INSERT INTO filter (name, type, value ) VALUES  ('$filter_name', '$filter_type', '$filter_value1');"
@@ -131,8 +135,10 @@
 	
 	filter1_fp_level=`uci get gateway.server1.fport_filter_level`
 	filter1_ad_level=`uci get gateway.server1.devaddr_filter_level`
+	filter1_nw_level=`uci get gateway.server1.nwkid_filter_level`
 	filter2_fp_level=`uci get gateway.server2.fport_filter_level`
 	filter2_ad_level=`uci get gateway.server2.devaddr_filter_level`
+	filter2_nw_level=`uci get gateway.server2.nwkid_filter_level`
 	
 	rfpower="$(uci -q get gateway.general.RFPOWER)"
 	rffreq="$(uci -q get gateway.radio1.RFFREQ)"
@@ -195,7 +201,7 @@
 
 <form id="lora" action="<% echo -n $SCRIPT_NAME %>" method="POST">
 
-<table class="configTable">
+<table class="configTable" style="width: 1100px;">
 	<tr><td colspan="18"><h3>General Settings</h3></td></tr>	
 	<tr>
 		<td colspan="1"></td>
@@ -221,7 +227,7 @@
 		<td colspan="24"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
 		  <option value="ttn_V3" >The Things Network V3</option>
 		  <option value="helium">Helium</option>
-		  <option value="mydevice" >IoT In A Box</option>
+		  <option value="mydevice" >Mydevices</option>
 		  <option value="router.cn.thethings.network" >Tencent</option>		
 		  <option value="127.0.0.1" >Built-in for ABP Decode to MQTT</option>
 		  <option value="custom" >Custom / Private LoRaWAN</option>
@@ -334,6 +340,20 @@
 		  <option value="0" >Level 0</option>
 		  <option value="1" >Level 1</option>
 		  <option value="2" >Level 2</option>
+		</select></td>
+		<td colspan="1"></td>
+		<td colspan="12"><label for="DEV_FILTER">NwkId Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
+		<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+		<p>Level 0: Do nothing</p>
+		<p>Level 1: Filter only the data in the list</p> 
+		<p>Level 2: Filter not in the database</p>
+		<p style="text-align: center;"><br>[Close]</p>
+		</div>
+		</td>
+		<td colspan="15"><select id='primary_nwkid_filter' name='PRIMARY_NWKID_FILTER' onchange="displayServerURL()">
+		  <option value="0" >Level 0</option>
+		  <option value="1" >Level 1</option>
+		  <option value="2" >Level 2</option>
 		</select></td>		
 	</tr>
 	<tr class="rowSpacer"></tr>
@@ -352,12 +372,23 @@
 		  <option value="1" >Level 1</option>
 		  <option value="2" >Level 2</option>
 		</select></td>
+		<td colspan="1"></td>
+		<td colspan="12"><label for="DEV_FILTER">NwkId Filter</label></td>
+		<td colspan="15"><select id='secondary_nwkid_filter' name='SECONDARY_NWKID_FILTER' onchange="displayServerURL()">
+		  <option value="0" >Level 0</option>
+		  <option value="1" >Level 1</option>
+		  <option value="2" >Level 2</option>
+		</select></td>
+
 	<tr>
 	
 	<script>document.getElementById("primary_fport_filter").value="<% echo -n $filter1_fp_level %>";</script>
 	<script>document.getElementById("primary_addre_filter").value="<% echo -n $filter1_ad_level %>";</script>
+	<script>document.getElementById("primary_nwkid_filter").value="<% echo -n $filter1_nw_level %>";</script>
 	<script>document.getElementById("secondary_fport_filter").value="<% echo -n $filter2_fp_level %>";</script>
 	<script>document.getElementById("secondary_addre_filter").value="<% echo -n $filter2_ad_level %>";</script>
+	<script>document.getElementById("secondary_nwkid_filter").value="<% echo -n $filter2_nw_level %>";</script>
+	
 	
 	</tr>
 	
@@ -374,6 +405,7 @@
 		<td colspan="15"><select id="filtername"name="FILTERNAME" onchange="displayServerURL()">
 			<option value="pri_server" selected = "selected" >Primary Server</option>
 			<option value="sed_server" selected = "selected" >Secondary Server</option>
+
 		</select></td>
 
 		<td colspan="1"></td>
@@ -381,6 +413,7 @@
 		<td colspan="14"><select id="filtertype"  name="FILTERTYPE" onchange="displayServerURL()">
 			<option value="fport_type" selected = "selected" >Fport</option>
 			<option value="addr_type" selected = "selected" >Dev Address</option>
+			<option value="nwkid_type" selected = "selected" >NwkId</option>
 		</select></td>
 
 		<td colspan="1"></td>

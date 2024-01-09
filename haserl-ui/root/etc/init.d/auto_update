@@ -3,6 +3,9 @@ START=99
 
 start()
 {	
+	random_number=`awk 'BEGIN{srand(); print int(1 + rand() * 12)}'`
+	sleep $random_number
+
 	# Auto update settiings. 
 	. /usr/share/libubox/jshn.sh
 

@@ -2,48 +2,81 @@
 START=99
 
 start(){
+if [ -e /tmp/.first_boot_updated ]; then
+  random_number=`awk 'BEGIN{srand(); print int(1 + rand() * 600)}'`
+  sleep $random_number
+else
+  touch /tmp/.first_boot_updated
+fi
 
 # remove cache
+logfile=/usr/share/opkg_update.log
+[ ! -f $logfile ] && touch $logfile
+if [ $(du -k "$logfile"|cut -f1) -gt "1024" ] 2> /dev/null; then
+	rm $logfile
+fi
+
 rm /var/opkg-lists/ -rf;
 
 # spicefy repository
-echo "src/gz dragino http://www.dragino.com/downloads/downloads/LoRa_Gateway/DLOS8/Firmware/Packages/dragino/" > /etc/opkg/distfeeds.conf \
+echo "src/gz dragino http://repo.dragino.com/openwrt/HE/Packages/" > /etc/opkg/distfeeds.conf \
 && opkg update \
-&& echo "update done" >> /var/log/opkg_update.log
+&& echo "$(date +"%Y-%m-%d %H:%M")" >> $logfile \
+&& echo "soure update done" >> $logfile
 
 #recovery repository
 cp /etc/opkg/distfeeds.conf.bak /etc/opkg/distfeeds.conf
 
 #list upgradable package
-package=$(opkg list-upgradable | awk '{print $1}'|grep -e dragino_gw_fwd -e haserl-ui -e  helium_gateway )
-logfile=/var/log/opkg_update.log
+#package=$(opkg list-upgradable | awk '{print $1}'|grep -e dragino_gw_fwd -e haserl-ui -e  helium_gateway)
+package_ui=$(opkg list-upgradable|grep haserl-ui)
+package_fwd=$(opkg list-upgradable|grep dragino_gw_fwd)
+package_ups=$(opkg list-upgradable|grep draginoups)
 
 #init info
 gwid="$(cat /etc/station/station.conf | grep routerid | awk -F "\"" '{print $4}')"
 
-#upgrade cycle
-for a in $package
-do
-	if [ ! -z $a ]; then
-		tar cvpzf /tmp/backup.tar.gz  /etc/config/; # backup config file
-		echo "================================================" >> $logfile
-		echo "$(date +"%Y-%m-%d %H:%M")" >> $logfile
-		echo "installed $a" >> $logfile
-		opkg install $a >> $logfile
-		echo "================================================" >> $logfile
-		tar xvpfz /tmp/backup.tar.gz -C /; # recovery config file
+if [ ! -z "$package_ui" ]; then
+	echo "================================================" >> $logfile
+	echo "An upgradeable version of haserl-ui has been detected." >> $logfile
+	echo "Start backup the config" >> $logfile
+	tar cvpzf /tmp/ui_backup.tar.gz  /etc/config/ /etc/iot/channels >> $logfile
+	if [ ! -f /tmp/ui_backup.tar.gz ]; then
+		echo "Backup fail, exit update" >> $logfile
+		exit 0;
+	else
+		echo "Backuped, Start update" >> $logfile
 	fi
-done
-if [ ! -z $package ]; then
-	if [ `uci get gateway.general.server_type` = "station" ]; then
-		sed -i '/routerid/d' /etc/station/station.conf;  sed -i '/"station_conf"/a\"routerid":"'$gwid'",' /etc/station/station.conf			
-		sed -i '/routerid/d' /etc/station/station-sx1301.conf;  sed -i '/"station_conf"/a\"routerid":"'$gwid'",' /etc/station/station-sx1301.conf
-		sed -i '/routerid/d' /etc/station/station-sx1302.conf;  sed -i '/"station_conf"/a\"routerid":"'$gwid'",' /etc/station/station-sx1302.conf
+	opkg install haserl-ui >> $logfile
+	echo "Start restore backup config" >> $logfile
+	tar xvpfz /tmp/ui_backup.tar.gz -C / >> $logfile
+	echo "================================================" >> $logfile
+
+	update_flag=1
+fi
+
+if [ ! -z "$package_fwd" ]; then
+	echo "================================================" >> $logfile
+	echo "$(date +"%Y-%m-%d %H:%M")" >> $logfile
+	echo "An upgradeable version of dragino_gw_fwd has been detected." >> $logfile
+	echo "Start backup the config" >> $logfile
+	tar cvpzf /tmp/fwd_backup.tar.gz  /etc/lora/local_conf.json  /etc/lora/global_conf.json /etc/station/  >> $logfile
+	if [ ! -f /tmp/fwd_backup.tar.gz ]; then
+		echo "Backup fail, exit update" >> $logfile
+		exit 0;
+	else
+		echo "Backuped, Start update" >> $logfile
 	fi
-	
-	/etc/init.d/lora_gw reload
-	sleep 5;
-	/usr/bin/reload_iot_service.sh
+	opkg install dragino_gw_fwd >> $logfile
+	echo "Start restore backup config" >> $logfile
+	tar xvpfz /tmp/fwd_backup.tar.gz -C / >> $logfile
+	echo "================================================" >> $logfile
+
+	update_flag=1
+fi
+
+if [ ! -z $update_flag ]; then
+	reboot
 fi
 
 }

@@ -32,9 +32,10 @@
 		uci commit network
 		
     # Run in background    
-		(sleep 1; /etc/init.d/network restart) &
-		(sleep 20; /etc/init.d/fallbackip start) &
-  fi
+		#(sleep 1; /etc/init.d/network restart) &
+		#(sleep 20; /etc/init.d/fallbackip start) &
+		/etc/init.d/network reload
+  	fi
 %>
 
 <%# --- Get the variables for the HTML page --- %>
@@ -65,10 +66,30 @@
 	elif [ `cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c` == "1" ]; then
 		echo 1 > /tmp/cell_detect.txt
 		if [ ! -f /tmp/cell_imei.txt ]; then
-			gcom -d /dev/ttyUSB3 -s /etc/gcom/getimei.gcom  |awk 'NR==2{print$0}' > /tmp/cell_imei.txt
-			IMEI=$(cat /tmp/cell_imei.txt)
+			IMEI=$(gcom -d /dev/ttyUSB3 -s /etc/gcom/getimei.gcom  |awk 'NR==2{print$1}')
+			if [ ! -z $IMEI ] && [ $IMEI -eq $IMEI  ] 2>/dev/null; then
+				echo $IMEI > /tmp/cell_imei.txt
+			fi
 		else
 			IMEI=$(cat /tmp/cell_imei.txt)
+		fi
+
+		if [ ! -f /tmp/cell_iccid.txt ]; then
+			ICCID=$(gcom -d /dev/ttyUSB3 -s /etc/gcom/geticcid.gcom  |awk 'NR==2{print$2}')
+			if echo "$ICCID" | grep -qE '^[0-9A-Fa-f]+$'; then
+				echo $ICCID > /tmp/cell_iccid.txt
+			fi
+		else
+			ICCID=$(cat /tmp/cell_iccid.txt)
+		fi
+
+		if [ ! -f /tmp/cell_imsi.txt ]; then
+			IMSI=$(gcom -d /dev/ttyUSB3 -s /etc/gcom/getimsi.gcom)
+			if [ ! -z $IMSI ] && [ $IMSI -eq $IMSI ] 2>/dev/null; then
+				echo $IMSI > /tmp/cell_imsi.txt
+			fi
+		else
+			IMSI=$(cat /tmp/cell_imsi.txt)
 		fi
 	else
 		echo 0 > /tmp/cell_detect.txt
@@ -119,8 +140,22 @@
 		<tr class="rowSpacer"><td colspan="20"></td></tr>  <!--Determines column widths-->
 		<tr>
 			<td colspan="1"></td>
+			<td colspan="3"><label for="IMEI">IMSI</label></td>
+			<td colspan="3"><label for="IMEI"><% echo $IMSI %></label></td>
+		</tr>
+
+		<tr class="rowSpacer"><td colspan="20"></td></tr>  <!--Determines column widths-->
+		<tr>
+			<td colspan="1"></td>
 			<td colspan="3"><label for="IMEI">IMEI</label></td>
 			<td colspan="3"><label for="IMEI"><% echo $IMEI %></label></td>
+		</tr>
+
+		<tr class="rowSpacer"><td colspan="20"></td></tr>  <!--Determines column widths-->
+		<tr>
+			<td colspan="1"></td>
+			<td colspan="3"><label for="IMEI">ICCID</label></td>
+			<td colspan="3"><label for="IMEI"><% echo $ICCID %></label></td>
 		</tr>
 
 		<tr class="rowSpacer"></tr>

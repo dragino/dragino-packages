@@ -87,7 +87,7 @@ reload_service() {
 service_triggers()
 {
     procd_add_reload_trigger "network" "wireless" "gateway" "mqtt" "tcp_client"
-    for iface in `cat /etc/config/network | grep interface | awk -F "\'"  '{print $2}' | sed '5d'`; do
+    for iface in `cat /etc/config/network | grep interface | awk -F "\'"  '{print $2}'`; do
         procd_add_interface_trigger "interface.*.up" "$iface" /etc/init.d/lora_gw reload
     done
 }

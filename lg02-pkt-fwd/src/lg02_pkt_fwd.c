@@ -1787,7 +1787,7 @@ void thread_push(void) {
                 txpkt.tx_mode = IMMEDIATE;
 
                 gettimeofday(&current_unix_time, NULL);
-                txpkt.count_us = current_unix_time.tv_sec + current_unix_time.tv_usec + 1495/*START_DELAY*/;
+                txpkt.count_us = current_unix_time.tv_sec * 1000000UL + current_unix_time.tv_usec + 1495/*START_DELAY*/;
 
                 txlora(txdev, &txpkt);
                 /* insert the queue is the best method, but is too truble to construct the txpkt pakeage */

@@ -25,6 +25,22 @@
 		echo "</pre>" >> /tmp/opkglist-installed.html
 	fi
 
+
+	package_info=$(opkg list_installed|grep  -e haserl-ui -e dragino_gw_fwd -e lg02_pkt_fwd -e lora-gateway)
+	if [ ! -z "$package_info" ]; then
+		echo "<pre>" > /tmp/main_packages.html
+		opkg list_installed|grep  -e haserl-ui -e dragino_gw_fwd -e lg02_pkt_fwd -e lora-gateway >> /tmp/main_packages.html
+		echo "</pre>" >> /tmp/main_packages.html
+	fi
+
+	if [ -f /usr/share/opkg_update.log  ]; then
+		ln -sf /usr/share/opkg_update.log  /tmp/opkg_update.log
+	else
+		echo null > /tmp/opkg_update.log
+	fi
+
+	boot_enable=$(uci get package.general.boot_enable)
+	day_enable=$(uci get package.general.day_enable)
 %>
 	
 
@@ -49,6 +65,35 @@
 		(opkg list-upgradable | sed 's/ - /\t/g' | cut -c 1-130 >> /tmp/opkglist.html); \
 		echo "</pre>" >> /tmp/opkglist.html; ) &
 	fi
+
+	if [ $FORM_BUTTON == "SAVE" ]; then
+		if [ $FORM_DAY_ENABLE = "checked" ];then
+			uci set package.general.day_enable=checked
+			sed -i 's/\#0 2 \* \* \*  \/etc\/init.d\/opkg-update start/0 2 \* \* \*  \/etc\/init.d\/opkg-update start/g' /etc/crontabs/root 
+			/etc/init.d/cron restart
+		else
+			uci set package.general.day_enable=0
+			line=$(cat /etc/crontabs/root| grep opkg-update -n|awk -F":" '{print $1}')
+			sed -i ''$line's/.*/\#0 2 \* \* \*  \/etc\/init.d\/opkg-update start/g' /etc/crontabs/root 
+			/etc/init.d/cron restart
+		fi
+		
+		if [ $FORM_BOOT_ENABLE = "checked" ];then
+			uci set package.general.boot_enable=checked
+			/etc/init.d/opkg-update enable
+		else
+			uci set package.general.boot_enable=0
+			/etc/init.d/opkg-update disable
+		fi
+		uci commit package
+		%>
+		<html>
+			<script>
+				window.location.href = "/cgi-bin/system-package.has"; /* Reload page */
+			</script>
+		</html>
+		<%
+	fi
 	
 	# Process core package upgrades
 	CORE_PKG="lg02_pkt_fwd lora-gateway haserl-ui dragino_gw_fwd"
@@ -57,7 +102,7 @@
 			upgrading="1"
 			package=$PKG
 		fi
-	done	
+	done
 	
 %>
 
@@ -74,7 +119,8 @@
 <div class="page-container">
 <h2>Package Management</h2>
 
-<form action="<% echo -n $SCRIPT_NAME %>" method=POST enctype="multipart/form-data" >
+<form name="SYSTEM_STATUS" id="update-log" action="<% echo -n $SCRIPT_NAME %>" method=POST enctype="multipart/form-data" >
+
 	<table class="configTable">
 		<tr> <td><h3> Package List </h3></td></tr>
 		<tr>
@@ -132,8 +178,8 @@
 		<% for PKG in $CORE_PKG; do %>
 
 		<tr><td colspan="3"><% echo $PKG %>:</td>
-			<td colspan="2" ><% echo $(cat /tmp/opkglist-installed.html | grep ^$PKG | awk '{print $3}') %></td>
-			<td colspan="2"><% echo $(cat /tmp/opkglist.html | grep ^$PKG | awk '{print $3}') %></td>
+			<td colspan="2" ><% echo $(cat /tmp/main_packages.html | grep ^$PKG | awk '{print $3}') %></td>
+			<td colspan="2"><% echo $(cat /tmp/main_packages.html | grep ^$PKG | awk '{print $3}') %></td>
 			<td colspan="2"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upgrade_<% echo -n $PKG %>"</td>
 		</tr>
 
@@ -173,6 +219,25 @@
 <script>	document.getElementById("upgrading").style.display = "none"; 	</script>
 <script> document.getElementById("install-infoframe").src = "/tmp/install-info.html"; </script>
 
+	<table class="configTable">
+	<tr> <td colspan="10"><h3>Auto-Update </h3></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label>Enable update every boot</lable></td>
+		<td colspan="5"><input type="checkbox" name="BOOT_ENABLE" value="checked" <% echo -n $boot_enable %> ></td>
+	</tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label>Enable update every day midnight</lable></td>
+		<td colspan="1"><input type="checkbox" name="DAY_ENABLE" value="checked" <% echo -n $day_enable %> ></td>
+		<td colspan="4"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="SAVE"  onclick="showPageLoaderIcon()"></td>
+	</tr>
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="10"><iframe id="installed-listframe" width="1140px" scrolling="auto" src="/tmp/opkg_update.log" ></iframe></td>
+	</tr>
+	<tr class="rowSpacer"></tr>
+</table>
 </form>
 </div>
 </body>

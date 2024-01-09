@@ -487,6 +487,8 @@ elif [ $server_type == "station" ]; then
 		server3=Senet,`cat /etc/station/tc.uri`
 	elif [ "$server_provider" == "TP" ]; then
 		server3=ThingPart,`cat /etc/station/tc.uri`
+	elif [ "$server_provider" == "LR" ]; then
+		server3=LORIOT,`cat /etc/station/tc.uri`
 	fi
 	station_status=$(ps | grep station | grep -c -v grep)
 	

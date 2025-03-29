@@ -1,0 +1,219 @@
+#!/usr/bin/haserl --upload-limit=4096 --upload-dir=/tmp
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+<%# --- Process the form submission --- %>
+<%
+
+if [ "$FORM_BUTTON" == "Save&Apply" ]; then
+	if [ "$FORM_KEY_TYPE" == "manuall" ]; then
+		sleep 3;
+	elif [ "$FORM_KEY_TYPE" = "import" ]; then
+		uci set openvpn.custom_config.type=import
+		uci set openvpn.custom_config.enabled=1
+		uci set openvpn.custom_config.config="/etc/openvpn/client.ovpn"
+		echo -n "$FORM_CONFIGINPUT" > /etc/openvpn/client.ovpn
+		cp /etc/openvpn/client.ovpn /tmp/client.txt
+		uci commit openvpn
+		/etc/init.d/openvpn start
+		sleep 3
+	fi
+
+	if [ -z "$(uci -q get firewall.@zone[1].device)" ]; then
+		uci set firewall.@zone[1].device="tun+"
+		uci rename firewall.@zone[0]="lan"
+		uci rename firewall.@zone[1]="wan"
+		uci del_list firewall.wan.device="tun+"
+		uci add_list firewall.wan.device="tun+"
+		uci add_list firewall.wan.device="tap+"
+		uci commit firewall
+		/etc/init.d/firewall reload
+	fi
+
+	if [ "$FORM_BOOT_ENABLE" == "checked" ]; then
+		uci set openvpn.custom_config.boot_up=checked
+		/etc/init.d/openvpn enable
+	else
+		uci set openvpn.custom_config.boot_up=0
+		/etc/init.d/openvpn disable
+	fi
+
+fi
+
+if [ "$FORM_BUTTON" == "Reload" ]; then
+	/etc/init.d/openvpn reload
+	sleep 3;
+fi
+
+if [ "$FORM_BUTTON" == "Stop" ]; then
+	/etc/init.d/openvpn stop
+	sleep 3;
+fi
+
+if [ "$FORM_BUTTON" == "Install OpenVPN" ]; then
+	wget -P /tmp http://repo.dragino.com/release/openwrt-package/packages/openvpn-openssl_2.4.5-3_mips_24kc.ipk http://repo.dragino.com/release/openwrt-package/packages/liblzo_2.10-1_mips_24kc.ipk
+	opkg install /tmp/liblzo_2.10-1_mips_24kc.ipk /tmp/openvpn-openssl_2.4.5-3_mips_24kc.ipk
+	reboot
+fi
+
+%>
+
+<%# --- Get the variables for the HTML page --- %>
+<% 
+	echo "no running" > /tmp/openvpn_status.txt
+	echo "null" > /tmp/client.txt
+	if [ -e /etc/openvpn/client.ovpn ]; then
+		cp /etc/openvpn/client.ovpn /tmp/client.txt
+		if [ $(cat /etc/openvpn/client.ovpn |grep tun -c ) -gt 0 ]; then
+			if [ $(ifconfig tun0 |grep tun0 -c) -gt 0 ]; then
+				ifconfig tun0 > /tmp/openvpn_status.txt
+			fi
+		elif [ $(cat /etc/openvpn/client.ovpn |grep tap -c ) -gt 0 ]; then
+			if [ $(ifconfig tap0 |grep tap0 -c) -gt 0 ]; then
+				ifconfig tap0 > /tmp/openvpn_status.txt
+			fi
+		fi
+	fi
+
+
+	boot_tick=$(uci -q get openvpn.custom_config.boot_up)
+
+	type_select=$FORM_KEY_TYPE
+	if [ -z $type_select ]; then
+		type_select=$(uci -q get openvpn.custom_config.type)
+		if [ -z $type_select ]; then
+				type_select=import
+		fi
+	fi
+
+	if [ "$type_select" == "manuall" ]; then
+		#disp1="inline"; disp2="none";
+		disp1="none"; disp2="inline";
+	elif [ "$type_select" == "import" ]; then
+		disp1="none"; disp2="inline";
+	fi
+%>
+
+<%# --- Present the HTML page --- %>
+<html>
+<head>
+<%inc /www/cgi-bin/inc/head.inc %>
+<script>
+	function displayFunction() {
+	    document.getElementById("manuall_key").style.display = "<% echo -n $disp1 %>"; 
+	    document.getElementById("import_key").style.display = "<% echo -n $disp2 %>";      
+	}
+	function changeFunc(val) {
+	    document.forms["openvpn"].submit();
+	}
+</script>
+<style>
+	textarea {
+		width: 85%;
+		height: 300px;
+		padding: 10px;
+		font-family: Arial, sans-serif;
+		font-size: 14px;
+		border: 1px solid #ccc;
+		resize: vertical;
+	}
+</style>
+</head>
+
+<body onload="displayFunction() ">
+<%inc /www/cgi-bin/inc/menu.inc %>
+
+<div class="page-container">
+<h2>
+	 OpenVPN Client
+</h2> 
+
+<form name="openvpn" id="openvpn" action="<% echo -n $SCRIPT_NAME %>" method="POST">
+<% if [ ! -f /usr/sbin/openvpn ]; then
+install_status='<span class="impact-light">Not Install</span>'
+ %>
+<table class="configTable">
+<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="5"><h3 for="SERVER_TYPE">OpenVPN Install Status</h3></td>
+		<td colspan="3"><% echo -n $install_status %></td>
+		<td colspan="4"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Install OpenVPN" onclick="showPageLoaderIcon()"></td>
+	</tr>
+
+</table>
+<% fi %>
+<table class="configTable">
+<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="4"><h3 for="SERVER_TYPE">Configuration Type</h3></td>
+		<td colspan="3">
+			<select id="key_type"  name="KEY_TYPE" onchange="changeFunc(this.value)" >
+			<option value="manuall" >Manuall</option>
+			<option value="import" >Import</option>
+		</select></td>
+	</tr>
+	<script>document.getElementById("key_type").value="<% echo -n $type_select %>";</script>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="4"><label for="HTTP">Boot Up Enable</label></td>
+		<td colspan="1"><input type="checkbox" name="BOOT_ENABLE" value="checked" <% echo -n $boot_tick %> ></td>
+	</tr>
+</table>
+
+<div id="manuall_key">
+<table class="configTable">
+	<tr>
+		<td colspan="4"><h3>General Settings</h3></td>
+	</tr>
+</table>
+</div>
+
+<div id="import_key">
+<table class="configTable">
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="4"><h3>configuration Import</h3></td>
+	</tr>
+	<tr>
+		<td colspan="14"><textarea id="configInput" name="CONFIGINPUT" placeholder="Enter your OpenVPN configuration information here"></textarea></td>
+
+	</tr>
+
+	<tr>
+		<td colspan="4"><h3>Configuration Display</h3></td>
+	</tr>
+
+	<tr>
+		<td>
+		<iframe id="NET_WIFI_STATUS" src="/tmp/client.txt"  width="750px" height="250" ></iframe>
+		</td>
+	</tr>
+</table>
+</div>
+<table class="configTable">
+	<tr>
+		<td colspan="4"><h3>OpenVPN Status</h3></td>
+	</tr>
+
+	<tr>
+		<td>
+		<iframe id="NET_WIFI_STATUS" src="/tmp/openvpn_status.txt"  width="750px" height="250" ></iframe>
+		</td>
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="4">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Stop" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Reload" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Refresh" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+</table>
+</form>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,217 @@
+#!/usr/bin/lua
+
+json = require('dragino.json')
+local utility = require("dragino.utility")
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+			
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+			
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+--Get Battery
+--HEX_BAT=string.sub(payload,17,18)
+--BAT_RAW=utility.hex2str(HEX_BAT)
+--BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+--payload_t.BatV=BAT
+
+	Len=string.len(payload)
+if Len==27 then
+
+    --Get Battery
+    HEX_BAT=string.sub(payload,17,18)
+    BAT_RAW=utility.hex2str(HEX_BAT)
+    BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+    payload_t.BatV=BAT
+
+	--Get EXTI_Trigger
+	EXTI_Trigger_RAW=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+	EXTI_Trigger=bit.bit_rshift(bit.bit_and(EXTI_Trigger_RAW,tonumber("40",16)),6)
+	payload_t.EXTI_Trigger=(EXTI_Trigger == 1) and "TRUE" or "FALSE"
+	
+    --Get EXTI_Level
+	EXTI_Level_RAW=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+	EXTI_Level=bit.bit_rshift(bit.bit_and(EXTI_Level_RAW,tonumber("80",16)),7)
+	payload_t.EXTI_Level=(EXTI_Level == 1) and "HIGH" or "LOW"
+	
+	 --Get Cur1L_status
+	Cur1L_status_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	Cur1L_status=bit.bit_rshift(bit.bit_and(Cur1L_status_RAW,tonumber("80",16)),7)
+	payload_t.Cur1L_status=(Cur1L_status == 1) and "TRUE" or "FALSE"
+
+	--Get Cur1H_status
+	Cur1H_status_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	Cur1H_status=bit.bit_rshift(bit.bit_and(Cur1H_status_RAW,tonumber("40",16)),6)
+	payload_t.Cur1H_status=(Cur1H_status == 1) and "TRUE" or "FALSE"
+	
+	
+	--Get Cur2L_status
+	Cur2L_status_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	Cur2L_status=bit.bit_rshift(bit.bit_and(Cur2L_status_RAW,tonumber("20",16)),5)
+	payload_t.Cur2L_status=(Cur2L_status == 1) and "TRUE" or "FALSE"
+	
+	--Get Cur2H_status
+	Cur2H_status_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	Cur2H_status=bit.bit_rshift(bit.bit_and(Cur2H_status_RAW,tonumber("10",16)),4)
+	payload_t.Cur2H_status=(Cur2H_status == 1) and "TRUE" or "FALSE"
+	
+	--Get Cur3L_status
+	Cur3L_status_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	Cur3L_status=bit.bit_rshift(bit.bit_and(Cur3L_status_RAW,tonumber("08",16)),3)
+	payload_t.Cur3L_status=(Cur3L_status == 1) and "TRUE" or "FALSE"
+
+    --Get Cur3H_status
+	Cur3H_status_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	Cur3H_status=bit.bit_rshift(bit.bit_and(Cur3H_status_RAW,tonumber("04",16)),2)
+	payload_t.Cur3H_status=(Cur3H_status == 1) and "TRUE" or "FALSE"
+	
+	--Get Cur4L_status
+	Cur4L_status_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	Cur4L_status=bit.bit_rshift(bit.bit_and(Cur4L_status_RAW,tonumber("02",16)),1)
+	payload_t.Cur4L_status=(Cur4L_status == 1) and "TRUE" or "FALSE"
+	
+	--Get Cur4H_status
+	Cur4H_status_RAW=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	Cur4H_status=bit.bit_and(Cur4H_status_RAW,tonumber("01",16))
+	payload_t.Cur4H_status=(Cur4H_status == 1) and "TRUE" or "FALSE"
+
+ 
+	
+	
+	--Get Current1_A
+	Current1_A_1_RAW=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+	Current1_A_1=bit.bit_lshift(Current1_A_1_RAW,8)
+
+	Current1_A_2_RAW=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+	Current1_A_2=Current1_A_2_RAW
+
+	Current1_A_RAW=bit.bit_or(Current1_A_1,Current1_A_2)
+	payload_t.Current1_A=Current1_A_RAW/100
+    
+	
+
+    --Get Current2_A
+	Current2_A_1_RAW=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+	Current2_A_1=bit.bit_lshift(Current2_A_1_RAW,8)
+
+	Current2_A_2_RAW=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+	Current2_A_2=Current2_A_2_RAW
+
+	Current2_A_RAW=bit.bit_or(Current2_A_1,Current2_A_2)
+	payload_t.Current2_A=Current2_A_RAW/100
+	
+	--Get Current3_A
+	Current3_A_1_RAW=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+	Current3_A_1=bit.bit_lshift(Current3_A_1_RAW,8)
+
+	Current3_A_2_RAW=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+	Current3_A_2=Current3_A_2_RAW
+
+	Current3_A_RAW=bit.bit_or(Current3_A_1,Current3_A_2)
+	payload_t.Current3_A=Current3_A_RAW/100
+	
+	--Get Current4_A
+	Current4_A_1_RAW=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+	Current4_A_1=bit.bit_lshift(Current4_A_1_RAW,8)
+
+	Current4_A_2_RAW=tonumber(utility.hex2str(string.sub(payload,26,26)),16)
+	Current4_A_2=Current4_A_2_RAW
+
+	Current4_A_RAW=bit.bit_or(Current4_A_1,Current4_A_2)
+	payload_t.Current4_A=Current4_A_RAW/100
+
+	
+elseif Len==23 then
+
+    if (tonumber(utility.hex2str(string.sub(payload,17,17)),16) == tonumber("33",16)) then
+	Sensor ="CS01-LB"
+	payload_t.Sensor=Sensor
+	end
+	
+	payload_t.SENSOR_MODEL=Sensor
+	if (tonumber(utility.hex2str(string.sub(payload,21,21)),16) == 255) then
+		Sub_band="NULL"
+	else
+		Sub_band=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+	end
+	payload_t.SUB_BAND=Sub_band
+	
+	if (tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 1) then
+		Freq_band="EU868"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 2) then 
+		Freq_band="US915"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 3) then 
+		Freq_band="IN865"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 4) then 
+		Freq_band="AU915"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 5) then 
+		Freq_band="KZ865"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 6) then 
+		Freq_band="RU864"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 7) then 
+		Freq_band="AS923"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 8) then 
+		Freq_band="AS923_1"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 9) then 
+		Freq_band="AS923_2"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 10) then 
+		Freq_band="AS923_3"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 11) then 
+		Freq_band="CN470"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 12) then 
+		Freq_band="EU433"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 13) then 
+		Freq_band="KR920"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 14) then 
+		Freq_band="MA869"	
+	end	
+	payload_t.FREQUENCY_BAND=Freq_band
+	
+	Firm_ver_RAW_1=bit.bit_and(tonumber(utility.hex2str(string.sub(payload,18,18)),16),tonumber("0F",16))
+	Firm_ver_RAW_2=bit.bit_and(bit.bit_rshift(tonumber(utility.hex2str(string.sub(payload,19,19)),16),4),tonumber("0F",16))
+	Firm_ver_RAW_3=bit.bit_and(tonumber(utility.hex2str(string.sub(payload,19,19)),16),tonumber("0F",16))
+	Firm_ver=Firm_ver_RAW_1 .. "." .. Firm_ver_RAW_2 .. "."  ..Firm_ver_RAW_3
+	payload_t.FIRMWARE_VERSION=Firm_ver
+	
+	BAT_RAW_1=bit.bit_lshift(tonumber(utility.hex2str(string.sub(payload,22,22)),16),8)
+	BAT_RAW_2=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+	BAT=bit.bit_or(BAT_RAW_1,BAT_RAW_2)/1000
+	payload_t.BAT=BAT
+end
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.RSSI .. "&field2=".. payload_t.SNR .. "&field3=".. payload_t.BAT .. "&field4=".. payload_t.Alarm .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&field7=".. payload_t.Pin_status.. "&field8="..payload_t.Calculate_flag.. "&field9=".. payload_t.Systimestamp.."&field10="..payload_t.Total_pulse.."&field10="..payload_t.Disconnect_duration.."&status=MQTTPUBLISH" 
+			print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t))
+return json.encode(payload_t)
+
+
+
+

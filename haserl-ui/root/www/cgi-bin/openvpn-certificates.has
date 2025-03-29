@@ -1,0 +1,192 @@
+#!/usr/bin/haserl --upload-limit=4096 --upload-dir=/tmp
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+<%# --- Process the form submission --- %>
+<%
+if [ "$FORM_BUTTON" == "Upload CA Trust" ]; then
+	if test -n "$HASERL_uploadfile_ca_trust_path"; then
+		ca_trust_name=$FORM_uploadfile_ca_trust_name
+		if [ "$ca_trust_name" != "" ]; then
+			if [ "$ca_trust_name" == "ca.crt" ];then
+				#find /etc/station -name "ca.crt*"|xargs rm -rfv   #  Remove the original cups.trust file
+				savedfile=$HASERL_uploadfile_ca_trust_path
+				cp $savedfile /etc/openvpn/$ca_trust_name  # Store the cert file
+				ca_trust_upload_status="<span class='impactOK'>Upload Finished</span>"			
+			else 
+				ca_trust_upload_status="<span class='impact'>file name must be ca.crt </span>"
+			fi 
+		else
+			ca_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! $ca_trust_name </span>"
+		fi
+	fi
+fi
+
+if [ "$FORM_BUTTON" == "Upload Client Cert" ]; then
+	if test -n "$HASERL_uploadfile_clientcert_path"; then
+		clientcert=$FORM_uploadfile_clientcert_name			
+		if [ "$clientcert" != "" ]; then				
+			if [ "${clientcert##*.}"x = "crt"x ];then
+				find /etc/openvpn/ -name '*crt*'|grep -v ca | xargs rm    #  Remove the original private.key file
+				savedfile=$HASERL_uploadfile_clientcert_path
+				cp $savedfile /etc/openvpn/$clientcert # Store the cert file
+				clientcert_upload_status="<span class='impactOK'>Upload Finished </span>"
+			else
+				clientcert_upload_status="<span class='impact'>file suffix must be crt </span>"
+			fi
+		else
+			clientcert_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! </span>"
+		fi
+	fi
+fi
+
+if [ "$FORM_BUTTON" == "Upload Client Key" ]; then
+	if test -n "$HASERL_uploadfile_clientkey_path"; then
+		clientkey=$FORM_uploadfile_clientkey_name			
+		if [ "$clientkey" != "" ]; then				
+			if [ "${clientkey##*.}"x = "key"x ];then
+				find /etc/openvpn/ -name '*key*'|grep -v ta | xargs rm    #  Remove the original private.key file
+				savedfile=$HASERL_uploadfile_clientkey_path
+				cp $savedfile /etc/openvpn/$clientkey # Store the cert file
+				clientkey_uploadfile_status="<span class='impactOK'>Upload Finished </span>"
+			else
+				clientkey_uploadfile_status="<span class='impact'>file suffix must be crt </span>"
+			fi
+		else
+			clientkey_uploadfile_status="<span class='impact'>&nbsp;&nbsp; Invalid file! </span>"
+		fi
+	fi
+fi
+
+if [ "$FORM_BUTTON" == "Upload Ta Key" ]; then
+	if test -n "$HASERL_uploadfile_takey_path"; then
+		takey_name=$FORM_uploadfile_takey_name
+		if [ "$takey_name" != "" ]; then
+			if [ "$takey_name" == "ta.key" ];then
+				#find /etc/station -name "ta.key*"|xargs rm -rfv   #  Remove the original cups.trust file
+				savedfile=$HASERL_uploadfile_takey_path
+				cp $savedfile /etc/openvpn/$takey_name  # Store the cert file
+				takey_upload_status="<span class='impactOK'>Upload Finished</span>"			
+			else 
+				takey_upload_status="<span class='impact'>file name must be ca.crt </span>"
+			fi 
+		else
+			takey_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! $takey_name </span>"
+		fi
+	fi
+fi
+
+if [ "$FORM_BUTTON" == "Remove Certificate files" ]; then
+	cd /etc/openvpn
+	cafiles=$(ls /etc/openvpn/ |grep -v ovpn)
+	rm $cafiles
+fi
+%>
+
+
+<%# --- Get the variables for the HTML page --- %>
+<% 
+if [ -e "/etc/openvpn/ca.crt" ]; then
+	ca_trust_status=`ls /etc/openvpn/ca.crt | awk -F '/' '{print $4}'`
+else
+	ca_trust_status='<span class="impact-light">Not Found</span>'
+fi
+
+if [ -e "/etc/openvpn/ta.key" ]; then
+	takey_file_status=`ls /etc/openvpn/ta.key | awk -F '/' '{print $4}'`
+else
+	takey_file_status='<span class="impact-light">Not Found</span>'
+fi
+
+if [ ! -z $(find /etc/openvpn/ -name '*crt*'|grep -v ca) ]; then
+	clientcert_file_status=`find /etc/openvpn/ -name '*crt*'|grep -v ca|awk -F '/' '{print $4}'`
+else
+	clientcert_file_status='<span class="impact-light">Not Found</span>'
+fi
+
+if [ ! -z $(find /etc/openvpn/ -name '*key*'|grep -v ta) ]; then
+	clientkey_file_status=`find /etc/openvpn/ -name '*key*'|grep -v ta|awk -F '/' '{print $4}'`
+else
+	clientkey_file_status='<span class="impact-light">Not Found</span>'
+fi
+	
+%>
+
+<%# --- Present the HTML page --- %>
+<html lang="en">
+<head>
+	<%inc /www/cgi-bin/inc/head.inc %>
+</head>
+
+<body onload="displayFunction() ">
+<%inc /www/cgi-bin/inc/menu.inc %>
+<div class="page-container">
+
+<h2>OpenVPN -- Certificates</h2>
+
+<form id="openvpn_certificates" action="<% echo -n $SCRIPT_NAME %>" method="POST" enctype="multipart/form-data">
+<table class="configTable">
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSTRUST">CA trust</label></td>
+		<td colspan="10"><% echo -n $ca_trust_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_ca_trust></td>
+		<td colspan="5"><% echo -n $ca_trust_upload_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload CA Trust" onclick="showPageLoaderIcon()"></td>
+	</tr>
+	
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CUPSTRUST">Client Cert</label></td>
+		<td colspan="10"><% echo -n $clientcert_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_clientcert></td>
+		<td colspan="5"><% echo -n $clientcert_upload_status %></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload Client Cert" onclick="showPageLoaderIcon()"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="PRIBATEKEY">Client Key</label></td>
+		<td colspan="10"><% echo -n $clientkey_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_clientkey></td>
+		<td colspan="5"><% echo -n $clientkey_uploadfile_status%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload Client Key" onclick="showPageLoaderIcon()"></td>
+	</tr>
+
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="5"><label for="CERTPEM">Ta Key</label></td>
+		<td colspan="10"><% echo -n $takey_file_status %></td>
+		<td colspan="8"><input type=file name=uploadfile_takey></td>
+		<td colspan="5"><% echo -n $takey_upload_status%></td>
+		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload Ta Key" onclick="showPageLoaderIcon()"></td>
+	</tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="5"><h2>Restore</h2></td>
+	</tr>
+	<tr class="rowSpacer"><td colspan="15"></td></tr>
+
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="6"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Remove Certificate files" onclick="return confirm('Start to remove the confiuration file include All Certificate file')"></td>
+	</tr>
+
+</table>	
+	
+</form>
+</div>
+</body>
+</html>
+
+

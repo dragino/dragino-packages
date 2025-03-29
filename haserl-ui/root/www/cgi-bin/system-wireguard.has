@@ -1,0 +1,227 @@
+#!/usr/bin/haserl --upload-limit=4096 --upload-dir=/tmp
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+<%# --- Process the form submission --- %>
+<%
+if [ "$FORM_BUTTON" == "Save&Apply" ]; then
+	uci set network.wg0=interface
+	uci set network.wgserver=wireguard_wg0
+	uci set network.wg0.proto=wireguard
+	uci set network.wgserver.route_allowed_ips=1  
+	if [ "$FORM_KEY_TYPE" == "default" ]; then
+		uci set network.wg0.type=default
+		uci set network.wg0.private_key=$(cat /etc/wireguard/wgclient.key)
+		uci set network.wg0.addresses=$FORM_PEERADDRESS
+		uci set network.wgserver.public_key=$FORM_SERVERKEY
+		uci set network.wgserver.endpoint_port=$FORM_LISTENPORT
+		uci set network.wgserver.endpoint_host=$FORM_SERADDRESS
+		uci set network.wgserver.allowed_ips=$FORM_SERPEERADDRESS
+		uci set network.wgserver.persistent_keepalive=$FORM_KEEPALIVE
+		uci commit network
+	elif [ "$FORM_KEY_TYPE" == "import" ]; then
+		uci set network.wg0.type=import
+		uci commit network
+		echo -n "$FORM_CONFIGINPUT" > /etc/wireguard/wireguard.conf
+		sed -i "s/\r//" /etc/wireguard/wireguard.conf
+		cp /etc/wireguard/wireguard.conf /tmp/wireguard_import.txt
+	fi
+
+	/etc/wireguard/generate_conf.sh
+	sleep 3;
+fi
+
+if [ "$FORM_BUTTON" == "Reload" ]; then
+	ifdown wg0
+	ifup wg0
+	sleep 3;
+fi
+%>
+
+<%# --- Get the variables for the HTML page --- %>
+<% 
+	wg show > /tmp/wireguard.txt
+
+	client_peeraddress=$(uci -q get network.wg0.addresses)
+	ser_pubkey=$(uci -q get network.wgserver.public_key)
+	ser_listenport=$(uci -q get network.wgserver.endpoint_port)
+	ser_address=$(uci -q get network.wgserver.endpoint_host)
+	ser_peeraddress=$(uci -q get network.wgserver.allowed_ips)
+	ser_keepalive=$(uci -q get network.wgserver.persistent_keepalive)
+	type_select=$FORM_KEY_TYPE
+	if [ -z $type_select ]; then
+		type_select=$(uci -q get network.wg0.type)
+		if [ -z $type_select ]; then
+				type_select=default
+		fi
+	fi
+
+	if [ ! -f /tmp/wireguard_import.txt ]; then
+		echo null > /tmp/wireguard_import.txt
+	fi
+	if [ "$type_select" == "default" ]; then
+		disp1="inline"; disp2="none";
+	elif [ "$type_select" == "import" ]; then
+		disp1="none"; disp2="inline";
+	fi
+%>
+
+<%# --- Present the HTML page --- %>
+<html>
+<head>
+<%inc /www/cgi-bin/inc/head.inc %>
+<script>
+	function displayFunction() {
+	    document.getElementById("default_key").style.display = "<% echo -n $disp1 %>"; 
+	    document.getElementById("import_key").style.display = "<% echo -n $disp2 %>";      
+	}
+	function changeFunc(val) {
+	    document.forms["wireguard"].submit();
+	}
+</script>
+<style>
+	textarea {
+		width: 85%;
+		height: 300px;
+		padding: 10px;
+		font-family: Arial, sans-serif;
+		font-size: 14px;
+		border: 1px solid #ccc;
+		resize: vertical;
+	}
+</style>
+</head>
+
+<body onload="displayFunction() ">
+<%inc /www/cgi-bin/inc/menu.inc %>
+
+<div class="page-container">
+
+<h2>
+	 WireGuard Client
+</h2>   		
+
+
+<form name="wireguard" id="wireguard" action="<% echo -n $SCRIPT_NAME %>" method="POST">
+
+<table class="configTable">
+<tr class="rowSpacer"><td colspan="15"></td></tr>
+	<tr>
+		<td colspan="4"><h3 for="SERVER_TYPE">Key Type</h3></td>
+		<td colspan="3">
+			<select id="key_type"  name="KEY_TYPE" onchange="changeFunc(this.value)" >
+			<option value="default" >Defalut Key</option>
+			<option value="import" >Import Client Configuration</option>
+		</select></td>
+	</tr>
+	<script>document.getElementById("key_type").value="<% echo -n $type_select %>";</script>
+</table>
+
+<div id="default_key">
+<table class="configTable">
+	<tr>
+		<td colspan="4"><h3>General Settings</h3></td>
+	</tr>
+
+	<tr>
+		<td colspan="1">
+		<td colspan="2"><label>Publick Key</label></td>
+		<td colspan="9"><% echo -n $(cat /etc/wireguard/wgclient.pub)  %></td>
+	</tr>
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1">
+		<td colspan="2"><label>Peer Address</label></td>
+		<td colspan="2"><input type="text" name="PEERADDRESS" maxlength="38" VALUE="<% echo -n $client_peeraddress %>" 
+			pattern="(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/[0-9]{1,2}"></td> 
+
+	</tr>
+
+	<tr>
+		<td colspan="4"><h3>Server Settings</h3></td>
+	</tr>
+	<tr>
+		<td colspan="1">
+		<td colspan="2"><label>Publick Key</label></td>
+		<td colspan="6"><input type="text" name="SERVERKEY" maxlength="64" VALUE="<% echo -n  "$ser_pubkey" %>" </td>
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1">
+		<td colspan="2"><label>Listen Port</label></td>
+		<td colspan="1"><input type="text" name="LISTENPORT" maxlength="6" VALUE="<% echo -n  "$ser_listenport" %>" </td>
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1">
+		<td colspan="2"><label>Server Address</label></td>
+		<td colspan="2"><input type="text" name="SERADDRESS" maxlength="38" VALUE="<% echo -n $ser_address %>" 
+			pattern="(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$"></td> 
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1">
+		<td colspan="2"><label>Peer Address</label></td>
+		<td colspan="2"><input type="text" name="SERPEERADDRESS" maxlength="38" VALUE="<% echo -n $ser_peeraddress %>" 
+			pattern="(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/[0-9]{1,2}"></td> 
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1">
+		<td colspan="2"><label>Keep Alive</label></td>
+		<td colspan="1"><input type="text" name="KEEPALIVE" maxlength="38" VALUE="<% echo -n $ser_keepalive %>" ></td> 
+	</tr>
+
+</table>
+</div>
+
+<div id="import_key">
+<table class="configTable">
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="4"><h3>configuration Import</h3></td>
+	</tr>
+	<tr>
+		<td colspan="14"><textarea id="configInput" name="CONFIGINPUT" placeholder="Enter your WireGuard configuration information here"></textarea></td>
+
+	</tr>
+
+	<tr>
+                <td colspan="4"><h3>Import</h3></td>
+        </tr>
+
+	<tr>
+                <td>
+                <iframe id="NET_WIFI_STATUS" src="/tmp/wireguard_import.txt"  width="750px" height="250" ></iframe>
+                </td>
+        </tr>
+</table>
+</div>
+<table class="configTable">
+	<tr>
+		<td colspan="4"><h3>WireGuard Status</h3></td>
+	</tr>
+
+	<tr>
+		<td>
+		<iframe id="NET_WIFI_STATUS" src="/tmp/wireguard.txt"  width="750px" height="250" ></iframe>
+		</td>
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="4">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Reload" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Refresh" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+</table>
+</form>
+</div>
+</body>
+</html>

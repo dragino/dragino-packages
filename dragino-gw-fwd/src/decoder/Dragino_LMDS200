@@ -1,0 +1,76 @@
+#!/usr/bin/lua
+
+--Decoder for LMDS200 firmware version
+
+json = require('dragino.json')
+local utility = require("dragino.utility") 
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+--Get Battery
+HEX_BAT=string.sub(payload,17,18)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+payload_t.BatV=BAT
+
+--Get DIS1
+HEX_DIS1=string.sub(payload,19,20)
+DIS1_RAW=utility.hex2str(HEX_DIS1)
+DIS1=tonumber(DIS1_RAW,16)
+payload_t.DIS1=DIS1
+
+--Get DIS2
+HEX_DIS2=string.sub(payload,21,22)
+DIS2_RAW=utility.hex2str(HEX_DIS2)
+DIS2=tonumber(DIS2_RAW,16)
+payload_t.DIS2=DIS2
+
+--Get Dalarm_Count
+Digital_IStatus_RAW=utility.hex2str(string.sub(payload,23,23))
+Dalarm_count=bit.bit_and(bit.bit_rshift(tonumber(Digital_IStatus_RAW,16),2),tonumber("3F",16))
+payload_t.Dalarm_count=Dalarm_count
+
+--Get Distance_alarm
+Distance_alarm=bit.bit_and(bit.bit_rshift(tonumber(utility.hex2str(string.sub(payload,23,23)),16),1),tonumber("01",16))
+payload_t.Distance_alarm=Distance_alarm
+
+--Get Interrupt_alarm
+Interrupt_alarm=bit.bit_and(tonumber(utility.hex2str(string.sub(payload,23,23)),16),tonumber("01",16))
+payload_t.Interrupt_alarm=Interrupt_alarm
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.RSSI .. "&field2=".. payload_t.SNR .. "&field3=".. payload_t.BatV .. "&field4=".. payload_t.DIS1 .. "&field5=".. payload_t.DIS2 .. "&field6=".. payload_t.Dalarm_Count .. "&field7="..payload_t.Interrupt_alarm.. "&field8=".. payload_t.Distance_alarm.."&status=MQTTPUBLISH" 
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t)) 
+return json.encode(payload_t)

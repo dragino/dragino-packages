@@ -1,0 +1,115 @@
+#!/bin/sh
+# This script is used to monitor gateway status and publish it via MQTT.
+
+# MQTT server and credentials
+SERVER='lns1.thingseye.io'
+USER='xxxx'             # MQTT User
+PASS='xxxxx'            # MQTT API Key
+
+# Channel details
+CHAN_ID='xxxxxxxxxxxxxx'    # Channel ID
+CHAN_KEY='xxxxxxxxxxxxxx'   # Channel Write API Key
+
+# CA certificate file
+Cafile='/tmp/ca.pem'
+
+# Monitor script version
+Monitor_Script_Version='1.0.0'
+
+# Retrieve system information
+model=$(cat /var/iot/model.txt)
+HOSTNAME=$(uci get system.@[0].hostname)
+ETH_MAC=$(ip link show eth1 | grep ether | awk '{ print $2 }')
+WIFI_MAC=$(ip link show wlan0 | grep ether | awk '{ print $2 }')
+Provision_key=$(hexdump -v -e '1/1 "%.2x"' -s $((0x100)) -n 32 /dev/mtd6)
+Firmware=$(cat /etc/banner | grep Version | awk '{print $3}')
+time_now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+uptime=$(uptime)
+Gateway_EUI=$(uci -q get gateway.general.GWID)
+freq_plan=$(uci -q get gateway.general.gwcfg)
+cpu_load_1m=$(echo ${uptime#*"load"} | awk '{print $2}' | tr -d ',')
+
+# Retrieve memory and disk usage
+ram_free_k=$(free -b -n 1 -d 0 | grep Mem | head -n 1 | awk '{print $4}')
+ram_free_M=$(expr $ram_free_k / 1024)
+disk_used=$(du -h / -d 1 | tail -n 1 | awk '{print $1}' | cut -f 1 -d "M")
+
+# Active network interfaces and IP addresses
+active_interfaces=""
+active_ips=""
+interfaces=$(ls /sys/class/net)
+for interface in $interfaces; do
+    if [ "$interface" != "br-lan" ]; then
+        if cat /sys/class/net/$interface/operstate | grep -q "up"; then
+            ip_address=$(ip addr show $interface | grep -oE 'inet [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | cut -d' ' -f2 | head -n 1)
+            if [ -n "$ip_address" ]; then
+                active_interfaces="${active_interfaces}${interface}/"
+                active_ips="${active_ips}${ip_address}/"
+            fi
+        fi
+    elif [ "$interface" == "3g-cellular" ]; then
+        ip_address=$(ip addr show $interface | grep -oE 'inet [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | cut -d' ' -f2 | head -n 1)
+        if [ -n "$ip_address" ]; then
+            active_interfaces="${active_interfaces}${interface}/"
+            active_ips="${active_ips}${ip_address}/"
+        fi
+    fi
+done
+Network=$(echo $active_interfaces | sed 's/\/$//')
+IP_Address=$(echo $active_ips | sed 's/\/$//')
+
+# Calculate uptime in minutes
+has_day=$(uptime | grep "day" -c)
+has_min=$(uptime | grep "min" -c)
+if [ "$has_day" -eq 1 ]; then
+    if [ "$has_min" -eq 1 ]; then
+        uptime_d=$(uptime | awk '{print $3}')
+        uptime_m=$(uptime | awk '{print $5}')
+        uptime_m=$(expr $uptime_d * 1440 + $uptime_m)
+    else
+        uptime_d=$(uptime | awk '{print $3}')
+        uptime_h=$(uptime | awk -F '[ ]+|[:,]' '{print $9}')
+        uptime_m=$(uptime | awk -F '[ ]+|[:,]' '{print $10}')
+        uptime_m=$(expr $uptime_d * 1440 + $uptime_h * 60 + $uptime_m)
+    fi
+else
+    if [ "$has_min" -eq 1 ]; then
+        uptime_m=$(uptime | awk '{print $3}')
+    else
+        uptime_h=$(uptime | awk -F '[ ]+|[:,]' '{print $6}')
+        uptime_m=$(uptime | awk -F '[ ]+|[:,]' '{print $7}')
+        uptime_m=$(expr $uptime_h * 60 + $uptime_m)
+    fi
+fi
+
+# Gateway online/offline status
+online_offline=$(cat /var/iot/status)
+cfg_ver=$(uci get system.@system[0].config_ver)
+
+# Prepare the data to be published
+upload_data="{
+    \"Model\": \"$model\",
+    \"Gateway_EUI\": \"$Gateway_EUI\",
+    \"Firmware\": \"$Firmware\",
+    \"freq_plan\": \"$freq_plan\",
+    \"Monitor_Service_Version\": \"$Monitor_Script_Version\",
+    \"Hostname\": \"$HOSTNAME\",
+    \"Network\": \"$Network\",
+    \"Time_Now\": \"$time_now\",
+    \"ETH_MAC\": \"$ETH_MAC\",
+    \"WIFI_MAC\": \"$WIFI_MAC\",
+    \"IP_Address\": \"$IP_Address\",
+    \"CPU_Load\": \"$cpu_load_1m\",
+    \"RAM_Free\": \"$ram_free_M\",
+    \"Disk_Used\": \"$disk_used\",
+    \"Uptime\": \"$uptime_m\",
+    \"Online_Offline\": \"$online_offline\",
+    \"CFG_Version\": \"$cfg_ver\",
+    \"Provision_Key\": \"$Provision_key\"
+}"
+
+# Publish the data using MQTT
+mosquitto_pub -h $SERVER -p 8883 -t dragino/gateway/status/$HOSTNAME -m "$upload_data" --cafile $Cafile
+
+# Print the data for debugging purposes
+#echo "$upload_data"

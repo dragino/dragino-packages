@@ -1,0 +1,281 @@
+#!/usr/bin/lua
+
+json = require('dragino.json')
+local utility = require("dragino.utility")
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+			
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+			
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+
+--Get Battery
+--HEX_BAT=string.sub(payload,17,18)
+--BAT_RAW=utility.hex2str(HEX_BAT)
+--BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+--payload_t.BatV=BAT
+
+	Len=string.len(payload)
+if Len==27 then
+
+	--Get Alarm
+
+	Alarm_RAW=tonumber(utility.hex2str(string.sub(payload,17,17)),16)
+	Alarm=bit.bit_rshift(bit.bit_and(Alarm_RAW,tonumber("02",16)),1)
+	payload_t.Alarm=(Alarm == 1) and "TRUE" or "FALSE"
+	
+    --Get Mod
+	Mod=string.sub(payload,22,22)
+	Mod_RAW=utility.hex2str(HEX_Mod)
+	payload_t.Mod=Mod_RAW
+	
+	--Get work_mod
+	HEX_work_mod=string.sub(payload,17,17)
+	work_mod_RAW=utility.hex2str(HEX_work_mod)
+	work_mod=bit.bit_rshift(bit.bit_and(tonumber(work_mod_RAW,16),tonumber("08",16)),3)
+	payload_t.work_mod=(work_mod == 1) and "CPL03" or "CPL01"
+
+	--Get count_mod
+	HEX_count_mod=string.sub(payload,17,17)
+	count_mod_RAW=tonumber(utility.hex2str(HEX_count_mod),16)
+	count_mod=bit.bit_rshift(bit.bit_and(count_mod_RAW,tonumber("20",16)),5)
+	payload_t.count_mod=(count_mod == 1) and "PART" or "SUM"
+	
+	
+	--Get tdc_interval
+	HEX_tdc_interval=string.sub(payload,17,17)
+	tdc_interval_RAW=tonumber(utility.hex2str(HEX_tdc_interval),16)
+	tdc_interval=bit.bit_rshift(bit.bit_and(tdc_interval_RAW,tonumber("10",16)),4)
+	payload_t.tdc_interval=(tdc_interval == 1) and "YES" or "NO"
+	
+	--Get ttrig_mod
+	HEX_ttrig_mod=string.sub(payload,17,17)
+	ttrig_mod_RAW=tonumber(utility.hex2str(HEX_ttrig_mod),16)
+	ttrig_mod=bit.bit_and(tdc_interval_RAW,tonumber("04",16))
+	payload_t.ttrig_mod=ttrig_mod
+	
+	
+
+    --Get pin_status
+	HEX_pin_status=string.sub(payload,17,17)
+	pin_status_RAW=tonumber(utility.hex2str(HEX_pin_status),16)
+	pin_status=bit.bit_and(pin_status_RAW,tonumber("01",16))
+	payload_t.pin_status=(pin_status == 1) and "OPEN" or "CLOSE"
+
+ 
+	
+	
+	--Get total_pulse
+	Total_pulse_1_RAW=tonumber(utility.hex2str(string.sub(payload,18,18)),16)
+	Total_pulse_1=bit.bit_lshift(Total_pulse_1_RAW,16)
+
+	Total_pulse_2_RAW=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+	Total_pulse_2=bit.bit_lshift(Total_pulse_2_RAW,8)
+
+	Total_pulse_3_RAW=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+	Total_pulse_3=Total_pulse_3_RAW
+	Total_pulse=bit.bit_or(bit.bit_or(Total_pulse_1,Total_pulse_2),Total_pulse_3)
+	payload_t.Total_pulse=Total_pulse
+
+    --Get last_duration
+    leak_duration_1_RAW=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+	leak_duration_1=bit.bit_lshift(leak_duration_1_RAW,16)
+
+	leak_duration_2_RAW=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+	leak_duration_2=bit.bit_lshift(leak_duration_2_RAW,8)
+
+	leak_duration_3_RAW=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+	leak_duration_3=leak_duration_3_RAW
+	Total_leak_duration=bit.bit_or(bit.bit_or(leak_duration_1,leak_duration_2),leak_duration_3)
+	payload_t.last_duration=Total_leak_duration
+
+
+	Systimestamp_RAW_24=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+	Systimestamp_RAW_25=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+	Systimestamp_RAW_26=tonumber(utility.hex2str(string.sub(payload,26,26)),16)
+	Systimestamp_RAW_27=tonumber(utility.hex2str(string.sub(payload,27,27)),16)
+	minus_flag_1 = bit.bit_lshift(Systimestamp_RAW_26,8)
+	minus_flag_2 = bit.bit_lshift(Systimestamp_RAW_25,16)
+	Systimestamp_0=bit.bit_or(bit.bit_or((bit.bit_or(bit.bit_lshift(Systimestamp_RAW_24,24),minus_flag_2)),minus_flag_1),Systimestamp_RAW_27)
+
+	function getTimeStamp(Systimestamp_0)
+		return os.date("%Y-%m-%d %H:%M:%S",Systimestamp_0)
+	end
+	payload_t.Time= getTimeStamp(Systimestamp_0)
+elseif Len==26 then
+
+
+	--Get work_mod
+	HEX_work_mod=string.sub(payload,17,17)
+	work_mod_RAW=utility.hex2str(HEX_work_mod)
+	work_mod=bit.bit_rshift(bit.bit_and(tonumber(work_mod_RAW,16),tonumber("08",16)),3)
+	payload_t.work_mod=(work_mod == 1) and "CPL03" or "CPL01"
+
+	--Get count_mod
+	HEX_count_mod=string.sub(payload,17,17)
+	count_mod_RAW=tonumber(utility.hex2str(HEX_count_mod),16)
+	count_mod=bit.bit_rshift(bit.bit_and(count_mod_RAW,tonumber("20",16)),5)
+	payload_t.count_mod=(count_mod == 1) and "PART" or "SUM"
+	
+	
+	--Get tdc_interval
+	HEX_tdc_interval=string.sub(payload,17,17)
+	tdc_interval_RAW=tonumber(utility.hex2str(HEX_tdc_interval),16)
+	tdc_interval=bit.bit_rshift(bit.bit_and(tdc_interval_RAW,tonumber("10",16)),4)
+	payload_t.tdc_interval=(tdc_interval == 1) and "YES" or "NO"
+	
+	--Get calculate_flag
+	HEX_calculate_flag=string.sub(payload,17,17)
+	calculate_flag_RAW=tonumber(utility.hex2str(HEX_calculate_flag),16)
+	calculate_flag=bit.bit_and(calculate_flag_RAW,tonumber("07",16))
+	payload_t.Calculate_flag=calculate_flag
+	
+	--Get PA8_TOTAL_PULSE
+	Total_pulse_1_RAW=tonumber(utility.hex2str(string.sub(payload,18,18)),16)
+	Total_pulse_1=bit.bit_lshift(Total_pulse_1_RAW,16)
+
+	Total_pulse_2_RAW=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+	Total_pulse_2=bit.bit_lshift(Total_pulse_2_RAW,8)
+
+	Total_pulse_3_RAW=tonumber(utility.hex2str(string.sub(payload,20,20)),16)
+	Total_pulse_3=Total_pulse_3_RAW
+	PA8_TOTAL_PULSE=bit.bit_or(bit.bit_or(Total_pulse_1,Total_pulse_2),Total_pulse_3)
+	payload_t.PA8_TOTAL_PULSE=PA8_TOTAL_PULSE
+
+    --Get PA4_TOTAL_PULSE
+	Total_pulse_4_RAW=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+	Total_pulse_4=bit.bit_lshift(Total_pulse_4_RAW,16)
+
+	Total_pulse_5_RAW=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+	Total_pulse_5=bit.bit_lshift(Total_pulse_5_RAW,8)
+
+	Total_pulse_6_RAW=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+	Total_pulse_6=Total_pulse_6_RAW
+	PA4_TOTAL_PULSE=bit.bit_or(bit.bit_or(Total_pulse_4,Total_pulse_5),Total_pulse_6)
+	payload_t.PA4_TOTAL_PULSE=PA4_TOTAL_PULSE
+	
+	--Get PB15_TOTAL_PULSE
+	Total_pulse_7_RAW=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+	Total_pulse_7=bit.bit_lshift(Total_pulse_7_RAW,16)
+
+	Total_pulse_8_RAW=tonumber(utility.hex2str(string.sub(payload,25,25)),16)
+	Total_pulse_8=bit.bit_lshift(Total_pulse_8_RAW,8)
+
+	Total_pulse_9_RAW=tonumber(utility.hex2str(string.sub(payload,26,26)),16)
+	Total_pulse_9=Total_pulse_9_RAW
+	PB15_TOTAL_PULSE=bit.bit_or(bit.bit_or(Total_pulse_7,Total_pulse_8),Total_pulse_9)
+	payload_t.PB15_TOTAL_PULSE=PB15_TOTAL_PULSE
+
+	
+	
+elseif Len==24 then
+	TDC_RAW_1=bit.bit_lshift(tonumber(utility.hex2str(string.sub(payload,17,17)),16),16)
+	TDC_RAW_2=bit.bit_lshift(tonumber(utility.hex2str(string.sub(payload,18,18)),16),8)
+	TDC_RAW_3=tonumber(utility.hex2str(string.sub(payload,19,19)),16)
+	TDC=bit.bit_or(bit.bit_or(TDC_RAW_1,TDC_RAW_2),TDC_RAW_3)
+	Disalarm=bit.bit_and(tonumber(utility.hex2str(string.sub(payload,20,20)),16),tonumber("01",16))
+	Keep_status=bit.bit_and(tonumber(utility.hex2str(string.sub(payload,21,21)),16),tonumber("01",16))
+	keep_time=bit.bit_or(bit.bit_lshift(tonumber(utility.hex2str(string.sub(payload,22,22)),16),8),tonumber(utility.hex2str(string.sub(payload,23,23)),16))
+	
+	leak_alarm_time=tonumber(utility.hex2str(string.sub(payload,24,24)),16)
+	
+	payload_t.TDC=TDC
+	payload_t.Stop_Timer=Disalarm
+	payload_t.KEEP_STATUS=Keep_status
+	payload_t.Keep_Timer=keep_time
+	payload_t.leak_alarm_time=leak_alarm_time
+	
+elseif Len==23 then
+
+    if (tonumber(utility.hex2str(string.sub(payload,17,17)),16) == tonumber("20",16)) then
+	Sensor ="CPL03-LB"
+	payload_t.Sensor=Sensor
+	end
+	
+	payload_t.SENSOR_MODEL=Sensor
+	if (tonumber(utility.hex2str(string.sub(payload,21,21)),16) == 255) then
+		Sub_band="NULL"
+	else
+		Sub_band=tonumber(utility.hex2str(string.sub(payload,21,21)),16)
+	end
+	payload_t.SUB_BAND=Sub_band
+	
+	if (tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 1) then
+		Freq_band="EU868"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 2) then 
+		Freq_band="US915"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 3) then 
+		Freq_band="IN865"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 4) then 
+		Freq_band="AU915"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 5) then 
+		Freq_band="KZ865"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 6) then 
+		Freq_band="RU864"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 7) then 
+		Freq_band="AS923"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 8) then 
+		Freq_band="AS923_1"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 9) then 
+		Freq_band="AS923_2"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 10) then 
+		Freq_band="AS923_3"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 11) then 
+		Freq_band="CN470"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 12) then 
+		Freq_band="EU433"
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 13) then 
+		Freq_band="KR920"	
+	elseif	(tonumber(utility.hex2str(string.sub(payload,20,20)),16) == 14) then 
+		Freq_band="MA869"	
+	end	
+	payload_t.FREQUENCY_BAND=Freq_band
+	
+	Firm_ver_RAW_1=bit.bit_and(tonumber(utility.hex2str(string.sub(payload,18,18)),16),tonumber("0F",16))
+	Firm_ver_RAW_2=bit.bit_and(bit.bit_rshift(tonumber(utility.hex2str(string.sub(payload,19,19)),16),4),tonumber("0F",16))
+	Firm_ver_RAW_3=bit.bit_and(tonumber(utility.hex2str(string.sub(payload,19,19)),16),tonumber("0F",16))
+	Firm_ver=Firm_ver_RAW_1 .. "." .. Firm_ver_RAW_2 .. "."  ..Firm_ver_RAW_3
+	payload_t.FIRMWARE_VERSION=Firm_ver
+	
+	BAT_RAW_1=bit.bit_lshift(tonumber(utility.hex2str(string.sub(payload,22,22)),16),8)
+	BAT_RAW_2=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+	BAT=bit.bit_or(BAT_RAW_1,BAT_RAW_2)/1000
+	payload_t.BAT=BAT
+end
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.RSSI .. "&field2=".. payload_t.SNR .. "&field3=".. payload_t.BAT .. "&field4=".. payload_t.Alarm .. "&field5=".. payload_t.RSSI .. "&field6=".. payload_t.SNR .."&field7=".. payload_t.Pin_status.. "&field8="..payload_t.Calculate_flag.. "&field9=".. payload_t.Systimestamp.."&field10="..payload_t.Total_pulse.."&field10="..payload_t.Disconnect_duration.."&status=MQTTPUBLISH" 
+			print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t))
+return json.encode(payload_t)
+
+
+
+

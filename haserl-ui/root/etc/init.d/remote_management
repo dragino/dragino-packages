@@ -1,0 +1,55 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+USE_PROCD=1
+
+
+if [ "$(uci get remote_management.general.enabled)" = 0 ]; then
+    echo "Service not enabled"
+    exit 0
+fi
+
+[ ! -x /usr/local/dragino/monitor/messages_subscribe ] && exit 1
+[ ! -f /etc/config/remote_management ] && exit 1
+
+
+general(){
+    if [ -z "$(cat /etc/crontabs/root|grep status_publish)" ]; then
+        echo "*/5 * * * * /usr/local/dragino/monitor/status_publish" >> /etc/crontabs/root
+        /etc/init.d/cron restart
+    fi
+}
+
+start_service() {
+    general
+    procd_open_instance
+    procd_set_param command /usr/local/dragino/monitor/messages_subscribe
+    procd_set_param file /etc/config/remote_management
+    procd_set_param stdout 1
+    procd_close_instance
+}
+
+stop_service() {
+    pids=$(pgrep -f "/bin/bash /usr/local/dragino/monitor/messages_subscribe")
+    if [ -n "$pids" ]; then
+        echo "Stopping messages_subscribe..."
+        for pid in $pids
+        do
+            kill -9 "$pid"
+        done
+        killall mosquitto_sub
+    fi
+    if [ -n "$(cat /etc/crontabs/root|grep status_publish)" ]; then
+        sed -i '/\*\/5 \* \* \* \* \/usr\/local\/dragino\/monitor\/status_publish/d' /etc/crontabs/root
+        /etc/init.d/cron restart
+    fi
+
+}
+
+
+service_triggers() {
+    procd_add_reload_trigger "remote_management"
+    for iface in $(uci show network | grep ".ifname=" | awk -F "=" '{print $2}'); do
+        procd_add_interface_trigger "interface.*.up" "$iface" /etc/init.d/remote_management reload
+    done
+}

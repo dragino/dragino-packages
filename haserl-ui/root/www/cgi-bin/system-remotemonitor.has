@@ -1,0 +1,141 @@
+#!/usr/bin/haserl
+
+<%  echo -en "content-type: text/html\r\n\r\n"  # RF2616 Compliance %>
+
+<%# --- Process the form submission --- %>
+<%
+# Update Server
+if [ "$FORM_BUTTON" == "RequestUpdate" ]; then
+	uci set system.@system[0].provision_server="$FORM_PROVISION_SERVER"
+	uci commit
+	/etc/init.d/auto_update start
+fi
+
+# Save parameters
+	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
+		
+		if [ "$FORM_MONITOR_ENABLE" == checked ]; then
+			uci set remote_management.general.owner="$FORM_MONITOR_OWNER"
+			uci set remote_management.general.enabled=checked
+			/etc/init.d/remote_management enable
+			/etc/init.d/remote_management restart
+		else
+			/etc/init.d/remote_management disable
+			/etc/init.d/remote_management stop
+			uci set remote_management.general.enabled=0
+		fi
+		uci commit remote_management
+	fi
+%>
+
+<%# --- Get the variables for the HTML page --- %>
+<% 
+	provision_server="$(uci -q get system.@system[0].provision_server)"
+	config_version="$(uci -q get system.@system[0].config_ver)"
+
+	monitor_enable=$(uci -q get remote_management.general.enabled)
+	monitor_owner="$(uci -q get remote_management.general.owner)"
+	[ -z $monitor_owner] && monitor_owner=Dragino
+	if [ -n "$(pgrep  -f "/bin/bash /usr/local/dragino/monitor/messages_subscribe")" ]; then
+		connection_status="<span class="impactOK">Connected to Remote platforms</span>"
+	else
+		connection_status="<span class="impact">Not connected to Remote platforms </span>"
+	fi
+%>
+
+
+<%# --- Present the HTML page --- %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<%inc /www/cgi-bin/inc/head.inc %>
+</head>
+
+<body>
+<%inc /www/cgi-bin/inc/menu.inc %>
+<div class="page-container">
+<form name="REMOTE" id="REMOTE" action="<% echo -n $SCRIPT_NAME %>" method="POST">
+<br>
+<br>
+<table class="configTable">
+	<tr>
+	<td colspan="6">
+		<h2>Auto Provision</h2>
+	</td>
+	</tr>
+	<tr><td colspan="1"></td></tr> <!--Determines column widths-->
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label for="PROVISION_SERVER">Provision Server</label></td>
+		<td colspan="4"><input type="text" name="PROVISION_SERVER" value="<% echo -n $provision_server %>" ></td>
+
+		<td colspan="1"></td>
+		<td colspan="11">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="RequestUpdate" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="7"><label>Configure Version:&nbsp;&nbsp;</label> <b><% echo -n $config_version %></b></td>
+		<td colspan="8"> <% echo -n `cat /var/provision.log` ; rm -f /var/provision.log %></td>
+	</tr>
+</table>
+
+<br>
+<br>
+<table class="configTable">
+	<tr>
+        <td colspan="8">
+            <h2>Remote Management Gateway</h2>
+        </td>
+		<td colspan="1"><label for="CLEAR"></label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+			<p>You can register the gateway to Dragino's gateway management platform</p> <a href="https://gateway.dragino.com">Platform</a> <a href="https://gateway.dragino.com">Document</a>
+			<p style="text-align: center;"><br>[Close]</p>
+		</div>
+    </tr>
+	<tr><td colspan="1"></td></tr> <!--Determines column widths-->
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label for="MONITOR_ENABLE">Enable</label></td>
+		<td colspan="1">
+		<input type="checkbox" name="MONITOR_ENABLE" value="checked" <% echo -n $monitor_enable %>></td>
+		
+	</tr>
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="3"><label for="REMOVE_OWNER">Owner</label></td>
+		<td colspan="4"><input type="text" name="MONITOR_OWNER" value="<% echo -n $monitor_owner %>" ></td>
+	</tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="15"><label>Connection Status: </label><% echo -n " $connection_status" %></td>
+	</tr>
+	<tr class="rowSpacer"></tr>
+	<tr>
+		<td colspan="1"></td>
+		<td colspan="15">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Refresh" onclick="showPageLoaderIcon()">
+		</td>
+	</tr>
+</table>
+<script>
+function showHelp1() {
+document.getElementById("helptext1").style.display="inline";
+}
+
+function hideHelp() {
+document.getElementById("helptext1").style.display="none";
+
+}
+
+</script>
+</form>
+</div>
+</body>
+</html>

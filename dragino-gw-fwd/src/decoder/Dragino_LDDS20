@@ -1,0 +1,82 @@
+#!/usr/bin/lua
+
+json = require('dragino.json')
+local utility = require("dragino.utility")
+local uci = require("dragino.luci_uci")
+local bit=require("dragino.bit")
+			
+local f = assert(io.open("/var/iot/channels/" .. arg[1], "rb"))
+			
+local payload = f:read("*all")
+
+f:close()
+
+data=""
+local payload_t={}
+Len=string.len(payload)
+
+
+--Get RSSI
+RSSI_RAW_1=tonumber(string.sub(payload,5,6),16)
+RSSI_RAW_2=tonumber(string.sub(payload,7,8),16)
+minus_flag = bit.bit_rshift(RSSI_RAW_1,7)
+RSSI=bit.bit_or(bit.bit_lshift(RSSI_RAW_1,8),RSSI_RAW_2)-minus_flag*65536
+payload_t.RSSI=RSSI
+				
+--Get SNR
+SNR_RAW_1=tonumber(string.sub(payload,13,14),16)
+SNR_RAW_2=tonumber(string.sub(payload,15,16),16)
+minus_flag = bit.bit_rshift(SNR_RAW_1,7)
+SNR=bit.bit_or(bit.bit_lshift(SNR_RAW_1,8),SNR_RAW_2)-minus_flag*65536
+payload_t.SNR=SNR/10
+					
+--Get Battery
+HEX_BAT=string.sub(payload,17,18)
+BAT_RAW=utility.hex2str(HEX_BAT)
+BAT=bit.bit_and(tonumber(BAT_RAW,16),tonumber("3FFF",16))/1000  -- Got the BAT by BAT & 3FFF
+payload_t.BatV=BAT		
+			
+--Get LDDS20 Level
+
+LDDS20_L_RAW=utility.hex2str(string.sub(payload,19,20))
+LDDS20_Level=tonumber(LDDS20_L_RAW,16)
+if LDDS20_Level == 0 then
+LDDS20_Level="No sensor"
+elseif (LDDS20_Level < 20) then
+LDDS20_Level="Invalid Reading"
+payload_t.Level=LDDS20_Level
+end
+
+--Get i_flag
+i_flag=string.sub(payload,21,21)
+Alarm_RAW=utility.hex2str(i_flag)
+Alarm=bit.bit_and(tonumber(Alarm_RAW,16),tonumber("01",16))
+payload_t.i_flag=(Alarm == 1) and "1" or "0"
+	
+	
+--Get DS18B20 Temp
+DS18B20_RAW_3=tonumber(utility.hex2str(string.sub(payload,22,22)),16)
+DS18B20_RAW_4=tonumber(utility.hex2str(string.sub(payload,23,23)),16)
+minus_flag = bit.bit_rshift(DS18B20_RAW_3,7)
+DS18B20_Temp=(bit.bit_or(bit.bit_lshift(DS18B20_RAW_3,8),DS18B20_RAW_4)-minus_flag*65536)/100
+payload_t.TempC_DS18B20=DS18B20_Temp
+
+--Get s_flag
+s_flag=string.sub(payload,24,24)
+Alarm_RAW=utility.hex2str(s_flag)
+Alarm=bit.bit_and(tonumber(Alarm_RAW,16),tonumber("01",16))
+payload_t.s_flag=(Alarm == 1) and "1" or "0"
+
+local server_type = uci:get("gateway","general","server_type")
+local mqtt_broker = uci:get("mqtt","common","server_type")
+
+if server_type == "mqtt" then
+	if mqtt_broker == "ThingSpeak" then
+		local data_up="field1=".. payload_t.Level .. "&field2=".. payload_t.BatV .. "&field3=".. payload_t.RSSI .. "&field4=".. payload_t.SNR .."&status=MQTTPUBLISH"
+		print(data_up) 
+		return data_up
+	end
+end 
+
+print(json.encode(payload_t))
+return json.encode(payload_t)

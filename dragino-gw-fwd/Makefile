@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dragino_gw_fwd
-PKG_VERSION:=2.8.0
+PKG_VERSION:=2.9.4
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -55,6 +55,7 @@ define Package/$(PKG_NAME)/install
 	$(LN) test_loragw_hal_rx $(1)/usr/bin/sx1302_rx_test
 	$(LN) test_loragw_hal_tx $(1)/usr/bin/sx1302_tx_test
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/rssh_client $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/tools/reset_lgw.sh $(1)/usr/bin
 
 	$(INSTALL_DIR) $(1)/etc/lora
 

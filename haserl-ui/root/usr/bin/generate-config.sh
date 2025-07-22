@@ -73,8 +73,6 @@ gen_gw_cfg() {
 
         json_add_boolean "mac2db" 0   # Save Decode Payload to database 
 
-
-        # stastatic 状态和统计的间隔时间，单位是秒*/
         json_add_int    "stat_interval" "`uci -q get gateway.general.stat`"  # 
 
         ##GPS coordinates. use fake GPS from UI or via GPS module
@@ -103,11 +101,11 @@ gen_gw_cfg() {
 
                 #Server1
                 json_add_object "server1"
-
-                json_add_string "server_name" "`uci get gateway.server1.server_id`"  #name是服务的标识，必须要设置一个name  
-                json_add_string "server_type" "semtech"  #服务类型有：semtech, mqtt, gwtraft, ttn
-                json_add_string "server_id"  "`uci get gateway.server1.mqtt_user`" # 类型是mqtt或ttn时才需要设置   
-                json_add_string "server_key" "`uci get gateway.server1.mqtt_pass`" # 类型是mqtt或ttn时才需要设置
+                json_add_string "server_name" "`uci get gateway.server1.server_id`"  
+                json_add_string "server_type" "semtech"
+                json_add_string "enable" "false"
+                json_add_string "server_id"  "`uci get gateway.server1.mqtt_user`" 
+                json_add_string "server_key" "`uci get gateway.server1.mqtt_pass`" 
                 json_add_string "server_address" "`uci get gateway.server1.server_address`"   
                 json_add_int "serv_port_up" "`uci get gateway.server1.upp`"
                 json_add_int "serv_port_down" "`uci get gateway.server1.dpp`"
@@ -118,24 +116,27 @@ gen_gw_cfg() {
                 json_add_int "push_timeout_ms" "`uci get gateway.server1.push_timeout_ms`"   
                 json_add_int "pull_timeout_ms" "`uci get gateway.server1.pull_timeout_ms`" 
 
-                #forward only valid packets
-                  #                   /*fport的过滤方法, 0是不处理，1是只转发数据库里设置了的fport，2不转发数据库里的fport */
-                  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
-                  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
+
                 json_add_int "fport_filter" "`uci get gateway.server1.fport_filter_level`" 
                 json_add_int "devaddr_filter" "`uci get gateway.server1.devaddr_filter_level`"
                 json_add_int "nwkid_filter" "`uci get gateway.server1.nwkid_filter_level`"
+                json_add_int "deveui_filter" "`uci get gateway.server1.deveui_filter_level`"
                 json_add_boolean "forward_crc_valid" "`uci get gateway.server1.forward_crc_valid`"
                 json_add_boolean "forward_crc_error" "`uci get gateway.server1.forward_crc_error`"
                 json_add_boolean "forward_crc_disabled" "`uci get gateway.server1.forward_crc_disabled`"
-                json_close_object 
+                json_close_object
+                json_add_object
+                json_add_string "server_name" "pkt_serv"  
+                json_add_string "server_type" "pkt"
+                json_add_string "enable" "true"
+                json_close_object
         if [ $(uci get gateway.server2.provider) != "disable" ]; then
                 #Server2
                 json_add_object "server2"
-                json_add_string "server_name" "`uci get gateway.server2.server_id`"  #name是服务的标识，必须要设置一个name   
+                json_add_string "server_name" "`uci get gateway.server2.server_id`" 
                 json_add_string "server_type" "semtech"  #semtech, mqtt, gwtraft, ttn    
-                json_add_string "server_id"  "`uci get gateway.server2.mqtt_user`" # 类型是mqtt或ttn时才需要设置
-                json_add_string "server_key" "`uci get gateway.server2.mqtt_pass`" # 类型是mqtt或ttn时才需要设置
+                json_add_string "server_id"  "`uci get gateway.server2.mqtt_user`" 
+                json_add_string "server_key" "`uci get gateway.server2.mqtt_pass`"
                 json_add_string "server_address" "`uci get gateway.server2.server_address`"   
                 json_add_int "serv_port_up" "`uci get gateway.server2.upp`"
                 json_add_int "serv_port_down" "`uci get gateway.server2.dpp`"
@@ -145,13 +146,10 @@ gen_gw_cfg() {
                 json_add_int "push_timeout_ms" "100"  
                 json_add_int "pull_timeout_ms" "100"
 
-                #forward only valid packets
-                  #                   /*fport的过滤方法, 0是不处理，1是只转发数据库里设置了的fport，2不转发数据库里的fport */
-                  #                   /*fport的数据库的key是 /filter/server_name/fport/fport_num, value可以是yes、no */
-                  #                   /*devaddr:  /filter/server_name/devaddr/devaddr/yes,例如:filter/name/devaddr/112233111/yes */
                 json_add_int "fport_filter" "`uci get gateway.server2.fport_filter_level`" 
                 json_add_int "devaddr_filter" "`uci get gateway.server2.devaddr_filter_level`"
                 json_add_int "nwkid_filter" "`uci get gateway.server2.nwkid_filter_level`"
+                json_add_int "deveui_filter" "`uci get gateway.server2.deveui_filter_level`"
                 json_add_boolean "forward_crc_valid" 1
                 json_add_boolean "forward_crc_error" 0
                 json_add_boolean "forward_crc_disabled" 0

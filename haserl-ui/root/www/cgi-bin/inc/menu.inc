@@ -91,6 +91,14 @@
 		<a href="/cgi-bin/system-cellular.has">Cellular</a>
     </div>
   </div> 
+
+  <div class="dropdown">
+    <button class="dropbtn">OpenVPN<span class="fas fa-caret-down"></span></button>
+    <div class="dropdown-content">
+                <a href="/cgi-bin/openvpn-client.has">Client</a>
+                <a href="/cgi-bin/openvpn-certificates.has">Certificates</a>
+    </div>
+  </div> 
  
  <div class="dropdown"> <!-- System -->
     <button class="dropbtn">System <span class="fas fa-caret-down"></span></button>
@@ -100,7 +108,7 @@
 		<a href="/cgi-bin/system-config.has">Back Up / Restore Config</a>
 		<a href="/cgi-bin/system-remoteit.has">Remote.it</a>
 		<a href="/cgi-bin/system-wireguard.has">WireGuard</a>
-		<a href="/cgi-bin/system-rssh.has">Remote Mgmt</a>
+		<a href="/cgi-bin/system-remotemonitor.has">Remote Mgmt</a>
 		<a href="/cgi-bin/system-firmware.has">Firmware Upgrade</a>
 		<a href="/cgi-bin/system-reboot.has">Reboot / Reset</a>
 		<a href="/cgi-bin/system-package.has">Package Maintain</a>

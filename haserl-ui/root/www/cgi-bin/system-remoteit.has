@@ -30,9 +30,9 @@
 			cd /var/
 			wget ${download_url}jq_1.5-3_mips_24kc.ipk
 
-			wget ${download_url}remoteit_4.13.5.ipk
+			wget ${download_url}remoteit_5.1.4.ipk
 			opkg install /var/jq_1.5-3_mips_24kc.ipk
-			opkg install /var/remoteit_4.13.5.ipk         > /tmp/remoteit_status.txt
+			opkg install /var/remoteit_5.1.4.ipk         > /tmp/remoteit_status.txt
 			echo "<p style='color:Green;'> Installation complete </p>"              >> /tmp/remoteit_status.txt
 				if [ -e "/etc/remoteit/config.json" ]; then
 					echo "<p style='color:Green;'> Device is registered </p>"   >> /tmp/remoteit_status.txt
@@ -40,7 +40,7 @@
 					echo "<p style='color:Red;'> Device is not registered </p>" >> /tmp/remoteit_status.txt
 				fi
 			rm jq_1.5-3_mips_24kc.ipk
-			rm remoteit_4.13.5.ipk
+			rm remoteit_5.1.4.ipk
 		fi
 	fi
 	

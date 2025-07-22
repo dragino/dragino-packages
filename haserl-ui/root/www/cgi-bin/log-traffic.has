@@ -47,7 +47,7 @@ LINE2="<hr style=\"height:1px;border:none;border-top:1px ridge black;\" width=\"
 					else
 						color="DADEEE"
 					fi 
-					CONTENT_2=`echo $line | awk -F '{' '{print $2}'`					
+					CONTENT_2=`echo $line | awk -F '{' '{print $2"{"$3}'`					
 					if [ "${M_Type}" == "JOIN_REQ_UP" ];then
 						ICOLOR="orange"
 						ICON="fa fa-bolt"

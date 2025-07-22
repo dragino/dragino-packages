@@ -278,10 +278,10 @@ do
 	if [ -n "$CID" ];then
 		[ $DEBUG -ge 2 ] && [ -n "$CID" ] && logger "[IoT.MQTT]: Found Data at Local Channels:" $CID
 		for channel in $CID; do
-			#channel_sql=$(echo $channel|cut -b '1-8')
-			CHAN_INFO=`sqlite3 $CHAN_FILE "SELECT *from mapping where local = '$channel';"`
+			channel_sql=$(echo $channel|cut -b '1-8')
+			CHAN_INFO=`sqlite3 $CHAN_FILE "SELECT *from mapping where local = '$channel_sql';"`
 			if [ -n "$CHAN_INFO" ];then
-				[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel" 
+				[ $DEBUG -ge 1 ] && logger "[IoT.MQTT]: " "Find Match Entry for $channel_sql" 
 
 				# Get values
 				local_id=`echo $CHAN_INFO | awk -F '\\|' '{print $1}'`
@@ -320,7 +320,7 @@ do
 				mqtt_data=`echo ${mqtt_data/JSON/$json}`  
 				
 				PUB_FLAG="-m "  # Default
-				DECODER=`sqlite3 $KEY_FILE "SELECT decoder from abpdevs where devaddr = '$channel';"`					
+				DECODER=`sqlite3 $KEY_FILE "SELECT decoder from abpdevs where devaddr = '$channel_sql';"`					
 				logger "[IoT.MQTT]: DECODER $DECODER $channel_sql"
 				# Send the File
 				if [ ! -z $DECODER ]; then
@@ -330,14 +330,14 @@ do
 							rssi=`expr $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '1-8')) - 4294967296`
 							snr=`expr  $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '9-16')) / 10`
 							payload=`xxd -p /var/iot/channels/$channel`
-							payload=`echo ${payload:32}`
+							payload=$(echo ${payload:32}|sed 's/[ \t]//g')
 						
 							mqtt_data="{\"rssi\": \"$rssi\", \"payload\": \"$payload\",\"snr\": \"$snr\"}"	
 						else
 							#Send As ASCII String
 							rssi=`hexdump -v -e '11/1 "%c"'  -n 16 /var/iot/channels/$channel | tr A-Z a-z`
 							payload=`xxd -p /var/iot/channels/$channel`
-							payload=`echo ${payload:32}`
+							payload=$(echo ${payload:32}|sed 's/[ \t]//g')
 							mqtt_data=$rssi$payload
 						fi
 						
@@ -357,7 +357,7 @@ do
 					rssi=`expr $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '1-8')) - 4294967296`
 					snr=`expr  $(printf %d 0x$(hexdump -v -e '12/1 "%c"'  -n 16 /var/iot/channels/$channel | cut -b '9-16')) / 10`
 					payload=`xxd -p /var/iot/channels/$channel`
-					payload=`echo ${payload:32}`
+					payload=$(echo ${payload:32}|sed 's/[ \t]//g')
 					
 					mqtt_data="{\"rssi\"\: \"$rssi\"\, \"payload\"\:\"$payload\"\,\"snr\"\:\"$snr\"}"
 				

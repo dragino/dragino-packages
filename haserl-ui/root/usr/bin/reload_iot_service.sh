@@ -14,6 +14,7 @@ killall -q station
 rm -f /var/iot/status
 
 if [ "$service" = "station" ]; then
+    /usr/bin/basic_station.sh start
 	station --home /etc/station -L /var/iot/station.log -d
 else
 	/etc/init.d/iot reload

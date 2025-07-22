@@ -268,7 +268,40 @@
 		curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Semtech UDP</span>'
 	fi
 
+	case $type in
+		station )
+			station_paltform_server_type="$(uci get gateway.general.station_server_provider)"
+			if [ "$station_paltform_server_type" == "AWS" ]; then 
+				cur_mod="Basic Station -- AWS"
+			elif [ "$station_paltform_server_type" == "TTN" ]; then
+				cur_mod="Basic Station -- TTN"
+			else
+				cur_mod="LoRaWAN Basic Station"
+			fi
+		;;
+		loriot)
+			cur_mod="LoRIOT"
+		;;
+		mqtt)
+			curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>'
+		;;
+		tcpudp)
+			curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>'
+		;;
+		customized)
+			curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>'
+		;;
+		abpdecode)
+			curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">ABP Decode</span>'
+		;;
+		lorawan)
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Semtech UDP</span>'
+		;;
+	esac
 
+	if [ ! -z "$cur_mod" ]; then
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">'$cur_mod'</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+	fi
 
 %>
 

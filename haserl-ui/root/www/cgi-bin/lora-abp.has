@@ -61,6 +61,7 @@
   if [ "$FORM_BUTTON" == "SAVE" ]; then
 	if [ "$FORM_ENABLE" == "checked" ]; then
 		uci set gateway.general.maccrypto=1
+		uci set gateway.general.server_type=abpdecode
 	else
 		uci set gateway.general.maccrypto=0
 	fi

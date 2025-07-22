@@ -82,7 +82,7 @@
 			<td colspan="3"><input type="text" name="IPADDR" value="<% echo -n $ipaddr %>" required pattern="(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$"></td>
 			<td colspan="1"></td>
 			<td colspan="2"><label for="GATEWAY">Gateway</label></td>
-			<td colspan="3"><input type="text" name="GATEWAY" VALUE="<% echo -n $gateway %>" required pattern="(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$"></td>
+			<td colspan="3"><input type="text" name="GATEWAY" VALUE="<% echo -n $gateway %>" pattern="(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$"></td>
 		</tr>
 		<tr class="rowSpacer"></tr>
 		<tr>

@@ -53,10 +53,18 @@ LINE="<hr style=\"height:2px;border:none;border-top:2px ridge green;\" width=\"1
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>
-		<h4>	<% echo "Logread RxTxJson:  " %> 	</h4>
+		<h4>	<% echo "Logread RxJson:  " %> 	</h4>
         <%= $LINE %>
-		<% logread -l 50 | grep "PKTUP~ \[server\] JSON" | grep -v "dragino.com" | awk 'BEGIN{FS="~"} {printf "%s %s", $2, "'$FM'"}' %>
+		<% logread -l 100 | grep "{\"rxpk\":"  %>
 	</td></tr>
+
+	<tr class="rowSpacer"></tr>
+	<tr><td>
+		<h4>	<% echo "Logread TxJson:  " %> 	</h4>
+        <%= $LINE %>
+		<% logread -l 100 | grep "{\"txpk\":"  %>
+	</td></tr>
+
 
 	<tr class="rowSpacer"></tr>
 	<tr><td>

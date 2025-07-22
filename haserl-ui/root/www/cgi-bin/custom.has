@@ -76,6 +76,41 @@
 		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN for IOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light"> Custom Script </span>'
 	fi
 
+	type="$(uci -q get gateway.general.server_type)"
+	case $type in
+		station )
+			station_paltform_server_type="$(uci get gateway.general.station_server_provider)"
+			if [ "$station_paltform_server_type" == "AWS" ]; then 
+				cur_mod="Basic Station -- AWS"
+			elif [ "$station_paltform_server_type" == "TTN" ]; then
+				cur_mod="Basic Station -- TTN"
+			else
+				cur_mod="LoRaWAN Basic Station"
+			fi
+		;;
+		loriot)
+			cur_mod="LoRIOT"
+		;;
+		mqtt)
+			cur_mod="LoRaWAN MQTT"
+		;;
+		tcpudp)
+			cur_mod="LoRaWAN TCP"
+		;;
+		customized)
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light"> Custom Script </span>'
+		;;
+		abpdecode)
+			cur_mod="ABP Decode"
+		;;
+		lorawan)
+			cur_mod="LoRaWAN Semtech UDP"
+		;;
+	esac
+
+	if [ ! -z "$cur_mod" ]; then
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">'$cur_mod'</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">Custom Script </span>'
+	fi
 %>
 
 <%# --- Present the HTML page --- %>

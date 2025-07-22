@@ -232,16 +232,18 @@
 <!-- WiFi Diagnostics -->
 <%
 	# Check wifi operation
-	wifi_op=$(iw dev | grep -c channel)
+	wifi_op=$(iw dev|grep wlan0-2 | grep -c channel)
 %>
-<%	if [ "$wifi_wan_enable" == "checked" ] && [ "$wifi_op" == "0" ]; then %>
-	<script>document.getElementById("wifi_str").style.visibility="visible";</script>
-	<script>document.getElementById("wifi_str").style.display="inline";</script>
-<% elif [ "$wifi_wan_enable" == "checked" ] && [ $wifi_op -gt "0" ]; then %>
-	<script>document.getElementById("wifi_str2").style.visibility="visible";</script>
-	<script>document.getElementById("wifi_str2").style.display="inline";</script>
-<% fi %>	
-	
+<%	if [ "$wifi_wan_enable" == "checked" ]; then
+		wifi_op=$(ubus call network.device status '{"name":"wlan0-2"}' | grep '"carrier"'| awk '{print $2}' | sed 's/,//g')
+		if [ "$wifi_op" == "true" ]; then %>
+			<script>document.getElementById("wifi_str2").style.visibility="visible";</script>
+            <script>document.getElementById("wifi_str2").style.display="inline";</script>
+		<% else %>
+			<script>document.getElementById("wifi_str").style.visibility="visible";</script>                                                          
+            <script>document.getElementById("wifi_str").style.display="inline";</script>
+		<% fi 
+    fi %>
 <%
 	# Scan for SSID information and store.
 	iwinfo radio0 scan > /tmp/scan.txt

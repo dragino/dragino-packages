@@ -86,15 +86,39 @@
 				
 		<%	
 		  if [ -f /lib/upgrade/custom/remoteit/remoteit ]; then
-			if [ "$FORM_SETTINGS_REMOTE" == "checked" ] && [ "$FORM_SETTINGS_GENERAL" == "checked" ]; then
-				sysupgrade -general -remoteit -v /tmp/flash.bin  # Perform the firmware upgrade
-			elif [ "$FORM_SETTINGS_REMOTE" == "checked" ]; then
-				sysupgrade -remoteit  -v /tmp/flash.bin 		 # Perform the firmware upgrade
-			elif [ "$FORM_SETTINGS_GENERAL" == "checked" ]; then
-				sysupgrade -general -v /tmp/flash.bin 			 # Perform the firmware upgrade
-			else
-				sysupgrade -n -v /tmp/flash.bin                  # Perform the firmware upgrade
+
+			if  [ "$FORM_SETTINGS_GENERAL" == "checked" ]; then
+				parameters="-general"
 			fi
+
+			if [ "$FORM_SETTINGS_REMOTE" == "checked" ]; then
+				parameters="$parameters -remoteit"
+			fi
+
+			if  [ "$FORM_SETTINGS_OPENVPN" == "checked" ]; then
+				parameters="$parameters -openvpn"
+			fi
+
+			if  [ "$FORM_SETTINGS_WIREGUARD" == "checked" ]; then
+				parameters="$parameters -wireguard"
+			fi
+
+			#if [ "$FORM_SETTINGS_REMOTE" == "checked" ] && [ "$FORM_SETTINGS_GENERAL" == "checked" ]; then
+			#	sysupgrade -general -remoteit -v /tmp/flash.bin  # Perform the firmware upgrade
+			#elif [ "$FORM_SETTINGS_REMOTE" == "checked" ]; then
+			#	sysupgrade -remoteit  -v /tmp/flash.bin 		 # Perform the firmware upgrade
+			#elif [ "$FORM_SETTINGS_GENERAL" == "checked" ]; then
+			#	sysupgrade -general -v /tmp/flash.bin 			 # Perform the firmware upgrade
+			#else
+			#	sysupgrade -n -v /tmp/flash.bin                  # Perform the firmware upgrade
+			#fi
+
+			if [ -z $parameters ]; then 
+				sysupgrade -n -v /tmp/flash.bin
+			else
+				sysupgrade $parameters -v /tmp/flash.bin
+			fi
+
     		
 		  else
 			if [ "$FORM_SETTINGS_ENABLE" == "checked" ]; then
@@ -122,9 +146,25 @@
 		</tr>
 		<tr>
 		<td colspan="1"></td>
+		<td colspan="4"><label size="2"> OpenVPN </label></td>
+		<td colspan="2"><input type="checkbox" name="SETTINGS_OPENVPN" value="checked" ></td>
+		</tr>
+
+		</tr>
+		<tr>
+		<td colspan="1"></td>
+		<td colspan="4"><label size="2"> Wireguard </label></td>
+		<td colspan="2"><input type="checkbox" name="SETTINGS_WIREGUARD" value="checked" ></td>
+		</tr>
+
+		</tr>
+		<tr>
+		<td colspan="1"></td>
 		<td colspan="4"><label size="2"> General Settings </label></td>
 		<td colspan="2"><input type="checkbox" name="SETTINGS_GENERAL" value="checked" ></td>
 		</tr>
+
+		
 		<tr class="rowSpacer"></tr>
 	<% else %>
 		<tr>

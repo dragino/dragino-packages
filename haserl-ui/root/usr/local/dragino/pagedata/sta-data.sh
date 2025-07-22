@@ -69,7 +69,7 @@ cable=$(ifconfig | grep -c eth1)
 wifi=$(ifconfig  | grep -c wlan0-2)
 
 cell_en=$(uci -q get network.cellular.auto) # Is interface enabled
-cell_if=$(ifconfig  | grep -c 3g-cellular) # Is interface present
+cell_if=$(ifconfig  | grep -c wwan0) # Is interface present
 
 # Get server type
 server_type=$(uci get gateway.general.server_type)
@@ -254,17 +254,18 @@ fi
 
 internet_cell=`cat /var/iot/internet`
 # Set up the SAT icon
-if [ $route == "3g-cellular" ] && [ $internet_cell == "1" ]; then
+if [ $route == "wwan0" ] && [ $internet_cell == "1" ]; then
   sat5="/static/img/SAT-Int-Cell-tick.png"
-elif [ $route == "3g-cellular" ] && [ $internet_cell == "0" ]; then  
+elif [ $route != "wwan0" ] && [ $internet_cell == "1" ] && [ $cell_if == "1" ]; then  
+	sat5="/static/img/SAT-Int-Cell-tick-amber.png"
+elif [ $route != "wwan0" ] && [ $internet_cell == "0" ]; then  
   sat5="/static/img/SAT-Int-Cell-cross-amber.png"
 elif [ $cell_if == "0" ]; then
 	sat5="/static/img/SAT-Int-Cell-cross.png"
-elif [ $cell_if == "1" ] && [ $route != "3g-cellular" ] && [ $internet_cell == "1" ]; then  
-  sat5="/static/img/SAT-Int-Cell-tick-amber.png"
-elif [ $cell_if == "1" ] && [ $route != "3g-cellular" ] && [ $internet_cell == "0" ]; then  
-  sat5="/static/img/SAT-Int-Cell-cross.png"
+else
+	sat5="/static/img/SAT-Int-Cell-cross.png"
 fi
+
 }
 
 SAT10()

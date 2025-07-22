@@ -11,6 +11,7 @@ up_str=$(uptime | cut -d " " -f4,5 | tr , " ")
 host_str=$(echo $HOSTNAME)
 service=$(uci get gateway.general.server_type)
 pic=$(cat /tmp/iot/pic.txt) #get centre icon photo filename
+/usr/local/dragino/pagedata/sta-data.sh >/dev/null 2>&1
 %>
 
 <%# --- Present the HTML page --- %>
@@ -336,3 +337,4 @@ function toggleNavbar() {
 </div> <!-- End body container -->
 </body>
 </html>
+<% /usr/local/dragino/get-page-data.sh %>

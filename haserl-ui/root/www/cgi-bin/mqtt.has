@@ -95,27 +95,40 @@
 	done
 	
 	type="$(uci -q get gateway.general.server_type)"
-	if [ "$type" == "station" ];  then	
-		if [ "$station_paltform_server_type" == "AWS" ]; then 
-			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- AWS</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+	case $type in
+		station )
+			station_paltform_server_type="$(uci get gateway.general.station_server_provider)"
+			if [ "$station_paltform_server_type" == "AWS" ]; then 
+				cur_mod="Basic Station -- AWS"
+			elif [ "$station_paltform_server_type" == "TTN" ]; then
+				cur_mod="Basic Station -- TTN"
+			else
+				cur_mod="LoRaWAN Basic Station"
+			fi
+		;;
+		loriot)
+			cur_mod="LoRIOT"
+		;;
+		mqtt)
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN MQTT</span>'
+		;;
+		tcpudp)
+			cur_mod="LoRaWAN TCP"
+		;;
+		customized)
+			cur_mod="Custom Script"
+		;;
+		abpdecode)
+			cur_mod="ABP Decode"
+		;;
+		lorawan)
+			cur_mod="LoRaWAN Semtech UDP"
+		;;
+	esac
 
-		elif [ "$station_paltform_server_type" == "TTN" ]; then
-			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- TTN</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
-		else
-			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Basic Station</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
-		fi
-	elif [ "$type" == "loriot" ];  then
-		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
-	elif [ "$type" == "mqtt" ];  then
-		curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN MQTT</span>'
-	elif [ "$type" == "tcpudp" ];  then
-		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
-	elif [ "$type" == "customized" ];  then
-		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
-	elif [ "$type" == "lorawan" ];  then
-		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN  </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
+	if [ ! -z "$cur_mod" ]; then
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">'$cur_mod'</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN MQTT </span>'
 	fi
-
 	
 # --- Set up server specific display fields ---
 

@@ -178,35 +178,40 @@ SAT5()
     fi
 
     info_title5="Cellular Internet"
-    ip5=$(ifconfig 3g-cellular|grep "inet addr"|cut -d ":" -f 2|cut -d " " -f 1)
-    txb5=$(ifconfig 3g-cellular |grep "TX bytes"|cut -d " " -f 18-20)
-    rxb5=$(ifconfig 3g-cellular |grep "RX bytes"|cut -d " " -f 13-15)
+    ip5=$(ifconfig wwan0|grep "inet addr"|cut -d ":" -f 2|cut -d " " -f 1)
+    txb5=$(ifconfig wwan0 |grep "TX bytes"|cut -d " " -f 18-20)
+    rxb5=$(ifconfig wwan0 |grep "RX bytes"|cut -d " " -f 13-15)
 
   # Get cell status and save to file
-  cp /tmp/celltmp.txt /tmp/cell1.txt 
-  killall  -q comgt ;
+	cp /tmp/celltmp.txt /tmp/cell1.txt 
+	# killall  -q comgt ;
   
-	if [ `cat /sys/kernel/debug/usb/devices | grep "Vendor=1e0e ProdID=9011" -c` == "1" ]; then
-		(comgt -d /dev/ttyUSB3 > /tmp/celltmp.txt; ) &
-		if [ -f /tmp/celltmp.txt ]; then
-			cops_format=`cat /tmp/celltmp.txt  | awk NR==3 |  cut -c 30-34`
-			if [ "$cops_format" -gt "0" ]; then
-				comgt -d /dev/ttyUSB1 -s /etc/gcom/setcopsfromat.gcom 
-			fi
-		fi
-	else
-		if [ "$model" = "LPS8-N" ]; then
-			( comgt -d /dev/ttyUSB3 > /tmp/celltmp.txt )  &
-		else	
-			( comgt -d /dev/ttyModemAT > /tmp/celltmp.txt ) &
-		fi
-	fi
-	
+	# if [ "$(cat /sys/kernel/debug/usb/devices | grep "Vendor=1e0e ProdID=9011" -c)" == "1" ]; then
+	# 	(comgt -d /dev/ttyUSB3 > /tmp/celltmp.txt; ) &
+	# 	if [ -f /tmp/celltmp.txt ]; then
+	# 		cops_format=$(cat /tmp/celltmp.txt  | awk NR==3 |  cut -c 30-34)
+	# 		if [ "$cops_format" -gt "0" ]; then
+	# 			comgt -d /dev/ttyUSB1 -s /etc/gcom/setcopsfromat.gcom 
+	# 		fi
+	# 	fi
+	# else
+	# 	if [ "$model" = "LPS8-N" ]; then
+	# 		( comgt -d /dev/ttyUSB3 > /tmp/celltmp.txt )  &
+	# 	else	
+	# 		( comgt -d /dev/ttyModemAT > /tmp/celltmp.txt ) &
+	# 	fi
+	# fi
+    ( comgt > /tmp/celltmp.txt )  &
   # Extract data for Info box
-  sim5=$(cat /tmp/cell1.txt |grep SIM)
-  sig=$(cat /tmp/cell1.txt | grep Signal)
-  net5=$(cat /tmp/cell1.txt | grep network: | cut -d : -f 2)
+    sim5=$(cat /tmp/cell1.txt |grep SIM)
+    sig=$(cat /tmp/cell1.txt | grep Signal)
+    net5=$(cat /tmp/cell1.txt | grep network: | cut -d : -f 2)
   
+
+#  sim5=$(comgt PIN|awk NR==2)
+#  sig=$(comgt sig|awk NR==2)
+#  net5=$(comgt reg|awk -F':' 'NR==3 {print $2}')
+
   # Get signal in dBm
   signal=$(echo $sig | cut -d : -f2 | cut -d , -f1)
   echo $signal
@@ -219,11 +224,11 @@ SAT5()
 	#Fast Cell Internet check	
 	# host1="1.1.1.1"                                     
 	# host2="www.dragino.com"
-	# fping -q -I 3g-cellular $host1 
+	# fping -q -I wwan0 $host1 
 	# if [ $? -eq "0" ]; then
   	# internet5="OK"
 	# else
-	# 	fping -q -I 3g-cellular $host2
+	# 	fping -q -I wwan0 $host2
 	# 	if [ $? -eq "0" ]; then
   	# 	internet5="OK"
 	# 	else
@@ -308,17 +313,11 @@ txb11=$(ifconfig wlan0 |grep "TX bytes"|cut -d " " -f 18-20)
 rxb11=$(ifconfig wlan0 |grep "RX bytes"|cut -d " " -f 13-15)
 }
 
-echo 1
 SAT1
-echo 2
 SAT2
-echo 3
 SAT3
-echo 5
 SAT5
-echo 10
 SAT10
-echo 11
 SAT11
 
 #######################################

@@ -7,8 +7,8 @@
 	if [ "$FORM_BUTTON" == "Save" ] || [ "$FORM_BUTTON" == "Save&Apply" ]; then
 
 		uci set network.cellular.apn="$FORM_APN"
-		uci set network.cellular.dialnumber="$FORM_DIALNUMBER"
-		uci set network.cellular.service="$FORM_SERVICE"
+		# uci set network.cellular.dialnumber="$FORM_DIALNUMBER"
+		# uci set network.cellular.service="$FORM_SERVICE"
 		uci set network.cellular.pincode="$FORM_PINCODE"
 		uci set network.cellular.username="$FORM_USER"
 		uci set network.cellular.password="$FORM_PASS"
@@ -18,22 +18,19 @@
 		else
 			uci set network.cellular.backup="0"
 		fi
-
-		uci commit network
-	fi
-
-	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
-		# Set up Cellular WAN 
+		
 		if [ "$FORM_CELL_ENABLE" == "checked" ]; then
+			#uci set network.cellular.enable="1"
+			#/etc/init.d/enable_cell start
+			#/etc/init.d/enable_cell enable
 			uci set network.cellular.auto="1"
 		else
 			uci set network.cellular.auto="0"
+			#uci set network.cellular.enable="0"
+			#/etc/init.d/enable_cell stop
+			#/etc/init.d/enable_cell disable
 		fi
 		uci commit network
-		
-    # Run in background    
-		#(sleep 1; /etc/init.d/network restart) &
-		#(sleep 20; /etc/init.d/fallbackip start) &
 		/etc/init.d/network reload
   	fi
 %>
@@ -82,15 +79,6 @@
 		else
 			ICCID=$(cat /tmp/cell_iccid.txt)
 		fi
-
-		if [ ! -f /tmp/cell_imsi.txt ]; then
-			IMSI=$(gcom -d /dev/ttyUSB3 -s /etc/gcom/getimsi.gcom)
-			if [ ! -z $IMSI ] && [ $IMSI -eq $IMSI ] 2>/dev/null; then
-				echo $IMSI > /tmp/cell_imsi.txt
-			fi
-		else
-			IMSI=$(cat /tmp/cell_imsi.txt)
-		fi
 	else
 		echo 0 > /tmp/cell_detect.txt
 	fi
@@ -136,13 +124,6 @@
   <% fi %>
 			</td>
 		</tr>
-		
-		<tr class="rowSpacer"><td colspan="20"></td></tr>  <!--Determines column widths-->
-		<tr>
-			<td colspan="1"></td>
-			<td colspan="3"><label for="IMEI">IMSI</label></td>
-			<td colspan="3"><label for="IMEI"><% echo $IMSI %></label></td>
-		</tr>
 
 		<tr class="rowSpacer"><td colspan="20"></td></tr>  <!--Determines column widths-->
 		<tr>
@@ -164,7 +145,7 @@
 			<td colspan="3"><label for="APN"> APN </label></td>
 			<td colspan="6"><input type="text" name="APN" placeholder="Service Provider APN" maxlength="32" VALUE="<% echo -n $apn %>" ></td>
 		</tr>
-		<tr class="rowSpacer"></tr>
+		<%# <tr class="rowSpacer"></tr>
 		<tr>
 			<td colspan="1"></td>
 			<td colspan="3"><label for="SERVICE"> Service</label></td>
@@ -183,7 +164,7 @@
 			<td colspan="1"></td>
 			<td colspan="3"><label for="DIALNUMBER"> Dial Number </label></td>
 			<td colspan="6"><input type="text" name="DIALNUMBER" placeholder="*99#" maxlength="32" VALUE="<% echo -n $dialnumber %>" ></td>
-		</tr>
+		</tr> --- %>
 		<tr class="rowSpacer"></tr>
 		<tr>
 			<td colspan="1"></td>

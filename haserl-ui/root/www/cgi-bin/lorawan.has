@@ -36,6 +36,7 @@
 		uci set gateway.server1.fport_filter_level="$FORM_PRIMARY_FPORT_FILTER" 
 		uci set gateway.server1.devaddr_filter_level="$FORM_PRIMARY_ADDR_FILTER"
 		uci set gateway.server1.nwkid_filter_level="$FORM_PRIMARY_NWKID_FILTER"
+		uci set gateway.server1.deveui_filter_level="$FORM_PRIMARY_DEVEUI_FILTER"
 
 		# Set up the secondary platform provider fields
 		secondary_provider="$FORM_SECONDARY_PROVIDER"
@@ -60,6 +61,7 @@
 		uci set gateway.server2.fport_filter_level="$FORM_SECONDARY_FPORT_FILTER" 
 		uci set gateway.server2.devaddr_filter_level="$FORM_SECONDARY_ADDR_FILTER"
 		uci set gateway.server2.nwkid_filter_level="$FORM_SECONDARY_NWKID_FILTER"
+		uci set gateway.server2.deveui_filter_level="$FORM_SECONDARY_DEVEUI_FILTER"
 
 		uci commit gateway
 	fi
@@ -90,6 +92,8 @@
 				filter_type=devaddr
 			elif [ $FORM_FILTERTYPE == "nwkid_type" ]; then
 				filter_type=nwkid
+			elif [ $FORM_FILTERTYPE == "deveui_type" ]; then
+				filter_type=deveui
 			fi
 			filter_value1=`echo $FORM_FILTERVALUE | tr -d " " | tr '[a-z]' '[A-Z]'`
 			sqlite3 /etc/lora/devskey "INSERT INTO filter (name, type, value ) VALUES  ('$filter_name', '$filter_type', '$filter_value1');"
@@ -136,9 +140,11 @@
 	filter1_fp_level=`uci get gateway.server1.fport_filter_level`
 	filter1_ad_level=`uci get gateway.server1.devaddr_filter_level`
 	filter1_nw_level=`uci get gateway.server1.nwkid_filter_level`
+	filter1_eui_level=`uci get gateway.server1.deveui_filter_level`
 	filter2_fp_level=`uci get gateway.server2.fport_filter_level`
 	filter2_ad_level=`uci get gateway.server2.devaddr_filter_level`
 	filter2_nw_level=`uci get gateway.server2.nwkid_filter_level`
+	filter2_eui_level=`uci get gateway.server2.deveui_filter_level`
 	
 	rfpower="$(uci -q get gateway.general.RFPOWER)"
 	rffreq="$(uci -q get gateway.radio1.RFFREQ)"
@@ -164,442 +170,488 @@
 	debug_str="<script>document.getElementById("debug").value="3";</script>"
 
 	type="$(uci -q get gateway.general.server_type)"
-	station_paltform_server_type="$(uci get gateway.general.station_server_provider)"
-	if [ "$type" == "station" ];  then	
-		if [ "$station_paltform_server_type" == "AWS" ]; then 
-			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- AWS</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
+	case $type in
+		station )
+			station_paltform_server_type="$(uci get gateway.general.station_server_provider)"
+			if [ "$station_paltform_server_type" == "AWS" ]; then 
+				cur_mod="Basic Station -- AWS"
+			elif [ "$station_paltform_server_type" == "TTN" ]; then
+				cur_mod="Basic Station -- TTN"
+			else
+				cur_mod="LoRaWAN Basic Station"
+			fi
+		;;
+		loriot)
+			cur_mod="LoRIOT"
+		;;
+		mqtt)
+			cur_mod="LoRaWAN MQTT"
+		;;
+		tcpudp)
+			cur_mod="LoRaWAN TCP"
+		;;
+		customized)
+			cur_mod="Custom Script"
+		;;
+		abpdecode)
+			cur_mod="ABP Decode"
+		;;
+		lorawan)
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Semtech UDP</span>'
+		;;
+	esac
 
-		elif [ "$station_paltform_server_type" == "TTN" ]; then
-			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- TTN</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
-		else
-			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Basic Station</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
-		fi
-	elif [ "$type" == "loriot" ];  then
-		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
-	elif [ "$type" == "mqtt" ];  then
-		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
-	elif [ "$type" == "tcpudp" ];  then
-		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
-	elif [ "$type" == "customized" ];  then
-		curent_mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
-	elif [ "$type" == "lorawan" ];  then
-		curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Semtech UDP</span>'
+	if [ ! -z "$cur_mod" ]; then
+			curent_mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">'$cur_mod'</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Semtech UDP </span>'
 	fi
-
 %>
 
 <%# --- Present the HTML page --- %>
 <html lang="en">
-<head>
-	<%inc /www/cgi-bin/inc/head.inc %>
-</head>
+    <head>
+    	<%inc /www/cgi-bin/inc/head.inc %>
+    </head>
+    <body onload="displayCustomURL()">
+        <%inc /www/cgi-bin/inc/menu.inc %>
+        <div class="page-container">
+            <h2>LoRaWAN Configuration</h2>
+            <form id="lora" action="<% echo -n $SCRIPT_NAME %>" method="POST">
+                <table class="configTable" style="width: 1427px;">
+    	            <tr><td colspan="18"><h3>General Settings</h3></td></tr>	
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="EMAIL">Email</label></td>
+    	            	<td colspan="24"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
+    	            	<td colspan="6"></td>
+    	            </tr>
+    	            
+    	            <tr class="rowSpacer"><td colspan="15"></td></tr>
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="GWID">Gateway EUI</label></td>
+    	            	<td colspan="18"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
+    	            	<td colspan="8"></td>
+    	            </tr>
+        
+                    <%# --- Primary LoRaWAN Server --- %>
+    	            <tr class="rowSpacer"></tr>	
+    	            <tr><td colspan="25"><h3>Primary LoRaWAN Server</h3></td></tr> <!-- Determines the column widths -->
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="PLATFORM">Service Provider</label></td>
+    	            	<td colspan="24"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
+    	            	  <option value="ttn_V3" >The Things Network V3</option>
+    	            	  <option value="helium">Helium</option>
+    	            	  <option value="mydevice" >Mydevices</option>
+    	            	  <option value="router.cn.thethings.network" >Tencent</option>		
+    	            	  <option value="127.0.0.1" >Built-in for ABP Decode</option>
+    	            	  <option value="custom" >Custom / Private LoRaWAN</option>
+    	            	</select></td>
+    	            	<script>document.getElementById("primary_provider").value="<% echo -n $primary_provider %>";</script>
+                
+    	            	<td colspan="2"></td>
+    	            	<td colspan="12"><label id="server_address_label" style="display:none;">Server Address</label></td>	
+                
+    	            	<td colspan="35">
+    	            		<input type="text" id="server_address" name="SERVER_ADDRESS" style="display:none;" 
+    	            	    VALUE="<% echo -n $primary_server %>">
+    	            		
+    	            		<select id='server_address_ttn_V3' name='SERVER_ADDRESS_TTN_V3' style="display:none;">
+    	            			<%inc /www/cgi-bin/inc/ttn_V3-server.inc %>	
+    	            		</select>
+                
+    	            		<select id='server_address_helium' name='SERVER_ADDRESS_HELIUM' style="display:none;">
+    	            			<%inc /www/cgi-bin/inc/helium.inc %>	
+    	            		</select>	
+                
+    	            		<select id='server_address_mydevice' name='SERVER_ADDRESS_MYDEVICE' style="display:none;">
+    	            			<%inc /www/cgi-bin/inc/iot-in-a-box-server.inc %>
+    	            		</select>
+    	            	</td>
+    	            	<script>document.getElementById("server_address_ttn_V3").value="<% echo -n $primary_server %>";</script>
+    	            	<script>document.getElementById("server_address_ttn").value="<% echo -n $primary_server %>";</script>
+    	            	<script>document.getElementById("server_address_mydevice").value="<% echo -n $primary_server %>";</script>		
+    	            </tr>
+    	            <tr class="rowSpacer"><td colspan="15"></td></tr>
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="PRI_UPP">Uplink Port</label></td>
+    	            	<td colspan="8"><input type="text" name="PRI_UPP" maxlength="8" VALUE="<% echo -n $pri_upp %>" pattern="[0-9]{1,8}" ></td>
+    	            	<td colspan="18"></td>
+    	            	<td colspan="12"><label for="PRI_DPP">Downlink Port</label></td>
+    	            	<td colspan="8"><input type="text" name="PRI_DPP" maxlength="8" VALUE="<% echo -n $pri_dpp %>" pattern="[0-9]{1,8}" ></td>
+    	            	<td colspan=""></td>
+    	            </tr>
+                    <%# --- Secondary LoRaWAN Server --- %>
+    	            <tr class="rowSpacer"></tr>
+    	            
+    	            <tr>
+    	            	<td colspan="28"><h3>Secondary LoRaWAN Server</h3></td>
+    	            </tr>
+    	    
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="PLATFORM">Service Provider</label></td>
+    	            	<td colspan="24"><select id='secondary_provider' name='SECONDARY_PROVIDER' onchange="displayServerURL()">
+    	            	  <option value="ttn_V3_secondary" >The Things Network V3</option>
+    	            	  <option value="helium_secondary" >Helium</option>
+    	            	  <option value="custom_secondary" >Custom / Private LoRaWAN</option>
+    	            	  <option value="disable">Disable</option>
+    	            	</select></td>
+    	            	<script>document.getElementById("secondary_provider").value="<% echo -n $secondary_provider %>";</script>
+    	            
+    	            	<td colspan="2"></td>
+    	            	<td colspan="12"><label id="server_address_label_secondary" style="display:none;">Server Address</label></td>	
+    	            	<td colspan="35">
+    	            		<input type="text" id="server_address_secondary" name="SERVER_ADDRESS_SECONDARY" style="display:none;" 
+    	            	    VALUE="<% echo -n $secondary_server %>">
+    	            		<select id='server_address_ttn_V3_secondary' name='SERVER_ADDRESS_TTN_V3_SECONDARY' style="display:none;">
+    	            			<%inc /www/cgi-bin/inc/ttn_V3-server.inc %>	
+    	            		</select>
+    	            		<select id='server_address_helium_secondary' name='SERVER_ADDRESS_HELIUM_SECONDARY' style="display:none;">
+    	            			<%inc /www/cgi-bin/inc/helium.inc %>	
+    	            		</select></td>
+    	            	<script>document.getElementById("server_address_ttn_V3_secondary").value="<% echo -n $secondary_server %>";</script>
+    	            </tr>
+    	            <tr class="rowSpacer"><td colspan="15"></td></tr>
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="SED_UPP" id="label_sed_upp" onchange="displayServerURL()">Uplink Port</label></td>
+    	            	<td colspan="8"><input type="text" name="SED_UPP" id="sed_upp" onchange="displayServerURL()" maxlength="8" VALUE="<% echo -n $sed_upp %>" pattern="[0-9]{1,8}" ></td>
+    	            	<td colspan="18"></td>
+    	            	<td colspan="12"><label for="SED_DPP" id="label_sed_dpp" onchange="displayServerURL()">Downlink Port</label></td>
+    	            	<td colspan="8"><input type="text" name="SED_DPP" id="sed_dpp" onchange="displayServerURL()" maxlength="8" VALUE="<% echo -n $sed_dpp %>" pattern="[0-9]{1,8}" ></td>
+    	            	<td colspan=""></td>
+    	            </tr>
+    	            <tr class="rowSpacer"></tr>
+    	    
+    	            <tr>
+    	            	<td colspan="24"><h3>Packet Filter</h3></td>
+					</tr>
 
-<body onload="displayCustomURL()">
-<%inc /www/cgi-bin/inc/menu.inc %>
-<div class="page-container">
-<h2>LoRaWAN Configuration</h2>
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="22"><label for="FPORTNUM">Primary server Fport Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+    	            	<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    	            	<p>Level 0: Do nothing</p>
+    	            	<p>Level 1: Filter only the data in the list</p> 
+    	            	<p>Level 2: Filter not in the database</p>
+    	            	<p style="text-align: center;"><br>[Close]</p>
+    	            	</div>
+    	            	</td>
+    	            	<td colspan="15"><select id='primary_fport_filter' name='PRIMARY_FPORT_FILTER' onchange="displayServerURL()">
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">DevAddr Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
+    	            	<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    	            	<p>Level 0: Do nothing</p>
+    	            	<p>Level 1: Filter only the data in the list</p> 
+    	            	<p>Level 2: Filter not in the database</p>
+    	            	<p style="text-align: center;"><br>[Close]</p>
+    	            	</div>
+    	            	</td>
+    	            	<td colspan="15"><select id='primary_addre_filter' name='PRIMARY_ADDR_FILTER' onchange="displayServerURL()">
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">NwkId Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp3()">&nbsp;&nbsp;?</span>
+    	            	<div id="helptext3" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    	            	<p>Level 0: Do nothing</p>
+    	            	<p>Level 1: Filter only the data in the list</p> 
+    	            	<p>Level 2: Filter not in the database</p>
+    	            	<p style="text-align: center;"><br>[Close]</p>
+    	            	</div>
+    	            	</td>
+    	            	<td colspan="15"><select id='primary_nwkid_filter' name='PRIMARY_NWKID_FILTER' onchange="displayServerURL()">
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>	
+                
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">DevEui Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp4()">&nbsp;&nbsp;?</span>
+    	            	<div id="helptext4" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    	            	<p>Level 0: Do nothing</p>
+    	            	<p>Level 1: Filter only the data in the list</p> 
+    	            	<p>Level 2: Filter not in the database</p>
+    	            	<p style="text-align: center;"><br>[Close]</p>
+    	            	</div>
+    	            	</td>
+    	            	<td colspan="15"><select id='primary_deveui_filter' name='PRIMARY_DEVEUI_FILTER' onchange="displayServerURL()">
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>	
+    	            </tr>
 
-<form id="lora" action="<% echo -n $SCRIPT_NAME %>" method="POST">
-
-<table class="configTable" style="width: 1100px;">
-	<tr><td colspan="18"><h3>General Settings</h3></td></tr>	
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="EMAIL">Email</label></td>
-		<td colspan="24"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
-		<td colspan="6"></td>
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="GWID">Gateway EUI</label></td>
-		<td colspan="18"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
-		<td colspan="8"></td>
-	</tr>
-
-<%# --- Primary LoRaWAN Server --- %>
-	<tr class="rowSpacer"></tr>	
-	<tr><td colspan="25"><h3>Primary LoRaWAN Server</h3></td></tr> <!-- Determines the column widths -->
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="PLATFORM">Service Provider</label></td>
-		<td colspan="24"><select id='primary_provider' name='PRIMARY_PROVIDER' onchange="displayServerURL()">
-		  <option value="ttn_V3" >The Things Network V3</option>
-		  <option value="helium">Helium</option>
-		  <option value="mydevice" >Mydevices</option>
-		  <option value="router.cn.thethings.network" >Tencent</option>		
-		  <option value="127.0.0.1" >Built-in for ABP Decode to MQTT</option>
-		  <option value="custom" >Custom / Private LoRaWAN</option>
-		</select></td>
-		<script>document.getElementById("primary_provider").value="<% echo -n $primary_provider %>";</script>
-
-		<td colspan="2"></td>
-		<td colspan="12"><label id="server_address_label" style="display:none;">Server Address</label></td>	
-
-		<td colspan="35">
-			<input type="text" id="server_address" name="SERVER_ADDRESS" style="display:none;" 
-		    VALUE="<% echo -n $primary_server %>">
-			
-			<select id='server_address_ttn_V3' name='SERVER_ADDRESS_TTN_V3' style="display:none;">
-				<%inc /www/cgi-bin/inc/ttn_V3-server.inc %>	
-			</select>
-
-			<select id='server_address_helium' name='SERVER_ADDRESS_HELIUM' style="display:none;">
-				<%inc /www/cgi-bin/inc/helium.inc %>	
-			</select>	
-
-			<select id='server_address_mydevice' name='SERVER_ADDRESS_MYDEVICE' style="display:none;">
-				<%inc /www/cgi-bin/inc/iot-in-a-box-server.inc %>
-			</select>
-		</td>
-		<script>document.getElementById("server_address_ttn_V3").value="<% echo -n $primary_server %>";</script>
-		<script>document.getElementById("server_address_ttn").value="<% echo -n $primary_server %>";</script>
-		<script>document.getElementById("server_address_mydevice").value="<% echo -n $primary_server %>";</script>		
-	</tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="PRI_UPP">Uplink Port</label></td>
-		<td colspan="8"><input type="text" name="PRI_UPP" maxlength="8" VALUE="<% echo -n $pri_upp %>" pattern="[0-9]{1,8}" ></td>
-		<td colspan="18"></td>
-		<td colspan="12"><label for="PRI_DPP">Downlink Port</label></td>
-		<td colspan="8"><input type="text" name="PRI_DPP" maxlength="8" VALUE="<% echo -n $pri_dpp %>" pattern="[0-9]{1,8}" ></td>
-		<td colspan=""></td>
-	</tr>
-<%# --- Secondary LoRaWAN Server --- %>
-	<tr class="rowSpacer"></tr>
-	
-	<tr>
-		<td colspan="28"><h3>Secondary LoRaWAN Server</h3></td>
-	</tr>
-	
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="PLATFORM">Service Provider</label></td>
-		<td colspan="24"><select id='secondary_provider' name='SECONDARY_PROVIDER' onchange="displayServerURL()">
-		  <option value="ttn_V3_secondary" >The Things Network V3</option>
-		  <option value="helium_secondary" >Helium</option>
-		  <option value="custom_secondary" >Custom / Private LoRaWAN</option>
-		  <option value="disable">Disable</option>
-		</select></td>
-		<script>document.getElementById("secondary_provider").value="<% echo -n $secondary_provider %>";</script>
-	
-		<td colspan="2"></td>
-		<td colspan="12"><label id="server_address_label_secondary" style="display:none;">Server Address</label></td>	
-		<td colspan="35">
-			<input type="text" id="server_address_secondary" name="SERVER_ADDRESS_SECONDARY" style="display:none;" 
-		    VALUE="<% echo -n $secondary_server %>">
-			<select id='server_address_ttn_V3_secondary' name='SERVER_ADDRESS_TTN_V3_SECONDARY' style="display:none;">
-				<%inc /www/cgi-bin/inc/ttn_V3-server.inc %>	
-			</select>
-			<select id='server_address_helium_secondary' name='SERVER_ADDRESS_HELIUM_SECONDARY' style="display:none;">
-				<%inc /www/cgi-bin/inc/helium.inc %>	
-			</select></td>
-		<script>document.getElementById("server_address_ttn_V3_secondary").value="<% echo -n $secondary_server %>";</script>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="SED_UPP" id="label_sed_upp" onchange="displayServerURL()">Uplink Port</label></td>
-		<td colspan="8"><input type="text" name="SED_UPP" id="sed_upp" onchange="displayServerURL()" maxlength="8" VALUE="<% echo -n $sed_upp %>" pattern="[0-9]{1,8}" ></td>
-		<td colspan="18"></td>
-		<td colspan="12"><label for="SED_DPP" id="label_sed_dpp" onchange="displayServerURL()">Downlink Port</label></td>
-		<td colspan="8"><input type="text" name="SED_DPP" id="sed_dpp" onchange="displayServerURL()" maxlength="8" VALUE="<% echo -n $sed_dpp %>" pattern="[0-9]{1,8}" ></td>
-		<td colspan=""></td>
-	</tr>
-	<tr class="rowSpacer"></tr>
-	
-	<tr>
-		<td colspan="24"><h3>Packet Filter</h3></td>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="22"><label for="FPORTNUM">Primary server Fport Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
-		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
-		<p>Level 0: Do nothing</p>
-		<p>Level 1: Filter only the data in the list</p> 
-		<p>Level 2: Filter not in the database</p>
-		<p style="text-align: center;"><br>[Close]</p>
-		</div>
-		</td>
-		<td colspan="15"><select id='primary_fport_filter' name='PRIMARY_FPORT_FILTER' onchange="displayServerURL()">
-		  <option value="0" >Level 0</option>
-		  <option value="1" >Level 1</option>
-		  <option value="2" >Level 2</option>
-		</select></td>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="DEV_FILTER">DevAddr Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
-		<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
-		<p>Level 0: Do nothing</p>
-		<p>Level 1: Filter only the data in the list</p> 
-		<p>Level 2: Filter not in the database</p>
-		<p style="text-align: center;"><br>[Close]</p>
-		</div>
-		</td>
-		<td colspan="15"><select id='primary_addre_filter' name='PRIMARY_ADDR_FILTER' onchange="displayServerURL()">
-		  <option value="0" >Level 0</option>
-		  <option value="1" >Level 1</option>
-		  <option value="2" >Level 2</option>
-		</select></td>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="DEV_FILTER">NwkId Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
-		<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
-		<p>Level 0: Do nothing</p>
-		<p>Level 1: Filter only the data in the list</p> 
-		<p>Level 2: Filter not in the database</p>
-		<p style="text-align: center;"><br>[Close]</p>
-		</div>
-		</td>
-		<td colspan="15"><select id='primary_nwkid_filter' name='PRIMARY_NWKID_FILTER' onchange="displayServerURL()">
-		  <option value="0" >Level 0</option>
-		  <option value="1" >Level 1</option>
-		  <option value="2" >Level 2</option>
-		</select></td>		
-	</tr>
-	<tr class="rowSpacer"></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="22"><label for="FPORTNUM">Secondary server Fport Filter</label></td>
-		<td colspan="15"><select id='secondary_fport_filter' name='SECONDARY_FPORT_FILTER' onchange="displayServerURL()">
-		  <option value="0" >Level 0</option>
-		  <option value="1" >Level 1</option>
-		  <option value="2" >Level 2</option>
-		</select></td>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="DEV_FILTER">DevAddr Filter</label></td>
-		<td colspan="15"><select id='secondary_addre_filter' name='SECONDARY_ADDR_FILTER' onchange="displayServerURL()">
-		  <option value="0" >Level 0</option>
-		  <option value="1" >Level 1</option>
-		  <option value="2" >Level 2</option>
-		</select></td>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="DEV_FILTER">NwkId Filter</label></td>
-		<td colspan="15"><select id='secondary_nwkid_filter' name='SECONDARY_NWKID_FILTER' onchange="displayServerURL()">
-		  <option value="0" >Level 0</option>
-		  <option value="1" >Level 1</option>
-		  <option value="2" >Level 2</option>
-		</select></td>
-
-	<tr>
-	
-	<script>document.getElementById("primary_fport_filter").value="<% echo -n $filter1_fp_level %>";</script>
-	<script>document.getElementById("primary_addre_filter").value="<% echo -n $filter1_ad_level %>";</script>
-	<script>document.getElementById("primary_nwkid_filter").value="<% echo -n $filter1_nw_level %>";</script>
-	<script>document.getElementById("secondary_fport_filter").value="<% echo -n $filter2_fp_level %>";</script>
-	<script>document.getElementById("secondary_addre_filter").value="<% echo -n $filter2_ad_level %>";</script>
-	<script>document.getElementById("secondary_nwkid_filter").value="<% echo -n $filter2_nw_level %>";</script>
-	
-	
-	</tr>
-	
-	<tr class="rowSpacer"></tr>
-
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><h4>Add Filter</h4></td>
-	</tr>
-	
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><label for="FILTER_NAME">Server Name:</label></td>
-		<td colspan="15"><select id="filtername"name="FILTERNAME" onchange="displayServerURL()">
-			<option value="pri_server" selected = "selected" >Primary Server</option>
-			<option value="sed_server" selected = "selected" >Secondary Server</option>
-
-		</select></td>
-
-		<td colspan="1"></td>
-		<td colspan="10"><label for="FILTER_TYPE">Filter type:</label></td>
-		<td colspan="14"><select id="filtertype"  name="FILTERTYPE" onchange="displayServerURL()">
-			<option value="fport_type" selected = "selected" >Fport</option>
-			<option value="addr_type" selected = "selected" >Dev Address</option>
-			<option value="nwkid_type" selected = "selected" >NwkId</option>
-		</select></td>
-
-		<td colspan="1"></td>
-		<td colspan="10"><label for="FILTERVALUE">Filter Value</label></td>
-		<td colspan="12"><input type="text" maxlength="8" name="FILTERVALUE" pattern="([a-fA-F0-9\s]{0,128})$" placeholder="1,2,3 or 018229BB"></td>
-		<script>document.getElementById("filtername").value="<% echo -n $filtername_select %>";</script>
-		<script>document.getElementById("filtertype").value="<% echo -n $filtertype_select %>";</script>
-
-		<td colspan="2"></td>
-		<td colspan="7"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="ADD_FILTER"></td>
-	</tr>
-
-	<tr class="rowSpacer"></tr>
-	<tr>
-		<td colspan="10">
-			<textarea cols="80" rows="8" ><% sqlite3 /etc/lora/devskey  "SELECT *from filter" | awk -F '\\|' '{print $1"  |  "$2"  |  "$3"  " }' %></textarea>
-		</td>
-	<tr>
-
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="12"><h4>DELET Filter</h4></td>
-		<td colspan="14"><select id="del_fileter"  name="DELFILTER" onchange="displayServerURL()">
-		<% for filter_value in $(sqlite3 /etc/lora/devskey "SELECT *from filter" | awk -F '\\|' '{print $3}'); do %>   
-			<option value="<% echo -n "$filter_value" %>" ><% echo -n "$filter_value" %></option>                                  
-		<% done %>
-			<option value="ALL">ALL</option>
-		</select></td>
-		<td colspan="6"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DELETE"></td>
-	</tr>
-
-	<script>document.getElementById("del_fileter").value="<% echo -n $del_fileter_value_select %>";</script>
-
-	<tr>
-
-	<tr class="rowSpacer"></tr>
-	<tr>
-			<td colspan="80"><% echo -n $curent_mode_status%></td>
-	</tr>
-
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="16">
-			<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
-			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
-			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
-		</td>
-	</tr>
-
-</table>
-</form>
-</div>
-
-<script>
-	var x = document.getElementById("primary_provider").value;
-	if (x == "custom") {
-	document.getElementById("server_address").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
-	}
-	if (x == "ttn_V3") {
-	document.getElementById("server_address_ttn_V3").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
-	}
-	if (x == "mydevice") {
-	document.getElementById("server_address_mydevice").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
-	}
-	if (x == "helium") {
-	document.getElementById("server_address_helium").style.display = "inline";
-	document.getElementById("server_address_label").style.display = "inline";
-	}
-	
-	
-	var y = document.getElementById("secondary_provider").value;
-	
-	if (y == "custom_secondary") {
-		document.getElementById("server_address_secondary").style.display = "inline";
-		document.getElementById("server_address_label_secondary").style.display = "inline";
-	}
-	
-	if (y == "ttn_V3_secondary") {
-		document.getElementById("server_address_ttn_V3_secondary").style.display = "inline";
-		document.getElementById("server_address_label_secondary").style.display = "inline";
-	}
-	
-	if (y == "helium_secondary") {
-		document.getElementById("server_address_helium_secondary").style.display = "inline";
-		document.getElementById("server_address_label_secondary").style.display = "inline";
-	}
-	
-	if (y == "disable") {
-		document.getElementById("label_sed_upp").style.display = "none";
-		document.getElementById("label_sed_dpp").style.display = "none";
-		document.getElementById("sed_upp").style.display = "none";
-		document.getElementById("sed_dpp").style.display = "none";
-	}
-	
-function displayServerURL(){
-	document.getElementById("server_address_label").style.display = "none";
-	document.getElementById("server_address").style.display = "none";
-	document.getElementById("server_address_ttn_V3").style.display = "none";
-	document.getElementById("server_address_mydevice").style.display = "none";
-	document.getElementById("server_address_helium").style.display = "none";
-	
-	var x = document.getElementById("primary_provider").value;
-	if (x == "custom") {
-		document.getElementById("server_address").style.display = "inline";
-		document.getElementById("server_address_label").style.display = "inline";
-	}
-	if (x == "ttn_V3") {
-		document.getElementById("server_address_ttn_V3").style.display = "inline";
-		document.getElementById("server_address_label").style.display = "inline";
-	}
-	if (x == "mydevice") {
-		document.getElementById("server_address_mydevice").style.display = "inline";
-		document.getElementById("server_address_label").style.display = "inline";
-	}
-	if (x == "helium") {
-		document.getElementById("server_address_helium").style.display = "inline";
-		document.getElementById("server_address_label").style.display = "inline";
-	}
-	
-	document.getElementById("server_address_label_secondary").style.display = "none";
-	document.getElementById("server_address_secondary").style.display = "none";
-	document.getElementById("server_address_ttn_V3_secondary").style.display = "none";
-	document.getElementById("server_address_helium_secondary").style.display = "none";
-	
-	var y = document.getElementById("secondary_provider").value;
-	if (y == "custom_secondary") {
-		document.getElementById("server_address_secondary").style.display = "inline";
-		document.getElementById("server_address_label_secondary").style.display = "inline";
-		document.getElementById("label_sed_upp").style.display = "inline";
-		document.getElementById("label_sed_dpp").style.display = "inline";
-		document.getElementById("sed_upp").style.display = "inline";
-		document.getElementById("sed_dpp").style.display = "inline";
-		
-	}
-	if (y == "ttn_V3_secondary") {
-		document.getElementById("server_address_ttn_V3_secondary").style.display = "inline";
-		document.getElementById("server_address_label_secondary").style.display = "inline";
-		document.getElementById("label_sed_upp").style.display = "inline";
-		document.getElementById("label_sed_dpp").style.display = "inline";
-		document.getElementById("sed_upp").style.display = "inline";
-		document.getElementById("sed_dpp").style.display = "inline";
-		
-	}
-	if (y == "disable" ) {
-		document.getElementById("label_sed_upp").style.display = "none";
-		document.getElementById("label_sed_dpp").style.display = "none";
-		document.getElementById("sed_upp").style.display = "none";
-		document.getElementById("sed_dpp").style.display = "none";
-		document.getElementById("div1").style.display = "none";
-	}
-	if (y == "helium_secondary" ) {
-		document.getElementById("server_address_helium_secondary").style.display = "inline";
-		document.getElementById("server_address_label_secondary").style.display = "inline";
-		document.getElementById("label_sed_upp").style.display = "inline";
-		document.getElementById("label_sed_dpp").style.display = "inline";
-		document.getElementById("sed_upp").style.display = "inline";
-		document.getElementById("sed_dpp").style.display = "inline";
-		
-	}
-}
-
-function showHelp1() {
-document.getElementById("helptext1").style.display="inline";
-document.getElementById("helptext1_sed").style.display="inline";
-}
-
-function showHelp2() {
-document.getElementById("helptext2").style.display="inline";
-document.getElementById("helptext2_sed").style.display="inline";
-}
-
-function hideHelp() {
-document.getElementById("helptext1").style.display="none";
-document.getElementById("helptext2").style.display="none";
-}
-
-function hideHelp_sed() {
-document.getElementById("helptext1_sed").style.display="none";
-document.getElementById("helptext2_sed").style.display="none";
-}
-
-</script>
-</body>
+    	            <tr class="rowSpacer"></tr>
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="22"><label for="FPORTNUM">Secondary server Fport Filter</label></td>
+    	            	<td colspan="15"><select id='secondary_fport_filter' name='SECONDARY_FPORT_FILTER' onchange="displayServerURL()">
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">DevAddr Filter</label></td>
+    	            	<td colspan="15"><select id='secondary_addre_filter' name='SECONDARY_ADDR_FILTER' onchange="displayServerURL()">
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">NwkId Filter</label></td>
+    	            	<td colspan="15"><select id='secondary_nwkid_filter' name='SECONDARY_NWKID_FILTER' onchange="displayServerURL()">
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">DevEui Filter</label></td>
+    	            	<td colspan="15"><select id='secondary_deveui_filter' name='SECONDARY_DEVEUI_FILTER' onchange="displayServerURL()">
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>
+					</tr>
+                
+    	            <tr>
+    	                <script>document.getElementById("primary_fport_filter").value="<% echo -n $filter1_fp_level %>";</script>
+    	                <script>document.getElementById("primary_addre_filter").value="<% echo -n $filter1_ad_level %>";</script>
+    	                <script>document.getElementById("primary_nwkid_filter").value="<% echo -n $filter1_nw_level %>";</script>
+    	                <script>document.getElementById("primary_deveui_filter").value="<% echo -n $filter1_eui_level %>";</script>
+    	                <script>document.getElementById("secondary_fport_filter").value="<% echo -n $filter2_fp_level %>";</script>
+    	                <script>document.getElementById("secondary_addre_filter").value="<% echo -n $filter2_ad_level %>";</script>
+    	                <script>document.getElementById("secondary_nwkid_filter").value="<% echo -n $filter2_nw_level %>";</script>
+    	                <script>document.getElementById("secondary_deveui_filter").value="<% echo -n $filter2_eui_level %>";</script>
+    	            
+    	            </tr>
+    	    
+    	            <tr class="rowSpacer"></tr>
+                
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><h4>Add Filter</h4></td>
+    	            </tr>
+    	    
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="FILTER_NAME">Server Name:</label></td>
+    	            	<td colspan="15"><select id="filtername"name="FILTERNAME" onchange="displayServerURL()">
+    	            		<option value="pri_server" selected = "selected" >Primary Server</option>
+    	            		<option value="sed_server" selected = "selected" >Secondary Server</option>
+                
+    	            	</select></td>
+                
+    	            	<td colspan="1"></td>
+    	            	<td colspan="10"><label for="FILTER_TYPE">Filter type:</label></td>
+    	            	<td colspan="13"><select id="filtertype"  name="FILTERTYPE" onchange="displayServerURL()">
+    	            		<option value="fport_type" selected = "selected" >Fport</option>
+    	            		<option value="addr_type" selected = "selected" >Dev Address</option>
+    	            		<option value="nwkid_type" selected = "selected" >NwkId</option>
+    	            		<option value="deveui_type" selected = "selected" >DevEui</option>
+    	            	</select></td>
+                
+    	            	<td colspan="1"></td>
+    	            	<td colspan="10"><label for="FILTERVALUE">Filter Value:</label></td>
+    	            	<td colspan="14"><input type="text" maxlength="16" name="FILTERVALUE" pattern="([a-fA-F0-9\s]{0,128})$" placeholder="1,2,3 or 018229BB"></td>
+    	            	<script>document.getElementById("filtername").value="<% echo -n $filtername_select %>";</script>
+    	            	<script>document.getElementById("filtertype").value="<% echo -n $filtertype_select %>";</script>
+                
+    	            	<td colspan="2"></td>
+    	            	<td colspan="7"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="ADD_FILTER"></td>
+    	            </tr>
+        
+    	            <tr class="rowSpacer"></tr>
+    	            <tr>
+    	            	<td colspan="10">
+    	            		<textarea cols="80" rows="8" ><% sqlite3 /etc/lora/devskey  "SELECT *from filter" | awk -F '\\|' '{print $1"  |  "$2"  |  "$3"  " }' %></textarea>
+    	            	</td>
+    	            </tr>
+        
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><h4>DELET Filter</h4></td>
+    	            	<td colspan="14"><select id="del_fileter"  name="DELFILTER" onchange="displayServerURL()">
+    	            	<% for filter_value in $(sqlite3 /etc/lora/devskey "SELECT *from filter" | awk -F '\\|' '{print $3}'); do %>   
+    	            		<option value="<% echo -n "$filter_value" %>" ><% echo -n "$filter_value" %></option>                                  
+    	            	<% done %>
+    	            		<option value="ALL">ALL</option>
+    	            	</select></td>
+    	            	<td colspan="6"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DELETE"></td>
+    	            </tr>
+        
+    	            <script>document.getElementById("del_fileter").value="<% echo -n $del_fileter_value_select %>";</script>
+                
+    	            <tr class="rowSpacer"></tr>
+    	            <tr>
+    	            		<td colspan="80"><% echo -n $curent_mode_status%></td>
+    	            </tr>
+                
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="16">
+    	            		<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
+    	            		<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+    	            		<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
+    	            	</td>
+    	            </tr>
+                </table>
+            </form>
+        </div>
+    
+        <script>
+        	var x = document.getElementById("primary_provider").value;
+        	if (x == "custom") {
+        	document.getElementById("server_address").style.display = "inline";
+        	document.getElementById("server_address_label").style.display = "inline";
+        	}
+        	if (x == "ttn_V3") {
+        	document.getElementById("server_address_ttn_V3").style.display = "inline";
+        	document.getElementById("server_address_label").style.display = "inline";
+        	}
+        	if (x == "mydevice") {
+        	document.getElementById("server_address_mydevice").style.display = "inline";
+        	document.getElementById("server_address_label").style.display = "inline";
+        	}
+        	if (x == "helium") {
+        	document.getElementById("server_address_helium").style.display = "inline";
+        	document.getElementById("server_address_label").style.display = "inline";
+        	}
+        	
+        	
+        	var y = document.getElementById("secondary_provider").value;
+        	
+        	if (y == "custom_secondary") {
+        		document.getElementById("server_address_secondary").style.display = "inline";
+        		document.getElementById("server_address_label_secondary").style.display = "inline";
+        	}
+        	
+        	if (y == "ttn_V3_secondary") {
+        		document.getElementById("server_address_ttn_V3_secondary").style.display = "inline";
+        		document.getElementById("server_address_label_secondary").style.display = "inline";
+        	}
+        	
+        	if (y == "helium_secondary") {
+        		document.getElementById("server_address_helium_secondary").style.display = "inline";
+        		document.getElementById("server_address_label_secondary").style.display = "inline";
+        	}
+        	
+        	if (y == "disable") {
+        		document.getElementById("label_sed_upp").style.display = "none";
+        		document.getElementById("label_sed_dpp").style.display = "none";
+        		document.getElementById("sed_upp").style.display = "none";
+        		document.getElementById("sed_dpp").style.display = "none";
+        	}
+        	
+            function displayServerURL(){
+            	document.getElementById("server_address_label").style.display = "none";
+            	document.getElementById("server_address").style.display = "none";
+            	document.getElementById("server_address_ttn_V3").style.display = "none";
+            	document.getElementById("server_address_mydevice").style.display = "none";
+            	document.getElementById("server_address_helium").style.display = "none";
+            	
+            	var x = document.getElementById("primary_provider").value;
+            	if (x == "custom") {
+            		document.getElementById("server_address").style.display = "inline";
+            		document.getElementById("server_address_label").style.display = "inline";
+            	}
+            	if (x == "ttn_V3") {
+            		document.getElementById("server_address_ttn_V3").style.display = "inline";
+            		document.getElementById("server_address_label").style.display = "inline";
+            	}
+            	if (x == "mydevice") {
+            		document.getElementById("server_address_mydevice").style.display = "inline";
+            		document.getElementById("server_address_label").style.display = "inline";
+            	}
+            	if (x == "helium") {
+            		document.getElementById("server_address_helium").style.display = "inline";
+            		document.getElementById("server_address_label").style.display = "inline";
+            	}
+            	
+            	document.getElementById("server_address_label_secondary").style.display = "none";
+            	document.getElementById("server_address_secondary").style.display = "none";
+            	document.getElementById("server_address_ttn_V3_secondary").style.display = "none";
+            	document.getElementById("server_address_helium_secondary").style.display = "none";
+            	
+            	var y = document.getElementById("secondary_provider").value;
+            	if (y == "custom_secondary") {
+            		document.getElementById("server_address_secondary").style.display = "inline";
+            		document.getElementById("server_address_label_secondary").style.display = "inline";
+            		document.getElementById("label_sed_upp").style.display = "inline";
+            		document.getElementById("label_sed_dpp").style.display = "inline";
+            		document.getElementById("sed_upp").style.display = "inline";
+            		document.getElementById("sed_dpp").style.display = "inline";
+            		
+            	}
+            	if (y == "ttn_V3_secondary") {
+            		document.getElementById("server_address_ttn_V3_secondary").style.display = "inline";
+            		document.getElementById("server_address_label_secondary").style.display = "inline";
+            		document.getElementById("label_sed_upp").style.display = "inline";
+            		document.getElementById("label_sed_dpp").style.display = "inline";
+            		document.getElementById("sed_upp").style.display = "inline";
+            		document.getElementById("sed_dpp").style.display = "inline";
+            		
+            	}
+            	if (y == "disable" ) {
+            		document.getElementById("label_sed_upp").style.display = "none";
+            		document.getElementById("label_sed_dpp").style.display = "none";
+            		document.getElementById("sed_upp").style.display = "none";
+            		document.getElementById("sed_dpp").style.display = "none";
+            		document.getElementById("div1").style.display = "none";
+            	}
+            	if (y == "helium_secondary" ) {
+            		document.getElementById("server_address_helium_secondary").style.display = "inline";
+            		document.getElementById("server_address_label_secondary").style.display = "inline";
+            		document.getElementById("label_sed_upp").style.display = "inline";
+            		document.getElementById("label_sed_dpp").style.display = "inline";
+            		document.getElementById("sed_upp").style.display = "inline";
+            		document.getElementById("sed_dpp").style.display = "inline";
+            		
+            	}
+            }
+        
+            function showHelp1() {
+                document.getElementById("helptext1").style.display="inline";
+                document.getElementById("helptext1_sed").style.display="inline";
+            }
+            
+            function showHelp2() {
+                document.getElementById("helptext2").style.display="inline";
+                document.getElementById("helptext2_sed").style.display="inline";
+            }
+            
+            function showHelp3() {
+                document.getElementById("helptext3").style.display="inline";
+                document.getElementById("helptext3_sed").style.display="inline";
+            }
+            
+            function showHelp4() {
+                document.getElementById("helptext4").style.display="inline";
+                document.getElementById("helptext4_sed").style.display="inline";
+            }
+            
+            function hideHelp() {
+                document.getElementById("helptext1").style.display="none";
+                document.getElementById("helptext2").style.display="none";
+                document.getElementById("helptext3").style.display="none";
+                document.getElementById("helptext4").style.display="none";
+            }
+            
+            function hideHelp_sed() {
+                document.getElementById("helptext1_sed").style.display="none";
+                document.getElementById("helptext2_sed").style.display="none";
+                document.getElementById("helptext3_sed").style.display="none";
+                document.getElementById("helptext4_sed").style.display="none";
+            }
+        </script>
+    </body>
 </html>
 
 

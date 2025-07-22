@@ -6,7 +6,7 @@
 <%
 
 if [ "$FORM_BUTTON" == "Save&Apply" ]; then
-	if [ "$FORM_KEY_TYPE" == "manuall" ]; then
+	if [ "$FORM_KEY_TYPE" == "manual" ]; then
 		sleep 3;
 	elif [ "$FORM_KEY_TYPE" = "import" ]; then
 		uci set openvpn.custom_config.type=import
@@ -86,9 +86,8 @@ fi
 		fi
 	fi
 
-	if [ "$type_select" == "manuall" ]; then
-		#disp1="inline"; disp2="none";
-		disp1="none"; disp2="inline";
+	if [ "$type_select" == "manual" ]; then
+		disp1="inline"; disp2="none";
 	elif [ "$type_select" == "import" ]; then
 		disp1="none"; disp2="inline";
 	fi
@@ -100,7 +99,7 @@ fi
 <%inc /www/cgi-bin/inc/head.inc %>
 <script>
 	function displayFunction() {
-	    document.getElementById("manuall_key").style.display = "<% echo -n $disp1 %>"; 
+	    document.getElementById("manual_key").style.display = "<% echo -n $disp1 %>"; 
 	    document.getElementById("import_key").style.display = "<% echo -n $disp2 %>";      
 	}
 	function changeFunc(val) {
@@ -148,7 +147,7 @@ install_status='<span class="impact-light">Not Install</span>'
 		<td colspan="4"><h3 for="SERVER_TYPE">Configuration Type</h3></td>
 		<td colspan="3">
 			<select id="key_type"  name="KEY_TYPE" onchange="changeFunc(this.value)" >
-			<option value="manuall" >Manuall</option>
+			<option value="manual" >manual</option>
 			<option value="import" >Import</option>
 		</select></td>
 	</tr>
@@ -161,7 +160,7 @@ install_status='<span class="impact-light">Not Install</span>'
 	</tr>
 </table>
 
-<div id="manuall_key">
+<div id="manual_key">
 <table class="configTable">
 	<tr>
 		<td colspan="4"><h3>General Settings</h3></td>

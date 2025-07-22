@@ -181,7 +181,7 @@ start() {
 	cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c > /tmp/cell_detect.txt
 	(sleep 30; cat /sys/kernel/debug/usb/devices | grep "Vendor=2c7c ProdID=0125" -c > /tmp/cell_detect.txt) &
 	
-	[ "`uci get network.cellular.device`" != "$EC25_P2" ] && uci set network.cellular.device=$EC25_P2 && uci commit network
+	#[ "`uci get network.cellular.device`" != "$EC25_P2" ] && uci set network.cellular.device=$EC25_P2 && uci commit network
 	#ln -s $EC25_P2 /dev/ttyModem;
 	ln -s $EC25_P3 /dev/ttyModemAT
 }

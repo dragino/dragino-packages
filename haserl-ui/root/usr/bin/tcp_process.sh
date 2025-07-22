@@ -26,13 +26,13 @@ do
 		if [ -n "$CID" ];then
 			[ $DEBUG -ge 2 ] && [ -n "$CID" ] && logger "[IoT.TCP]: Found Data at Local Channels:" $CID
 			for channel in $CID; do
-					
+				channel_sql=$(echo $channel|cut -b '1-8')
 				if [ "$board_type" == "LG01" ] || [ "$board_type" == "LG02" ]; then
 					tcp_data=`cat /var/iot/channels/$channel`
 					DECODER="LG01/LG02 Raw Data"
 				else
-					DECODER=`sqlite3 $KEY_FILE "SELECT decoder from abpdevs where devaddr = '$channel';"`					
-					logger "[IoT.TCP]: DECODER $DECODER $channel"
+					DECODER=`sqlite3 $KEY_FILE "SELECT decoder from abpdevs where devaddr = '$channel_sql';"`					
+					logger "[IoT.TCP]: DECODER $DECODER $channel_sql"
 					# Send the File
 					if [ ! -z $DECODER ]; then
 						if [ "$DECODER" == "ASCII" ]; then

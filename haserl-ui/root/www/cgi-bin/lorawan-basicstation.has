@@ -4,10 +4,8 @@
 
 <%# --- Process the form submission --- %>
 <%
-	
-
-	if [ "$FORM_BUTTON" == "Save&Apply" ]; then
-		if [ "$FORM_PALTFORM_SERVER_TYPE" == "AWS" ]; then
+	if [ "$FORM_BUTTON" = "Save&Apply" ]; then
+		if [ "$FORM_PALTFORM_SERVER_TYPE" = "AWS" ]; then
 			if [ -n "$FORM_CUPSURI" ]; then
 				echo "$FORM_CUPSURI" > /etc/station/cups.uri;
 			fi
@@ -48,13 +46,22 @@
 		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "LR" ]; then
 			if [ -n "$FORM_LNSURI_LR" ]; then
 				echo "$FORM_LNSURI_LR" > /etc/station/tc.uri
-
+			fi
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "CW" ]; then
+			if [ -n "$FORM_LNSURI_CW" ]; then
+				echo "$FORM_LNSURI_CW" > /etc/station/tc.uri
 			fi
 		fi
 		
 		uci set gateway.general.station_server_provider=$FORM_PALTFORM_SERVER_TYPE	
 		uci set gateway.general.email="$FORM_EMAIL"
 		uci set gateway.general.server_type="station"
+
+		uci set gateway.station.fport_filter_level="$FORM_PRIMARY_FPORT_FILTER" 
+		uci set gateway.station.devaddr_filter_level="$FORM_PRIMARY_ADDR_FILTER"
+		uci set gateway.station.nwkid_filter_level="$FORM_PRIMARY_NWKID_FILTER"
+		uci set gateway.station.deveui_filter_level="$FORM_PRIMARY_DEVEUI_FILTER"
+
 		uci commit gateway
 
 		#Enter the routerid into the station configuration file
@@ -99,12 +106,12 @@
 				find /etc/station -name "cups.trust*"|xargs rm -rfv   #  Remove the original cups.trust file
 				savedfile=$HASERL_uploadfile_pem_trust_path
 				cp $savedfile /etc/station/$cups_trust_name  # Store the cert file
-				trust_upload_status="<span class='impactOK'>Upload Finished </span>"			
-			else 
-				trust_upload_status="<span class='impact'>file name must be cups.trust </span>"
+				aws_cups_uploadstatus="<span class='impactOK'>Upload Finished </span>"			
+			else
+				aws_cups_uploadstatus="<span class='impact'>file name must be cups.trust </span>"
 			fi 
 		  else
-		  	trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file! $cups_trust_name </span>"
+		  	aws_cups_uploadstatus="<span class='impact'>&nbsp;&nbsp; Invalid file! $cups_trust_name </span>"
 		  fi
 		fi
 	fi
@@ -177,89 +184,87 @@
 		fi
 	fi
 	
-	if [ "$FORM_BUTTON" == "Upload_CUPS_Cert" ] && [ "$FORM_PALTFORM_SERVER_TYPE" == "TTN" ]; then
-		if test -n "$HASERL_uploadfile_pem_ttn_path"; then
-		  ttn_trust_name=$FORM_uploadfile_pem_ttn_name
-		  if [ "$ttn_trust_name" != "" ]; then
-		  	if [ "${ttn_trust_name##*.}"x = "pem"x ] || [ "${ttn_trust_name##*.}"x = "trust"x ];then
-				find /etc/station -name "cups.trust"| xargs rm -rfv   #  Remove the original cups.trust file
-				savedfile=$HASERL_uploadfile_pem_ttn_path
-				#cp $savedfile /etc/station/$tc_trust_name
-				mv $savedfile /etc/station/cups.trust  # Store the cert file
-				ttn_trust_upload_status="<span class='impactOK'>Upload Finished</span>"		
-			else 
-				ttn_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
-			fi 
-		  else
-		  	ttn_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
-		  fi
-		 fi
-	elif [ "$FORM_BUTTON" == "Upload_CUPS_Cert" ] && [ "$FORM_PALTFORM_SERVER_TYPE" == "TP" ]; then
-		if test -n "$HASERL_uploadfile_cer_tp_path" ; then
-		  tp_trust_name=$FORM_uploadfile_cer_tp_name
-		  if [ "$tp_trust_name" != "" ]; then
-		  	if [ "${tp_trust_name##*.}"x = "cer"x ] || [ "${tp_trust_name##*.}"x = "pem"x ];then
-				find /etc/station -name "cups.trust"| xargs rm -rfv   #  Remove the original cups.trust file
-				savedfile=$HASERL_uploadfile_cer_tp_path
-				#cp $savedfile /etc/station/$tp_trust_name
-				mv $savedfile /etc/station/cups.trust  # Store the cert file
-				tp_trust_upload_status="<span class='impactOK'>Upload Finished</span>"	
-			else 
-				tp_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
-			fi 
-		  else
-			tp_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
-		  fi
+	if [ "$FORM_BUTTON" == "Upload_CUPS_Cert" ]; then
+		if [ "$FORM_PALTFORM_SERVER_TYPE" == "TTN" ]; then
+			file_name=$HASERL_ttn_ca_path
+			file_path=$FORM_ttn_ca_name
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "TP" ]; then
+			file_name=$HASERL_tp_ca_path
+			file_path=$FORM_tp_ca_name
+		fi
+
+		if [ -f $file_path ]; then
+			if [ ! -z $file_name  ]; then
+				if [ "${file_name##*.}"x == "pem"x ] || [ "${file_name##*.}"x == "trust"x ] || [ "${file_name##*.}"x == "cer"x ];then
+					find /etc/station -name "cups.trust"| xargs rm -rfv >/dev/null 2>&1
+					mv $file_path /etc/station/cups.trust
+					tp_trust_upload_status="<span class='impactOK'>Upload Finished</span>"
+					ttn_trust_upload_status="<span class='impactOK'>Upload Finished</span>"
+				else
+					ttn_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
+					tp_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
+				fi
+			else
+				ttn_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
+				tp_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
+			fi
 		fi
 	fi
-	
-	
-	if [ "$FORM_BUTTON" == "Upload_LNS_Trust" ] && [ "$FORM_PALTFORM_SERVER_TYPE" == "CS" ]; then
 
-			if test -n "$HASERL_uploadfile_tc_pem_trust_path"; then
-			  tc_trust_name=$FORM_uploadfile_tc_pem_trust_name
-			  if [ "$tc_trust_name" != "" ]; then
-				if [ "${tc_trust_name##*.}"x = "pem"x ] || [ "${tc_trust_name##*.}"x = "trust"x ];then
-					find /etc/station -name "tc.trust"| xargs rm -rfv   #  Remove the original tc.trust file
-					savedfile=$HASERL_uploadfile_tc_pem_trust_path
-					#cp $savedfile /etc/station/$tc_trust_name
-					mv $savedfile /etc/station/tc.trust  # Store the cert file
-					tc_trust_upload_status="<span class='impactOK'>Upload Finished</span>"			
-				else 
-					tc_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
-				fi 
-			  else
-				tc_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
-			  fi
+
+	if [ "$FORM_BUTTON" == "Upload_LNS_Trust" ]; then
+		if [ "$FORM_PALTFORM_SERVER_TYPE" == "CS" ]; then
+			uploadname=cs_trust
+			file_path=$HASERL_cs_trust_path
+			file_name=$FORM_cs_trust_name
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "CW" ]; then  
+			uploadname=cw_trust
+			file_path=$HASERL_cw_trust_path
+			file_name=$FORM_cw_trust_name
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "SN" ]; then  
+			uploadname=sn_trust
+			file_path=$HASERL_sn_trust_path
+			file_name=$FORM_sn_trust_name
+		fi
+
+		if [ -f $file_path ]; then
+			if [ ! -z $file_name  ]; then
+				if [ "${file_name##*.}"x == "pem"x ] || [ "${file_name##*.}"x == "trust"x ];then
+					find /etc/station -name "tc.trust"| xargs rm -rfv  >/dev/null 2>&1
+					mv $file_path /etc/station/tc.trust  # Store the cert file
+					trust_upload_status="<span class='impactOK'>Upload Finished</span>"
+				else
+					trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
+				fi
+			else
+				trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
 			fi
-	elif [ "$FORM_BUTTON" == "Upload_LNS_Trust" ] && [ "$FORM_PALTFORM_SERVER_TYPE" == "SN" ]; then
-		if test -n "$HASERL_uploadfile_sn_pem_trust_path"; then
-			  tc_trust_name=$FORM_uploadfile_sn_pem_trust_name
-			  if [ "$tc_trust_name" != "" ]; then
-				if [ "${tc_trust_name##*.}"x = "pem"x ] || [ "${tc_trust_name##*.}"x = "trust"x ];then
-					find /etc/station -name "tc.trust"| xargs rm -rfv   #  Remove the original tc.trust file
-					savedfile=$HASERL_uploadfile_sn_pem_trust_path
-					#cp $savedfile /etc/station/$tc_trust_name
-					mv $savedfile /etc/station/tc.trust  # Store the cert file
-					tc_trust_upload_status="<span class='impactOK'>Upload Finished</span>"			
-				else 
-					tc_trust_upload_status="<span class='impact'>file name should be tc.trust or XX.pem </span>"
-				fi 
-			  else
-				tc_trust_upload_status="<span class='impact'>&nbsp;&nbsp; Invalid file!  </span>"
-			  fi
-			fi
+		fi
+
 	fi
 	
+
 	if [ "$FORM_BUTTON" == "Upload_LNS_key" ] || [ "$FORM_BUTTON" == "Upload_TLS_key" ]; then
-		if test -n "$HASERL_uploadfile_tc_key_path"; then
-			tc_private_key_name=$FORM_uploadfile_tc_key_name
-			if [ "$tc_private_key_name" != "" ]; then		
-				if [ "${tc_private_key_name##*.}"x = "key"x ] ;then
-					find /etc/station/ -name '*private.key*' | xargs rm    #  Remove the original private.key file
-					savedfile=$HASERL_uploadfile_tc_key_path
-					cp $savedfile /etc/station/$private_key_name  # Store the cert file
-					mv $savedfile /etc/station/tc.key    # Store Copy the cert file
+		if [ "$FORM_PALTFORM_SERVER_TYPE" == "CS" ]; then
+			uploadname=cs_key
+			file_path=$HASERL_cs_key_path
+			file_name=$FORM_cs_key_name
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "CW" ]; then  
+			uploadname=cw_key
+			file_path=$HASERL_cw_key_path
+			file_name=$FORM_cw_key_name
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "LR" ]; then  
+			uploadname=lr_key
+			file_path=$HASERL_lr_key_path
+			file_name=$FORM_lr_key_name
+		fi
+
+		if [ -f $file_path ]; then
+			if [ ! -z $file_name  ]; then
+				if [ "${file_name##*.}"x == "key"x ] ;then
+					find /etc/station/ -name '*private.key*' | xargs rm >/dev/null 2>&1
+					cp $file_path /etc/station/
+					mv $file_path /etc/station/tc.key    # Store Copy the cert file
 					tc_key_upload_status="<span class='impactOK'>Upload Finished </span>"
 				else
 					tc_key_upload_status="<span class='impact'>file suffix must be private.key </span>"
@@ -270,15 +275,26 @@
 		fi
 	fi
 
-	if [ "$FORM_BUTTON" == "Upload_LNS_pem" ]|| [ "$FORM_BUTTON" == "Upload_TLS_Cerificate" ]; then
-		if test -n "$HASERL_uploadfile_tc_pem_path"; then
-		 	tc_cert_pem_name=$FORM_uploadfile_tc_pem_name
-			if [ "$tc_cert_pem_name" != "" ]; then
-				if [ "${tc_cert_pem_name##*.}"x = "pem"x ] || [ "${tc_cert_pem_name##*.}"x = "crt"x ];then
-					find /etc/station/ -name '*cert.pem*' | xargs rm        #  Remove the original cert.pem file
-					savedfile=$HASERL_uploadfile_tc_pem_path
-					cp $savedfile /etc/station/tc.crt  # Store the cert file
-					#mv $savedfile /etc/station/tc.crt    # Store Copy the cert file	
+	if [ "$FORM_BUTTON" == "Upload_LNS_pem" ] || [ "$FORM_BUTTON" == "Upload_TLS_Cerificate" ]; then
+		if [ "$FORM_PALTFORM_SERVER_TYPE" == "CS" ]; then
+			uploadname=cs_pem
+			file_path=$HASERL_cs_pem_path
+			file_name=$FORM_cs_pem_name
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "CW" ]; then  
+			uploadname=cw_pem
+			file_path=$HASERL_cw_pem_path
+			file_name=$FORM_cw_pem_name
+		elif [ "$FORM_PALTFORM_SERVER_TYPE" == "LR" ]; then  
+			uploadname=lr_pem
+			file_path=$HASERL_lr_pem_path
+			file_name=$FORM_lr_pem_name
+		fi
+
+		if [ -f $file_path ]; then
+			if [ ! -z $file_name  ]; then
+				if [ "${file_name##*.}"x == "pem"x ] || [ "${file_name##*.}"x == "crt"x ];then
+					find /etc/station/ -name '*cert.pem*' | xargs rm >/dev/null 2>&1
+					mv $file_path /etc/station/tc.crt    # Store Copy the cert file
 					tc_pem_upload_status="<span class='impactOK'>Upload Finished </span>"
 				else
 					tc_pem_upload_status="<span class='impact'>file suffix must be Cert.pem </span>"
@@ -307,6 +323,40 @@
 			fi
 		fi
 	fi
+
+	if [ $FORM_BUTTON == "ADD_FILTER" ]; then
+		if [ -n $FORM_FILTERNAME ] && [ -n $FORM_FILTERTYPE ] && [ -n $FORM_FILTERVALUE ]; then
+			if [ $FORM_FILTERNAME == "pri_server" ]; then
+				filter_name=server
+			else
+				filter_name=server2
+			fi
+			if [ $FORM_FILTERTYPE == "fport_type" ]; then
+				filter_type=fport
+			elif [ $FORM_FILTERTYPE == "addr_type" ]; then
+				filter_type=devaddr
+			elif [ $FORM_FILTERTYPE == "nwkid_type" ]; then
+				filter_type=nwkid
+			elif [ $FORM_FILTERTYPE == "deveui_type" ]; then
+				filter_type=deveui
+			fi
+			filter_value1=`echo $FORM_FILTERVALUE | tr -d " " | tr '[a-z]' '[A-Z]'`
+			sqlite3 /etc/lora/devskey "INSERT INTO filter (name, type, value ) VALUES  ('$filter_name', '$filter_type', '$filter_value1');"
+		fi
+	fi
+
+	if [ $FORM_BUTTON == "DELETE" ]; then
+		if [ "$FORM_DELFILTER" == "ALL" ]; then
+			server=`sqlite3 /etc/lora/devskey  "SELECT *from filter" | awk -F'|' '{print$1}'`
+			for sr in $server
+			do
+				sqlite3 /etc/lora/devskey "DELETE FROM filter where name = '$sr';"
+			done
+		else
+			sqlite3 /etc/lora/devskey "DELETE FROM filter where value  = '$FORM_DELFILTER';"
+		fi
+	fi
+
 %>
 
 
@@ -382,431 +432,632 @@
 
 #################
 	type="$(uci -q get gateway.general.server_type)"
-	
-	if [ "$type" == "lorawan" ];  then	
-		mode_status='<span class="black-light"> Current Mode: </span>''<span class="impact-light">LoRaWAN Semtech UDP </span>''<span class="black-light">  Click Save & Apply will change to mode: </span>''<span class="impact-light">LoRaWAN Basic Station </span>'	
-	elif [ "$type" == "loriot" ];  then
-		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRIOT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
-	elif [ "$type" == "mqtt" ];  then
-		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN MQTT </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
-	elif [ "$type" == "tcp" ];  then
-		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
-	elif [ "$type" == "tcpudp" ];  then
-		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">LoRaWAN TCP </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
-	elif [ "$type" == "customized" ];  then
-		mode_status='<span class="black-light">Current Mode: </span>''<span class="impact-light">Custom Script </span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station </span>'
-	elif [ "$type" == "station" ];  then
-		if [ "$paltform_server_type" == "AWS" ]; then 
-			mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- AWS</span>'
-		elif [ "$paltform_server_type" == "TTN" ]; then
-			mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- TTN</span>'
-		else
-			mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Basic Station</span>'
-		fi
+	case $type in
+		station )
+			station_paltform_server_type="$(uci get gateway.general.station_server_provider)"
+			if [ "$paltform_server_type" == "AWS" ]; then 
+				mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- AWS</span>'
+			elif [ "$paltform_server_type" == "TTN" ]; then
+				mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">Basic Station -- TTN</span>'
+			else
+				mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">LoRaWAN Basic Station</span>'
+			fi
+		;;
+		loriot)
+			cur_mod="LoRIOT"
+		;;
+		mqtt)
+			cur_mod="LoRaWAN MQTT"
+		;;
+		tcpudp)
+			cur_mod="LoRaWAN TCP"
+		;;
+		customized)
+			cur_mod="Custom Script"
+		;;
+		abpdecode)
+			cur_mod="ABP Decode"
+		;;
+		lorawan)
+			cur_mod="LoRaWAN Semtech UDP"
+		;;
+	esac
+
+	if [ ! -z "$cur_mod" ]; then
+			mode_status='<span class="black-light">Current Mode:</span>''<span class="impact-light">'$cur_mod'</span>''<span class="black-light"> Click Save & Apply will change to mode :</span>''<span class="impact-light">LoRaWAN Basic Station</span>'
 	fi
 	
-	
-	
-	disp1="inline"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"
+	disp1="inline"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="none"; disp_CW="none"
 	# Set up display options
 	if [ "$paltform_server_type_select" == "AWS" ]; then
-		disp1="none"; disp2="inline"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="none"
+		disp1="none"; disp2="inline"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="none"; disp_CW="none"
 	elif [ "$paltform_server_type_select" == "TTN" ]; then
-		disp1="inline";disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="none"
+		disp1="inline";disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="none"; disp_CW="none"
 	elif [ "$paltform_server_type_select" == "CS" ]; then
-		disp1="none"; disp2="none"; disp3="inline"; disp_TP="none"; disp_SN="none"; disp_LR="none"
+		disp1="none"; disp2="none"; disp3="inline"; disp_TP="none"; disp_SN="none"; disp_LR="none"; disp_CW="none"
 	elif [ "$paltform_server_type_select" == "TP" ]; then
-		disp1="none"; disp2="none"; disp3="none"; disp_TP="inline"; disp_SN="none"; disp_LR="none"
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="inline"; disp_SN="none"; disp_LR="none"; disp_CW="none"
 	elif [ "$paltform_server_type_select" == "SN" ]; then
-		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="inline"; disp_LR="none"
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="inline"; disp_LR="none"; disp_CW="none"
 	elif [ "$paltform_server_type_select" == "LR" ]; then
-		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="inline"
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="inline"; disp_CW="none"
+	elif [ "$paltform_server_type_select" == "CW" ]; then
+		disp1="none"; disp2="none"; disp3="none"; disp_TP="none"; disp_SN="none"; disp_LR="none"; disp_CW="inline"
 	fi
 
-
+    filter1_fp_level=`uci get gateway.station.fport_filter_level`
+	filter1_ad_level=`uci get gateway.station.devaddr_filter_level`
+	filter1_nw_level=`uci get gateway.station.nwkid_filter_level`
+	filter1_eui_level=`uci get gateway.station.deveui_filter_level`
 	
 %>
 
 <%# --- Present the HTML page --- %>
 <html lang="en">
-<head>
-	<%inc /www/cgi-bin/inc/head.inc %>
-<script>
-	function displayFunction() {
-	    document.getElementById("div1").style.display = "<% echo -n $disp1 %>"; 
-	    document.getElementById("div2").style.display = "<% echo -n $disp2 %>";      
-		document.getElementById("div3").style.display = "<% echo -n $disp3 %>"; 
-		document.getElementById("div_TP").style.display = "<% echo -n $disp_TP %>";
-		document.getElementById("div_SN").style.display = "<% echo -n $disp_SN %>"; 
-		document.getElementById("div_LR").style.display = "<% echo -n $disp_LR %>"; 
-    	}
-	function changeFunc(val) {
-	    document.forms["station"].submit();
-	}
-</script>
-</head>
+    <head>
+    	<%inc /www/cgi-bin/inc/head.inc %>
+        <script>
+        	function displayFunction() {
+        	    document.getElementById("div1").style.display = "<% echo -n $disp1 %>"; 
+        	    document.getElementById("div2").style.display = "<% echo -n $disp2 %>";      
+        		document.getElementById("div3").style.display = "<% echo -n $disp3 %>"; 
+        		document.getElementById("div_TP").style.display = "<% echo -n $disp_TP %>";
+        		document.getElementById("div_SN").style.display = "<% echo -n $disp_SN %>"; 
+        		document.getElementById("div_LR").style.display = "<% echo -n $disp_LR %>"; 
+        		document.getElementById("div_CW").style.display = "<% echo -n $disp_CW %>"; 
+            	}
+        	function changeFunc(val) {
+        	    document.forms["station"].submit();
+        	}
+        </script>
+    </head>
 
-<body onload="displayFunction() ">
-<%inc /www/cgi-bin/inc/menu.inc %>
-<div class="page-container">
+    <body onload="displayFunction() ">
+        <%inc /www/cgi-bin/inc/menu.inc %>
+        <div class="page-container">
+            <h2>LoRaWAN -- Basic Station</h2>
+            <form id="station" action="<% echo -n $SCRIPT_NAME %>" method="POST" enctype="multipart/form-data">
 
-<h2>LoRaWAN -- Basic Station</h2>
+                <table class="configTable">
+                	<tr><td colspan="18"><h3>General Settings</h3></td></tr>
+                	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                
+                	<tr>
+                		<td colspan="1"></td>
+                		<td colspan="3"><label for="EMAIL">Email</label></td>
+                		<td colspan="7"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
+                		<td colspan="6"></td>
+                	</tr>
+                
+                	<tr class="rowSpacer"><td colspan="15"></td></tr>	
+                	<tr>
+                		<td colspan="1"></td>
+                		<td colspan="3"><label for="GWID">Gateway ID</label></td>
+                		<td colspan="5"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
+                		<td colspan="3"></td>
+                		<td colspan="3"><label for="CLEAR">Restore</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp()">&nbsp;&nbsp;?</span>
+                		<div id="helptext" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+                		<p>Users can remove current confiuration files via this botton of remove configurations include CA certificate and URI </p> 
+                		<p style="text-align: center;"><br>[Close]</p>
+                		</div>
+                		</td>
+                		<td colspan="6"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Restore_Configuration" onclick="return confirm('Start to remove the confiuration file include CA Certificate and URI')"></td>
+                		<td colspan="6"><% echo -n $clearing_status %></td>
+                	</tr>
+                </table>
+    
+                <table class="configTable">
+                
+                	<tr class="rowSpacer"></tr>
+                	<tr>
+                		<td colspan="4"><h3>Primary LoRaWAN Server</h3></td>
+                		
+                	</tr> 
+                	
+                	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                	<tr>
+                		<td colspan="3"><label for="SERVER_TYPE">Service Provider</label></td>
+                		<td colspan="5">
+                			<select id="paltform_server_type"  name="PALTFORM_SERVER_TYPE" onchange="changeFunc(this.value)" >
+                	  		<option value="TTN" >The Things Network -- Basic Station</option>
+                	  		<option value="AWS" >Amazon IoT -- Basic Station </option>
+                			<option value="CS" >Chirp Stack -- Basic Station </option>
+                			<option value="TP">ThingPark -- Basic Station </option>
+                			<option value="SN">Senet -- Basic Station </option>
+                			<option value="LR">LORIOT -- Basic Station </option>
+                			<option value="CW">Chirp Wireless -- Basic Station </option>
+                		</select></td>
+                	</tr>
+                
+                	<script>document.getElementById("paltform_server_type").value="<% echo -n $paltform_server_type_select %>";</script>
+                </table>
 
-<form id="station" action="<% echo -n $SCRIPT_NAME %>" method="POST" enctype="multipart/form-data">
-
-
-<table class="configTable">
-	<tr><td colspan="18"><h3>General Settings</h3></td></tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="3"><label for="EMAIL">Email</label></td>
-		<td colspan="7"><input type="text" name="EMAIL" maxlength="128" VALUE=<% echo -n $email %> pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" ></td>
-		<td colspan="6"></td>
-	</tr>
-
-	<tr class="rowSpacer"><td colspan="15"></td></tr>	
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="3"><label for="GWID">Gateway ID</label></td>
-		<td colspan="5"><input type="text" name="GWID" maxlength="32" VALUE=<% echo -n $gwid %> ></td>
-		<td colspan="3"></td>
-		<td colspan="3"><label for="CLEAR">Restore</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
-		<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
-		<p>Users can remove current confiuration files via this botton of remove configurations include CA certificate and URI </p> 
-		<p style="text-align: center;"><br>[Close]</p>
-		</div>
-		</td>
-		<td colspan="6"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Restore_Configuration" onclick="return confirm('Start to remove the confiuration file include CA Certificate and URI')"></td>
-		<td colspan="6"><% echo -n $clearing_status %></td>
-	</tr>
-</table>
-
-<table class="configTable">
-
-	<tr class="rowSpacer"></tr>
-	<tr>
-		<td colspan="4"><h3>Primary LoRaWAN Server</h3></td>
-		
-	</tr> 
 	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="3"><label for="SERVER_TYPE">Service Provider</label></td>
-		<td colspan="5">
-			<select id="paltform_server_type"  name="PALTFORM_SERVER_TYPE" onchange="changeFunc(this.value)" >
-	  		<option value="TTN" >The Things Network -- Basic Station</option>
-	  		<option value="AWS" >Amazon IoT -- Basic Stion </option>
-			<option value="CS" >ChirpStack -- Basic Station </option>
-			<option value="TP">ThingPark -- Basic Station </option>
-			<option value="SN">Senet -- Basic Station </option>
-			<option value="LR">LORIOT -- Basic Station </option>
-		</select></td>
-	</tr>
 
-	<script>document.getElementById("paltform_server_type").value="<% echo -n $paltform_server_type_select %>";</script>
-</table>
+                <div id="div1" >
+                    <table class="configTable">
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="13"><label for="CUPSURI">CUPS Server URI</label></td>
+                    		<td colspan="22"><input type="text" name="TTN_URI" maxlength="128" placeholder="example: https://eu1.cloud.thethings.network:443" VALUE=<% echo -n $cups_uri %> ></td>
+                    		<td colspan="6"></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="13"><label for="CUPSKEY">CUPS Authorization Key</label></td>
+                    		<td colspan="42"><input type="text" name="TTN_CUPS" maxlength="128" placeholder="example: NNSXS.2WT4MDZ3R24GFIRNJB6A3OKZWPRNT6HZLXM3PXI.JT42TOKFSAGZ3JZIRVFHE37Q7IKBPSI7H7EKWIED2VTXUZJCC67Q" VALUE=<% echo -n "$ttn_cups_key" %>></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="13"><label for="LNSKEY">LNS Authentication Key</label></td>
+                    		<td colspan="42"><input type="text" name="TTN_LNS" maxlength="128" placeholder="example: NNSXS.2WT4MDZ3R24GFIRNJB6A3OKZWPRNT6HZLXM3PXI.JT42TOKFSAGZ3JZIRVFHE37Q7IKBPSI7H7EKWIED2VTXUZJCC67Q" VALUE=<% echo -n "$ttn_lns_key" %>></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="13"><label for="CLEAR">CUPS Certificate Authority</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp_ca()">&nbsp;&nbsp;?</span>
+                    		<div id="helptext_ca" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+                    		<p>User can clicking DEFAULTDE CERTIFICATE to download certificate or upload own certificate </p> 
+                    		<p style="text-align: center;"><br>[Close]</p>
+                    		</div>
+                    		</td>
+                    		<td colspan="1"></td>
+                    		<td colspan="20"><% echo -n $ttn_trust_file_status %></td>		
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="8"></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DEFAULT_CERTIFICATE" onclick="return confirm('Start install default CA Certificate')"></td>
+                    		<td colspan="12"></td>
+                    		<td colspan="8"><input type=file name=ttn_ca></td>
+                    		<td colspan="4"></td>
+                    		<td colspan="14"><% echo -n $ttn_trust_upload_status %></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Cert" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    </table>
+                </div>
 
-	
+                <div id="div2">
+                    <table class="configTable">
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CUPSURI">CUPS URI</label></td>
+                    		<td colspan="24"><input type="text" name="CUPSURI" maxlength="128" placeholder="example: https://xxxxxxx.cups.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $cups_uri %> ></td>
+                    	</tr>
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CUPSURI">LNS  URI</label></td>
+                    		<td colspan="24"><input type="text" name="LNSURI" maxlength="128" placeholder="example: wss://xxxxxxx.lns.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $lns_uri %> ></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CUPSTRUST">CUPS trust</label></td>
+                    		<td colspan="10"><% echo -n $trust_status %></td>
+                    		<td colspan="8"><input type=file name=uploadfile_pem_trust></td>
+                    		<td colspan="5"><% echo -n $aws_cups_uploadstatus %></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Trust" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CUPSTRUST">LNS  trust</label></td>
+                    		<td colspan="10"><% echo -n $lns_trust_status %></td>
+                    		<td colspan="8"><input type=file name=uploadfile_lns_trust></td>
+                    		<td colspan="5"><% echo -n $lns_trust_upload_status %></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="PRIBATEKEY">Private key</label></td>
+                    		<td colspan="10"><% echo -n $key_file_status %></td>
+                    		<td colspan="8"><input type=file name=uploadfile_key></td>
+                    		<td colspan="5"><% echo -n $key_upload_status%></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_Private_key" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CERTPEM">Cert pem</label></td>
+                    		<td colspan="10"><% echo -n $pem_file_status %></td>
+                    		<td colspan="8"><input type=file name=uploadfile_pem></td>
+                    		<td colspan="5"><% echo -n $pem_upload_status%></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_Cert_pem" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    </table>	
+                </div>
 
-<div id="div1" >
-<table class="configTable">
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="13"><label for="CUPSURI">CUPS Server URI</label></td>
-		<td colspan="22"><input type="text" name="TTN_URI" maxlength="128" placeholder="example: https://eu1.cloud.thethings.network:443" VALUE=<% echo -n $cups_uri %> ></td>
-		<td colspan="6"></td>
-	</tr>
+                <%#----chirpstack %>
+                <div id="div3">
+                    <table class="configTable">
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
+                    		<td colspan="24"><input type="text" name="LNSURI_CS" maxlength="128" placeholder="example: wss://xxxx.chirpstack.com:443 or ws://xxx.chirpstack.com:3001 " VALUE=<% echo -n $tc_uri %>  ></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CUPSTRUST">LNS TLS trust</label></td>
+                    		<td colspan="10"><% echo -n $tc_trust_status %></td>
+                    		<td colspan="8"><input type=file name=cs_trust></td>
+                    		<td colspan="5"><% echo -n $trust_upload_status %></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="PRIBATEKEY">Private TLS key</label></td>
+                    		<td colspan="10"><% echo -n $tc_key_file_status %></td>
+                    		<td colspan="8"><input type=file name=cs_key></td>
+                    		<td colspan="5"><% echo -n $tc_key_upload_status%></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_key" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CERTPEM">Private TLS Cert</label></td>
+                    		<td colspan="10"><% echo -n $tc_pem_file_status %></td>
+                    		<td colspan="8"><input type=file name=cs_pem></td>
+                    		<td colspan="5"><% echo -n $tc_pem_upload_status%></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_pem" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    </table>
+                </div>
 
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="13"><label for="CUPSKEY">CUPS Authorization Key</label></td>
-		<td colspan="42"><input type="text" name="TTN_CUPS" maxlength="128" placeholder="example: NNSXS.2WT4MDZ3R24GFIRNJB6A3OKZWPRNT6HZLXM3PXI.JT42TOKFSAGZ3JZIRVFHE37Q7IKBPSI7H7EKWIED2VTXUZJCC67Q" VALUE=<% echo -n "$ttn_cups_key" %>></td>
-	</tr>
+                <div id="div_TP">
+                    <table class="configTable">
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="13"><label for="LNSURI">CUPS Server URI</label></td>
+                    		<td colspan="24"><input type="text" name="CUPSURI_TP" maxlength="128" placeholder="example: https://community.thingpark.io:443 " VALUE=<% echo -n $cups_uri %>  ></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="13"><label for="CLEAR">CUPS Certificate Authority</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp_tp()">&nbsp;&nbsp;?</span>
+                    		<div id="helptext_tp" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+                    		<p>User can clicking DEFAULTDE CERTIFICATE to download certificate or upload own certificate </p> 
+                    		<p style="text-align: center;"><br>[Close]</p>
+                    		</div>
+                    		</td>
+                    		<td colspan="1"></td>
+                    		<td colspan="20"><% echo -n $trust_status %></td>		
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="8"></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DEFAULT_CERTIFICATE" onclick="return confirm('Start install default CA Certificate')"></td>
+                    		<td colspan="12"></td>
+                    		<td colspan="8"><input type=file name=tp_ca></td>
+                    		<td colspan="4"></td>
+                    		<td colspan="14"><% echo -n $tp_trust_upload_status %></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Cert" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    	
+                    </table>
+                </div>
 
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="13"><label for="LNSKEY">LNS Authentication Key</label></td>
-		<td colspan="42"><input type="text" name="TTN_LNS" maxlength="128" placeholder="example: NNSXS.2WT4MDZ3R24GFIRNJB6A3OKZWPRNT6HZLXM3PXI.JT42TOKFSAGZ3JZIRVFHE37Q7IKBPSI7H7EKWIED2VTXUZJCC67Q" VALUE=<% echo -n "$ttn_lns_key" %>></td>
-	</tr>
+                <div id="div_SN">
+                    <table class="configTable">
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
+                    		<td colspan="24"><input type="text" name="LNSURI_SN" maxlength="128" placeholder="example: wss://collector.senetco.io:6042 " VALUE=<% echo -n $tc_uri %>  ></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CUPSTRUST">LNS TLS trust</label></td>
+                    		<td colspan="10"><% echo -n $tc_trust_status %></td>
+                    		<td colspan="8"><input type=file name=sn_trust></td>
+                    		<td colspan="5"><% echo -n $trust_upload_status %></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    </table>
+                </div>
 
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="13"><label for="CLEAR">CUPS Certificate Authority</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp_ca()">&nbsp;&nbsp;?</span>
-		<div id="helptext_ca" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
-		<p>User can clicking DEFAULTDE CERTIFICATE to download certificate or upload own certificate </p> 
-		<p style="text-align: center;"><br>[Close]</p>
-		</div>
-		</td>
-		<td colspan="1"></td>
-		<td colspan="20"><% echo -n $ttn_trust_file_status %></td>		
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="8"></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DEFAULT_CERTIFICATE" onclick="return confirm('Start install default CA Certificate')"></td>
-		<td colspan="12"></td>
-		<td colspan="8"><input type=file name=uploadfile_pem_ttn></td>
-		<td colspan="4"></td>
-		<td colspan="14"><% echo -n $ttn_trust_upload_status %></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Cert" onclick="showPageLoaderIcon()"></td>
-	</tr>
-</table>
-</div>
+                <div id="div_LR">
+                    <table class="configTable">
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
+                    		<td colspan="24"><input type="text" name="LNSURI_LR" maxlength="128" placeholder="example: wss://xxx.loriot.io:xxx " VALUE=<% echo -n $tc_uri %>  ></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CUPSTRUST">TLS CA Certificate</label></td>
+                    		<td colspan="10"><% echo -n $tc_trust_status %></td>
+                    		<td colspan="8"><input type=file name=uploadfile_loriot_ca></td>
+                    		<td colspan="5"><% echo -n $loriot_ca_upload_status %></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CA_Certificate" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="PRIBATEKEY">TLS Certificate</label></td>
+                    		<td colspan="10"><% echo -n $tc_pem_file_status %></td>
+                    		<td colspan="8"><input type=file name=lr_pem></td>
+                    		<td colspan="5"><% echo -n $tc_pem_upload_status%></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_TLS_Cerificate" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CERTPEM">TLS Key</label></td>
+                    		<td colspan="10"><% echo -n $tc_key_file_status %></td>
+                    		<td colspan="8"><input type=file name=lr_key></td>
+                    		<td colspan="5"><% echo -n $tc_key_upload_status%></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_TLS_key" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    </table>
+                </div>
 
-<div id="div2">
-<table class="configTable">
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CUPSURI">CUPS URI</label></td>
-		<td colspan="24"><input type="text" name="CUPSURI" maxlength="128" placeholder="example: https://xxxxxxx.cups.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $cups_uri %> ></td>
-	</tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CUPSURI">LNS  URI</label></td>
-		<td colspan="24"><input type="text" name="LNSURI" maxlength="128" placeholder="example: wss://xxxxxxx.lns.lorawan.us-east-1.amazonaws.com:443" VALUE=<% echo -n $lns_uri %> ></td>
-	</tr>
+                <div id="div_CW">
+                    <table class="configTable">
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
+                    		<td colspan="24"><input type="text" name="LNSURI_CW" maxlength="128" placeholder="example: wss://lora-xxx.cloud.chirpwireless:443" VALUE=<% echo -n $tc_uri %>  ></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CUPSTRUST">LNS TLS trust</label></td>
+                    		<td colspan="10"><% echo -n $tc_trust_status %></td>
+                    		<td colspan="8"><input type=file name=cw_trust></td>
+                    		<td colspan="5"><% echo -n $trust_upload_status %></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    	
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="PRIBATEKEY">Private TLS key</label></td>
+                    		<td colspan="10"><% echo -n $tc_key_file_status %></td>
+                    		<td colspan="8"><input type=file name=cw_key></td>
+                    		<td colspan="5"><% echo -n $tc_key_upload_status%></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_key" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    
+                    	<tr class="rowSpacer"><td colspan="15"></td></tr>
+                    	<tr>
+                    		<td colspan="1"></td>
+                    		<td colspan="5"><label for="CERTPEM">Private TLS Cert</label></td>
+                    		<td colspan="10"><% echo -n $tc_pem_file_status %></td>
+                    		<td colspan="8"><input type=file name=cw_pem></td>
+                    		<td colspan="5"><% echo -n $tc_pem_upload_status%></td>
+                    		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_pem" onclick="showPageLoaderIcon()"></td>
+                    	</tr>
+                    </table>
+                </div>
 
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CUPSTRUST">CUPS trust</label></td>
-		<td colspan="10"><% echo -n $trust_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_pem_trust></td>
-		<td colspan="5"><% echo -n $trust_upload_status %></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Trust" onclick="showPageLoaderIcon()"></td>
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CUPSTRUST">LNS  trust</label></td>
-		<td colspan="10"><% echo -n $lns_trust_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_lns_trust></td>
-		<td colspan="5"><% echo -n $lns_trust_upload_status %></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
-	</tr>
+                <table class="configTable" style="width:1427px">
+    	            <tr>
+    	            	<td colspan="24"><h3>Packet Filter</h3></td>
+					</tr>
 
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="PRIBATEKEY">Private key</label></td>
-		<td colspan="10"><% echo -n $key_file_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_key></td>
-		<td colspan="5"><% echo -n $key_upload_status%></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_Private_key" onclick="showPageLoaderIcon()"></td>
-	</tr>
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="22"><label for="FPORTNUM">Primary server Fport Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp1()">&nbsp;&nbsp;?</span>
+    	            	<div id="helptext1" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    	            	<p>Level 0: Do nothing</p>
+    	            	<p>Level 1: Filter only the data in the list</p> 
+    	            	<p>Level 2: Filter not in the database</p>
+    	            	<p style="text-align: center;"><br>[Close]</p>
+    	            	</div>
+    	            	</td>
+    	            	<td colspan="15"><select id='primary_fport_filter' name='PRIMARY_FPORT_FILTER' >
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">DevAddr Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp2()">&nbsp;&nbsp;?</span>
+    	            	<div id="helptext2" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    	            	<p>Level 0: Do nothing</p>
+    	            	<p>Level 1: Filter only the data in the list</p> 
+    	            	<p>Level 2: Filter not in the database</p>
+    	            	<p style="text-align: center;"><br>[Close]</p>
+    	            	</div>
+    	            	</td>
+    	            	<td colspan="15"><select id='primary_addre_filter' name='PRIMARY_ADDR_FILTER' >
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">NwkId Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp3()">&nbsp;&nbsp;?</span>
+    	            	<div id="helptext3" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    	            	<p>Level 0: Do nothing</p>
+    	            	<p>Level 1: Filter only the data in the list</p> 
+    	            	<p>Level 2: Filter not in the database</p>
+    	            	<p style="text-align: center;"><br>[Close]</p>
+    	            	</div>
+    	            	</td>
+    	            	<td colspan="15"><select id='primary_nwkid_filter' name='PRIMARY_NWKID_FILTER' >
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>	
+                
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="DEV_FILTER">DevEui Filter</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp4()">&nbsp;&nbsp;?</span>
+    	            	<div id="helptext4" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
+    	            	<p>Level 0: Do nothing</p>
+    	            	<p>Level 1: Filter only the data in the list</p> 
+    	            	<p>Level 2: Filter not in the database</p>
+    	            	<p style="text-align: center;"><br>[Close]</p>
+    	            	</div>
+    	            	</td>
+    	            	<td colspan="15"><select id='primary_deveui_filter' name='PRIMARY_DEVEUI_FILTER' >
+    	            	  <option value="0" >Level 0</option>
+    	            	  <option value="1" >Level 1</option>
+    	            	  <option value="2" >Level 2</option>
+    	            	</select></td>	
+    	            </tr>
 
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CERTPEM">Cert pem</label></td>
-		<td colspan="10"><% echo -n $pem_file_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_pem></td>
-		<td colspan="5"><% echo -n $pem_upload_status%></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_Cert_pem" onclick="showPageLoaderIcon()"></td>
-	</tr>
-</table>	
-</div>
+    	            <tr>
+    	                <script>document.getElementById("primary_fport_filter").value="<% echo -n $filter1_fp_level %>";</script>
+    	                <script>document.getElementById("primary_addre_filter").value="<% echo -n $filter1_ad_level %>";</script>
+    	                <script>document.getElementById("primary_nwkid_filter").value="<% echo -n $filter1_nw_level %>";</script>
+    	                <script>document.getElementById("primary_deveui_filter").value="<% echo -n $filter1_eui_level %>";</script>
+    	            
+    	            </tr>
+    	    
+    	            <tr class="rowSpacer"></tr>
+                
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><h4>Add Filter</h4></td>
+    	            </tr>
+    	    
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><label for="FILTER_NAME">Server Name:</label></td>
+    	            	<td colspan="15"><select id="filtername"name="FILTERNAME" >
+    	            		<option value="pri_server" selected = "selected" >Primary Server</option>
+                
+    	            	</select></td>
+                
+    	            	<td colspan="1"></td>
+    	            	<td colspan="10"><label for="FILTER_TYPE">Filter type:</label></td>
+    	            	<td colspan="14"><select id="filtertype"  name="FILTERTYPE" >
+    	            		<option value="fport_type" selected = "selected" >Fport</option>
+    	            		<option value="addr_type" selected = "selected" >Dev Address</option>
+    	            		<option value="nwkid_type" selected = "selected" >NwkId</option>
+    	            		<option value="deveui_type" selected = "selected" >DevEui</option>
+    	            	</select></td>
+                
+    	            	<td colspan="1"></td>
+    	            	<td colspan="10"><label for="FILTERVALUE">Filter Value</label></td>
+    	            	<td colspan="12"><input type="text" maxlength="8" name="FILTERVALUE" pattern="([a-fA-F0-9\s]{0,128})$" placeholder="1,2,3 or 018229BB"></td>
+    	            	<script>document.getElementById("filtername").value="<% echo -n $filtername_select %>";</script>
+    	            	<script>document.getElementById("filtertype").value="<% echo -n $filtertype_select %>";</script>
+                
+    	            	<td colspan="2"></td>
+    	            	<td colspan="7"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="ADD_FILTER"></td>
+    	            </tr>
+        
+    	            <tr class="rowSpacer"></tr>
+    	            <tr>
+    	            	<td colspan="10">
+    	            		<textarea cols="80" rows="8" ><% sqlite3 /etc/lora/devskey  "SELECT *from filter" | awk -F '\\|' '{print $1"  |  "$2"  |  "$3"  " }' %></textarea>
+    	            	</td>
+    	            </tr>
+        
+    	            <tr>
+    	            	<td colspan="1"></td>
+    	            	<td colspan="12"><h4>DELET Filter</h4></td>
+    	            	<td colspan="14"><select id="del_fileter"  name="DELFILTER" >
+    	            	<% for filter_value in $(sqlite3 /etc/lora/devskey "SELECT *from filter" | awk -F '\\|' '{print $3}'); do %>   
+    	            		<option value="<% echo -n "$filter_value" %>" ><% echo -n "$filter_value" %></option>                                  
+    	            	<% done %>
+    	            		<option value="ALL">ALL</option>
+    	            	</select></td>
+    	            	<td colspan="6"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DELETE"></td>
+    	            </tr>
+        
+    	            <script>document.getElementById("del_fileter").value="<% echo -n $del_fileter_value_select %>";</script>
+                </table>
 
-<%#----chirpstack %>
-<div id="div3">
-	<table class="configTable">
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
-		<td colspan="24"><input type="text" name="LNSURI_CS" maxlength="128" placeholder="example: wss://xxxx.chirpstack.com:443 or ws://xxx.chirpstack.com:3001 " VALUE=<% echo -n $tc_uri %>  ></td>
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CUPSTRUST">LNS TLS trust</label></td>
-		<td colspan="10"><% echo -n $tc_trust_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_tc_pem_trust></td>
-		<td colspan="5"><% echo -n $tc_trust_upload_status %></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="PRIBATEKEY">Private TLS key</label></td>
-		<td colspan="10"><% echo -n $tc_key_file_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_tc_key></td>
-		<td colspan="5"><% echo -n $tc_key_upload_status%></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_key" onclick="showPageLoaderIcon()"></td>
-	</tr>
+                <table class="configTable">		
+                	<tr class="rowSpacer"></tr>
+                	<tr class="rowSpacer"></tr>
+                		<tr>
+                		
+                			<td colspan="18"><% echo -n $mode_status%></td>
+                		</tr>
+                		<td colspan="16">
+                			<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
+                			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
+                			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
+                		</td>
+                	</tr>
+                </table>
 
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CERTPEM">Private TLS Cert</label></td>
-		<td colspan="10"><% echo -n $tc_pem_file_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_tc_pem></td>
-		<td colspan="5"><% echo -n $tc_pem_upload_status%></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_pem" onclick="showPageLoaderIcon()"></td>
-	</tr>
-</table>
-</div>
+                <script>
+                    function showHelp() {
+                        document.getElementById("helptext").style.display="inline";
+                    }
 
-<div id="div_TP">
-	<table class="configTable">
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="13"><label for="LNSURI">CUPS Server URI</label></td>
-		<td colspan="24"><input type="text" name="CUPSURI_TP" maxlength="128" placeholder="example: https://community.thingpark.io:443 " VALUE=<% echo -n $cups_uri %>  ></td>
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="13"><label for="CLEAR">CUPS Certificate Authority</label><span style="position: absolute; z-index: 0; color:red; font-size:large; font-weight: bold;" onclick="showHelp_tp()">&nbsp;&nbsp;?</span>
-		<div id="helptext_tp" style="position: absolute; width: 30%; margin-left: 25px; padding: 20px; display: none; z-index: 1; background-color: rgb(250, 244, 237); color:darkblue; border: 0.5mm ridge; border-radius: 15%;" onclick="hideHelp()">
-		<p>User can clicking DEFAULTDE CERTIFICATE to download certificate or upload own certificate </p> 
-		<p style="text-align: center;"><br>[Close]</p>
-		</div>
-		</td>
-		<td colspan="1"></td>
-		<td colspan="20"><% echo -n $trust_status %></td>		
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="8"></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="DEFAULT_CERTIFICATE" onclick="return confirm('Start install default CA Certificate')"></td>
-		<td colspan="12"></td>
-		<td colspan="8"><input type=file name=uploadfile_cer_tp></td>
-		<td colspan="4"></td>
-		<td colspan="14"><% echo -n $tp_trust_upload_status %></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CUPS_Cert" onclick="showPageLoaderIcon()"></td>
-	</tr>
-	
-</table>
-</div>
+                    function showHelp_ca() {
+                        document.getElementById("helptext_ca").style.display="inline";
+                    }
 
-<div id="div_SN">
-	<table class="configTable">
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
-		<td colspan="24"><input type="text" name="LNSURI_SN" maxlength="128" placeholder="example: wss://collector.senetco.io:6042 " VALUE=<% echo -n $tc_uri %>  ></td>
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CUPSTRUST">LNS TLS trust</label></td>
-		<td colspan="10"><% echo -n $tc_trust_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_sn_pem_trust></td>
-		<td colspan="5"><% echo -n $tc_trust_upload_status %></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_LNS_Trust" onclick="showPageLoaderIcon()"></td>
-	</tr>
-</table>
-</div>
+                    function showHelp_tp() {
+                        document.getElementById("helptext_tp").style.display="inline";
+                    }
 
-<div id="div_LR">
-	<table class="configTable">
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="LNSURI">LNS URI</label></td>
-		<td colspan="24"><input type="text" name="LNSURI_LR" maxlength="128" placeholder="example: wss://xxx.loriot.io:xxx " VALUE=<% echo -n $tc_uri %>  ></td>
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CUPSTRUST">TLS CA Certificate</label></td>
-		<td colspan="10"><% echo -n $tc_trust_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_loriot_ca></td>
-		<td colspan="5"><% echo -n $loriot_ca_upload_status %></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_CA_Certificate" onclick="showPageLoaderIcon()"></td>
-	</tr>
-	
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="PRIBATEKEY">TLS Certificate</label></td>
-		<td colspan="10"><% echo -n $tc_pem_file_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_tc_pem></td>
-		<td colspan="5"><% echo -n $tc_pem_upload_status%></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_TLS_Cerificate" onclick="showPageLoaderIcon()"></td>
-	</tr>
+                    function showHelp1() {
+                        document.getElementById("helptext1").style.display="inline";
+                    }
+                    
+                    function showHelp2() {
+                        document.getElementById("helptext2").style.display="inline";
+                    }
+                    
+                    function showHelp3() {
+                        document.getElementById("helptext3").style.display="inline";
+                    }
+                    
+                    function showHelp4() {
+                        document.getElementById("helptext4").style.display="inline";
+                    }
+                    
+                    function hideHelp() {
+                        document.getElementById("helptext").style.display="none";
+                        document.getElementById("helptext_ca").style.display="none";
+                        document.getElementById("helptext_tp").style.display="none";
+                        document.getElementById("helptext1").style.display="none";
+                        document.getElementById("helptext2").style.display="none";
+                        document.getElementById("helptext3").style.display="none";
+                        document.getElementById("helptext4").style.display="none";
+                    }
 
-	<tr class="rowSpacer"><td colspan="15"></td></tr>
-	<tr>
-		<td colspan="1"></td>
-		<td colspan="5"><label for="CERTPEM">TLS Key</label></td>
-		<td colspan="10"><% echo -n $tc_key_file_status %></td>
-		<td colspan="8"><input type=file name=uploadfile_tc_key></td>
-		<td colspan="5"><% echo -n $tc_key_upload_status%></td>
-		<td colspan="3"><INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Upload_TLS_key" onclick="showPageLoaderIcon()"></td>
-	</tr>
-</table>
-</div>
-
-
-<table class="configTable">		
-	<tr class="rowSpacer"></tr>
-	<tr class="rowSpacer"></tr>
-		<tr>
-		
-			<td colspan="18"><% echo -n $mode_status%></td>
-		</tr>
-		<td colspan="16">
-			<INPUT class="hiddenKey" TYPE="SUBMIT" name="BUTTON" VALUE="Save" accesskey="s"> 
-			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Save&Apply" onclick="showPageLoaderIcon()">
-			<INPUT TYPE="SUBMIT" name="BUTTON" VALUE="Cancel" onclick="showPageLoaderIcon()">
-		</td>
-	</tr>
-</table>
-<script>
-function showHelp1() {
-document.getElementById("helptext1").style.display="inline";
-
-}
-function showHelp_ca() {
-document.getElementById("helptext_ca").style.display="inline";
-}
-function showHelp_tp() {
-document.getElementById("helptext_tp").style.display="inline";
-}
-
-function hideHelp() {
-document.getElementById("helptext1").style.display="none";
-document.getElementById("helptext_ca").style.display="none";
-document.getElementById("helptext_tp").style.display="none";
-}
-
-
-
-</script>
-	
-</form>
-</div>
-</body>
+                </script>
+            </form>
+        </div>
+    </body>
 </html>
-
-
